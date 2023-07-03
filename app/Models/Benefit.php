@@ -138,6 +138,7 @@ class Benefit extends BaseModel
 
         try {
             $workspace = get_current_workspace();
+            $data['workspace_id'] = $workspace?->id;
 
             DB::beginTransaction();
 
@@ -596,6 +597,10 @@ class Benefit extends BaseModel
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
         $user_id = $data['user'];
         $status_benefit = ($data['status'] && is_array($data['status']) && count($data['status']) > 0) ? $data['status'] : null;
+        $group_benefit = ($data['type'] && is_array($data['type']) && count($data['type']) > 0) ? $data['type'] : null;
+
+        if( is_array($status_benefit) && in_array('locked', $status_benefit) )
+            array_push($status_benefit,'finished');
 
         $user_status_active = Taxonomy::getFirstData('benefit', 'user_status', 'active');
         $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
@@ -654,6 +659,11 @@ class Benefit extends BaseModel
                     $query->whereIn('code', $status_benefit);
                 });
             }
+        }
+        if($group_benefit) {
+            $benefits_query->whereHas('group', function ($query) use ($group_benefit) {
+                $query->whereIn('code', $group_benefit);
+            });
         }
 
         $benefits = $benefits_query->paginate(request('paginate', 15));

@@ -22,6 +22,7 @@ class RestBenefitController extends Controller
         $data = [
             'filtro' => $request->filtro,
             'status' => $request->status ?? null,
+            'type' => $request->type ?? null,
             'user' => $user?->id ?? null,
             'page' => $request->page ?? null
         ];
