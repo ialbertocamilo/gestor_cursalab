@@ -23,4 +23,9 @@ class UserBenefit extends BaseModel
         return $this->belongsTo(Benefit::class, 'benefit_id');
     }
 
+    public function status()
+    {
+        return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
+
 }

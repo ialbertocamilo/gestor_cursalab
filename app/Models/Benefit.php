@@ -390,6 +390,9 @@ class Benefit extends BaseModel
 
         $is_registered = UserBenefit::where('user_id', $user_id)
                         ->where('benefit_id', $benefit_id)
+                        ->whereHas('status', function($q){
+                            $q->where('code','subscribed');
+                        })
                         ->first();
 
         if($is_registered) {
@@ -406,26 +409,28 @@ class Benefit extends BaseModel
                 try {
                     DB::beginTransaction();
 
-                    $is_created = UserBenefit::create(['user_id'=>$user_id, 'benefit_id'=>$benefit_id]);
+                    $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+
+                    $is_created = UserBenefit::create([
+                        'user_id' => $user_id,
+                        'benefit_id' => $benefit_id,
+                        'status_id' => $user_status_subscribed?->id,
+                    ]);
                     cache_clear_model(UserBenefit::class);
 
                     if($is_created) {
-                        $benefit = Benefit::with([
-                        'status'=> function ($query) {
-                                $query->select('id', 'name', 'code');
-                            }
-                        ])
-                        ->where('id', $benefit_id)
-                        ->first();
+
+                        $benefit = Benefit::where('id', $benefit_id)->first();
+
                         $response['msg'] = [
                             'title' => 'Inscripción confirmada',
                             'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
                         ];
                         $response['data'] = [
                             'benefit_id' => $benefit_id,
-                            'user_status' => ['name' => 'Suscrito', 'code' => 'subscribed'],
+                            'user_status' => ['name' => 'Registrado', 'code' => 'subscribed'],
                             'subscribed' => true,
-                            'status' => $benefit->status
+                            'status' => ['name' => 'Registrado', 'code' => 'subscribed'],
                         ];
                     }
 
@@ -457,6 +462,68 @@ class Benefit extends BaseModel
 
         return $response;
     }
+
+    protected function notifyUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        try {
+            DB::beginTransaction();
+
+            $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
+
+            $benefit = UserBenefit::where('user_id', $user_id)
+                                ->where('benefit_id', $benefit_id)
+                                ->first();
+
+            if($benefit) {
+                $benefit->status_id = $user_status_notify?->id;
+                $benefit->save();
+            }
+            else {
+                $benefit = UserBenefit::create([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id,
+                    'status_id' => $user_status_notify?->id,
+                ]);
+            }
+            cache_clear_model(UserBenefit::class);
+
+            if($benefit) {
+
+                $response['msg'] = [
+                    'title' => 'Alerta de beneficio activada',
+                    'description' => ['Se notificará cuando este beneficio este disponible.']
+                ];
+                $response['data'] = [
+                    'benefit_id' => $benefit_id,
+                    'user_status' => ['name' => 'Notificarme', 'code' => 'notify'],
+                    'subscribed' => false,
+                    'status' => ['name' => 'Notificarme', 'code' => 'notify'],
+                ];
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            info($e);
+            DB::rollBack();
+            // Error::storeAndNotificateException($e, request());
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'No se pudo registrar a este beneficio',
+                'description' => ['No se pudo registrar a este beneficio. Inténtelo nuevamente.']
+            ];
+            // abort(errorExceptionServer());
+        }
+
+        return $response;
+    }
+
     protected function unsubscribeUserForBenefit( $data )
     {
         $response['error'] = false;
@@ -481,16 +548,14 @@ class Benefit extends BaseModel
             try {
                 DB::beginTransaction();
 
+                    $user_status_unsubscribe = Taxonomy::getFirstData('benefit', 'user_status', 'unsubscribe');
+
+                    $is_registered->status_id = $user_status_unsubscribe?->id;
+                    $is_registered->save();
                     $is_registered->delete();
                     cache_clear_model(UserBenefit::class);
 
-                    $benefit = Benefit::with([
-                    'status'=> function ($query) {
-                            $query->select('id', 'name', 'code');
-                        }
-                    ])
-                    ->where('id', $benefit_id)
-                    ->first();
+                    $benefit = Benefit::where('id', $benefit_id)->first();
 
                     $response['msg'] = [
                         'title' => 'Te has retirado del beneficio',
@@ -498,9 +563,9 @@ class Benefit extends BaseModel
                     ];
                     $response['data'] = [
                         'benefit_id' => $benefit_id,
-                        'user_status' => ['name' => 'Retirado', 'code' => 'unsubscribe'],
+                        'user_status' => ['name' => 'Registrarme', 'code' => 'active'],
                         'subscribed' => false,
-                        'status' => $benefit->status
+                        'status' => ['name' => 'Registrarme', 'code' => 'active']
                     ];
 
                 DB::commit();

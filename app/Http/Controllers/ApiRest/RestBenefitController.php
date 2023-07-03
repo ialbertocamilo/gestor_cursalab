@@ -62,18 +62,14 @@ class RestBenefitController extends Controller
         $data = [
             'user' => $user?->id ?? null,
             'benefit' => $request->benefit ?? null,
+            'type' => $type,
         ];
 
         if( $type == 'unsubscribe' ) {
             $apiResponse = Benefit::unsubscribeUserForBenefit($data);
         }
         else if( $type == 'notify' ) {
-            $apiResponse['error'] = true;
-            $apiResponse['data'] = [];
-            $apiResponse['msg'] = [
-                'title' => 'Alerta de beneficio activada',
-                'description' => 'Se notificara cuando este beneficio este disponible.'
-            ];
+            $apiResponse = Benefit::notifyUserForBenefit($data);
         }
         else {
             $apiResponse = Benefit::registerUserForBenefit($data);
