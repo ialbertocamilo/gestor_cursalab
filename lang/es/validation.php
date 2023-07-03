@@ -199,6 +199,7 @@ return [
         'subtitle' => 'subtítulo',
         'title_short' => 'título corto',
         'content' => 'contenido',
+        'old_passwords' => 'Antigua contraseña',
 
     
         'status_id' => 'estado',
@@ -338,14 +339,14 @@ return [
         'duration' => 'duración',
         'attendants' => 'asistentes',
         'q' => 'búsqueda',
-        'course_id' => 'curso id',
+        'course_id' => 'Curso',
         'visits_count' => 'contador de visitas',
         'topic_requirement_id' => 'requisito de tema',
         'type_evaluation_id' => 'tipo de evaluación',
         'duplicate_id' => 'ID duplicado',
         'evaluation_verified' => 'evaluación verificada',
 
-        'subworkspace_id' => 'subworkspace id',
+        'subworkspace_id' => 'módulo',
         'email_gestor' => 'email gestor',
         'expires_code' => 'codigo de expiración',
         'enable_2fa' => 'habilitar 2FA',
@@ -385,7 +386,7 @@ return [
         'certification_issued_at' => 'fecha del problema de certificación ',
         'certification_accepted_at' => 'fecha de la certificación aceptada',
 
-        'topic_id' => 'id del tema',
+        'topic_id' => 'Tema',
         'correct_Answers' => 'respuestas correctas',
         'failed_Answers' => 'respuestas incorrectas',
         'downloads' => 'descargas',
@@ -428,9 +429,19 @@ return [
         'courses_assigned' => 'Cursos Asignados',
 
         'courses_completed' => 'Cursos completados',
+        // App\Model\Topic
+        'active_results' => 'Activar resultados',
+        'has_to_pass_to_continue' => 'Aprobar para continuar',
 
+        // App\Model\Questions
+        'rptas_json' => 'Respuestas',
 
+        // App\Model\SectionUpload
+        'fields' => 'filtros',
+        'file' => 'archivo',
 
+        // App\Models\Videoteca
+        'workspace_id' => 'Módulo',
 
     ],
 

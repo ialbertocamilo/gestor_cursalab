@@ -13,6 +13,7 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use Aws\S3\S3Client;
 use ZipArchive;
 
+use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
 
 class Media extends BaseModel
 {
@@ -30,6 +31,168 @@ class Media extends BaseModel
     protected $fillable = [
         'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id'
     ];
+
+    public function modulesByFile() {
+
+        $workspaces = Workspace::select('id', 'name')
+                                ->where('logo', $this->file)
+                                ->orWhere('plantilla_diploma', $this->file)
+                                ->get();
+
+        $workspaces = $workspaces->map(function ($workspace) {
+            $workspace->url = url("/modulos?media_data=modulo");
+            $workspace->url_filters = [
+                'q' => $workspace->name,
+                'id' => $workspace->id
+            ];
+
+            return $workspace;
+        });
+
+        return $workspaces;
+    }
+    
+
+    public function announcementsByFile() 
+    {
+        $announcements = Announcement::select('id', 'nombre as name','active')
+                        ->where('imagen', $this->file)
+                        ->orWhere('archivo', $this->file)
+                        ->get();
+
+        $announcements = $announcements->map(function ($announcement) {
+            $announcement_module_id = $announcement->criterionValues()->pluck('criterion_value_id');
+            $announcement_filters = [
+                'q' => $announcement->name,
+                'module' => $announcement_module_id,
+                'active' => (int) $announcement->active,
+                'id' => $announcement->id
+            ];
+
+            $announcement->url = url("/anuncios?media_data=anuncio");
+            $announcement->url_filters = $announcement_filters;
+            return $announcement;
+        });
+
+        return $announcements;
+    }
+
+    public function vademecumsByFile() 
+    {
+        $vademecums = Vademecum::select('id', 'name', 'category_id')
+                               ->where('media_id', $this->id)
+                               ->get();
+
+        $vademecums = $vademecums->map(function ($vademecum) {
+            $vademecum_module_id = $vademecum->modules()->pluck('id');
+            $vademecum_filters = [
+                'q' => $vademecum->name,
+                'module_id' => $vademecum_module_id,
+                'category_id' => $vademecum->category_id,
+                'id' => $vademecum->id
+            ];
+
+            $vademecum->url = url("/vademecum?media_data=vademecum");
+            $vademecum->url_filters = $vademecum_filters;
+
+            return $vademecum;
+        });
+
+        return $vademecums;
+    }
+
+    public function videotecasByFile() 
+    {
+        $videotecas = Videoteca::select('id', 'title as name')
+                              ->where('media_id', $this->id)
+                              ->orWhere('preview_id', $this->id)
+                              ->get();
+
+        $videotecas = $videotecas->map(function ($videoteca) {
+            $videoteca->url = url("/videoteca/list?media_data=videoteca");
+            $videoteca->url_filters = [
+                'q' => $videoteca->name,
+                'id' => $videoteca->id
+            ];
+            return $videoteca;
+        });
+
+        return $videotecas;
+    }
+
+    public function schoolsByFile() 
+    {
+        $schools = School::select('id', 'name')
+                         ->where('imagen', $this->file)
+                         ->orWhere('plantilla_diploma', $this->file)
+                         ->get();
+
+        $schools = $schools->map(function ($school) {
+            $school->url = [
+                route('escuelas.edit', [
+                    'school' => $school->id
+                ])
+            ];
+
+            return $school;
+        });
+
+        return $schools;
+    }
+
+    public function coursesByFile() 
+    {
+        $courses = Course::select('id', 'name')->where('imagen', $this->file)
+                         ->with('schools:id,name')->get();
+
+        $courses = $courses->map(function ($course) {
+            if ($course->schools) {
+                $course->url = $course->schools->map(function ($school) use ($course) {
+                    return route('cursos.editCurso', [
+                        'school' => $school->id,
+                        'course' => $course->id,
+                    ]);
+                })->toArray();
+
+            } else $course->url = [];
+            
+            return $course;
+        });
+ 
+        return $courses;
+    }
+
+    public function topicsByFile() 
+    {
+        $file = $this->file;
+        $topics = Topic::select('id', 'course_id', 'name')
+                        ->where('imagen', $file)
+                        ->orWhereHas('medias', function ($query) use ($file) {
+                            $query->where('value', $file);
+                        })
+                        ->with([
+                        'course' => function($q_course){
+                            $q_course->select('id', 'name');
+                        },
+                        'course.schools' => function($q_course_school){
+                            $q_course_school->select('id', 'name');   
+                        }
+                        ])->get();
+
+        $topics = $topics->map(function ($topic) {
+            if ($topic->course && $topic->course->schools) {
+                
+                $topic->url = $topic->course->schools->map(function ($school) use ($topic) {
+                    return url("/escuelas/{$school->id}/cursos/{$topic->course->id}/temas/edit/{$topic->id}");
+                })->toArray();
+
+            } else $topic->url = [];
+
+            return $topic;
+        });
+
+        return $topics;
+    }
 
     /*
 
@@ -407,7 +570,7 @@ class Media extends BaseModel
         $preview = '';
 
         if (in_array(strtolower($ext), $valid_ext1)) {
-            $preview = $this->file;
+            $preview = FileService::generateUrl($this->file);
         } else if (in_array(strtolower($ext), $valid_ext2)) {
             $preview = FileService::generateUrl(self::DEFAULT_VIDEO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext3)) {
@@ -458,6 +621,20 @@ class Media extends BaseModel
         if (ob_get_level()) ob_end_clean();
 
         return $response;
+    }
+
+    protected function generateNameFile($name, $ext) {
+        
+        $name = Str::of($name)->limit(200);
+        $str_random = Str::random(15);
+        $workspace_id = session('workspace')['id'] ?? NULL;
+
+        // workspace creation reference
+        $workspace_code = 'wrkspc-' . ($workspace_id ?? 'x');
+        $name = $workspace_code . '-' . $name . '-' . date('YmdHis') . '-' . $str_random;
+        $fileName = $name . '.' . $ext;
+
+        return $fileName;
     }
 
     // public function getViewDetail($preview)

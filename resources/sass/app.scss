@@ -176,9 +176,37 @@ Override Vue Toastification plugin styles
         top: -3px !important;
     }
 }
+
+.workspace-badge .v-badge__badge {
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    padding: 3px 6px !important;
+}
+
+.header-menu-session{
+    .dropdown-icon-width{
+        margin-top: -5px;
+    }
+}
+
 .font-nunito {
     font-family: "Nunito", sans-serif;
 }
 .fw-bold {
     font-weight: 700;
+}
+
+.list-style-none{
+    list-style: none !important;
+}
+
+.v-treeview-node__content {
+    margin-top: 6px;
+}
+
+.text-overflow-ellipsis {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }

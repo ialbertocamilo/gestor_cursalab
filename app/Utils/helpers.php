@@ -85,8 +85,9 @@ function convert($number)
  */
 function clean_html(?string $text, int $limit = 100)
 {
+    $text = html_entity_decode(strip_tags($text));
 
-    return mb_substr(strip_tags($text), 0, $limit);
+    return mb_substr($text, 0, $limit);
 }
 
 function secret($value)
@@ -332,4 +333,39 @@ function stringConcatEqualNum(array $data, int $num)
     unset($piecesPart[$pieceIndex]);
 
     return implode('|', $piecesPart);
+}
+
+function get_data_bykeys($data, $keys = [])
+{
+    $new_data = [];
+    foreach ($data as $key => $value) {
+        if(in_array($key, $keys)) $new_data[$key] = $value; 
+    }
+
+    return $new_data;
+}
+
+function messageToSlackByChannel($texto,$attachments,$canal){
+    $blocks =  [
+        "text" => "*".$texto."*",
+        "attachments"  => $attachments
+	];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $canal);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"text\":\"$mensaje\"}");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($blocks));
+
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['text'=>$mensaje]));
+    $headers = array();
+    $headers[] = 'Content-Type: application/json';
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    info($result);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
 }

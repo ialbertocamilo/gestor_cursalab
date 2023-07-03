@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use App\Models\SectionUpload;
 use App\Models\User;
 use App\Models\Ciclo;
 use App\Models\Curso;
@@ -96,7 +97,13 @@ class MasivoController extends Controller
             Excel::import(new FirstPageImport($import), $request->file('file'));
     
             $headers = $import->excelHeaders;
-    
+
+            // === guardar archivo log ===
+            $codes = [  'code_section' => 'massive-upload', 
+                        'code_type' => 'upload' ];
+            SectionUpload::storeRequestLog($request, $codes);
+            // === guardar archivo log ===
+
             if ($import->error_message):
     
                 return $this->success([
@@ -139,7 +146,13 @@ class MasivoController extends Controller
             $import->identificator = 'document';
             $import->state_user_massive = 1;
             Excel::import(new FirstPageImport($import), $request->file('file'));
-    
+        
+            // === guardar archivo log ===
+            $codes = [  'code_section' => 'massive-upload', 
+                        'code_type' => 'upload' ];
+            SectionUpload::storeRequestLog($request, $codes);
+            // === guardar archivo log ===
+
             if ($import->error_message):
     
                 return $this->success([
@@ -180,6 +193,13 @@ class MasivoController extends Controller
             $import->identificator = 'document';
             $import->state_user_massive = 0;
             Excel::import(new FirstPageImport($import), $request->file('file'));
+            
+            // === guardar archivo log ===
+            $codes = [  'code_section' => 'massive-upload', 
+                        'code_type' => 'upload' ];
+            SectionUpload::storeRequestLog($request, $codes);
+            // === guardar archivo log ===
+
             return $this->success([
                 'message' => 'Usuarios inactivados correctamente.',
                 'headers' => $import->getStaticHeader(false, true),

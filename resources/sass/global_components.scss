@@ -65,7 +65,8 @@ $widths: 5px, 10px, 15px, 20px, 25px, 30px, 35px, 40px, 45px, 50px, 55px, 60px, 
 .main-header {
     width: 100%;
     height: min-content;
-    padding: 8px 25px;
+    padding: 5px 0px;
+    // padding: 8px 25px;
     background-color: white;
 
     div.content {
@@ -339,7 +340,8 @@ $widths: 5px, 10px, 15px, 20px, 25px, 30px, 35px, 40px, 45px, 50px, 55px, 60px, 
 }
 
 .section-list {
-    margin: 0 20px 50px 20px;
+    margin: 0 20px 0px 20px;
+    // margin: 0 20px 50px 20px;
 }
 
 // CUSTOM EXPANSION PANEL

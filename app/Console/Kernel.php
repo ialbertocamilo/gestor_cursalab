@@ -51,7 +51,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('report:users-quantity')->dailyAt('23:58');
 
-        $schedule->command('mongo:save-data')->dailyAt('03:00');
+        // $schedule->command('mongo:save-data')->dailyAt('03:00');
 
         // Criteria
 

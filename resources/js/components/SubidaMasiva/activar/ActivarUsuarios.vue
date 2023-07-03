@@ -49,7 +49,7 @@ import vuedropzone from "./../dropzone.vue";
 
 const percentLoader = document.getElementById('percentLoader');
 export default {
-    props: ['q_error', 'url_template'],
+    props: ['q_error', 'url_template', 'process'],
     components: {vuedropzone},
     data() {
         return {
@@ -80,6 +80,7 @@ export default {
                 this.showLoader();
                 let data = new FormData();
                 data.append("file", this.archivo);
+                data.append("process", JSON.stringify(this.process)); // == data section-upload ==
                 data.append("number_socket", this.number_socket || null);
                 percentLoader.innerHTML = ``;
                 axios.post('/masivos/active-users', data).then((res) => {

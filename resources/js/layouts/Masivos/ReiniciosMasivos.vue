@@ -22,7 +22,7 @@
 
                 <ul class="mt-3">
                     <li><small>Se listan los usuarios luego de seleccionar el curso o tema evaluable.</small></li>
-                    <li><small>En el filtro "Tipo de reinicio", las opciones:</small>
+                    <li><small>En el filtro "Usuarios", las opciones:</small>
                         <ul>
                             <li><small>"Solo desaprobados" mostrará a los usuarios que desaprobaron el tema.</small></li>
                             <li><small>"Todos" mostrará a todos los usuarios que realizaron una evaluación del tema (aprobados y desaprobados).</small></li>
@@ -40,7 +40,7 @@
                         outlined
                         dense
                         attach=""
-                        label="Tipo de reinicio"
+                        label="Usuarios"
                         hide-details="auto"
                         :items="items.tipo_reinicio"
                         v-model="select.tipo_reinicio"
@@ -269,6 +269,8 @@
                                                                         style="align-items: center"
                                                                     >
                                                                         {{ item.user.name }}
+                                                                        {{ item.user.lastname }}
+                                                                        {{ item.user.surname }}
                                                                         <!-- item.usuario.apellido_paterno -->
                                                                         <!-- item.usuario.apellido_materno -->
                                                                     </v-col>
@@ -439,7 +441,7 @@
         getData() {
             let vue = this;
             axios
-                .get("/masivo/usuarios/reinicios_data")
+                .get("/intentos-masivos/reinicios_data")
                 .then((res) => {
                     vue.baseData.modulos = res.data.modules;
                     vue.baseData.escuelas = res.data.schools;
@@ -479,7 +481,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarCursosxEscuela/${vue.select.escuela}`;
+            let url = `/intentos-masivos/buscarCursosxEscuela/${vue.select.escuela}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -504,7 +506,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarTemasxCurso/${vue.select.curso}`;
+            let url = `/intentos-masivos/buscarTemasxCurso/${vue.select.curso}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -559,7 +561,7 @@
             };
 
             axios
-                .post("/masivo/usuarios/validarReinicio", data)
+                .post("/intentos-masivos/validarReinicio", data)
                 .then((res) => {
 
                     vue.data_validar.count_usuarios = res.data.data.count_usuarios;
@@ -599,7 +601,7 @@
                 usuarios: vue.data_validar.pruebas.filter((element) => element.selected == true),
             };
             axios
-                .post("/masivo/usuarios/reiniciarIntentosMasivos", data)
+                .post("/intentos-masivos/reiniciarIntentosMasivos", data)
                 .then((res) => {
                     setTimeout(() => {
 

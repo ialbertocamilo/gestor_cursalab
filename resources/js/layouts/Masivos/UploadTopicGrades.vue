@@ -193,6 +193,11 @@ export default {
             vue.showLoader()
             let formData = new FormData();
             formData.append("file", vue.archivo);
+            const process_data = {  school: vue.select.school, 
+                                    course: vue.select.course, 
+                                    evaluation_type: vue.select.evaluation_type, 
+                                    topics: vue.select.topics };
+            formData.append("process", JSON.stringify(process_data));
             formData.append("course", vue.select.course);
             formData.append("evaluation_type", vue.select.evaluation_type);
             formData.append("number_socket", number_socket);

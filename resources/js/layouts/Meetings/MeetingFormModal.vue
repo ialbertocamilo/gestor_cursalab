@@ -32,7 +32,7 @@
                            :rules="rules.type"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="6" class="">
                         <DefaultAutocomplete
                             :items="selects.hosts"
                             v-model="resource.host"
@@ -147,7 +147,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" class="box-meeting-search-attendants mx-3"
+                <v-row justify="space-around" class="box-meeting-search-attendants mx-0"
                        v-if="resource.attendants && resource.attendants.length === 0">
                     <p>No se han agregado asistentes todavía.</p>
                 </v-row>

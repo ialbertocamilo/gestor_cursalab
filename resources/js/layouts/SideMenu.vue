@@ -117,8 +117,8 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
 const SUB_ITEM_VADEMECUM = {
                             title:"Protocolos y Documentos",
                             icon:"fas fa-file-invoice",
-                            path:"/vademecum",
-                            subpaths:["vademecum"],
+                            path:"/protocolos-y-documentos",
+                            subpaths:["protocolos-y-documentos"],
                             selected:false,
                             permission:"vademecum",
                             role:["super-user","admin","content-manager","trainer-TEST"]
@@ -177,8 +177,8 @@ export default {
                     {
                         title: "Aulas Virtuales",
                         icon: "fas fa-chalkboard-teacher",
-                        path: "/aulas-virtuales",
-                        subpaths: ["aulas-virtuales"],
+                        path: "/aulas-virtuales/reuniones",
+                        subpaths: ["aulas-virtuales/reuniones"],
                         selected: false,
                         permission: "meetings",
                         role: ["super-user", this.show_meeting_section]
@@ -187,7 +187,7 @@ export default {
                         title: "Cuentas Zoom",
                         icon: "fas fa-chalkboard-teacher",
                         path: "/aulas-virtuales/cuentas",
-                        subpaths: ["cuentas-zoom"],
+                        subpaths: ["aulas-virtuales/cuentas"],
                         selected: false,
                         permission: "accounts",
                         role: ["super-user"]
@@ -266,7 +266,7 @@ export default {
                         path: "/users",
                         subpaths: ["users"],
                         selected: false,
-                        role: ["super-user", "config"]
+                        role: ["super-user"]
                     },
                     {
                         title: "Criterios",
@@ -351,7 +351,42 @@ export default {
                     // },
                 ]
             },
+            {
+                title: "DIPLOMAS",
+                icon: "fas fa-medal",
+                active: false,
+                items: [
+                    {
+                        title: "Listar",
+                        icon: "fas fa-list",
+                        path: "/diplomas",
+                        subpaths: ["diplomas"],
+                        selected: false,
+                        permission: "diplomas",
+                        role: [
+                            "super-user",
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
+                        ]
+                    },
 
+                    {
+                        title: "Crear",
+                        icon: "fas fa-plus",
+                        path: "/diploma/create",
+                        subpaths: ["diploma/create"],
+                        selected: false,
+                        permission: "diploma_create",
+                        role: [
+                            "super-user",
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
+                        ]
+                    }
+                ]
+            },
             {
                 title: "GESTIONA TU CONTENIDO",
                 icon: "fas fa-pen-square",
@@ -514,17 +549,17 @@ export default {
                     {
                         title: "Intentos masivos",
                         icon: "fas fa-redo-alt",
-                        path: "/masivo/usuarios/index_reinicios",
-                        subpaths: ["masivo/usuarios"],
+                        path: "/intentos-masivos",
+                        subpaths: ["intentos-masivos"],
                         selected: false,
                         permission: "reinicio_usuarios",
                         role: ["super-user", "admin"]
                     },
                     {
-                        title: "Subida masivos",
+                        title: "Procesos masivos",
                         icon: "fas fa-share-square",
-                        path: "/masivos",
-                        subpaths: ["masivos"],
+                        path: "/procesos-masivos",
+                        subpaths: ["procesos-masivos"],
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin"]
@@ -545,7 +580,7 @@ export default {
                         subpaths: ["documentation-api"],
                         selected: false,
                         permission: "documentation_api",
-                        role: ["super-user", "admin"]
+                        role: ["super-user"]
                     }
                 ]
             },
@@ -585,6 +620,21 @@ export default {
                         subpaths:["soporte"],
                         selected:false,
                         role: ["super-user", "admin"]
+                    },
+                ]
+            },
+            {
+                title: "CONFIGURACIÓN",
+                icon: "fas fa-wrench",
+                active: false,
+                items: [
+                    {
+                        title: "Ambiente",
+                        icon: "fas fa-cog",
+                        path: "/ambiente",
+                        subpaths: ["ambiente"],
+                        selected: false,
+                        role: ["super-user"]
                     },
                 ]
             }
@@ -647,13 +697,14 @@ export default {
          * Load data from server
          */
         loadData() {
+
             let vue = this;
 
             // Load workspaces
 
             let url = `/workspaces/search`;
             this.$http.get(url).then(({ data }) => {
-                vue.workspaces = data.data.data;
+                vue.workspaces = data.data.workspaces.data;
             });
         },
 

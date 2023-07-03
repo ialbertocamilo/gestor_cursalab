@@ -85,7 +85,7 @@ class AuthImpersonationController extends Controller
             return $this->error('Tu cuenta se encuentra inactiva.
             Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
-        $user->load('criterion_values:id,value_text');
+        $user->load('criterion_values.criterion');
         // $user->updateUserDeviceVersion($data);
         // $user->updateLastUserLogin($data);
 
@@ -102,9 +102,13 @@ class AuthImpersonationController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
+
+            if ($workspace_data->slug == 'farmacias-peruanas') {
+                $workspace_data->logo = get_media_url($user->subworkspace->logo);
+            }
         }
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
@@ -115,13 +119,22 @@ class AuthImpersonationController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
+        $criterios = [];
+
+        foreach ($user->criterion_values as $value) {
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
+        }
+
         $user_data = [
             "id" => $user->id,
             "dni" => $user->document,
             "nombre" => $user->name ?? '',
             "apellido" => $user->lastname ?? '',
             "full_name" => $user->fullname,
-            'criteria' => $user->criterion_values,
+            // 'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
@@ -131,6 +144,7 @@ class AuthImpersonationController extends Controller
             'android' => $user->android,
             'ios' => $user->ios,
             'huawei' => $user->huawei,
+            'criterios' => $criterios,
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();

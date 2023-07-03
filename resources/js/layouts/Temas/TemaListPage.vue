@@ -45,7 +45,6 @@
                     </v-col>
                 </v-row>
             </v-card-text>
-
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"

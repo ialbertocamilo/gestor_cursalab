@@ -59,6 +59,8 @@ if (isset($fullScreen)) {
 
     <div class="d-flex align-items-stretch">
 
+        @unless(isset($fullScreen) && $fullScreen)
+
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
@@ -66,6 +68,8 @@ if (isset($fullScreen)) {
                 {{-- </v-app> --}}
             </div>
         </div>
+
+        @endunless
 
         <div class="content-inner-small pb-0">
             <p class="">
@@ -219,8 +223,9 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.6' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=2' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.234-' . date('Y-W-d-H')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.234-' . date('Y-W-m')) }}"></script>
+
     <script>
         $(document).ready(function () {
             $('#content_polls').css('display','block');

@@ -24,13 +24,45 @@
                         type="button" data-toggle="dropdown" aria-expanded="false">
                     <div class="username-rol">
                         <p class="username">{{ Auth::user()->name }}</p>
-                        <p class="rol">{{ Auth::user()->email }}</p>
+                        <p class="rol">{{ Auth::user()->email_gestor }}</p>
                     </div>
                     <div class="avatar-image mr-2">
                         <img class="avatar" src="{{ asset('img/avatar-default.png') }}" />
                     </div>
                 </button>
-                <div class="dropdown-menu dropdown-header-menu shadow-md">
+                <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session">
+
+                    @if(auth()->user()->isAn('super-user'))
+
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/workspaces/criterios">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-clipboard-list"></span>
+                        </div>
+                        <span>Criterios</span>
+                    </a>
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/users">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-users-cog"></span>
+                        </div>
+                        <span>Administradores</span>
+                    </a>
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/roles">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-user-shield"></span>
+                        </div>
+                        <span>Roles</span>
+                    </a>
+                    <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/preguntas-frecuentes">
+                        <div class="dropdown-icon-width">
+                            <span class="far fa-question-circle"></span>
+                        </div>
+                        <span>Preguntas Frecuentes</span>
+                    </a>
+                    
+                    <hr>
+
+                    @endif
+
                     <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/reset_password">
                         <div class="dropdown-icon-width">
                             <span class="fas fa-shield-alt"></span>

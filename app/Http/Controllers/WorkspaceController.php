@@ -15,6 +15,7 @@ use App\Models\SegmentValue;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
+use App\Models\Ambiente;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -64,7 +65,75 @@ class WorkspaceController extends Controller
         $workspaces = Workspace::search($request);
         WorkspaceResource::collection($workspaces);
 
-        return $this->success($workspaces);
+        $config = Ambiente::first();
+        $config->logo = get_media_url($config->logo);
+
+        return $this->success(compact('workspaces', 'config'));
+    }
+
+    public function create(): JsonResponse
+    {
+        // Load criteria
+
+        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+
+        foreach ($workspace['criteria'] as $wk_crit) {
+            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            $in_segment_list = $in_segment->pluck('id')->all();
+            $wk_crit->its_used = true;
+        }
+
+        $workspace['criteria_workspace'] = null;
+        $workspace['limit_allowed_users'] = null;
+        $workspace['is_superuser'] = auth()->user()->isA('super-user');
+
+        return $this->success($workspace);
+    }
+
+    public function store(WorkspaceRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        // Upload files
+
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'logo_negativo');
+
+        // Set constraint: limit allowed users
+
+        if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
+
+            $constraint_user['type'] = $data['limit_allowed_users_type'];
+            $constraint_user['quantity'] = intval($data['limit_allowed_users_limit']);
+
+            $data['limit_allowed_users'] = $constraint_user;
+        else:
+            $data['limit_allowed_users'] = null;
+        endif;
+
+        // Update record in database
+
+        $workspace = Workspace::create($data);
+
+        // Save workspace's criteria
+
+        $criteriaSelected = json_decode($data['selected_criteria'], true);
+
+        $criteria = [];
+
+        $module_criterion = Criterion::where('code', 'module')->first();
+
+        foreach ($criteriaSelected as $criterion_id => $is_selected) {
+            if ($is_selected) $criteria[] = $criterion_id;
+        }
+
+        $criteria[] = $module_criterion->id;
+
+        $workspace->criterionWorkspace()->sync($criteria);
+
+        \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
+
+        return $this->success(['msg' => 'Workspace creado correctamente.']);
     }
 
     /**
@@ -80,19 +149,21 @@ class WorkspaceController extends Controller
         $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
 
         foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            $in_segment_list = $in_segment->pluck('id')->all();
-            $wk_crit->its_used = false;
-            if (count($in_segment_list))
-                $wk_crit->its_used = true;
+            $in_segments = SegmentValue::where('criterion_id', $wk_crit->id)->count();
+            // $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            // $in_segment_list = $in_segment->pluck('id')->all();
+             $wk_crit->its_used = $in_segments > 0 ? true : false;
+            // $wk_crit->its_used = false;
+            // if (count($in_segment_list))
+                // $wk_crit->its_used = true;
         }
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
-
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
 
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
+        // $workspace['is_superuser'] = true;
 
         return $this->success($workspace);
     }
@@ -109,9 +180,11 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
+        // info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
+        $data = Media::requestUploadFile($data, 'logo_marca_agua');
 
         // Set constraint: limit allowed users
 
