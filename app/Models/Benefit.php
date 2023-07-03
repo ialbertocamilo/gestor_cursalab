@@ -149,15 +149,7 @@ class Benefit extends BaseModel
             else:
 
                 $benefit = self::create($data);
-                // $benefit->workspaces()->sync([$workspace->id]);
-                // foreach ($data['escuelas'] as  $escuela) {
-                //     SortingModel::setLastPositionInPivotTable(CourseSchool::class,Course::class,[
-                //         'school_id' => $escuela,
-                //         'course_id'=>$course->id,
-                //     ],[
-                //         'school_id'=>$escuela,
-                //     ]);
-                // }
+
             endif;
 
             if(!is_null($list_silabos)) {
@@ -209,18 +201,7 @@ class Benefit extends BaseModel
                 }
             }
 
-
-            // if ($data['requisito_id']) :
-            //     Requirement::updateOrCreate(
-            //         ['model_type' => Course::class, 'model_id' => $course->id,],
-            //         ['requirement_type' => Course::class, 'requirement_id' => $data['requisito_id']]
-            //     );
-
-            // else :
-
-            //     $course->requirements()->delete();
-
-            // endif;
+            $this->setStatus($benefit);
 
 
             DB::commit();
@@ -353,15 +334,57 @@ class Benefit extends BaseModel
 
         return ['benefit' => $benefit];
     }
+
+    protected function setStatus( $benefit )
+    {
+        if($benefit) {
+
+            $inicio_inscripcion = new Carbon($benefit->inicio_inscripcion);
+            $fin_inscripcion = new Carbon($benefit->fin_inscripcion);
+            $fecha_liberacion = new Carbon($benefit->fecha_liberacion);
+            $now = Carbon::now();
+
+
+            $status_active = Taxonomy::getFirstData('benefit', 'status', 'active');
+            $status_locked = Taxonomy::getFirstData('benefit', 'status', 'locked');
+            $status_finished = Taxonomy::getFirstData('benefit', 'status', 'finished');
+            $status_released = Taxonomy::getFirstData('benefit', 'status', 'released');
+
+            if($now->lt($inicio_inscripcion)) {
+                $benefit->status_id = $status_locked->id;
+            }
+            else if ($now->gt($inicio_inscripcion) && $now->lt($fin_inscripcion)) {
+                $benefit->status_id = $status_active->id;
+            }
+            else if($now->gt($fin_inscripcion) && $now->lt($fecha_liberacion)) {
+                $benefit->status_id = $status_finished->id;
+            }
+            else if($now->gt($fecha_liberacion)) {
+                $benefit->status_id = $status_released->id;
+            }
+
+            $benefit->save();
+        }
+
+
+        return $benefit;
+    }
+
     // Apis
     protected function registerUserForBenefit( $data )
     {
-        $limit_benefits_x_user = 3;
         $response['error'] = false;
         $response['data'] = [];
 
         $user_id = $data['user'] ?? null;
         $benefit_id = $data['benefit'] ?? null;
+
+        $max_benefits_workspace = Benefit::join('workspaces','benefits.workspace_id','=','workspaces.id')
+                                ->where('benefits.id', $benefit_id)
+                                ->select('workspaces.max_benefits')
+                                ->first();
+
+        $limit_benefits_x_user = $max_benefits_workspace ? $max_benefits_workspace->max_benefits : 0;
 
         $is_registered = UserBenefit::where('user_id', $user_id)
                         ->where('benefit_id', $benefit_id)
@@ -504,6 +527,14 @@ class Benefit extends BaseModel
         $user_id = $data['user'];
         $status_benefit = ($data['status'] && is_array($data['status']) && count($data['status']) > 0) ? $data['status'] : null;
 
+        $user_status_active = Taxonomy::getFirstData('benefit', 'user_status', 'active');
+        $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
+        $user_status_exchanged = Taxonomy::getFirstData('benefit', 'user_status', 'exchanged');
+        $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+        $user_status_disabled = Taxonomy::getFirstData('benefit', 'user_status', 'disabled');
+        $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
+        $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
+
         // $workspace = get_current_workspace();
 
         $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
@@ -564,19 +595,31 @@ class Benefit extends BaseModel
 
             if(in_array($item->id, $benefits_user_registered)) {
                 $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $item->id])->first();
-                if($user_benefit) {
-                    $item->user_status = ['name' => 'Suscrito', 'code' => 'subscribed'];
-                    $item->subscribed = true;
+
+                if($item->status?->code == 'active') {
+                    if($user_benefit->status_id == $user_status_subscribed?->id) {
+                        $item->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                        $item->subscribed = true;
+                    }
+                    else {
+                        $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                    }
+                }
+                else if($item->status?->code == 'locked') {
+                    $item->user_status = $item->status;
+                }
+                else if($item->status?->code == 'finished') {
+                    $item->user_status = $item->status;
+                }
+                else if($item->status?->code == 'released') {
+                    if($user_benefit->status_id == $user_status_subscribed?->id) {
+                        $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                        $item->subscribed = true;
+                    }
                 }
             }
-
-            // if ($item->inicio_inscripcion && $item->fin_inscripcion) {
-            //     $inicio_inscripcion = new Carbon($item->inicio_inscripcion);
-            //     $fin_inscripcion = new Carbon($item->fin_inscripcion);
-            //     $now = Carbon::now();
-            //     if ($now->gt($inicio_inscripcion) && $now->lt($fin_inscripcion))
-            //         $item->status = ['name' => 'Activo', 'code' => 'activo'];
-            // }
+            unset($item->status);
+            $item->status = $item->user_status;
 
 
             $item->ubicacion = "Lima";
