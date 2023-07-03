@@ -196,37 +196,37 @@ export default {
                     }
                 ]
             },
-            {
-                title: "BENEFICIOS",
-                icon: "fas fa-gift",
-                active: false,
-                items: [
-                    {
-                        title: "Configuración",
-                        icon: "fas fa-gift",
-                        path: "/beneficios",
-                        subpaths: ["beneficios"],
-                        selected: false,
-                        permission: "beneficios",
-                        role: [
-                            "super-user",
-                            "admin"
-                        ]
-                    },
-                    {
-                        title: "Speakers",
-                        icon: "fas fa-gift",
-                        path: "/speakers",
-                        subpaths: ["speakers"],
-                        selected: false,
-                        permission: "speakers",
-                        role: [
-                            "super-user",
-                            "admin"
-                        ]
-                    }
-                ]
-            },
+            // {
+            //     title: "BENEFICIOS",
+            //     icon: "fas fa-gift",
+            //     active: false,
+            //     items: [
+            //         {
+            //             title: "Configuración",
+            //             icon: "fas fa-gift",
+            //             path: "/beneficios",
+            //             subpaths: ["beneficios"],
+            //             selected: false,
+            //             permission: "beneficios",
+            //             role: [
+            //                 "super-user",
+            //                 "admin"
+            //             ]
+            //         },
+            //         {
+            //             title: "Speakers",
+            //             icon: "fas fa-gift",
+            //             path: "/speakers",
+            //             subpaths: ["speakers"],
+            //             selected: false,
+            //             permission: "speakers",
+            //             role: [
+            //                 "super-user",
+            //                 "admin"
+            //             ]
+            //         }
+            //     ]
+            // },
             {
                 title: "USUARIOS",
                 icon: "fas fa-users-cog",
