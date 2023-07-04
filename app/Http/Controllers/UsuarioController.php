@@ -102,6 +102,9 @@ class UsuarioController extends Controller
         $workspace = get_current_workspace();
         $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
 
+        info('sub_workspaces_id search');
+        info($sub_workspaces_id);
+
         $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
 
         $users = User::search($request, withAdvancedFilters: true);

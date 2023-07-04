@@ -187,6 +187,10 @@ class CriterionValue extends BaseModel
     {
         $subworkspacesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
 
+        if (!$subworkspacesIds) {
+            return [];
+        }
+
         $query_criteria = $criteriaIds ? ' and cv.criterion_id in ('.implode(',', $criteriaIds).')' : '';
 
         $query = '
