@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GeneralStorageRequest;
+use App\Http\Resources\ResourceGeneralSubWorkspaceStatus;
+use App\Http\Resources\ResourceGeneralWorkspaceStatus;
+use App\Http\Resources\ResourceListGeneralWorkspacesStatus;
 use App\Models\Criterion;
 use App\Models\Prueba;
 use App\Models\Workspace;
@@ -189,5 +193,58 @@ class GeneralController extends Controller
         $pbi_url = $workspace->url_powerbi ?? 'Not provided';
 
         return view('powerbi.index', compact('pbi_url'));
+    }
+
+    public function workspaces_status(Request $request) 
+    {
+        $workspaces_status = DashboardService::loadWorkspacesStatus();
+
+        // === storage segun workspace_id ===
+        $workspaces_ids = $workspaces_status->pluck('id');
+        $workspaces_storage = DashboardService::loadSizeWorkspaces($workspaces_ids);
+        $request->workspaces_storage = $workspaces_storage;
+
+        $workspaces_status->each(function ($workspace, $key) use($workspaces_storage) {
+
+            $workspace->size_medias = (int) $workspaces_storage[$key]->medias_sum_size; // en KB
+            $workspace->users_count = $workspace->subworkspaces->sum('users_count');
+
+            return $workspace;
+        });
+
+        // === storage y usuarios total ===
+        $workspaces_total = [ 
+            'workspaces_total_storage' => formatSize($workspaces_status->sum('size_medias')),
+            'workspaces_total_users' => $workspaces_status->sum('users_count') 
+        ];
+
+        $workspaces_status_total = ResourceListGeneralWorkspacesStatus::collection($workspaces_status);
+
+        return $this->success(compact('workspaces_total', 'workspaces_status_total'));
+    }
+
+    public function workspace_current_status(Request $request) 
+    {
+        $workspace_status = DashboardService::loadCurrentWorkspaceStatus();
+        
+        return $this->success(new ResourceGeneralWorkspaceStatus($workspace_status));
+    }
+
+    public function subworkspace_status(Request $request, string $subworkspace_id = NULL) 
+    {
+        $subworkspace_status = $subworkspace_id;
+
+        // === usuarios total por subworkspace ===
+        if($subworkspace_id) {
+            $subworkspace_status = DashboardService::loadSubworkspaceStatus($subworkspace_id);
+            $subworkspace_status = new ResourceGeneralSubWorkspaceStatus($subworkspace_status);
+        }
+
+        return $this->success($subworkspace_status);
+    }
+
+    public function subworkspace_plan(GeneralStorageRequest $request) 
+    {
+        return $this->success(true);
     }
 }

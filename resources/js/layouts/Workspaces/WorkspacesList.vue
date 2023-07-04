@@ -47,16 +47,54 @@
         <!--
             Workspaces title
         ======================================== -->
-
         <v-row class="justify-content-center mt-3 pt-3 pb-3">
-            <div class="col-10">
-                <h2>
-                    <b>
-                        Workspaces
-                    </b>
-                </h2>
-            </div>
+            <v-col cols="10">
+                <v-row>
+                    <div class="col-6 d-flex align-items-center">
+                        <h2>
+                            <b>
+                                Workspaces
+                            </b>
+                        </h2>
+                    </div>
+                    <div class="col-6 d-flex justify-space-between align-items-center">
+
+                        <div class="d-flex align-items-center">
+                            <span class="mdi mdi-cloud-outline fa-4x mx-3"></span>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold mb-0">Total utilizado</p>
+                                <span class="fa-2x">22 Gb</span>
+                                <a href="">Ver detalle <span class="fas fa-arrow-right"></span> </a>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center">
+                            <span class="mdi mdi-account-multiple-outline fa-4x mx-3"></span>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold mb-0">Total Usuarios</p>
+                                <span class="fa-2x">160 000</span>
+                                <a href="">Ver detalle <span class="fas fa-arrow-right"></span> </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <v-btn color="primary">
+                                <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
+                                Auditoria                   
+                            </v-btn>
+                            <v-btn color="primary">
+                                <span class="mdi mdi-plus fa-lg"></span>
+                                Workspace                   
+                            </v-btn>
+                        </div>
+
+                    </div>
+                </v-row>            
+            </v-col>
         </v-row>
+
+
+        <div v-show="!showDetail">
 
         <!--
             Workspaces
@@ -253,6 +291,15 @@
                 </v-row>
             </v-col>
         </v-row>
+        
+        </div>
+
+
+        <div v-show="showDetail">
+
+            mostrar estados segun workspace
+        </div>
+
 
         <!--
             Modals
@@ -298,6 +345,8 @@ export default {
         configurationIsVisible: false
         ,
         canAccessConfiguration: false
+        ,
+        showDetail: false
         ,
         workspaceFormModalOptions: {
             ref: 'WorkspacesForm',
