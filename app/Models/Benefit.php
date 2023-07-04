@@ -224,16 +224,15 @@ class Benefit extends BaseModel
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
-        // $workspace = get_current_workspace();
+        $workspace = get_current_workspace();
 
         $benefits_query = Benefit::with(
             ['speaker',
             'type'=> function ($query) {
                         $query->select('id', 'name', 'code');
                     }
-                ]);
-        // ->where('active',1);
-        // where('workspace_id', $workspace->id)
+                ])
+        ->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -590,8 +589,8 @@ class Benefit extends BaseModel
 
     protected function getBenefits( $data )
     {
-        // $user = auth()->user();
-        // $workspace = $user?->subworkspace?->parent?->id;
+        $user = auth()->user();
+        $workspace_id = $user?->subworkspace?->parent?->id;
 
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
@@ -626,8 +625,8 @@ class Benefit extends BaseModel
                     $query->select('id', 'name', 'code');
                 }
         ])
-        ->where('active',1);
-        // where('workspace_id', $workspace->id)
+        ->where('active',1)
+        ->where('workspace_id', $workspace_id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';

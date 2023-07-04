@@ -136,6 +136,7 @@ export default {
                 title: "RESUMEN",
                 icon: "fas fa-dice-d6",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Dashboard",
@@ -173,6 +174,7 @@ export default {
                 title: "AULAS VIRTUALES",
                 icon: "fas fa-chalkboard",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Aulas Virtuales",
@@ -196,41 +198,43 @@ export default {
                     }
                 ]
             },
-            // {
-            //     title: "BENEFICIOS",
-            //     icon: "fas fa-gift",
-            //     active: false,
-            //     items: [
-            //         {
-            //             title: "Configuración",
-            //             icon: "fas fa-gift",
-            //             path: "/beneficios",
-            //             subpaths: ["beneficios"],
-            //             selected: false,
-            //             permission: "beneficios",
-            //             role: [
-            //                 "super-user",
-            //                 "admin"
-            //             ]
-            //         },
-            //         {
-            //             title: "Speakers",
-            //             icon: "fas fa-gift",
-            //             path: "/speakers",
-            //             subpaths: ["speakers"],
-            //             selected: false,
-            //             permission: "speakers",
-            //             role: [
-            //                 "super-user",
-            //                 "admin"
-            //             ]
-            //         }
-            //     ]
-            // },
+            {
+                title: "BENEFICIOS",
+                icon: "fas fa-gift",
+                active: false,
+                functionality: ['benefits'],
+                items: [
+                    {
+                        title: "Configuración",
+                        icon: "fas fa-gift",
+                        path: "/beneficios",
+                        subpaths: ["beneficios"],
+                        selected: false,
+                        permission: "beneficios",
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
+                    },
+                    {
+                        title: "Speakers",
+                        icon: "fas fa-gift",
+                        path: "/speakers",
+                        subpaths: ["speakers"],
+                        selected: false,
+                        permission: "speakers",
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
+                    }
+                ]
+            },
             {
                 title: "USUARIOS",
                 icon: "fas fa-users-cog",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Módulos",
@@ -293,6 +297,7 @@ export default {
                 title: "GESTIONA TUS CURSOS",
                 icon: "fas fa-cog",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Módulos",
@@ -356,6 +361,7 @@ export default {
                 title: "GESTIONA TU CONTENIDO",
                 icon: "fas fa-pen-square",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Anuncios",
@@ -415,6 +421,7 @@ export default {
                 title: "ENTRENADORES Y CHECKLIST",
                 icon: "fas fa-business-time",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Entrenadores",
@@ -450,6 +457,7 @@ export default {
                 title: "REPORTES",
                 icon: "fas fa-download",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "General",
@@ -501,6 +509,7 @@ export default {
                 title: "HERRAMIENTAS",
                 icon: "fas fa-tools",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Notificaciones push",
@@ -553,6 +562,7 @@ export default {
                 title: "ATENCIÓN AL COLABORADOR",
                 icon: "fas fa-headset",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Preguntas frecuentes",
@@ -598,6 +608,10 @@ export default {
         show_meeting_section: {
             type: String,
             required: true
+        },
+        functionality: {
+            type: Array,
+            required: true
         }
 
     },
@@ -605,6 +619,7 @@ export default {
         gruposFiltrado: function() {
             let vue = this;
             let new_grupos = [];
+            let new_grupos_sections = [];
             let location = window.location.pathname.split("/");
             this.grupos.forEach(grupo => {
                 let new_items = [];
@@ -624,8 +639,15 @@ export default {
                     new_grupos.push(grupo);
                 }
             });
+            new_grupos.forEach(sec => {
+                vue.functionality.forEach(f => {
+                    if(sec.functionality.includes(f)) {
+                        new_grupos_sections.push(sec)
+                    }
+                });
+            });
             // console.log(new_grupos);
-            return new_grupos;
+            return new_grupos_sections;
         }
     },
     mounted() {

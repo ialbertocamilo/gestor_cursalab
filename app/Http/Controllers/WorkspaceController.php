@@ -15,7 +15,7 @@ use App\Models\SegmentValue;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
-
+use App\Models\WorkspaceFunctionality;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -231,21 +231,23 @@ class WorkspaceController extends Controller
             $item->active = false;
         });
 
-        $side_menu = Taxonomy::select('id', 'name')
-                             ->where('group', 'system')
-                             ->where('type', 'side_menu')
-                             ->where('active', ACTIVE);
+        $side_menu = WorkspaceFunctionality::sideMenuApp(get_current_workspace()->id);
 
-        #=== visible glossary only for FP ===
-        $jump_menu = (get_current_workspace()->id !== 25);
-        if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
-        #=== visible glossary only for FP ===
+        // $side_menu = Taxonomy::select('id', 'name')
+        //                      ->where('group', 'system')
+        //                      ->where('type', 'side_menu')
+        //                      ->where('active', ACTIVE);
 
-        $side_menu = $side_menu->get();
+        // #=== visible glossary only for FP ===
+        // $jump_menu = (get_current_workspace()->id !== 25);
+        // if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
+        // #=== visible glossary only for FP ===
 
-        $side_menu->each(function ($item) {
-            $item->active = false;
-        });
+        // $side_menu = $side_menu->get();
+
+        // $side_menu->each(function ($item) {
+        //     $item->active = false;
+        // });
 
         $response = compact('main_menu', 'side_menu');
 
