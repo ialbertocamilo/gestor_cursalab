@@ -360,6 +360,7 @@ export default {
                 title: "DIPLOMAS",
                 icon: "fas fa-medal",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Listar",
@@ -691,7 +692,7 @@ export default {
             });
             new_grupos.forEach(sec => {
                 vue.functionality.forEach(f => {
-                    if(sec.functionality.includes(f)) {
+                    if (!sec.hasOwnProperty('functionality') || sec.functionality.includes(f)) {
                         new_grupos_sections.push(sec)
                     }
                 });
