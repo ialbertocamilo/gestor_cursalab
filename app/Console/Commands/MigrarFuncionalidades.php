@@ -85,8 +85,6 @@ class MigrarFuncionalidades extends Command
                     ->where('active', 1)
                     ->where('code','<>','glosario')
                     ->where('code','<>','beneficios')
-                    ->where('code','<>','aulas_virtuales')
-                    ->where('code','<>','checklist')
                     ->pluck('id')
                     ->toArray();
 
