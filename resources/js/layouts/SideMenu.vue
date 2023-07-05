@@ -691,11 +691,16 @@ export default {
                 }
             });
             new_grupos.forEach(sec => {
-                vue.functionality.forEach(f => {
-                    if (!sec.hasOwnProperty('functionality') || sec.functionality.includes(f)) {
-                        new_grupos_sections.push(sec)
-                    }
-                });
+                if (!sec.hasOwnProperty('functionality')) {
+                    new_grupos_sections.push(sec)
+                }
+                else {
+                    vue.functionality.forEach(f => {
+                        if (sec.functionality.includes(f)) {
+                            new_grupos_sections.push(sec)
+                        }
+                    });
+                }
             });
             // console.log(new_grupos);
             return new_grupos_sections;
