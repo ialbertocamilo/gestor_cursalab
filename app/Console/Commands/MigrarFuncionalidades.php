@@ -43,7 +43,9 @@ class MigrarFuncionalidades extends Command
     public function handle()
     {
         // Agregar la funcionalidad por defecto a los workspaces
-        $this->functionalitiesWorkspaces();
+        $this->functionalitiesWorkspacesDefault('default');
+        $this->functionalitiesWorkspacesDefault('sesiones-live');
+        $this->functionalitiesWorkspacesDefault('checklist');
 
 
         // Agregar side_menu a la funcionalidad por defecto
@@ -51,23 +53,25 @@ class MigrarFuncionalidades extends Command
 
     }
 
-    private function functionalitiesWorkspaces() {
+    private function functionalitiesWorkspacesDefault($valor) {
 
         $this->info("\n ------- Funcionalidad - Inicio ------- \n");
         info(" ------- Funcionalidad - Inicio ------- ");
 
         $parents = Workspace::whereNull('parent_id')->pluck('id')->toArray();
-        $default = Taxonomy::getFirstData('system','functionality','default');
+        $default = Taxonomy::getFirstData('system','functionality', $valor);
 
         $list_created = [];
-        foreach($parents as $id) {
-            $exist = WorkspaceFunctionality::where('workspace_id',$id)->where('functionality_id', $default?->id)->first();
-            if(!$exist) {
-                $created = WorkspaceFunctionality::create(array('workspace_id'=>$id, 'functionality_id' => $default?->id));
-                array_push($list_created, $created->id);
+        if($default) {
+            foreach($parents as $id) {
+                $exist = WorkspaceFunctionality::where('workspace_id',$id)->where('functionality_id', $default?->id)->first();
+                if(!$exist) {
+                    $created = WorkspaceFunctionality::create(array('workspace_id'=>$id, 'functionality_id' => $default?->id));
+                    array_push($list_created, $created->id);
+                }
             }
+            cache_clear_model(WorkspaceFunctionality::class);
         }
-        cache_clear_model(WorkspaceFunctionality::class);
 
         $this->info("\n ------- Funcionalidad - Fin ".json_encode($list_created)." ------- \n");
         info(" ------- Funcionalidad - Fin ".json_encode($list_created)."------- ");
@@ -85,6 +89,8 @@ class MigrarFuncionalidades extends Command
                     ->where('active', 1)
                     ->where('code','<>','glosario')
                     ->where('code','<>','beneficios')
+                    ->where('code','<>','aulas_virtuales')
+                    ->where('code','<>','checklist')
                     ->pluck('id')
                     ->toArray();
 
