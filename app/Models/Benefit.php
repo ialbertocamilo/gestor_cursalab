@@ -714,7 +714,7 @@ class Benefit extends BaseModel
             $item->status = $item->user_status;
 
 
-            $item->ubicacion = "Lima";
+            $item->ubicacion = null;
             $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
             $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
             $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
@@ -843,12 +843,8 @@ class Benefit extends BaseModel
             unset($benefit->status);
             $benefit->status = $benefit->user_status;
 
-            $benefit->direccion = [
-                'lugar' => 'Av. José Larco 401, Miraflores 15074, Perú',
-                'link' => 'https://goo.gl/maps/9bxyJjvWxxPeadap6',
-                'image' => 'images/wrkspc-25-mapa-20230623100732-G69RYsduBbafxRV.PNG',
-                'referencia' => $benefit->referencia
-            ];
+            $benefit->direccion = null;
+            $benefit->ubicacion = null;
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
@@ -923,7 +919,6 @@ class Benefit extends BaseModel
                     "name" => "Mis Beneficios",
                     "code"=> "benefits",
                     "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active", "checked" => true],
                         ["name" => "Canjeados", "code"=> "exchanged", "checked" => true],
                         ["name" => "Registrados", "code"=> "subscribed", "checked" => true]
                     ],
