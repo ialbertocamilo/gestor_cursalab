@@ -25,6 +25,7 @@ class WorkspaceRequest extends FormRequest
             'selected_criteria' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
+            'selected_functionality' => 'nullable',
         ];
     }
 

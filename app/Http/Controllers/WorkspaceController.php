@@ -94,6 +94,9 @@ class WorkspaceController extends Controller
 
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
+        $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
+        $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+
         return $this->success($workspace);
     }
 
@@ -144,6 +147,40 @@ class WorkspaceController extends Controller
         $criteria[] = $module_criterion->id;
 
         $workspace->criterionWorkspace()->sync($criteria);
+
+        // Actualizar funcionalidades
+
+        $selected_functionality = json_decode($data['selected_functionality'], true);
+
+        foreach($selected_functionality as $fun_id => $fun) {
+
+            $exist = WorkspaceFunctionality::where('workspace_id', $workspace->id)->where('functionality_id', $fun_id)->first();
+
+            if($exist) {
+                if(!$fun) {
+                    $exist->delete();
+                }
+            }
+            else {
+                if($fun) {
+                    try {
+
+                        DB::beginTransaction();
+                        $data = array('workspace_id'=> $workspace->id, 'functionality_id'=>$fun_id);
+                        WorkspaceFunctionality::create($data);
+
+                        DB::commit();
+                    } catch (\Exception $e) {
+                        info($e);
+                        DB::rollBack();
+                        abort(errorExceptionServer());
+                    }
+                }
+            }
+        }
+
+        cache_clear_model(WorkspaceFunctionality::class);
+
 
         \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
 

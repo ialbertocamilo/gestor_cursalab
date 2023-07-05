@@ -28,7 +28,7 @@ class WorkspaceFunctionality extends Model
         return $this->belongsTo(Taxonomy::class, 'functionality_id');
     }
 
-    protected function functionalities( $workspace_id ) {
+    protected function functionalities( $workspace_id, $name = false ) {
 
         $list = collect();
 
@@ -38,8 +38,11 @@ class WorkspaceFunctionality extends Model
                             ->where('workspace_id', $workspace_id)
                             ->get();
 
-        $functionalities->each(function($q) use($list) {
-            $list->push($q->functionality?->code);
+        $functionalities->each(function($q) use($list, $name) {
+            if($name)
+                $list->push($q->functionality);
+            else
+                $list->push($q->functionality?->code);
         });
         return $list->toArray();
     }
