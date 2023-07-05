@@ -657,41 +657,47 @@ class DiplomaController extends Controller
         $upper_string= true;
         switch ($e_dinamic['id']) {
             case 'users':
-                $d = DB::table($e_dinamic['id']);
-                if($real){
-                    $d = $d->select('name','lastname','surname')->where('id',$real['usuario_id'])->first(); 
-                }else{
-                    switch ($e_dinamic['id_formato']) {
-                        case "1":
-                            $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name) as len_full_name'))->orderBy('len_full_name','desc')->first();
-                        break;
-                        case "2": 
-                            $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname) as len_full_name'))->orderBy('len_full_name','desc')->first();
-                        break;
-                        case "3": 
-                            $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
-                        break;
-                        case "4": 
-                            $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
-                        break;
-                    }
-                }
+                // $d = DB::table($e_dinamic['id']);
+                // if($real){
+                //     $d = $d->select('name','lastname','surname')->where('id',$real['usuario_id'])->first(); 
+                // }else{
+                //     switch ($e_dinamic['id_formato']) {
+                //         case "1":
+                //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name) as len_full_name'))->orderBy('len_full_name','desc')->first();
+                //         break;
+                //         case "2": 
+                //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname) as len_full_name'))->orderBy('len_full_name','desc')->first();
+                //         break;
+                //         case "3": 
+                //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
+                //         break;
+                //         case "4": 
+                //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
+                //         break;
+                //     }
+                // }
                 // info(['user' => $d]);
-                $text = $d->name;
+                // $text = 'Usuario';
+                $text = 'Usuario Prueba Cursalab Powered';
+                // $text = $d->name;
                 // Estos id son definidos en el front (Diplomas/index.js) en el metodo context_menu() 
-                switch ($e_dinamic['id_formato']) {
-                    case "2": $text = $br[0].' '.$d->lastname; break;
-                    case "3": $text = $br[0].' '.$d->lastname.' '.$d->surname; break;
-                    case "4": $text = $d->name.' '.$d->lastname.' '.$d->surname;break;
-                }
+                // switch ($e_dinamic['id_formato']) {
+                //     case "2": $text = $text . ' Cursalab'; break;
+                //     // case "2": $text = $br[0].' '.$d->lastname; break;
+                //     case "3": $text = $text . ' Cursalab Powered'; break;
+                //     // case "3": $text = $br[0].' '.$d->lastname.' '.$d->surname; break;
+                //     case "4": $text = $text . ' Prueba Cursalab Powered'; break;
+                //     // case "4": $text = $d->name.' '.$d->lastname.' '.$d->surname;break;
+                // }
             break;
             case 'courses':
                 // info(['real_cursos' => $real]);
-                $q = DB::table($e_dinamic['id']);
-                $q = $q->select('name',DB::raw('LENGTH(name) as len_nombre'))->orderBy('len_nombre','desc')->first();
+                // $q = DB::table($e_dinamic['id']);
+                // $q = $q->select('name',DB::raw('LENGTH(name) as len_nombre'))->orderBy('len_nombre','desc')->first();
                     // $q = $q->random(1)[0];
                 //}
-                $text = $q->name; 
+                $text = 'Curso de buenas prácticas de programación 2023'; 
+                // $text = $q->name; 
                 $upper_string= false;
             break;
             case 'fecha':
