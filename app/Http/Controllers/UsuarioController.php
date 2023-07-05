@@ -561,10 +561,10 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
-        if(now()->diffInMinutes($user->required_update_at) > 60) {
-            $user->required_update_at = now();
-            $user->save();
-        }
+        // Update flag to force update users courses
+
+        $user->required_update_at = now();
+        $user->save();
 
         info('getCoursesByUser INICIO');
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
