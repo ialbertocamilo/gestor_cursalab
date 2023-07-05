@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Rules\CustomContextSpecificWords;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -12,10 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use App\Models\User;
-
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password AS RulePassword;
-
 use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
@@ -73,12 +73,17 @@ class ResetPasswordApiController extends Controller
             "password_available:{$user_id}",
             // ->mixedCase()->uncompromised(3),
 
-            new ContextSpecificWords($user->email ?? NULL),
-            new ContextSpecificWords($user->document ?? NULL),
+            new CustomContextSpecificWords($user->email ?? NULL, 'email'),
+            new CustomContextSpecificWords($user->document ?? NULL, 'document'),
+            new CustomContextSpecificWords($user->name ?? NULL, 'name'),
+            new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
+            new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
 
-            new ContextSpecificWords($user->name ?? NULL),
-            new ContextSpecificWords($user->lastname ?? NULL),
-            new ContextSpecificWords($user->surname ?? NULL),
+            // new ContextSpecificWords($user->email ?? NULL),
+            // new ContextSpecificWords($user->document ?? NULL),
+            // new ContextSpecificWords($user->name ?? NULL),
+            // new ContextSpecificWords($user->lastname ?? NULL),
+            // new ContextSpecificWords($user->surname ?? NULL),
             
             // new RepetitiveCharacters(),
             // new SequentialCharacters(),
@@ -92,6 +97,10 @@ class ResetPasswordApiController extends Controller
         ];
     }
 
+    protected function validationErrorMessages() 
+    {
+        return ['password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.' ];
+    }
 
     /**
      * Reset the given user's password.
@@ -99,9 +108,9 @@ class ResetPasswordApiController extends Controller
      * @param Request $request
      * @return RedirectResponse|JsonResponse
      */
-    public function reset(Request $request): JsonResponse|RedirectResponse
+    // public function reset(Request $request): JsonResponse|RedirectResponse
+    public function reset(Request $request)
     {
-
         $request->validate($this->rules(), $this->validationErrorMessages());
 
         // Here we will attempt to reset the user's password. If it is successful we

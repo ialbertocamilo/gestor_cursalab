@@ -102,6 +102,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
+    Route::get('existe_email/{email?}', [RestAyudaController::class, 'existe_email']);
     Route::post('registrar_soporte_login', [RestAyudaController::class, 'registra_ayuda_login']);
     Route::get('listar_empresas', [RestAyudaController::class, 'listar_empresas']);
     Route::prefix('checklist')->group(base_path('routes/app/checklist.php'));
