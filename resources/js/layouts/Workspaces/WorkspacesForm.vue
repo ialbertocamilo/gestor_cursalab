@@ -68,6 +68,27 @@
                     </v-col>
                 </v-row>
 
+                <v-row justify="space-around" v-if="is_superuser">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Funcionalidades"
+                        >
+                            <template v-slot:content>
+
+                                <v-col cols="12">
+                                    <v-checkbox
+                                        v-for="functionality in functionalities"
+                                        :key="functionality.id"
+                                        v-model="resource.selected_functionality[functionality.id]"
+                                        :label="functionality.name"
+                                    >
+                                    </v-checkbox>
+                                </v-col>
+
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
                 <v-row>
                     <v-col cols="12">
                         <DefaultModalSection title="Diplomas">
@@ -201,7 +222,7 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
     'logo_marca_agua', 'marca_agua_estado',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -243,13 +264,14 @@ export default {
                 url_powerbi: '',
                 logo: '',
                 logo_negativo: '',
-                selected_criteria: {}
+                selected_criteria: {},
+                selected_functionality: {}
             },
             limit_allowed_users: null,
             resource: {
-            }
-            ,
-            defaultCriteria: []
+            },
+            defaultCriteria: [],
+            functionalities: []
             ,
             customCriteria: []
             ,
@@ -311,6 +333,9 @@ export default {
                 formData.set(
                     'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
                 );
+                formData.set(
+                    'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
+                );
 
                 vue.setLimitUsersAllowed(formData);
 
@@ -352,6 +377,8 @@ export default {
 
             // if (!workspace) return;
 
+            this.showLoader()
+
             let vue = this;
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
@@ -384,6 +411,19 @@ export default {
                     });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
+
+                    vue.functionalities = data.data.functionalities;
+
+                    vue.resource.selected_functionality = {};
+                    data.data.functionalities_selected.forEach(c => {
+                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
+                            c.id, data.data.functionalities
+                        );
+                    });
+                    this.hideLoader();
+                })
+                .catch((error) => {
+                    this.hideLoader();
                 })
         }
         ,

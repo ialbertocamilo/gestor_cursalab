@@ -187,7 +187,7 @@
                             <DefaultAutocomplete
                                 dense
                                 label="Tipo de agrupación de beneficio"
-                                v-model="resource.group"
+                                v-model="selectGroup"
                                 :items="selects.lista_grupo"
                                 item-text="name"
                                 item-value="code"
@@ -1102,7 +1102,7 @@ export default {
             }
 
             vue.resource.type = vue.selectType
-            // vue.resource.group = vue.selectGroup
+            vue.resource.group = vue.selectGroup
 
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -1177,6 +1177,7 @@ export default {
                         let response = data.data.data;
 
                         this.selectType = (response.type != null) ? response.type.code : null
+                        this.selectGroup = (response.group != null) ? response.group.code : null
 
                         if(response.silabo != null && response.silabo.length > 0) {
                             vue.options_modules[1].active = true
@@ -1244,6 +1245,12 @@ export default {
             if (this.selectType == null || this.selectType == '') {
                 errors.push({
                     message: 'Debe seleccionar un tipo de beneficio'
+                })
+                valid = false;
+            }
+            if (this.selectGroup == null || this.selectGroup == '') {
+                errors.push({
+                    message: 'Debe seleccionar un grupo de beneficio'
                 })
                 valid = false;
             }

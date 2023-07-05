@@ -3,6 +3,7 @@
 
     $user = auth()->user();
     $roles = $user->getRoles();
+    $functionality = \App\Models\WorkspaceFunctionality::functionalities( get_current_workspace()->id );
     $subworkspace = get_current_workspace();
     $accounts_count = \App\Models\Account::where('active', ACTIVE)
         ->where('workspace_id', $subworkspace->id ?? null)
@@ -49,12 +50,12 @@ if (isset($fullScreen)) {
 <div id="app">
     @impersonating($guard = null)
         <div class="d-flex align-items-stretch bg-red text-center">
-        
+
             <div class="col text-center">
                 <a class="text-center text-white" href="{{ route('impersonate.leave') }}">Leave impersonation</a>
             </div>
 
-        </div>  
+        </div>
     @endImpersonating
 
     <div class="d-flex align-items-stretch">
@@ -64,7 +65,7 @@ if (isset($fullScreen)) {
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
-                <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" />
+                <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" :functionality="{{ json_encode($functionality) }}"/>
                 {{-- </v-app> --}}
             </div>
         </div>

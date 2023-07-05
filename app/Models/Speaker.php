@@ -45,6 +45,7 @@ class Speaker extends BaseModel
 
         try {
             $workspace = get_current_workspace();
+            $data['workspace_id'] = $workspace?->id;
 
             DB::beginTransaction();
 
@@ -91,11 +92,9 @@ class Speaker extends BaseModel
         $response['data'] = null;
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
-        // $workspace = get_current_workspace();
+        $workspace = get_current_workspace();
 
-        $speakers_query = Speaker::
-        where('active',1);
-        // where('workspace_id', $workspace->id)
+        $speakers_query = Speaker::where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
