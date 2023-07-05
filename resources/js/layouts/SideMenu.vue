@@ -174,7 +174,7 @@ export default {
                 title: "AULAS VIRTUALES",
                 icon: "fas fa-chalkboard",
                 active: false,
-                functionality: ['default'],
+                functionality: ['sesiones-live'],
                 items: [
                     {
                         title: "Aulas Virtuales",

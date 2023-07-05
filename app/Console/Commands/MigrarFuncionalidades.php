@@ -49,35 +49,6 @@ class MigrarFuncionalidades extends Command
         // Agregar side_menu a la funcionalidad por defecto
         $this->functionalitiesConfig();
 
-
-        // Agregar una configuración a una funcionalidad
-
-        // $functionality = Taxonomy::getFirstData('system','functionality','xxxxxxxxxx');
-        // $config = Taxonomy::getFirstData('system','side_menu','xxxxxxxxxxxxxxxx');
-
-        // $this->addConfigFunctionality($functionality, $config);
-
-    }
-
-    private function addConfigFunctionality($functionality, $config){
-
-        try {
-
-            DB::beginTransaction();
-            FunctionalityConfig::create([
-
-                'config_id'=>$config?->id,
-                'functionality_id' => $functionality?->id
-
-            ]);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            info($e);
-            DB::rollBack();
-            abort(errorExceptionServer());
-        }
-        cache_clear_model(FunctionalityConfig::class);
     }
 
     private function functionalitiesWorkspaces() {
@@ -114,6 +85,8 @@ class MigrarFuncionalidades extends Command
                     ->where('active', 1)
                     ->where('code','<>','glosario')
                     ->where('code','<>','beneficios')
+                    ->where('code','<>','aulas_virtuales')
+                    ->where('code','<>','checklist')
                     ->pluck('id')
                     ->toArray();
 
