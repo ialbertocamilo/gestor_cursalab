@@ -207,7 +207,7 @@ class GeneralController extends Controller
         $workspaces_status->each(function ($workspace, $key) use($workspaces_storage) {
 
             $workspace->size_medias = (int) $workspaces_storage[$key]->medias_sum_size; // en KB
-            $workspace->users_count = $workspace->subworkspaces->sum('users_count');
+            $workspace->users_count_actives = $workspace->subworkspaces->sum('users_count_actives');
 
             return $workspace;
         });
@@ -215,7 +215,7 @@ class GeneralController extends Controller
         // === storage y usuarios total ===
         $workspaces_total = [ 
             'workspaces_total_storage' => formatSize($workspaces_status->sum('size_medias')),
-            'workspaces_total_users' => $workspaces_status->sum('users_count') 
+            'workspaces_total_users' => $workspaces_status->sum('users_count_actives') 
         ];
 
         $workspaces_status_total = ResourceListGeneralWorkspacesStatus::collection($workspaces_status);

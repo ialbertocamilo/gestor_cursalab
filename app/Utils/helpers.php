@@ -359,7 +359,7 @@ function messageToSlackByChannel($texto,$attachments,$canal){
 }
 
 function formatSize($kilobytes, $precision = 2, $parsed = true) { // desde KB hacia arriba
-    $unit = ["KB", "MB", "GB", "TB", "PT"];
+    $unit = ["Kb", "Mb", "Gb", "Tb", "Pt"];
     $exp = floor(log($kilobytes, 1024)) | 0;
 
     $size = round($kilobytes / (pow(1024, $exp)), $precision);
