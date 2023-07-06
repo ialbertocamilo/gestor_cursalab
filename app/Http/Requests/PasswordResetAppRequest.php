@@ -77,6 +77,7 @@ class PasswordResetAppRequest extends FormRequest
     public function messages() {
         return [
             'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
+            'email.email' => 'El campo correo electrónico no es un correo válido'
         ];
     }
 

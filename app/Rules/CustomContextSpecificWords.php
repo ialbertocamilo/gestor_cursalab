@@ -17,11 +17,13 @@ class CustomContextSpecificWords implements Rule
     {
         $text = '';
         $text .= ' ';
-        $text .= str_replace(
-            ['http://', 'https://', '-', '_', '.com', '.org', '.biz', '.net', '.'],
-            ' ',
-            config('app.url')
-        );
+        
+        // $text .= str_replace(
+        //     ['http://', 'https://', '-', '_', '.com', '.org', '.biz', '.net', '.'],
+        //     ' ',
+        //     config('app.url')
+        // );
+
         $text .= ' ';
         $text .= $username;
 

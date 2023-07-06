@@ -113,11 +113,8 @@ class ResetPasswordApiController extends Controller
     public function reset(Request $request)
     {
         
-        $validator = Validator::make($request->all(), $this->rules());
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            info(['errors' => $errors]);
-        }
+        // $validator = Validator::make($request->all(), $this->rules());
+        // if ($validator->fails()) info(['errors' => $validator->errors()]);
 
         $request->validate($this->rules(), $this->validationErrorMessages());
 
