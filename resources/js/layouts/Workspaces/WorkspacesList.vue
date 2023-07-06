@@ -147,6 +147,17 @@
                                     </span>
                                 </button>
 
+                             <!--    <button
+                                    type="button" class="btn btn-md"
+                                    @click="duplicateWorkspace(workspace.id)"
+                                    v-show="!view && workspace.is_super_user"
+                                >
+                                    <span class="v-badge">
+                                        <v-icon class="icon" color="primary">mdi-copy</v-icon>
+                                        <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
+                                    </span>
+                                </button> -->
+
                                 <button
                                     type="button" class="btn btn-md"
                                     @click="openFormModal(
@@ -211,12 +222,21 @@
             @onConfirm="loadData()"
         />
 
+        <WorkspacesDuplicateForm
+            :options="workspaceDuplicateFormModalOptions"
+            width="60vw"
+            :ref="workspaceDuplicateFormModalOptions.ref"
+            @onCancel="closeSimpleModal(workspaceDuplicateFormModalOptions)"
+            @onConfirm="loadData()"
+        />
+
     </div>
 </template>
 
 <script>
 
 import WorkspacesForm from "./WorkspacesForm";
+import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
@@ -229,7 +249,7 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm
         
     },
     data: () => ({
@@ -253,6 +273,13 @@ export default {
             action: 'edit',
             base_endpoint: 'workspaces',
             confirmLabel: 'Guardar'
+        },
+        workspaceDuplicateFormModalOptions: {
+            ref: 'WorkspacesDuplicateForm',
+            open: false,
+            action: 'duplicate',
+            base_endpoint: 'workspaces',
+            confirmLabel: 'Duplicar'
         },
         view: true,
         loading: true,
@@ -341,6 +368,22 @@ export default {
                 'Editar workspace'
             );
             this.setActiveWorkspace(workspaceId, false);
+        }
+        ,
+        /**
+         * Open form to duplicate workspace
+         *
+         * @param workspaceId
+         */
+        duplicateWorkspace(workspaceId) {
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                {workspaceId: workspaceId},
+                'duplicate',
+                'Duplicar workspace'
+            );
+            // this.setActiveWorkspace(workspaceId, false);
         }
         ,
         /**
