@@ -55,7 +55,10 @@ class ForgotPasswordApiController extends Controller
         );
 
         return response()->json([
-            'success' => $response == Password::RESET_LINK_SENT
+            'success' => $response == Password::RESET_LINK_SENT,
+            'message' => $response == Password::RESET_LINK_SENT
+                    ? $this->sendResetLinkResponse($request, $response)
+                    : $this->sendResetLinkFailedResponse($request, $response)
         ]);
     }
 }
