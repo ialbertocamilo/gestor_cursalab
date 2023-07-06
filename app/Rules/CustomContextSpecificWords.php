@@ -16,7 +16,6 @@ class CustomContextSpecificWords implements Rule
     public function __construct($username, $identifier)
     {
         $text = '';
-        $text = config('app.name');
         $text .= ' ';
         $text .= str_replace(
             ['http://', 'https://', '-', '_', '.com', '.org', '.biz', '.net', '.'],
@@ -64,24 +63,23 @@ class CustomContextSpecificWords implements Rule
     protected function fail() 
     {
     	switch ($this->identifier) {
-    		case 'email':
-    			$build_message = 'El campo correo electrónico no es un correo válido';
-			break;
-
+            case 'email':
+                $build_message = 'No puedes incluir tu correo electronico \''.$this->detectedWord.'\' en la contraseña. <br>'."Usa otros términos que te sean fácil de recordar.";
+            break;
     		case 'document':
-    			$build_message = 'No puedes incluir tu Documento de Identidad \''.$this->detectedWord.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar.";
+    			$build_message = 'No puedes incluir tu documento de identidad \''.$this->detectedWord.'\' en la contraseña. <br>'." Usa otros términos que te sean fácil de recordar.";
 			break;
 
     		case 'name':
-    			$build_message = 'No puedes incluir tu nombre \''.$this->detectedWord.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar.";
+    			$build_message = 'No puedes incluir tu nombre \''.$this->detectedWord.'\' en la contraseña. <br>'."Usa otros términos que te sean fácil de recordar.";
 			break;
 
     		case 'lastname':
-    			$build_message = 'No puedes incluir tu nombre ni apellido \''.$this->detectedWord.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar.";
+    			$build_message = 'No puedes incluir tu nombre ni apellido \''.$this->detectedWord.'\' en la contraseña. <br>'."Usa otros términos que te sean fácil de recordar.";
 			break;
 
     		case 'surname':
-    			$build_message = 'No puedes incluir tu nombre ni apellido \''.$this->detectedWord.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar.";
+    			$build_message = 'No puedes incluir tu nombre ni apellido \''.$this->detectedWord.'\' en la contraseña. <br>'."Usa otros términos que te sean fácil de recordar.";
 			break;
 
     		default: 

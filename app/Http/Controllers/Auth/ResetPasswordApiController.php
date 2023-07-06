@@ -98,7 +98,8 @@ class ResetPasswordApiController extends Controller
     protected function validationErrorMessages() 
     {
         return [
-                'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.'
+                'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
+                'email.email' => 'El campo correo electrónico no es un correo válido'
             ];
     }
 
@@ -112,11 +113,11 @@ class ResetPasswordApiController extends Controller
     public function reset(Request $request)
     {
         
-        // $validator = Validator::make($request->all(), $this->rules());
-        // if ($validator->fails()) {
-        //     $errors = $validator->errors();
-        //     info(['errors' => $errors]);
-        // }
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            info(['errors' => $errors]);
+        }
 
         $request->validate($this->rules(), $this->validationErrorMessages());
 

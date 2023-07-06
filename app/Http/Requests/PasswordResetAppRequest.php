@@ -61,35 +61,22 @@ class PasswordResetAppRequest extends FormRequest
                            // "not_regex:/($piecesPass)/i", 
                             Password::min(8)->letters()->numbers()->symbols(),
 
-                            // new CustomContextSpecificWords(
-                            //     $user->email ?? NULL, 
-                            //     'El campo correo electrónico no es un correo válido'
-                            // ),
-                            // new CustomContextSpecificWords(
-                            //     $user->document ?? NULL, 
-                            //     'No puedes incluir tu Documento de Identidad \''.$user->document.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar."
-                            // ),
-                            // new CustomContextSpecificWords(
-                            //     $user->name ?? NULL, 
-                            //     'No puedes incluir tu nombre \''.$user->name.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar."
-                            // ),
-                            // new CustomContextSpecificWords($user->lastname ?? NULL, 
-                            //     'No puedes incluir tu nombre ni apellido  \''.$user->lastname.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar."
-                            // ),
-                            // new CustomContextSpecificWords($user->surname ?? NULL,
-                            //     'No puedes incluir tu nombre ni apellido  \''.$user->surname.'\' en la contraseña.'."\n Usa otros términos que te sean fácil de recordar."
-                            // ),
-
-                            new ContextSpecificWords($user->email ?? NULL),
-                            new ContextSpecificWords($user->document ?? NULL),
-                            new ContextSpecificWords($user->name ?? NULL),
-                            new ContextSpecificWords($user->lastname ?? NULL),
-                            new ContextSpecificWords($user->surname ?? NULL),
+                            new CustomContextSpecificWords($user->email ?? NULL, 'email'),
+                            new CustomContextSpecificWords($user->document ?? NULL, 'document'),
+                            new CustomContextSpecificWords($user->name ?? NULL, 'name'),
+                            new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
+                            new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
                                             // ->uncompromised(3)
                         ],
             'token' => 'required',
             'os' => 'nullable',
             'version' => 'nullable'
+        ];
+    }
+
+    public function messages() {
+        return [
+            'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
         ];
     }
 
