@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Rules\CustomContextSpecificWords;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -69,21 +69,19 @@ class ResetPasswordApiController extends Controller
         $passwordRules = [
             "required", 'confirmed', 'max:100',
             RulePassword::min(8)->letters()->numbers()->symbols(),
-
             "password_available:{$user_id}",
-            // ->mixedCase()->uncompromised(3),
-
-            new CustomContextSpecificWords($user->email ?? NULL, 'email'),
-            new CustomContextSpecificWords($user->document ?? NULL, 'document'),
-            new CustomContextSpecificWords($user->name ?? NULL, 'name'),
-            new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
-            new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
 
             // new ContextSpecificWords($user->email ?? NULL),
             // new ContextSpecificWords($user->document ?? NULL),
             // new ContextSpecificWords($user->name ?? NULL),
             // new ContextSpecificWords($user->lastname ?? NULL),
             // new ContextSpecificWords($user->surname ?? NULL),
+            
+            new CustomContextSpecificWords($user->email ?? NULL, 'email'),
+            new CustomContextSpecificWords($user->document ?? NULL, 'document'),
+            new CustomContextSpecificWords($user->name ?? NULL, 'name'),
+            new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
+            new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
             
             // new RepetitiveCharacters(),
             // new SequentialCharacters(),
@@ -99,7 +97,9 @@ class ResetPasswordApiController extends Controller
 
     protected function validationErrorMessages() 
     {
-        return ['password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.' ];
+        return [
+                'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.'
+            ];
     }
 
     /**
@@ -111,6 +111,13 @@ class ResetPasswordApiController extends Controller
     // public function reset(Request $request): JsonResponse|RedirectResponse
     public function reset(Request $request)
     {
+        
+        // $validator = Validator::make($request->all(), $this->rules());
+        // if ($validator->fails()) {
+        //     $errors = $validator->errors();
+        //     info(['errors' => $errors]);
+        // }
+
         $request->validate($this->rules(), $this->validationErrorMessages());
 
         // Here we will attempt to reset the user's password. If it is successful we
