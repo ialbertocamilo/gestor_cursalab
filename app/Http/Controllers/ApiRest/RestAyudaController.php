@@ -82,7 +82,7 @@ class RestAyudaController extends Controller
 
             $response = [
                 'error' => true,
-                'error_msg' => 'Tu usuario no está registrado. Contáctate con tu supervisor.',
+                'error_msg' => 'Tu usuario no está registrado. Contáctate con tu jefe directo.',
                 'data' => null
             ];
 
@@ -159,5 +159,16 @@ class RestAyudaController extends Controller
         $preguntas = Post::where('section_id', $tax_id->id)->get();
 
         return response()->json(compact('preguntas'));
+    }
+
+    public function existe_email(Request $request, $email = NULL) 
+    {
+        $existe_email = $email ?? false;
+        
+        if($existe_email) {
+            $existe_email = User::where('email', $email)->exists();
+        }
+
+        return response()->json((bool) $existe_email);
     }
 }
