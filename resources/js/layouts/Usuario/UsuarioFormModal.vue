@@ -87,7 +87,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.document"
-                            label="Identificador"
+                            label="Identificador*"
                             autocomplete="new-document"
                             :rules="rules.document"
                         />
@@ -96,7 +96,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.password"
-                            label="Contraseña"
+                            :label="options.action === 'edit' ? 'Contraseña' : 'Contraseña*'"
                             autocomplete="new-password"
                             type="password"
                             ref="passwordRefModal"
