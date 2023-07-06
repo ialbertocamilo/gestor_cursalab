@@ -85,7 +85,7 @@
                     data.append("process", JSON.stringify(this.process));// == data section-upload ==
                     data.append("number_socket", this.number_socket || null);
                     percentLoader.innerHTML = ``;
-                    axios.post('/masivos/inactive-users',data).then((res)=>{
+                    axios.post('/procesos-masivos/inactive-users',data).then((res)=>{
                         const data = res.data.data;
                         if(data.errores.length > 0){
                             let headers = data.headers;
