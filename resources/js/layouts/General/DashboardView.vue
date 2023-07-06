@@ -4,14 +4,14 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title class="title_prim">
-                
+
                 <div v-if="showDetail">
-                    <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span> 
-                    <span class="fas fa-chevron-right mx-2"></span> 
+                    <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span>
+                    <span class="fas fa-chevron-right mx-2"></span>
                     Gestor de almacenamiento y usuarios.
                 </div>
                 <div v-else>
-                    Dashboard 
+                    Dashboard
                 </div>
 
                 <v-spacer/>
@@ -33,8 +33,8 @@
                         />
                     </v-col>
 
-                    <v-col cols="6" 
-                            offset="1" 
+                    <v-col cols="6"
+                            offset="1"
                             :class="`${ !showDetail ? 'd-flex' : 'd-none' } justify-space-between align-items-center`"
                         >
                         <div class="d-flex align-items-center w-75">
@@ -79,7 +79,7 @@
 
                         <div class="w-25">
                             <a href class="ml-1" @click.prevent="showDetail = true">
-                                Ver detalle <span class="ml-2 fas fa-arrow-right"></span> 
+                                Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
                             </a>
                         </div>
                     </v-col>
@@ -92,7 +92,7 @@
                             <span class="mdi mdi-cloud-outlined fa-lg mr-2"></span>
                             Aumentar mi plan
                         </v-btn>
-                        
+
                     </v-col>
                 </v-row>
 
