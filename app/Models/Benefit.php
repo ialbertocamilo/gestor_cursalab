@@ -245,6 +245,9 @@ class Benefit extends BaseModel
                 $query->orWhere('benefits.description', 'like', "%$filtro%");
             });
         }
+        if(request()->types){
+            $benefits_query->whereHas('type', fn($q) => $q->whereIn('code', $types));
+        }
         $benefits = $benefits_query->paginate(request('paginate', 15));
 
         $benefits_items = $benefits->items();

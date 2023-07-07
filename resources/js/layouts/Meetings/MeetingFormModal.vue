@@ -30,6 +30,17 @@
                            item-text="name"
                            return-object
                            :rules="rules.type"
+                           @onChange="changeType"
+                           :disabled="resource.status && resource.status.code == 'in-progress'"/>
+                    </v-col>
+                    <v-col cols="6" class="d-flex justify-content-center" v-if="selects.benefits.length > 0">
+                        <DefaultSelect
+                           :items="selects.benefits"
+                           v-model="resource.benefit"
+                           label="Beneficio"
+                           item-text="title"
+                           return-object
+                           :rules="rules.type"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center">
@@ -325,6 +336,7 @@ export default {
                 starts_at: null,
 
                 type: null,
+                benefit:null,
                 host: null,
                 status: {code: null},
                 description: '',
@@ -338,6 +350,7 @@ export default {
             },
             selects: {
                 types: [],
+                benefits:[],
                 hosts: [],
             },
             modalScheduledMeetings: {
@@ -406,6 +419,23 @@ export default {
             if (hostAsAttendantIndex !== -1) {
                 attendants.splice(hostAsAttendantIndex, 1)
             }
+        },
+        changeType(){
+            let vue = this;
+            if(vue.resource.type.code == 'benefits'){
+                vue.$http.get(`/beneficios/search?types[]=''`)
+                .then(({data}) => {
+                    console.log(data);
+                    vue.selects.benefits = data.data.data;
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
+                
+            }
+            console.log('type',vue.resource.type);
         },
         closeModal() {
             let vue = this
