@@ -35,14 +35,38 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
             'size_medias_porcent' => calculate_porcent($size_medias_storage_value['size'], $size_medias_limit, 90),
 
             'routes_redirects' => [
-                'courses' => 'url_courses',
-                'topics' => 'url_courses',
-                'pdf' => 'url_courses',
-                'scorm' => 'url_courses',
-                'office' => 'url_courses',
-                'video' => 'url_courses',
-                'Imagenes' => 'url_courses',
-                'Audio' => 'url_courses',
+                'courses' => [
+                    'label' =>'Cursos',
+                    'url' =>'url_courses'
+                ],
+                'topics' => [
+                    'label' =>'Temas',
+                    'url' =>'url_courses'
+                ],
+                'pdf' => [
+                    'label' =>'Pdf',
+                    'url' =>'url_courses'
+                ],
+                'scorm' => [
+                    'label' =>'Scorm',
+                    'url' =>'url_courses'
+                ],
+                'office' => [
+                    'label' =>'Office',
+                    'url' =>'url_courses'
+                ],
+                'videos' => [
+                    'label' =>'Videos',
+                    'url' =>'url_courses'
+                ],
+                'images' => [
+                    'label' =>'Imagenes',
+                    'url' =>'url_courses'
+                ],
+                'audio' => [
+                    'label' =>'Audio',
+                    'url' =>'url_courses'
+                ],
             ]
         ];
     

@@ -3,7 +3,7 @@
         <v-card flat class="elevation-0 mb-4">
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
-            <v-card-title class="title_prim">
+            <v-card-title>
 
                 <div v-if="showDetail">
                     <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span>
@@ -87,12 +87,10 @@
                     <v-col cols="7"
                            :class="`${ showDetail ? 'd-flex' : 'd-none' } justify-content-end align-self-center`"
                         >
-
                         <v-btn color="primary" outlined>
-                            <span class="mdi mdi-cloud-outlined fa-lg mr-2"></span>
+                            <span class="mdi mdi-cloud-outline fa-lg mr-2"></span>
                             Aumentar mi plan
                         </v-btn>
-
                     </v-col>
                 </v-row>
 
@@ -135,11 +133,79 @@
                 </v-row>
             </v-card>
         </section>
+
         <section v-show="showDetail">
-            <v-card flat class="elevation-0 mb-4 bg-transparent">
-                <v-card-title>Almacenamiento general</v-card-title>
+            <v-card flat class="elevation-0 mb-4">
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="7" class="px-8 py-6 border-right">
+                            <v-card-title>
+                                Almacenamiento general
+                            </v-card-title>
+                            <div class="my-2 d-flex justify-space-between">
+                                <span 
+                                    class="fa-2x"
+                                    :class="workspace_status.size_medias_porcent.exceded && 'text-center'" 
+                                    v-text="workspace_status.size_medias_porcent.porcent+'% '+'usado'">
+                                </span>
+
+                                <span>
+                                    <span class="font-weight-bold">
+                                        Total utilizado:
+                                        <span v-text="workspace_status.size_medias_storage"></span>
+                                    </span>
+                                    / 
+                                    <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                </span>
+                            </div>
+
+                            <v-progress-linear
+                                    :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
+                                    :value="workspace_status.size_medias_porcent.porcent"
+                                    height="20"
+                                    rounded
+                                >
+                            </v-progress-linear>
+
+                            <p class="mt-5 font-weight-bold">Detalle del almacenamiento</p>
+
+                            <ul class="px-0 pb-0">
+                                <li v-for="route in workspace_status.routes_redirects" :key="route.label"
+                                    class="d-flex justify-content-between mb-3">
+                                    <span v-text="route.label"></span> 
+
+                                    <v-btn 
+                                        class="ml-2" 
+                                        text 
+                                        color="primary" 
+                                        >
+                                        <v-icon>
+                                            mdi-open-in-new
+                                        </v-icon>
+                                    </v-btn>
+
+                                </li>
+                            </ul>
+                            
+                        </v-col>
+                        <v-col cols="5" class="px-8 py-6">
+                            <div class="grey lighten-4 rounded p-4">
+                                <div class="d-flex">
+                                    <span class="mdi mdi-account-multiple-outline fa-3x"></span>
+                                    <div class="d-flex flex-column">
+                                        <v-card-title>Total Usuarios</v-card-title>
+                                        <span class="fa-2x"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </v-col>
+                    </v-row>
+
+                </v-card-text>
             </v-card>
         </section>
+
         <!-- <Fab/> -->
     </section>
 </template>
