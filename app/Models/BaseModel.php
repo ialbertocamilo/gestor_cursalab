@@ -206,14 +206,14 @@ class BaseModel extends Model implements Recordable
         ];
     }
 
-    public function replicateWithRelationsAttributes(): static
+    public function replicateWithRelationsAttributes()
     {
         $model = clone $this->replicate();
+        
         foreach ($this->getRelations() as $key => $relation) {
            $model->setAttribute($key, clone $relation);
         }
 
         return $model;
-
     }
 }
