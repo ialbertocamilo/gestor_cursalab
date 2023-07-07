@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Mail\EmailTemplate;
 use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class Benefit extends BaseModel
 {
@@ -113,6 +116,11 @@ class Benefit extends BaseModel
     public function status()
     {
         return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
+
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
     }
 
     protected function storeRequest($data, $benefit = null)
@@ -609,7 +617,7 @@ class Benefit extends BaseModel
         $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
         $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
 
-        // $workspace = get_current_workspace();
+        $benefits_asigned = array_column($user->getSegmentedByModelType(Benefit::class),'id');
 
         $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
@@ -626,7 +634,7 @@ class Benefit extends BaseModel
                 }
         ])
         ->where('active',1)
-        ->where('workspace_id', $workspace_id);
+        ->whereIn('id', $benefits_asigned);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
