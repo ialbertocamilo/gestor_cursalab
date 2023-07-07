@@ -78,7 +78,7 @@ export default {
     },
     data() {
         return {
-            reportType: 'empty_criteria',
+            reportType: 'users_history',
             criteriaInSegmentation: [],
             selectedCriteria: [],
             selectedModules: [],
