@@ -210,3 +210,7 @@ Override Vue Toastification plugin styles
     white-space: nowrap;
     overflow: hidden;
 }
+
+.dropzone .dz-preview .dz-details .dz-filename {
+    white-space: normal !important;
+}

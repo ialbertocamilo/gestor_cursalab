@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Console\Commands\reinicios_programado;
 use App\Http\Requests\WorkspaceRequest;
 use App\Http\Requests\SubWorkspaceRequest;
+use App\Http\Requests\WorkspaceDuplicateRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\SubWorkspaceResource;
 
@@ -420,5 +421,50 @@ class WorkspaceController extends Controller
         $subworkspace = Workspace::storeSubWorkspaceRequest($data, $subworkspace);
 
         return $this->success(['msg' => 'Módulo actualizado correctamente.']);
+    }
+
+    /**
+     * Process request to copy record data
+     *
+     * @param Workspace $workspace
+     * @return JsonResponse
+     */
+    public function copy(Workspace $workspace): JsonResponse
+    {
+        return $this->success([]);
+    }
+
+    /**
+     * Process request to duplicate record data
+     *
+     * @param Workspace $workspace
+     * @return JsonResponse
+     */
+    public function duplicate(WorkspaceDuplicateRequest $request, Workspace $workspace): JsonResponse
+    {
+        $data = $request->validated();
+
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'logo_negativo');
+
+
+        //copy attributes
+        $new = $workspace->replicate();
+
+        //save model before you recreate relations (so it has an id)
+        $new->push();
+
+        //reset relations on EXISTING MODEL (this way you can control which ones will be loaded
+        $workspace->relations = [];
+
+        //load relations on EXISTING MODEL
+        $workspace->load('subworkspaces', 'schools', 'courses');
+
+        //re-sync everything
+        foreach ($this->relations as $relationName => $values){
+            $new->{$relationName}()->sync($values);
+        }
+
+        return $this->success([]);
     }
 }

@@ -147,13 +147,18 @@
                                     </span>
                                 </button>
 
-                             <!--    <button
+                               <!--  <button
                                     type="button" class="btn btn-md"
-                                    @click="duplicateWorkspace(workspace.id)"
+                                    @click="openFormModal(
+                                        workspaceDuplicateFormModalOptions,
+                                        workspace,
+                                        'duplicate',
+                                        `Duplicar workspace - ${workspace.name}`
+                                    )"
                                     v-show="!view && workspace.is_super_user"
                                 >
                                     <span class="v-badge">
-                                        <v-icon class="icon" color="primary">mdi-copy</v-icon>
+                                        <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
                                         <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
                                     </span>
                                 </button> -->
@@ -272,6 +277,7 @@ export default {
             open: false,
             action: 'edit',
             base_endpoint: 'workspaces',
+            showCloseIcon: true,
             confirmLabel: 'Guardar'
         },
         workspaceDuplicateFormModalOptions: {
@@ -279,6 +285,7 @@ export default {
             open: false,
             action: 'duplicate',
             base_endpoint: 'workspaces',
+            showCloseIcon: true,
             confirmLabel: 'Duplicar'
         },
         view: true,

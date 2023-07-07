@@ -192,7 +192,9 @@ class BaseModel extends Model implements Recordable
               ->pluck('name')
               ->all();
      }
-     public static function generateExternalApiPageData($data,$resource='data'){
+
+     public static function generateExternalApiPageData($data,$resource='data')
+     {
         return [
             $resource=>$data->items(),
             'current_page' => $data->currentPage(),
@@ -202,5 +204,16 @@ class BaseModel extends Model implements Recordable
             'nex_page_url'=>$data->nextPageUrl(),
             'total'=>$data->total(),
         ];
+    }
+
+    public function replicateWithRelationsAttributes(): static
+    {
+        $model = clone $this->replicate();
+        foreach ($this->getRelations() as $key => $relation) {
+           $model->setAttribute($key, clone $relation);
+        }
+
+        return $model;
+
     }
 }

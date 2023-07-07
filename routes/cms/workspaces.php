@@ -12,4 +12,6 @@ Route::controller(WorkspaceController::class)->group(function () {
     // Route::get('/search', 'search');
     Route::get('/{workspace}/edit', 'edit');
     Route::put('/{workspace}/update', 'update');
+    Route::get('/{workspace}/copy', 'copy');
+    Route::post('/{workspace}/duplicate', 'duplicate');
 });

@@ -15,7 +15,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.name"
-                            label="Título del workspace"
+                            label="Nombre del workspace"
                             :rules="rules.name"
                         />
                     </v-col>
@@ -47,7 +47,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" v-if="is_superuser">
+               <!--  <v-row justify="space-around" v-if="is_superuser">
                     <v-col cols="12">
                         <DefaultModalSection
                             title="Límite de Usuarios"
@@ -66,8 +66,8 @@
                             </template>
                         </DefaultModalSection>
                     </v-col>
-                </v-row>
-
+                </v-row> -->
+<!-- 
                 <v-row justify="space-around" v-if="is_superuser">
                     <v-col cols="12">
                         <DefaultModalSection
@@ -88,37 +88,9 @@
                             </template>
                         </DefaultModalSection>
                     </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultModalSection title="Diplomas">
-                            <template v-slot:content>
-                                <v-row>
-                                    <v-col cols="6">
-                                        <DefaultSelectOrUploadMultimedia
-                                            ref="inputLogoMarcaAgua"
-                                            v-model="resource.logo_marca_agua"
-                                            label="Imagen (500x350px)"
-                                            :file-types="['image']"
-                                            @onSelect="setFile($event, resource, 'logo_marca_agua')"
-                                        />
-                                    </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <span class="mt-4 mr-2">¿Activar marca de agua en diploma?</span>
-                                        <div>
-                                            <DefaultToggle
-                                                class="mt-0"
-                                                v-model="resource.marca_agua_estado"
-                                                no-label
-                                                />
-                                        </div>
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
-
+                </v-row> -->
+  
+<!-- 
                 <v-row>
                     <v-col cols="12">
                         <DefaultModalSection title="Notificaciones Push">
@@ -147,70 +119,8 @@
                                 </template>
                         </DefaultModalSection>
                     </v-col>
-                </v-row>
-
-                <v-row>
-                    <v-col>
-                        <v-subheader class="mt-4 px-0">
-                            <strong>Criterios</strong>
-                        </v-subheader>
-
-                        <v-divider class="mt-0"/>
-
-                        <v-alert
-                            border="top"
-                            colored-border
-                            type="info"
-                            elevation="2"
-                        >
-                            Selecciona los criterios que usa la empresa para segmentar el contenido
-                            <v-row>
-                                <v-col cols="12">
-                                    <p class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
-                                       :key="index">
-                                        <v-icon class="mx-2"
-                                                style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check
-                                        </v-icon>
-                                        <span>{{ mensaje }}</span>
-                                    </p>
-                                </v-col>
-                            </v-row>
-                        </v-alert>
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="6">
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Por defecto</strong>
-                        </v-subheader>
-                        <v-checkbox
-                            v-for="criterion in defaultCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="generateCriterionTitle(criterion)"
-                            :disabled="false"
-                        >
-                            <!-- :disabled="criterion.code === 'module'" -->
-                        </v-checkbox>
-                    </v-col>
-                    <v-col cols="6">
-
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Personalizados</strong>
-                        </v-subheader>
-
-                        <v-checkbox
-                            v-for="criterion in customCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                            :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
-                        >
-                            <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
-
-                        </v-checkbox>
-                    </v-col>
-                </v-row>
+                </v-row> -->
+              
             </v-form>
         </template>
     </DefaultDialog>
@@ -221,19 +131,10 @@
 
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
-    'logo_marca_agua', 'marca_agua_estado',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
+    // 'logo_marca_agua', 'marca_agua_estado',
+    // 'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
-const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
-const mensajes = [
-    'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
-    'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos workspaces.',
-    'Los "criterios personalizados" son datos que se utilizan de forma opcional por cada workspace.',
-    'Al habilitar un "criterio personalizado", es necesario actualizar la data de los usuarios mediante APIs o subida masiva. De esa forma se podrá utilizar el criterio en las segmentaciones.',
-    'Los criterios que se activen, estarán disponibles en todas las secciones donde se realice "segmentación" dentro del workspace.',
-    'Se recomienda utilizar los criterios predefinidos en la configuración inicial y no habilitar los criterios que no se van  a usar en segmentación o no se va a actualizar el dato por cada usuario.',
-    'Es importante saber que si un criterio es activado y utilizado en alguna segmentación, ya no será posible desactivarlo a menos que se eliminen la segmentaciones donde está presente el criterio.'
-];
+
 
 export default {
     props: {
@@ -247,34 +148,19 @@ export default {
     data() {
         return {
             is_superuser: false,
-            mensajes: mensajes,
-            errors: []
-            ,
-            generateCriterionTitle(criterion) {
-
-                let requiredLabel = criterion.required
-                    ? '(requerido)'
-                    : '(opcional)';
-
-                return `${criterion.name} ${requiredLabel}`;
-            }
-            ,
+            errors: [],
             resourceDefault: {
                 name: '',
                 url_powerbi: '',
                 logo: '',
                 logo_negativo: '',
-                selected_criteria: {},
-                selected_functionality: {}
+                // selected_criteria: {},
+                // selected_functionality: {}
             },
             limit_allowed_users: null,
             resource: {
             },
-            defaultCriteria: [],
-            functionalities: []
-            ,
-            customCriteria: []
-            ,
+            functionalities: [],
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
@@ -298,7 +184,6 @@ export default {
             let vue = this
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
-            vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
         }
         ,
         closeModal() {
@@ -313,32 +198,21 @@ export default {
             vue.errors = []
             this.showLoader()
 
-            const isValid = vue.validateForm('workspaceForm');
-            const edit = vue.options.action === 'edit';
+            const isValid = vue.validateForm('workspaceDuplicateForm');
+            // const edit = vue.options.action === 'edit';
 
             let base = `${vue.options.base_endpoint}`;
-            let url = vue.resource.id
-                ? `/${base}/${vue.resource.id}/update`
-                : `/${base}/store`;
+            let url = `/${base}/${vue.resource.id}/duplicate`
 
-            let method = edit ? 'PUT' : 'POST';
+            let method = 'POST';
 
             if (isValid) {
 
                 // Prepare data
 
                 let formData = vue.getMultipartFormData(
-                    method, vue.resource, fields, file_fields
+                    method, vue.resource, fields
                 );
-                formData.set(
-                    'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
-                );
-                formData.set(
-                    'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
-                );
-
-                vue.setLimitUsersAllowed(formData);
-
 
                 // Submit data to be saved
 
@@ -360,22 +234,14 @@ export default {
             } else {
                 this.hideLoader();
             }
-        }
-        ,
-
-        setLimitUsersAllowed(formData) {
-            let vue = this;
-            if (vue.limit_allowed_users) {
-                formData.append('limit_allowed_users_type', 'by_workspace');
-                formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
-            }
         },
+
         /**
          * Load data from server
          */
         loadData(workspace) {
 
-            // if (!workspace) return;
+            if (!workspace) return;
 
             this.showLoader()
 
@@ -384,42 +250,17 @@ export default {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
-            let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
+            let url = `/workspaces/${workspace.workspaceId}/copy`;
 
             this.$http
                 .get(url)
                 .then(({data}) => {
                     vue.hideLoader();
 
-                    vue.is_superuser = data.data.is_superuser || false;
+                    // vue.is_superuser = data.data.is_superuser || false;
 
                     vue.resource = Object.assign({}, data.data);
-
-                    // Filter criteria in two collections,
-                    // according its "required" properties
-
-                    vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
-                    vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
-
-                    // Update content of selected criteria
-
-                    vue.resource.selected_criteria = {};
-                    data.data.criteria.forEach(c => {
-                        vue.resource.selected_criteria[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.criteria_workspace
-                        );
-                    });
-
-                    vue.limit_allowed_users = data.data.limit_allowed_users;
-
-                    vue.functionalities = data.data.functionalities;
-
-                    vue.resource.selected_functionality = {};
-                    data.data.functionalities_selected.forEach(c => {
-                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.functionalities
-                        );
-                    });
+                   
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -428,23 +269,22 @@ export default {
         }
         ,
         loadSelects() {
-        }
-        ,
-        criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
+        },
+        // criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
 
-            let exists = false;
+        //     let exists = false;
 
-            if (criteria_workspace) {
+        //     if (criteria_workspace) {
 
-                criteria_workspace.forEach(v => {
-                    if (v.id === criterionId)
-                        exists = true;
-                });
-            }
+        //         criteria_workspace.forEach(v => {
+        //             if (v.id === criterionId)
+        //                 exists = true;
+        //         });
+        //     }
 
 
-            return exists;
-        }
+        //     return exists;
+        // }
     }
 }
 </script>
