@@ -138,7 +138,7 @@
 
                                 <button
                                     type="button" class="btn btn-md"
-                                    @click="editWorkspace(workspace.id)"
+                                    @click="editWorkspace(workspace.id, workspace.name)"
                                     v-show="!view && workspace.is_super_user"
                                 >
                                     <span class="v-badge">
@@ -366,13 +366,13 @@ export default {
          *
          * @param workspaceId
          */
-        editWorkspace(workspaceId) {
+        editWorkspace(workspaceId, workspace_name) {
 
             this.openFormModal(
                 this.workspaceFormModalOptions,
                 {workspaceId: workspaceId},
                 'edit',
-                'Editar workspace'
+                `Editar workspace - ${workspace_name}`
             );
             this.setActiveWorkspace(workspaceId, false);
         }

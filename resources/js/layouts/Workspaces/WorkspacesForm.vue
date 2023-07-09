@@ -15,7 +15,7 @@
                         <DefaultInput
                             clearable
                             v-model="resource.name"
-                            label="Título del workspace"
+                            label="Nombre del workspace"
                             :rules="rules.name"
                         />
                     </v-col>
@@ -54,7 +54,7 @@
                         >
                             <template v-slot:content>
 
-                                <v-col cols="12">
+                                <v-col cols="4">
                                     <DefaultInput
                                         label="Límite"
                                         v-model="limit_allowed_users"
@@ -75,15 +75,17 @@
                         >
                             <template v-slot:content>
 
-                                <v-col cols="12">
-                                    <v-checkbox
-                                        v-for="functionality in functionalities"
-                                        :key="functionality.id"
-                                        v-model="resource.selected_functionality[functionality.id]"
-                                        :label="functionality.name"
-                                    >
-                                    </v-checkbox>
-                                </v-col>
+                                <v-row justify="space-around">
+
+                                    <v-col cols="4" v-for="functionality in functionalities" :key="functionality.id">
+                                        <v-checkbox
+                                            v-model="resource.selected_functionality[functionality.id]"
+                                            :label="functionality.name"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+
+                                </v-row>
 
                             </template>
                         </DefaultModalSection>
@@ -119,26 +121,28 @@
                     </v-col>
                 </v-row>
 
-                <v-row>
-                    <v-col cols="12">
+                <v-row v-if="is_superuser">
+                    <v-col cols="12" >
                         <DefaultModalSection title="Notificaciones Push">
                                 <template v-slot:content>
                                     <v-row>
-                                        <v-col cols="6">
+                                        <v-col cols="4">
                                             <DefaultInput
                                                 class="mb-4"
-                                                label="Empezar envio luego de: (en minutos)"
+                                                label="Empezar envío luego de: (en minutos)"
                                                 type="number"
                                                 v-model="resource.notificaciones_push_envio_inicio" />
+                                        </v-col>
+                                        <v-col cols="4">
                                             <DefaultInput
-                                                label="Número de usuarios por envio"
+                                                label="Número de usuarios por envío"
                                                 type="number"
                                                 v-model="resource.notificaciones_push_envio_intervalo"
                                             />
                                         </v-col>
-                                        <v-col cols="6">
+                                        <v-col cols="4">
                                             <DefaultInput
-                                                label="Frecuencia de envio por bloques (en minutos)"
+                                                label="Frecuencia de envío por bloques (en minutos)"
                                                 type="number"
                                                 v-model="resource.notificaciones_push_chunk"
                                                 />
@@ -178,39 +182,47 @@
                         </v-alert>
                     </v-col>
                 </v-row>
-                <v-row>
-                    <v-col cols="6">
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Por defecto</strong>
-                        </v-subheader>
-                        <v-checkbox
-                            v-for="criterion in defaultCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="generateCriterionTitle(criterion)"
-                            :disabled="false"
-                        >
-                            <!-- :disabled="criterion.code === 'module'" -->
-                        </v-checkbox>
-                    </v-col>
-                    <v-col cols="6">
+                <v-container
+                        id="scroll-target"
+                        class="overflow-y-auto py-0 px-1"
+                        style="min-height: 380px; max-height: 400px"
+                    >
+                           
+                    <v-row class="mx-1">
+                        <v-col cols="6">
+                            <v-subheader class="mb-3 px-0">
+                                <strong>Por defecto</strong>
+                            </v-subheader>
+                            <v-checkbox
+                                v-for="criterion in defaultCriteria"
+                                :key="criterion.id"
+                                v-model="resource.selected_criteria[criterion.id]"
+                                :label="generateCriterionTitle(criterion)"
+                                :disabled="false"
+                            >
+                                <!-- :disabled="criterion.code === 'module'" -->
+                            </v-checkbox>
+                        </v-col>
+                        <v-col cols="6">
 
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Personalizados</strong>
-                        </v-subheader>
+                            <v-subheader class="mb-3 px-0">
+                                <strong>Personalizados</strong>
+                            </v-subheader>
 
-                        <v-checkbox
-                            v-for="criterion in customCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                            :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
-                        >
-                            <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
+                            <v-checkbox
+                                v-for="criterion in customCriteria"
+                                :key="criterion.id"
+                                v-model="resource.selected_criteria[criterion.id]"
+                                :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
+                                :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
+                            >
+                                <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
 
-                        </v-checkbox>
-                    </v-col>
-                </v-row>
+                            </v-checkbox>
+                        </v-col>
+                    </v-row>
+
+                    </v-container>
             </v-form>
         </template>
     </DefaultDialog>
