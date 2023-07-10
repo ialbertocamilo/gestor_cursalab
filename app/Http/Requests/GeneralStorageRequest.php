@@ -24,7 +24,15 @@ class GeneralStorageRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'limit_allowed_storage' => 'nullable',
+            'limit_allowed_users' => 'nullable',
+            'description' => 'required|max:255'
+        ];
+    }
+
+    public function messages() {
+        return [
+            'description.required' => 'La descripción es requerida.'
         ];
     }
 }

@@ -1200,3 +1200,11 @@ span.lbl_txt_val {
 /*three*/
 /*solo soporta hasta tres por layout*/
 
+
+.text-primary-sub {
+	color: #5458ea;	
+}
+
+.v-progress-linear__content {
+    justify-content: unset !important;
+}

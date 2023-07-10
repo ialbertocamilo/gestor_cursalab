@@ -15,18 +15,23 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
     public function toArray($request)
     {
         $users_count_actives = $this->subworkspaces->sum('users_count_actives');
+        $users_count_inactives = $this->subworkspaces->sum('users_count_inactives');
+        
         $users_count_limit = $this->limit_allowed_users ? $this->limit_allowed_users['quantity'] : 0;
         
         $size_medias_limit = $this->limit_allowed_storage ?? 0;
         $size_medias_storage = formatSize($this->medias_sum_size);
         $size_medias_storage_value = formatSize($this->medias_sum_size, parsed:false);
         
+        $url_multimedia = url('/multimedia?tipo[]=')
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'logo' => get_media_url($this->logo),
             
             'users_count_actives' => $users_count_actives,
+            'users_count_inactives' => $users_count_inactives,
             'users_count_limit' => $users_count_limit,
             'users_count_porcent' => calculate_porcent($users_count_actives, $users_count_limit, 90),
 
@@ -37,35 +42,30 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
             'routes_redirects' => [
                 'courses' => [
                     'label' =>'Cursos',
-                    'url' =>'url_courses'
-                ],
-                'topics' => [
-                    'label' =>'Temas',
-                    'url' =>'url_courses'
+                    'filters' =>'tipo[]=image',
                 ],
                 'pdf' => [
                     'label' =>'Pdf',
-                    'url' =>'url_courses'
+                    'url' =>'url_courses',
+                    'filters' =>'pdf',
                 ],
                 'scorm' => [
                     'label' =>'Scorm',
-                    'url' =>'url_courses'
-                ],
-                'office' => [
-                    'label' =>'Office',
-                    'url' =>'url_courses'
+                    'filters' =>'scorm',
                 ],
                 'videos' => [
                     'label' =>'Videos',
-                    'url' =>'url_courses'
+                    'filters' =>'video',
                 ],
                 'images' => [
                     'label' =>'Imagenes',
-                    'url' =>'url_courses'
+                    'url' =>'url_courses',
+                    'filters' =>'image',
                 ],
                 'audio' => [
                     'label' =>'Audio',
-                    'url' =>'url_courses'
+                    'url' =>'url_courses',
+                    'filters' =>'audio',
                 ],
             ]
         ];

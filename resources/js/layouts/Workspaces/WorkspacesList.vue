@@ -72,7 +72,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex" style="column-gap:1.5rem;">
+                        <div class="d-flex" style="column-gap:1.5rem;" v-if="canAccessConfiguration">
                             <v-btn color="primary">
                                 <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
                                 Auditoria                   
@@ -330,13 +330,21 @@
                                         </div>
                                     </div>
 
+
+
                                     <v-progress-linear
                                         :color="workspace.size_medias_porcent.exceded ? 'red' : 'primary'"
                                         height="25"
                                         :value="workspace.size_medias_porcent.porcent"
                                         rounded
                                     >
-                                      <strong class="text-white" v-text="workspace.size_medias_porcent.porcent + ' %'"></strong>
+                                        <div class="d-flex justify-content-end" 
+                                            :style="{ width: (workspace.size_medias_porcent.porcent < 10) ? '8%' :workspace.size_medias_porcent.porcent +'%'}">
+                                            <strong 
+                                                class="text-white text-right"
+                                                v-text="workspace.size_medias_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
                                     </v-progress-linear>
                                 </div>
 
@@ -344,7 +352,7 @@
                                     class="ml-2" 
                                     text 
                                     color="primary"
-                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'multimedia')">
+                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'home')">
                                     <v-icon>
                                         mdi-open-in-new
                                     </v-icon>
@@ -385,7 +393,13 @@
                                         :value="workspace.users_count_porcent.porcent"
                                         rounded
                                     >
-                                      <strong class="text-white" v-text="workspace.users_count_porcent.porcent + ' %'"></strong>
+                                        <div class="d-flex justify-content-end" 
+                                            :style="{ width: (workspace.users_count_porcent.porcent < 10) ? '8%' :workspace.users_count_porcent.porcent +'%'}">
+                                            <strong 
+                                                class="text-white text-right"
+                                                v-text="workspace.users_count_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
                                     </v-progress-linear>
                                 </div>
 

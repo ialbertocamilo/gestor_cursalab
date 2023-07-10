@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\GeneralStorageRequest;
 use App\Http\Resources\ResourceGeneralSubWorkspaceStatus;
 use App\Http\Resources\ResourceGeneralWorkspaceStatus;
 use App\Http\Resources\ResourceListGeneralWorkspacesStatus;
+use App\Mail\EmailTemplate;
 use App\Models\Criterion;
 use App\Models\Prueba;
 use App\Models\Workspace;
@@ -13,6 +15,7 @@ use App\Services\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class GeneralController extends Controller
 {
@@ -243,8 +246,30 @@ class GeneralController extends Controller
         return $this->success($subworkspace_status);
     }
 
-    public function subworkspace_plan(GeneralStorageRequest $request) 
+    public function workspace_plan(GeneralStorageRequest $request) 
     {
+        /*paola@cursalab.io|juanjose@cursalab.io|juan@cursalab.io*/
+
+        $workspace = get_current_workspace();
+        $user = Auth::user();
+
+        $storage_mail = [ 
+                    'subject' => 'Solicitud de Almacenamiento',
+                    'user_admin' => $user->getFullnameAttribute(),
+                    'user_admin_email' => $user->email_gestor,
+                    'workspace_name' => $workspace->name,
+
+                    'storage' => $request->limit_allowed_storage ?? '-',
+                    'users' => $request->limit_allowed_users ?? '-',
+                    'description' => $request->description ?? '-'
+                ];
+
+        // info(['storage_mail' => $storage_mail]);
+        Mail::to('juan@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
+                
+        // Mail::to('paola@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
+        // Mail::to('juanjose@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
+
         return $this->success(true);
     }
 }

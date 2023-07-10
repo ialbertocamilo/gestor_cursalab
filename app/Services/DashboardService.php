@@ -337,8 +337,10 @@ class  DashboardService {
         $query->with(['subworkspaces' => function ($q) use ($user_cursalab) {
                     $q->select('id', 'criterion_value_id', 'name', 'logo', 'parent_id');
                     self::withCountUsers($q, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+                    self::withCountUsers($q, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
         }]);
         self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+        self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
         
         $query->withSum('medias', 'size');
 
