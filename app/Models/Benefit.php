@@ -940,29 +940,8 @@ class Benefit extends BaseModel
         return ['data' => $response];
     }
 
-    protected function sendEmail( $type = null, $user = null, $benefit = null ) {
-
-        // $segments = Benefit::with(['segments'=> function ($q) {
-        //         $q
-        //             ->where('active', ACTIVE)
-        //             ->select('id', 'model_id')
-        //             ->with('values', function ($q) {
-        //                 $q
-        //                     ->with('criterion_value', function ($q) {
-        //                         $q
-        //                             ->where('active', ACTIVE)
-        //                             ->select('id', 'value_text', 'value_date', 'value_boolean')
-        //                             ->with('criterion', function ($q) {
-        //                                 $q->select('id', 'name', 'code');
-        //                             });
-        //                     })
-        //                     ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
-        //             });
-        //     }])->where('id', 11)->first();
-        // $course = new Course();
-        // $users_assigned = $course->usersSegmented($segments->segments, $type = 'users_id');
-        // dd($users_assigned);
-
+    protected function sendEmail( $type = null, $user = null, $benefit = null )
+    {
         if($type && $user && $benefit){
             $base_url = env('WEB_BASE_URL') ?? null;
             $email = $user?->email ?? null;
