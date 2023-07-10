@@ -483,4 +483,56 @@ class Workspace extends BaseModel
     {
         return $this->hasMany(CriterionValueWorkspace::class);
     }
+
+    public function replicateWithRelations($data)
+    {
+        $relationships = [
+            // 'schools',
+            'courses.topics',
+            'subworkspaces.schools',
+            
+            'users',
+            
+            'app_menu',
+            'main_menu',
+            'side_menu',
+
+            'criterionWorkspace',
+            'criteriaValue',
+        ];
+
+        $model = $this->replicate();
+
+        $model->update($data);
+
+        $model->push();
+
+        $this->load($relationships);
+
+        $model->subworkspaces()->createMany($this->subworkspaces);
+
+        $model->app_menu()->sync($this->app_menu);
+        $model->main_menu()->sync($this->main_menu);
+        $model->side_menu()->sync($this->side_menu);
+
+        $model->criterionWorkspace()->sync($this->criterionWorkspace);
+        $model->criteriaValue()->sync($this->criteriaValue);
+
+        foreach ($model->subworkspaces as $key => $module) {
+            $schools = $this->subworkspaces->where('id', $module->id)->first()->schools;
+            $module->schools()->createMany($schools);
+
+            
+        }
+
+        // foreach ($this->relations as $relationName => $values){
+        //     $model->{$relationName}()->sync($values);
+        // }
+
+        // foreach ($this->getRelations() as $key => $relation) {
+        //    $model->setAttribute($key, clone $relation);
+        // }
+
+        return $model;
+    }
 }

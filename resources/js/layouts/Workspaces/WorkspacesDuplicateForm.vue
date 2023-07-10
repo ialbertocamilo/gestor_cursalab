@@ -9,7 +9,7 @@
 
             <DefaultErrors :errors="errors"/>
 
-            <v-form ref="workspaceForm">
+            <v-form ref="workspaceDuplicateForm">
                 <v-row class="justify-content-center pt-4">
                     <v-col cols="6">
                         <DefaultInput
@@ -130,7 +130,7 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
+    'name', 'url_powerbi', 'logo', 'logo_negativo'
     // 'logo_marca_agua', 'marca_agua_estado',
     // 'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
@@ -152,8 +152,8 @@ export default {
             resourceDefault: {
                 name: '',
                 url_powerbi: '',
-                logo: '',
-                logo_negativo: '',
+                logo: null,
+                logo_negativo: null,
                 // selected_criteria: {},
                 // selected_functionality: {}
             },
@@ -163,7 +163,7 @@ export default {
             functionalities: [],
             rules: {
                 name: this.getRules(['required', 'max:255']),
-                logo: this.getRules(['required']),
+                // logo: this.getRules(['required']),
             }
         }
     }
@@ -250,16 +250,16 @@ export default {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
-            let url = `/workspaces/${workspace.workspaceId}/copy`;
+            let url = `/workspaces/${workspace.id}/copy`;
 
             this.$http
                 .get(url)
                 .then(({data}) => {
-                    vue.hideLoader();
+                    // vue.hideLoader();
 
                     // vue.is_superuser = data.data.is_superuser || false;
 
-                    vue.resource = Object.assign({}, data.data);
+                    vue.resource.id = workspace.id;
                    
                     this.hideLoader();
                 })
