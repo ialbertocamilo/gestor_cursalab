@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Mail\EmailTemplate;
 use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class Benefit extends BaseModel
 {
@@ -113,6 +116,11 @@ class Benefit extends BaseModel
     public function status()
     {
         return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
+
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
     }
 
     protected function storeRequest($data, $benefit = null)
@@ -612,7 +620,7 @@ class Benefit extends BaseModel
         $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
         $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
 
-        // $workspace = get_current_workspace();
+        $benefits_asigned = array_column($user->getSegmentedByModelType(Benefit::class),'id');
 
         $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
@@ -629,7 +637,7 @@ class Benefit extends BaseModel
                 }
         ])
         ->where('active',1)
-        ->where('workspace_id', $workspace_id);
+        ->whereIn('id', $benefits_asigned);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -934,4 +942,43 @@ class Benefit extends BaseModel
         ];
         return ['data' => $response];
     }
+
+    protected function sendEmail() {
+
+        // $segments = Benefit::with(['segments'=> function ($q) {
+        //         $q
+        //             ->where('active', ACTIVE)
+        //             ->select('id', 'model_id')
+        //             ->with('values', function ($q) {
+        //                 $q
+        //                     ->with('criterion_value', function ($q) {
+        //                         $q
+        //                             ->where('active', ACTIVE)
+        //                             ->select('id', 'value_text', 'value_date', 'value_boolean')
+        //                             ->with('criterion', function ($q) {
+        //                                 $q->select('id', 'name', 'code');
+        //                             });
+        //                     })
+        //                     ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+        //             });
+        //     }])->where('id', 11)->first();
+        // $course = new Course();
+        // $users_assigned = $course->usersSegmented($segments->segments, $type = 'users_id');
+        // dd($users_assigned);
+
+
+
+
+        // $mail_data = [ 'subject' => 'Tenemos un nuevo beneficio para ti',
+        //                'benefit_name' => 'Platzi para todos💂🏻🧙🏽👮🏼',
+        //                'benefit_link' => 'https://demo.cursalab.io/beneficio?beneficio=6',
+        //                'icon_new' => URL::asset('img/benefits/icon_mail_new.png'),
+        //                'icon_notify' => URL::asset('img/benefits/icon_mail_notify.png'),
+        //                'type' => 'new' ];
+
+        // // enviar email
+        // Mail::to('daniel@cursalab.io')
+        //     ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+    }
+
 }

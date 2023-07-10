@@ -369,7 +369,7 @@ Segment extends BaseModel
             ];
         }
         $data['segments'] = [$segment];
-        $data = (object) $data; 
+        $data = (object) $data;
         $this->updateSegmentToLaunchObeserver($data);
         $segment->values()->sync($values);
     }
@@ -614,5 +614,95 @@ Segment extends BaseModel
         }
 
         $segment->values()->sync($values);
+    }
+
+    public function preDirectSegmentation($data)
+    {
+        $list_segments_direct = [];
+
+        $direct_segmentation = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data->code);
+
+        foreach ($data->segments as $key => $segment_row) {
+            if (count($segment_row['criteria_selected']) == 0) continue;
+
+            $segment_data = [
+                'type_id' => $direct_segmentation->id,
+                'code_id' => $code_segmentation?->id,
+                'model_type' => $data->model_type,
+                'model_id' => $data->model_id,
+                'name' => 'Nuevo segmento',
+                'active' => ACTIVE,
+            ];
+
+            $segment = new Segment($segment_data);
+
+            $values = [];
+
+            foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
+
+                $temp_values = match ($criterion['field_type']['code']) {
+                    'default' => (new Segment)->prepareDefaultValues($criterion),
+                    'date' => (new Segment)->prepareDateRangeValues($criterion),
+                    default => [],
+                };
+
+                $values = array_merge($values, $temp_values);
+            }
+            $model_values = collect();
+            foreach($values as $val) {
+
+                $segment_value = new SegmentValue($val);
+                $model_values->push($segment_value);
+            }
+            $segment->values = $model_values;
+            array_push($list_segments_direct, $segment);
+        }
+        return $list_segments_direct;
+    }
+
+
+    public function preSegmentationByDocument($data)
+    {
+        $list_segments_document = [];
+
+        $segmentation_by_document = Taxonomy::getFirstData('segment', 'type', 'segmentation-by-document');
+        $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data['code']);
+
+        $segment_data = [
+            'type_id' => $segmentation_by_document->id,
+            'code_id' => $code_segmentation?->id,
+            'model_type' => $data['model_type'],
+            'model_id' => $data['model_id'],
+            'name' => 'Segmentación por documento',
+            'active' => ACTIVE,
+        ];
+
+        $segment = new Segment($segment_data);
+
+        $document_criterion = Criterion::where('code', 'document')->first();
+
+        $values = [];
+
+        foreach ($data['segment_by_document']['segmentation_by_document'] ?? [] as $value) {
+
+            $values[] = [
+                'id' => $value['segment_value_id'] ?? null,
+                'criterion_value_id' => $value['criterion_value_id'],
+                'criterion_id' => $document_criterion->id,
+                'type_id' => NULL,
+            ];
+        }
+
+        $model_values = collect();
+        foreach($values as $val) {
+
+            $segment_value = new SegmentValue($val);
+            $model_values->push($segment_value);
+        }
+        $segment->values = $model_values;
+        array_push($list_segments_document, $segment);
+
+        return $list_segments_document;
     }
 }

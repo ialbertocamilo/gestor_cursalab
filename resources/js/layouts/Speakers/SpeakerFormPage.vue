@@ -228,7 +228,7 @@ export default {
             formdata.append("model_id", null);
 
             axios
-                .post("/upload-image/beneficios", formdata)
+                .post("/upload-image/speakers", formdata)
                 .then((res) => {
                     success(res.data.location);
                 })
