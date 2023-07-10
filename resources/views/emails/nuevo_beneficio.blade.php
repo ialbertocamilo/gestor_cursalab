@@ -4,11 +4,10 @@
         <td style="font-family: 'Poppins', sans-serif; ">
             <div style="text-align:center;margin:15px;">
                 <div style="margin-left: auto; margin-right: auto;">
-                    <img src="{{ $data['icon_new'] }}" alt="nuevo beneficio" style="max-width: 100%;" width="135px">
+                    <img src="{{ $data['icon'] }}" alt="nuevo beneficio" style="max-width: 100%;" width="135px">
                 </div>
             </div>
-            <p style="color:#333D5D;font-size: 1.1rem;padding: 0px 46px;margin:0;">Tenemos un nuevo beneficio para ti
-            </p>
+            <p style="color:#333D5D;font-size: 1.1rem;padding: 0px 46px;margin:0;">{{ $data['subject'] }}</p>
         </td>
     </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">

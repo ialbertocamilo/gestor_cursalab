@@ -149,16 +149,6 @@ class BenefitController extends Controller
         return $this->success(['msg' => 'Beneficio eliminado correctamente.']);
     }
 
-
-    public function sendEmail()
-    {
-        Benefit::sendEmail();
-        $response = ['error'=> false];
-
-        return $this->success($response);
-    }
-
-
     public function usersSegmentedBenefit(Request $request)
     {
         $data = $request->all();
