@@ -14,7 +14,7 @@
 
                         <v-divider class="mx-3" /> -->
 
-                <v-row justify="space-around">
+                <v-row>
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput
                             v-model="resource.name"
@@ -22,7 +22,7 @@
                             :rules="rules.name"/>
                     </v-col>
 
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="6">
                         <DefaultSelect
                            :items="selects.types"
                            v-model="resource.type"
@@ -33,17 +33,17 @@
                            @onChange="changeType"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center" v-if="selects.benefits.length > 0">
+                    <v-col cols="6" v-if="selects.benefits.length > 0 && resource.type.code == 'benefits'">
                         <DefaultSelect
                            :items="selects.benefits"
-                           v-model="resource.benefit"
+                           v-model="resource.model_id"
                            label="Beneficio"
                            item-text="title"
                            return-object
                            :rules="rules.type"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="6">
                         <DefaultAutocomplete
                             :items="selects.hosts"
                             v-model="resource.host"
@@ -336,7 +336,7 @@ export default {
                 starts_at: null,
 
                 type: null,
-                benefit:null,
+                model_id:null,
                 host: null,
                 status: {code: null},
                 description: '',
@@ -423,9 +423,8 @@ export default {
         changeType(){
             let vue = this;
             if(vue.resource.type.code == 'benefits'){
-                vue.$http.get(`/beneficios/search?types[]=''`)
+                vue.$http.get("/beneficios/search?types[]=sesion_online&types[]=sesion_hibrida")
                 .then(({data}) => {
-                    console.log(data);
                     vue.selects.benefits = data.data.data;
                     this.hideLoader()
                 })
@@ -433,9 +432,10 @@ export default {
                     console.log(err);
                     this.hideLoader()
                 });
-                
+            }else{
+                vue.selects.benefits = [];
+                vue.resource.benefit = null;
             }
-            console.log('type',vue.resource.type);
         },
         closeModal() {
             let vue = this

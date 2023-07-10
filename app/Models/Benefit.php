@@ -254,7 +254,7 @@ class Benefit extends BaseModel
             });
         }
         if(request()->types){
-            $benefits_query->whereHas('type', fn($q) => $q->whereIn('code', $types));
+            $benefits_query->whereHas('type', fn($q) => $q->whereIn('code',request()->types));
         }
         $benefits = $benefits_query->paginate(request('paginate', 15));
 
