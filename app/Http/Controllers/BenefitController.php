@@ -6,6 +6,7 @@ use App\Http\Requests\Benefit\BenefitStoreUpdateRequest;
 use Illuminate\Http\Request;
 
 use App\Models\Benefit;
+use App\Models\Course;
 use App\Models\Media;
 use App\Models\Poll;
 use App\Models\Segment;
@@ -47,33 +48,19 @@ class BenefitController extends Controller
 
     public function saveSegment(Request $request)
     {
-        $workspace = get_current_workspace();
         $data = $request->all();
         $benefit_id = $data['id'] ?? null;
 
         // Segmentación directa
-        if(isset($data['list_segments']['segments']) && count($data['list_segments']['segments']) > 0)
-        {
-            $data['list_segments']['model_id'] = $benefit_id;
-
-            $list_segments_temp = [];
-            foreach($data['list_segments']['segments'] as $seg) {
-                if($seg['type_code'] === 'direct-segmentation')
-                    array_push($list_segments_temp, $seg);
-            }
-            $data['list_segments']['segments'] = $list_segments_temp;
-
-            $list_segments = (object) $data['list_segments'];
-
-            (new Segment)->storeDirectSegmentation($list_segments);
+        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
+        if( !is_null($list_segments_direct) ) {
+            (new Segment)->storeDirectSegmentation($list_segments_direct);
         }
-        // Segmentación por documento
-        if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
-        {
-            $data['list_segments_document']['model_id'] = $benefit_id;
-            $list_segments = $data['list_segments_document'];
 
-            (new Segment)->storeSegmentationByDocumentForm($list_segments);
+        // Segmentación por documento
+        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
+        if( !is_null($list_segments_document) ) {
+            (new Segment)->storeSegmentationByDocumentForm($list_segments_document);
         }
 
         $msg = 'Beneficio segmentado.';
@@ -161,4 +148,65 @@ class BenefitController extends Controller
 
         return $this->success(['msg' => 'Beneficio eliminado correctamente.']);
     }
+
+    public function usersSegmentedBenefit(Request $request)
+    {
+        $data = $request->all();
+        $benefit_id = $data['id'] ?? null;
+
+        // Segmentación directa
+        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
+
+        // Segmentación por documento
+        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
+
+        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
+
+        $msg = 'Total de usuarios asignados';
+
+        return $this->success(['msg' => $msg, 'benefit'=>$benefit_id, 'users'=> $users_assigned]);
+    }
+
+
+    private function countUsersSegmentedBenefit( $list_segments_direct = null, $list_segments_document = null) {
+
+        $segments_direct = !is_null($list_segments_direct) ? (new Segment)->preDirectSegmentation($list_segments_direct) : [];
+        $segments_document = !is_null($list_segments_document) ? (new Segment)->preSegmentationByDocument($list_segments_document) : [];
+
+        $segments = array_merge($segments_direct,$segments_document);
+
+        $users_segmented = new Course();
+        $users_assigned = $users_segmented->usersSegmented($segments, $type = 'users_id');
+
+        return count($users_assigned);
+    }
+
+    private function listSegmentDirect( $benefit_id, $data ) {
+
+        if(isset($data['list_segments']['segments']) && count($data['list_segments']['segments']) > 0)
+        {
+            $data['list_segments']['model_id'] = $benefit_id;
+
+            $list_segments_temp = [];
+            foreach($data['list_segments']['segments'] as $seg) {
+                if($seg['type_code'] === 'direct-segmentation')
+                    array_push($list_segments_temp, $seg);
+            }
+            $data['list_segments']['segments'] = $list_segments_temp;
+
+            return (object) $data['list_segments'];
+        }
+        return null;
+    }
+
+    private function listSegmentDocument( $benefit_id, $data ) {
+
+        if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
+        {
+            $data['list_segments_document']['model_id'] = $benefit_id;
+            return $data['list_segments_document'];
+        }
+        return null;
+    }
+
 }

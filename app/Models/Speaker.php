@@ -167,7 +167,7 @@ class Speaker extends BaseModel
     {
         $workspace = get_current_workspace();
         $speakers_items = Speaker::where('active',1)
-                        // ->where('workspace_id', $workspace->id)
+                        ->where('workspace_id', $workspace->id)
                         ->orderBy('name', 'DESC')
                         ->get();
         foreach($speakers_items as $speaker) {

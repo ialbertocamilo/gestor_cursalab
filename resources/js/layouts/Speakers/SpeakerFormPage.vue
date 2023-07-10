@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title class="justify-content-between align-items-center position-relative">
-                <span>Speaker: {{ speaker_id ? 'Editar' : 'Crear' }}</span>
+                <span>Expositores: {{ speaker_id ? 'Editar Expositor' : 'Crear' }}</span>
             </v-card-title>
         </v-card>
         <br>
@@ -75,7 +75,7 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Experiencia del speaker"
+                                title="Experiencia del expositor(a)"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_links">
@@ -228,7 +228,7 @@ export default {
             formdata.append("model_id", null);
 
             axios
-                .post("/upload-image/beneficios", formdata)
+                .post("/upload-image/speakers", formdata)
                 .then((res) => {
                     success(res.data.location);
                 })
