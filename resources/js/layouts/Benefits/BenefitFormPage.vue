@@ -491,7 +491,7 @@
                         <!-- Speaker -->
                         <v-col cols="6" v-if="options_modules[4].active">
                             <DefaultModalSection
-                                title="Speaker"
+                                title="Selecciona tu expositor(a)"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_speaker d-flex">
@@ -499,7 +499,7 @@
                                             <div v-if="!resource.speaker" class="d-flex align-center">
                                                 <div class="bx_speaker_img"></div>
                                                 <div class="bx_speaker_name">
-                                                    <span>Seleccionar speaker</span>
+                                                    <span>Selecciona un expositor(a)</span>
                                                 </div>
                                             </div>
                                             <div v-if="resource.speaker" class="d-flex align-center">
@@ -513,7 +513,7 @@
                                         </div>
                                         <div class="box_button_speaker">
                                             <v-btn color="primary" outlined @click="openModalSelectSpeaker">
-                                                Seleccionar speaker
+                                                Seleccionar expositor(a)
                                             </v-btn>
                                         </div>
                                     </div>
@@ -583,7 +583,7 @@
                         <!-- Promotor -->
                         <v-col cols="6" v-if="options_modules[0].active">
                             <DefaultModalSection
-                                title="Promotor del beneficio"
+                                title="Promotor"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_promotor d-flex">
@@ -591,7 +591,7 @@
                                             <DefaultInput
                                                 dense
                                                 label="Promotor"
-                                                placeholder="Empresa que promociona"
+                                                placeholder="Indicar la empresa que promociona"
                                                 v-model="resource.promotor"
                                                 :rules="rules.promotor"
                                             />
@@ -735,7 +735,7 @@ export default {
                 {name: 'Sílabo', code: 'silabo', active: false},
                 {name: 'Ubicación / Mapa', code: 'ubicacion', active: false},
                 {name: 'Agregar link', code: 'links', active: false},
-                {name: 'Speaker', code: 'speaker', active: false},
+                {name: 'Expositores', code: 'speaker', active: false},
                 {name: 'Tags', code: 'dificultad', active: false},
                 {name: 'Implementos necesarios', code: 'implementos', active: false},
                 {name: 'Duración', code: 'duracion', active: false},

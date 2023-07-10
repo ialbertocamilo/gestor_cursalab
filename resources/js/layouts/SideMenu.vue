@@ -217,7 +217,7 @@ export default {
                         ]
                     },
                     {
-                        title: "Speakers",
+                        title: "Expositores",
                         icon: "fas fa-gift",
                         path: "/speakers",
                         subpaths: ["speakers"],
