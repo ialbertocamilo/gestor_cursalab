@@ -2,9 +2,9 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Speakers
+                Expositores
                 <v-spacer/>
-                <DefaultModalButton :label="'Agregar speakers'" @click="openCRUDPage('/speakers/create')"/>
+                <DefaultModalButton :label="'Agregar expositor(a)'" @click="openCRUDPage('/speakers/create')"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -14,7 +14,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar speaker"
+                            label="Buscar expositores"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -28,7 +28,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openModalSelectActivitys($event)"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un speaker')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un expositor(a)')"
                 @addSpeaker="addSpeaker($event)"
             />
         </v-card>
@@ -107,9 +107,9 @@ export default {
                 endpoint: '',
                 content_modal: {
                     delete: {
-                        title: '¡Estás por eliminar un Speaker!',
+                        title: '¡Estás por eliminar un expositor(a)!',
                         details: [
-                            'Este speaker no podrá ser visto por los usuarios.',
+                            'Este expositor(a) no podrá ser visto por los usuarios.',
                             'La información eliminada no podra recuperarse'
                         ],
                     }

@@ -40,8 +40,8 @@
                 && list_segments[0] != null
                 && list_segments[0].direct_segmentation.length > 0
                 && list_segments[0].direct_segmentation[0] != null
-                && list_segments[0].direct_segmentation.length < 3" style="text-align: center;">
-                    <div class="msg_label">Debes seleccionar al menos 3 criterios para continuar.</div>
+                && list_segments[0].direct_segmentation.length < 1" style="text-align: center;">
+                    <div class="msg_label">Debes seleccionar al menos 1 criterio para continuar.</div>
                 </div>
             </v-tab-item>
 

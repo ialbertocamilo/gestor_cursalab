@@ -447,24 +447,25 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
+        // $new = $workspace->replicate();
+        $new = $workspace->replicateWithRelations($data);
 
-        //copy attributes
-        $new = $workspace->replicate();
+        
 
         //save model before you recreate relations (so it has an id)
-        $new->push();
+        // $new->push();
 
-        //reset relations on EXISTING MODEL (this way you can control which ones will be loaded
-        $workspace->relations = [];
+        // //reset relations on EXISTING MODEL (this way you can control which ones will be loaded
+        // $workspace->relations = [];
 
-        //load relations on EXISTING MODEL
-        $workspace->load('subworkspaces', 'schools', 'courses');
+        // //load relations on EXISTING MODEL
+        // $workspace->load('subworkspaces', 'schools', 'courses');
 
-        //re-sync everything
-        foreach ($this->relations as $relationName => $values){
-            $new->{$relationName}()->sync($values);
-        }
+        // //re-sync everything
+        // foreach ($this->relations as $relationName => $values){
+        //     $new->{$relationName}()->sync($values);
+        // }
 
-        return $this->success([]);
+        return $this->success(compact('new'));
     }
 }

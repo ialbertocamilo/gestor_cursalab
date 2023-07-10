@@ -307,7 +307,7 @@ export default {
                     if( direct_segmentation[0] == null ) {}
                     else {
                         direct_segmentation.forEach(element => {
-                            if (direct_segmentation.length < 3 || element == null || element.values_selected == undefined || element.values_selected == null){
+                            if (direct_segmentation.length < 1 || element == null || element.values_selected == undefined || element.values_selected == null){
                                 vue.stepper_box_btn1 = true;
                             }
                         });

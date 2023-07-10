@@ -107,7 +107,7 @@ export default {
                 ref: 'BenefitTable',
                 headers: [
                     {text: "Nombre", value: "title", align: 'start', sortable: true},
-                    {text: "Speaker", value: "benefit_speaker", align: 'center', sortable: false},
+                    {text: "Expositor(a)", value: "benefit_speaker", align: 'center', sortable: false},
                     {text: "Tipo", value: "benefit_type", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],

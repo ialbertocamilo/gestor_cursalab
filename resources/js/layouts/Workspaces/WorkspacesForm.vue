@@ -401,7 +401,7 @@ export default {
             this.$http
                 .get(url)
                 .then(({data}) => {
-                    vue.hideLoader();
+                    // vue.hideLoader();
 
                     vue.is_superuser = data.data.is_superuser || false;
 
