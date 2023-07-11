@@ -943,42 +943,31 @@ class Benefit extends BaseModel
         return ['data' => $response];
     }
 
-    protected function sendEmail() {
+    protected function sendEmail( $type = null, $user = null, $benefit = null )
+    {
+        if($type && $user && $benefit){
+            $base_url = env('WEB_BASE_URL') ?? null;
+            $email = $user?->email ?? null;
 
-        // $segments = Benefit::with(['segments'=> function ($q) {
-        //         $q
-        //             ->where('active', ACTIVE)
-        //             ->select('id', 'model_id')
-        //             ->with('values', function ($q) {
-        //                 $q
-        //                     ->with('criterion_value', function ($q) {
-        //                         $q
-        //                             ->where('active', ACTIVE)
-        //                             ->select('id', 'value_text', 'value_date', 'value_boolean')
-        //                             ->with('criterion', function ($q) {
-        //                                 $q->select('id', 'name', 'code');
-        //                             });
-        //                     })
-        //                     ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
-        //             });
-        //     }])->where('id', 11)->first();
-        // $course = new Course();
-        // $users_assigned = $course->usersSegmented($segments->segments, $type = 'users_id');
-        // dd($users_assigned);
+            if($base_url) {
+                if($type == 'notify') {
+                    $imagen = URL::asset('img/benefits/icon_mail_notify.png');
+                    $subject = 'Inscripción abierta';
+                }
+                else {
+                    $imagen = URL::asset('img/benefits/icon_mail_new.png');
+                    $subject = 'Tenemos un nuevo beneficio para ti';
+                }
+                $mail_data = [ 'subject' => $subject,
+                               'benefit_name' => $benefit?->title,
+                               'benefit_link' => $base_url.'/beneficio?beneficio='.$benefit?->id,
+                               'icon' => $imagen ];
 
-
-
-
-        // $mail_data = [ 'subject' => 'Tenemos un nuevo beneficio para ti',
-        //                'benefit_name' => 'Platzi para todos💂🏻🧙🏽👮🏼',
-        //                'benefit_link' => 'https://demo.cursalab.io/beneficio?beneficio=6',
-        //                'icon_new' => URL::asset('img/benefits/icon_mail_new.png'),
-        //                'icon_notify' => URL::asset('img/benefits/icon_mail_notify.png'),
-        //                'type' => 'new' ];
-
-        // // enviar email
-        // Mail::to('daniel@cursalab.io')
-        //     ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                // enviar email
+                Mail::to($email)
+                    ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+            }
+        }
     }
 
 }
