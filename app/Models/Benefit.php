@@ -256,6 +256,10 @@ class Benefit extends BaseModel
         if(request()->types){
             $benefits_query->whereHas('type', fn($q) => $q->whereIn('code',request()->types));
         }
+        if(request()->all_data){
+            $response['data'] = $benefits_query->get();
+            return $response;
+        }
         $benefits = $benefits_query->paginate(request('paginate', 15));
 
         $benefits_items = $benefits->items();

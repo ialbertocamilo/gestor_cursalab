@@ -195,7 +195,12 @@
                         Criterios vacíos
                     </span>
                 </v-tab>
-
+                <v-tab class="justify-content-start py-7" key='benefit-report'>
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
+                        Reporte de Beneficios
+                    </span>
+                </v-tab>
                 <!--
 
                 TABS CONTENT
@@ -470,6 +475,20 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <BenefitsReport
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
             </v-tabs>
         </v-card>
@@ -545,7 +564,7 @@ import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
 import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
-
+import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 export default {
     components: {
         EmptyCriteria,
@@ -570,7 +589,8 @@ export default {
         Ranking,
         Meetings,
         Diploma,
-        Segmentacion
+        Segmentacion,
+        BenefitsReport
     },
     data() {
         return {
