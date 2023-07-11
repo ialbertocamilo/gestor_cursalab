@@ -1397,6 +1397,14 @@ table.table-scroll thead, table.table-scroll tbody tr {
 	gap: 2rem;
 }
 
+.gap{
+	gap: 1rem;
+}
+
 .h-1 {
 	height: 1.4rem;
+}
+
+.flex-1 {
+	flex: 1 1 0%;
 }

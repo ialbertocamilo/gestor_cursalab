@@ -1,6 +1,6 @@
 <template>
     <DefaultDialog
-        width="30vw"
+        width="45vw"
         :options="options"
         @onCancel="onCancel"
         @onConfirm="onConfirm"
@@ -14,10 +14,16 @@
                             {{ options.contentText }}
                         </p>
                     </span>
-                    <div class="d-flex justify-content-around align-items-center">
-                        <div v-show="options.resource.stages.stage_content != null">
-                            <div class="d-flex flex-column">
-                                <p class="text-center mb-0">Contenido</p>
+                    <div class="d-flex justify-content-around gap">
+                        <div class="flex-1" v-show="options.resource.stages.stage_content != null">
+                            <div class="d-flex flex-column align-items-center">
+                                <v-card class="elevation-1" style="height:11rem;">
+                                    <v-card-title class="justify-content-center">Contenido</v-card-title>
+                                    <v-card-text>
+                                        Podrán ver contenido referente a la campaña y contestar una pregunta.
+                                    </v-card-text>
+                                </v-card>
+
                                 <DefaultToggle 
                                     class="mt-0 ml-3" 
                                     v-model="options.resource.stages.stage_content" 
@@ -25,9 +31,15 @@
                                 />
                             </div>
                         </div>
-                        <div v-show="options.resource.stages.stage_postulate != null">
-                            <div class="d-flex flex-column">
-                                <p class="text-center mb-0">Postulación</p>
+                        <div class="flex-1" v-show="options.resource.stages.stage_postulate != null">
+                            <div class="d-flex flex-column align-items-center">
+                                <v-card class="elevation-1" style="height:11rem;">
+                                    <v-card-title class="justify-content-center">Postulaciones</v-card-title>
+                                    <v-card-text>
+                                        Postular a varios usuarios del mismo criterio y brindar un sustento por cada uno que podrá ser revisado y filtrado desde el gestor.
+                                    </v-card-text>
+                                </v-card>
+
                                 <DefaultToggle 
                                     class="mt-0 ml-3" 
                                     v-model="options.resource.stages.stage_postulate" 
@@ -35,9 +47,15 @@
                                 />
                             </div>
                         </div>
-                        <div v-show="options.resource.stages.stage_votation != null"  >
-                            <div class="d-flex flex-column">
-                                <p class="text-center mb-0">Votación</p>
+                        <div class="flex-1" v-show="options.resource.stages.stage_votation != null"  >
+                            <div class="d-flex flex-column align-items-center">
+
+                                <v-card class="elevation-1" style="height:11rem;">
+                                    <v-card-title class="justify-content-center">Votaciones</v-card-title>
+                                    <v-card-text>
+                                       Realizar una votación final, los resultados solo se verán en el gestor.
+                                    </v-card-text>
+                                </v-card>
                                 <DefaultToggle 
                                     class="mt-0 ml-3" 
                                     v-model="options.resource.stages.stage_votation" 
