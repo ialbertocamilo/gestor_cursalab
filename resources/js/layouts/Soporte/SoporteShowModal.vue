@@ -113,7 +113,7 @@
                             </v-icon>
                             Los correos coinciden
                         </div>
-                        <div v-if="resource.email_user.trim() && (resource.email_user.trim() !== resource.email_ticket.trim())"
+                        <div v-if="resource.email_user && (resource.email_user.trim() !== resource.email_ticket.trim())"
                             class="mt-3">
                             <v-icon left color="yellow">
                                 fas fa-exclamation-triangle
