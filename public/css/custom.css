@@ -1207,4 +1207,11 @@ span.lbl_txt_val {
 
 .v-progress-linear__content {
     justify-content: unset !important;
+<<<<<<< Updated upstream
+=======
+}
+
+.ml-24-porcent{
+	margin-left: 24%;
+>>>>>>> Stashed changes
 }

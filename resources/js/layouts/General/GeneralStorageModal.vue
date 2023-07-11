@@ -14,6 +14,8 @@
 					Seleccione almacenamiento o ingrese n° de usuarios.
 				</v-alert>
 
+				<p>Te comunicarás con nuestro equipo comercial para mejorar tu plan, <b>selecciona que deseas aumentar:</b></p>
+
 				<v-row>
 					<v-col cols="6">
 						<DefaultSelect

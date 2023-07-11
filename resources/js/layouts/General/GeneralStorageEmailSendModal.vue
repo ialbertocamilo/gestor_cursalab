@@ -4,14 +4,14 @@
 		:width="width"
 		@onCancel="closeModal"
 		@onConfirm="$emit('onConfirm')"
-		header-class="text-body bg-white"
+		header-class="text-body bg-white ml-24-porcent"
 		color-close-icon="primary"
 		:persistent="true"
 	>
 		<template v-slot:content>
 			<v-row class="justify-content-center">
 				
-				<div class="text-center">
+				<div class="text-center w-50">
 					<p>
 						Nuestro equipo comercial se comunicará contigo en breve para procesar 
 						<b>tu solicitud.</b>

@@ -16,7 +16,7 @@
                 <div style="margin-bottom: 1rem;margin-top: 1rem;">
                     <p style="margin: 0.3rem 0;display: flex;align-items: center;"> 
                         <img src="{{ url('/img/storage/cloud-outline.png') }}" style="margin-right: 0.3rem;"> Aumentar almacenamiento: 
-                        <b>8 Gb.</b> 
+                        <b>{{ $data['storage'] }}.</b> 
                     </p>
                     <p style="margin: 0.3rem 0;display: flex;">
                         <img src="{{ url('/img/storage/users-outline.png') }}" style="margin-right: .3rem;"> Aumentar usuarios: 
