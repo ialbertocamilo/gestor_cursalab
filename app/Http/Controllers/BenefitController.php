@@ -63,7 +63,7 @@ class BenefitController extends Controller
 
         if(count($users_assigned) > 0)
         {
-            $push_chunk = 50;
+            $push_chunk = 40;
             $chunk = array_chunk($users_assigned, $push_chunk);
 
             if(count($chunk) > 1) {
