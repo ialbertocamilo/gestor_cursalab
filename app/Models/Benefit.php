@@ -419,7 +419,10 @@ class Benefit extends BaseModel
         }
         else {
 
-            $benefits_user_registered = UserBenefit::where('user_id',$user_id)->count();
+            $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('user_id',$user_id)->count();
             if($benefits_user_registered < $limit_benefits_x_user) {
                 try {
                     DB::beginTransaction();
@@ -549,6 +552,9 @@ class Benefit extends BaseModel
 
         $is_registered = UserBenefit::where('user_id', $user_id)
                         ->where('benefit_id', $benefit_id)
+                        ->whereHas('status', function($q){
+                            $q->where('code', 'subscribed');
+                        })
                         ->first();
 
         if(!$is_registered) {
@@ -616,17 +622,17 @@ class Benefit extends BaseModel
         if( is_array($status_benefit) && in_array('locked', $status_benefit) )
             array_push($status_benefit,'finished');
 
-        $user_status_active = Taxonomy::getFirstData('benefit', 'user_status', 'active');
-        $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
-        $user_status_exchanged = Taxonomy::getFirstData('benefit', 'user_status', 'exchanged');
-        $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
-        $user_status_disabled = Taxonomy::getFirstData('benefit', 'user_status', 'disabled');
-        $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
-        $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
-
         $benefits_asigned = array_column($user->getSegmentedByModelType(Benefit::class),'id');
 
-        $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
+        $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'subscribed');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
+        $benefits_user_notified = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'notify');
+                                        $q->orWhere('code', 'notified');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
         $benefits_query = Benefit::with([
             'polls',
@@ -688,26 +694,27 @@ class Benefit extends BaseModel
         {
             $item->user_status = null;
             $item->subscribed = false;
+            $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                                $q->where('code', 'subscribed');
+                                            })
+                                            ->where('benefit_id', $item->id)->count();
             if(!is_null($item->cupos) && is_numeric($item->cupos)) {
-                $registrados = count($benefits_user_registered);
+                $registrados = $users_subscribed_in_benefit;
                 $item->cupos -= $registrados;
                 $item->cupos = $item->cupos < 0 ? 0 : $item->cupos;
             }
 
             if(in_array($item->id, $benefits_user_registered)) {
-                $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $item->id])->first();
-
-                if($user_benefit) {
-                    if($user_benefit->status_id == $user_status_subscribed?->id) {
-                        $item->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
-                        $item->subscribed = true;
-                        if($item->status?->code == 'released') {
-                            $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
-                        }
-                    }
-                    else if($user_benefit->status_id == $user_status_notify?->id) {
-                        $item->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
-                    }
+                $item->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                $item->subscribed = true;
+                if($item->status?->code == 'released') {
+                    $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                }
+            }
+            else if (in_array($item->id, $benefits_user_notified)) {
+                $item->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
+                if($item->status?->code == 'active') {
+                    $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
                 }
             }
             else {
@@ -785,17 +792,21 @@ class Benefit extends BaseModel
         $benefit_id = $data['benefit'];
         $user_id = $data['user'];
 
-        $benefits_user_registered = UserBenefit::where('user_id',$user_id)->pluck('benefit_id')->toArray();
+        $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'subscribed');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
-        $user_status_active = Taxonomy::getFirstData('benefit', 'user_status', 'active');
-        $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
-        $user_status_exchanged = Taxonomy::getFirstData('benefit', 'user_status', 'exchanged');
-        $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
-        $user_status_disabled = Taxonomy::getFirstData('benefit', 'user_status', 'disabled');
-        $user_status_contactme = Taxonomy::getFirstData('benefit', 'user_status', 'contact-me');
-        $user_status_poll = Taxonomy::getFirstData('benefit', 'user_status', 'poll');
+        $benefits_user_notified = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'notify');
+                                        $q->orWhere('code', 'notified');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
-        // $workspace = get_current_workspace();
+        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit_id?->id)->count();
 
         $benefit = Benefit::with(
             ['implements','silabo','polls','links','speaker',
@@ -812,35 +823,34 @@ class Benefit extends BaseModel
         ->where('active',1)
         ->where('id', $benefit_id->id)
         ->first();
-        // where('workspace_id', $workspace->id)
 
         if($benefit) {
 
             $benefit->user_status = null;
             $benefit->subscribed = false;
             if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
-                $registrados = count($benefits_user_registered);
+                $registrados = $users_subscribed_in_benefit;
                 $benefit->cupos -= $registrados;
                 $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
             }
 
             if(in_array($benefit->id, $benefits_user_registered)) {
-                $user_benefit = UserBenefit::where(['user_id' => $user_id, 'benefit_id' => $benefit->id])->first();
 
-                if($user_benefit) {
-                    if($user_benefit->status_id == $user_status_subscribed?->id) {
-                        $benefit->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
-                        $benefit->subscribed = true;
-                        if($benefit->status?->code == 'released') {
-                            $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
-                        }
-                    }
-                    else if($user_benefit->status_id == $user_status_notify?->id) {
-                        $benefit->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
-                    }
+                $benefit->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                $benefit->subscribed = true;
+                if($benefit->status?->code == 'released') {
+                    $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                }
+
+            }
+            else if (in_array($benefit->id, $benefits_user_notified)) {
+
+                $benefit->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
+                if($benefit->status?->code == 'active') {
+                    $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
                 }
             }
-            {
+            else {
                 if($benefit->status?->code == 'active') {
                     $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
                 }
@@ -876,6 +886,11 @@ class Benefit extends BaseModel
                 else
                     $benefit->type_poll = null;
             }
+
+            $benefit->silabo->each(function($item){
+                $item->value_date = Carbon::parse($item->value_date)->format('d/m/Y');
+                $item->value_time = Carbon::parse($item->value_time)->format('H:i');
+            });
 
             unset(
                 $benefit->referencia,
@@ -968,8 +983,10 @@ class Benefit extends BaseModel
                                'icon' => $imagen ];
 
                 // enviar email
-                Mail::to($email)
-                    ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                if($email) {
+                    Mail::to($email)
+                        ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                }
             }
         }
     }

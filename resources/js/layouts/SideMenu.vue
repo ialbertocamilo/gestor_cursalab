@@ -213,6 +213,7 @@ export default {
                         subpaths: ["beneficios"],
                         selected: false,
                         permission: "beneficios",
+                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
@@ -225,6 +226,7 @@ export default {
                         subpaths: ["speakers"],
                         selected: false,
                         permission: "speakers",
+                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
