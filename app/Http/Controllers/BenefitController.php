@@ -63,7 +63,7 @@ class BenefitController extends Controller
 
         if(count($users_assigned) > 0)
         {
-            $push_chunk = 40;
+            $push_chunk = 50;
             $chunk = array_chunk($users_assigned, $push_chunk);
 
             if(count($chunk) > 1) {
@@ -250,7 +250,11 @@ class BenefitController extends Controller
 
     private function listSegmentDocument( $benefit_id, $data ) {
 
-        if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
+        if( isset($data['list_segments_document']['segment_by_document']) &&
+            isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']) &&
+            is_array($data['list_segments_document']['segment_by_document']['segmentation_by_document']) &&
+            count($data['list_segments_document']['segment_by_document']['segmentation_by_document']) > 0
+        )
         {
             $data['list_segments_document']['model_id'] = $benefit_id;
             return $data['list_segments_document'];
