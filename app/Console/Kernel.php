@@ -63,7 +63,7 @@ class Kernel extends ConsoleKernel
         // Beneficios
         $schedule->command('beneficios:change-status')->dailyAt('00:00');
         $schedule->command('beneficios:notify-users')->dailyAt('00:30');
-        $schedule->command('beneficios:email-segments')->everyTenMinutes();
+        $schedule->command('beneficios:email-segments')->everyTwoMinutes();
     }
 
     /**
