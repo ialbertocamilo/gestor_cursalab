@@ -313,6 +313,7 @@ export default {
                 open: false,
                 showCloseIcon: true,
                 base_endpoint: '/general',
+                confirmLabel:'Enviar',
                 persistent: true
             },
             modalGeneralStorageEmailSendOptions: {
