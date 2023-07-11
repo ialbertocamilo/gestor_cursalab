@@ -196,7 +196,9 @@
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='criterios-vacios'>
+                <v-tab class="justify-content-start py-7"
+                       v-if="isSuperUser"
+                       key='historial-multiples-usuarios'>
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Historial de múltiples usuarios
@@ -478,7 +480,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="isSuperUser">
                     <v-card flat>
                         <v-card-text>
                             <UsersHistory
