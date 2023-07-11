@@ -969,5 +969,22 @@ class Benefit extends BaseModel
             }
         }
     }
-
+    function syncUsersInBenefitsMeeting(array $users,$type='add'){
+        //$benefit->syncUsersInBenefitsMeeting(User $users);
+        $benefit = $this;
+        $benefit->loadMissing('silabo');
+        foreach ($benefit->silabo as $silabo) {
+            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')->where('model_id',$silabo->id)->first();
+            if($meeting){
+                switch ($type) {
+                    case 'add':
+                        Meeting::addAttendantFromUser($meeting,$users);
+                        break;
+                    case 'remove':
+                        Meeting::deleteAttendantFromUser($meeting,$users);
+                        break;
+                }
+            }
+        }
+    }
 }
