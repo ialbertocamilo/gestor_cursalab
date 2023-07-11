@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Facade;
 
 return [
     'CHATBOT_HUBSPOT' => env('CHATBOT_HUBSPOT',''),
+    'gtag'=>[
+        'gestor'=> env('GTAG_GESTOR',NULL)
+    ],
 
     /*
     |--------------------------------------------------------------------------

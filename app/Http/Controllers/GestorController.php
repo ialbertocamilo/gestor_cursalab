@@ -85,11 +85,9 @@ class GestorController extends Controller
             ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
             ->where('id', $course_id)->first();
 
-        if (!$course) abort(404);
-
         $course_to_export = $course;
 
-        if (request()->has('original_id')) {
+        if (!$course && request()->has('original_id')) {
             $original_id = request()->original_id;
 
             $validate_compatible = $this->validateCompatibleCourse($user, $course, $original_id);

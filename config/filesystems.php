@@ -56,13 +56,13 @@ return [
             'throw' => true,
             'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER'),
             'options' => [
-                'CacheControl' => 'max-age=25920000, no-transform, public', 
+                'CacheControl' => 'max-age=25920000, no-transform, public',
                 // 'ContentEncoding' => 'gzip'
             ],
             'scorm' => [
                 'bucket' => env('AWS_BUCKET_SCORM'),
                 'root' => env('AWS_CURSALAB_CLIENT_NAME_FOLDER_SCORM'),
-            ],
+            ]
         ],
 
         'cdn' => [
