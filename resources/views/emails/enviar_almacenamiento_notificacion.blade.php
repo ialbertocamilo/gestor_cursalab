@@ -10,8 +10,14 @@
             <p>Workspace: {{ $data['workspace_name'] }}</p>
 
             <div style="margin-bottom: 2rem; margin-top: 2rem;">
-                <p style="margin-bottom: 1rem;">Aumentar almacenamiento: <b>{{ $data['storage'] }} Gb.</b> </p>
-                <p>Aumentar usuarios: <b>{{ $data['users'] }} usuarios.</b> </p>
+                <p style="margin-bottom: 1rem;"> 
+                    <img src="{{ url('/img/storage/cloud-outline.png') }}" alt="storage"> Aumentar almacenamiento: 
+                    <b>{{ $data['storage'] }} Gb.</b> 
+                </p>
+                <p>
+                    <img src="{{ url('/img/storage/users-outline.png') }}" alt="users"> Aumentar usuarios: 
+                    <b>{{ $data['users'] }} usuarios.</b> 
+                </p>
             </div>
 
             <p> <span style="font-weight:bold;">Descripción:</span> {{ $data['description'] }} </p>
