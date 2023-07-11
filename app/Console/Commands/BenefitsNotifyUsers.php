@@ -57,7 +57,7 @@ class BenefitsNotifyUsers extends Command
                                     ->first();
 
             if($benefit) {
-                $user = User::where('id', $item?->user_id)->first();
+                $user = User::where('id', $item?->user_id)->select('email')->first();
 
                 Benefit::sendEmail('notify', $user, $benefit);
 

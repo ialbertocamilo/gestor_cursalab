@@ -983,8 +983,10 @@ class Benefit extends BaseModel
                                'icon' => $imagen ];
 
                 // enviar email
-                Mail::to($email)
-                    ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                if($email) {
+                    Mail::to($email)
+                        ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                }
             }
         }
     }
