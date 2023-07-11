@@ -51,7 +51,7 @@
                                         rounded
                                     >
                                      <div class="d-flex justify-content-end" 
-                                          :style="{ width: (workspace_status.size_medias_porcent.porcent < 10) ? '8%' :workspace_status.  size_medias_porcent.porcent +'%'}">
+                                          :style="{ width: (workspace_status.size_medias_porcent.porcent < 10) ? '12%' :workspace_status.  size_medias_porcent.porcent +'%'}">
                                         <strong 
                                             class="text-white text-right"
                                             v-text="workspace_status.size_medias_porcent.porcent + '%'">
@@ -77,7 +77,7 @@
                                         rounded
                                     >
                                     <div class="d-flex justify-content-end" 
-                                        :style="{ width: (workspace_status.users_count_porcent.porcent < 10) ? '8%' :workspace_status.users_count_porcent.porcent +'%'}">
+                                        :style="{ width: (workspace_status.users_count_porcent.porcent < 10) ? '12%' :workspace_status.users_count_porcent.porcent +'%'}">
                                         <strong 
                                             class="text-white text-right"
                                             v-text="workspace_status.users_count_porcent.porcent + '%'">
@@ -192,14 +192,14 @@
 
                             <ul class="px-0 pb-0">
                                 <li v-for="route in workspace_status.routes_redirects" :key="route.label"
-                                    class="d-flex justify-content-between mb-2 text-primary-sub">
+                                    class="d-flex align-items-center justify-content-between mb-2 text-primary-sub">
                                     <span v-text="route.label"></span> 
 
                                     <v-btn 
                                         class="ml-2" 
                                         text 
                                         color="primary" 
-                                        >
+                                        @click="setStorageUrl(route.url, route.filters)">
                                         <v-icon>
                                             mdi-open-in-new
                                         </v-icon>
@@ -243,7 +243,11 @@
                                         <span>Usuarios Activos</span>
                                         <div>
                                             <span v-text="workspace_status.users_count_actives"></span>
-                                            <v-btn text color="primary">
+                                            <v-btn 
+                                                text 
+                                                color="primary"
+                                                @click="setStorageUrl(workspace_status.route_user_actives.url, 
+                                                                      workspace_status.route_user_actives.filters)">
                                                 <v-icon>mdi-open-in-new</v-icon>
                                             </v-btn>
                                         </div>
@@ -253,7 +257,11 @@
                                         <span>Usuarios Inactivos</span>
                                         <div>
                                             <span v-text="workspace_status.users_count_inactives"></span>
-                                            <v-btn text color="primary">
+                                            <v-btn 
+                                                text 
+                                                color="primary"
+                                                @click="setStorageUrl(workspace_status.route_user_inactives.url, 
+                                                                      workspace_status.route_user_inactives.filters)">
                                                 <v-icon>mdi-open-in-new</v-icon>
                                             </v-btn>
                                         </div>

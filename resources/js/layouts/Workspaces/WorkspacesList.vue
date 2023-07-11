@@ -36,7 +36,7 @@
         <v-row class="justify-content-center">
             <div class="col-10">
                 <v-row>
-                    <div class="col-6 d-flex justify-content-center flex-column">
+                    <div class="col d-flex justify-content-center flex-column">
                         <h1>
                             Bienvenido(a) a WeConnect 2.0
                         </h1>
@@ -45,7 +45,7 @@
                         </h3>
                     </div>
 
-                    <div :class="`col-6 d-flex ${ !showDetail ? 'justify-space-between' : 'justify-content-end'} align-items-center` ">
+                    <div :class="`${canAccessConfiguration ? 'col-6' : 'col-4' } d-flex ${ !showDetail ? 'justify-space-between' : 'justify-content-end'} align-items-center` ">
                         <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
                             <span class="mdi mdi-cloud-outline fa-4x mr-3"></span>
                             <div class="d-flex flex-column">
@@ -73,12 +73,12 @@
                         </div>
 
                         <div class="d-flex" style="column-gap:1.5rem;" v-if="canAccessConfiguration">
-                            <v-btn color="primary">
+                            <v-btn color="primary" @click="openLink('/auditoria')">
                                 <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
                                 Auditoria                   
                             </v-btn>
 
-                            <v-btn color="primary">
+                            <v-btn color="primary" @click="storeWorkspace">
                                 <span class="mdi mdi-plus fa-lg mr-2"></span>
                                 Workspace                   
                             </v-btn>
@@ -516,6 +516,23 @@ export default {
                 'Editar workspace'
             );
             this.setActiveWorkspace(workspaceId, false);
+        }
+        ,
+        /**
+         * Open form to store workspace, and update the session workspace
+         *
+         * @param workspaceId
+         */
+        storeWorkspace() {
+
+            this.workspaceFormModalOptions.action = 'create';
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                null,
+                null,
+                'Crear workspace'
+            );
         }
         ,
         /**
