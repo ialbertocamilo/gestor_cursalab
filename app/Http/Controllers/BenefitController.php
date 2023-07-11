@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 
 use App\Models\Benefit;
 use App\Models\Course;
+use App\Models\EmailSegment;
 use App\Models\Media;
 use App\Models\Poll;
 use App\Models\Segment;
 use App\Models\Speaker;
 use App\Models\Taxonomy;
+use App\Models\User;
 
 class BenefitController extends Controller
 {
@@ -53,12 +55,59 @@ class BenefitController extends Controller
 
         // Segmentación directa
         $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
+
+        // Segmentación por documento
+        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
+
+        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
+
+        if(count($users_assigned) > 0)
+        {
+            $push_chunk = 40;
+            $chunk = array_chunk($users_assigned, $push_chunk);
+
+            if(count($chunk) > 1) {
+                foreach ($chunk as $key => $agrupado) {
+                    $email_segment = new EmailSegment();
+                    $email_segment->workspace_id = get_current_workspace()?->id;
+                    $email_segment->benefit_id = $benefit_id;
+                    $email_segment->users = json_encode($agrupado);
+                    $email_segment->chunk = $key + 1;
+                    $email_segment->sent = false;
+                    $email_segment->save();
+                }
+            }
+            else {
+                foreach ($chunk as $key => $agrupado) {
+                    $email_segment = new EmailSegment();
+                    $email_segment->workspace_id = get_current_workspace()?->id;
+                    $email_segment->benefit_id = $benefit_id;
+                    $email_segment->users = json_encode($agrupado);
+                    $email_segment->chunk = $key + 1;
+                    $email_segment->sent = true;
+                    $email_segment->save();
+                    if(is_array($agrupado)) {
+                        foreach($agrupado as $user_id) {
+                            $user = User::where('id', $user_id)->select('email')->first();
+                            if($user) {
+                                $benefit = Benefit::where('id', $benefit_id)->first();
+                                if($benefit) {
+                                    Benefit::sendEmail( 'new', $user, $benefit );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cache_clear_model(EmailSegment::class);
+
+        // Segmentación directa
         if( !is_null($list_segments_direct) ) {
             (new Segment)->storeDirectSegmentation($list_segments_direct);
         }
 
         // Segmentación por documento
-        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
         if( !is_null($list_segments_document) ) {
             (new Segment)->storeSegmentationByDocumentForm($list_segments_document);
         }
@@ -164,7 +213,7 @@ class BenefitController extends Controller
 
         $msg = 'Total de usuarios asignados';
 
-        return $this->success(['msg' => $msg, 'benefit'=>$benefit_id, 'users'=> $users_assigned]);
+        return $this->success(['msg' => $msg, 'benefit'=>$benefit_id, 'users'=> count($users_assigned)]);
     }
 
 
@@ -178,7 +227,7 @@ class BenefitController extends Controller
         $users_segmented = new Course();
         $users_assigned = $users_segmented->usersSegmented($segments, $type = 'users_id');
 
-        return count($users_assigned);
+        return $users_assigned;
     }
 
     private function listSegmentDirect( $benefit_id, $data ) {
@@ -201,7 +250,11 @@ class BenefitController extends Controller
 
     private function listSegmentDocument( $benefit_id, $data ) {
 
-        if(isset($data['list_segments_document']['segment_by_document']) && isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']))
+        if( isset($data['list_segments_document']['segment_by_document']) &&
+            isset($data['list_segments_document']['segment_by_document']['segmentation_by_document']) &&
+            is_array($data['list_segments_document']['segment_by_document']['segmentation_by_document']) &&
+            count($data['list_segments_document']['segment_by_document']['segmentation_by_document']) > 0
+        )
         {
             $data['list_segments_document']['model_id'] = $benefit_id;
             return $data['list_segments_document'];

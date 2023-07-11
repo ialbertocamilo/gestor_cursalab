@@ -2,16 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
+use App\Rules\CustomContextSpecificWords;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
-use App\Models\User;
-
 use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
 use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
-
 use Laravel\Sanctum\PersonalAccessToken;
 
 class PasswordResetAppRequest extends FormRequest
@@ -62,16 +61,23 @@ class PasswordResetAppRequest extends FormRequest
                            // "not_regex:/($piecesPass)/i", 
                             Password::min(8)->letters()->numbers()->symbols(),
 
-                            new ContextSpecificWords($user->email ?? NULL),
-                            new ContextSpecificWords($user->document ?? NULL),
-                            new ContextSpecificWords($user->name ?? NULL),
-                            new ContextSpecificWords($user->lastname ?? NULL),
-                            new ContextSpecificWords($user->surname ?? NULL),
+                            new CustomContextSpecificWords($user->email ?? NULL, 'email'),
+                            new CustomContextSpecificWords($user->document ?? NULL, 'document'),
+                            new CustomContextSpecificWords($user->name ?? NULL, 'name'),
+                            new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
+                            new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
                                             // ->uncompromised(3)
                         ],
             'token' => 'required',
             'os' => 'nullable',
             'version' => 'nullable'
+        ];
+    }
+
+    public function messages() {
+        return [
+            'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
+            'email.email' => 'El campo correo electrónico no es un correo válido'
         ];
     }
 

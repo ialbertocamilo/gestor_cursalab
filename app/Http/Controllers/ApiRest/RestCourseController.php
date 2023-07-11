@@ -19,6 +19,14 @@ class RestCourseController extends Controller
     public function courses()
     {
         $user = Auth::user();
+
+        // Update flag to force update users courses
+
+        if(now()->diffInMinutes($user->required_update_at) > 60) {
+            $user->required_update_at = now();
+            $user->save();
+        }
+
 //        $courses = $user->getCurrentCourses();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
 

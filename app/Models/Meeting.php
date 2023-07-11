@@ -379,6 +379,30 @@ class Meeting extends BaseModel
         return $meeting;
     }
 
+    protected function addAttendantFromUser(Meeting $meeting,array $users ){
+        $users_in_meeting = $meeting->attendants()->get();
+        $user_type = Taxonomy::getFirstData('meeting', 'user','normal');
+        $attendants = [];
+        foreach ($users as $user) {
+            $user_in_meeting = $users_in_meeting->where('usuario_id',$user->id)->first();
+            if(!$user_in_meeting){
+                $attendants[] = [
+                    'usuario_id' => $user->id,
+                    'type_id' => $user_type?->id, 
+                    'id' => null
+                ];
+            }
+        }
+        if(count($attendants)){
+            $meeting->attendants()->sync($attendants,false);
+            // $meeting->sendMeetingPushNotifications($attendants);
+        }
+    }
+
+    protected function deleteAttendantFromUser(Meeting $meeting,array $users){
+        $users_id_to_delete = collect($users)->pluck('id');
+        $meeting->attendants()->where('usuario_id',$users_id_to_delete)->delete();
+    }
     protected function getScheduledAttendanceCall(&$data)
     {
         $starts_at = carbonFromFormat($data['starts_at']);

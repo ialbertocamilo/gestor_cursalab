@@ -147,7 +147,7 @@
                                     </span>
                                 </button>
 
-                                <button
+                                <!-- <button
                                     type="button" class="btn btn-md"
                                     @click="openFormModal(
                                         workspaceDuplicateFormModalOptions,
@@ -161,7 +161,7 @@
                                         <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
                                         <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
                                     </span>
-                                </button>
+                                </button> -->
 
                                 <button
                                     type="button" class="btn btn-md"
