@@ -4,19 +4,17 @@
 		:width="width"
 		@onCancel="closeModal"
 		@onConfirm="$emit('onConfirm')"
-		header-class="text-body bg-white ml-24-porcent"
-		color-close-icon="primary"
 		:persistent="true"
 	>
 		<template v-slot:content>
 			<v-row class="justify-content-center">
-				
+				<p class="text-body fa-2x mt-3 mb-8"> Muchas gracias por confiar en nosotros</p>
 				<div class="text-center w-50">
 					<p>
 						Nuestro equipo comercial se comunicará contigo en breve para procesar 
 						<b>tu solicitud.</b>
 					</p>
-					<span class="fas fa-paper-plane fa-7x my-4 text-primary-sub"></span>
+					<img src="/img/mail-send.png" alt="mail-send" style="width: 50%;margin: 1rem 0;">
 				</div>
 
 			</v-row>

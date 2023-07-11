@@ -108,7 +108,6 @@
                         class="d-flex justify-content-end align-self-center">
                         <v-btn 
                             color="primary" 
-                            outlined
                             @click="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan')">
                             <span class="mdi mdi-cloud-outline fa-lg mr-2"></span>
                             Aumentar mi plan
@@ -192,7 +191,7 @@
 
                             <ul class="px-0 pb-0">
                                 <li v-for="route in workspace_status.routes_redirects" :key="route.label"
-                                    class="d-flex align-items-center justify-content-between mb-2 text-primary-sub">
+                                    class="d-flex align-items-center justify-content-between mb-2 grey lighten-5 rounded px-2">
                                     <span v-text="route.label"></span> 
 
                                     <v-btn 
@@ -282,7 +281,7 @@
             width="45vw"
             @onCancel="closeFormModal(modalGeneralStorageOptions)"
             @onConfirm="closeFormModal(modalGeneralStorageOptions), 
-                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Muchas gracias por confiar en nosotros')"
+                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
         />
         <!-- MODAL ALMACENAMIENTO -->
 
