@@ -228,7 +228,7 @@ class UsuarioController extends Controller
 
         User::storeRequest($data);
         /****************** Insertar/Actualizar en BD master ****************/
-        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
             $dni_previo = '';
             $email_previo = '';
             $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario);
@@ -245,7 +245,7 @@ class UsuarioController extends Controller
         // info($data);
         User::storeRequest($data, $user);
         /****************** Insertar/Actualizar en BD master ****************/
-        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
             $dni_previo = $user->dni;
             $email_previo = $user->email;
             $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $user);
@@ -273,7 +273,7 @@ class UsuarioController extends Controller
         }
 
         /******************ELIMINA en BD master****************/
-        if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
             $usu_master = UsuarioMaster::where('dni', $usuario->dni)->first();
             if ($usu_master) {
                 $usu_master->delete();
