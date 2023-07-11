@@ -981,7 +981,7 @@ class UsuarioController extends Controller
             $usu_master->customer_id = ENV('CUSTOMER_ID');
             $usu_master->created_at = $usuario->created_at;
             $usu_master->updated_at = null;
-                $usu_master->deleted_at = null;
+            $usu_master->deleted_at = null;
             $usu_master->save();
         }else{
 

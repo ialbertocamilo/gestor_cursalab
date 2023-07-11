@@ -51,6 +51,7 @@ class MigrarUsuarios extends Command
                     'dni' => $usuario->document,
                     'username' => $usuario->username,
                     'email' => $usuario->email,
+                    'customer_id' => ENV('CUSTOMER_ID'),
                     'created_at' => $usuario->created_at,
                     'updated_at' => $usuario->updated_at,
                     'delete_at' => $usuario->deleted_at,
