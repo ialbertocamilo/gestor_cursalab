@@ -99,7 +99,7 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
-        $workspace = get_current_workspace();
+        $workspace = get_current_workspace()->fresh();
         $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
 
         $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
@@ -114,7 +114,7 @@ class UsuarioController extends Controller
     public function getListSelects()
     {
         $workspace = get_current_workspace();
-        
+
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
             ->select('id', 'name')->get();
 
@@ -157,7 +157,7 @@ class UsuarioController extends Controller
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
-            
+
             $value = $user->criterion_values->where('criterion_id', $criterion->id);
 
             $user_criterion_value = $criterion->multiple ? $value->pluck('id') : $value?->first()?->id;
@@ -561,6 +561,11 @@ class UsuarioController extends Controller
 
     public function getCoursesByUser(User $user)
     {
+        // Update flag to force update users courses
+
+        $user->required_update_at = now();
+        $user->save();
+
         // info('getCoursesByUser INICIO');
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
         // info('getCoursesByUser FIN');
@@ -912,7 +917,7 @@ class UsuarioController extends Controller
         $user->update($data);
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
-    } 
+    }
 
     public function getSignature(User $user, Request $request)
     {
