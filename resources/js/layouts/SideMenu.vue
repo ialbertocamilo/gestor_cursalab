@@ -290,7 +290,6 @@ export default {
                         path: "/escuelas",
                         subpaths: ["escuelas"],
                         selected: false,
-                        isBeta: true,
                         permission: "escuelas",
                         role: [
                             "super-user",
@@ -305,7 +304,6 @@ export default {
                         path: "/cursos",
                         subpaths: ["cursos"],
                         selected: false,
-                        isBeta: true,
                         permission: "cursos",
                         role: [
                             "super-user",
@@ -409,6 +407,7 @@ export default {
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],
                         selected: false,
+                        isBeta: true,
                         permission: "checklist",
                         role: [
                             "super-user",
