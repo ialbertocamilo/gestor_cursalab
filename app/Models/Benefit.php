@@ -253,6 +253,13 @@ class Benefit extends BaseModel
                 $query->orWhere('benefits.description', 'like', "%$filtro%");
             });
         }
+        if(request()->types){
+            $benefits_query->whereHas('type', fn($q) => $q->whereIn('code',request()->types));
+        }
+        if(request()->all_data){
+            $response['data'] = $benefits_query->get();
+            return $response;
+        }
         $benefits = $benefits_query->paginate(request('paginate', 15));
 
         $benefits_items = $benefits->items();
@@ -940,29 +947,8 @@ class Benefit extends BaseModel
         return ['data' => $response];
     }
 
-    protected function sendEmail( $type = null, $user = null, $benefit = null ) {
-
-        // $segments = Benefit::with(['segments'=> function ($q) {
-        //         $q
-        //             ->where('active', ACTIVE)
-        //             ->select('id', 'model_id')
-        //             ->with('values', function ($q) {
-        //                 $q
-        //                     ->with('criterion_value', function ($q) {
-        //                         $q
-        //                             ->where('active', ACTIVE)
-        //                             ->select('id', 'value_text', 'value_date', 'value_boolean')
-        //                             ->with('criterion', function ($q) {
-        //                                 $q->select('id', 'name', 'code');
-        //                             });
-        //                     })
-        //                     ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
-        //             });
-        //     }])->where('id', 11)->first();
-        // $course = new Course();
-        // $users_assigned = $course->usersSegmented($segments->segments, $type = 'users_id');
-        // dd($users_assigned);
-
+    protected function sendEmail( $type = null, $user = null, $benefit = null )
+    {
         if($type && $user && $benefit){
             $base_url = env('WEB_BASE_URL') ?? null;
             $email = $user?->email ?? null;
@@ -987,5 +973,22 @@ class Benefit extends BaseModel
             }
         }
     }
-
+    function syncUsersInBenefitsMeeting(array $users,$type='add'){
+        //$benefit->syncUsersInBenefitsMeeting(User $users);
+        $benefit = $this;
+        $benefit->loadMissing('silabo');
+        foreach ($benefit->silabo as $silabo) {
+            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')->where('model_id',$silabo->id)->first();
+            if($meeting){
+                switch ($type) {
+                    case 'add':
+                        Meeting::addAttendantFromUser($meeting,$users);
+                        break;
+                    case 'remove':
+                        Meeting::deleteAttendantFromUser($meeting,$users);
+                        break;
+                }
+            }
+        }
+    }
 }
