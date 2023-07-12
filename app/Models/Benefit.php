@@ -144,6 +144,8 @@ class Benefit extends BaseModel
         $data['group_id'] = !is_null($benefit_group) ? $benefit_group->id : null;
         $data['speaker_id'] = !is_null($speaker) ? $speaker->id : null;
 
+        $data['cupos'] = ( $data['cupos'] == 'ilimitado') ? null : $data['cupos'];
+
         try {
             $workspace = get_current_workspace();
             $data['workspace_id'] = $workspace?->id;
@@ -440,15 +442,27 @@ class Benefit extends BaseModel
 
                         $benefit = Benefit::where('id', $benefit_id)->first();
 
+                        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit->id)->count();
+
+                        if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                            $registrados = $users_subscribed_in_benefit;
+                            $benefit->cupos -= $registrados;
+                            $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                        }
+
                         $response['msg'] = [
                             'title' => 'Inscripción confirmada',
                             'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
                         ];
                         $response['data'] = [
                             'benefit_id' => $benefit_id,
-                            'user_status' => ['name' => 'Registrado', 'code' => 'subscribed'],
+                            'user_status' => ['name' => 'Retirarme', 'code' => 'subscribed'],
                             'subscribed' => true,
-                            'status' => ['name' => 'Registrado', 'code' => 'subscribed'],
+                            'status' => ['name' => 'Retirarme', 'code' => 'subscribed'],
+                            'cupos' => $benefit->cupos ?? null
                         ];
                     }
 
@@ -513,15 +527,27 @@ class Benefit extends BaseModel
 
             if($benefit) {
 
+                $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                    $q->where('code', 'subscribed');
+                                })
+                                ->where('benefit_id', $benefit->id)->count();
+
+                if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                    $registrados = $users_subscribed_in_benefit;
+                    $benefit->cupos -= $registrados;
+                    $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                }
+
                 $response['msg'] = [
                     'title' => 'Alerta de beneficio activada',
-                    'description' => ['Se notificará cuando este beneficio este disponible.']
+                    'description' => ['Se notificará en tu correo asignado cuando este beneficio se encuentre disponible.']
                 ];
                 $response['data'] = [
                     'benefit_id' => $benefit_id,
                     'user_status' => ['name' => 'Notificarme', 'code' => 'notify'],
                     'subscribed' => false,
                     'status' => ['name' => 'Notificarme', 'code' => 'notify'],
+                    'cupos' => $benefit->cupos ?? null
                 ];
             }
 
@@ -578,16 +604,31 @@ class Benefit extends BaseModel
 
                     $benefit = Benefit::where('id', $benefit_id)->first();
 
-                    $response['msg'] = [
-                        'title' => 'Te has retirado del beneficio',
-                        'description' => ['Ya no te encuentras registrado al beneficio: '. $benefit->title]
-                    ];
-                    $response['data'] = [
-                        'benefit_id' => $benefit_id,
-                        'user_status' => ['name' => 'Registrarme', 'code' => 'active'],
-                        'subscribed' => false,
-                        'status' => ['name' => 'Registrarme', 'code' => 'active']
-                    ];
+                    if($benefit){
+
+                        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit->id)->count();
+
+                        if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                            $registrados = $users_subscribed_in_benefit;
+                            $benefit->cupos -= $registrados;
+                            $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                        }
+
+                        $response['msg'] = [
+                            'title' => 'Te has retirado del beneficio',
+                            'description' => ['Ya no te encuentras registrado al beneficio: '. $benefit->title]
+                        ];
+                        $response['data'] = [
+                            'benefit_id' => $benefit_id,
+                            'user_status' => ['name' => 'Registrarme', 'code' => 'active'],
+                            'subscribed' => false,
+                            'status' => ['name' => 'Registrarme', 'code' => 'active'],
+                            'cupos' => $benefit->cupos ?? null
+                        ];
+                    }
 
                 DB::commit();
 
@@ -705,7 +746,7 @@ class Benefit extends BaseModel
             }
 
             if(in_array($item->id, $benefits_user_registered)) {
-                $item->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                $item->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
                 $item->subscribed = true;
                 if($item->status?->code == 'released') {
                     $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
@@ -720,6 +761,8 @@ class Benefit extends BaseModel
             else {
                 if($item->status?->code == 'active') {
                     $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                    if($item->cupos == 0)
+                        $item->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
                 }
                 else if($item->status?->code == 'locked') {
                     $item->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
@@ -836,7 +879,7 @@ class Benefit extends BaseModel
 
             if(in_array($benefit->id, $benefits_user_registered)) {
 
-                $benefit->user_status = ['name' => 'Registrado', 'code' => 'subscribed'];
+                $benefit->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
                 $benefit->subscribed = true;
                 if($benefit->status?->code == 'released') {
                     $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
@@ -853,6 +896,8 @@ class Benefit extends BaseModel
             else {
                 if($benefit->status?->code == 'active') {
                     $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                    if($benefit->cupos == 0)
+                        $benefit->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
                 }
                 else if($benefit->status?->code == 'locked') {
                     $benefit->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
