@@ -31,7 +31,7 @@
                         />
                         <v-img v-else contain width="276" height="200"
                                :src="bucketBaseUrl + '/' + fileSelected" -->
-                    <v-img contain width="276" height="200"
+                    <v-img contain width="100%" height="226"
                            :src="getMediaPreview"
                            v-if="TypeOf(fileSelected) !== 'undefined'"
                     />
