@@ -222,20 +222,25 @@ class UsuarioController extends Controller
 
     public function store(UserStoreRequest $request)
     {
-        $data = $request->validated();
-        // $data['subworkspace_id'] = get_current_workspace()?->id;
-        $usuario = Usuario::create($data);
+        try{
+            $data = $request->validated();
+            // $data['subworkspace_id'] = get_current_workspace()?->id;
+            $usuario = Usuario::create($data);
 
-        User::storeRequest($data);
-        /****************** Insertar/Actualizar en BD master ****************/
-        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
-            $dni_previo = '';
-            $email_previo = '';
-            $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario);
+            /****************** Insertar/Actualizar en BD master ****************/
+            if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
+                $dni_previo = '';
+                $email_previo = '';
+                $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario);
+            }
+            /********************************************************************/
+            User::storeRequest($data);
+
+            return $this->success(['msg' => 'Usuario creado correctamente.']);
+        } catch (\Exception $e){
+            return $this->error($e->getMessage());
         }
-        /********************************************************************/
 
-        return $this->success(['msg' => 'Usuario creado correctamente.']);
     }
 
     public function update(UserStoreRequest $request, User $user)
@@ -983,12 +988,7 @@ class UsuarioController extends Controller
             $usu_master->updated_at = null;
             $usu_master->deleted_at = null;
             $usu_master->save();
-        }else{
-
-            $usu_master = UsuarioMaster::where('dni', $usuario->dni)->first();
-
-            if (!$usu_master)
-            {
+        }   else    {
                 $usu_master = new UsuarioMaster;
                 $usu_master->dni = $usuario->document;
                 $usu_master->email = $usuario->email;
@@ -999,8 +999,6 @@ class UsuarioController extends Controller
                 if ($usuario->deleted_at)
                     $usu_master->deleted_at = $usuario->deleted_at;
                 $usu_master->save();
-            }
-
         }
     }
 }
