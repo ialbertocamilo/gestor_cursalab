@@ -78,9 +78,8 @@
                         <DefaultInput
                             clearable
                             v-model="resource.email"
-                            label="Correo electrónico*"
+                            label="Correo electrónico"
                             autocomplete="new-email"
-                            :rules="rules.email"
                         />
                     </v-col>
                     <v-col cols="4" class="d-flex justify-content-center">

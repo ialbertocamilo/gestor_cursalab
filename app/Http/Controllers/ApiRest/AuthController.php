@@ -35,11 +35,13 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            if(ENV('RECAPTCHA_ENABLED') == true){
+             if(ENV('RECAPTCHA_ENABLED') == true){
 
-                $responseRecaptcha = $this->checkRecaptchaData($data);
-                $responseRecaptcha = true;
-                if($responseRecaptcha !== true) return $responseRecaptcha;
+                $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+                if($availableRecaptcha) {
+                    $responseRecaptcha = $this->checkRecaptchaData($data);
+                    if($responseRecaptcha !== true) return $responseRecaptcha;
+                }
             }
 
             // === validacion de recaptcha ===
