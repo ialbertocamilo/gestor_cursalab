@@ -75,12 +75,12 @@
 
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
-                        <!-- :rules="rules.email" -->
                         <DefaultInput
                             clearable
                             v-model="resource.email"
-                            label="Correo electrónico"
+                            label="Correo electrónico*"
                             autocomplete="new-email"
+                            :rules="rules.email"
                         />
                     </v-col>
                     <v-col cols="4" class="d-flex justify-content-center">
@@ -258,7 +258,7 @@ export default {
                 surname: this.getRules(['required', 'max:100', 'text']),
                 document: this.getRules(['required', 'min:8']),
                 password: this.getRules(['required', 'min:8']),
-                // email: this.getRules(['required', 'min:8']),
+                email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
             },
             show_lbl_error_cri: false,
