@@ -120,7 +120,7 @@
                 </v-row>
 
                 <v-row>
-                    <v-col cols="12">
+                    <v-col cols="12" v-if="is_superuser">
                         <DefaultModalSection title="Notificaciones Push">
                                 <template v-slot:content>
                                     <v-row>
@@ -373,7 +373,7 @@ export default {
         /**
          * Load data from server
          */
-        loadData(workspace) {
+        async loadData(workspace) {
 
             // if (!workspace) return;
 
@@ -386,7 +386,7 @@ export default {
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
 
-            this.$http
+            await this.$http
                 .get(url)
                 .then(({data}) => {
                     // vue.hideLoader();
