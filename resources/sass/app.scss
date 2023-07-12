@@ -214,3 +214,20 @@ Override Vue Toastification plugin styles
 .dropzone .dz-preview .dz-details .dz-filename {
     white-space: normal !important;
 }
+
+.coming-soon {
+
+    // text-align: right;
+    // flex: auto;
+    margin-left: 15px;
+
+    small {
+        padding: 5px 10px;
+        border-radius: 8px;
+        background: #fff;
+        color: #5458ea;
+        // font-size: 13px;
+        font-style: normal;
+        font-weight: 400;
+    }
+}
