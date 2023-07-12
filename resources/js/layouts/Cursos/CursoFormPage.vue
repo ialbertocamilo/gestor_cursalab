@@ -222,7 +222,7 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Programación de curso *(Pronto)"
+                                title="Programación de curso *(Próximamente)"
                             >
                                 <template slot="content">
                                     <v-row justify="center">

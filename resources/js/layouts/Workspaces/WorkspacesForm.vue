@@ -94,7 +94,7 @@
                                         />
                                     </v-col>
                                     <v-col cols="6">
-                                        <small>*Elija el sistema de calificación con el que se tendrá por defecto en la creación de cursos.</small>
+                                        <small>*Elija el sistema de calificación que se tendrá por defecto en la creación de cursos.</small>
                                     </v-col>
                                 </v-row>
                             </template>
