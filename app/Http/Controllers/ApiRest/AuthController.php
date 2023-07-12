@@ -35,13 +35,15 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            // $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
-            $availableRecaptcha = true;
-            if($availableRecaptcha) {
-                // $responseRecaptcha = $this->checkRecaptchaData($data);
-                $responseRecaptcha = true;
-                if($responseRecaptcha !== true) return $responseRecaptcha;
+             if(ENV('RECAPTCHA_ENABLED') == true){
+
+                $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+                if($availableRecaptcha) {
+                    $responseRecaptcha = $this->checkRecaptchaData($data);
+                    if($responseRecaptcha !== true) return $responseRecaptcha;
+                }
             }
+
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
@@ -63,8 +65,8 @@ class AuthController extends Controller
                 // custom message
                 if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                     return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
-                } 
-                return $this->error('Intento fallido [L].', 400, $responseAttempts);
+                }
+                return $this->error('Intento fallido A.', 400, $responseAttempts);
             }
             // === validacion de intentos ===
 
@@ -155,7 +157,9 @@ class AuthController extends Controller
         catch (Exception $e) {
             info($e);
             Error::storeAndNotificateException($e, request());
-            return $this->error('Server error.', 500);
+            // return $this->error('Server error.', 500);
+            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+
         }
     }
 
@@ -243,7 +247,6 @@ class AuthController extends Controller
             'android' => $user->android,
             'ios' => $user->ios,
             'huawei' => $user->huawei,
-            'criterios' => $criterios,
             // 'can_be_host' => true,
             // 'carrera' => $carrera,
             // 'ciclo' => $ciclo
@@ -614,13 +617,13 @@ class AuthController extends Controller
         return $media;
     }
 
-    public function configuracion_ambiente() 
+    public function configuracion_ambiente()
     {
         $ambiente = Ambiente::first();
-        
+
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
-            
+
             // gestor
             $ambiente->fondo = $this->getMediaUrl($ambiente->fondo);
             $ambiente->logo  = $this->getMediaUrl($ambiente->logo);

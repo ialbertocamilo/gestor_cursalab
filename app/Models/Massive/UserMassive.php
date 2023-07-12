@@ -73,6 +73,8 @@ class UserMassive extends Massive implements ToCollection
 
     private function process_user($users, $headers, $criteria)
     {
+        $master = DB::connection('mysql_master');
+
         $count_users = count($users);
         $counter = 0;
         foreach ($users as $user) {
@@ -107,7 +109,21 @@ class UserMassive extends Massive implements ToCollection
             $data_user = $this->prepare_data_user($data_users, $data_criteria, $criteria);
             if (!$data_user['has_error']) {
                 $user = User::where('document', $data_user['user']['document'])->first();
+                $existingUser = $master
+                ->table('master_usuarios')
+                ->where('dni', $data_user['user']['document'])
+                ->orWhere('email', $data_user['user']['email'])
+                ->first();
 
+            if (!$existingUser) {
+                $master->table('master_usuarios')->insert([
+                    'dni' => $data_user['user']['document'],
+                    'username' => $data_user['user']['username'],
+                    'email' => $data_user['user']['email'],
+                    'customer_id' => ENV('CUSTOMER_ID'),
+                    'created_at' => now(),
+                ]);
+            }
 //                $current_workspace = get_current_workspace();
 //                if (
 //                    ($data_user['user']['active'] && ($user->active != $data_user['user']['active']))
@@ -154,7 +170,7 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
-                            
+
             if ($dt['code'] == 'active') {
                 if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
                     $has_error = true;
@@ -164,7 +180,7 @@ class UserMassive extends Massive implements ToCollection
                     ];
                     continue;
                 }
-                
+
                 $user[$dt['code']] = (strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
         }
@@ -200,6 +216,7 @@ class UserMassive extends Massive implements ToCollection
         }
         if (!$has_error) {
             $user['password'] = $user['document'];
+
         }
 
         $user['criterion_list'] = [];
@@ -262,7 +279,7 @@ class UserMassive extends Massive implements ToCollection
                 }
             }
         }
-        
+
         return compact('has_error', 'user', 'errors_index');
     }
     private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
@@ -276,7 +293,7 @@ class UserMassive extends Massive implements ToCollection
                     'message' => 'No se puede usar fórmulas de excel.'
                 ],
             ];
-        } 
+        }
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
         if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value?->id)->first())) {
             $has_error = true;
@@ -288,7 +305,7 @@ class UserMassive extends Massive implements ToCollection
                 ],
             ];
         }
-        
+
         if (!$criterion_value) {
             // $has_error = true;
             // $errors_index[] = $dc['index'];

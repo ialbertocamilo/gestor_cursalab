@@ -122,12 +122,23 @@
                     </v-row>
                     <v-row>
                         <v-col cols="4">
-                            <DefaultInput
-                                dense
-                                label="Cupo de participantes"
-                                placeholder="Indicar cupos"
-                                v-model="resource.cupos"
-                            />
+                            <div class="box_beneficio_duracion d-flex justify-content-center align-items-center">
+                                <div class="box_input_duracion mr-6">
+                                    <DefaultInput
+                                        dense
+                                        label="Cupo de participantes"
+                                        placeholder="Indicar cupos"
+                                        v-model="cupoValue"
+                                        @input="cupoIlimitado = null"
+                                        type="number"
+                                    />
+                                </div>
+                                <div class="box_button_duracion">
+                                    <v-radio-group v-model="cupoIlimitado">
+                                        <v-radio name="cupo" label="Ilimitado" :value="'ilimitado'" @change="cupoValue = null"></v-radio>
+                                    </v-radio-group>
+                                </div>
+                            </div>
                         </v-col>
                         <v-col cols="4">
                             <DefaultInputDate
@@ -779,6 +790,8 @@ export default {
             activeDificultad: null,
             duracionValue: null,
             duracionIlimitado: null,
+            cupoValue: null,
+            cupoIlimitado: null,
             modalDateFilter1: {
                 open: false,
             },
@@ -1101,6 +1114,13 @@ export default {
                 vue.resource.duracion = vue.duracionValue
             }
 
+            if( vue.cupoIlimitado == 'ilimitado' ) {
+                vue.resource.cupos = 'ilimitado'
+            }
+            else if( vue.cupoValue != null && vue.cupoValue != '' ) {
+                vue.resource.cupos = vue.cupoValue
+            }
+
             vue.resource.type = vue.selectType
             vue.resource.group = vue.selectGroup
 
@@ -1178,6 +1198,12 @@ export default {
 
                         this.selectType = (response.type != null) ? response.type.code : null
                         this.selectGroup = (response.group != null) ? response.group.code : null
+
+
+                        if(response.cupos == null)
+                            vue.cupoIlimitado = 'ilimitado'
+                        else
+                            vue.cupoValue = response.cupos
 
                         if(response.silabo != null && response.silabo.length > 0) {
                             vue.options_modules[1].active = true

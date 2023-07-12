@@ -222,7 +222,8 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Programación de curso *(Próximamente)"
+                                title="Programación de curso"
+                                :coming-soon="true"
                             >
                                 <template slot="content">
                                     <v-row justify="center">

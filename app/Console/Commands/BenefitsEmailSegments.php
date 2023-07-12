@@ -49,7 +49,7 @@ class BenefitsEmailSegments extends Command
             $users = $queue->users ? json_decode($queue->users) : null;
             if(is_array($users)) {
                 foreach($users as $user_id) {
-                    $user = User::where('id', $user_id)->first();
+                    $user = User::where('id', $user_id)->select('email')->first();
                     $benefit = Benefit::where('id', $queue->benefit_id)->first();
                     if($user && $benefit) {
                         Benefit::sendEmail('new', $user, $benefit);

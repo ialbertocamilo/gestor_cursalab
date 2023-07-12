@@ -213,6 +213,7 @@ export default {
                         subpaths: ["beneficios"],
                         selected: false,
                         permission: "beneficios",
+                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
@@ -225,6 +226,7 @@ export default {
                         subpaths: ["speakers"],
                         selected: false,
                         permission: "speakers",
+                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
@@ -326,7 +328,7 @@ export default {
                         path: "/escuelas",
                         subpaths: ["escuelas"],
                         selected: false,
-                        isBeta: true,
+                        isBeta: false,
                         permission: "escuelas",
                         role: [
                             "super-user",
@@ -341,7 +343,7 @@ export default {
                         path: "/cursos",
                         subpaths: ["cursos"],
                         selected: false,
-                        isBeta: true,
+                        isBeta: false,
                         permission: "cursos",
                         role: [
                             "super-user",
@@ -364,6 +366,7 @@ export default {
                 title: "DIPLOMAS",
                 icon: "fas fa-medal",
                 active: false,
+                isBeta: true,
                 functionality: ['default'],
                 items: [
                     {
@@ -372,6 +375,7 @@ export default {
                         path: "/diplomas",
                         subpaths: ["diplomas"],
                         selected: false,
+                        isBeta: true,
                         permission: "diplomas",
                         role: [
                             "super-user",
@@ -387,6 +391,7 @@ export default {
                         path: "/diploma/create",
                         subpaths: ["diploma/create"],
                         selected: false,
+                        isBeta: true,
                         permission: "diploma_create",
                         role: [
                             "super-user",
@@ -483,6 +488,7 @@ export default {
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],
                         selected: false,
+                        isBeta: true,
                         permission: "checklist",
                         role: [
                             "super-user",

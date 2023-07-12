@@ -459,6 +459,11 @@ export default {
                     const tempRule = (v) => (v && v >= max) || `El valor debe ser menor a ${max}`;
                     tempRules.push(tempRule);
                 }
+                if (labelRule.indexOf("email") > -1) {
+                const tempRule = (v) =>
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || "El formato de correo electrónico es inválido";
+                tempRules.push(tempRule);
+                }
             });
             return tempRules;
         },
