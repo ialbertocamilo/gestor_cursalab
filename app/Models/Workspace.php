@@ -23,6 +23,7 @@ class Workspace extends BaseModel
         'contact_support',
         'limit_allowed_users',
         'users_with_empty_criteria',
+        'qualification_type_id',
 
         'logo_marca_agua',
         'marca_agua_estado',

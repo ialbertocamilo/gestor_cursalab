@@ -287,7 +287,7 @@
 
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
-    'logo_marca_agua', 'marca_agua_estado', 'qualification_type_id',
+    'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
@@ -331,7 +331,7 @@ export default {
                 url_powerbi: '',
                 logo: '',
                 logo_negativo: '',
-                qualification_type_id: '',
+                qualification_type: '',
                 selected_criteria: {},
                 selected_functionality: {}
             },
@@ -466,9 +466,6 @@ export default {
                     // vue.hideLoader();
 
                     vue.selects.qualification_types = data.data.qualification_types
-
-                    console.log('vue.selects')
-                    console.log(vue.selects)
 
                     vue.is_superuser = data.data.is_superuser || false;
 

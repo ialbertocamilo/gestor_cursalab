@@ -32,6 +32,8 @@ class WorkspaceRequest extends FormRequest
             'notificaciones_push_envio_intervalo' => 'nullable',
             'notificaciones_push_chunk' => 'nullable',
             'selected_functionality' => 'nullable',
+
+            'qualification_type_id' => 'required',
         ];
     }
 
@@ -47,6 +49,8 @@ class WorkspaceRequest extends FormRequest
             $data['marca_agua_estado'] = ($this->marca_agua_estado == 'true' ||
                                           $this->marca_agua_estado == 1 ) ? true : false;
         }
+
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }
