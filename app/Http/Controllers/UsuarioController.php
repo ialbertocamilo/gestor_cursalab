@@ -225,38 +225,45 @@ class UsuarioController extends Controller
         try{
             $data = $request->validated();
             // $data['subworkspace_id'] = get_current_workspace()?->id;
-            $usuario = Usuario::create($data);
 
             /****************** Insertar/Actualizar en BD master ****************/
-            if (env('MULTIMARCA') && env('APP_ENV') == 'local') {
-                $dni_previo = '';
-                $email_previo = '';
-                $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario);
+            if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                $this->crear_o_actualizar_usuario_en_master(null, null, $data);
+
             }
             /********************************************************************/
+            $usuario = Usuario::create($data);
+
             User::storeRequest($data);
 
             return $this->success(['msg' => 'Usuario creado correctamente.']);
         } catch (\Exception $e){
-            return $this->error($e->getMessage());
+             return $this->master_errors($e);
         }
 
     }
 
     public function update(UserStoreRequest $request, User $user)
     {
-        $data = $request->validated();
-        // $data['subworkspace_id'] = get_current_workspace()?->id;
-        // info($data);
-        User::storeRequest($data, $user);
-        /****************** Insertar/Actualizar en BD master ****************/
-        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
-            $dni_previo = $user->dni;
-            $email_previo = $user->email;
-            $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $user);
+        try{
+             $data = $request->validated();
+            // $data['subworkspace_id'] = get_current_workspace()?->id;
+            // info($data);
+            /****************** Insertar/Actualizar en BD master ****************/
+            if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                $dni_previo = $user['document'];
+                $email_previo = $user['email'];
+                $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
+                info($data);
+            }
+            /********************************************************************/
+            User::storeRequest($data, $user);
+
+            return $this->success(['msg' => 'Usuario actualizado correctamente.']);
+        }  catch (\Exception $e){
+             return $this->master_errors($e);
         }
-        /********************************************************************/
-        return $this->success(['msg' => 'Usuario actualizado correctamente.']);
+
     }
 
     public function destroy(Usuario $usuario)
@@ -981,29 +988,95 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
     }
 
-        public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario){
-        $usu_master = UsuarioMaster::where('dni', $dni_previo)->first();
+    public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario){
+        $master_email_existe = null;
+        $usuario_master= null;
 
-        if ($usu_master) {
-            $usu_master->dni = $usuario->document;
-            $usu_master->email = $usuario->email;
-            $usu_master->username = $usuario->username;
-            $usu_master->customer_id = ENV('CUSTOMER_ID');
-            $usu_master->created_at = $usuario->created_at;
-            $usu_master->updated_at = null;
-            $usu_master->deleted_at = null;
-            $usu_master->save();
-        }   else    {
-                $usu_master = new UsuarioMaster;
-                $usu_master->dni = $usuario->document;
-                $usu_master->email = $usuario->email;
-                $usu_master->username = $usuario->username;
-                $usu_master->customer_id = ENV('CUSTOMER_ID');
-                $usu_master->created_at = $usuario->created_at;
-                $usu_master->updated_at = $usuario->updated_at;
-                if ($usuario->deleted_at)
-                    $usu_master->deleted_at = $usuario->deleted_at;
-                $usu_master->save();
+        if($dni_previo == $usuario['document'] && $email_previo == $usuario['email']) {
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+            $usuario_master->username = $usuario['username'];
+            $usuario_master->updated_at = now();
+            $usuario_master->save();
+            return;
         }
+        $master_dni_existe = UsuarioMaster::where('dni', $usuario['document'])->first();
+        if(isset($usuario['email'])){
+            $master_email_existe = UsuarioMaster::where('email', $usuario['email'])->first();
+        }
+        if(!is_null($dni_previo))
+        {
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+        } else {
+
+            if($master_dni_existe || $master_email_existe){
+                // Valida el documento
+                if($master_dni_existe && $master_dni_existe->dni == $usuario['document']){
+                    // Valida Documento y Correo Electronico
+                    if($master_email_existe && $master_email_existe->email == $usuario['email']){
+                        throw new \Exception('Este usuario no se puede registrar, porque el porque el documento(DNI) y el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',3);
+                    }
+                    // Mensaje de Error por Documento duplicado en Master
+                    throw new \Exception('Este usuario no se puede registrar, porque el documento(DNI) ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',1);
+                }
+                // Valida el Correo Electronico
+                if($master_email_existe && $master_email_existe->email == $usuario['email']){
+                    // Valida Correo Electronico y Documento
+                    if ($master_dni_existe &&$master_dni_existe->dni == $usuario['document']){
+                        throw new \Exception('Este usuario no se puede registrar, porque el porque el documento(DNI) y el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',3);
+                    }
+                    // Mensaje de Error por Correo Electronico duplicado en Master
+                    throw new \Exception('Este usuario no se puede registrar, porque el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',2);
+                }
+            }
+
+        }
+
+        if (!$usuario_master){
+            $master_dni_existe = new UsuarioMaster;
+            $master_dni_existe->dni = $usuario['document'];
+            $master_dni_existe->email = isset($usuario['email']) ? $usuario['email'] : null;
+            $master_dni_existe->username = $usuario['username'];
+            $master_dni_existe->customer_id = ENV('CUSTOMER_ID');
+            $master_dni_existe->created_at = now();
+            $master_dni_existe->save();
+
+        } else if($usuario_master && !$master_email_existe) {
+            $usuario_master->email = isset($usuario['email'] )? $usuario['email'] : null;
+            $usuario_master->username = $usuario['username'];
+            $usuario_master->updated_at = now();
+            $usuario_master->save();
+        } else if($usuario_master && !$master_dni_existe) {
+            $usuario_master->dni = $usuario['document'];
+            $usuario_master->username = $usuario['username'];
+            $usuario_master->updated_at = now();
+            $usuario_master->save();
+        }
+
+    }
+
+    public function master_errors($e){
+        $error = [
+            'message' => $e->getMessage(),
+            'errors' => []
+        ];
+
+        switch ($e->getCode()) {
+            case 1:
+                $error['errors']['document'] = [$e->getMessage()];
+
+                break;
+            case 2:
+                $error['errors']['email'] = [$e->getMessage()];
+
+                break;
+            case 3:
+                $error['message'] = ['El campo documento ya ha sido registrado. (and 1 more error)'];
+                $error['errors']['email'] = [$e->getMessage()];
+                break;
+            default:
+                break;
+        }
+
+        return response()->json( $error,422);
     }
 }
