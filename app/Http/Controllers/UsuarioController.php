@@ -989,8 +989,9 @@ class UsuarioController extends Controller
     }
 
     public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario){
+        $master_dni_existe = null;
         $master_email_existe = null;
-        $usuario_master= null;
+        $usuario_master = null;
 
         if($dni_previo == $usuario['document'] && $email_previo == $usuario['email']) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
@@ -999,46 +1000,45 @@ class UsuarioController extends Controller
             $usuario_master->save();
             return;
         }
+
+        // Busca datos del payload (inputs) en la BD master
         $master_dni_existe = UsuarioMaster::where('dni', $usuario['document'])->first();
         if(isset($usuario['email'])){
             $master_email_existe = UsuarioMaster::where('email', $usuario['email'])->first();
         }
-        if(!is_null($dni_previo))
-        {
+        
+        // Busca usuario en BD Master con su dni registrado previamente 
+        if(!is_null($dni_previo)){
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-        } else {
+        }
 
-            if($master_dni_existe || $master_email_existe){
-                // Valida el documento
-                if($master_dni_existe && $master_dni_existe->dni == $usuario['document']){
-                    // Valida Documento y Correo Electronico
-                    if($master_email_existe && $master_email_existe->email == $usuario['email']){
-                        throw new \Exception('Este usuario no se puede registrar, porque el porque el documento(DNI) y el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',3);
-                    }
-                    // Mensaje de Error por Documento duplicado en Master
-                    throw new \Exception('Este usuario no se puede registrar, porque el documento(DNI) ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',1);
-                }
-                // Valida el Correo Electronico
-                if($master_email_existe && $master_email_existe->email == $usuario['email']){
-                    // Valida Correo Electronico y Documento
-                    if ($master_dni_existe &&$master_dni_existe->dni == $usuario['document']){
-                        throw new \Exception('Este usuario no se puede registrar, porque el porque el documento(DNI) y el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',3);
-                    }
-                    // Mensaje de Error por Correo Electronico duplicado en Master
-                    throw new \Exception('Este usuario no se puede registrar, porque el correo electrónico ya fue registrado. Si necesitas ayuda, contacta con el equipo de soporte.',2);
-                }
+        // Valida si existe datos en BD Master
+        if($master_dni_existe && $master_dni_existe->dni != $dni_previo){
+            // Valida Documento y Correo Electronico
+            if($master_email_existe && $master_email_existe->email != $email_previo){
+                throw new \Exception('No se puede registrar a este usuario porque el porque el documento (DNI) y el Email ya fueron utilizados. Si necesitas ayuda, contacta con el equipo de soporte.',3);
             }
-
+            // Mensaje de Error por Documento duplicado en Master
+            throw new \Exception('No se puede registrar a este usuario porque el documento (DNI) ya fue utilizado. Si necesitas ayuda, contacta con el equipo de soporte.',1);
+        }
+        // Valida el Correo Electronico
+        if($master_email_existe && $master_email_existe->email != $email_previo){
+            // Valida Correo Electronico y Documento
+            if ($master_dni_existe && $master_dni_existe->dni != $dni_previo){
+                throw new \Exception('No se puede registrar a este usuario porque el porque el documento (DNI) y el Email ya fueron utilizados. Si necesitas ayuda, contacta con el equipo de soporte.',3);
+            }
+            // Mensaje de Error por Correo Electronico duplicado en Master
+            throw new \Exception('No se puede registrar a este usuario porque el Email ya fue utilizado. Si necesitas ayuda, contacta con el equipo de soporte.',2);
         }
 
         if (!$usuario_master){
-            $master_dni_existe = new UsuarioMaster;
-            $master_dni_existe->dni = $usuario['document'];
-            $master_dni_existe->email = isset($usuario['email']) ? $usuario['email'] : null;
-            $master_dni_existe->username = $usuario['username'];
-            $master_dni_existe->customer_id = ENV('CUSTOMER_ID');
-            $master_dni_existe->created_at = now();
-            $master_dni_existe->save();
+            $new_usuario_master = new UsuarioMaster;
+            $new_usuario_master->dni = $usuario['document'];
+            $new_usuario_master->email = isset($usuario['email']) ? $usuario['email'] : null;
+            $new_usuario_master->username = $usuario['username'];
+            $new_usuario_master->customer_id = ENV('CUSTOMER_ID');
+            $new_usuario_master->created_at = now();
+            $new_usuario_master->save();
 
         } else if($usuario_master && !$master_email_existe) {
             $usuario_master->email = isset($usuario['email'] )? $usuario['email'] : null;
