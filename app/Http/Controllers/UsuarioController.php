@@ -994,22 +994,18 @@ class UsuarioController extends Controller
         $usuario_master = null;
 
         if($dni_previo == $usuario['document'] && $email_previo == $usuario['email']) {
-            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-            $usuario_master->username = $usuario['username'];
-            $usuario_master->updated_at = now();
-            $usuario_master->save();
             return;
         }
 
         // Busca datos del payload (inputs) en la BD master
-        $master_dni_existe = UsuarioMaster::where('dni', $usuario['document'])->first();
+        $master_dni_existe = UsuarioMaster::select('dni')->where('dni', $usuario['document'])->first();
         if(isset($usuario['email'])){
-            $master_email_existe = UsuarioMaster::where('email', $usuario['email'])->first();
+            $master_email_existe = UsuarioMaster::select('email')->where('email', $usuario['email'])->first();
         }
         
         // Busca usuario en BD Master con su dni registrado previamente 
         if(!is_null($dni_previo)){
-            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+            $usuario_master = UsuarioMaster::select('dni', 'email')->where('dni', $dni_previo)->first();
         }
 
         // Valida si existe datos en BD Master
@@ -1040,13 +1036,13 @@ class UsuarioController extends Controller
             $new_usuario_master->created_at = now();
             $new_usuario_master->save();
 
-        } else if($usuario_master && !$master_email_existe) {
-            $usuario_master->email = isset($usuario['email'] )? $usuario['email'] : null;
-            $usuario_master->username = $usuario['username'];
-            $usuario_master->updated_at = now();
-            $usuario_master->save();
-        } else if($usuario_master && !$master_dni_existe) {
-            $usuario_master->dni = $usuario['document'];
+        } else {
+            if ( !$master_email_existe && isset($usuario['email']) ){
+                $usuario_master->email = $usuario['email'];
+            }
+            if ( !$master_dni_existe ){
+                $usuario_master->dni = $usuario['document'];
+            }
             $usuario_master->username = $usuario['username'];
             $usuario_master->updated_at = now();
             $usuario_master->save();
