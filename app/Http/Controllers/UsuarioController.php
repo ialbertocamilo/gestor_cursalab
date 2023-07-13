@@ -252,7 +252,7 @@ class UsuarioController extends Controller
                 $dni_previo = $user['document'];
                 $email_previo = $user['email'];
                 $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
-                // info($data);
+                info($user);
             }
             /********************************************************************/
             User::storeRequest($data, $user);
@@ -987,23 +987,25 @@ class UsuarioController extends Controller
         return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
     }
 
-    public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario){
+    public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario_input){
         $master_dni_existe = null;
         $master_email_existe = null;
         $usuario_master = null;
+        $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
 
-        if($dni_previo == $usuario['document'] && $email_previo == $usuario['email']) {
+        // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones 
+        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email']) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-            $usuario_master->username = $usuario['username'];
+            $usuario_master->username = $usuario_input['username'];
             $usuario_master->updated_at = now();
             $usuario_master->save();
             return;
         }
 
         // Busca datos del payload (inputs) en la BD master
-        $master_dni_existe = UsuarioMaster::select('dni')->where('dni', $usuario['document'])->first();
-        if(isset($usuario['email'])){
-            $master_email_existe = UsuarioMaster::select('email')->where('email', $usuario['email'])->first();
+        $master_dni_existe = UsuarioMaster::select('dni')->where('dni', $usuario_input['document'])->first();
+        if(isset($usuario_input['email'])){
+            $master_email_existe = UsuarioMaster::select('email')->where('email', $usuario_input['email'])->first();
         }
 
         // Busca usuario en BD Master con su dni registrado previamente
@@ -1032,9 +1034,9 @@ class UsuarioController extends Controller
 
         if (!$usuario_master){
             $new_usuario_master = new UsuarioMaster;
-            $new_usuario_master->dni = $usuario['document'];
-            $new_usuario_master->email = isset($usuario['email']) ? $usuario['email'] : null;
-            $new_usuario_master->username = $usuario['username'];
+            $new_usuario_master->dni = $usuario_input['document'];
+            $new_usuario_master->email = isset($usuario_input['email']) ? $usuario_input['email'] : null;
+            $new_usuario_master->username = $usuario_input['username'];
             $new_usuario_master->customer_id = ENV('CUSTOMER_ID');
             $new_usuario_master->created_at = now();
             $new_usuario_master->save();
@@ -1042,13 +1044,13 @@ class UsuarioController extends Controller
         }
         if($usuario_master){
 
-            if ( !$master_email_existe && isset($usuario['email']) ){
-                $usuario_master->email = $usuario['email'];
+            if ( !$master_email_existe && isset($usuario_input['email']) ){
+                $usuario_master->email = $usuario_input['email'];
             }
             if ( !$master_dni_existe ){
-                $usuario_master->dni = $usuario['document'];
+                $usuario_master->dni = $usuario_input['document'];
             }
-            $usuario_master->username = $usuario['username'];
+            $usuario_master->username = $usuario_input['username'];
             $usuario_master->updated_at = now();
             $usuario_master->save();
         }
