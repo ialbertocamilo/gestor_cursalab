@@ -978,8 +978,9 @@ class UsuarioController extends Controller
         $expires = $query['expires'] ?? null;
 
         $web_url = config('app.web_url');
+        $api_url = config('app.url').'api';
 
-        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}";
+        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}&api_url={$api_url}";
 
         Accountant::record($user, 'impersonated');
 
