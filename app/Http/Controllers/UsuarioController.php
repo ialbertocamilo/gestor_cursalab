@@ -232,8 +232,6 @@ class UsuarioController extends Controller
 
             }
             /********************************************************************/
-            $usuario = Usuario::create($data);
-
             User::storeRequest($data);
 
             return $this->success(['msg' => 'Usuario creado correctamente.']);
