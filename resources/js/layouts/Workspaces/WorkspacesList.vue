@@ -2,41 +2,18 @@
     <div class="wrapper">
 
         <!--
-            Logo
-        ======================================== -->
-
-        <v-row class="justify-content-center pt-3 pb-3">
-            <div class="col-4">
-                <img src="/img/we-connect-logo.png"
-                     class="logo"
-                     alt="We connect">
-            </div>
-            <div class="col-6">
-                <div v-html="headerTemplate"></div>
-                <!--
-                <div v-if="userSession.user"
-                    class="user-button-wrapper">
-                    <button class="mr-3">
-                        <v-icon class="icon">mdi-account</v-icon>
-                        {{ userSession.user.fullname }}
-                    </button>
-
-                    <a @click="logout()">
-                        <v-icon class="stats-icon">mdi-logout</v-icon>
-                    </a>
-                </div>
-                -->
-            </div>
-        </v-row>
-
-        <!--
             Main title
         ======================================== -->
 
         <v-row class="justify-content-center">
             <div class="col-10">
                 <v-row>
-                    <div class="col d-flex justify-content-center flex-column">
+                    <div class="col-2">
+                        <img src="/img/we-connect-logo.png"
+                            class="logo"
+                            alt="We connect">
+                    </div>
+                    <div class="col-sm-2 col-lg-3 d-flex justify-content-center flex-column ">
                         <h1>
                             Bienvenido(a) a WeConnect 2.0
                         </h1>
@@ -44,45 +21,49 @@
                             Ingresa a un workspace para administrar  su contenido
                         </h3>
                     </div>
-
-                    <div :class="`${canAccessConfiguration ? 'col-6' : 'col-4' } d-flex ${ !showDetail ? 'justify-space-between' : 'justify-content-end'} align-items-center` ">
+                    <div class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
                         <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
-                            <span class="mdi mdi-cloud-outline fa-4x mr-3"></span>
+                            <span class="mdi mdi-cloud-outline fa-3x mr-3"></span>
                             <div class="d-flex flex-column">
                                 <p class="font-weight-bold mb-0">Total utilizado</p>
                                 <span class="fa-2x" v-text="workspaces_total.workspaces_total_storage"></span>
-                                
+
                                 <a href class="ml-1" @click.prevent="showDetail = true">
-                                    Ver detalle <span class="ml-2 fas fa-arrow-right"></span> 
+                                    Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
                                 </a>
                             </div>
                         </div>
 
                         <div :class="`${ showDetail && 'd-none' } bg-secondary h-100`" style="width: 1px;"></div>
-                        
+
                         <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
-                            <span class="mdi mdi-account-multiple-outline fa-4x mr-3"></span>
+                            <span class="mdi mdi-account-multiple-outline fa-3x mr-3"></span>
                             <div class="d-flex flex-column">
                                 <p class="font-weight-bold mb-0">Total usuarios activos</p>
-                                <span class="fa-2x" v-text="workspaces_total.workspaces_total_users"></span>
+                                <span class="fa-2x" v-text="workspaces_total.workspaces_total_users.toLocaleString()"></span>
 
                                 <a href class="ml-1" @click.prevent="showDetail = true">
-                                    Ver detalle <span class="ml-2 fas fa-arrow-right"></span> 
+                                    Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
                                 </a>
                             </div>
                         </div>
 
-                        <div class="d-flex" style="column-gap:1.5rem;" v-if="canAccessConfiguration">
+                        <div class="d-flex flex-column" 
+                            style="gap:1rem;" 
+                            v-if="false">
                             <v-btn color="primary" @click="openLink('/auditoria')">
                                 <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
-                                Auditoria                   
+                                Auditoria
                             </v-btn>
 
-                            <v-btn color="primary" @click="storeWorkspace">
+                            <v-btn color="primary">
                                 <span class="mdi mdi-plus fa-lg mr-2"></span>
-                                Workspace                   
+                                Workspace
                             </v-btn>
                         </div>
+                    </div>
+                    <div class="col-2">
+                        <div v-html="headerTemplate"></div>
                     </div>
                 </v-row>
             </div>
