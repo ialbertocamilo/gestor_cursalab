@@ -254,7 +254,7 @@ class UsuarioController extends Controller
                 $dni_previo = $user['document'];
                 $email_previo = $user['email'];
                 $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
-                info($data);
+                // info($data);
             }
             /********************************************************************/
             User::storeRequest($data, $user);
@@ -1005,7 +1005,7 @@ class UsuarioController extends Controller
         
         // Busca usuario en BD Master con su dni registrado previamente 
         if(!is_null($dni_previo)){
-            $usuario_master = UsuarioMaster::select('dni', 'email')->where('dni', $dni_previo)->first();
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
         }
 
         // Valida si existe datos en BD Master
@@ -1038,6 +1038,7 @@ class UsuarioController extends Controller
 
         } 
         if($usuario_master){
+            
             if ( !$master_email_existe && isset($usuario['email']) ){
                 $usuario_master->email = $usuario['email'];
             }
@@ -1047,6 +1048,7 @@ class UsuarioController extends Controller
             $usuario_master->username = $usuario['username'];
             $usuario_master->updated_at = now();
             $usuario_master->save();
+            info($usuario_master);
         }
 
     }
