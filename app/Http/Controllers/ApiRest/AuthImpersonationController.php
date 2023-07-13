@@ -64,7 +64,7 @@ class AuthImpersonationController extends Controller
 
             $responseUserData = $this->respondWithDataAndToken($user);
 
-            return response()->json($responseUserData); 
+            return response()->json($responseUserData);
 
         } catch (\Exception $e) {
 
@@ -153,8 +153,14 @@ class AuthImpersonationController extends Controller
         $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
         $config_data->filters = config('data.filters');
+        $api_url = config('app.url');
 
         return [
+            'url_workspace'=>[
+                'api_url'=> $api_url .'api',
+                'gestor_url'=> $api_url,
+                'reportes_url'=> $report_url
+            ],
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
             'config_data' => $config_data,
@@ -202,7 +208,7 @@ class AuthImpersonationController extends Controller
                     'show_title' => 'Accediste como ' . $user->fullname,
                     'user' => $gestor->fullname,
                 ];
-                
+
                 return response()->json($data);
             }
 
