@@ -994,6 +994,10 @@ class UsuarioController extends Controller
         $usuario_master = null;
 
         if($dni_previo == $usuario['document'] && $email_previo == $usuario['email']) {
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+            $usuario_master->username = $usuario['username'];
+            $usuario_master->updated_at = now();
+            $usuario_master->save();
             return;
         }
 
@@ -1048,7 +1052,6 @@ class UsuarioController extends Controller
             $usuario_master->username = $usuario['username'];
             $usuario_master->updated_at = now();
             $usuario_master->save();
-            info($usuario_master);
         }
 
     }
