@@ -1036,7 +1036,8 @@ class UsuarioController extends Controller
             $new_usuario_master->created_at = now();
             $new_usuario_master->save();
 
-        } else {
+        } 
+        if($usuario_master){
             if ( !$master_email_existe && isset($usuario['email']) ){
                 $usuario_master->email = $usuario['email'];
             }
