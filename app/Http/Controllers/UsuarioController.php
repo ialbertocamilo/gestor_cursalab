@@ -978,7 +978,7 @@ class UsuarioController extends Controller
         $expires = $query['expires'] ?? null;
 
         $web_url = config('app.web_url');
-        $api_url = config('app.url').'/api';
+        $api_url = config('app.url');
 
         $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}&api_url={$api_url}";
 
