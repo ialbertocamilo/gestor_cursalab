@@ -50,10 +50,10 @@ class AuthController extends Controller
             $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
-            $credentials1 = $credentials2 = ['password' => $password];
-            // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $password];
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
+            $credentials3['email'] = trim($userinput);
 
             $userInstance = new User;
 
