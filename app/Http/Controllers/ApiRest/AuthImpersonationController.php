@@ -159,7 +159,7 @@ class AuthImpersonationController extends Controller
             'url_workspace'=>[
                 'api_url'=> $api_url .'/api',
                 'gestor_url'=> $api_url,
-                'app_url'=> ENV('APP_URL'),
+                'app_url'=> ENV('url_app'),
                 'reportes_url'=>env('REPORTES_URL')
             ],
             'access_token' => $token,
