@@ -978,7 +978,7 @@ class UsuarioController extends Controller
         $expires = $query['expires'] ?? null;
 
         $web_url = config('app.web_url');
-        $api_url = config('app.url').'api';
+        $api_url = config('app.url').'/api';
 
         $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}&api_url={$api_url}";
 
@@ -1007,8 +1007,8 @@ class UsuarioController extends Controller
         if(isset($usuario['email'])){
             $master_email_existe = UsuarioMaster::select('email')->where('email', $usuario['email'])->first();
         }
-        
-        // Busca usuario en BD Master con su dni registrado previamente 
+
+        // Busca usuario en BD Master con su dni registrado previamente
         if(!is_null($dni_previo)){
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
         }
@@ -1041,9 +1041,9 @@ class UsuarioController extends Controller
             $new_usuario_master->created_at = now();
             $new_usuario_master->save();
 
-        } 
+        }
         if($usuario_master){
-            
+
             if ( !$master_email_existe && isset($usuario['email']) ){
                 $usuario_master->email = $usuario['email'];
             }

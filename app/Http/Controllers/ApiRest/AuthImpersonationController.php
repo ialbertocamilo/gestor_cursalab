@@ -154,12 +154,10 @@ class AuthImpersonationController extends Controller
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
         $config_data->filters = config('data.filters');
         $api_url = config('app.url');
-
         return [
             'url_workspace'=>[
-                'api_url'=> $api_url .'api',
+                'api_url'=> $api_url .'/api',
                 'gestor_url'=> $api_url,
-                'reportes_url'=> $report_url
             ],
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
