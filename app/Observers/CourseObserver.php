@@ -26,7 +26,7 @@ class CourseObserver
      */
     public function updated(Course $course)
     {
-        if ( $course->wasChanged('active') ) {
+        if ( $course->wasChanged('active') ||  $course->wasChanged('type_id')) {
             Summary::updateUsersByCourse($course,null,false);
             // $action = $course->active ? 'actived' : 'inactived';
 
