@@ -25,11 +25,11 @@ class UsuarioMaster extends Model
             if (is_null($user)) {
                 $user = new UsuarioMaster();
                 $user->fill($data);
-                info('create_master', [$user]);
+                // info('create_master', [$user]);
 
             }else {
                 $user->update($data);
-                info('update_master', [$user]);
+                // info('update_master', [$user]);
 
             }
             $user->save();

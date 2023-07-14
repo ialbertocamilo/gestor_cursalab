@@ -110,10 +110,6 @@ class UserMassive extends Massive implements ToCollection
             if (!$data_user['has_error']) {
                 $user = User::where('document', $data_user['user']['document'])->first();
                 $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
-                info('user_data', [$data_user]);
-                info('master_user', [$master_user]);
-                info('user', [$user]);
-                // return;
                 $master_user_arr = [
                         'dni' => $data_user['user']['document'],
                         'username' => $data_user['user']['username'],
@@ -133,7 +129,7 @@ class UserMassive extends Massive implements ToCollection
 
                 //Insert user and criteria
                 UsuarioMaster::storeRequest($master_user_arr, $master_user);
-                // User::storeRequest($data_user['user'], $user, false, true);
+                User::storeRequest($data_user['user'], $user, false, true);
                 $this->processed_users++;
             } else {
                 //set errors
@@ -194,6 +190,17 @@ class UserMassive extends Massive implements ToCollection
                 isset($user['email']) && $q->orWhere('email', $user['email']);
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
 
+
+
+            $master_username_email = UsuarioMaster::where(function ($q) use ($user) {
+                if (isset($user['username'])) {
+                    $q->orWhere('username', $user['username']);
+                }
+                if (isset($user['email'])) {
+                    $q->orWhere('email', $user['email']);
+                }
+            })->where('dni', '<>', $user['document'])->select('email', 'username')->first();
+
         } else {
             $has_error = true;
             $errors_index[] = [
@@ -202,14 +209,23 @@ class UserMassive extends Massive implements ToCollection
             ];
         }
         if ($user_username_email || $master_username_email) {
-            if (isset($user['username']) && $user['username'] != '' && !is_null($user_username_email->username) && strtolower($user_username_email->username) == strtolower($user['username'])                ) {
+            if (isset($user['username']) && $user['username'] != '' &&
+                !is_null($user_username_email->username) &&
+                strtolower($user_username_email->username) == strtolower($user['username']) ||
+                isset($user['username']) && $user['username'] != '' && !is_null($master_username_email->username)
+                && strtolower($master_username_email->username) == strtolower($user['username'])) {
+
                 $has_error = true;
                 $errors_index[] = [
                     'index' => $username_index,
                     'message' => ($this->messageInSpanish) ? 'Este username es usado por otro usuario.' : 'The field username must be unique.'
                 ];
             }
-            if ($user['email'] != '' && !is_null($user_username_email->email) && strtolower($user_username_email->email) == strtolower($user['email'])) {
+            if ($user['email'] != '' && !is_null($user_username_email->email)
+                && strtolower($user_username_email->email) == strtolower($user['email'])
+                || $user['email'] != '' && !is_null($master_username_email)
+                && strtolower($master_username_email->email) == strtolower($user['email'])) {
+
                 $has_error = true;
                 $errors_index[] = [
                     'index' => $email_index,
