@@ -22,13 +22,16 @@ class UsuarioMaster extends Model
         try {
 
             DB::beginTransaction();
-            if ($user == null) {
+            if (is_null($user)) {
                 $user = new UsuarioMaster();
-                $user->create($data);
+                $user->fill($data);
+                info('create_master', [$user]);
+
             }else {
                 $user->update($data);
+                info('update_master', [$user]);
+
             }
-            info($user);
             $user->save();
 
             DB::commit();

@@ -110,6 +110,10 @@ class UserMassive extends Massive implements ToCollection
             if (!$data_user['has_error']) {
                 $user = User::where('document', $data_user['user']['document'])->first();
                 $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
+                info('user_data', [$data_user]);
+                info('master_user', [$master_user]);
+                info('user', [$user]);
+                // return;
                 $master_user_arr = [
                         'dni' => $data_user['user']['document'],
                         'username' => $data_user['user']['username'],
@@ -128,8 +132,8 @@ class UserMassive extends Massive implements ToCollection
                 //                endif;
 
                 //Insert user and criteria
-                User::storeRequest($data_user['user'], $user, false, true);
                 UsuarioMaster::storeRequest($master_user_arr, $master_user);
+                // User::storeRequest($data_user['user'], $user, false, true);
                 $this->processed_users++;
             } else {
                 //set errors
@@ -141,6 +145,8 @@ class UserMassive extends Massive implements ToCollection
 
         }
         cache_clear_model(User::class);
+        cache_clear_model(UsuarioMaster::class);
+
         cache_clear_model(CriterionValue::class);
     }
 
