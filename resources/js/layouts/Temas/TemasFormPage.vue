@@ -325,7 +325,7 @@ export default {
             },
             selects: {
                 assessable: [
-                    {id: 1, nombre: 'Sí, el temas es evaluable'},
+                    {id: 1, nombre: 'Sí, el tema es evaluable'},
                     {id: 0, nombre: 'No, el tema no es evaluable'},
                 ],
                 evaluation_types: [],
