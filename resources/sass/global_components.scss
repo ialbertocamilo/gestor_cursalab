@@ -574,6 +574,31 @@ fieldset.editor {
     }
 }
 
+.multimedia-table-icon {
+    // width: 60px;
+    // height: 59px;
+    // background: #EBEEF0;
+    border-radius: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: $primary-default-color;
+    cursor: pointer;
+
+    i {
+        font-size: 2.25rem !important;
+    }
+
+    // .multimedia-box-span {
+    //     font-style: normal;
+    //     font-weight: normal;
+    //     font-size: 0.75rem;
+    //     line-height: 21px;
+    //     letter-spacing: 0.01em;
+    // }
+}
+
 .reporte-filtro-checkbox {
     .v-input--checkbox .v-input--selection-controls__input {
         top: -3px;

@@ -490,13 +490,13 @@ export default {
 // .tableMeeting button.v-icon.v-icon--disabled {
 //     color: #94DDDB !important;
 // }
-.v-tooltip__content {
-    background-color: #fff;
-    color: #5757EA;
-    border: 1px solid #5757EA;
-    border-radius: 10px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-}
+// .v-tooltip__content {
+//     background-color: #fff;
+//     color: #5757EA;
+//     border: 1px solid #5757EA;
+//     border-radius: 10px;
+//     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+// }
 button.btn_anf.primary {
     background-color: #fff !important;
     color: #5458ea !important;

@@ -49,6 +49,7 @@
                                     v-model="resource.name"
                                     label="Nombre del workspace"
                                     :rules="rules.name"
+                                    dense
                                 />
                             </v-col>
                             <v-col cols="6">
@@ -56,6 +57,7 @@
                                     clearable
                                     v-model="resource.url_powerbi"
                                     label="Link de learning analytics (PowerBI)"
+                                    dense
                                 />
                             </v-col>
                         </v-row>
@@ -91,10 +93,14 @@
                                             v-model="resource.qualification_type"
                                             label="Sistema de calificación"
                                             :rules="rules.qualification_type_id"
+                                            dense
                                         />
                                     </v-col>
-                                    <v-col cols="6">
-                                        <small>*Elija el sistema de calificación que se tendrá por defecto en la creación de cursos.</small>
+                                    <v-col cols="6" class="d-flex">
+                                        <DefaultInfoTooltip
+                                            class=""
+                                            top
+                                            text="Elija el sistema de calificación que se tendrá por defecto en la creación de cursos." />
                                     </v-col>
                                 </v-row>
                             </template>
@@ -113,14 +119,12 @@
                                         />
                                     </v-col>
                                     <v-col cols="6" class="d-flex">
-                                        <span class="mt-4 mr-2">¿Activar marca de agua en diploma?</span>
-                                        <div>
-                                            <DefaultToggle
-                                                class="mt-0"
-                                                v-model="resource.marca_agua_estado"
-                                                no-label
-                                                />
-                                        </div>
+                                        <DefaultToggle
+                                            class="mt-5"
+                                            v-model="resource.marca_agua_estado"
+                                            active-label="Mostrar marca de agua en diploma"
+                                            inactive-label="No mostrar marca de agua en diploma"
+                                            />
                                     </v-col>
                                 </v-row>
                             </template>
@@ -155,7 +159,7 @@
                         <v-container
                                 id="scroll-target"
                                 class="overflow-y-auto py-0 px-1"
-                                style="min-height: 380px; max-height: 400px"
+                                style="min-height: 360px; max-height: 400px"
                             >
                                    
                             <v-row class="mr-1">
@@ -212,6 +216,7 @@
                                             type="number"
                                             min="0"
                                             clearable
+                                            dense
                                         />
                                     </v-col>
                                     <v-col cols="8">
@@ -253,12 +258,14 @@
                                             class="mb-4"
                                             label="Empezar envío luego de: (en minutos)"
                                             type="number"
+                                            dense
                                             v-model="resource.notificaciones_push_envio_inicio" />
                                     </v-col>
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Número de usuarios por envío"
                                             type="number"
+                                            dense
                                             v-model="resource.notificaciones_push_envio_intervalo"
                                         />
                                     </v-col>
@@ -266,6 +273,7 @@
                                         <DefaultInput
                                             label="Frecuencia de envío por bloques (en minutos)"
                                             type="number"
+                                            dense
                                             v-model="resource.notificaciones_push_chunk"
                                             />
                                     </v-col>
@@ -293,7 +301,7 @@ const fields = [
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
     'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
-    'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos workspaces.',
+    'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos los workspaces.',
     'Los "criterios personalizados" son datos que se utilizan de forma opcional por cada workspace.',
     'Al habilitar un "criterio personalizado", es necesario actualizar la data de los usuarios mediante APIs o subida masiva. De esa forma se podrá utilizar el criterio en las segmentaciones.',
     'Los criterios que se activen, estarán disponibles en todas las secciones donde se realice "segmentación" dentro del workspace.',

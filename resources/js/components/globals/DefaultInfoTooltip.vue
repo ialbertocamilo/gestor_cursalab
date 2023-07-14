@@ -35,7 +35,8 @@ export default {
         small: {
             type: Boolean,
             default: false
-        },top: {
+        },
+        top: {
             type: Boolean,
             default: false
         },
@@ -50,6 +51,10 @@ export default {
         right: {
             type: Boolean,
             default: false
+        },
+        size: {
+            type: String,
+            default: ''
         },
     }
 }

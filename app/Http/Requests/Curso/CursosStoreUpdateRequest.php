@@ -30,6 +30,7 @@ class CursosStoreUpdateRequest extends FormRequest
             'active' => 'required',
             'show_certification_date' => 'required',
             'requisito_id' => 'nullable',
+            'qualification_type_id' => 'nullable',
 
             'reinicios_programado' => 'nullable',
             'mod_evaluaciones' => 'required',
@@ -58,6 +59,7 @@ class CursosStoreUpdateRequest extends FormRequest
         $data['validateForm'] = !!$this->validateForm;
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
         $data['mod_evaluaciones'] = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }

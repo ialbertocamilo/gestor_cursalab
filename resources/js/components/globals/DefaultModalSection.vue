@@ -13,7 +13,7 @@
                 color="white"
             />
         </v-card-title>
-        <v-card-text class="default-section-content py-5 px-5">
+        <v-card-text class="default-section-content py-3 px-5">
             <slot name="content"/>
         </v-card-text>
     </v-card>

@@ -8,7 +8,7 @@ class Topic extends BaseModel
 {
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen',
-        'position', 'visits_count', 'assessable', 'evaluation_verified',
+        'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
         'active', 'active_results', 'position'
     ];
@@ -75,6 +75,11 @@ class Topic extends BaseModel
     public function summaries()
     {
         return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function qualification_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
     public function countQuestionsByTypeEvaluation($code)

@@ -9,7 +9,7 @@ class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
-        'assessable', 'freely_eligible', 'type_id',
+        'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date'
@@ -101,6 +101,11 @@ class Course extends BaseModel
         // info($this->compatibilities_b);
 
         return $this->compatibilities_a->merge($this->compatibilities_b);
+    }
+
+    public function qualification_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
     public function setActiveAttribute($value)

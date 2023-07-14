@@ -43,7 +43,9 @@ class TemaStoreUpdateRequest extends FormRequest
 
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
-            'validate' => 'required'
+            'validate' => 'required',
+
+            'qualification_type_id' => 'required',
         ];
     }
 
@@ -62,6 +64,8 @@ class TemaStoreUpdateRequest extends FormRequest
 //
        if ( ! $this->has('assessable') )
             $data['assessable'] = 0;
+
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }

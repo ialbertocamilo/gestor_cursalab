@@ -50,8 +50,11 @@ class TemaController extends Controller
         $requisitos = $q_requisitos->orderBy('position')->get();
 
         $evaluation_types = Taxonomy::getDataForSelect('topic', 'evaluation-type');
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
-        $response = compact('tags', 'requisitos', 'evaluation_types');
+        $qualification_type = $course->qualification_type;
+        
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -60,6 +63,8 @@ class TemaController extends Controller
     {
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
         $topic->tags = [];
+
+        $topic->load('qualification_type');
 
         $topic->hide_evaluable = $topic->assessable;
         $topic->hide_tipo_ev = $topic->type_evaluation_id;
@@ -79,7 +84,8 @@ class TemaController extends Controller
             'tema' => $topic,
             'tags' => $form_selects['tags'],
             'requisitos' => $form_selects['requisitos'],
-            'evaluation_types' => $form_selects['evaluation_types']
+            'evaluation_types' => $form_selects['evaluation_types'],
+            'qualification_types' => $form_selects['qualification_types']
         ]);
     }
 

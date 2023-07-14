@@ -30,7 +30,7 @@ export default {
                 {label: 'YouTube', icon: 'mdi mdi-youtube', type: 'youtube'},
                 {label: 'Vimeo', icon: 'mdi mdi-vimeo', type: 'vimeo'},
                 {label: 'Video', icon: 'mdi mdi-video', type: 'video'},
-                {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
+                {label: 'Audio', icon: 'mdi mdi-headphones', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
