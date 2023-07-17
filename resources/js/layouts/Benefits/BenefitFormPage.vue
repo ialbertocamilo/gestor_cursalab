@@ -438,7 +438,7 @@
                                     </v-row>
                                     <div class="row">
                                         <v-col cols="12">
-                                            <div class="bx_maps_benefit" id="bx_maps_benefit">
+                                            <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
                                                 <GmapMap
                                                     :center="center"
                                                     :zoom="zoom"
@@ -725,6 +725,7 @@ const file_fields = ['image'];
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
 import GmapMap from 'vue2-google-maps/dist/components/map.vue'
+import html2canvas from 'html2canvas';
 import ModalAddLink from "../../components/Benefit/ModalAddLink";
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 import ModalSelectLogoPromotor from "../../components/Benefit/ModalSelectLogoPromotor";
@@ -1121,9 +1122,12 @@ export default {
             let vue = this
             window.location.href = vue.base_endpoint;
         },
-        confirmModal(validateForm = true) {
+        async confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
+            // html2canvas(vue.$refs.bx_maps_benefit).then(function(canvas) {
+            //     console.log(canvas.toDataURL());
+            // });
 
             if( vue.duracionIlimitado == 'ilimitado' ) {
                 vue.resource.duracion = 'ilimitado'

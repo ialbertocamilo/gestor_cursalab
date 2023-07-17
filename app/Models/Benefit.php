@@ -943,7 +943,18 @@ class Benefit extends BaseModel
             unset($benefit->status);
             $benefit->status = $benefit->user_status;
 
-            $benefit->direccion = null;
+            $direccion = ($benefit->direccion) ? json_decode($benefit->direccion) : null;
+            if ($direccion) {
+                $benefit->direccion = (object)[
+                    'lugar' => $direccion->address,
+                    'link' => $direccion->url,
+                    'image' => null,
+                    'referencia' => $benefit->referencia,
+                ];
+            }
+            else{
+                $benefit->direccion = null;
+            }
             $benefit->ubicacion = null;
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
