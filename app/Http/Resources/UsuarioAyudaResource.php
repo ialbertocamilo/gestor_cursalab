@@ -35,7 +35,7 @@ class UsuarioAyudaResource extends JsonResource
             'dni' => $this->dni ?? '',
             'email_ticket' => $this->email,
             'email_user' => $this->user?->email,
-            'last_login' => $this->user?->last_login,
+            'last_login' => $this->user?->last_login ? date('d/m/Y G:i a', strtotime($this->user?->last_login)) : '',
             'nombre' => $this->name ?? '',
             'image' => $image,
             'module' => $this->user?->subworkspace?->name ?? 'No definido',
