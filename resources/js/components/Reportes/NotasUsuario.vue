@@ -8,7 +8,7 @@
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
-            <list-item titulo="Tipo de calificación" subtitulo="El tipo de calificación asignado al curso" />
+            <list-item titulo="Sistema de calificación" subtitulo="El sistema de calificación asignado al curso" />
             <list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
             <list-item titulo="Nota" subtitulo="Nota correspondiente a un tema evaluable y calificado" />
             <list-item
@@ -75,7 +75,7 @@
                 <v-subheader class="border text-body-2 align-center">
                     <v-row class="text-grey font-weight-bold" no-gutters>
                         <v-col class="col-curso px-4">Curso</v-col>
-                        <v-col class="col-tipo_calificacion px-4">Tipo de calificación</v-col>
+                        <v-col class="col-tipo_calificacion px-4">Sistema de calificación</v-col>
                         <v-col class="col-nota_prom px-4">Nota</v-col>
                         <v-col class="col-visitas px-4">Visitas</v-col>
                         <v-col class="col-reinicios px-4">Reinicios</v-col>
@@ -121,7 +121,7 @@
                         <v-subheader class="pl-0 pr-14">
                             <v-row class="text-center text-weight-bold text-body-2 align-center" no-gutters>
                                 <v-col class="tema-col-tema">Tema</v-col>
-                                <v-col class="tema-col-tipo_calificacion">Tipo de calificación</v-col>
+                                <v-col class="tema-col-tipo_calificacion">Sistema de calificación</v-col>
                                 <v-col class="tema-col-nota">Nota</v-col>
                                 <v-col class="tema-col-score">Score</v-col>
                                 <v-col class="tema-col-correctas">Correctas</v-col>
