@@ -147,13 +147,15 @@
                             />
 
                     </v-col>
-                    <v-col cols="4">
-                        <div class="row ml-0">
+                    <v-col cols="4" class="d-flex align-items-center">
+                        <div class="">
                             <DefaultToggle v-model="resource.required" active-label="Obligatorio" inactive-label="No obligatorio"/>
                         </div>
                     </v-col>
-                    <v-col cols="4">
-                        <DefaultToggle v-model="resource.active" @onChange="alertStatus"/>
+                    <v-col cols="4" class="d-flex align-items-center">
+                        <div class="">
+                            <DefaultToggle v-model="resource.active" @onChange="alertStatus"/>
+                        </div>
                     </v-col>
                 </v-row>
             </v-form>

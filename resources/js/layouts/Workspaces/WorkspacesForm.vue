@@ -42,7 +42,7 @@
                 <v-tabs-items v-model="tabs">
                     
                     <v-tab-item :key="1" :value="'tab-1'">
-                        <v-row class="justify-content-center pt-4">
+                        <v-row class="--justify-content-center pt-4">
                             <v-col cols="6">
                                 <DefaultInput
                                     clearable
@@ -52,14 +52,7 @@
                                     dense
                                 />
                             </v-col>
-                            <v-col cols="6">
-                                <DefaultInput
-                                    clearable
-                                    v-model="resource.url_powerbi"
-                                    label="Link de learning analytics (PowerBI)"
-                                    dense
-                                />
-                            </v-col>
+                            
                         </v-row>
                         <v-row class="justify-content-center">
                             <v-col cols="6">
@@ -80,55 +73,6 @@
                                     @onSelect="setFile($event, resource,'logo_negativo')"/>
                             </v-col>
                         </v-row>
-
-                        <DefaultSection title="Configuración de sistema de calificación">
-                            <template v-slot:content>
-                                <v-row justify="space-around">
-                                    <v-col cols="6">
-                                        <DefaultSelect
-                                            clearable
-                                            :items="selects.qualification_types"
-                                            item-text="name"
-                                            return-object
-                                            v-model="resource.qualification_type"
-                                            label="Sistema de calificación"
-                                            :rules="rules.qualification_type_id"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultInfoTooltip
-                                            class=""
-                                            top
-                                            text="Elija el sistema de calificación que se tendrá por defecto en la creación de cursos." />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultSection>
-          
-                        <DefaultSection title="Configuración de diplomas">
-                            <template v-slot:content>
-                                <v-row>
-                                    <v-col cols="6">
-                                        <DefaultSelectOrUploadMultimedia
-                                            ref="inputLogoMarcaAgua"
-                                            v-model="resource.logo_marca_agua"
-                                            label="Imagen (500x350px)"
-                                            :file-types="['image']"
-                                            @onSelect="setFile($event, resource, 'logo_marca_agua')"
-                                        />
-                                    </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultToggle
-                                            class="mt-5"
-                                            v-model="resource.marca_agua_estado"
-                                            active-label="Mostrar marca de agua en diploma"
-                                            inactive-label="No mostrar marca de agua en diploma"
-                                            />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultSection>
 
                     </v-tab-item>
 
@@ -202,6 +146,31 @@
 
                     <v-tab-item :key="3" :value="'tab-3'" v-if="is_superuser">
 
+                        <DefaultSection title="Configuración de sistema de calificación" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row justify="space-around">
+                                    <v-col cols="6">
+                                        <DefaultSelect
+                                            clearable
+                                            :items="selects.qualification_types"
+                                            item-text="name"
+                                            return-object
+                                            v-model="resource.qualification_type"
+                                            label="Sistema de calificación"
+                                            :rules="rules.qualification_type_id"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <DefaultInfoTooltip
+                                            class=""
+                                            top
+                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+
                         <DefaultSection
                             title="Configuración de límites"
                             v-if="is_superuser"
@@ -225,6 +194,7 @@
                             </template>
                         </DefaultSection>
 
+                        
                         <v-row justify="space-around" v-if="is_superuser">
                             <v-col cols="12">
                                 <DefaultSection
@@ -280,6 +250,50 @@
                                 </v-row>
                             </template>
                         </DefaultSection>
+
+                        <DefaultSection title="Configuración de diplomas" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputLogoMarcaAgua"
+                                            v-model="resource.logo_marca_agua"
+                                            label="Imagen (500x350px)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource, 'logo_marca_agua')"
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <DefaultToggle
+                                            class="mt-5"
+                                            v-model="resource.marca_agua_estado"
+                                            active-label="Mostrar marca de agua en diploma"
+                                            inactive-label="No mostrar marca de agua en diploma"
+                                            />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+
+                        <DefaultSection
+                            title="Configuración adicional"
+                            v-if="is_superuser"
+                        >
+                            <template v-slot:content>
+
+                                <v-row justify="space-around" >
+                                    <v-col cols="12">
+                                        <DefaultInput
+                                            clearable
+                                            v-model="resource.url_powerbi"
+                                            label="Link de learning analytics (PowerBI)"
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+
 
                     </v-tab-item>
 

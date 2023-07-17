@@ -53,7 +53,7 @@ class TemaController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $course->qualification_type;
-        
+
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type');
 
         return $compactResponse ? $response : $this->success($response);
@@ -195,7 +195,7 @@ class TemaController extends Controller
 
     public function search_preguntas(School $school, Course $course, Topic $topic, Request $request)
     {
-        $request->merge(['tema_id' => $topic->id]);
+        $request->merge(['tema_id' => $topic->id, 'current_qualification_value' => $topic->qualification_type->position]);
 
         $preguntas = Topic::search_preguntas($request, $topic);
 

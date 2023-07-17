@@ -369,3 +369,10 @@ function messageToSlackByChannel($texto,$attachments,$canal){
     }
     curl_close($ch);
 }
+
+function calculateValueForQualification($value, $current_system, $main_system = 20)
+{
+    if ($current_system == $main_system) return $value;
+
+    return $value * $current_system / $main_system;
+}

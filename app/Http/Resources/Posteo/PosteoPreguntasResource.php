@@ -20,7 +20,7 @@ class PosteoPreguntasResource extends JsonResource
             'active' => (bool)$this->active,
             'tipo_pregunta' => $this->type->name,
             'required' => $this->required ? 'Sí' : 'No',
-            'score' => $this->score ?? '-',
+            'score' => $this->score ? calculateValueForQualification($this->score, $request->current_qualification_value) : '-',
             'is_super_user'=>auth()->user()->isAn('super-user')
             // 'is_super_user'=> true
         ];
