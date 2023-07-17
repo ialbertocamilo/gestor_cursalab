@@ -415,7 +415,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $data['summary_user_update'] = true;
         }
         $user->save();
+        if($user->active){
+            $this->current_workspace->sendEmailByLimit();
+        }
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
+
         if (!$criterion) {
             return true;
         }

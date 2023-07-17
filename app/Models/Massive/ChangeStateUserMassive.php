@@ -40,6 +40,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
 
         if ($this->state_user_massive == 1 && !$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
+            $this->current_workspace->sendEmailByLimit();
             $this->error_message = $message;
             return;
         endif;
