@@ -50,15 +50,15 @@ class AuthController extends Controller
             $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
-            $credentials1 = $credentials2 = ['password' => $password];
-            // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $password];
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
+            $credentials3['email'] = trim($userinput);
 
             $userInstance = new User;
 
             // === validacion de intentos ===
-            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2, $credentials3], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
 
@@ -70,7 +70,10 @@ class AuthController extends Controller
             }
             // === validacion de intentos ===
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+                // Valida si usuario está inactivo
+                if (!Auth::user()->active)
+                    return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
@@ -121,7 +124,6 @@ class AuthController extends Controller
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
 
                 // Update flag to update courses
-
                 $user->required_update_at = now();
                 $user->save();
 
@@ -136,6 +138,7 @@ class AuthController extends Controller
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
                     $responseAttempts['credentials1'] = $credentials1;
                     $responseAttempts['credentials2'] = $credentials2;
+                    $responseAttempts['credentials3'] = $credentials3;
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
@@ -180,9 +183,9 @@ class AuthController extends Controller
         //     );
         // }
 
-        if (!$user->active)
-            return $this->error('Tu cuenta se encuentra inactiva.
-            Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
+        // if (!$user->active)
+        //     return $this->error('Tu cuenta se encuentra inactiva.
+        //     Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
         $user->load('criterion_values.criterion');
         $user->updateUserDeviceVersion($data);

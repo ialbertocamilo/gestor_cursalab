@@ -127,7 +127,6 @@
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list_req"
-                                :only_req="true"
                             />
                     </v-col>
                 </v-row>
@@ -156,7 +155,6 @@
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list_opt"
-                                :only_req="false"
                             />
                         </v-expand-transition>
                     </v-col>

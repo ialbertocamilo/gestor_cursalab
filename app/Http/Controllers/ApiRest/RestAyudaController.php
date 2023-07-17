@@ -61,7 +61,7 @@ class RestAyudaController extends Controller
         // Set data to store
 
         $user = User::where('document', $dni)->first();
-        
+
         if ($user) {
 
             $data = [
@@ -161,14 +161,30 @@ class RestAyudaController extends Controller
         return response()->json(compact('preguntas'));
     }
 
-    public function existe_email(Request $request, $email = NULL) 
+    public function existe_email(Request $request, $email = null)
     {
-        $existe_email = $email ?? false;
-        
-        if($existe_email) {
-            $existe_email = User::where('email', $email)->exists();
+        $existe_email = $email ? User::where('email', $email)->exists() : false;
+        $mensaje = '';
+
+        if ($existe_email) {
+            $user = User::where('email', $email)->first();
+            if ($user->active) {
+                $mensaje = 'El usuario está activo.';
+                $codigo_http = 200; // OK
+            } else {
+                $mensaje = 'El usuario está inactivo.';
+                $codigo_http = 403; // Prohibido
+            }
+        } else {
+            $mensaje = 'El usuario no existe.';
+            $codigo_http = 404; // No encontrado
         }
 
-        return response()->json((bool) $existe_email);
+        return response()->json([
+            'existe_email' => (bool) $existe_email,
+            'mensaje' => $mensaje
+        ], $codigo_http);
     }
+
+
 }
