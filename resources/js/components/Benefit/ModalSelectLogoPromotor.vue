@@ -96,6 +96,7 @@ export default {
             vue.closeModalSelectLogoPromotor()
             // vue.fileSelected = media.file
             // vue.$emit('onSelect', vue.fileSelected)
+            vue.confirmSelectLogoPromotor(media.file)
         },
         handleFileChange(e) {
             let vue = this;

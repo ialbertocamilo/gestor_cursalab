@@ -609,7 +609,12 @@
                                         </div>
                                         <div class="box_button_promotor">
                                             <v-btn color="primary" outlined @click="openModalSelectLogoPromotor">
-                                                Agregar Logotipo
+                                                <span v-if="image_promotor_selected">
+                                                    Logotipo agregado
+                                                </span>
+                                                <span v-else>
+                                                    Agregar Logotipo
+                                                </span>
                                             </v-btn>
                                         </div>
                                     </div>
@@ -706,6 +711,7 @@ const fields = [
     'list_links',
     'lista_encuestas',
     'promotor',
+    'promotor_imagen_multimedia',
     'referencia',
     // 'speaker',
     'type',
@@ -778,6 +784,8 @@ export default {
             },
 
             // otros
+            image_promotor_selected: false,
+            promotor_imagen: null,
             drag_links: false,
             drag_silabos: false,
             list_links: [],
@@ -816,6 +824,7 @@ export default {
             resourceDefault: {
                 title: null,
                 description: null,
+                promotor_imagen_multimedia: null,
                 // position: null,
                 image: null,
                 file_image: null,
@@ -956,6 +965,15 @@ export default {
         confirmSelectLogoPromotor( value ){
             let vue = this;
             vue.modalLogoPromotor.open = false
+
+            vue.image_promotor_selected = true
+            vue.promotor_imagen = null
+            if(value){
+                vue.image_promotor_selected = true
+                vue.promotor_imagen = value
+            }
+            console.log(value);
+            console.log(vue.resource);
         },
         async openModalSelectSpeaker() {
             let vue = this;
@@ -1121,6 +1139,10 @@ export default {
                 vue.resource.cupos = vue.cupoValue
             }
 
+            if( vue.promotor_imagen != null ) {
+                vue.resource.promotor_imagen_multimedia = vue.promotor_imagen
+            }
+
             vue.resource.type = vue.selectType
             vue.resource.group = vue.selectGroup
 
@@ -1199,7 +1221,17 @@ export default {
                         this.selectType = (response.type != null) ? response.type.code : null
                         this.selectGroup = (response.group != null) ? response.group.code : null
 
+                        if(response.promotor_imagen != null) {
+                            vue.image_promotor_selected = true
+                            vue.promotor_imagen = response.promotor_imagen
+                        }
 
+                        if(response.direccion != null && response.direccion.address != null) {
+                            setTimeout(() => {
+                                vue.$refs.autocompleteMap.$refs.input.value = response.direccion.address
+                            }, 2000);
+                        }
+console.log(vue.resource);
                         if(response.cupos == null)
                             vue.cupoIlimitado = 'ilimitado'
                         else
@@ -1230,11 +1262,13 @@ export default {
                             vue.options_modules[4].active = true
                         }
 
-                        if(response.promotor != null && response.promotor != '') {
+                        if((response.promotor != null && response.promotor != '') ||
+                        (response.promotor_imagen != null && response.promotor_imagen != '')) {
                             vue.options_modules[0].active = true
                         }
 
-                        if(response.referencia != null && response.referencia != '') {
+                        if((response.referencia != null && response.referencia != '') ||
+                            (response.direccion != null && response.direccion != '')) {
                             vue.options_modules[2].active = true
                         }
 
