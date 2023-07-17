@@ -285,7 +285,7 @@ class UserMassive extends Massive implements ToCollection
                 'has_error'=>true,
                 'info_error'=>[
                     'index' => $dc['index'],
-                    'message' => 'Este criterio no existe en la plataforma.'
+                    'message' => 'Solo puedes subir valores que han sido registrados. Revisa la ortografía y vuelve a intentarlo.'
                 ],
             ];
         }
