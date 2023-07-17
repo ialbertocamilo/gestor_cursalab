@@ -125,6 +125,21 @@ class Benefit extends BaseModel
 
     protected function storeRequest($data, $benefit = null)
     {
+        $promotor_imagen_multimedia = (isset($data['promotor_imagen_multimedia']) && !is_null($data['promotor_imagen_multimedia'])) ? $data['promotor_imagen_multimedia'] : null;
+        $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+
+        $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa'])) ? json_decode($data['ubicacion_mapa']) : null;
+
+        if($data_maps) {
+            $geometry = $data_maps->geometry ?? null;
+            $json_maps['location'] = $geometry->location ?? null;
+            $json_maps['address'] = $data_maps->formatted_address ?? null;
+            $json_maps['url'] = $data_maps->url ?? null;
+            $json_maps['image'] = null;
+
+            $data['direccion'] = json_encode($json_maps);
+        }
+
         $list_links = (isset($data['list_links']) && !is_null($data['list_links'])) ? json_decode($data['list_links']) : null;
         $list_silabos = (isset($data['list_silabos']) && !is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
         $lista_implementos = (isset($data['lista_implementos']) && !is_null($data['lista_implementos'])) ? json_decode($data['lista_implementos']) : null;
@@ -314,6 +329,7 @@ class Benefit extends BaseModel
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('Y-m-d');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('Y-m-d');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('Y-m-d');
+            $benefit->direccion = (!is_null($benefit->direccion)) ? json_decode($benefit->direccion) : null;
             if($benefit->speaker) {
                 $benefit->speaker->image = $benefit->speaker->image ? FileService::generateUrl($benefit->speaker->image) : $benefit->speaker->image;
             }
@@ -441,6 +457,13 @@ class Benefit extends BaseModel
                     if($is_created) {
 
                         $benefit = Benefit::where('id', $benefit_id)->first();
+
+                        $user = User::where('id', $user_id)->first();
+                        if($user){
+                            $users = [];
+                            array_push($users, $user);
+                            $benefit->syncUsersInBenefitsMeeting($users);
+                        }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
@@ -605,6 +628,13 @@ class Benefit extends BaseModel
                     $benefit = Benefit::where('id', $benefit_id)->first();
 
                     if($benefit){
+
+                        $user = User::where('id', $user_id)->first();
+                        if($user){
+                            $users = [];
+                            array_push($users, $user);
+                            $benefit->syncUsersInBenefitsMeeting($users, 'remove');
+                        }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
@@ -968,6 +998,17 @@ class Benefit extends BaseModel
             ],
             "tabs"=> [
                 [
+                    "name" => "IR Academy",
+                    "code" => "ir-academy",
+                    "filtros_status" => [
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
+                    ],
+                    "filtros_tipo" => [
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                    ]
+                ],
+                [
                     "name" => "Todos",
                     "code"=> "free",
                     "filtros_status" => [
@@ -976,17 +1017,6 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
-                    ]
-                ],
-                [
-                    "name" => "IR Academy",
-                    "code" => "ir-academy",
-                    "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active", "checked" => true],
-                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
-                    ],
-                    "filtros_tipo" => [
                         ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
