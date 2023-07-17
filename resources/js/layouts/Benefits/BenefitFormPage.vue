@@ -438,7 +438,7 @@
                                     </v-row>
                                     <div class="row">
                                         <v-col cols="12">
-                                            <div class="bx_maps_benefit" id="bx_maps_benefit">
+                                            <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
                                                 <GmapMap
                                                     :center="center"
                                                     :zoom="zoom"
@@ -609,7 +609,12 @@
                                         </div>
                                         <div class="box_button_promotor">
                                             <v-btn color="primary" outlined @click="openModalSelectLogoPromotor">
-                                                Agregar Logotipo
+                                                <span v-if="image_promotor_selected">
+                                                    Logotipo agregado
+                                                </span>
+                                                <span v-else>
+                                                    Agregar Logotipo
+                                                </span>
                                             </v-btn>
                                         </div>
                                     </div>
@@ -706,6 +711,7 @@ const fields = [
     'list_links',
     'lista_encuestas',
     'promotor',
+    'promotor_imagen_multimedia',
     'referencia',
     // 'speaker',
     'type',
@@ -719,6 +725,7 @@ const file_fields = ['image'];
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
 import GmapMap from 'vue2-google-maps/dist/components/map.vue'
+import html2canvas from 'html2canvas';
 import ModalAddLink from "../../components/Benefit/ModalAddLink";
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 import ModalSelectLogoPromotor from "../../components/Benefit/ModalSelectLogoPromotor";
@@ -778,6 +785,8 @@ export default {
             },
 
             // otros
+            image_promotor_selected: false,
+            promotor_imagen: null,
             drag_links: false,
             drag_silabos: false,
             list_links: [],
@@ -816,6 +825,7 @@ export default {
             resourceDefault: {
                 title: null,
                 description: null,
+                promotor_imagen_multimedia: null,
                 // position: null,
                 image: null,
                 file_image: null,
@@ -956,6 +966,15 @@ export default {
         confirmSelectLogoPromotor( value ){
             let vue = this;
             vue.modalLogoPromotor.open = false
+
+            vue.image_promotor_selected = true
+            vue.promotor_imagen = null
+            if(value){
+                vue.image_promotor_selected = true
+                vue.promotor_imagen = value
+            }
+            console.log(value);
+            console.log(vue.resource);
         },
         async openModalSelectSpeaker() {
             let vue = this;
@@ -1103,9 +1122,12 @@ export default {
             let vue = this
             window.location.href = vue.base_endpoint;
         },
-        confirmModal(validateForm = true) {
+        async confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
+            // html2canvas(vue.$refs.bx_maps_benefit).then(function(canvas) {
+            //     console.log(canvas.toDataURL());
+            // });
 
             if( vue.duracionIlimitado == 'ilimitado' ) {
                 vue.resource.duracion = 'ilimitado'
@@ -1119,6 +1141,10 @@ export default {
             }
             else if( vue.cupoValue != null && vue.cupoValue != '' ) {
                 vue.resource.cupos = vue.cupoValue
+            }
+
+            if( vue.promotor_imagen != null ) {
+                vue.resource.promotor_imagen_multimedia = vue.promotor_imagen
             }
 
             vue.resource.type = vue.selectType
@@ -1199,7 +1225,17 @@ export default {
                         this.selectType = (response.type != null) ? response.type.code : null
                         this.selectGroup = (response.group != null) ? response.group.code : null
 
+                        if(response.promotor_imagen != null) {
+                            vue.image_promotor_selected = true
+                            vue.promotor_imagen = response.promotor_imagen
+                        }
 
+                        if(response.direccion != null && response.direccion.address != null) {
+                            setTimeout(() => {
+                                vue.$refs.autocompleteMap.$refs.input.value = response.direccion.address
+                            }, 2000);
+                        }
+console.log(vue.resource);
                         if(response.cupos == null)
                             vue.cupoIlimitado = 'ilimitado'
                         else
@@ -1230,11 +1266,13 @@ export default {
                             vue.options_modules[4].active = true
                         }
 
-                        if(response.promotor != null && response.promotor != '') {
+                        if((response.promotor != null && response.promotor != '') ||
+                        (response.promotor_imagen != null && response.promotor_imagen != '')) {
                             vue.options_modules[0].active = true
                         }
 
-                        if(response.referencia != null && response.referencia != '') {
+                        if((response.referencia != null && response.referencia != '') ||
+                            (response.direccion != null && response.direccion != '')) {
                             vue.options_modules[2].active = true
                         }
 
