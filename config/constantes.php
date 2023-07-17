@@ -176,11 +176,13 @@ return [
         'pendiente' => 'Pendiente',
         'revisando' => 'Revisando',
         'solucionado' => 'Solucionado',
+        'contactado' => 'Contactado'
     ],
 
     'soporte-estados-colors' => [
         'pendiente' => 'red',
         'revisando' => 'orange',
+        'contactado' => 'orange',
         'solucionado' => 'blue',
     ],
 
