@@ -201,6 +201,12 @@
                         Reporte de Beneficios
                     </span>
                 </v-tab>
+                <v-tab class="justify-content-start py-7" key='user-benefit-report'>
+                    <v-icon left>fa fa-square</v-icon>
+                    <span class="pt-2">
+                        Usuarios segmentados al Beneficio
+                    </span>
+                </v-tab>
                 <!--
 
                 TABS CONTENT
@@ -489,7 +495,20 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <UsersBenefitReport
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
 
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
             </v-tabs>
         </v-card>
 
@@ -565,6 +584,8 @@ import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
 import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
 import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
+import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
+
 export default {
     components: {
         EmptyCriteria,
@@ -590,7 +611,8 @@ export default {
         Meetings,
         Diploma,
         Segmentacion,
-        BenefitsReport
+        BenefitsReport,
+        UsersBenefitReport
     },
     data() {
         return {

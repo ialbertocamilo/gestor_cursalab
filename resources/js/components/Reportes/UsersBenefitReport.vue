@@ -3,7 +3,7 @@
     <v-main>
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el reporte detallado de un Beneficio.
+                Descarga el reporte detallado de usuarios en un Beneficio.
             </template>
             <list-item
                 titulo="Beneficio"
@@ -69,7 +69,7 @@ export default {
     },
     data() {
         return {
-            reportType: 'benefit_report',
+            reportType: 'user_benefit_report',
             selects:{
                 benefits:[]
             },
