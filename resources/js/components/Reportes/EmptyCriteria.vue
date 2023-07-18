@@ -158,7 +158,12 @@ export default {
         }
         ,
         atLeastOneCriteriaIsSelected () {
-            if (this.selectedCriteria.length === 0) return false
+
+            if (this.criteriaInSegmentation.length) {
+                if (this.selectedCriteria.length === 0) return false
+            } else {
+                return true;
+            }
 
             return this.selectedCriteria.includes(true)
         }
