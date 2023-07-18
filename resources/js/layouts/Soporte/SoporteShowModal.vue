@@ -23,6 +23,10 @@
                         <a href="javascript:;" @click="openFormModal(modalSoporteOptions, resource, 'ticket', `Editar ticket #${resource.id}`)">
                             <span v-text="resource.status.text" :style="{ 'color': resource.status.color, 'font-weight': 'bold' } "></span>
                         </a>
+                        {{ solvedBy
+                            ? `por ${solvedBy}`
+                            : ''
+                        }}
                     </v-col>
                     <v-col class="">
                         <v-icon left color="primary">fa-solid fa-calendar</v-icon>
@@ -113,6 +117,12 @@
                         <a target="_blank"
                            @click="markTicketAsContacted()"
                            :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a>
+                         <strong>
+                             ({{ contactedBy
+                                ? `Contactado por ${contactedBy}`
+                                : 'No contactado'
+                             }})
+                         </strong>
                     </v-col>
                     <v-col cols="6" class="" v-if="resource.last_login">
                         <v-icon left color="primary">fas fa-sign-in-alt</v-icon>
@@ -304,6 +314,8 @@ export default {
     },
     data() {
         return {
+            solvedBy: null,
+            contactedBy: null,
             resourceDefault: {
                 id: null,
                 user: {
@@ -316,6 +328,7 @@ export default {
                 },
                 msg_to_user: '',
                 info_support: '',
+                is_contacted: null
             },
             resource: {
                 user: {
@@ -326,6 +339,8 @@ export default {
                     color: null,
                     text: null,
                 },
+                info_support: '',
+                is_contacted: null
             },
             modalResetPasswordOptions: {
                 ref: 'UsuarioResetPasswordModal',
@@ -414,6 +429,13 @@ export default {
                     if (resource) {
                         vue.resource = Object.assign({}, data.data.ticket);
                         vue.resource.user = Object.assign({}, data.data.ticket.user);
+
+                       vue.solvedBy = vue.resource.info_support
+                            ? vue.resource.info_support.solvedBy
+                            : null
+                       vue.contactedBy =  vue.resource.info_support
+                           ? vue.resource.info_support.contactedBy
+                           : null
                     }
 
                 })
@@ -436,9 +458,11 @@ export default {
                     url,
                     method: 'put',
                     data: {
-                        status: 'contactado'
+                        is_contacted: 1
                     }
                 })
+
+                await this.loadData(this.resource)
             } catch (ex) {
                 console.log(ex)
             }

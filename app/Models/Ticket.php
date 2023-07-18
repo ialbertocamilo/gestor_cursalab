@@ -21,6 +21,24 @@ class Ticket extends BaseModel
 
     /*
 
+        Mutators and accesors
+
+    --------------------------------------------------------------------------*/
+
+
+    public function setInfoSupportAttribute($info): void
+    {
+        $this->attributes['info_support'] = json_encode($info);
+    }
+
+    public function getInfoSupportAttribute($info)
+    {
+
+        return $info ? json_decode($info) : null;
+    }
+
+    /*
+
         Relationships
 
     --------------------------------------------------------------------------*/
@@ -98,5 +116,23 @@ class Ticket extends BaseModel
         }
 
         return $query->paginate($request->paginate);
+    }
+
+    /**
+     * Update values in info_support column
+     */
+    public function updateInfoSupport($solvedBy = null, $contactedBy = null) {
+        $infoSupport = $this->info_support ?? new \stdClass();
+
+        if ($solvedBy) {
+            $infoSupport->solvedBy = $solvedBy;
+        }
+
+        if ($contactedBy) {
+            $infoSupport->contactedBy = $contactedBy;
+        }
+
+        $this->info_support = $infoSupport;
+        $this->save();
     }
 }

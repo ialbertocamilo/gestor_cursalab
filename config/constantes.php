@@ -175,14 +175,12 @@ return [
     'soporte-estados' => [
         'pendiente' => 'Pendiente',
         'revisando' => 'Revisando',
-        'solucionado' => 'Solucionado',
-        'contactado' => 'Contactado'
+        'solucionado' => 'Solucionado'
     ],
 
     'soporte-estados-colors' => [
         'pendiente' => 'red',
         'revisando' => 'orange',
-        'contactado' => 'orange',
         'solucionado' => 'blue',
     ],
 
