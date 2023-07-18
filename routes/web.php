@@ -145,6 +145,8 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('checkrol:admin,super-user');
 
     Route::prefix('resumen_encuesta')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_encuesta.php'));
+    
+    Route::prefix('resumen_evaluaciones')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_evaluaciones.php'));
 
     Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
     Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));

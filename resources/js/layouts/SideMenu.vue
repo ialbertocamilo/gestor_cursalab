@@ -542,6 +542,21 @@ export default {
                             "reports",
                             'only-reports'
                         ]
+                    },
+                    {
+                        title: "Evaluaciones",
+                        icon: "fas fa-file-alt",
+                        path: "/resumen_evaluaciones",
+                        subpaths: ["resumen_evaluaciones"],
+                        selected: false,
+                        permission: "resumen_evaluaciones",
+                        role: [
+                            "super-user",
+                            "admin",
+                            "trainer",
+                            "reports",
+                            'only-reports'
+                        ]
                     }
                 ]
             },
