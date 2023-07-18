@@ -201,6 +201,9 @@ Segment extends BaseModel
             $this->storeDirectSegmentation($request);
 
             $this->storeSegmentationByDocument($request->all());
+            //colocar usuarios en cola para actualizaciónes masivas
+            $course = Course::find($request->model_id);
+            Summary::updateUsersByCourse($course,null,false,false,'segmented');
 
             DB::commit();
         } catch (\Exception $e) {
@@ -222,7 +225,7 @@ Segment extends BaseModel
 
         return $this->success(['msg' => $message], $message);
     }
-
+    
     private function updateSegmentToLaunchObeserver($data)
     {
         $segments_id = array_column($data->segments, 'id');
@@ -241,7 +244,7 @@ Segment extends BaseModel
 
     public function storeDirectSegmentation($data)
     {
-        $this->updateSegmentToLaunchObeserver($data);
+        // $this->updateSegmentToLaunchObeserver($data);
 
         $segments_id = array_column($data->segments, 'id');
 
@@ -370,7 +373,7 @@ Segment extends BaseModel
         }
         $data['segments'] = [$segment];
         $data = (object) $data; 
-        $this->updateSegmentToLaunchObeserver($data);
+        // $this->updateSegmentToLaunchObeserver($data);
         $segment->values()->sync($values);
     }
 

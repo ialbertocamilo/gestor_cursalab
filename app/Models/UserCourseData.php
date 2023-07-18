@@ -15,6 +15,8 @@ class UserCourseData extends Model
 {
     protected $connection = 'mongodb';
 
+    protected $timestamps = true;
+    
     protected $table = 'course_user_data';
 
     protected $fillable = ['user_id', 'courses', 'schools', 'compatibles', 'course_id_tags', 'current_courses_updated_at'];

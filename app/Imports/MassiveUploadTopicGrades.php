@@ -129,7 +129,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
         }
         $users_chunks = array_chunk($this->updated_users_id,100);
         foreach ($users_chunks as $users) {
-            Summary::updateUsersByCourse($this->course,$users);
+            Summary::updateUsersByCourse($this->course,$users,true,false,'massive_topic_grade');
         }
     }
 
