@@ -38,7 +38,7 @@
                            @onChange="changeBenefit"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
-                    <v-col cols="6" v-if="resource.type && resource.type.code == 'benefits'">
+                    <v-col cols="6" v-if="resource.type && selects.silabos.length > 0 && resource.type.code == 'benefits'">
                         <DefaultSelect
                            :items="selects.silabos"
                            v-model="resource.model_id"
@@ -309,7 +309,7 @@ import VueTimepicker from 'vue2-timepicker'
 import 'vue2-timepicker/dist/VueTimepicker.css'
 
 
-const fields = ['name', 'starts_at', 'date','model_id' ,'time', 'duration', 'attendants', 'type', 'host', 'description'];
+const fields = ['name', 'starts_at', 'date','model_id' ,'time', 'duration', 'attendants', 'type','model_type', 'host', 'description'];
 
 export default {
     components: {
@@ -362,7 +362,7 @@ export default {
             },
             selects: {
                 types: [],
-                benefits:[],
+                benefits :[],
                 silabos:[],
                 hosts: [],
             },
@@ -508,16 +508,10 @@ export default {
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm) {
-                switch (vue.resource.type.code) {
-                    case 'benefits':
-                        vue.resource.model_type = 'App\Models\BenefitProperty';
-                        break;
-                    default:
-                        break;
-                }
                 let formData = vue.getMultipartFormData(method, vue.resource, fields);
-                vue.parseAttendants(formData)
 
+                vue.parseAttendants(formData)
+                this.hideLoader();
 
                 vue.$http.post(url, formData)
                     .then(({data}) => {
@@ -593,11 +587,11 @@ export default {
                 vue.selects.types = _data.types
                 vue.selects.hosts = _data.hosts
                 vue.selects.user_types = _data.user_types
-
+                vue.selects.benefits = _data.benefits ? _data.benefits : [];
+                vue.selects.silabos = _data.silabos ? _data.silabos : [];
                 // TODO: Por ahora
                 if (_data.default_meeting_type)
                     vue.resource.type = _data.default_meeting_type.id
-
                 if (resource) {
                     // vue.resource = vue.options.action == 'duplicate' ? _data.duplicate : _data.meeting
 
