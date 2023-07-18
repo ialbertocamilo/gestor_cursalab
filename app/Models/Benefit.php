@@ -977,6 +977,10 @@ class Benefit extends BaseModel
                 $item->value_date = Carbon::parse($item->value_date)->format('d/m/Y');
                 $item->value_time = Carbon::parse($item->value_time)->format('H:i');
             });
+            $benefit->hasMeeting = false;
+            if( count($benefit->silabo) > 0){
+                $benefit->hasMeeting = boolval(Meeting::where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$benefit->silabo->pluck('id'))->first());
+            }
 
             unset(
                 $benefit->referencia,

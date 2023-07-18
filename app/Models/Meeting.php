@@ -22,7 +22,7 @@ class Meeting extends BaseModel
         'starts_at', 'finishes_at', 'duration', 'started_at', 'finished_at', 'report_generated_at',
         'url_start_generated_at',
         'attendance_call_first_at', 'attendance_call_middle_at', 'attendance_call_last_at',
-        'status_id', 'account_id', 'type_id', 'host_id', 'user_id',
+        'status_id', 'account_id', 'type_id', 'host_id', 'user_id','model_id','model_type'
     ];
 
     protected $hidden = ['raw_data_response'];
@@ -305,7 +305,11 @@ class Meeting extends BaseModel
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
             $host = Usuario::find($data['host_id']);
-
+            
+            if($type->code == 'benefits'){
+                $data['model_type'] = 'App\\Models\\BenefitProperty';
+            }
+            info($data);
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
 
             #add workspace id
