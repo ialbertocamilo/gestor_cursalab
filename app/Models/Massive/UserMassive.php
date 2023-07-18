@@ -109,7 +109,7 @@ class UserMassive extends Massive implements ToCollection
 
             if (!$data_user['has_error']) {
                 $user = User::where('document', $data_user['user']['document'])->first();
-                if (env('MULTIMARCA')) {
+                if (env('MULTIMARCA') === true) {
                     $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
                     $master_user_arr = [
                             'dni' => $data_user['user']['document'],
@@ -134,7 +134,7 @@ class UserMassive extends Massive implements ToCollection
         }
         cache_clear_model(User::class);
         cache_clear_model(CriterionValue::class);
-        if (env('MULTIMARCA'))
+        if (env('MULTIMARCA') === true)
             cache_clear_model(UsuarioMaster::class);
     }
 
@@ -181,7 +181,7 @@ class UserMassive extends Massive implements ToCollection
                 isset($user['email']) && $q->orWhere('email', $user['email']);
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
 
-            if (env('MULTIMARCA')) {
+            if (env('MULTIMARCA') === true) {
                 $master_username_email = null;
                 $master_username_email = UsuarioMaster::where(function ($q) use ($user) {
                     if (isset($user['username'])) {
@@ -200,7 +200,7 @@ class UserMassive extends Massive implements ToCollection
                 'message' => ($this->messageInSpanish) ? 'El campo documento es requerido.' : 'The field document is required'
             ];
         }
-        if (env('MULTIMARCA')) {
+        if (env('MULTIMARCA') === true) {
 
             if ($user_username_email || $master_username_email) {
                 if (isset($user['username']) && $user['username'] != '' &&
@@ -228,7 +228,7 @@ class UserMassive extends Massive implements ToCollection
                 }
             }
         } else {
-              if ($user_username_email || $master_username_email) {
+              if ($user_username_email ) {
                 if (isset($user['username']) && $user['username'] != '' &&
                     !is_null($user_username_email->username) &&
                     strtolower($user_username_email->username) == strtolower($user['username']) ) {
