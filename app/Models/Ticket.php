@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
+
 class Ticket extends BaseModel
 {
 
@@ -117,6 +119,40 @@ class Ticket extends BaseModel
 
         return $query->paginate($request->paginate);
     }
+
+    /**
+     * Mark tickets as "solucionado" when user has logged in
+     * after creating the ticket
+     * @return void
+     */
+    protected function markAsSolucionado()
+    {
+        $subworkspaces = get_current_workspace_indexes();
+        $subworkspacesIds = implode(',', $subworkspaces['ids']->toArray());
+
+        $usersToUpdate = DB::select(DB::raw("
+            select
+                u.id
+            from users u join tickets t on t.user_id = u.id
+            where u.last_login > t.created_at
+            and u.subworkspace_id in ($subworkspacesIds)
+        "));
+        $usersToUpdateIds = collect($usersToUpdate)->pluck('id');
+
+        $tickets = Ticket::query()
+            ->where('status', '!=', 'solucionado')
+            ->where('reason', 'Soporte Login')
+            ->whereIn('user_id', $usersToUpdateIds)
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $ticket->status = 'solucionado';
+            $ticket->save();
+
+            $this->updateInfoSupport('Plataforma', '');
+        }
+    }
+
 
     /**
      * Update values in info_support column
