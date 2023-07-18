@@ -14,7 +14,7 @@
 					Seleccione almacenamiento o ingrese n° de usuarios.
 				</v-alert>
 
-				<p>Te comunicarás con nuestro equipo comercial para mejorar tu plan, <b>selecciona que deseas aumentar:</b></p>
+				<p>Te comunicarás con nuestro equipo comercial para mejorar tu plan, <b>selecciona qué deseas aumentar:</b></p>
 
 				<v-row>
 					<v-col cols="6">
@@ -24,15 +24,16 @@
 							:items="storageItems"
 							item-text="name"
 							item-id="value"
-							label="Almacenamiento"
+							label="¿Cuánto almacenamiento deseas asignar?"
 						/>
 					</v-col>
 					<v-col cols="6">
 						<DefaultInput
 								clearable
 								v-model="resource.limit_allowed_users"
-								label="Usuarios"
+								label="¿Cuántos usuarios deseas asignar?"
 								type="number"
+								:prefix="resource.limit_allowed_users ? '+' : '' "
 								min="0"
 							/>
 					</v-col>

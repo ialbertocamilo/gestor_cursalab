@@ -246,6 +246,49 @@ class GeneralController extends Controller
         return $this->success($subworkspace_status);
     }
 
+    public function workspace_storage(Request $request) 
+    {
+        $workspace = get_current_workspace();
+        $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
+        $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
+
+        // === workspace storage actual ===
+        $total_current_storage = $workspace_current_storage + round($request->size / 1024);
+        $total_current_storage = formatSize($total_current_storage, parsed:false);
+        // === workspace storage actual ===
+
+        $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
+        $file_storage_check  = ($total_current_storage['size_unit'] == 'Gb' && 
+                                $total_storage_limit <= $total_current_storage['size']); 
+
+        $workspace_data = [
+            'workspace_storage' => $total_storage_limit.' Gb', // gb
+            'workspace_current_storage' => formatSize($workspace_current_storage), // kb
+            'file_current_size' =>  formatSize(round($request->size / 1024)), // kb
+            'file_storage_check' => $file_storage_check,
+            // 'file_storage_check' => true,
+        ];
+
+        return $this->success($workspace_data);
+    }
+
+    public function workspace_users(Request $request) 
+    {
+        $workspace_storage = DashboardService::loadCountUsersWorkspaces();
+        $users_count_inactives = $workspace_storage->subworkspaces->sum('users_count_actives');
+
+        $total_current_storage = $users_count_inactives + 1;
+        $user_storage_check = $workspace_storage->limit_allowed_users['quantity'] < $total_current_storage;
+
+        $workspace_data = [
+            'workspace_storage' => $workspace_storage->limit_allowed_users['quantity'], // gb
+            'workspace_current_storage' => $total_current_storage, // kb
+            'user_storage_check' => $user_storage_check,
+        ];
+
+        return $this->success($workspace_data);
+    }
+    
     public function workspace_plan(GeneralStorageRequest $request) 
     {
         /*paola@cursalab.io|juanjose@cursalab.io|juan@cursalab.io*/

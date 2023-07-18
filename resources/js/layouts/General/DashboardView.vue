@@ -166,7 +166,7 @@
                                 <span 
                                     class="fa-2x"
                                     :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
-                                    v-text="workspace_status.size_medias_porcent.porcent+'% '+'usado'">
+                                    v-text="workspace_status.size_medias_porcent.porcent+'% '+'utilizado'">
                                 </span>
 
                                 <span>
@@ -191,10 +191,10 @@
 
                             <ul class="px-0 pb-0">
                                 <li v-for="route in workspace_status.routes_redirects" :key="route.label"
-                                    class="d-flex align-items-center justify-content-between mb-2 grey lighten-5 rounded px-2">
+                                    class="d-flex align-items-center justify-content-between mb-3 grey lighten-5 rounded p-2">
                                     <span v-text="route.label"></span> 
-
-                                    <v-btn 
+                                    <span v-text="route.size"></span>
+                                   <!--  <v-btn 
                                         class="ml-2" 
                                         text 
                                         color="primary" 
@@ -202,7 +202,7 @@
                                         <v-icon>
                                             mdi-open-in-new
                                         </v-icon>
-                                    </v-btn>
+                                    </v-btn> -->
 
                                 </li>
                             </ul>
@@ -291,7 +291,7 @@
             :options="modalGeneralStorageEmailSendOptions"
             width="35vw"
             @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
-            @onConfirm="openLink('home')"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
         />
         <!-- MODAL EMAIL ENVIADO -->
 
@@ -321,7 +321,7 @@ export default {
                 open: false,
                 showCloseIcon: true,
                 hideCancelBtn: true,
-                confirmLabel:'Volver a inicio',
+                confirmLabel:'Entendido',
                 persistent: false
             },
             showDetail: false,

@@ -324,6 +324,33 @@ class  DashboardService {
                         ->withSum('medias', 'size')->get();
     }
 
+    public static function loadSizeByExtensionWorkspace($workspace_id, $key) {
+        $extensions = config('constantes.extensiones');
+
+        return Media::where('workspace_id', $workspace_id)
+                    ->whereIn('ext', $extensions[$key])
+                    ->sum('size');
+    }
+
+    public static function loadCountUsersWorkspaces() {
+        // === usuario cursalab ===
+        $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
+
+        $workspace = get_current_workspace(); 
+
+        $query = Workspace::where('id', $workspace->id);
+        $query->select('id', 'name', 'logo', 'limit_allowed_users', 'limit_allowed_storage', 'parent_id', 'criterion_value_id');
+        $query->with(['subworkspaces' => function ($q) use ($user_cursalab) {
+                    $q->select('id', 'criterion_value_id', 'name', 'logo', 'parent_id');
+                    self::withCountUsers($q, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+                    // self::withCountUsers($q, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
+        }]);
+        self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+        // self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives')
+        
+        return $query->first();
+    }
+
     public static function loadCurrentWorkspaceStatus()
     {
         // === usuario cursalab ===
