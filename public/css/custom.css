@@ -1205,13 +1205,18 @@ span.lbl_txt_val {
 	color: #5458ea;	
 }
 
+.fa-1_4x{
+	font-size: 1.4rem;
+}
+
+.w-90{
+	width: 90%;
+}
+
 .v-progress-linear__content {
     justify-content: unset !important;
-<<<<<<< Updated upstream
-=======
 }
 
 .ml-24-porcent{
 	margin-left: 24%;
->>>>>>> Stashed changes
 }

@@ -37,10 +37,10 @@
                     <v-col  cols="6" offset="1"
                             class="d-flex justify-space-between align-items-center">
                         <div class="d-flex align-items-center w-75">
-                            <div class="d-flex flex-column w-75">
+                            <div class="d-flex flex-column w-90">
                                 <p class="font-weight-bold mb-0">Almacenamiento general</p>
                                 <div class="my-2">
-                                    <span class="fa-2x" v-text="workspace_status.size_medias_storage+' usados'"></span>
+                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage+' utilizados'"></span>
                                     de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
                                 </div>
 
@@ -63,10 +63,10 @@
                         </div>
 
                         <div class="d-flex align-items-center w-75">
-                            <div class="d-flex flex-column w-75">
+                            <div class="d-flex flex-column w-90">
                                 <p class="font-weight-bold mb-0">Total usuarios activos</p>
                                 <div class="my-2">
-                                    <span class="fa-2x" v-text="workspace_status.users_count_actives"></span>
+                                    <span class="fa-1_4x" v-text="workspace_status.users_count_actives"></span>
                                     de <span v-text="workspace_status.users_count_limit"></span> disponibles.
                                 </div>
 
@@ -160,116 +160,107 @@
             <v-card flat class="elevation-0 mb-4">
                 <v-card-text>
                     <v-row>
-                        <v-col cols="7" class="px-8 py-6 border-right">
-                            <v-card-title class="p-0 font-weight-bold">Almacenamiento general</v-card-title>
-                            <div class="my-3 d-flex justify-space-between">
-                                <span 
-                                    class="fa-2x"
-                                    :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
-                                    v-text="workspace_status.size_medias_porcent.porcent+'% '+'utilizado'">
-                                </span>
 
-                                <span>
-                                    <span class="font-weight-bold">
-                                        Total utilizado:
-                                        <span v-text="workspace_status.size_medias_storage"></span>
-                                    </span>
-                                    / 
-                                    <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
-                                </span>
-                            </div>
+                        <v-col cols="7" class="px-5 py-6 border-right">
 
-                            <v-progress-linear
-                                    :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
-                                    :value="workspace_status.size_medias_porcent.porcent"
-                                    height="20"
-                                    rounded
-                                >
-                            </v-progress-linear>
+                            <v-card class="p-4 mb-7 elevation-0 border">
+                                <v-card-title class="p-0 font-weight-bold">Almacenamiento general</v-card-title>
+                                <v-card-text class="p-0">
+                                    <div class="my-3 d-flex flex-column">
+                                        <span 
+                                            class="fa-2x mb-3"
+                                            :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
+                                            v-text="workspace_status.size_medias_porcent.porcent+'% '+'utilizado'">
+                                        </span>
 
-                            <p class="my-6 font-weight-bold">Detalle del almacenamiento</p>
-
-                            <ul class="px-0 pb-0">
-                                <li v-for="route in workspace_status.routes_redirects" :key="route.label"
-                                    class="d-flex align-items-center justify-content-between mb-3 grey lighten-5 rounded p-2">
-                                    <span v-text="route.label"></span> 
-                                    <span v-text="route.size"></span>
-                                   <!--  <v-btn 
-                                        class="ml-2" 
-                                        text 
-                                        color="primary" 
-                                        @click="setStorageUrl(route.url, route.filters)">
-                                        <v-icon>
-                                            mdi-open-in-new
-                                        </v-icon>
-                                    </v-btn> -->
-
-                                </li>
-                            </ul>
-                            
-                        </v-col>
-                        <v-col cols="5" class="px-8 py-6">
-                            <div class="grey lighten-4 rounded p-4">
-                                <div class="d-flex align-items-center">
-                                    <span 
-                                        class="mdi mdi-account-multiple-outline text-primary-sub fa-4x mr-4"
-                                        :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
-                                        ></span>
-                                    <div class="d-flex flex-column">    
-                                        <v-card-title class="p-0 font-weight-bold">Total Usuarios</v-card-title>
-                                        
-                                        <div>
-                                            <span 
-                                                class="fa-2x my-2" 
-                                                v-text="workspace_status.users_count_actives"
-                                                :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
-                                                ></span>
-                                            <span>de <span v-text="workspace_status.users_count_limit"></span> disponibles</span>
-                                        </div>
+                                        <span>
+                                            <span class="font-weight-bold">
+                                                Total utilizado:
+                                                <span v-text="workspace_status.size_medias_storage"></span>
+                                            </span>
+                                            / 
+                                            <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                        </span>
                                     </div>
-                                </div>
-                                <v-progress-linear
-                                    class="my-2"
-                                    :color="workspace_status.users_count_porcent.exceded ? 'red' : 'primary' "
-                                    :value="workspace_status.users_count_porcent.porcent"
-                                    height="20"
-                                    rounded
-                                    >
-                                </v-progress-linear>
 
-                                <ul class="px-0 mb-0 mt-4">
-                                    <li class="d-flex justify-content-between mb-1">
-                                        <span>Usuarios Activos</span>
-                                        <div>
-                                            <span v-text="workspace_status.users_count_actives"></span>
-                                            <v-btn 
-                                                text 
-                                                color="primary"
-                                                @click="setStorageUrl(workspace_status.route_user_actives.url, 
-                                                                      workspace_status.route_user_actives.filters)">
-                                                <v-icon>mdi-open-in-new</v-icon>
-                                            </v-btn>
-                                        </div>
-                                    </li>
+                                    <v-progress-linear
+                                            :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
+                                            :value="workspace_status.size_medias_porcent.porcent"
+                                            height="20"
+                                            rounded
+                                        >
+                                    </v-progress-linear>
+                                </v-card-text>
+                            </v-card>
 
-                                    <li class="d-flex justify-content-between">
-                                        <span>Usuarios Inactivos</span>
-                                        <div>
-                                            <span v-text="workspace_status.users_count_inactives"></span>
-                                            <v-btn 
-                                                text 
-                                                color="primary"
-                                                @click="setStorageUrl(workspace_status.route_user_inactives.url, 
-                                                                      workspace_status.route_user_inactives.filters)">
-                                                <v-icon>mdi-open-in-new</v-icon>
-                                            </v-btn>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
+                            <v-card class="p-4 elevation-0 border">
+                                <v-card-title class="p-0 font-weight-bold">Usuarios Activos</v-card-title>
+                                <v-card-text class="p-0">
+                                    <div class="my-3 d-flex flex-column">
+                                        <span 
+                                            class="fa-2x mb-3"
+                                            :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
+                                            v-text="workspace_status.users_count_porcent.porcent+'% '+'utilizado'">
+                                        </span>
+
+                                        <span>
+                                            <span class="font-weight-bold">
+                                                Total utilizado:
+                                                <span v-text="workspace_status.users_count_actives"></span>
+                                            </span>
+                                            / 
+                                            <span v-text="workspace_status.users_count_limit"></span>
+                                        </span>
+                                    </div>
+
+                                    <v-progress-linear
+                                            :color="workspace_status.users_count_porcent.exceded ? 'red' : 'primary' "
+                                            :value="workspace_status.users_count_porcent.porcent"
+                                            height="20"
+                                            rounded
+                                        >
+                                    </v-progress-linear>
+
+                                    <ul class="px-0 mb-0 mt-4">
+                                        <li class="d-flex grey lighten-5 justify-content-between align-items-center p-2 rounded mb-2">
+                                            <span>Usuarios Activos</span>
+                                            <div>
+                                                <span v-text="workspace_status.users_count_actives"></span>
+                                                <v-btn 
+                                                    text 
+                                                    color="primary"
+                                                    @click="setStorageUrl(workspace_status.route_user_actives.url, 
+                                                                          workspace_status.route_user_actives.filters)">
+                                                    <v-icon>mdi-open-in-new</v-icon>
+                                                </v-btn>
+                                            </div>
+                                        </li>
+
+                                        <li class="d-flex grey lighten-5 justify-content-between align-items-center p-2 rounded">
+                                            <span>Usuarios Inactivos</span>
+                                            <div>
+                                                <span v-text="workspace_status.users_count_inactives"></span>
+                                                <v-btn 
+                                                    text 
+                                                    color="primary"
+                                                    @click="setStorageUrl(workspace_status.route_user_inactives.url, 
+                                                                          workspace_status.route_user_inactives.filters)">
+                                                    <v-icon>mdi-open-in-new</v-icon>
+                                                </v-btn>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </v-card-text>
+                            </v-card>
+
                         </v-col>
-                    </v-row>
 
+                        <v-col cols="5" class="align-self-center text-center px-5 py-6">
+                           <img class="w-75" src="/img/user-storage-image.png" alt="user-storage-image" />
+                        </v-col>
+
+                    </v-row>
                 </v-card-text>
             </v-card>
         </section>
