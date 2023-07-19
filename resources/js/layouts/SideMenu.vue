@@ -93,6 +93,8 @@
                             v-text="item.title"
                             class="item_title"
                         ></v-list-item-title>
+                        <div v-if="item.isBeta"
+                             class="beta">Beta</div>
                     </v-list-item>
 
 
@@ -405,6 +407,7 @@ export default {
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],
                         selected: false,
+                        isBeta: true,
                         permission: "checklist",
                         role: [
                             "super-user",
@@ -764,5 +767,15 @@ export default {
 .item_title {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.93em;
+}
+
+.list_submenu .beta {
+    padding: 2px 10px 2px 10px;
+    border-radius: 8px;
+    background: #FFF;
+    color: #5458EA;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
 }
 </style>

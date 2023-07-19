@@ -1383,7 +1383,7 @@ class Course extends BaseModel
         if ($summary_course) return null;
 
         if ($course->compatibilities->count() === 0) return null;
-
+        if(empty($summary_courses_compatibles)) return null;
         // $compatible_summary_course = SummaryCourse::with('course:id,name')
         //     ->whereRelation('course', 'active', ACTIVE)
         //     ->where('user_id', $user->id)
@@ -1391,6 +1391,7 @@ class Course extends BaseModel
         //     ->orderBy('grade_average', 'DESC')
         //     ->whereRelation('status', 'code', 'aprobado')
         //     ->first();
+
         $compatible_summary_course = $summary_courses_compatibles
             ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
             ->sortByDesc('grade_average')
