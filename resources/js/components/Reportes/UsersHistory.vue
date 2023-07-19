@@ -97,7 +97,7 @@ export default {
         async exportReport(reportName) {
 
             const filtersDescriptions = {
-                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+                "Módulos": this.generateNamesArray(this.modules, this.selectedModules),
             }
 
             this.$emit('reportStarted', {})
