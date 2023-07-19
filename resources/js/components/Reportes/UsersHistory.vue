@@ -95,6 +95,11 @@ export default {
         }
         ,
         async exportReport(reportName) {
+
+            const filtersDescriptions = {
+                "Módulos": this.generateNamesArray(this.modules, this.modulo),
+            }
+
             this.$emit('reportStarted', {})
             const url = `${this.reportsBaseUrl}/exportar/${this.reportType}`
             try {
@@ -106,24 +111,12 @@ export default {
                         adminId: this.adminId,
                         reportName,
                         modules: this.selectedModules,
-                        filtersDescriptions: this.generateFiltersDescription(),
-                        selectedCriteria: this.getSelectedFilters()
+                        filtersDescriptions
                     }
                 })
             } catch (ex) {
                 console.log(ex.message)
             }
-        }
-        ,
-        generateFiltersDescription () {
-            let descriptions = {}
-            for(let i = 0; i < this.criteriaInSegmentation.length; i++) {
-                let criterion = this.criteriaInSegmentation[i];
-                if (this.selectedCriteria[i]) {
-                    descriptions[criterion.name] = this.yesOrNo(true)
-                }
-            }
-            return descriptions
         }
         ,
         getSelectedFilters () {
