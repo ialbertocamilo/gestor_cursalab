@@ -203,7 +203,9 @@ Segment extends BaseModel
             $this->storeSegmentationByDocument($request->all());
             //colocar usuarios en cola para actualizaciónes masivas
             $course = Course::find($request->model_id);
-            Summary::updateUsersByCourse($course,null,false,false,'segmented');
+            if($course){
+                Summary::updateUsersByCourse($course,null,false,false,'segmented');
+            }
 
             DB::commit();
         } catch (\Exception $e) {
