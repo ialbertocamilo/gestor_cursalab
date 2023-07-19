@@ -121,7 +121,7 @@ export default {
         getMediaPreview() {
             let vue = this
             // let preview = this.bucketBaseUrl + '/' + "images/default-scorm-img_116_360.png"
-            let preview = "images/default-scorm-img_116_360.png"
+            let preview = "/images/default-scorm-img_116_360.png"
 
             if (vue.TypeOf(this.fileSelected) === 'string') {
                 const extension = this.fileSelected.split('.').at(-1).toLowerCase()
@@ -149,7 +149,7 @@ export default {
             }
 
             return vue.fileSelected
-                ? this.bucketBaseUrl + '/' + preview
+                ? preview
                 : null
         }
     },
