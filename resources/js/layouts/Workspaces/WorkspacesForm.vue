@@ -86,6 +86,7 @@
                                     class="mb-0"
                                 >
                                     <!-- Selecciona los criterios que usa la empresa para segmentar el contenido -->
+                                    <p>En esta sección podrás gestionar los criterios que se mostrarán en la segmentación. Ten en cuenta lo siguiente:</p>
                                     <v-row>
                                         <v-col cols="12" class="py-0">
                                             <small class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
@@ -314,13 +315,8 @@ const fields = [
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
-    'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
-    'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos los workspaces.',
-    'Los "criterios personalizados" son datos que se utilizan de forma opcional por cada workspace.',
-    'Al habilitar un "criterio personalizado", es necesario actualizar la data de los usuarios mediante APIs o subida masiva. De esa forma se podrá utilizar el criterio en las segmentaciones.',
-    'Los criterios que se activen, estarán disponibles en todas las secciones donde se realice "segmentación" dentro del workspace.',
-    'Se recomienda utilizar los criterios predefinidos en la configuración inicial y no habilitar los criterios que no se van  a usar en segmentación o no se va a actualizar el dato por cada usuario.',
-    'Es importante saber que si un criterio es activado y utilizado en alguna segmentación, ya no será posible desactivarlo a menos que se eliminen la segmentaciones donde está presente el criterio.'
+    'Los criterios "por defecto" son obligatorios e inalterables, mientras que los "personalizados" son propios del wokspace.',
+    'Para desactivar un criterio, debes retirarlo de las segmentaciones donde fue usado.',
 ];
 
 export default {

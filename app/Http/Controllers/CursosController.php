@@ -135,6 +135,14 @@ class CursosController extends Controller
 
         $course->lista_escuelas = $schools;
 
+        $mod_evaluaciones = $course->mod_evaluaciones;
+
+        if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
+            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $course->qualification_type->position);
+            $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            $course->mod_evaluaciones = $mod_evaluaciones;
+        }
+
         return $this->success([
             'curso' => $course,
             'requisitos' => $form_selects['requisitos'],

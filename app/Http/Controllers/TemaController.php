@@ -220,6 +220,7 @@ class TemaController extends Controller
         }
         $pregunta->respuestas = $temp;
 
+        $pregunta->score = calculateValueForQualification($pregunta->score, $topic->qualification_type->position);
 
         return $this->success(['pregunta' => $pregunta]);
     }
@@ -239,11 +240,6 @@ class TemaController extends Controller
         if ($result['status'])
             return $this->error($result['message'], 422, ['errors' => [$result['message']]]);
 
-
-        // info('nuevasRptas');
-        // info($data['nuevasRptas']);
-        // info(json_decode($data['nuevasRptas'], true));
-
         Question::updateOrCreate(
             ['id' => $data['id']],
             [
@@ -257,7 +253,7 @@ class TemaController extends Controller
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
                 'required' => $data['required'] ?? NULL,
-                'score' => $data['score'] ?? NULL,
+                'score' => $data['score'] ? calculateValueForQualification($data['score'], 20, $topic->qualification_type->position) : NULL,
                 // 'position' => 'despues'
             ]
         );

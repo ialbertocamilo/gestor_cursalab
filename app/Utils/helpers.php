@@ -374,5 +374,7 @@ function calculateValueForQualification($value, $current_system, $main_system = 
 {
     if ($current_system == $main_system) return $value;
 
-    return $value * $current_system / $main_system;
+    $new_value = $value * $current_system / $main_system;
+
+    return round($new_value, 2);
 }

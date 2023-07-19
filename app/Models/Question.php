@@ -165,6 +165,8 @@ class Question extends BaseModel
         $score_missing = $sum = 0;
         $sum_not_required = $sum_required = 0;
 
+        $current_system = $topic->qualification_type->position;
+
         $data = [];
 
         // if ($topic->evaluation_type->code == 'qualified') {
@@ -176,10 +178,16 @@ class Question extends BaseModel
         $sum_not_required = $sum - $sum_required;
         $score_missing = $s_ev_base - $sum_required;
 
+        $sum = calculateValueForQualification($sum, $current_system);
+        $sum_required = calculateValueForQualification($sum_required, $current_system);
+        $sum_not_required = calculateValueForQualification($sum_not_required, $current_system);
+
         $data = compact('sum', 'sum_required', 'sum_not_required', 'score_missing');
         // }
 
         if ($score_missing == 0) {
+
+            // $data['score_missing'] = calculateValueForQualification()
 
             $topic->update(['evaluation_verified' => true]);
 
@@ -216,6 +224,9 @@ class Question extends BaseModel
         } else {
 
             $score_missing = collect($missings)->pluck('value')->min();
+
+            $score_missing = calculateValueForQualification($score_missing, $current_system);
+
             $message = 'Se necesita ' . $score_missing . ' punto(s) para que la evaluación esté completa.';
 
             $data = compact('sum', 'sum_required', 'sum_not_required', 'score_missing');
@@ -257,8 +268,10 @@ class Question extends BaseModel
                     ->where('id', '<>', $question_id)
                     ->sum('score');
 
-        $status = ($sum + $data['score']) > $base;
+        $status = ($sum + calculateValueForQualification($data['score'], 20, $topic->qualification_type->position)) > $base;
         $missing = $base - $sum;
+
+        $missing = calculateValueForQualification($missing, $topic->qualification_type->position);
 
         $message = 'Solo le quedan ' . $missing . ' punto(s) para preguntas obligatorias.';
 

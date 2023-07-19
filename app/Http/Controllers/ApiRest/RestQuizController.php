@@ -117,6 +117,8 @@ class RestQuizController extends Controller
             $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
         }
 
+        $data_ev['new_grade'] = calculateValueForQualification($data_ev['new_grade'], $topic->qualification_type->position);
+
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 

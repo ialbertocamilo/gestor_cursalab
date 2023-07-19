@@ -108,6 +108,7 @@
                 @onCancel="closeFormModal(modalOptions)"
                 :evaluable="evaluable"
                 :evaluation_type="evaluation_type"
+                :base_score="parseInt(qualification_type_value)"
             />
             <TemaPreguntasImport
                 width="50vw"
