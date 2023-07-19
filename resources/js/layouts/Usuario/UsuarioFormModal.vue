@@ -389,14 +389,18 @@ export default {
             const base = `${vue.options.base_endpoint}`
             const method = edit ? 'put' : 'post';
 
-            let check_users = false;
-            if (!edit) {
-                check_users = await vue.checkUsersStorageLimit();
-                // console.log('check_users limit')
-                if(check_users) return;
-            }
-
             if (validateForm && vue.isValid()) {
+
+                // === verificar limite usuarios ===
+                let check_users = false;
+                if (!edit) {
+                    check_users = await vue.checkUsersStorageLimit();
+                    // console.log('check_users limit')
+                    if(check_users) return;
+                }
+                // === verificar limite usuarios ===
+
+
                 let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
                 let data = vue.resource
                 vue.parseCriterionValues()
