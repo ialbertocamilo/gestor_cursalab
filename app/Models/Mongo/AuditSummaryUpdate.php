@@ -14,7 +14,7 @@ class AuditSummaryUpdate extends Model
 
     protected $table = 'audit_summary_updates';
 
-    protected $fillable = ['user_ids', 'course_id', 'summary_course_update', 'type'];
+    protected $fillable = ['user_ids', 'course_ids', 'summary_course_update', 'type'];
   
     // protected $casts = [
     //     'created_at' => 'datetime',
