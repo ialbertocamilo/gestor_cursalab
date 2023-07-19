@@ -141,7 +141,7 @@ class Summary extends BaseModel
     }
     protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default'){
         $users_id_segmented = [];
-        $course->loadMissing('segments');
+        // $course->loadMissing('segments');
         if($only_users_has_sc){
             $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
         }else{
