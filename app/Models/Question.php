@@ -294,6 +294,9 @@ class Question extends BaseModel
 
         try {
 
+            $topic = Topic::find($data['topic_id']);
+            // $topic_qualification = $topic->qualification_type;
+
             // Calculate total score with the existing questions
 
             $totalScore = Question::calculateTopicQuestionsScore($data['topic_id']);
@@ -301,6 +304,7 @@ class Question extends BaseModel
             $model = new ExamenImport;
             $model->topic_id = $data['topic_id'];
             $model->totalScore = $totalScore;
+            $model->maxScore = $topic->qualification_type->position;
             $model->selectQuestionTypeId = $selectQuestionType->id;
             $model->writtenQuestionTypeId = $writtenQuestionType->id;
             $model->isQualified = $data['isQualified'];
