@@ -23,6 +23,24 @@ class Ticket extends BaseModel
 
     /*
 
+    Mutators and accesors
+
+--------------------------------------------------------------------------*/
+
+
+    public function setInfoSupportAttribute($info): void
+    {
+        $this->attributes['info_support'] = json_encode($info);
+    }
+
+    public function getInfoSupportAttribute($info)
+    {
+
+        return $info ? json_decode($info) : null;
+    }
+
+    /*
+
         Relationships
 
     --------------------------------------------------------------------------*/
@@ -107,11 +125,12 @@ class Ticket extends BaseModel
     }
 
     /**
-     * Set tickets to 'solucionado' login tickets when user has logged in
+     * Mark tickets as "solucionado" when user has logged in
      * after creating the ticket
      * @return void
      */
-    protected function markAsSolucionado() {
+    protected function markAsSolucionado()
+    {
         $subworkspaces = get_current_workspace_indexes();
         $subworkspacesIds = implode(',', $subworkspaces['ids']->toArray());
 
@@ -124,9 +143,36 @@ class Ticket extends BaseModel
         "));
         $usersToUpdateIds = collect($usersToUpdate)->pluck('id');
 
-        Ticket::query()
+        $tickets = Ticket::query()
+            ->where('status', '!=', 'solucionado')
             ->where('reason', 'Soporte Login')
             ->whereIn('user_id', $usersToUpdateIds)
-            ->update(['status' => 'solucionado']);
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $ticket->status = 'solucionado';
+            $ticket->save();
+
+            $this->updateInfoSupport('Plataforma', '');
+        }
+    }
+
+
+    /**
+     * Update values in info_support column
+     */
+    public function updateInfoSupport($solvedBy = null, $contactedBy = null) {
+        $infoSupport = $this->info_support ?? new \stdClass();
+
+        if ($solvedBy) {
+            $infoSupport->solvedBy = $solvedBy;
+        }
+
+        if ($contactedBy) {
+            $infoSupport->contactedBy = $contactedBy;
+        }
+
+        $this->info_support = $infoSupport;
+        $this->save();
     }
 }
