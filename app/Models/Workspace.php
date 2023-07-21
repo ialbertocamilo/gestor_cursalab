@@ -507,16 +507,6 @@ class Workspace extends BaseModel
     public function replicateWithRelations($data)
     {
         $relationships = [
-            // 'schools',
-            // 'courses' => [
-            //     'topics' => [
-            //         'questions',
-            //         'medias',
-            //         'requirements',
-            //     ],
-            //     'polls',
-            //     'requirements'
-            // ],
             'subworkspaces.schools.courses' => [
                 'topics' => [
                     'questions',
@@ -537,10 +527,10 @@ class Workspace extends BaseModel
             'criterionWorkspace', // criterion_workspace OK
             'criteriaValue', // criterion_value_workspace OK
 
-            'videotecas' => [
-                'modules',
-                'tags',
-            ],
+            // 'videotecas' => [
+            //     'modules',
+            //     'tags',
+            // ],
             'medias', // OK
             'polls.questions', // 
         ];
@@ -572,16 +562,10 @@ class Workspace extends BaseModel
 
                 $current_subworkspaces = $workspace->subworkspaces()->get();
 
-                // info('current_subworkspaces');
-                // info($current_subworkspaces->pluck('id'));
-
                 $school = School::whereRelationIn('subworkspaces', 'id', $current_subworkspaces->pluck('id'))
                             ->where('external_id', $_school->id)
                             ->first();
                 
-                // info('school');
-                // info($school);
-
                 if ( ! $school ) {
 
                     $school_data = $_school->toArray();
@@ -609,36 +593,52 @@ class Workspace extends BaseModel
                         
                         foreach ($_course->topics as $_topic) {
 
-                            $topic = $course->topics()->create($_topic->toArray());
+                            $topic_data = $_topic->toArray();
+                            $topic_data['external_id'] = $_topic->id;
 
-                            // $topic->medias()->
+                            $topic = $course->topics()->create($topic_data);
+
+                            $topic->medias()->createMany($_topic->medias->toArray());
                             $topic->questions()->createMany($_topic->questions->toArray());
-                            $topic->requirements()->createMany($_topic->requirements->toArray());
+
+                            $_requirement = $_topic->requirements->first();
+
+                            if ($_requirement) {
+
+                                $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                                if ($requirement) {
+
+                                    Requirement::updateOrCreate(
+                                        ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                        ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                                    );
+                                }
+                            }
                         }
 
                         $workspace->courses()->attach($course);
+
+                        $_c_requirement = $_course->requirements->first();
+
+                        if ($_c_requirement) {
+
+                            $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+                            if ($c_requirement) {
+
+                                Requirement::updateOrCreate(
+                                    ['model_type' => Course::class, 'model_id' => $course->id],
+                                    ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                                );
+                            }
+                        }
 
                     } else {
 
                         $school->courses()->syncWithoutDetaching($course);
                     }
-
-                    // $poll = $workspace->polls->where('name', $) 
-
-                    // if ( $course ) {
-
-                    //     $course = $school->courses()->create($_course);
-                    //     $workspace->courses()->attach($course);
-
-                    // } else {
-
-                    //     $school->courses()->attach($course);
-                    // }
-
-
-
                 }
-
             }
         }
 
@@ -653,19 +653,12 @@ class Workspace extends BaseModel
         $workspace->medias()->createMany($this->medias->toArray());
         // $workspace->polls()->createMany($this->polls);
 
-        
+        // foreach ($this->videotecas as $_videoteca) {
 
-        // foreach ($workspace->subworkspaces as $key => $module) {
-        //     $schools = $this->subworkspaces->where('id', $module->id)->first()->schools;
-        //     $module->schools()->createMany($schools);
-        // }
+        //     $videoteca = $workspace->videotecas()->create($_videoteca->toArray());
 
-        // foreach ($this->relations as $relationName => $values){
-        //     $workspace->{$relationName}()->sync($values);
-        // }
-
-        // foreach ($this->getRelations() as $key => $relation) {
-        //    $model->setAttribute($key, clone $relation);
+        //     $videoteca->modules()->sync($_videoteca->modules);
+        //     $videoteca->tags()->sync($_videoteca->tags);
         // }
 
         return $workspace;
