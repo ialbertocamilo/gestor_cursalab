@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class School extends BaseModel
 {
     protected $fillable = [
-        'name', 'description', 'imagen', 'plantilla_diploma',
+        'name', 'description', 'imagen', 'plantilla_diploma', 'external_id',
          'scheduled_restarts', 'active'
     ];
 

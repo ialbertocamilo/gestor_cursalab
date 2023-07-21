@@ -3,6 +3,10 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+
 use Throwable;
 use Exception;
 
@@ -72,7 +76,7 @@ class Handler extends ExceptionHandler
     {
         Error::storeAndNotificateException($exception, $request);
         if($request->is('integrations*') && $this->isHttpException($exception)){
-            switch ($exception->getStatusCode()) 
+            switch ($exception->getStatusCode())
                 {
                 case 405:
                     return response()->json(['data' =>['message'=>'Method not allowed.']],405);
@@ -81,6 +85,12 @@ class Handler extends ExceptionHandler
                     return response()->json(['data' =>['message'=>'Route not found.']],404);
                 break;
             }
+        }
+        if ($exception instanceof TokenMismatchException) {
+            return redirect('/');
+        }
+        if ($exception instanceof NotFoundHttpException) {
+            return redirect('/'); // Redirigir a la página de inicio
         }
         // if ($request->wantsJson()) {
         //     // Define the response
