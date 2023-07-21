@@ -222,6 +222,69 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
+                                title="Programación de curso"
+                                :coming-soon="true"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+
+                                         <v-col cols="12">
+                                            * Programar la activación y/o inactivación de un curso.
+                                        </v-col>
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter1"
+                                                v-model="resource.publish_date_1"
+                                                label="Fecha de inicio"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Hora"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter2"
+                                                v-model="resource.publish_date_2"
+                                                label="Fecha de fin"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Hora"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                    <!-- <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                        <div style="color: #FF5252" class="v-messages__wrapper">
+                                            <div class="v-messages__message">Validar hora de reinicio</div>
+                                        </div>
+                                    </div> -->
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
                                 title="Configuración de diploma"
                             >
                                 <template slot="content">
@@ -441,6 +504,14 @@ export default {
                     }
                 },
             },
+
+            modalDateFilter1: {
+                open: false
+            },
+
+            modalDateFilter2: {
+                open: false
+            }
         }
     },
     computed: {

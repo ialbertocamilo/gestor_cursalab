@@ -60,7 +60,7 @@ class EntrenadorUsuario extends Model implements Recordable
             ->whereHas('students');
 
         // $queryEntrenadores = Usuario::where('rol_entrenamiento', Usuario::TAG_ROL_ENTRENAMIENTO_ENTRENADOR);
-        if (!empty($filtro) || $filtro == null) {
+        if ((!empty($filtro) || $filtro == null) && !is_array($filtro)) {
             $queryEntrenadores->where(function ($query) use ($filtro) {
                 $query->where('name', 'like', "%$filtro%");
                 $query->orWhere('document', 'like', "%$filtro%");
@@ -244,7 +244,7 @@ class EntrenadorUsuario extends Model implements Recordable
                 });
             })
             ->whereIn('users.id', $alumnos_ids->pluck('user_id')->all())
-            ->select('users.id', 'users.name', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
+            ->select('users.id', 'users.name', 'users.lastname', 'users.surname', 'users.subworkspace_id','users.fullname as full_name', 'users.document', 'w.name as subworkspace','suc.advanced_percentage','suc.assigned');
 
         if ($page) {
             $perPage = 50;
@@ -269,6 +269,7 @@ class EntrenadorUsuario extends Model implements Recordable
             $value->carrera = '';
             $value->advanced_percentage = $value->advanced_percentage ?? 0;
             $value->assigned = $value->assigned ?? 0;
+            $value->name = $value->fullname ?? $value->getFullnameAttribute();
         });
         $response['alumnos'] = $dataAlumnos;
         $response['total_alumnos'] = count($dataAlumnos);

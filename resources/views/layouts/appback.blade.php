@@ -3,6 +3,7 @@
 
     $user = auth()->user();
     $roles = $user->getRoles();
+    $functionality = \App\Models\WorkspaceFunctionality::functionalities( get_current_workspace()->id );
     $subworkspace = get_current_workspace();
     $accounts_count = \App\Models\Account::where('active', ACTIVE)
         ->where('workspace_id', $subworkspace->id ?? null)
@@ -49,23 +50,27 @@ if (isset($fullScreen)) {
 <div id="app">
     @impersonating($guard = null)
         <div class="d-flex align-items-stretch bg-red text-center">
-        
+
             <div class="col text-center">
                 <a class="text-center text-white" href="{{ route('impersonate.leave') }}">Leave impersonation</a>
             </div>
 
-        </div>  
+        </div>
     @endImpersonating
 
     <div class="d-flex align-items-stretch">
 
+        @unless(isset($fullScreen) && $fullScreen)
+
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
                 {{-- <v-app> --}}
-                <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" />
+                <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" :functionality="{{ json_encode($functionality) }}"/>
                 {{-- </v-app> --}}
             </div>
         </div>
+
+        @endunless
 
         <div class="content-inner-small pb-0">
             <p class="">
@@ -219,8 +224,9 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.6' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=2' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.2379-' . date('Y-W-d-H')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.2379-' . date('Y-W-m')) }}"></script>
+
     <script>
         $(document).ready(function () {
             $('#content_polls').css('display','block');

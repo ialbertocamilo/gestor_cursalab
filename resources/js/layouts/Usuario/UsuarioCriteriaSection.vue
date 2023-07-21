@@ -1,27 +1,9 @@
 <template>
     <div class="w-100">
-        <v-row justify="start" v-if="only_req">
-            <v-col cols="4" v-for="criterion in criterion_list" :key="criterion.id"
-                        v-show="criterion.required">
-                <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
 
-                    <DefaultAutocomplete
-                        :rules="criterion.required ? rules.required : []"
-                        :multiple="!!criterion.multiple"
-                        placeholder="Elige una opción"
-                        :label="criterion.name+'*'"
-                        :items="criterion.values"
-                        item-text="value_text"
-                        clearable
-                        v-model="user.criterion_list[criterion.code]"
-                    />
+        <v-row justify="start">
+            <v-col cols="4" v-for="(criterion, index) in criterion_list" :key="criterion.id">
 
-                </div>
-            </v-col>
-        </v-row>
-        <v-row justify="start" v-else>
-            <v-col cols="4" v-for="(criterion, index) in criterion_list" :key="criterion.id"
-                        v-show="!criterion.required">
                 <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
                     <div v-if="criterion.field_type != null && criterion.field_type.code == 'date'">
                         <DefaultInputDate
@@ -66,9 +48,7 @@ export default {
             type: Array | Object,
             required: true
         },
-        only_req: {
-            type: Boolean
-        }
+
     },
     data() {
         return {

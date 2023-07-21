@@ -8,6 +8,8 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     protected $commands = [
+        Commands\MigrarUsuarios::class,
+
         Commands\reptot_data3::class,
         Commands\reptot_data2::class,
         Commands\reptot_data1::class,
@@ -60,6 +62,11 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('tokens:revoke-impersonation-access')->everyTenMinutes();
         // $schedule->command('passport:purge --hours=1')->hourly();
+
+        // Beneficios
+        $schedule->command('beneficios:change-status')->dailyAt('00:00');
+        $schedule->command('beneficios:notify-users')->dailyAt('00:30');
+        $schedule->command('beneficios:email-segments')->everyFiveMinutes();
     }
 
     /**

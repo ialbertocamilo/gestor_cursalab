@@ -14,6 +14,11 @@ class SummaryUser extends Summary
         'grade_average', 'courses_completed', 'advanced_percentage'
     ];
 
+    public $defaultRelationships = [
+        'user_id' => 'user',
+        'status_id' => 'status',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

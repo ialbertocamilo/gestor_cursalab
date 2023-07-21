@@ -1,0 +1,1097 @@
+<?php
+
+namespace App\Models;
+
+use App\Mail\EmailTemplate;
+use App\Services\FileService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
+
+class Benefit extends BaseModel
+{
+    protected $table = 'benefits';
+
+    protected $fillable = [
+        'workspace_id',
+        'type_id',
+        'speaker_id',
+        'status_id',
+        'poll_id',
+        'group_id',
+
+        'title',
+        'description',
+        'image',
+        'cupos',
+        'inicio_inscripcion',
+        'fin_inscripcion',
+        'fecha_liberacion',
+        'correo',
+        'duracion',
+        'promotor',
+        'promotor_imagen',
+        'direccion',
+        'referencia',
+        'accesible',
+
+        'active',
+    ];
+
+    protected $casts = [
+        'active' => 'boolean',
+        'accesible' => 'boolean',
+    ];
+
+    protected $hidden = [
+        'created_at', 'updated_at', 'deleted_at'
+    ];
+
+
+    public function type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Taxonomy::class, 'group_id');
+    }
+
+    public function properties()
+    {
+        return $this->hasMany(BenefitProperty::class, 'benefit_id', 'id');
+    }
+
+    public function speaker()
+    {
+        return $this->belongsTo(Speaker::class, 'speaker_id', 'id');
+    }
+
+    public function implements()
+    {
+        $implements_id = Taxonomy::where('group', 'benefit')
+                            ->where('type', 'benefit_property')
+                            ->where('code', 'implements')
+                            ->first();
+        return $this->properties()->where('type_id', $implements_id->id);
+    }
+
+    public function silabo()
+    {
+        $silabo_id = Taxonomy::where('group', 'benefit')
+                            ->where('type', 'benefit_property')
+                            ->where('code', 'silabo')
+                            ->first();
+        return $this->properties()->where('type_id', $silabo_id->id);
+    }
+
+    public function polls()
+    {
+        $polls_id = Taxonomy::where('group', 'benefit')
+                            ->where('type', 'benefit_property')
+                            ->where('code', 'polls')
+                            ->first();
+        return $this->properties()->where('type_id', $polls_id->id);
+    }
+
+    public function links()
+    {
+        $links_id = Taxonomy::where('group', 'benefit')
+                            ->where('type', 'benefit_property')
+                            ->where('code', 'links')
+                            ->first();
+        return $this->properties()->where('type_id', $links_id->id);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_benefits', 'benefit_id', 'user_id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
+
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
+    protected function storeRequest($data, $benefit = null)
+    {
+        $promotor_imagen_multimedia = (isset($data['promotor_imagen_multimedia']) && !is_null($data['promotor_imagen_multimedia'])) ? $data['promotor_imagen_multimedia'] : null;
+        $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+
+        $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa'])) ? json_decode($data['ubicacion_mapa']) : null;
+
+        if($data_maps) {
+            $geometry = $data_maps->geometry ?? null;
+            $json_maps['location'] = $geometry->location ?? null;
+            $json_maps['address'] = $data_maps->formatted_address ?? null;
+            $json_maps['url'] = $data_maps->url ?? null;
+            $json_maps['image'] = null;
+
+            $data['direccion'] = json_encode($json_maps);
+        }
+
+        $list_links = (isset($data['list_links']) && !is_null($data['list_links'])) ? json_decode($data['list_links']) : null;
+        $list_silabos = (isset($data['list_silabos']) && !is_null($data['list_silabos'])) ? json_decode($data['list_silabos']) : null;
+        $lista_implementos = (isset($data['lista_implementos']) && !is_null($data['lista_implementos'])) ? json_decode($data['lista_implementos']) : null;
+        $speaker = (!is_null($data['speaker'])) ? json_decode($data['speaker']) : null;
+
+        $property_silabo = Taxonomy::getFirstData('benefit', 'benefit_property', 'silabo');
+        $property_links = Taxonomy::getFirstData('benefit', 'benefit_property', 'links');
+        $property_polls = Taxonomy::getFirstData('benefit', 'benefit_property', 'polls');
+        $property_implements = Taxonomy::getFirstData('benefit', 'benefit_property', 'implements');
+
+        $benefit_type = Taxonomy::getFirstData('benefit', 'benefit_type', $data['type']);
+
+        $group = $data['group'] ?? 'free';
+        $benefit_group = Taxonomy::getFirstData('benefit', 'group', $group);
+
+        $data['type_id'] = !is_null($benefit_type) ? $benefit_type->id : null;
+        $data['group_id'] = !is_null($benefit_group) ? $benefit_group->id : null;
+        $data['speaker_id'] = !is_null($speaker) ? $speaker->id : null;
+
+        $data['cupos'] = ( $data['cupos'] == 'ilimitado') ? null : $data['cupos'];
+
+        try {
+            $workspace = get_current_workspace();
+            $data['workspace_id'] = $workspace?->id;
+
+            DB::beginTransaction();
+
+
+            if ($benefit) :
+
+                $benefit->update($data);
+
+            else:
+
+                $benefit = self::create($data);
+
+            endif;
+
+            if(!is_null($list_silabos)) {
+                foreach ($list_silabos as $key => $silabo) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($silabo->id, 'n-') ? null : $silabo->id],
+                        [
+                            'name' => $silabo->name,
+                            'value' => $silabo->value,
+                            'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
+                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:m:i') : null,
+                            'active' => $silabo->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_silabo->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+            if(!is_null($list_links)) {
+                foreach ($list_links as $key => $link) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($link->id, 'n-') ? null : $link->id],
+                        [
+                            'name' => $link->name,
+                            'value' => $link->value,
+                            'active' => $link->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_links->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+            if(!is_null($lista_implementos)) {
+                foreach ($lista_implementos as $key => $implemento) {
+                    BenefitProperty::updateOrCreate(
+                        ['id' => str_contains($implemento->id, 'n-') ? null : $implemento->id],
+                        [
+                            'name' => $implemento->name,
+                            'active' => $implemento->active,
+                            'benefit_id' => $benefit->id,
+                            'type_id' => $property_implements->id,
+                            'position' => $key + 1,
+                        ]
+                    );
+                }
+            }
+
+            $this->setStatus($benefit);
+
+
+            DB::commit();
+        } catch (\Exception $e) {
+            info($e);
+            DB::rollBack();
+            // Error::storeAndNotificateException($e, request());
+            abort(errorExceptionServer());
+        }
+
+        cache_clear_model(Benefit::class);
+        cache_clear_model(BenefitProperty::class);
+
+        return $benefit;
+    }
+
+    protected function getBenefitsList( $data )
+    {
+        $response['data'] = null;
+        $filtro = $data['filtro'] ?? $data['q'] ?? '';
+
+        $workspace = get_current_workspace();
+
+        $benefits_query = Benefit::with(
+            ['speaker',
+            'type'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    }
+                ])
+        ->where('workspace_id', $workspace->id);
+
+        $field = request()->sortBy ?? 'created_at';
+        $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $benefits_query->orderBy($field, $sort);
+
+        if (!is_null($filtro) && !empty($filtro)) {
+            $benefits_query->where(function ($query) use ($filtro) {
+                $query->where('benefits.title', 'like', "%$filtro%");
+                $query->orWhere('benefits.description', 'like', "%$filtro%");
+            });
+        }
+        if(request()->types){
+            $benefits_query->whereHas('type', fn($q) => $q->whereIn('code',request()->types));
+        }
+        if(request()->all_data){
+            $response['data'] = $benefits_query->get();
+            return $response;
+        }
+        $benefits = $benefits_query->paginate(request('paginate', 15));
+
+        $benefits_items = $benefits->items();
+        foreach($benefits_items as $item) {
+            $item->benefit_speaker = $item->speaker?->name ?? null;
+            $item->benefit_type = $item->type?->name ?? null;
+            $item->benefit_stars = null;
+
+            $route_edit = route('benefit.editBenefit', [$item->id]);
+            $item->edit_route = $route_edit;
+        }
+
+        $response['data'] = $benefits->items();
+        $response['lastPage'] = $benefits->lastPage();
+        $response['current_page'] = $benefits->currentPage();
+        $response['first_page_url'] = $benefits->url(1);
+        $response['from'] = $benefits->firstItem();
+        $response['last_page'] = $benefits->lastPage();
+        $response['last_page_url'] = $benefits->url($benefits->lastPage());
+        $response['next_page_url'] = $benefits->nextPageUrl();
+        $response['path'] = $benefits->getOptions()['path'];
+        $response['per_page'] = $benefits->perPage();
+        $response['prev_page_url'] = $benefits->previousPageUrl();
+        $response['to'] = $benefits->lastItem();
+        $response['total'] = $benefits->total();
+
+        return $response;
+    }
+
+    protected function getData( $benefit_id )
+    {
+        $response['data'] = null;
+
+        // $workspace = get_current_workspace();
+
+        $benefit = Benefit::with(
+            ['implements','silabo','polls','links','speaker',
+            'type'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    },
+            'group'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    }
+        ])
+        ->where('id', $benefit_id->id)
+        ->first();
+        // where('workspace_id', $workspace->id)
+
+        if( !is_null($benefit) ) {
+            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('Y-m-d');
+            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('Y-m-d');
+            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('Y-m-d');
+            $benefit->direccion = (!is_null($benefit->direccion)) ? json_decode($benefit->direccion) : null;
+            if($benefit->speaker) {
+                $benefit->speaker->image = $benefit->speaker->image ? FileService::generateUrl($benefit->speaker->image) : $benefit->speaker->image;
+            }
+        }
+
+        return ['data'=> $benefit];
+    }
+
+    protected function getSegments( $benefit_id )
+    {
+        $benefit = null;
+
+        $workspace = get_current_workspace();
+
+        if(!is_null($benefit_id)) {
+
+            $criteria = Segment::getCriteriaByWorkspace(get_current_workspace());
+            $segments = Segment::getSegmentsByModel($criteria, Benefit::class, $benefit_id->id);
+
+            $benefit['segments'] = $segments;
+
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $benefit['segmentation_by_document'] = ['segmentation_by_document'=> $segmentation_by_document_list];
+
+        }
+
+        return ['benefit' => $benefit];
+    }
+
+    protected function setStatus( $benefit )
+    {
+        if($benefit) {
+
+            $inicio_inscripcion = new Carbon($benefit->inicio_inscripcion);
+            $fin_inscripcion = new Carbon($benefit->fin_inscripcion);
+            $fecha_liberacion = new Carbon($benefit->fecha_liberacion);
+            $now = Carbon::now();
+
+
+            $status_active = Taxonomy::getFirstData('benefit', 'status', 'active');
+            $status_locked = Taxonomy::getFirstData('benefit', 'status', 'locked');
+            $status_finished = Taxonomy::getFirstData('benefit', 'status', 'finished');
+            $status_released = Taxonomy::getFirstData('benefit', 'status', 'released');
+
+            if($now->lt($inicio_inscripcion)) {
+                $benefit->status_id = $status_locked->id;
+            }
+            else if ($now->gt($inicio_inscripcion) && $now->lt($fin_inscripcion)) {
+                $benefit->status_id = $status_active->id;
+            }
+            else if($now->gt($fin_inscripcion) && $now->lt($fecha_liberacion)) {
+                $benefit->status_id = $status_finished->id;
+            }
+            else if($now->gt($fecha_liberacion)) {
+                $benefit->status_id = $status_released->id;
+            }
+
+            $benefit->save();
+        }
+
+        cache_clear_model(Benefit::class);
+
+        return $benefit;
+    }
+
+    // Apis
+    protected function registerUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        $max_benefits_workspace = Benefit::join('workspaces','benefits.workspace_id','=','workspaces.id')
+                                ->where('benefits.id', $benefit_id)
+                                ->select('workspaces.max_benefits')
+                                ->first();
+
+        $limit_benefits_x_user = $max_benefits_workspace ? $max_benefits_workspace->max_benefits : 0;
+        $limit_benefits_x_user = $limit_benefits_x_user ?? 0;
+
+        $is_registered = UserBenefit::where('user_id', $user_id)
+                        ->where('benefit_id', $benefit_id)
+                        ->whereHas('status', function($q){
+                            $q->where('code','subscribed');
+                        })
+                        ->first();
+
+        if($is_registered) {
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'Ya cuentas con este beneficio',
+                'description' => ['Ya te encuentras registrado en este beneficio.']
+            ];
+        }
+        else {
+
+            $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('user_id',$user_id)->count();
+            if($benefits_user_registered < $limit_benefits_x_user) {
+                try {
+                    DB::beginTransaction();
+
+                    $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+
+                    $is_created = UserBenefit::create([
+                        'user_id' => $user_id,
+                        'benefit_id' => $benefit_id,
+                        'status_id' => $user_status_subscribed?->id,
+                    ]);
+                    cache_clear_model(UserBenefit::class);
+
+                    if($is_created) {
+
+                        $benefit = Benefit::where('id', $benefit_id)->first();
+
+                        $user = User::where('id', $user_id)->first();
+                        if($user){
+                            $users = [];
+                            array_push($users, $user);
+                            $benefit->syncUsersInBenefitsMeeting($users);
+                        }
+
+                        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit->id)->count();
+
+                        if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                            $registrados = $users_subscribed_in_benefit;
+                            $benefit->cupos -= $registrados;
+                            $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                        }
+
+                        $response['msg'] = [
+                            'title' => 'Inscripción confirmada',
+                            'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
+                        ];
+                        $response['data'] = [
+                            'benefit_id' => $benefit_id,
+                            'user_status' => ['name' => 'Retirarme', 'code' => 'subscribed'],
+                            'subscribed' => true,
+                            'status' => ['name' => 'Retirarme', 'code' => 'subscribed'],
+                            'cupos' => $benefit->cupos ?? null
+                        ];
+                    }
+
+                    DB::commit();
+
+                } catch (\Exception $e) {
+                    info($e);
+                    DB::rollBack();
+                    // Error::storeAndNotificateException($e, request());
+                    $response['error'] = true;
+                    $response['msg'] = [
+                        'title' => 'No se pudo registrar a este beneficio',
+                        'description' => ['No se pudo registrar a este beneficio. Inténtelo nuevamente.']
+                    ];
+                    // abort(errorExceptionServer());
+                }
+
+            }
+            else {
+                $response['error'] = true;
+                $response['msg'] = [
+                    'title' => 'Límite de inscripciones alcanzadas',
+                    'description' => [
+                        'Has alcanzando <b>el máximo de beneficios inscritos a la vez ('.$limit_benefits_x_user.')</b>, si deseas registrarte debes retirarte de otro beneficio o comunicarte con tu coordinador del beneficio.'
+                    ]
+                ];
+            }
+        }
+
+        return $response;
+    }
+
+    protected function notifyUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        try {
+            DB::beginTransaction();
+
+            $user_status_notify = Taxonomy::getFirstData('benefit', 'user_status', 'notify');
+
+            $benefit = UserBenefit::where('user_id', $user_id)
+                                ->where('benefit_id', $benefit_id)
+                                ->first();
+
+            if($benefit) {
+                $benefit->status_id = $user_status_notify?->id;
+                $benefit->save();
+            }
+            else {
+                $benefit = UserBenefit::create([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id,
+                    'status_id' => $user_status_notify?->id,
+                ]);
+            }
+            cache_clear_model(UserBenefit::class);
+
+            if($benefit) {
+
+                $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                    $q->where('code', 'subscribed');
+                                })
+                                ->where('benefit_id', $benefit->id)->count();
+
+                if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                    $registrados = $users_subscribed_in_benefit;
+                    $benefit->cupos -= $registrados;
+                    $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                }
+
+                $response['msg'] = [
+                    'title' => 'Alerta de beneficio activada',
+                    'description' => ['Se notificará en tu correo asignado cuando este beneficio se encuentre disponible.']
+                ];
+                $response['data'] = [
+                    'benefit_id' => $benefit_id,
+                    'user_status' => ['name' => 'Notificarme', 'code' => 'notify'],
+                    'subscribed' => false,
+                    'status' => ['name' => 'Notificarme', 'code' => 'notify'],
+                    'cupos' => $benefit->cupos ?? null
+                ];
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            info($e);
+            DB::rollBack();
+            // Error::storeAndNotificateException($e, request());
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'No se pudo registrar a este beneficio',
+                'description' => ['No se pudo registrar a este beneficio. Inténtelo nuevamente.']
+            ];
+            // abort(errorExceptionServer());
+        }
+
+        return $response;
+    }
+
+    protected function unsubscribeUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        $is_registered = UserBenefit::where('user_id', $user_id)
+                        ->where('benefit_id', $benefit_id)
+                        ->whereHas('status', function($q){
+                            $q->where('code', 'subscribed');
+                        })
+                        ->first();
+
+        if(!$is_registered) {
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'No cuentas con este beneficio',
+                'description' => ['No estás registrado en este beneficio.']
+            ];
+        }
+        else {
+
+            try {
+                DB::beginTransaction();
+
+                    $user_status_unsubscribe = Taxonomy::getFirstData('benefit', 'user_status', 'unsubscribe');
+
+                    $is_registered->status_id = $user_status_unsubscribe?->id;
+                    $is_registered->save();
+                    $is_registered->delete();
+                    cache_clear_model(UserBenefit::class);
+
+                    $benefit = Benefit::where('id', $benefit_id)->first();
+
+                    if($benefit){
+
+                        $user = User::where('id', $user_id)->first();
+                        if($user){
+                            $users = [];
+                            array_push($users, $user);
+                            $benefit->syncUsersInBenefitsMeeting($users, 'remove');
+                        }
+
+                        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit->id)->count();
+
+                        if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                            $registrados = $users_subscribed_in_benefit;
+                            $benefit->cupos -= $registrados;
+                            $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                        }
+
+                        $response['msg'] = [
+                            'title' => 'Te has retirado del beneficio',
+                            'description' => ['Ya no te encuentras registrado al beneficio: '. $benefit->title]
+                        ];
+                        $response['data'] = [
+                            'benefit_id' => $benefit_id,
+                            'user_status' => ['name' => 'Registrarme', 'code' => 'active'],
+                            'subscribed' => false,
+                            'status' => ['name' => 'Registrarme', 'code' => 'active'],
+                            'cupos' => $benefit->cupos ?? null
+                        ];
+                    }
+
+                DB::commit();
+
+            } catch (\Exception $e) {
+                info($e);
+                DB::rollBack();
+                // Error::storeAndNotificateException($e, request());
+                $response['error'] = true;
+                $response['msg'] = [
+                    'title' => 'No se pudo dar de baja a este beneficio',
+                    'description' => ['No se pudo dar de baja a este beneficio. Inténtelo nuevamente.']
+                ];
+                // abort(errorExceptionServer());
+            }
+
+        }
+
+        return $response;
+    }
+
+    protected function getBenefits( $data )
+    {
+        $user = auth()->user();
+        $workspace_id = $user?->subworkspace?->parent?->id;
+
+        $response['data'] = null;
+        $filtro = $data['filtro'] ?? $data['q'] ?? '';
+        $user_id = $data['user'];
+        $status_benefit = ($data['status'] && is_array($data['status']) && count($data['status']) > 0) ? $data['status'] : null;
+        $group_benefit = ($data['type'] && is_array($data['type']) && count($data['type']) > 0) ? $data['type'] : null;
+
+        if( is_array($status_benefit) && in_array('locked', $status_benefit) )
+            array_push($status_benefit,'finished');
+
+        $benefits_asigned = array_column($user->getSegmentedByModelType(Benefit::class),'id');
+
+        $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'subscribed');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
+        $benefits_user_notified = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'notify');
+                                        $q->orWhere('code', 'notified');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
+
+        $benefits_query = Benefit::with([
+            'polls',
+            'group'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
+            'type'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
+            'status'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                }
+        ])
+        ->where('active',1)
+        ->whereIn('id', $benefits_asigned);
+
+        $field = request()->sortBy ?? 'created_at';
+        $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $benefits_query->orderBy($field, $sort);
+
+        $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+            $query->where('code', '<>', 'released');
+        });
+
+        if (!is_null($filtro) && !empty($filtro)) {
+            $benefits_query->where(function ($query) use ($filtro) {
+                $query->where('benefits.title', 'like', "%$filtro%");
+                $query->orWhere('benefits.description', 'like', "%$filtro%");
+            });
+        }
+        if($status_benefit) {
+            if(in_array('subscribed', $status_benefit) && count($status_benefit) == 1) {
+                $benefits_query->whereIn('id', $benefits_user_registered);
+            }
+            else if(in_array('subscribed', $status_benefit) && count($status_benefit) > 1) {
+                $benefits_query->whereIn('id', $benefits_user_registered);
+                $benefits_query->orWhereHas('status', function ($query) use ($status_benefit) {
+                    $query->whereIn('code', $status_benefit);
+                });
+            }
+            else {
+                $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+                    $query->whereIn('code', $status_benefit);
+                });
+            }
+        }
+        if($group_benefit) {
+            $benefits_query->whereHas('group', function ($query) use ($group_benefit) {
+                $query->whereIn('code', $group_benefit);
+            });
+        }
+
+        $benefits = $benefits_query->paginate(request('paginate', 15));
+
+        $benefits_items = $benefits->items();
+
+        foreach($benefits_items as $key => $item)
+        {
+            $item->user_status = null;
+            $item->subscribed = false;
+            $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                                $q->where('code', 'subscribed');
+                                            })
+                                            ->where('benefit_id', $item->id)->count();
+            if(!is_null($item->cupos) && is_numeric($item->cupos)) {
+                $registrados = $users_subscribed_in_benefit;
+                $item->cupos -= $registrados;
+                $item->cupos = $item->cupos < 0 ? 0 : $item->cupos;
+            }
+
+            if(in_array($item->id, $benefits_user_registered)) {
+                $item->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
+                $item->subscribed = true;
+                if($item->status?->code == 'released') {
+                    $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                }
+            }
+            else if (in_array($item->id, $benefits_user_notified)) {
+                $item->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
+                if($item->status?->code == 'active') {
+                    $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                }
+            }
+            else {
+                if($item->status?->code == 'active') {
+                    $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                    if($item->cupos == 0)
+                        $item->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($item->status?->code == 'locked') {
+                    $item->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
+                }
+                else if($item->status?->code == 'finished') {
+                    $item->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($item->status?->code == 'released') {
+                    $item->user_status = $item->status;
+                }
+            }
+
+            unset($item->status);
+            $item->status = $item->user_status;
+
+
+            $item->ubicacion = null;
+            $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
+            $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
+            $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+
+            if(!is_null($item->poll_id)) {
+                $item->type_poll = 'interno';
+                $poll = Poll::select('id','titulo','imagen','anonima')->where('id', $item->poll_id)->first();
+                $item->poll = $poll;
+            }
+            else {
+                $item->poll = null;
+                if(count($item->polls) > 0)
+                    $item->type_poll = 'externo';
+                else
+                    $item->type_poll = null;
+            }
+
+            unset(
+                $item->promotor,
+                $item->promotor_imagen,
+                $item->direccion,
+                $item->referencia,
+                $item->duracion,
+                $item->workspace_id,
+                $item->type_id,
+                $item->speaker_id,
+                $item->status_id,
+                $item->active,
+                $item->user_status
+            );
+        }
+
+        $response['data'] = $benefits->items();
+        $response['lastPage'] = $benefits->lastPage();
+        $response['current_page'] = $benefits->currentPage();
+        $response['first_page_url'] = $benefits->url(1);
+        $response['from'] = $benefits->firstItem();
+        $response['last_page'] = $benefits->lastPage();
+        $response['last_page_url'] = $benefits->url($benefits->lastPage());
+        $response['next_page_url'] = $benefits->nextPageUrl();
+        $response['path'] = $benefits->getOptions()['path'];
+        $response['per_page'] = $benefits->perPage();
+        $response['prev_page_url'] = $benefits->previousPageUrl();
+        $response['to'] = $benefits->lastItem();
+        $response['total'] = $benefits->total();
+
+        return $response;
+    }
+
+    protected function getInfo( $data )
+    {
+        $response['data'] = null;
+        $benefit_id = $data['benefit'];
+        $user_id = $data['user'];
+
+        $benefits_user_registered = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'subscribed');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
+
+        $benefits_user_notified = UserBenefit::whereHas('status', function($q){
+                                        $q->where('code', 'notify');
+                                        $q->orWhere('code', 'notified');
+                                    })
+                                    ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
+
+        $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                            $q->where('code', 'subscribed');
+                                        })
+                                        ->where('benefit_id', $benefit_id?->id)->count();
+
+        $benefit = Benefit::with(
+            ['implements','silabo','polls','links','speaker',
+            'group'=> function ($query) {
+                    $query->select('id', 'name', 'code');
+                },
+            'type'=> function ($query) {
+                        $query->select('id', 'name', 'code');
+                    },
+            'status'=> function ($query) {
+                $query->select('id', 'name', 'code');
+            }
+        ])
+        ->where('active',1)
+        ->where('id', $benefit_id->id)
+        ->first();
+
+        if($benefit) {
+
+            $benefit->user_status = null;
+            $benefit->subscribed = false;
+            if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                $registrados = $users_subscribed_in_benefit;
+                $benefit->cupos -= $registrados;
+                $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+            }
+
+            if(in_array($benefit->id, $benefits_user_registered)) {
+
+                $benefit->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
+                $benefit->subscribed = true;
+                if($benefit->status?->code == 'released') {
+                    $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                }
+
+            }
+            else if (in_array($benefit->id, $benefits_user_notified)) {
+
+                $benefit->user_status = ['name' => 'Notificarme', 'code' => 'notify'];
+                if($benefit->status?->code == 'active') {
+                    $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                }
+            }
+            else {
+                if($benefit->status?->code == 'active') {
+                    $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
+                    if($benefit->cupos == 0)
+                        $benefit->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($benefit->status?->code == 'locked') {
+                    $benefit->user_status = ['name' => 'Notificarme', 'code' => 'disabled'];
+                }
+                else if($benefit->status?->code == 'finished') {
+                    $benefit->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
+                }
+                else if($benefit->status?->code == 'released') {
+                    $benefit->user_status = $benefit->status;
+                }
+            }
+
+            unset($benefit->status);
+            $benefit->status = $benefit->user_status;
+
+            $direccion = ($benefit->direccion) ? json_decode($benefit->direccion) : null;
+            if ($direccion) {
+                $benefit->direccion = (object)[
+                    'lugar' => $direccion->address,
+                    'link' => $direccion->url,
+                    'image' => null,
+                    'referencia' => $benefit->referencia,
+                ];
+            }
+            else{
+                $benefit->direccion = null;
+            }
+            $benefit->ubicacion = null;
+            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
+            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
+            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+
+            if(!is_null($benefit->poll_id)) {
+                $benefit->type_poll = 'interno';
+                $poll = Poll::select('id','titulo','imagen','anonima')->where('id', $benefit->poll_id)->first();
+                $benefit->poll = $poll;
+            }
+            else {
+                $benefit->poll = null;
+                if(count($benefit->polls) > 0)
+                    $benefit->type_poll = 'externo';
+                else
+                    $benefit->type_poll = null;
+            }
+
+            $benefit->silabo->each(function($item){
+                $item->value_date = Carbon::parse($item->value_date)->format('d/m/Y');
+                $item->value_time = Carbon::parse($item->value_time)->format('H:i');
+            });
+
+            unset(
+                $benefit->referencia,
+                $benefit->workspace_id,
+                $benefit->type_id,
+                $benefit->speaker_id,
+                $benefit->status_id,
+                $benefit->poll_id,
+                $benefit->active
+            );
+        }
+
+        return ['data'=>$benefit];
+    }
+
+    protected function config($data)
+    {
+        $response = [
+            "buscador" => [
+                "filtros_status" => [
+                    ["name" => "Activos", "code"=> "active", "checked" => true],
+                    ["name" => "Bloqueados", "code"=> "locked", "checked" => true],
+                    ["name" => "Registrados", "code"=> "subscribed", "checked" => true],
+                    ["name" => "Canjeados", "code"=> "exchanged", "checked" => true]
+                ],
+                "filtros_tipo" => [
+                    ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                ]
+            ],
+            "tabs"=> [
+                [
+                    "name" => "IR Academy",
+                    "code" => "ir-academy",
+                    "filtros_status" => [
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
+                    ],
+                    "filtros_tipo" => [
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                    ]
+                ],
+                [
+                    "name" => "Todos",
+                    "code"=> "free",
+                    "filtros_status" => [
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
+                    ],
+                    "filtros_tipo" => [
+                        ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                    ]
+                ],
+                [
+                    "name" => "Mis Beneficios",
+                    "code"=> "benefits",
+                    "filtros_status" => [
+                        ["name" => "Canjeados", "code"=> "exchanged", "checked" => true],
+                        ["name" => "Registrados", "code"=> "subscribed", "checked" => true]
+                    ],
+                    "filtros_tipo" => [
+                        ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                    ]
+                ]
+            ]
+        ];
+        return ['data' => $response];
+    }
+
+    protected function sendEmail( $type = null, $user = null, $benefit = null )
+    {
+        if($type && $user && $benefit){
+            $base_url = env('WEB_BASE_URL') ?? null;
+            $email = $user?->email ?? null;
+
+            if($base_url) {
+                if($type == 'notify') {
+                    $imagen = URL::asset('img/benefits/icon_mail_notify.png');
+                    $subject = 'Inscripción abierta';
+                }
+                else {
+                    $imagen = URL::asset('img/benefits/icon_mail_new.png');
+                    $subject = 'Tenemos un nuevo beneficio para ti';
+                }
+                $mail_data = [ 'subject' => $subject,
+                               'benefit_name' => $benefit?->title,
+                               'benefit_link' => $base_url.'/beneficio?beneficio='.$benefit?->id,
+                               'icon' => $imagen ];
+
+                // enviar email
+                if($email) {
+                    Mail::to($email)
+                        ->send(new EmailTemplate('emails.nuevo_beneficio', $mail_data));
+                }
+            }
+        }
+    }
+    function syncUsersInBenefitsMeeting(array $users,$type='add'){
+        //$benefit->syncUsersInBenefitsMeeting(User $users);
+        $benefit = $this;
+        $benefit->loadMissing('silabo');
+        foreach ($benefit->silabo as $silabo) {
+            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')->where('model_id',$silabo->id)->first();
+            if($meeting){
+                switch ($type) {
+                    case 'add':
+                        Meeting::addAttendantFromUser($meeting,$users);
+                        break;
+                    case 'remove':
+                        Meeting::deleteAttendantFromUser($meeting,$users);
+                        break;
+                }
+            }
+        }
+    }
+}

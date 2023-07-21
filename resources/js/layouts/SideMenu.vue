@@ -119,8 +119,8 @@ const SUB_ITEM_GLOSARY =  { title:"Glosario",
 const SUB_ITEM_VADEMECUM = {
                             title:"Protocolos y Documentos",
                             icon:"fas fa-file-invoice",
-                            path:"/vademecum",
-                            subpaths:["vademecum"],
+                            path:"/protocolos-y-documentos",
+                            subpaths:["protocolos-y-documentos"],
                             selected:false,
                             permission:"vademecum",
                             role:["super-user","admin","content-manager","trainer-TEST"]
@@ -138,6 +138,7 @@ export default {
                 title: "RESUMEN",
                 icon: "fas fa-dice-d6",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Dashboard",
@@ -175,12 +176,13 @@ export default {
                 title: "AULAS VIRTUALES",
                 icon: "fas fa-chalkboard",
                 active: false,
+                functionality: ['sesiones-live'],
                 items: [
                     {
                         title: "Aulas Virtuales",
                         icon: "fas fa-chalkboard-teacher",
-                        path: "/aulas-virtuales",
-                        subpaths: ["aulas-virtuales"],
+                        path: "/aulas-virtuales/reuniones",
+                        subpaths: ["aulas-virtuales/reuniones"],
                         selected: false,
                         permission: "meetings",
                         role: ["super-user", this.show_meeting_section]
@@ -189,7 +191,7 @@ export default {
                         title: "Cuentas Zoom",
                         icon: "fas fa-chalkboard-teacher",
                         path: "/aulas-virtuales/cuentas",
-                        subpaths: ["cuentas-zoom"],
+                        subpaths: ["aulas-virtuales/cuentas"],
                         selected: false,
                         permission: "accounts",
                         role: ["super-user"]
@@ -199,9 +201,44 @@ export default {
                 ]
             },
             {
+                title: "BENEFICIOS",
+                icon: "fas fa-gift",
+                active: false,
+                functionality: ['benefits'],
+                items: [
+                    {
+                        title: "Configuración",
+                        icon: "fas fa-gift",
+                        path: "/beneficios",
+                        subpaths: ["beneficios"],
+                        selected: false,
+                        permission: "beneficios",
+                        isBeta: true,
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
+                    },
+                    {
+                        title: "Expositores",
+                        icon: "fas fa-gift",
+                        path: "/speakers",
+                        subpaths: ["speakers"],
+                        selected: false,
+                        permission: "speakers",
+                        isBeta: true,
+                        role: [
+                            "super-user",
+                            "admin"
+                        ]
+                    }
+                ]
+            },
+            {
                 title: "USUARIOS",
                 icon: "fas fa-users-cog",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Módulos",
@@ -237,7 +274,7 @@ export default {
                         path: "/users",
                         subpaths: ["users"],
                         selected: false,
-                        role: ["super-user", "config"]
+                        role: ["super-user"]
                     },
                     {
                         title: "Criterios",
@@ -264,6 +301,7 @@ export default {
                 title: "GESTIONA TUS CURSOS",
                 icon: "fas fa-cog",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Módulos",
@@ -290,6 +328,7 @@ export default {
                         path: "/escuelas",
                         subpaths: ["escuelas"],
                         selected: false,
+                        isBeta: false,
                         permission: "escuelas",
                         role: [
                             "super-user",
@@ -304,6 +343,7 @@ export default {
                         path: "/cursos",
                         subpaths: ["cursos"],
                         selected: false,
+                        isBeta: false,
                         permission: "cursos",
                         role: [
                             "super-user",
@@ -322,11 +362,51 @@ export default {
                     // },
                 ]
             },
+            {
+                title: "DIPLOMAS",
+                icon: "fas fa-medal",
+                active: false,
+                isBeta: true,
+                functionality: ['default'],
+                items: [
+                    {
+                        title: "Listar",
+                        icon: "fas fa-list",
+                        path: "/diplomas",
+                        subpaths: ["diplomas"],
+                        selected: false,
+                        isBeta: true,
+                        permission: "diplomas",
+                        role: [
+                            "super-user",
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
+                        ]
+                    },
 
+                    {
+                        title: "Crear",
+                        icon: "fas fa-plus",
+                        path: "/diploma/create",
+                        subpaths: ["diploma/create"],
+                        selected: false,
+                        isBeta: true,
+                        permission: "diploma_create",
+                        role: [
+                            "super-user",
+                            // "admin",
+                            // "content-manager",
+                            // "trainer"
+                        ]
+                    }
+                ]
+            },
             {
                 title: "GESTIONA TU CONTENIDO",
                 icon: "fas fa-pen-square",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Anuncios",
@@ -386,6 +466,7 @@ export default {
                 title: "ENTRENADORES Y CHECKLIST",
                 icon: "fas fa-business-time",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Entrenadores",
@@ -422,6 +503,7 @@ export default {
                 title: "REPORTES",
                 icon: "fas fa-download",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "General",
@@ -473,6 +555,7 @@ export default {
                 title: "HERRAMIENTAS",
                 icon: "fas fa-tools",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Notificaciones push",
@@ -486,17 +569,17 @@ export default {
                     {
                         title: "Intentos masivos",
                         icon: "fas fa-redo-alt",
-                        path: "/masivo/usuarios/index_reinicios",
-                        subpaths: ["masivo/usuarios"],
+                        path: "/intentos-masivos",
+                        subpaths: ["intentos-masivos"],
                         selected: false,
                         permission: "reinicio_usuarios",
                         role: ["super-user", "admin"]
                     },
                     {
-                        title: "Subida masivos",
+                        title: "Procesos masivos",
                         icon: "fas fa-share-square",
-                        path: "/masivos",
-                        subpaths: ["masivos"],
+                        path: "/procesos-masivos",
+                        subpaths: ["procesos-masivos"],
                         selected: false,
                         permission: "proceso_masivo",
                         role: ["super-user", "admin"]
@@ -517,7 +600,7 @@ export default {
                         subpaths: ["documentation-api"],
                         selected: false,
                         permission: "documentation_api",
-                        role: ["super-user", "admin"]
+                        role: ["super-user"]
                     }
                 ]
             },
@@ -525,6 +608,7 @@ export default {
                 title: "ATENCIÓN AL COLABORADOR",
                 icon: "fas fa-headset",
                 active: false,
+                functionality: ['default'],
                 items: [
                     {
                         title: "Preguntas frecuentes",
@@ -559,6 +643,21 @@ export default {
                         role: ["super-user", "admin"]
                     },
                 ]
+            },
+            {
+                title: "CONFIGURACIÓN",
+                icon: "fas fa-wrench",
+                active: false,
+                items: [
+                    {
+                        title: "Ambiente",
+                        icon: "fas fa-cog",
+                        path: "/ambiente",
+                        subpaths: ["ambiente"],
+                        selected: false,
+                        role: ["super-user"]
+                    },
+                ]
             }
         ]
     }),
@@ -570,6 +669,10 @@ export default {
         show_meeting_section: {
             type: String,
             required: true
+        },
+        functionality: {
+            type: Array,
+            required: true
         }
 
     },
@@ -577,6 +680,7 @@ export default {
         gruposFiltrado: function() {
             let vue = this;
             let new_grupos = [];
+            let new_grupos_sections = [];
             let location = window.location.pathname.split("/");
             this.grupos.forEach(grupo => {
                 let new_items = [];
@@ -596,8 +700,20 @@ export default {
                     new_grupos.push(grupo);
                 }
             });
+            new_grupos.forEach(sec => {
+                if (!sec.hasOwnProperty('functionality')) {
+                    new_grupos_sections.push(sec)
+                }
+                else {
+                    vue.functionality.forEach(f => {
+                        if (sec.functionality.includes(f)) {
+                            new_grupos_sections.push(sec)
+                        }
+                    });
+                }
+            });
             // console.log(new_grupos);
-            return new_grupos;
+            return new_grupos_sections;
         }
     },
     mounted() {
@@ -619,13 +735,14 @@ export default {
          * Load data from server
          */
         loadData() {
+
             let vue = this;
 
             // Load workspaces
 
             let url = `/workspaces/search`;
             this.$http.get(url).then(({ data }) => {
-                vue.workspaces = data.data.data;
+                vue.workspaces = data.data.workspaces.data;
             });
         },
 

@@ -44,6 +44,13 @@ Vue.use(VueNotification, {
         color: "#0f5132"
     }
 });
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps , {
+    load: {
+        key: 'AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE',
+        libraries: 'places',
+    },
+})
 
 Vue.use(Toast, {
     position: "bottom-right",
@@ -117,6 +124,10 @@ Vue.component("usuario-ayuda", require("./layouts/UsuarioAyuda.vue"));
 Vue.component("soporte-layout", require("./layouts/Soporte/SoporteListPage.vue"));
 Vue.component("soporte-ayuda-layout", require("./layouts/Soporte/Ayudas/AyudaListPage.vue"));
 
+// diplomas
+Vue.component("diploma-layout", require("./layouts/Diplomas/DiplomasListPage"));
+Vue.component("diploma-form-page", require("./layouts/Diplomas/DiplomaFormPage"));
+
 // Gestor views
 Vue.component("blocks-layout", require("./layouts/Blocks/BlockListPage"));
 Vue.component("blocks-form-data-layout", require("./layouts/Blocks/BlockFormDataPage"));
@@ -125,6 +136,7 @@ Vue.component("tag-layout", require("./layouts/Tags/TagListPage"));
 Vue.component("error-layout", require("./layouts/Errores/ErrorListPage"));
 Vue.component("usuario-layout", require("./layouts/Usuario/UsuarioListPage"));
 Vue.component("modulo-layout", require("./layouts/Modulos/ModuloListPage"));
+Vue.component("role-layout", require("./layouts/Roles/RoleListPage"));
 Vue.component("escuela-layout", require("./layouts/Escuelas/EscuelaListPage"));
 Vue.component("escuela-form-page", require("./layouts/Escuelas/EscuelaFormPage"));
 Vue.component("curso-layout", require("./layouts/Cursos/CursosListPage"));
@@ -140,6 +152,7 @@ Vue.component("criterion-layout-wk", require("./layouts/Criteria/CriterionListPa
 Vue.component("criterion-value-layout", require("./layouts/Criteria/CriterionValues/CriterionValueListPage"));
 Vue.component("encuesta-layout", require("./layouts/Encuestas/EncuestaListPage"));
 Vue.component("incidencia-layout", require("./layouts/Incidencias/IncidenciaListPage"));
+Vue.component("ambiente-layout", require("./layouts/Ambiente/AmbientePage"));
 Vue.component(
     "encuesta-pregunta-layout",
     require("./layouts/Encuestas/Preguntas/PreguntaListPage")
@@ -199,6 +212,12 @@ Vue.component("meetings-layout", require("./layouts/Meetings/MeetingsListPage.vu
 Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue"));
 
 Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
+
+Vue.component("benefit-layout", require("./layouts/Benefits/BenefitsList.vue"));
+Vue.component("benefit-form-page", require("./layouts/Benefits/BenefitFormPage"));
+
+Vue.component("speaker-layout", require("./layouts/Speakers/SpeakersList.vue"));
+Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage"));
 
 const app = new Vue({
     vuetify,

@@ -27,6 +27,7 @@ use App\Models\Workspace;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
+use App\Models\UsuarioMaster;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
 use App\Services\FileService;
@@ -221,22 +222,46 @@ class UsuarioController extends Controller
 
     public function store(UserStoreRequest $request)
     {
-        $data = $request->validated();
-        // $data['subworkspace_id'] = get_current_workspace()?->id;
+        try{
+            $data = $request->validated();
+            // $data['subworkspace_id'] = get_current_workspace()?->id;
 
-        User::storeRequest($data);
+            /****************** Insertar/Actualizar en BD master ****************/
+            if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                $this->crear_o_actualizar_usuario_en_master(null, null, $data);
 
-        return $this->success(['msg' => 'Usuario creado correctamente.']);
+            }
+            /********************************************************************/
+            User::storeRequest($data);
+
+            return $this->success(['msg' => 'Usuario creado correctamente.']);
+        } catch (\Exception $e){
+             return $this->master_errors($e);
+        }
+
     }
 
     public function update(UserStoreRequest $request, User $user)
     {
-        $data = $request->validated();
-        // $data['subworkspace_id'] = get_current_workspace()?->id;
-        // info($data);
-        User::storeRequest($data, $user);
+        try{
+             $data = $request->validated();
+            // $data['subworkspace_id'] = get_current_workspace()?->id;
+            // info($data);
+            /****************** Insertar/Actualizar en BD master ****************/
+            if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                $dni_previo = $user['document'];
+                $email_previo = $user['email'];
+                $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
+                info($user);
+            }
+            /********************************************************************/
+            User::storeRequest($data, $user);
 
-        return $this->success(['msg' => 'Usuario actualizado correctamente.']);
+            return $this->success(['msg' => 'Usuario actualizado correctamente.']);
+        }  catch (\Exception $e){
+             return $this->master_errors($e);
+        }
+
     }
 
     public function destroy(Usuario $usuario)
@@ -256,6 +281,16 @@ class UsuarioController extends Controller
             Matricula_criterio::where('matricula_id', $matricula->id)->destroy();
             Matricula::destroy($matricula->id);
         }
+
+        /******************ELIMINA en BD master****************/
+        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+            $usu_master = UsuarioMaster::where('dni', $usuario->dni)->first();
+            if ($usu_master) {
+                $usu_master->delete();
+            }
+        }
+        /**********************************/
+
         // $usuario->matricula()->delete();
         $usuario->delete();
 
@@ -566,13 +601,13 @@ class UsuarioController extends Controller
         $user->required_update_at = now();
         $user->save();
 
-        info('getCoursesByUser INICIO');
+        // info('getCoursesByUser INICIO');
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
-        info('getCoursesByUser FIN');
+        // info('getCoursesByUser FIN');
 
-        info('getDataToCoursesViewAppByUser INICIO');
+        // info('getDataToCoursesViewAppByUser INICIO');
         $schools = Course::getDataToCoursesViewAppByUser($user, $courses);
-        info('getDataToCoursesViewAppByUser FIN');
+        // info('getDataToCoursesViewAppByUser FIN');
 
         return $this->success([
             'user' => [
@@ -941,13 +976,112 @@ class UsuarioController extends Controller
         $expires = $query['expires'] ?? null;
 
         $web_url = config('app.web_url');
+        $api_url = config('app.url');
 
-        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}";
+        $url = $web_url . "auth/login/external?token={$token}&expires={$expires}&signature={$signature}&api_url={$api_url}";
 
         Accountant::record($user, 'impersonated');
 
         $data = compact('url', 'signature', 'expires', 'token', 'signed_url');
 
         return $this->success(['msg' => 'Autenticando...', 'config' => $data]);
+    }
+
+    public function crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $usuario_input){
+        $master_dni_existe = null;
+        $master_email_existe = null;
+        $usuario_master = null;
+        $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
+
+        // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
+        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email'] ) {
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+            $usuario_master->updated_at = now();
+                if (!is_null($usuario_input['username'] || $usuario_master->username != $usuario_input['username'])){
+                    $usuario_master->username = $usuario_input['username'];
+                }
+            $usuario_master->save();
+            return;
+        }
+
+        // Busca datos del payload (inputs) en la BD master
+        $master_dni_existe = UsuarioMaster::select('dni')->where('dni', $usuario_input['document'])->first();
+        if(isset($usuario_input['email'])){
+            $master_email_existe = UsuarioMaster::select('email')->where('email', $usuario_input['email'])->first();
+        }
+
+        // Busca usuario en BD Master con su dni registrado previamente
+        if(!is_null($dni_previo)){
+            $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
+        }
+
+        // Valida si existe datos en BD Master
+        if($master_dni_existe && $master_dni_existe->dni != $dni_previo){
+            // Valida Documento y Correo Electronico
+            if($master_email_existe && $master_email_existe->email != $email_previo){
+                throw new \Exception('No se puede registrar a este usuario porque el porque el documento (DNI) y el Email ya fueron utilizados. Si necesitas ayuda, contacta con el equipo de soporte.',3);
+            }
+            // Mensaje de Error por Documento duplicado en Master
+            throw new \Exception('No se puede registrar a este usuario porque el documento (DNI) ya fue utilizado. Si necesitas ayuda, contacta con el equipo de soporte.',1);
+        }
+        // Valida el Correo Electronico
+        if($master_email_existe && $master_email_existe->email != $email_previo){
+            // Valida Correo Electronico y Documento
+            if ($master_dni_existe && $master_dni_existe->dni != $dni_previo){
+                throw new \Exception('No se puede registrar a este usuario porque el porque el documento (DNI) y el Email ya fueron utilizados. Si necesitas ayuda, contacta con el equipo de soporte.',3);
+            }
+            // Mensaje de Error por Correo Electronico duplicado en Master
+            throw new \Exception('No se puede registrar a este usuario porque el Email ya fue utilizado. Si necesitas ayuda, contacta con el equipo de soporte.',2);
+        }
+
+        if (!$usuario_master){
+            $new_usuario_master = new UsuarioMaster;
+            $new_usuario_master->dni = $usuario_input['document'];
+            $new_usuario_master->email = isset($usuario_input['email']) ? $usuario_input['email'] : null;
+            $new_usuario_master->username = $usuario_input['username'];
+            $new_usuario_master->customer_id = ENV('CUSTOMER_ID');
+            $new_usuario_master->created_at = now();
+            $new_usuario_master->save();
+
+        }
+        if($usuario_master){
+
+            if ( !$master_email_existe && isset($usuario_input['email']) ){
+                $usuario_master->email = $usuario_input['email'];
+            }
+            if ( !$master_dni_existe ){
+                $usuario_master->dni = $usuario_input['document'];
+            }
+            $usuario_master->username = $usuario_input['username'];
+            $usuario_master->updated_at = now();
+            $usuario_master->save();
+        }
+
+    }
+
+    public function master_errors($e){
+        $error = [
+            'message' => $e->getMessage(),
+            'errors' => []
+        ];
+
+        switch ($e->getCode()) {
+            case 1:
+                $error['errors']['document'] = [$e->getMessage()];
+
+                break;
+            case 2:
+                $error['errors']['email'] = [$e->getMessage()];
+
+                break;
+            case 3:
+                $error['message'] = ['El campo documento ya ha sido registrado. (and 1 more error)'];
+                $error['errors']['email'] = [$e->getMessage()];
+                break;
+            default:
+                break;
+        }
+
+        return response()->json( $error,422);
     }
 }

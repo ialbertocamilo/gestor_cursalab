@@ -74,6 +74,7 @@
             <!--        Contenido-->
             <!-- <v-card flat class="elevation-0 mb-4"> -->
             <DefaultTable
+                :avoid_first_data_load="getUrlParamsTotal() > 0"
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"

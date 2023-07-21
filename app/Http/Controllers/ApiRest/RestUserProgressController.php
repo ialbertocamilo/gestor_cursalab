@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\School;
+use App\Models\Certificate;
 use App\Models\Taxonomy;
 use App\Models\CourseSchool;
 use Illuminate\Http\Request;
@@ -54,12 +55,15 @@ class RestUserProgressController extends Controller
         $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
         $general_percentage = min($general_percentage, 100);
 
+        $total_certificates = Certificate::getTotalByUser($user, $assigned_courses);
+
         $response['summary_user'] = [
             'asignados' => $assigned_courses_count,
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
             'pendientes' => $pending_courses,
             'porcentaje' => $general_percentage,
+            'diplomas' => $total_certificates,
         ];
 
         $regular_courses = $assigned_courses->where('type.code', 'regular');

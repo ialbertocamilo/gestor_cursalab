@@ -8,6 +8,7 @@ use App\Models\Announcement;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\Media;
+use App\Models\WorkspaceFunctionality;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -62,6 +63,13 @@ class AnnouncementController extends Controller
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
 
+        $functionalities = WorkspaceFunctionality::functionalities( get_current_workspace()->id );
+        if(in_array('benefits', $functionalities)) {
+            if(is_array($destinos)) {
+                array_push($destinos, array('id'=> 'beneficios', 'nombre'=>'Beneficios'));
+            }
+        }
+
         return $this->success(get_defined_vars());
     }
 
@@ -111,6 +119,13 @@ class AnnouncementController extends Controller
             ->pluck('criterion_value_id');
         $modules = Criterion::getValuesForSelect('module');
         $destinos = config('data.destinos');
+
+        $functionalities = WorkspaceFunctionality::functionalities( get_current_workspace()->id );
+        if(in_array('benefits', $functionalities)) {
+            if(is_array($destinos)) {
+                array_push($destinos, array('id' => 'beneficios', 'nombre' => 'Beneficios'));
+            }
+        }
 
         return $this->success(get_defined_vars());
     }

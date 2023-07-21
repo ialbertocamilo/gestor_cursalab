@@ -1,5 +1,5 @@
 <template>
-    <section class="section-list ">
+    <section class="section-list">
         <DefaultFilter
             v-model="open_advanced_filter"
             @filter="advanced_filter(dataTable, filters, 1)"
@@ -7,10 +7,11 @@
             :disabled-confirm-btn="isValuesObjectEmpty(filters)"
         >
             <template v-slot:content>
-                <v-row>
+                <v-row justify="center">
                     <v-col cols="12">
                         <DefaultSelect
                             clearable
+                            dense
                             :items="selects.sub_workspaces"
                             v-model="filters.subworkspace_id"
                             label="Módulos"
@@ -21,6 +22,7 @@
                     <v-col cols="12">
                         <DefaultSelect
                             clearable
+                            dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
@@ -37,6 +39,7 @@
                             <DefaultInputDate
                                 v-if="criteria_template[index-2].field_type.code === 'date'"
                                 clearable
+                                dense
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="{ open: false, }"
                                 v-model="filters[selectKey]"
@@ -46,6 +49,7 @@
                             <DefaultAutocomplete
                                 v-else
                                 clearable
+                                dense
                                 :items="value"
                                 v-model="filters[selectKey]"
                                 :label="criteria_template[index-2].name"
@@ -264,7 +268,7 @@ export default {
                         type: "action",
                         method_name: "edit"
                     },
-                    
+
                     {
                         text: "Logs",
                         icon: "mdi mdi-database",
@@ -410,10 +414,10 @@ export default {
 
             let param_subworkspace = params.subworkspace_id;
             let param_document = params.document;
-           
+
             vue.filters.subworkspace_id = parseInt(param_subworkspace);
             vue.filters.q = param_document;
-            
+
             if (param_subworkspace || param_document) {
                 vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
             }
@@ -448,7 +452,7 @@ export default {
             vue.consoleObjectTable(user, 'User to Reset')
         },
         goToReiniciosMasivos() {
-            window.location.href = "/masivo/usuarios/index_reinicios";
+            window.location.href = "/intentos-masivos";
         },
         activity() {
             console.log('activity')

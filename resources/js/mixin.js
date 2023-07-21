@@ -14,12 +14,12 @@ const extensiones = {
     // rise: ["zip", "rise"],
 };
 const default_media_images = {
-    video: "images/default-video-img_285_360.png",
-    audio: "images/default-audio-img_119.png",
-    pdf: "images/default-pdf-img_210.png",
-    excel: "images/default-scorm-img_116_360.png",
-    scorm: "images/default-scorm-img_116_360.png",
-    link: "images/default-scorm-img_116_360.png",
+    video: "/images/default-video-img_285_360.png",
+    audio: "/images/default-audio-img_119.png",
+    pdf: "/images/default-pdf-img_210.png",
+    excel: "/images/default-scorm-img_116_360.png",
+    scorm: "/images/default-scorm-img_116_360.png",
+    link: "/images/default-scorm-img_116_360.png",
 }
 
 export default {
@@ -104,7 +104,7 @@ export default {
             setTimeout(() => {
                 // $('#pageloader').css('display', 'none')
                 $('#pageloader').fadeOut()
-            }, 800)
+            }, 250)
         },
         showAlert(msg, type = 'success', title = '') {
             let vue = this
@@ -349,7 +349,7 @@ export default {
             vue.$nextTick(() => {
                 vue.$refs[dialog.ref].loadSelects();
             });
-
+            // console.log('here at openFormModal');
             if (action != 'status' && action != 'delete')
                 vue.hideLoader()
         },
@@ -458,6 +458,11 @@ export default {
                     let max = split[1];
                     const tempRule = (v) => (v && v >= max) || `El valor debe ser menor a ${max}`;
                     tempRules.push(tempRule);
+                }
+                if (labelRule.indexOf("email") > -1) {
+                const tempRule = (v) =>
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || "El formato de correo electrónico es inválido";
+                tempRules.push(tempRule);
                 }
             });
             return tempRules;
@@ -731,5 +736,21 @@ export default {
             }
             return res;
         },
+        getStorageUrl(key, mainKey = 'media_data') {
+
+            const currentUrl = window.location.search;
+            const currentParams = new URLSearchParams(currentUrl);
+            const existKey = currentParams.has(mainKey);
+
+            let storage = localStorage.getItem(key);
+            let status = false;
+
+            if(storage && existKey) {
+                storage = JSON.parse(storage);
+                status = true;
+            }
+
+            return { storage, status };
+        }
     },
 };

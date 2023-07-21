@@ -186,6 +186,13 @@ class CriterionValue extends BaseModel
     public static function findUsersWithIncompleteCriteriaValues($workspaceId, $criteriaIds): array
     {
         $subworkspacesIds = Workspace::loadSubWorkspacesIds($workspaceId)->toArray();
+
+        if (!$subworkspacesIds) {
+            return [];
+        }
+
+        $query_criteria = $criteriaIds ? ' and cv.criterion_id in ('.implode(',', $criteriaIds).')' : '';
+
         $query = '
             select
                 user_id,
@@ -205,10 +212,9 @@ class CriterionValue extends BaseModel
                     and cv.active = 1
                     and u.deleted_at is null
                     and cv.deleted_at is null
-                    and u.subworkspace_id in ('.implode(',', $subworkspacesIds).')
-                    and cv.criterion_id in ('.implode(',', $criteriaIds).')
-
-                group by
+                    and u.subworkspace_id in ('.implode(',', $subworkspacesIds).')' .
+                    $query_criteria .
+                'group by
                   u.id, cv.criterion_id
             ) user_criteria_count
             group by user_id

@@ -75,7 +75,6 @@
 
                 <v-row justify="space-around">
                     <v-col cols="4" class="d-flex justify-content-center">
-                        <!-- :rules="rules.email" -->
                         <DefaultInput
                             clearable
                             v-model="resource.email"
@@ -128,7 +127,6 @@
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list_req"
-                                :only_req="true"
                             />
                     </v-col>
                 </v-row>
@@ -157,7 +155,6 @@
                                 :options="options"
                                 :user="resource"
                                 :criterion_list="criterion_list_opt"
-                                :only_req="false"
                             />
                         </v-expand-transition>
                     </v-col>
@@ -173,6 +170,14 @@
                 </v-row>
 
             </v-form>
+
+            <UsuarioFormInfoModal
+              width="30vh"
+              :ref="modalUsuarioFormInfoOptions.ref"
+              :options="modalUsuarioFormInfoOptions"
+              @onCancel="closeFormModal(modalUsuarioFormInfoOptions), confirmModalInfo = true"
+              @onConfirm="confirmByModalInfo()"
+            />
 
             <PasswordGeneratorModal
                 width="40vw"
@@ -202,9 +207,10 @@
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 import PasswordGeneratorModal from "./PasswordGeneratorModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import UsuarioFormInfoModal from './UsuarioFormInfoModal.vue';
 
 export default {
-    components: {UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm},
+    components: { UsuarioFormInfoModal, UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm },
     props: {
         options: {
             type: Object,
@@ -236,6 +242,11 @@ export default {
                 criterion_list_final: {},
                 active: true,
             },
+            resource_criterion_static: {
+                usuario: {},
+                criterios: [],
+                criterion_values: {}
+            },
             resource: {},
             selects: {},
             rules: {
@@ -244,7 +255,7 @@ export default {
                 surname: this.getRules(['required', 'max:100', 'text']),
                 document: this.getRules(['required', 'min:8']),
                 password: this.getRules(['required', 'min:8']),
-                // email: this.getRules(['required', 'min:8']),
+                email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
             },
             show_lbl_error_cri: false,
@@ -255,6 +266,18 @@ export default {
                 resource: 'Password',
                 confirmLabel: 'Cerrar',
                 showCloseIcon: true,
+            },
+            confirmModalInfo: true,
+            modalUsuarioFormInfoOptions: {
+                ref: 'UsuarioFormInfoModal',
+                open: false,
+                confirmLabel: 'Confirmar',
+                subTitle:'¡Estás por actualizar los criterios de un usuario!',
+                showCloseIcon: true,
+                resource: {
+                    changes_criterios: [],
+                    changes_data: []
+                }
             },
             updateStatusModal: {
                 ref: 'UsuarioUpdateStatusModal',
@@ -316,9 +339,79 @@ export default {
                 vue.updateStatusModal.status_item_modal = !vue.resource.active
             }
         },
+        checkBuildFinalIds() {
+            let vue = this;
+            const { criterios, criterion_values } = vue.resource_criterion_static;
+
+            const criterios_ids = Object.entries(criterios).map(([, ele]) => ele.id);
+            const criterios_array = Object.entries(criterion_values).filter(([, ele]) => criterios_ids.includes(ele.criterion_id) );
+
+            return criterios_array.map(([, ele]) => ele.id );
+        },
+        checkChangesAtArrays(criterion_list_final, criterios_final_ids) {
+            let stack_criterios = [];
+
+            const { loop, compare } = (criterion_list_final.length >= criterios_final_ids.length)
+                                ? { loop: criterion_list_final, compare: criterios_final_ids } :
+                                  { loop: criterios_final_ids, compare: criterion_list_final };
+            loop.forEach((id) => {
+                if(!compare.includes(id)) {
+                    stack_criterios.push(id);
+                }
+            });
+
+            return stack_criterios;
+        },
+        checkChangesAtCriterios(criterion_list_final) {
+            let vue = this;
+
+            const { criterios, criterion_values } = vue.resource_criterion_static;
+            const criterios_final_ids = vue.checkBuildFinalIds();
+            const stack_criterios = vue.checkChangesAtArrays(criterion_list_final, criterios_final_ids);
+
+            let same_criterios = (stack_criterios.length === 0);
+            let changes_criterios = [];
+
+            if(!same_criterios) {
+                const criterios_list = Object.entries(criterios);
+
+                for (let i = 0; i < criterios_list.length; i++) {
+                    const [, ele] = criterios_list[i];
+                    const criterio_values = ele.values.map((val) => val.id);
+                    const criterio_match  = stack_criterios.some((id) => criterio_values.includes(id));
+
+                    if(criterio_match) {
+                        const { code, name, id } = ele;
+                        changes_criterios.push({code, name, id});
+                    }
+                }
+            }
+
+            return { same_criterios, changes_criterios };
+        },
+        checkChangesAtUserData(data, stack_keys) {
+            let vue = this;
+            const { usuario } = vue.resource_criterion_static;
+
+            const changes_data = stack_keys.filter((ele) => {
+                const current_value = data[ele.key];
+                const origin_value = usuario[ele.key];
+
+                return (current_value !== origin_value);
+            });
+
+            const same_data = (changes_data.length === 0);
+            return { same_data, changes_data };
+        },
+        confirmByModalInfo() {
+            let vue = this;
+            vue.confirmModalInfo = false;
+            vue.confirmModal();
+        },
         async confirmModal() {
-            let vue = this
-            vue.showLoader()
+            let vue = this;
+            vue.showLoader();
+
             const validateForm = vue.validateForm('UsuarioForm')
             vue.show_lbl_error_cri = !validateForm
 
@@ -331,9 +424,29 @@ export default {
                 let data = vue.resource
                 vue.parseCriterionValues()
 
+                // === validar cambio de criterios
+                if (vue.confirmModalInfo && edit) {
+                    const checkCriterios = vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
+                    const checkData = vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
+
+                    if(!checkCriterios.same_criterios || !checkData.same_data) {
+                        vue.hideLoader();
+                        vue.modalUsuarioFormInfoOptions.resource = { changes_criterios: checkCriterios.changes_criterios ,
+                                                                     changes_data: checkData.changes_data };
+                        vue.openFormModal(vue.modalUsuarioFormInfoOptions, null, 'status', 'Actualización de datos')
+                        return;
+                    }
+                }
+                // === validar cambio de criterios
+
+            /*  console.log('sending form user', data);
+                vue.errors = [];
+                vue.hideLoader(); */
+
                 vue.$http[method](url, data)
                     .then(({data}) => {
                         vue.errors = []
+                        vue.confirmModalInfo = true;
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
@@ -408,6 +521,8 @@ export default {
                     vue.criterion_list_req = [];
                     vue.criterion_list_opt = [];
 
+
+
                     vue.criterion_list = data.data.criteria
                     vue.criterion_list.forEach(criterion => {
                         // console.log(criterion)
@@ -421,8 +536,14 @@ export default {
                             vue.criterion_list_opt.push(criterion)
                     })
 
-                    if (resource)
-                        vue.resource = data.data.usuario
+                    if (resource) {
+                        //console.log('loadData', { url, criterion_list: data.data.usuario.criterion_list });
+                        vue.resource = data.data.usuario;
+                        const { document: documento } = data.data.usuario
+                        vue.resource_criterion_static.usuario = { document: documento }; // copy
+                        vue.resource_criterion_static.criterios = { ...data.data.criteria }; // copy
+                        vue.resource_criterion_static.criterion_values = { ...data.data.usuario.criterion_values }; // copy
+                    }
 
                     return 0;
                 })

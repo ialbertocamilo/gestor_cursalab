@@ -14,15 +14,9 @@
 
                         <v-divider class="mx-3" /> -->
 
-                <v-row justify="space-around">
-                    <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput
-                            v-model="resource.name"
-                            label="Nombre"
-                            :rules="rules.name"/>
-                    </v-col>
+                <v-row>
 
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="6">
                         <DefaultSelect
                            :items="selects.types"
                            v-model="resource.type"
@@ -30,9 +24,32 @@
                            item-text="name"
                            return-object
                            :rules="rules.type"
+                           @onChange="changeType"
                            :disabled="resource.status && resource.status.code == 'in-progress'"/>
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-content-center">
+                    <v-col cols="6" v-if="resource.type && selects.benefits.length > 0 && resource.type.code == 'benefits'">
+                        <DefaultSelect
+                           :items="selects.benefits"
+                           v-model="resource.benefit"
+                           label="Beneficio"
+                           item-text="title"
+                           return-object
+                           :rules="rules.type"
+                           @onChange="changeBenefit"
+                           :disabled="resource.status && resource.status.code == 'in-progress'"/>
+                    </v-col>
+                    <v-col cols="6" v-if="resource.type && resource.type.code == 'benefits'">
+                        <DefaultSelect
+                           :items="selects.silabos"
+                           v-model="resource.model_id"
+                           label="Silabo del beneficio"
+                           item-text="name"
+                           return-object
+                           :rules="rules.type"
+                           @onChange = "changeSilabo"
+                           :disabled="resource.status && resource.status.code == 'in-progress'"/>
+                    </v-col>
+                    <v-col cols="6">
                         <DefaultAutocomplete
                             :items="selects.hosts"
                             v-model="resource.host"
@@ -42,6 +59,12 @@
                             :rules="rules.host"
                             @onChange="changeHost"
                         />
+                    </v-col>
+                    <v-col cols="12" class="d-flex justify-content-center">
+                        <DefaultInput
+                            v-model="resource.name"
+                            label="Nombre"
+                            :rules="rules.name"/>
                     </v-col>
                 </v-row>
 
@@ -147,7 +170,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" class="box-meeting-search-attendants mx-3"
+                <v-row justify="space-around" class="box-meeting-search-attendants mx-0"
                        v-if="resource.attendants && resource.attendants.length === 0">
                     <p>No se han agregado asistentes todavía.</p>
                 </v-row>
@@ -286,7 +309,7 @@ import VueTimepicker from 'vue2-timepicker'
 import 'vue2-timepicker/dist/VueTimepicker.css'
 
 
-const fields = ['name', 'starts_at', 'date', 'time', 'duration', 'attendants', 'type', 'host', 'description'];
+const fields = ['name', 'starts_at', 'date','model_id' ,'time', 'duration', 'attendants', 'type', 'host', 'description'];
 
 export default {
     components: {
@@ -323,8 +346,9 @@ export default {
                 duration: null,
 
                 starts_at: null,
-
                 type: null,
+                model_id:null,
+                model_type:null,
                 host: null,
                 status: {code: null},
                 description: '',
@@ -338,6 +362,8 @@ export default {
             },
             selects: {
                 types: [],
+                benefits:[],
+                silabos:[],
                 hosts: [],
             },
             modalScheduledMeetings: {
@@ -407,6 +433,51 @@ export default {
                 attendants.splice(hostAsAttendantIndex, 1)
             }
         },
+        async changeType(){
+            let vue = this;
+            if(vue.resource.type && vue.resource.type.code == 'benefits'){
+                await vue.$http.get("/beneficios/search?types[]=sesion_online&types[]=sesion_hibrida")
+                .then(({data}) => {
+                    vue.selects.benefits = data.data.data;
+                    this.hideLoader()
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.hideLoader()
+                });
+            }else{
+                vue.selects.benefits = [];
+                vue.selects.silabos = [];
+                vue.resource.benefit = null;
+                vue.resource.model_id = null;
+                vue.resource.name = null;
+                vue.resource.date = null;
+                vue.resource.time = null;
+                vue.resource.starts_at = null;
+            }
+        },
+        async changeBenefit(){
+            let vue = this;
+            vue.selects.silabos = [];
+            vue.resource.model_id = null;
+            await vue.$http.get(`/beneficios/search/${vue.resource.benefit.id}`).then(({data}) => {
+                vue.selects.silabos = data.data.data.silabo;
+                this.hideLoader()
+            })
+            .catch((err) => {
+                console.log(err);
+                this.hideLoader()
+            });
+        },
+        changeSilabo(){
+            let vue = this;
+            const date = vue.resource.model_id.value_date;
+            const time = vue.resource.model_id.value_time;
+            vue.resource.name = vue.resource.model_id.name;
+            vue.resource.date = moment(date).format("YYYY-MM-DD");
+            vue.resource.time = moment(`${date} ${time}`).format("HH:mm") ;
+            vue.resource.starts_at = `${vue.resource.date} ${vue.resource.time}`
+        },
         closeModal() {
             let vue = this
             // vue.options.open = false
@@ -437,7 +508,13 @@ export default {
 
             // if (validateForm && validateSelectedModules) {
             if (validateForm) {
-
+                switch (vue.resource.type.code) {
+                    case 'benefits':
+                        vue.resource.model_type = 'App\Models\BenefitProperty';
+                        break;
+                    default:
+                        break;
+                }
                 let formData = vue.getMultipartFormData(method, vue.resource, fields);
                 vue.parseAttendants(formData)
 

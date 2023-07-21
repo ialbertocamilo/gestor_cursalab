@@ -36,6 +36,7 @@ use App\Http\Controllers\MigrarAvanceController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\ConvalidacionesController;
 use App\Http\Controllers\MigracionController;
+use App\Http\Controllers\DiplomaController;
 
 // Route::get('dashboard_pbi', function () {
 //     return view('powerbi.index');
@@ -77,198 +78,198 @@ Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name(
 
 // });
 
-Route::controller(AbconfigController::class)->group(function () {
+// Route::controller(AbconfigController::class)->group(function () {
 
-    // AB CONFIG
-    Route::get('abconfigs/{abconfig}/usuarios', 'usuarios')->name('abconfigs.usuarios');
-    Route::get('abconfigs/{abconfig}/categorias', 'categorias')->name('abconfigs.categorias');
-    //
-    Route::post('abconfigs/store', 'store')->name('abconfigs.store');
-    // ->middleware('permission:abconfigs.create');
-    Route::get('abconfigs/index', 'index')->name('abconfigs.index');
-    // ->middleware('permission:abconfigs.index');
-    Route::get('abconfigs/create', 'create')->name('abconfigs.create');
-    // ->middleware('permission:abconfigs.create');
-    Route::put('abconfigs/{abconfig}', 'update')->name('abconfigs.update');
-    // ->middleware('permission:abconfigs.edit');
-    Route::get('abconfigs/{abconfig}', 'show')->name('abconfigs.show');
-    // ->middleware('permission:abconfigs.show');
-    Route::delete('abconfigs/{abconfig}', 'destroy')->name('abconfigs.destroy');
-    // ->middleware('permission:abconfigs.destroy');
-    Route::get('abconfigs/{abconfig}/edit', 'edit')->name('abconfigs.edit');
-    // ->middleware('permission:abconfigs.edit');
+//     // AB CONFIG
+//     Route::get('abconfigs/{abconfig}/usuarios', 'usuarios')->name('abconfigs.usuarios');
+//     Route::get('abconfigs/{abconfig}/categorias', 'categorias')->name('abconfigs.categorias');
+//     //
+//     Route::post('abconfigs/store', 'store')->name('abconfigs.store');
+//     // ->middleware('permission:abconfigs.create');
+//     Route::get('abconfigs/index', 'index')->name('abconfigs.index');
+//     // ->middleware('permission:abconfigs.index');
+//     Route::get('abconfigs/create', 'create')->name('abconfigs.create');
+//     // ->middleware('permission:abconfigs.create');
+//     Route::put('abconfigs/{abconfig}', 'update')->name('abconfigs.update');
+//     // ->middleware('permission:abconfigs.edit');
+//     Route::get('abconfigs/{abconfig}', 'show')->name('abconfigs.show');
+//     // ->middleware('permission:abconfigs.show');
+//     Route::delete('abconfigs/{abconfig}', 'destroy')->name('abconfigs.destroy');
+//     // ->middleware('permission:abconfigs.destroy');
+//     Route::get('abconfigs/{abconfig}/edit', 'edit')->name('abconfigs.edit');
+//     // ->middleware('permission:abconfigs.edit');
 
-});
+// });
 
-Route::controller(CategoriaController::class)->group(function () {
+// Route::controller(CategoriaController::class)->group(function () {
 
-    // Categorias
-    Route::get('abconfigs/{abconfig}/categorias/{categoria}/cursos', 'cursos')->name('categorias.cursos');
-    Route::post('abconfigs/{abconfig}/categorias/store', 'store')->name('categorias.store');
-    // ->middleware('permission:categorias.create');
-    Route::get('abconfigs/{abconfig}/categorias/create', 'create')->name('categorias.create');
-    // ->middleware('permission:categorias.create');
-    Route::put('abconfigs/{abconfig}/categorias/{categoria}', 'update')->name('categorias.update');
-    // ->middleware('permission:categorias.edit');
-    Route::delete('abconfigs/{abconfig}/categorias/{categoria}', 'destroy')->name('categorias.destroy');
-    // ->middleware('permission:categorias.destroy');
-    Route::get('abconfigs/{abconfig}/categorias/{categoria}/edit', 'edit')->name('categorias.edit');
-    // ->middleware('permission:categorias.edit');
+//     // Categorias
+//     Route::get('abconfigs/{abconfig}/categorias/{categoria}/cursos', 'cursos')->name('categorias.cursos');
+//     Route::post('abconfigs/{abconfig}/categorias/store', 'store')->name('categorias.store');
+//     // ->middleware('permission:categorias.create');
+//     Route::get('abconfigs/{abconfig}/categorias/create', 'create')->name('categorias.create');
+//     // ->middleware('permission:categorias.create');
+//     Route::put('abconfigs/{abconfig}/categorias/{categoria}', 'update')->name('categorias.update');
+//     // ->middleware('permission:categorias.edit');
+//     Route::delete('abconfigs/{abconfig}/categorias/{categoria}', 'destroy')->name('categorias.destroy');
+//     // ->middleware('permission:categorias.destroy');
+//     Route::get('abconfigs/{abconfig}/categorias/{categoria}/edit', 'edit')->name('categorias.edit');
+//     // ->middleware('permission:categorias.edit');
 
-});
+// });
 
-Route::controller(TipoCriterioController::class)->group(function () {
+// Route::controller(TipoCriterioController::class)->group(function () {
 
-    //TIPO CRITERIOS
-    Route::get('tipo_criterios/', 'index')->name('tipo_criterio.index');
-    Route::get('tipo_criterios/{tipo_criterio}/edit', 'edit')->name('tipo_criterio.edit');
-    Route::get('tipo_criterios/create', 'create')->name('tipo_criterio.create');
-    Route::post('tipo_criterios/store', 'store')->name('tipo_criterio.store');
-    Route::put('tipo_criterios/{tipoCriterio}/update', 'update')->name('tipo_criterio.update');
-    Route::patch('tipo_criterios/{tipoCriterio}/cambiar-orden/{new}', 'changeOrder')->name('tipo_criterio.change-order');
-    // ->middleware('permission:tipo_criterio.edit');
-});
+//     //TIPO CRITERIOS
+//     Route::get('tipo_criterios/', 'index')->name('tipo_criterio.index');
+//     Route::get('tipo_criterios/{tipo_criterio}/edit', 'edit')->name('tipo_criterio.edit');
+//     Route::get('tipo_criterios/create', 'create')->name('tipo_criterio.create');
+//     Route::post('tipo_criterios/store', 'store')->name('tipo_criterio.store');
+//     Route::put('tipo_criterios/{tipoCriterio}/update', 'update')->name('tipo_criterio.update');
+//     Route::patch('tipo_criterios/{tipoCriterio}/cambiar-orden/{new}', 'changeOrder')->name('tipo_criterio.change-order');
+//     // ->middleware('permission:tipo_criterio.edit');
+// });
 
-Route::controller(CriteriosController::class)->group(function () {
+// Route::controller(CriteriosController::class)->group(function () {
 
-    // Criterios
-    Route::get('tipo_criterios/criterios', 'index')->name('criterio.index');
-    Route::get('criterios/create', 'create')->name('criterios.create');
-    Route::get('criterios/getInitialData', 'getInitialData');
-    Route::post('criterios/insert_or_edit', 'insert_or_edit');
-    Route::get('criterios/buscar/{criterio_nombre}', 'buscar_criterio');
-});
+//     // Criterios
+//     Route::get('tipo_criterios/criterios', 'index')->name('criterio.index');
+//     Route::get('criterios/create', 'create')->name('criterios.create');
+//     Route::get('criterios/getInitialData', 'getInitialData');
+//     Route::post('criterios/insert_or_edit', 'insert_or_edit');
+//     Route::get('criterios/buscar/{criterio_nombre}', 'buscar_criterio');
+// });
 
-Route::controller(CarreraController::class)->group(function () {
-    // Carreras
-    Route::post('carreras', 'carreras_x_modulo');
-    Route::get('abconfigs/{abconfig}/carreras/{carrera}/ciclos', 'ciclos')->name('carreras.ciclos');
-    Route::post('abconfigs/{abconfig}/carreras/store', 'store')->name('carreras.store');
-    // ->middleware('permission:carreras.create');
-    Route::get('carreras/index', 'index')->name('carreras.index');
-    // ->middleware('permission:carreras.index');
-    Route::get('abconfigs/{abconfig}/carreras/create', 'create')->name('carreras.create');
-    // ->middleware('permission:carreras.create');
-    Route::put('abconfigs/{abconfig}/carreras/{carrera}', 'update')->name('carreras.update');
-    // ->middleware('permission:carreras.edit');
-    Route::delete('abconfigs/{abconfig}/carreras/{carrera}', 'destroy')->name('carreras.destroy');
-    // ->middleware('permission:carreras.destroy');
-    Route::get('abconfigs/{abconfig}/carreras/{carrera}/edit', 'edit')->name('carreras.edit');
-    // ->middleware('permission:carreras.edit');
-});
+// Route::controller(CarreraController::class)->group(function () {
+//     // Carreras
+//     Route::post('carreras', 'carreras_x_modulo');
+//     Route::get('abconfigs/{abconfig}/carreras/{carrera}/ciclos', 'ciclos')->name('carreras.ciclos');
+//     Route::post('abconfigs/{abconfig}/carreras/store', 'store')->name('carreras.store');
+//     // ->middleware('permission:carreras.create');
+//     Route::get('carreras/index', 'index')->name('carreras.index');
+//     // ->middleware('permission:carreras.index');
+//     Route::get('abconfigs/{abconfig}/carreras/create', 'create')->name('carreras.create');
+//     // ->middleware('permission:carreras.create');
+//     Route::put('abconfigs/{abconfig}/carreras/{carrera}', 'update')->name('carreras.update');
+//     // ->middleware('permission:carreras.edit');
+//     Route::delete('abconfigs/{abconfig}/carreras/{carrera}', 'destroy')->name('carreras.destroy');
+//     // ->middleware('permission:carreras.destroy');
+//     Route::get('abconfigs/{abconfig}/carreras/{carrera}/edit', 'edit')->name('carreras.edit');
+//     // ->middleware('permission:carreras.edit');
+// });
 
-Route::controller(CicloController::class)->group(function () {
+// Route::controller(CicloController::class)->group(function () {
 
-    // Ciclos
-    Route::post('ciclos', 'ciclos_x_carrera');
-    Route::get('carreras/{carrera}/ciclos/{ciclo}/cursos', 'temas')->name('ciclos.cursos');
-    Route::post('carreras/{carrera}/ciclos/store', 'store')->name('ciclos.store');
-    // ->middleware('permission:ciclos.create');
-    Route::get('carreras/{carrera}/ciclos/create', 'create')->name('ciclos.create');
-    // ->middleware('permission:ciclos.create');
-    Route::put('carreras/{carrera}/ciclos/{ciclo}', 'update')->name('ciclos.update');
-    // ->middleware('permission:ciclos.edit');
-    Route::delete('carreras/{carrera}/ciclos/{ciclo}', 'destroy')->name('ciclos.destroy');
-    // ->middleware('permission:ciclos.destroy');
-    Route::get('carreras/{carrera}/ciclos/{ciclo}/edit', 'edit')->name('ciclos.edit');
-    // ->middleware('permission:ciclos.edit');
-});
+//     // Ciclos
+//     Route::post('ciclos', 'ciclos_x_carrera');
+//     Route::get('carreras/{carrera}/ciclos/{ciclo}/cursos', 'temas')->name('ciclos.cursos');
+//     Route::post('carreras/{carrera}/ciclos/store', 'store')->name('ciclos.store');
+//     // ->middleware('permission:ciclos.create');
+//     Route::get('carreras/{carrera}/ciclos/create', 'create')->name('ciclos.create');
+//     // ->middleware('permission:ciclos.create');
+//     Route::put('carreras/{carrera}/ciclos/{ciclo}', 'update')->name('ciclos.update');
+//     // ->middleware('permission:ciclos.edit');
+//     Route::delete('carreras/{carrera}/ciclos/{ciclo}', 'destroy')->name('ciclos.destroy');
+//     // ->middleware('permission:ciclos.destroy');
+//     Route::get('carreras/{carrera}/ciclos/{ciclo}/edit', 'edit')->name('ciclos.edit');
+//     // ->middleware('permission:ciclos.edit');
+// });
 
-Route::controller(CursosController::class)->group(function () {
+// Route::controller(CursosController::class)->group(function () {
 
-    // Cursos
-    Route::get('categorias/{categoria}/cursos/{curso}/temas', 'temas')->name('cursos.temas');
-    Route::post('categorias/{categoria}/cursos/store', 'store')->name('cursos.store');
-    // ->middleware('permission:cursos.create');
-    Route::get('categorias/{categoria}/cursos/create', 'create')->name('cursos.create');
-    // ->middleware('permission:cursos.create');
-    Route::put('categorias/{categoria}/cursos/{curso}', 'update')->name('cursos.update');
-    // ->middleware('permission:cursos.edit');
-    Route::delete('categorias/{categoria}/cursos/{curso}', 'destroy')->name('cursos.destroy');
-    // ->middleware('permission:cursos.destroy');
-    Route::get('categorias/{categoria}/cursos/{curso}/edit', 'edit')->name('cursos.edit');
-    // ->middleware('permission:cursos.edit');
-    Route::post('categorias/get_requisitos', 'get_requisitos');
+//     // Cursos
+//     Route::get('categorias/{categoria}/cursos/{curso}/temas', 'temas')->name('cursos.temas');
+//     Route::post('categorias/{categoria}/cursos/store', 'store')->name('cursos.store');
+//     // ->middleware('permission:cursos.create');
+//     Route::get('categorias/{categoria}/cursos/create', 'create')->name('cursos.create');
+//     // ->middleware('permission:cursos.create');
+//     Route::put('categorias/{categoria}/cursos/{curso}', 'update')->name('cursos.update');
+//     // ->middleware('permission:cursos.edit');
+//     Route::delete('categorias/{categoria}/cursos/{curso}', 'destroy')->name('cursos.destroy');
+//     // ->middleware('permission:cursos.destroy');
+//     Route::get('categorias/{categoria}/cursos/{curso}/edit', 'edit')->name('cursos.edit');
+//     // ->middleware('permission:cursos.edit');
+//     Route::post('categorias/get_requisitos', 'get_requisitos');
 
-    // CURSO ENCUESTA
-    Route::get('cursos/{curso}/curso_encuesta/create', 'create_CE')->name('curso_encuesta.create');
-    // ->middleware('permission:cursos.create');
-    Route::post('cursos/{curso}/curso_encuesta/store', 'store_CE')->name('curso_encuesta.store');
-    // ->middleware('permission:cursos.create');
-    Route::put('cursos/{curso}/curso_encuesta/{ce}', 'update_CE')->name('curso_encuesta.update');
-    // ->middleware('permission:cursos.edit');
-    Route::delete('cursos/{curso}/curso_encuesta/{ce}', 'destroy_CE')->name('curso_encuesta.destroy');
-    // ->middleware('permission:cursos.destroy');
-    Route::get('cursos/{curso}/curso_encuesta/{ce}/edit', 'edit_CE')->name('curso_encuesta.edit');
-    // ->middleware('permission:cursos.edit');
+//     // CURSO ENCUESTA
+//     Route::get('cursos/{curso}/curso_encuesta/create', 'create_CE')->name('curso_encuesta.create');
+//     // ->middleware('permission:cursos.create');
+//     Route::post('cursos/{curso}/curso_encuesta/store', 'store_CE')->name('curso_encuesta.store');
+//     // ->middleware('permission:cursos.create');
+//     Route::put('cursos/{curso}/curso_encuesta/{ce}', 'update_CE')->name('curso_encuesta.update');
+//     // ->middleware('permission:cursos.edit');
+//     Route::delete('cursos/{curso}/curso_encuesta/{ce}', 'destroy_CE')->name('curso_encuesta.destroy');
+//     // ->middleware('permission:cursos.destroy');
+//     Route::get('cursos/{curso}/curso_encuesta/{ce}/edit', 'edit_CE')->name('curso_encuesta.edit');
+//     // ->middleware('permission:cursos.edit');
 
-});
+// });
 
-Route::controller(CurriculasGruposController::class)->group(function () {
+// Route::controller(CurriculasGruposController::class)->group(function () {
 
-    // CURRICULA 3 COMPONENTES
-    Route::get('curriculas_grupos', 'index')->name('curriculas_grupos');
-    Route::get('getCurriculaGrupos', 'getCurriculaGrupos');
-    Route::get('getCurriculaXCurso/{curso_id}', 'getCurriculaXCurso');
-    Route::get('getCarreras', 'getCarreras');
-    Route::get('getGrupos', 'getGrupos');
-    Route::post('guardarCurricula', 'guardarCurricula');
-    Route::get('getCurriculaxCurso/{cursoid}/{carrera_id}', 'getCurriculaxCurso');
-    Route::get('getGruposXCurricula/{curricula_id}', 'getGruposXCurricula');
-    // SELECCIONAR TODOS LOS GRUPOS DEL CAMPO grupo en USUARIOS Y AGREGARLOS A LA TABLA CRITERIOS
-    Route::get('llenarTablaGrupos', 'llenarTablaGrupos');
+//     // CURRICULA 3 COMPONENTES
+//     Route::get('curriculas_grupos', 'index')->name('curriculas_grupos');
+//     Route::get('getCurriculaGrupos', 'getCurriculaGrupos');
+//     Route::get('getCurriculaXCurso/{curso_id}', 'getCurriculaXCurso');
+//     Route::get('getCarreras', 'getCarreras');
+//     Route::get('getGrupos', 'getGrupos');
+//     Route::post('guardarCurricula', 'guardarCurricula');
+//     Route::get('getCurriculaxCurso/{cursoid}/{carrera_id}', 'getCurriculaxCurso');
+//     Route::get('getGruposXCurricula/{curricula_id}', 'getGruposXCurricula');
+//     // SELECCIONAR TODOS LOS GRUPOS DEL CAMPO grupo en USUARIOS Y AGREGARLOS A LA TABLA CRITERIOS
+//     Route::get('llenarTablaGrupos', 'llenarTablaGrupos');
 
-    Route::get('temporal', 'temporal');
-});
+//     Route::get('temporal', 'temporal');
+// });
 
-Route::controller(PosteoController::class)->group(function () {
+// Route::controller(PosteoController::class)->group(function () {
 
-    // POSTEOS
-    Route::get('cursos/{curso}/posteos/{posteo}/preguntas', 'preguntas')->name('posteos.preguntas');
-    // Route::get('cursos/{curso}/posteos/{posteo}/encuesta', 'encuesta')->name('posteos.encuesta');
+//     // POSTEOS
+//     Route::get('cursos/{curso}/posteos/{posteo}/preguntas', 'preguntas')->name('posteos.preguntas');
+//     // Route::get('cursos/{curso}/posteos/{posteo}/encuesta', 'encuesta')->name('posteos.encuesta');
 
-    Route::post('cursos/{curso}/posteos/store', 'store')->name('posteos.store');
-    // ->middleware('permission:posteos.create');
-    Route::get('cursos/{curso}/posteos/create', 'create')->name('posteos.create');
-    // ->middleware('permission:posteos.create');
-    Route::put('cursos/{curso}/posteos/{posteo}', 'update')->name('posteos.update');
-    // ->middleware('permission:posteos.edit');
-    Route::delete('cursos/{curso}/posteos/{posteo}', 'destroy')->name('posteos.destroy');
-    // ->middleware('permission:posteos.destroy');
-    Route::get('cursos/{curso}/posteos/{posteo}/edit', 'edit')->name('posteos.edit');
-    // ->middleware('permission:posteos.edit');
+//     Route::post('cursos/{curso}/posteos/store', 'store')->name('posteos.store');
+//     // ->middleware('permission:posteos.create');
+//     Route::get('cursos/{curso}/posteos/create', 'create')->name('posteos.create');
+//     // ->middleware('permission:posteos.create');
+//     Route::put('cursos/{curso}/posteos/{posteo}', 'update')->name('posteos.update');
+//     // ->middleware('permission:posteos.edit');
+//     Route::delete('cursos/{curso}/posteos/{posteo}', 'destroy')->name('posteos.destroy');
+//     // ->middleware('permission:posteos.destroy');
+//     Route::get('cursos/{curso}/posteos/{posteo}/edit', 'edit')->name('posteos.edit');
+//     // ->middleware('permission:posteos.edit');
 
-    Route::get('posteos/{posteo}/del_attached_video', 'del_attached_video')->name('posteos.del_attached_video');
-    // ->middleware('permission:posteos.edit');
-    Route::get('posteos/{posteo}/del_attached_archivo', 'del_attached_archivo')->name('posteos.del_attached_archivo');
-    // ->middleware('permission:posteos.edit');
+//     Route::get('posteos/{posteo}/del_attached_video', 'del_attached_video')->name('posteos.del_attached_video');
+//     // ->middleware('permission:posteos.edit');
+//     Route::get('posteos/{posteo}/del_attached_archivo', 'del_attached_archivo')->name('posteos.del_attached_archivo');
+//     // ->middleware('permission:posteos.edit');
 
-});
-
-
-Route::controller(PreguntaController::class)->group(function () {
-
-    // PREGUNTAS1
-    Route::get('cursos/{curso}/posteos/{posteo}/examen/subir', 'subirExamen')->name('preguntas.examen.create');
-    // ->middleware('permission:preguntas.create');
-    Route::post('cursos/{curso}/posteos/{posteo}/examen/store', 'guardarExamen')->name('preguntas.examen.store');
-    // ->middleware('permission:preguntas.create');
-
-    Route::post('posteos/{posteo}/preguntas/store', 'store')->name('preguntas.store');
-    // ->middleware('permission:preguntas.create');
-    Route::get('posteos/{posteo}/preguntas/create', 'create')->name('preguntas.create');
-    // ->middleware('permission:preguntas.create');
-    Route::put('posteos/{posteo}/preguntas/{pregunta}', 'update')->name('preguntas.update');
-    // ->middleware('permission:preguntas.edit');
-    Route::delete('posteos/{posteo}/preguntas/{pregunta}', 'destroy')->name('preguntas.destroy');
-    // ->middleware('permission:preguntas.destroy');
-    Route::get('posteos/{posteo}/preguntas/{pregunta}/edit', 'edit')->name('preguntas.edit');
-    // ->middleware('permission:preguntas.edit');
+// });
 
 
-    Route::get('evaluaciones/preguntas/getInitalData/{pregunta_id}', 'getInitalData');
-    Route::post('evaluaciones/preguntas/createOrUpdate', 'createOrUpdate');
-});
+// Route::controller(PreguntaController::class)->group(function () {
+
+//     // PREGUNTAS1
+//     Route::get('cursos/{curso}/posteos/{posteo}/examen/subir', 'subirExamen')->name('preguntas.examen.create');
+//     // ->middleware('permission:preguntas.create');
+//     Route::post('cursos/{curso}/posteos/{posteo}/examen/store', 'guardarExamen')->name('preguntas.examen.store');
+//     // ->middleware('permission:preguntas.create');
+
+//     Route::post('posteos/{posteo}/preguntas/store', 'store')->name('preguntas.store');
+//     // ->middleware('permission:preguntas.create');
+//     Route::get('posteos/{posteo}/preguntas/create', 'create')->name('preguntas.create');
+//     // ->middleware('permission:preguntas.create');
+//     Route::put('posteos/{posteo}/preguntas/{pregunta}', 'update')->name('preguntas.update');
+//     // ->middleware('permission:preguntas.edit');
+//     Route::delete('posteos/{posteo}/preguntas/{pregunta}', 'destroy')->name('preguntas.destroy');
+//     // ->middleware('permission:preguntas.destroy');
+//     Route::get('posteos/{posteo}/preguntas/{pregunta}/edit', 'edit')->name('preguntas.edit');
+//     // ->middleware('permission:preguntas.edit');
+
+
+//     Route::get('evaluaciones/preguntas/getInitalData/{pregunta_id}', 'getInitalData');
+//     Route::post('evaluaciones/preguntas/createOrUpdate', 'createOrUpdate');
+// });
 
 // Route::controller(UserController::class)->group(function () {
 
@@ -324,82 +325,82 @@ Route::controller(PreguntaController::class)->group(function () {
 // Route::get('pregunta_frecuentes/{pregunta_frecuente}/edit', 'Pregunta_frecuenteController@edit')->name('pregunta_frecuentes.edit');
 // ->middleware('permission:pregunta_frecuentes.edit');
 
-Route::controller(GrupoController::class)->group(function () {
+// Route::controller(GrupoController::class)->group(function () {
 
-    // grupos
-    // adicional
-    Route::get('grupos/{grupo}/usuarios', 'usuarios')->name('grupos.usuarios');
-    Route::post('grupos/store', 'store')->name('grupos.store');
-    // ->middleware('permission:grupos.create');
-    Route::get('grupos/index', 'index')->name('grupos.index');
-    // ->middleware('permission:grupos.index');
-    Route::get('grupos/create', 'create')->name('grupos.create');
-    // ->middleware('permission:grupos.create');
-    Route::put('grupos/{grupo}', 'update')->name('grupos.update');
-    // ->middleware('permission:grupos.edit');
-    Route::delete('grupos/{grupo}', 'destroy')->name('grupos.destroy');
-    // ->middleware('permission:grupos.destroy');
-    Route::get('grupos/{grupo}/edit', 'edit')->name('grupos.edit');
-    // ->middleware('permission:grupos.edit');
+//     // grupos
+//     // adicional
+//     Route::get('grupos/{grupo}/usuarios', 'usuarios')->name('grupos.usuarios');
+//     Route::post('grupos/store', 'store')->name('grupos.store');
+//     // ->middleware('permission:grupos.create');
+//     Route::get('grupos/index', 'index')->name('grupos.index');
+//     // ->middleware('permission:grupos.index');
+//     Route::get('grupos/create', 'create')->name('grupos.create');
+//     // ->middleware('permission:grupos.create');
+//     Route::put('grupos/{grupo}', 'update')->name('grupos.update');
+//     // ->middleware('permission:grupos.edit');
+//     Route::delete('grupos/{grupo}', 'destroy')->name('grupos.destroy');
+//     // ->middleware('permission:grupos.destroy');
+//     Route::get('grupos/{grupo}/edit', 'edit')->name('grupos.edit');
+//     // ->middleware('permission:grupos.edit');
 
-});
+// });
 
-Route::controller(Encuestas_respuestaController::class)->group(function () {
+// Route::controller(Encuestas_respuestaController::class)->group(function () {
 
-    // ENCUENTAS RESPUESTAS
-    Route::get('encuestas_respuestas/index', 'index')->name('encuestas_respuestas.index');
-    // ->middleware('permission:encuestas_respuestas.index');
-    Route::put('encuestas_respuestas/{encuestas_respuesta}', 'update')->name('encuestas_respuestas.update');
-    // ->middleware('permission:encuestas_respuestas.edit');
-    Route::delete('encuestas_respuestas/{encuestas_respuesta}', 'destroy')->name('encuestas_respuestas.destroy');
-    // ->middleware('permission:encuestas_respuestas.destroy');
-    Route::get('encuestas_respuestas/{encuestas_respuesta}/edit', 'edit')->name('encuestas_respuestas.edit');
-    // ->middleware('permission:encuestas_respuestas.edit');
-});
-
-
+//     // ENCUENTAS RESPUESTAS
+//     Route::get('encuestas_respuestas/index', 'index')->name('encuestas_respuestas.index');
+//     // ->middleware('permission:encuestas_respuestas.index');
+//     Route::put('encuestas_respuestas/{encuestas_respuesta}', 'update')->name('encuestas_respuestas.update');
+//     // ->middleware('permission:encuestas_respuestas.edit');
+//     Route::delete('encuestas_respuestas/{encuestas_respuesta}', 'destroy')->name('encuestas_respuestas.destroy');
+//     // ->middleware('permission:encuestas_respuestas.destroy');
+//     Route::get('encuestas_respuestas/{encuestas_respuesta}/edit', 'edit')->name('encuestas_respuestas.edit');
+//     // ->middleware('permission:encuestas_respuestas.edit');
+// });
 
 
-Route::controller(Post_electivoController::class)->group(function () {
 
-    // POST_ELECTIVOS
-    Route::post('post_electivos/store', 'store')->name('post_electivos.store');
-    // ->middleware('permission:post_electivos.create');
-    Route::get('post_electivos/index', 'index')->name('post_electivos.index');
-    // ->middleware('permission:post_electivos.index');
-    Route::get('post_electivos/create', 'create')->name('post_electivos.create');
-    // ->middleware('permission:post_electivos.create');
-    Route::put('post_electivos/{post_electivo}', 'update')->name('post_electivos.update');
-    // ->middleware('permission:post_electivos.edit');
-    Route::delete('post_electivos/{post_electivo}', 'destroy')->name('post_electivos.destroy');
-    // ->middleware('permission:post_electivos.destroy');
-    Route::get('post_electivos/{post_electivo}/edit', 'edit')->name('post_electivos.edit');
-    // ->middleware('permission:post_electivos.edit');
-});
+
+// Route::controller(Post_electivoController::class)->group(function () {
+
+//     // POST_ELECTIVOS
+//     Route::post('post_electivos/store', 'store')->name('post_electivos.store');
+//     // ->middleware('permission:post_electivos.create');
+//     Route::get('post_electivos/index', 'index')->name('post_electivos.index');
+//     // ->middleware('permission:post_electivos.index');
+//     Route::get('post_electivos/create', 'create')->name('post_electivos.create');
+//     // ->middleware('permission:post_electivos.create');
+//     Route::put('post_electivos/{post_electivo}', 'update')->name('post_electivos.update');
+//     // ->middleware('permission:post_electivos.edit');
+//     Route::delete('post_electivos/{post_electivo}', 'destroy')->name('post_electivos.destroy');
+//     // ->middleware('permission:post_electivos.destroy');
+//     Route::get('post_electivos/{post_electivo}/edit', 'edit')->name('post_electivos.edit');
+//     // ->middleware('permission:post_electivos.edit');
+// });
 
 Route::controller(UsuarioController::class)->group(function () {
 
     // USUARIOS
-    Route::post('usuarios/cambia_modulo_carga_ciclos', 'cambia_modulo_carga_ciclos');
+    // Route::post('usuarios/cambia_modulo_carga_ciclos', 'cambia_modulo_carga_ciclos');
 
-    Route::post('usuarios/store', 'store')->name('usuarios.store');
-    // ->middleware('permission:usuarios.create');
-    Route::get('usuarios/index', 'index')->name('usuarios.index');
-    // ->middleware('permission:usuarios.index');
-    Route::get('usuarios/create', 'create')->name('usuarios.create');
-    // ->middleware('permission:usuarios.create');
-    //	Route::put('usuarios/{usuario}', 'update')->name('usuarios.update');
-    // ->middleware('permission:usuarios.edit');
-    Route::delete('usuarios/{usuario}', 'destroy')->name('usuarios.destroy');
-    // ->middleware('permission:usuarios.destroy');
-    Route::patch('usuarios/{usuario}', 'status')->name('usuarios.status');
-    // ->middleware('permission:usuarios.edit');
-    //	Route::get('usuarios/{usuario}/edit', 'edit')->name('usuarios.edit');
-    // ->middleware('permission:usuarios.edit');
+    // Route::post('usuarios/store', 'store')->name('usuarios.store');
+    // // ->middleware('permission:usuarios.create');
+    // Route::get('usuarios/index', 'index')->name('usuarios.index');
+    // // ->middleware('permission:usuarios.index');
+    // Route::get('usuarios/create', 'create')->name('usuarios.create');
+    // // ->middleware('permission:usuarios.create');
+    // //	Route::put('usuarios/{usuario}', 'update')->name('usuarios.update');
+    // // ->middleware('permission:usuarios.edit');
+    // Route::delete('usuarios/{usuario}', 'destroy')->name('usuarios.destroy');
+    // // ->middleware('permission:usuarios.destroy');
+    // Route::patch('usuarios/{usuario}', 'status')->name('usuarios.status');
+    // // ->middleware('permission:usuarios.edit');
+    // //	Route::get('usuarios/{usuario}/edit', 'edit')->name('usuarios.edit');
+    // // ->middleware('permission:usuarios.edit');
 
     // USUARIOS RESET MASIVO
-    Route::prefix('/masivo/usuarios')->group(function () {
-        Route::get('index_reinicios', 'index_reinicios')->name('usuarios.index_reinicios');
+    Route::prefix('/intentos-masivos')->group(function () {
+        Route::get('/', 'index_reinicios')->name('usuarios.index_reinicios');
         // ->middleware('permission:usuarios.index_reinicios');
         Route::get('reinicios_data', 'reinicios_data');
         Route::get('buscarCursosxEscuela/{school_id}', 'buscarCursosxEscuela');
@@ -408,54 +409,54 @@ Route::controller(UsuarioController::class)->group(function () {
         Route::post('reiniciarIntentosMasivos', 'reiniciarIntentosMasivos');
     });
 
-    Route::get('usuarios/getInitialData/{usuario_id}', 'getInitialData');
-    Route::get('usuarios/getCarrerasxModulo/{config_id}', 'getCarrerasxModulo');
-    Route::get('usuarios/getCarrerasxGrupo/{grupo_id}/{config_id}', 'getCarrerasxGrupo');
-    Route::get('usuarios/getCiclosxCarrera/{carrera_id}/{grupo_id}', 'getCiclosxCarrera');
-    Route::get('usuarios/getCiclosxCarreraFilter/{carrera_id}', 'getCiclosxCarreraFilter');
-    Route::get('usuarios/getDataCiclo/{ciclo_id}/{carrera_id}/{grupo_id}', 'getDataCiclo');
-    Route::get('usuarios/getCiclo/{ciclo_id}/{carrera_id}/{grupo_id}', 'getCiclo');
+    // Route::get('usuarios/getInitialData/{usuario_id}', 'getInitialData');
+    // Route::get('usuarios/getCarrerasxModulo/{config_id}', 'getCarrerasxModulo');
+    // Route::get('usuarios/getCarrerasxGrupo/{grupo_id}/{config_id}', 'getCarrerasxGrupo');
+    // Route::get('usuarios/getCiclosxCarrera/{carrera_id}/{grupo_id}', 'getCiclosxCarrera');
+    // Route::get('usuarios/getCiclosxCarreraFilter/{carrera_id}', 'getCiclosxCarreraFilter');
+    // Route::get('usuarios/getDataCiclo/{ciclo_id}/{carrera_id}/{grupo_id}', 'getDataCiclo');
+    // Route::get('usuarios/getCiclo/{ciclo_id}/{carrera_id}/{grupo_id}', 'getCiclo');
 
-    Route::get('usuarios/getCursosxUsuario/{usuario_id}', 'getCursosxUsuario');
+    // Route::get('usuarios/getCursosxUsuario/{usuario_id}', 'getCursosxUsuario');
 
-    Route::post('usuarios/crear', 'crear');
+    // Route::post('usuarios/crear', 'crear');
 });
 
 
 // CONVALIDACIONES
-Route::get('convalidaciones/index', [ConvalidacionesController::class, 'index'])->name('convalidaciones.index');
+// Route::get('convalidaciones/index', [ConvalidacionesController::class, 'index'])->name('convalidaciones.index');
 
-Route::controller(Usuario_vigenciaController::class)->group(function () {
+// Route::controller(Usuario_vigenciaController::class)->group(function () {
 
-    // USUAIRO_VIGENCIA
-    Route::post('usuario_vigencias/store', 'store')->name('usuario_vigencias.store');
-    // ->middleware('permission:usuario_vigencias.create');
-    Route::get('usuario_vigencias/index', 'index')->name('usuario_vigencias.index');
-    // ->middleware('permission:usuario_vigencias.index');
-    Route::get('usuario_vigencias/create', 'create')->name('usuario_vigencias.create');
-    // ->middleware('permission:usuario_vigencias.create');
-    Route::put('usuario_vigencias/{usuario_vigencia}', 'update')->name('usuario_vigencias.update');
-    // ->middleware('permission:usuario_vigencias.edit');
-    Route::delete('usuario_vigencias/{usuario_vigencia}', 'destroy')->name('usuario_vigencias.destroy');
-    // ->middleware('permission:usuario_vigencias.destroy');
-    Route::get('usuario_vigencias/{usuario_vigencia}/edit', 'edit')->name('usuario_vigencias.edit');
-    // ->middleware('permission:usuario_vigencias.edit');
-});
+//     // USUAIRO_VIGENCIA
+//     Route::post('usuario_vigencias/store', 'store')->name('usuario_vigencias.store');
+//     // ->middleware('permission:usuario_vigencias.create');
+//     Route::get('usuario_vigencias/index', 'index')->name('usuario_vigencias.index');
+//     // ->middleware('permission:usuario_vigencias.index');
+//     Route::get('usuario_vigencias/create', 'create')->name('usuario_vigencias.create');
+//     // ->middleware('permission:usuario_vigencias.create');
+//     Route::put('usuario_vigencias/{usuario_vigencia}', 'update')->name('usuario_vigencias.update');
+//     // ->middleware('permission:usuario_vigencias.edit');
+//     Route::delete('usuario_vigencias/{usuario_vigencia}', 'destroy')->name('usuario_vigencias.destroy');
+//     // ->middleware('permission:usuario_vigencias.destroy');
+//     Route::get('usuario_vigencias/{usuario_vigencia}/edit', 'edit')->name('usuario_vigencias.edit');
+//     // ->middleware('permission:usuario_vigencias.edit');
+// });
 
-Route::controller(CompatibleController::class)->group(function () {
+// Route::controller(CompatibleController::class)->group(function () {
 
-    //COMPATIBLES
-    Route::get('compatibles', function () {
-        return view('compatibles.index');
-    })->name('compatibles.index');
-    Route::get('/get_cursos_compatibles', 'get_cursos_compatibles');
-    Route::post('/get_coincidencias', 'get_coincidencias');
-    Route::post('/guardar_compatibles', 'guardar_compatibles');
-    Route::post('/compatibles_lista', 'compatibles_lista');
-    Route::post('/search_tema', 'search_tema');
-    Route::get('/compatible/reporte', 'reporte');
-    Route::get('/migracion_compatibles_x_usuario/{carrera_id}', 'migracion_compatibles_x_usuario');
-});
+//     //COMPATIBLES
+//     Route::get('compatibles', function () {
+//         return view('compatibles.index');
+//     })->name('compatibles.index');
+//     Route::get('/get_cursos_compatibles', 'get_cursos_compatibles');
+//     Route::post('/get_coincidencias', 'get_coincidencias');
+//     Route::post('/guardar_compatibles', 'guardar_compatibles');
+//     Route::post('/compatibles_lista', 'compatibles_lista');
+//     Route::post('/search_tema', 'search_tema');
+//     Route::get('/compatible/reporte', 'reporte');
+//     Route::get('/migracion_compatibles_x_usuario/{carrera_id}', 'migracion_compatibles_x_usuario');
+// });
 
 // Route::controller(CompatibleController::class)->group(function() {
 // 	// Permisos
@@ -473,35 +474,35 @@ Route::controller(CompatibleController::class)->group(function () {
 // 	// ->middleware('permission:permisos.edit');
 // });
 
-Route::controller(MallasController::class)->group(function () {
+// Route::controller(MallasController::class)->group(function () {
 
-    // MALLAS
-    Route::post('mallas/store', 'store')->name('mallas.store');
-    // ->middleware('permission:mallas.create');
-    Route::get('mallas/index', 'index')->name('mallas.index');
-    // ->middleware('permission:mallas.index');
-    Route::get('mallas/create', 'create')->name('mallas.create');
-    // ->middleware('permission:mallas.create');
-    Route::put('mallas/{malla}', 'update')->name('mallas.update');
-    // ->middleware('permission:mallas.edit');
-    Route::delete('mallas/{malla}', 'destroy')->name('mallas.destroy');
-    // ->middleware('permission:mallas.destroy');
-    Route::get('mallas/{malla}/edit', 'edit')->name('mallas.edit');
-    // ->middleware('permission:mallas.edit');
-});
+//     // MALLAS
+//     Route::post('mallas/store', 'store')->name('mallas.store');
+//     // ->middleware('permission:mallas.create');
+//     Route::get('mallas/index', 'index')->name('mallas.index');
+//     // ->middleware('permission:mallas.index');
+//     Route::get('mallas/create', 'create')->name('mallas.create');
+//     // ->middleware('permission:mallas.create');
+//     Route::put('mallas/{malla}', 'update')->name('mallas.update');
+//     // ->middleware('permission:mallas.edit');
+//     Route::delete('mallas/{malla}', 'destroy')->name('mallas.destroy');
+//     // ->middleware('permission:mallas.destroy');
+//     Route::get('mallas/{malla}/edit', 'edit')->name('mallas.edit');
+//     // ->middleware('permission:mallas.edit');
+// });
 
 
-Route::controller(MediaController::class)->group(function () {
+// Route::controller(MediaController::class)->group(function () {
 
-    // MEDIA
-    Route::post('media/fileupload', 'fileupload')->name('media.fileupload');
-    Route::get('media/eliminar/{id}', 'eliminar')->name('media.eliminar');
-    Route::get('media/index', 'index')->name('media.index');
-    Route::get('media/create', 'create')->name('media.create');
-    Route::get('media/modal_list_media_asigna', 'modal_list_media_asigna')->name('media.modal_list_media_asigna');
-    Route::get('media/search', 'search');
-    Route::get('media/{media}/download', 'downloadExternalFile')->name('media.download');
-});
+//     // MEDIA
+//     Route::post('media/fileupload', 'fileupload')->name('media.fileupload');
+//     Route::get('media/eliminar/{id}', 'eliminar')->name('media.eliminar');
+//     Route::get('media/index', 'index')->name('media.index');
+//     Route::get('media/create', 'create')->name('media.create');
+//     Route::get('media/modal_list_media_asigna', 'modal_list_media_asigna')->name('media.modal_list_media_asigna');
+//     Route::get('media/search', 'search');
+//     Route::get('media/{media}/download', 'downloadExternalFile')->name('media.download');
+// });
 
 Route::controller(HomeController::class)->group(function () {
     //Resumen Encuestas
@@ -538,16 +539,16 @@ Route::controller(HomeController::class)->group(function () {
 //	Route::get('aulas_virtuales', 'AulasVirtualesController@index')->name('aulas_virtuales');
 
 // COMPATIBLES
-Route::get('tools/compatibles', [MigracionController::class, 'compatibles'])->name('tools.compatibles');
+// Route::get('tools/compatibles', [MigracionController::class, 'compatibles'])->name('tools.compatibles');
 
-Route::controller(GestorController::class)->group(function () {
+// Route::controller(GestorController::class)->group(function () {
 
-    // Generar password
-    Route::get('genpass', 'generarPass')->name('gen.pass');
+//     // Generar password
+//     Route::get('genpass', 'generarPass')->name('gen.pass');
 
-    // Generar vigencias
-    Route::get('genuv', 'generarVigencia')->name('gen.pass');
-});
+//     // Generar vigencias
+//     Route::get('genuv', 'generarVigencia')->name('gen.pass');
+// });
 
 // AUDITORIA //
 
@@ -580,55 +581,55 @@ Route::controller(GestorController::class)->group(function () {
 
 
 // PROCESOS MASIVOS //
-Route::controller(MasivoController::class)->group(function () {
+// Route::controller(MasivoController::class)->group(function () {
 
-    Route::get('masivo/index', 'index')->name('masivo.index');
-    Route::post('masivo/migrar_usuarios', 'migrar_usuarios')->name('masivo.migrar_usuarios');
-    Route::post('masivo/actualizar_ciclo', 'actualizar_ciclo')->name('masivo.actualizar_ciclo');
-    Route::post('masivo/cesar_usuarios', 'cesar_usuarios')->name('masivo.cesar_usuarios');
-    Route::post('masivo/migrar_avance_x_curso', 'migrar_avance_x_curso')->name('masivo.migrar_avance_x_curso');
-    Route::post('masivo/recuperar_data_cesados', 'recuperar_data_cesados')->name('masivo.recuperar_data_cesados');
-    Route::get('masivo/migrar_data_cesados_a_historial', 'migrar_data_cesados_a_historial')->name('masivo.migrar_data_cesados_a_historial');
-    Route::get('masivo/depurar_tablas', 'depurar_tablas')->name('masivo.depurar_tablas');
-    Route::post('masivo/migrar_farma_historial', 'migrar_farma_historial')->name('masivo.migrar_farma_historial');
-    Route::post('masivo/subir_cursos', 'subir_cursos');
+//     Route::get('masivo/index', 'index')->name('masivo.index');
+//     Route::post('masivo/migrar_usuarios', 'migrar_usuarios')->name('masivo.migrar_usuarios');
+//     Route::post('masivo/actualizar_ciclo', 'actualizar_ciclo')->name('masivo.actualizar_ciclo');
+//     Route::post('masivo/cesar_usuarios', 'cesar_usuarios')->name('masivo.cesar_usuarios');
+//     Route::post('masivo/migrar_avance_x_curso', 'migrar_avance_x_curso')->name('masivo.migrar_avance_x_curso');
+//     Route::post('masivo/recuperar_data_cesados', 'recuperar_data_cesados')->name('masivo.recuperar_data_cesados');
+//     Route::get('masivo/migrar_data_cesados_a_historial', 'migrar_data_cesados_a_historial')->name('masivo.migrar_data_cesados_a_historial');
+//     Route::get('masivo/depurar_tablas', 'depurar_tablas')->name('masivo.depurar_tablas');
+//     Route::post('masivo/migrar_farma_historial', 'migrar_farma_historial')->name('masivo.migrar_farma_historial');
+//     Route::post('masivo/subir_cursos', 'subir_cursos');
 
-    Route::post('masivo/subir_usuarios', 'subir_usuarios')->name('masivo.subir_usuarios');
+//     Route::post('masivo/subir_usuarios', 'subir_usuarios')->name('masivo.subir_usuarios');
 
-    Route::post('/masivo/restaurar_bd2019', 'restaurar_bd2019')->name('masivo.restaurar_bd2019');
-});
+//     Route::post('/masivo/restaurar_bd2019', 'restaurar_bd2019')->name('masivo.restaurar_bd2019');
+// });
 
-Route::controller(ErroresMasivoController::class)->group(function () {
+// Route::controller(ErroresMasivoController::class)->group(function () {
 
-    //ERRORES
-    Route::get('/masivo/reporte_errores/{tipo}', 'reporte_errores');
-    Route::get('/masivo/errores/get_errores/{tipo}', 'get_errores');
-    Route::post('/masivo/errores/get_change', 'get_change');
-    Route::post('/masivo/errores/guardar_data', 'guardar_data');
+//     //ERRORES
+//     Route::get('/masivo/reporte_errores/{tipo}', 'reporte_errores');
+//     Route::get('/masivo/errores/get_errores/{tipo}', 'get_errores');
+//     Route::post('/masivo/errores/get_change', 'get_change');
+//     Route::post('/masivo/errores/guardar_data', 'guardar_data');
 
-    Route::get('masivo/errores', 'obtener_errores');
-    Route::post('masivo/comprobar_data', 'comprobar_data');
-    Route::delete('/masivo/eliminar_error/{id}', 'eliminar_error');
-    Route::post('/masivo/arreglar_errores', 'arreglar_errores');
-    Route::post('/masivo/eliminar_errores', 'eliminar_errores');
+//     Route::get('masivo/errores', 'obtener_errores');
+//     Route::post('masivo/comprobar_data', 'comprobar_data');
+//     Route::delete('/masivo/eliminar_error/{id}', 'eliminar_error');
+//     Route::post('/masivo/arreglar_errores', 'arreglar_errores');
+//     Route::post('/masivo/eliminar_errores', 'eliminar_errores');
 
-    Route::post('/masivo/fix_err_cic_carr', 'fix_err_cic_carr');
+//     Route::post('/masivo/fix_err_cic_carr', 'fix_err_cic_carr');
 
-    Route::get('masivo/err_cesados', 'obtener_err_cesados');
-    Route::post('/masivo/fix_err_cesados', 'fix_err_cesados');
+//     Route::get('masivo/err_cesados', 'obtener_err_cesados');
+//     Route::post('/masivo/fix_err_cesados', 'fix_err_cesados');
 
-    Route::get('masivo/err_rec_cesados', 'obtener_err_rec_cesados');
-    Route::post('/masivo/fix_err_rec_cesados', 'fix_err_rec_cesados');
-});
+//     Route::get('masivo/err_rec_cesados', 'obtener_err_rec_cesados');
+//     Route::post('/masivo/fix_err_rec_cesados', 'fix_err_rec_cesados');
+// });
 
-Route::controller(IncidenciaController::class)->group(function () {
+// Route::controller(IncidenciaController::class)->group(function () {
 
-    //INCIDENCIAS
-    Route::get('incidencias/index', 'index')->name('incidencias.index');
-    // ->middleware('permission:incidencias.index');
-    Route::post('incidencias/ejecutar_comando', 'ejecutar_comando')->name('incidencias.ejecutar');
-    Route::delete('incidencias/destroy/{id}', 'destroy')->name('incidencias.destroy');
-});
+//     //INCIDENCIAS
+//     Route::get('incidencias/index', 'index')->name('incidencias.index');
+//     // ->middleware('permission:incidencias.index');
+//     Route::post('incidencias/ejecutar_comando', 'ejecutar_comando')->name('incidencias.ejecutar');
+//     Route::delete('incidencias/destroy/{id}', 'destroy')->name('incidencias.destroy');
+// });
 
 Route::controller(DuplicarController::class)->group(function () {
 
@@ -649,16 +650,16 @@ Route::controller(PushNotificationsFirebaseController::class)->group(function ()
     Route::post('notificaciones_push/enviarNotificacionCustom', 'enviarNotificacionCustom');
 });
 
-Route::controller(HelperController::class)->group(function () {
+// Route::controller(HelperController::class)->group(function () {
 
-    // NOTIFICACIONES PUSH PERSONALIZADAS DESDE EL GESTOR //
-    //	Funciones para migrar boticas
-    Route::get('actualizar_curricula_x_criterio', 'actualizarCurriculaxCriterio');
-    Route::get('actualizar_boticas_x_criterio', 'actualizarBoticasxCriterio');
-    Route::get('actualizar_usuarios_x_criterio', 'actualizarUsuariosxCriterio');
-    Route::get('migracion_boticas', 'migracionBoticas');
-    Route::get('actualizar_matricula_x_criterio', 'actualizarMatriculasxCriterio');
-});
+//     // NOTIFICACIONES PUSH PERSONALIZADAS DESDE EL GESTOR //
+//     //	Funciones para migrar boticas
+//     Route::get('actualizar_curricula_x_criterio', 'actualizarCurriculaxCriterio');
+//     Route::get('actualizar_boticas_x_criterio', 'actualizarBoticasxCriterio');
+//     Route::get('actualizar_usuarios_x_criterio', 'actualizarUsuariosxCriterio');
+//     Route::get('migracion_boticas', 'migracionBoticas');
+//     Route::get('actualizar_matricula_x_criterio', 'actualizarMatriculasxCriterio');
+// });
 
 //	Funciones para migrar boticas
 
@@ -702,4 +703,10 @@ Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->grou
     Route::get('/list_temas/{curso_id}', 'listTemas');
     Route::get('/get_duplicates_data/{tipo}/{id}/{categoria_id}', 'getDuplicatesData');
     Route::post('/migrar_temas', 'migrarTemas');
+});
+
+// DIPLOMAS
+Route::prefix('/diploma')->controller(DiplomaController::class)->group(function () {
+    Route::view('/create', 'diploma.create_edit')->name('diploma.create');
+    Route::view('/edit/{diploma}', 'diploma.create_edit')->name('diploma.edit');
 });

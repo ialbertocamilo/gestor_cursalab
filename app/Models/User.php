@@ -51,7 +51,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
     use HasApiTokens, HasFactory, Notifiable, HasRolesAndAbilities, HasPushSubscriptions;
 
-    use \Altek\Accountant\Recordable, \Altek\Eventually\Eventually;
+    use \Altek\Accountant\Recordable;
+    use \Altek\Eventually\Eventually;
 
     use CustomCRUD, CustomAudit, CustomMedia;
 
@@ -65,7 +66,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     use Impersonate;
 
-  use HybridRelations;
+    use HybridRelations;
+
     use Cachable {
         Cachable::newEloquentBuilder insteadof HybridRelations;
         Cachable::getObservableEvents insteadof \Altek\Eventually\Eventually, CustomAudit;
@@ -110,7 +112,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'deleted_at',
         'pivot'
     ];
-
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -214,6 +215,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function segments()
     {
         return $this->morphMany(Segment::class, 'model');
+    }
+
+    public function benefits()
+    {
+        return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
     }
 
     public function scopeOnlyClientUsers($q)
@@ -502,8 +508,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->subworkspace_id = Workspace::query()
                 ->where('criterion_value_id', $data['criterion_list']['module'])
-                ->first()
-                ?->id;
+                ->first()?->id;
 
             $criterion_list_final = [];
 
@@ -560,6 +565,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->save();
 
+            foreach ($user->criterion_values as $criterion) {
+                info($criterion);
+            }
+
+            info([ 'is_recordable' => $this->isRecordingEnabled(),
+                   'is_event_record: syncing' => $this->isEventRecordable('syncing'),
+                   'is_event_record: synced'  => $this->isEventRecordable('synced'),
+                   'is_event_record: updatingExistingPivot' => $this->isEventRecordable('updatingExistingPivot'),
+                   'is_event_record: existingPivotUpdated' => $this->isEventRecordable('existingPivotUpdated') ]);
+
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
             }
@@ -572,6 +587,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
+
+        info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
 
     public function syncDocumentCriterionValue($old_document, $new_document)
@@ -1289,7 +1306,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         if ($keyenv == 'GESTOR') {
-            return $user->where('email', $value)->first();
+            return $user->where('email_gestor', $value)->first();
         }
 
         return $user->where('document', $value)

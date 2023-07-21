@@ -68,6 +68,87 @@
                     </v-col>
                 </v-row>
 
+                <v-row justify="space-around" v-if="is_superuser">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Funcionalidades"
+                        >
+                            <template v-slot:content>
+
+                                <v-col cols="12">
+                                    <v-checkbox
+                                        v-for="functionality in functionalities"
+                                        :key="functionality.id"
+                                        v-model="resource.selected_functionality[functionality.id]"
+                                        :label="functionality.name"
+                                    >
+                                    </v-checkbox>
+                                </v-col>
+
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultModalSection title="Diplomas">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputLogoMarcaAgua"
+                                            v-model="resource.logo_marca_agua"
+                                            label="Imagen (500x350px)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource, 'logo_marca_agua')"
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <span class="mt-4 mr-2">¿Activar marca de agua en diploma?</span>
+                                        <div>
+                                            <DefaultToggle
+                                                class="mt-0"
+                                                v-model="resource.marca_agua_estado"
+                                                no-label
+                                                />
+                                        </div>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col cols="12" v-if="is_superuser">
+                        <DefaultModalSection title="Notificaciones Push">
+                                <template v-slot:content>
+                                    <v-row>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                class="mb-4"
+                                                label="Empezar envio luego de: (en minutos)"
+                                                type="number"
+                                                v-model="resource.notificaciones_push_envio_inicio" />
+                                            <DefaultInput
+                                                label="Número de usuarios por envio"
+                                                type="number"
+                                                v-model="resource.notificaciones_push_envio_intervalo"
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="Frecuencia de envio por bloques (en minutos)"
+                                                type="number"
+                                                v-model="resource.notificaciones_push_chunk"
+                                                />
+                                        </v-col>
+                                    </v-row>
+                                </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col>
                         <v-subheader class="mt-4 px-0">
@@ -107,7 +188,7 @@
                             :key="criterion.id"
                             v-model="resource.selected_criteria[criterion.id]"
                             :label="generateCriterionTitle(criterion)"
-                            :disabled="true"
+                            :disabled="false"
                         >
                             <!-- :disabled="criterion.code === 'module'" -->
                         </v-checkbox>
@@ -139,9 +220,11 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria'
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
+    'logo_marca_agua', 'marca_agua_estado',
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
-const file_fields = ['logo', 'logo_negativo'];
+const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
     'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
     'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos workspaces.',
@@ -181,14 +264,14 @@ export default {
                 url_powerbi: '',
                 logo: '',
                 logo_negativo: '',
-                selected_criteria: {}
-            }
-
-            ,
+                selected_criteria: {},
+                selected_functionality: {}
+            },
             limit_allowed_users: null,
-            resource: {}
-            ,
-            defaultCriteria: []
+            resource: {
+            },
+            defaultCriteria: [],
+            functionalities: []
             ,
             customCriteria: []
             ,
@@ -202,7 +285,7 @@ export default {
     ,
     mounted() {
 
-        this.loadData();
+        // this.loadData();
     }
     ,
     methods: {
@@ -215,6 +298,7 @@ export default {
             let vue = this
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
+            vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
         }
         ,
         closeModal() {
@@ -248,6 +332,9 @@ export default {
                 );
                 formData.set(
                     'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
+                );
+                formData.set(
+                    'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
                 );
 
                 vue.setLimitUsersAllowed(formData);
@@ -286,20 +373,23 @@ export default {
         /**
          * Load data from server
          */
-        loadData(workspace) {
+        async loadData(workspace) {
 
-            if (!workspace) return;
+            // if (!workspace) return;
+
+            this.showLoader()
 
             let vue = this;
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
 
-            let url = `/workspaces/${workspace.workspaceId}/edit`;
+            let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
 
-            this.$http
+            await this.$http
                 .get(url)
                 .then(({data}) => {
+                    // vue.hideLoader();
 
                     vue.is_superuser = data.data.is_superuser || false;
 
@@ -322,6 +412,18 @@ export default {
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
+                    vue.functionalities = data.data.functionalities;
+
+                    vue.resource.selected_functionality = {};
+                    data.data.functionalities_selected.forEach(c => {
+                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
+                            c.id, data.data.functionalities
+                        );
+                    });
+                    this.hideLoader();
+                })
+                .catch((error) => {
+                    this.hideLoader();
                 })
         }
         ,
@@ -332,10 +434,14 @@ export default {
 
             let exists = false;
 
-            criteria_workspace.forEach(v => {
-                if (v.id === criterionId)
-                    exists = true;
-            });
+            if (criteria_workspace) {
+
+                criteria_workspace.forEach(v => {
+                    if (v.id === criterionId)
+                        exists = true;
+                });
+            }
+
 
             return exists;
         }

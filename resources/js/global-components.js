@@ -1,6 +1,7 @@
 import DefaultTable from './components/globals/DefaultTable'
 import DefaultSelect from "./components/globals/DefaultSelect";
 import DefaultInput from "./components/globals/DefaultInput";
+import DefaultInputColor from "./components/globals/DefaultInputColor";
 import DefaultModalButton from "./components/globals/DefaultModalButton";
 import DefaultActivityButton from "./components/globals/DefaultActivityButton";
 import DefaultModalActionButton from "./components/globals/DefaultModalActionButton";
@@ -51,6 +52,7 @@ export default {
         DefaultSingleExpansionPanel,
         DefaultSelectOrUploadMultimedia,
         DefaultInputDate,
+        DefaultInputColor,
         DefaultTextArea,
         DefaultFilter,
         DefaultModalSection,

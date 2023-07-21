@@ -19,8 +19,8 @@ class FaqsResource extends JsonResource
         return [
             'id' => $this->id,
 
-            'title' => clean_html($this->title, 40),
-            'content' => clean_html($this->content, 250),
+            'title' => clean_html($this->title, 100),
+            'content' => clean_html($this->content, 50),
 
             'position' => $this->position,
 

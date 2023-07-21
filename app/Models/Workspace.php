@@ -22,7 +22,13 @@ class Workspace extends BaseModel
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
-        'users_with_empty_criteria'
+        'users_with_empty_criteria',
+
+        'logo_marca_agua',
+        'marca_agua_estado',
+        'notificaciones_push_chunk',
+        'notificaciones_push_envio_inicio',
+        'notificaciones_push_envio_intervalo'
     ];
 
     public function sluggable(): array
@@ -127,14 +133,19 @@ class Workspace extends BaseModel
 
         $query = self::generateUserWorkspacesQuery($userId);
 
-        if ($request->id) {
-            $query::where('id', $request->id)
-                ->withCount(['schools', 'courses']);
-        }
+        $query->withCount(['schools', 'courses', 'subworkspaces']);
 
-        if ($request->q) {
+        if ($request->id)
+            $query::where('id', $request->id);
+
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
+        if ($request->q)
             $query->where('name', 'like', "%$request->q%");
-        }
 
         $field = $request->sortBy ?? 'workspaces.id';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
@@ -471,5 +482,57 @@ class Workspace extends BaseModel
     public function criterion_workspace()
     {
         return $this->hasMany(CriterionValueWorkspace::class);
+    }
+
+    public function replicateWithRelations($data)
+    {
+        $relationships = [
+            // 'schools',
+            'courses.topics',
+            'subworkspaces.schools',
+            
+            'users',
+            
+            'app_menu',
+            'main_menu',
+            'side_menu',
+
+            'criterionWorkspace',
+            'criteriaValue',
+        ];
+
+        $model = $this->replicate();
+
+        $model->update($data);
+
+        $model->push();
+
+        $this->load($relationships);
+
+        $model->subworkspaces()->createMany($this->subworkspaces);
+
+        $model->app_menu()->sync($this->app_menu);
+        $model->main_menu()->sync($this->main_menu);
+        $model->side_menu()->sync($this->side_menu);
+
+        $model->criterionWorkspace()->sync($this->criterionWorkspace);
+        $model->criteriaValue()->sync($this->criteriaValue);
+
+        foreach ($model->subworkspaces as $key => $module) {
+            $schools = $this->subworkspaces->where('id', $module->id)->first()->schools;
+            $module->schools()->createMany($schools);
+
+            
+        }
+
+        // foreach ($this->relations as $relationName => $values){
+        //     $model->{$relationName}()->sync($values);
+        // }
+
+        // foreach ($this->getRelations() as $key => $relation) {
+        //    $model->setAttribute($key, clone $relation);
+        // }
+
+        return $model;
     }
 }

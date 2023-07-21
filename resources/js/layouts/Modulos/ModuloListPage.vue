@@ -49,6 +49,7 @@
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
+                :avoid_first_data_load="dataTable.avoid_first_data_load"
                 @reset="reset"
                 @logs="
                     openFormModal(
@@ -99,6 +100,7 @@ export default {
                 {title: 'Módulos', text: null, disabled: true, href: 'null'},
             ],
             dataTable: {
+                avoid_first_data_load: false,
                 endpoint: '/modulos/search',
                 ref: 'modulosTable',
                 headers: [
@@ -181,6 +183,25 @@ export default {
         vue.getSelects();
 
         vue.filters.module = vue.config_id
+
+        // === check localstorage vademecum ===
+        if(vue.dataTable.avoid_first_data_load) {
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+            const { storage: moduleStorage } = vue.getStorageUrl('modulo');
+            vue.openFormModal(vue.modalOptions, { id: moduleStorage.id });
+        }
+        // === check localstorage vademecum ===
+    },
+    created() {
+        let vue = this;
+        
+        // === check localstorage modulos ===
+        const { status, storage: moduleStorage } = vue.getStorageUrl('modulo');
+        if(status) {
+            vue.filters.q = moduleStorage.q;
+            vue.dataTable.avoid_first_data_load = true;
+        }
+        // === check localstorage modulos ===
     },
     methods: {
         getSelects() {

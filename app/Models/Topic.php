@@ -10,16 +10,26 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen',
         'position', 'visits_count', 'assessable', 'evaluation_verified',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active', 'position'
+        'active', 'active_results', 'position'
     ];
 
     //    protected $casts = [
     //        'assessable' => 'string'
     //    ];
 
+    public $defaultRelationships = [
+        'type_evaluation_id' => 'evaluation_type',
+        'course_id' => 'course'
+    ];
+
     public function setActiveAttribute($value)
     {
         $this->attributes['active'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
+    }
+
+    public function setActiveResultsAttribute($value)
+    {
+        $this->attributes['active_results'] = ($value === 'true' or $value === true or $value === 1 or $value === '1') ? 1 : 0;
     }
 
     public function setAssessableAttribute($value)
@@ -922,6 +932,34 @@ class Topic extends BaseModel
         }
 
         return [$correct_answers, $failed_answers, $correct_answers_score];
+    }
+
+    protected function evaluateAnswers2($respuestas, $topic) {
+        $questions = Question::select('id', 'rptas_json', 'pregunta','rpta_ok', 'score')->where('topic_id', $topic->id)->get();
+        
+        $question_results = [];
+
+        foreach ($respuestas as $key => $respuesta) {
+
+            $question = $questions->where('id', $respuesta['preg_id'])->first();
+            $esCorrecto = ($question->rpta_ok == $respuesta['opc']); 
+
+            if ($question) {
+                $question_results[] = [
+                    'pregunta' => $question->pregunta, 
+                    'esCorrecto' => $esCorrecto,
+                    'opcion_usuario' => ($respuesta['opc']) ? 
+                                        $question->rptas_json[$respuesta['opc']] : '' 
+                ];
+                /*
+                info([
+                    'pregunta' => $question->pregunta, 
+                    'esCorrecto' => $esCorrecto,
+                    'opcion_usuario' => $question->rptas_json
+                ]);*/
+            }
+        }
+        return $question_results;
     }
 
     protected function getTopicProgressByUser($user, Topic $topic)

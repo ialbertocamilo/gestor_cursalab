@@ -110,11 +110,17 @@
                 </v-row>
 
             </v-card-text>
-
+            {{ $event }}
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                @logs=" openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs de la pregunta - ${$event.custom_tema_preguntas_pregunta}`
+                    )"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
                 @delete="deleteTemaPregunta($event);"
             />
@@ -143,6 +149,16 @@
                 @onConfirm="confirmDelete"
                 @onCancel="modalDeleteOptions.open = false"
             />
+
+             <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Question"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -152,9 +168,10 @@
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm},
+    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal},
     props: [
         'modulo_id',
         'modulo_name',
@@ -226,6 +243,13 @@ export default {
                         type: 'action',
                         method_name: 'delete'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
                     // {
                     //     text: "Actividad",
                     //     icon: 'fas fa-file',
@@ -236,6 +260,13 @@ export default {
             },
             selects: {
                 modules: []
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                persistent: true,
+                base_endpoint: "/search"
             },
             filters: {
                 q: '',

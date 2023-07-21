@@ -16,6 +16,18 @@ class Question extends BaseModel
         // 'score' => 'integer',
     ];
 
+    public $defaultRelationships = [
+        'type_id' => 'type',
+        'topic_id' => 'topic'
+    ];
+
+    public function topic() 
+    {
+        return $this->belongsTo(Topic::class);
+    }
+
+    // $current = $request->all();
+    // return [__function__, __class__, $current];
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');

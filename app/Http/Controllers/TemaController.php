@@ -62,7 +62,6 @@ class TemaController extends Controller
         $topic->tags = [];
 
         $topic->hide_evaluable = $topic->assessable;
-
         $topic->hide_tipo_ev = $topic->type_evaluation_id;
 
         $topic->disabled_estado_toggle = false;
@@ -108,6 +107,7 @@ class TemaController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
+        // info($data);
 
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);

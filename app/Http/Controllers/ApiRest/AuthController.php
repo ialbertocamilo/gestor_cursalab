@@ -7,7 +7,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User };
+use App\Models\{ Usuario, User, Ambiente };
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -35,26 +35,30 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
-            if($availableRecaptcha) {
-                $responseRecaptcha = $this->checkRecaptchaData($data);
-                if($responseRecaptcha !== true) return $responseRecaptcha;
+             if(ENV('RECAPTCHA_ENABLED') == true){
+
+                $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+                if($availableRecaptcha) {
+                    $responseRecaptcha = $this->checkRecaptchaData($data);
+                    if($responseRecaptcha !== true) return $responseRecaptcha;
+                }
             }
+
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
             $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
-            $credentials1 = $credentials2 = ['password' => $password];
-            // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $password];
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
+            $credentials3['email'] = trim($userinput);
 
             $userInstance = new User;
 
             // === validacion de intentos ===
-            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2, $credentials3], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
 
@@ -66,7 +70,10 @@ class AuthController extends Controller
             }
             // === validacion de intentos ===
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+                // Valida si usuario está inactivo
+                if (!Auth::user()->active)
+                    return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
@@ -117,7 +124,6 @@ class AuthController extends Controller
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
 
                 // Update flag to update courses
-
                 $user->required_update_at = now();
                 $user->save();
 
@@ -132,12 +138,13 @@ class AuthController extends Controller
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
                     $responseAttempts['credentials1'] = $credentials1;
                     $responseAttempts['credentials2'] = $credentials2;
+                    $responseAttempts['credentials3'] = $credentials3;
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                     }
 
-                    return $this->error('Intento fallido.', 400, $responseAttempts);
+                    return $this->error('Intento fallido [L2].', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===
 
@@ -153,7 +160,9 @@ class AuthController extends Controller
         catch (Exception $e) {
             info($e);
             Error::storeAndNotificateException($e, request());
-            return $this->error('Server error.', 500);
+            // return $this->error('Server error.', 500);
+            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+
         }
     }
 
@@ -174,11 +183,11 @@ class AuthController extends Controller
         //     );
         // }
 
-        if (!$user->active)
-            return $this->error('Tu cuenta se encuentra inactiva.
-            Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
+        // if (!$user->active)
+        //     return $this->error('Tu cuenta se encuentra inactiva.
+        //     Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
-        $user->load('criterion_values:id,value_text');
+        $user->load('criterion_values.criterion');
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
@@ -198,17 +207,31 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
         if ($workspace_data) {
             $workspace_data->logo = get_media_url($workspace_data->logo);
+
+            if ($workspace_data->slug == 'farmacias-peruanas') {
+                $workspace_data->logo = get_media_url($user->subworkspace->logo);
+            }
         }
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
 
+
         $ciclo_actual = null;
         if ($user->subworkspace->parent_id == 25){
             $ciclo_actual = $user->getActiveCycle()?->value_text;
+        }
+
+        $criterios = [];
+
+        foreach ($user->criterion_values as $value) {
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
         }
 
         $user_data = [
@@ -217,7 +240,7 @@ class AuthController extends Controller
             "nombre" => $user->name ?? '',
             "apellido" => $user->lastname ?? '',
             "full_name" => $user->fullname,
-            'criteria' => $user->criterion_values,
+            // 'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
@@ -246,7 +269,7 @@ class AuthController extends Controller
         return [
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
-            //            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            // 'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
@@ -342,7 +365,7 @@ class AuthController extends Controller
             // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
             $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
             if($returned) return $responseAttempts;
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [IAO].', 400, $responseAttempts);
         }
     }
     // === ATTEMPTS ===
@@ -469,7 +492,7 @@ class AuthController extends Controller
         if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
             $responseAttempts = $this->sendAttempsAppResponse($user);
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [Q].', 400, $responseAttempts);
         }
         // === validacion de intentos ===
 
@@ -586,4 +609,42 @@ class AuthController extends Controller
         return $this->error('invalid-token', 503, $status);
     }
     // === RESET ===
+
+
+
+    // === AMBIENTE ===
+    public function getMediaUrl($media) {
+        if ($media) {
+           return get_media_url($media);
+        }
+        return $media;
+    }
+
+    public function configuracion_ambiente()
+    {
+        $ambiente = Ambiente::first();
+
+        if($ambiente) {
+            $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
+
+            // gestor
+            $ambiente->fondo = $this->getMediaUrl($ambiente->fondo);
+            $ambiente->logo  = $this->getMediaUrl($ambiente->logo);
+            $ambiente->icono = $this->getMediaUrl($ambiente->icono);
+            $ambiente->logo_empresa = $this->getMediaUrl($ambiente->logo_empresa);
+            // app
+            $ambiente->fondo_app = $this->getMediaUrl($ambiente->fondo_app);
+            $ambiente->logo_app  = $this->getMediaUrl($ambiente->logo_app);
+            $ambiente->logo_cursalab = $this->getMediaUrl($ambiente->logo_cursalab);
+            $ambiente->completed_courses_logo = $this->getMediaUrl($ambiente->completed_courses_logo);
+            $ambiente->enrolled_courses_logo  = $this->getMediaUrl($ambiente->enrolled_courses_logo);
+            $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
+            $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
+            $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
+
+            return response()->json($ambiente);
+        }
+        return response()->json([]);
+    }
+    // === AMBIENTE ===
 }
