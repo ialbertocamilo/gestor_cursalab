@@ -47,80 +47,6 @@
                     </v-col>
                 </v-row>
 
-               <!--  <v-row justify="space-around" v-if="is_superuser">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Límite de Usuarios"
-                        >
-                            <template v-slot:content>
-
-                                <v-col cols="12">
-                                    <DefaultInput
-                                        label="Límite"
-                                        v-model="limit_allowed_users"
-                                        type="number"
-                                        min="0"
-                                        clearable
-                                    />
-                                </v-col>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row> -->
-<!-- 
-                <v-row justify="space-around" v-if="is_superuser">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Funcionalidades"
-                        >
-                            <template v-slot:content>
-
-                                <v-col cols="12">
-                                    <v-checkbox
-                                        v-for="functionality in functionalities"
-                                        :key="functionality.id"
-                                        v-model="resource.selected_functionality[functionality.id]"
-                                        :label="functionality.name"
-                                    >
-                                    </v-checkbox>
-                                </v-col>
-
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row> -->
-  
-<!-- 
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultModalSection title="Notificaciones Push">
-                                <template v-slot:content>
-                                    <v-row>
-                                        <v-col cols="6">
-                                            <DefaultInput
-                                                class="mb-4"
-                                                label="Empezar envio luego de: (en minutos)"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_envio_inicio" />
-                                            <DefaultInput
-                                                label="Número de usuarios por envio"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_envio_intervalo"
-                                            />
-                                        </v-col>
-                                        <v-col cols="6">
-                                            <DefaultInput
-                                                label="Frecuencia de envio por bloques (en minutos)"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_chunk"
-                                                />
-                                        </v-col>
-                                    </v-row>
-                                </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row> -->
-              
             </v-form>
         </template>
     </DefaultDialog>
@@ -128,13 +54,11 @@
 
 <script>
 
-
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo'
-    // 'logo_marca_agua', 'marca_agua_estado',
-    // 'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
+    'name', 'url_powerbi', 
 ];
 
+const file_fields = ['logo', 'logo_negativo'];
 
 export default {
     props: {
@@ -144,7 +68,6 @@ export default {
         },
         width: String
     },
-    // data: () => ({
     data() {
         return {
             is_superuser: false,
@@ -170,10 +93,8 @@ export default {
     // })
     ,
     mounted() {
-
         // this.loadData();
-    }
-    ,
+    },
     methods: {
         resetValidation() {
             let vue = this
@@ -211,7 +132,7 @@ export default {
                 // Prepare data
 
                 let formData = vue.getMultipartFormData(
-                    method, vue.resource, fields
+                    method, vue.resource, fields, file_fields
                 );
 
                 // Submit data to be saved
@@ -270,21 +191,6 @@ export default {
         ,
         loadSelects() {
         },
-        // criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
-
-        //     let exists = false;
-
-        //     if (criteria_workspace) {
-
-        //         criteria_workspace.forEach(v => {
-        //             if (v.id === criterionId)
-        //                 exists = true;
-        //         });
-        //     }
-
-
-        //     return exists;
-        // }
     }
 }
 </script>
