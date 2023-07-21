@@ -1,8 +1,13 @@
 <template>
     <v-card-text :class="addClass">
         <div class="row head-table">
-            <div class="col-sm-6" v-for="(header,i) in headers" :key="i" >
-               {{header}}
+            <div v-for="(header, i) in headers" :key="i"
+                 :class="
+                 `${header.align ? `text-${header.align}`: 'text-center'}
+                  ${header.cols ? `col-${header.cols}`: 'col'}`">
+               
+               {{ header.label }}
+            
             </div>
         </div>
         <slot name="content"/>
