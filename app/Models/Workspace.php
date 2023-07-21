@@ -554,7 +554,7 @@ class Workspace extends BaseModel
 
         $this->load($relationships);
 
-        $_t_module = Criterion::where('code', 'module')->first();
+        $_crit_module = Criterion::where('code', 'module')->first();
 
         foreach ($this->polls as $_poll) {
 
@@ -570,14 +570,14 @@ class Workspace extends BaseModel
             $_subworkspace_data = $_subworkspace->toArray();
 
 
-            $criterion_value = $_t_module->values()->create([
+            $criterion_value = $_crit_module->values()->create([
                 'value_text' => $_subworkspace->name,
                 'active' => ACTIVE
             ]);
 
             $_subworkspace_data['criterion_value_id'] = $criterion_value->id;
 
-            $workspace->criteriaValue()->attach($criterion_value);
+            $workspace->criteriaValue()->syncWithoutDetaching($criterion_value);
 
             $subworkspace = $workspace->subworkspaces()->create($_subworkspace_data);
 
@@ -673,7 +673,8 @@ class Workspace extends BaseModel
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
-        $workspace->criteriaValue()->sync($this->criteriaValue);
+
+        $workspace->criteriaValue()->createMany($this->criteriaValue->where('criterion_id', '<>', $_crit_module->id)->toArray());
 
         $workspace->medias()->createMany($this->medias->toArray());
         // $workspace->polls()->createMany($this->polls);
