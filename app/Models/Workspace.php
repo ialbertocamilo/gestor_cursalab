@@ -507,21 +507,23 @@ class Workspace extends BaseModel
     public function replicateWithRelations($data)
     {
         $relationships = [
-            'subworkspaces.schools.courses' => [
-                'topics' => [
-                    'questions',
-                    'medias',
-                    'requirements',
+            'subworkspaces' => [
+                'app_menu', // OK
+                'main_menu', // OK
+                'side_menu', // OK
+                'schools.courses' => [
+                    'topics' => [
+                        'questions',
+                        'medias',
+                        'requirements',
+                    ],
+                    'polls',
+                    'requirements'
                 ],
-                'polls',
-                'requirements'
             ],
             
             // 'users',
             
-            'app_menu', // OK
-            'main_menu', // OK
-            'side_menu', // OK
             'functionalities', // OK
 
             'criterionWorkspace', // criterion_workspace OK
@@ -531,6 +533,7 @@ class Workspace extends BaseModel
             //     'modules',
             //     'tags',
             // ],
+
             'medias', // OK
             'polls.questions', // 
         ];
@@ -557,6 +560,10 @@ class Workspace extends BaseModel
         foreach ($this->subworkspaces as $_subworkspace) {
 
             $subworkspace = $workspace->subworkspaces()->create($_subworkspace->toArray());
+
+            $subworkspace->app_menu()->syncWithoutDetaching($_subworkspace->app_menu);
+            $subworkspace->main_menu()->syncWithoutDetaching($_subworkspace->main_menu);
+            $subworkspace->side_menu()->syncWithoutDetaching($_subworkspace->side_menu);
 
             foreach ($_subworkspace->schools as $_school) {
 
@@ -642,9 +649,7 @@ class Workspace extends BaseModel
             }
         }
 
-        $workspace->app_menu()->sync($this->app_menu);
-        $workspace->main_menu()->sync($this->main_menu);
-        $workspace->side_menu()->sync($this->side_menu);
+        
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
