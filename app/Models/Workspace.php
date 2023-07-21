@@ -548,6 +548,8 @@ class Workspace extends BaseModel
 
         $this->load($relationships);
 
+        $_t_module = Criterion::where('code', 'module')->first();
+
         foreach ($this->polls as $_poll) {
 
             $poll = $workspace->polls()->create($_poll->toArray());
@@ -559,7 +561,19 @@ class Workspace extends BaseModel
 
         foreach ($this->subworkspaces as $_subworkspace) {
 
-            $subworkspace = $workspace->subworkspaces()->create($_subworkspace->toArray());
+            $_subworkspace_data = $_subworkspace->toArray();
+
+
+            $criterion_value = $_t_module->values()->create([
+                'value_text' => $_subworkspace->name,
+                'active' => ACTIVE
+            ]);
+
+            $_subworkspace_data['criterion_value_id'] = $criterion_value->id;
+
+            $workspace->criteriaValue()->attach($criterion_value);
+
+            $subworkspace = $workspace->subworkspaces()->create($_subworkspace_data);
 
             $subworkspace->app_menu()->syncWithoutDetaching($_subworkspace->app_menu);
             $subworkspace->main_menu()->syncWithoutDetaching($_subworkspace->main_menu);
