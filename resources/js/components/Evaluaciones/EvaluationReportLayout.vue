@@ -22,7 +22,7 @@
             <div class="row col-sm-12 p-4">
               <div class="col-sm-3">
                 <DefaultAutocomplete
-                    v-model="filters.modules"
+                    v-model="modulo"
                     :items="modules"
                     label="Módulos"
                     item-text="name"
@@ -32,14 +32,14 @@
                     :count-show-values="3"
                     :max-values-selected="1"
                     :loading="modules_loader"
-                    @onChange="loadSchools(filters.modules)"
+                    @onChange="moduloChange"
                   />
               </div>
               <div class="col-sm-3 mb-3">
                   <DefaultAutocomplete
-                      :disabled="!modules.length"
-                      v-model="filters.schools"
-                      :items="schools"
+                      v-model="escuela"
+                      :disabled="!filteredSchools[0]"
+                      :items="filteredSchools"
                       label="Escuelas"
                       item-text="name"
                       item-value="id"
@@ -48,14 +48,14 @@
                       :count-show-values="3"
                       :max-values-selected="1"
                       :loading="schools_loader"
-                      @onChange="loadCourses(filters.schools)"
+                      @onChange="escuelaChange"
                   />
               </div>
               <div class="col-sm-3 mb-3">
                   <DefaultAutocomplete
-                      :disabled="!schools.length"
-                      v-model="filters.courses"
+                      v-model="curso"
                       :items="courses"
+                      :disabled="!courses[0]"
                       label="Cursos"
                       item-text="name"
                       item-value="id"
@@ -64,13 +64,13 @@
                       :count-show-values="5"
                       :max-values-selected="5"
                       :loading="courses_loader"
-                      @onChange="loadTopics(filters.courses)"
+                      @onChange="cursoChange"
                   />
               </div>
               <div class="col-sm-3 mb-3">
                   <DefaultAutocomplete
-                      :disabled="!topics.length"
-                      v-model="filters.topics"
+                      :disabled="!topics[0]"
+                      v-model="tema"
                       :items="topics"
                       label="Temas"
                       item-text="name"
@@ -85,10 +85,9 @@
                 <DefaultInputDate
                   clearable
                   dense
-                  range
                   :referenceComponent="'modalDateFilter1'"
                   :options="modalDateFilter1"
-                  v-model="filters.date_start"
+                  v-model="date_start"
                   label="Fecha Inicio"
                 />
 
@@ -97,10 +96,9 @@
                 <DefaultInputDate
                   clearable
                   dense
-                  range
                   :referenceComponent="'modalDateFilter2'"
                   :options="modalDateFilter2"
-                  v-model="filters.date_end"
+                  v-model="date_end"
                   label="Fecha Fin"
                 />
               </div>
@@ -108,10 +106,10 @@
               <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
                 <div class="col-sm-4">
                   <b-button 
-                    :disabled="!filters.modules.length || !filters.courses.length" 
+                    :disabled="modulo.length === 0 || curso.length === 0" 
                     block 
                     variant="primary" 
-                    @click="searchData()"
+                    @click="searchEvaluations"
                     >
                     Consultar
                   </b-button>
@@ -124,7 +122,7 @@
               <div class="container-fluid">
                 <div>
                   <v-card>
-                    <v-card-title class="default-dialog-title text-bold">Reporte evaluaciones</v-card-title>
+                    <v-card-title class="default-dialog-title text-bold">Resumen de evaluaciones</v-card-title>
                     
                     <InfoTable 
                       :addClass="'py-5 px-10'" 
@@ -142,7 +140,7 @@
                             <span v-text="eva.course_name"></span>
                           </div>
                           <div class="col text-left">
-                            <a href v-text="eva.topic_name" @click.prevent="searchDataDetail(eva)"></a>
+                            <a href v-text="eva.topic_name" @click.prevent="searchEvaluationDetail(eva)"></a>
                           </div>
                           <div class="col">
                             <span v-text="eva.total_corrects"></span>
@@ -170,7 +168,8 @@
                   </v-card>
                 </div>
 
-                <div class="row px-4 justify-content-between">
+                <!-- DOWNLOAD BUTTONS -->
+                <div class="row justify-content-between">
                   <div class="col-4">
                     <v-btn class="px-3" 
                         color="primary" 
@@ -184,7 +183,7 @@
                     </v-btn>
                   </div>
 
-                  <div class="col-4 justify-content-center">
+                  <div class="col-4 text-center">
                     <v-btn class="px-3" 
                       color="primary" 
                       dense
@@ -196,7 +195,10 @@
                       Descargar detalle
                     </v-btn>
 
-                    <v-btn class="px-3" color="primary" dense>
+                    <v-btn class="px-3" 
+                      color="primary" 
+                      dense
+                      @click="searchEvaluationDetailTopics">
                       <v-icon>
                         mdi-file-eye
                       </v-icon>
@@ -207,6 +209,7 @@
 
                   <div class="col-4"></div>
                 </div>
+                <!-- DOWNLOAD BUTTONS -->
 
               </div>
             </div>
@@ -220,7 +223,7 @@
       <v-card v-show="showTableDataDetail" flat class="elevation-0 mb-4">
         <div class="container-fluid">
             <v-card>
-              <v-card-title class="default-dialog-title text-bold">Reporte evaluaciones</v-card-title>
+              <v-card-title class="default-dialog-title text-bold">Resumen de evaluaciones tema</v-card-title>
               
               <InfoTable 
                 :addClass="'py-5 px-10'" 
@@ -269,27 +272,33 @@
       </v-card>
       <!-- EVALUACIONES DETALLE-->
 
+      <DefaultReportModal
+        :isOpen="openReport"
+        :report="report"
+        @onCancel="openReport = false"
+        @onConfirm="openReport = false"
+      />
   </section>
 </template>
 
 <script>
-const FileSaver = require("file-saver");
-import ModalBloqueReport from './ModalBloqueReport.vue';
 import lang from "./../../plugins/lang_datepicker";
-import InfoTable from './InfoTable.vue'
-import ModalChangeNameReport from './ModalChangeNameReport.vue'
-const now = new Date().toISOString();
-const date_final = now.slice(0, 10);
-const date_init = (now.slice(0, 4) - 1) +'-' +now.slice(5, 10);
+
+import DefaultReportModal from '../../layouts/Default/DefaultReportModal.vue';
+import InfoTable from './InfoTable.vue';
 
 export default {
-  components:{ ModalBloqueReport, InfoTable, ModalChangeNameReport },
-  props: ["Encuestas"],
+  components:{ InfoTable, DefaultReportModal },
+  props: ["Evaluaciones"],
   data() {
     return {
       reportsBaseUrl: '',
       lang: lang,
-      // === tabla cabeceras ===
+      openReport: false,
+      report: {},
+      reportDetail: {},
+
+      // === tables ===
       headersTableData:[
         { label:'Curso', align:'left' }, { label:'Tema', align:'left' }, 
         { label:'Correctas'}, { label:'Incorrectas' }, 
@@ -300,301 +309,318 @@ export default {
         { label:'Correctas' }, { label:'Incorrectas' }, 
         { label:'Total evaluaciones' } 
       ],
-      // === tabla cabeceras ===
+      // === tables ===
 
-      evaluations: [],
-      evaluations_details: [],
-      modules: [],
-      groups: [],
+      reportType: 'evaluations',
+      reportSubType: 'evaluations_detail',
+
+      //=== forms==
+      filteredSchools: [],
       schools: [],
       courses: [],
       topics: [],
-      //loaders
-      modules_loader: false,
-      schools_loader: false,
-      courses_loader: false,
-      topics_loader: false,
-      filters:{
-          modules: [],
-          schools: [],
-          courses: [],
-          topics: [],
-          date_start: [],
-          date_end: [],
-      },
+      areas:[],
+
+      modulo: [],
+      escuela: [],
+      curso: [],
+      tema: [],
+      date_start: null,
+      date_end: null,
+
       modalDateFilter1: {
         open: false,
       },
       modalDateFilter2: {
         open: false,
       },
+      //=== forms==
+
+      evaluations: [],
+      evaluations_details: [],
       showTableData: false,
       showTableDataDetail: false,
-      modalOptions: {
-        title:'Generador de Reportes por bloques',
-        ref: 'TableDownload',
-        open: true,
-        base_endpoint: '',
-        persistent:true,
-        hideCancelBtn:true,
-        confirmLabel:'Cerrar',
-        loading:true
-      },
-      dates:[ date_init, date_final ], 
-      download_list: [],
-      filenameDialog: false,
-      nameReport: {} 
+
+      modules_loader: false,
+      schools_loader: false,
+      courses_loader: false,
+      topics_loader: false,
+
+      workspaceId: 0,
+      adminId: 0,
+      modules: [],
+      reportsBaseUrl: '',
     };
   },
-  mounted(){
-    this.loadModulos();
-    this.reportsBaseUrl = this.getReportsBaseUrl()
-    // this.showLoader();
+  async mounted(){
+    const  vue = this;
+
+    vue.reportsBaseUrl = vue.getReportsBaseUrl();
+
+    vue.reportData = await vue.fetchDataReport();
+    vue.modules = vue.reportData.modules;
+    vue.workspaceId = vue.reportData.workspaceId;
+    vue.adminId = vue.reportData.adminId;
+
+    await vue.fetchFiltersData();
   },
   methods: {
-    loadModulos() {
-      const vue = this;
-      vue.modules_loader = true;
-
-      vue.$http.get('/resumen_evaluaciones/modules')
-         .then((res) => {
-          vue.modules = res.data.data
-          vue.modules_loader = false;
-        });
-    },
-    loadSchools(module) {
+    async fetchFiltersData(){
       const vue = this;
 
-      vue.courses = [];
-      vue.schools = [];
-      vue.topics = [];
-      vue.filters.courses = [];
-      vue.filters.schools = [];
-      vue.filters.topics = [];
-
-      if (!module.length) return;
       vue.schools_loader = true;
 
-      vue.$http.get(`/resumen_evaluaciones/schools/${module}`)
-         .then((res) => {
-          vue.schools = res.data.data;
-          vue.schools_loader = false;
+      let urlSchools = `${vue.reportsBaseUrl}/filtros/schools/${vue.workspaceId}?grouped=0`;
+      let responseSchools = await axios({
+          url: urlSchools,
+          method: 'get'
+      });
+      vue.schools_loader = false;
+      vue.schools = responseSchools.data
+    },
+    async moduloChange() {
+        let vue = this;
+
+        vue.escuela = [];
+        vue.curso = [];
+        vue.tema = [];
+
+        let alreadyAdded = []
+        vue.filteredSchools = vue.schools.filter(s => {
+
+            if (vue.modulo.includes(s.subworkspace_id) &&
+                !alreadyAdded.includes(s.id)) {
+                alreadyAdded.push(s.id)
+                return true
+            } else {
+                return false
+            }
         })
     },
-    loadCourses(school){
+    /**
+     * Fetch courses
+     * @returns {Promise<boolean>}
+     */
+    async escuelaChange() {
       let vue = this;
 
+      vue.curso = [];
+      vue.tema = [];
       vue.courses = [];
       vue.topics = [];
-      vue.filters.courses = [];
-      vue.filters.topics = [];
 
-      if (!school.length) return;
+      if (vue.escuela.length === 0) return false;
       vue.courses_loader = true;
 
-      vue.$http.get(`/resumen_evaluaciones/courses/${school}`)
-         .then((res) => {
-          vue.courses = res.data.data;
-          vue.courses_loader = false;
-        });
+      let url = `${vue.reportsBaseUrl}/filtros/courses/${vue.escuela.join()}`
+      let res = await axios({
+          url,
+          method: 'get'
+      });
+      vue.courses = res.data;
+      vue.courses_loader = false;
     },
-    loadTopics(course) {
+    /**
+     * Fetch topics
+     * @returns {Promise<boolean>}
+     */
+    async cursoChange() {
       let vue = this;
-      
-      vue.topics = [];
-      vue.filters.topics = [];
 
-      if (!course.length) return;  
+      vue.tema = [];
+      vue.topics = [];
+      if (vue.curso.length === 0) return false;
       vue.topics_loader = true;
 
-      vue.$http.get(`/resumen_evaluaciones/topics/${course}`)
-         .then((res) => {
-          vue.topics = res.data.data;
-          vue.topics_loader = false;
-        });
+
+      let url = `${vue.reportsBaseUrl}/filtros/topics/${vue.curso.join()}`
+      let res = await axios({
+          url,
+          method: 'get'
+      });
+
+      vue.topics = res.data;
+      vue.topics_loader = false;
     },
-    searchData(){
+
+    /* === EVALUACIONES === */
+    async searchEvaluations(){
       let vue = this;
       vue.showLoader();
 
-      vue.$http.put(`/resumen_evaluaciones/evaluations_data`, vue.filters)
-         .then((res) => {
-            vue.showTableData = true;
-            vue.evaluations = res.data.data;
+      let response = await axios({
+          url: `${vue.reportsBaseUrl}/exportar/${vue.reportType}_data`,
+          method: 'post',
+          data: {
+            workspaceId: vue.workspaceId,
+            adminId: vue.adminId,
+            modulos: vue.modulo,
+            escuelas: vue.escuela,
+            cursos: vue.curso,
+            temas: vue.tema,
+            start: vue.date_start,
+            end: vue.date_end,
+          }
+      });
+      vue.showTableData = true;
+      vue.evaluations = response.data.data;
 
-            vue.hideLoader();
-         })
-         .catch((err) => {
-            vue.showtAlertError();
-         });
-    },
-    searchDataDetail(evaluation) {
-      let vue = this;
-      vue.showLoader();
-
-      vue.$http.put(`/resumen_evaluaciones/evaluations_data_detail/${evaluation.topic_id}`, evaluation)
-         .then((res) => {
-
-            vue.evaluations_details= res.data.data;
-            vue.showTableDataDetail = true;
-            vue.hideLoader();
-         });
+      vue.hideLoader();
     },
     downloadReportEvaluations(){
       let vue = this;
-    
+      vue.report = { callback: vue.exportEvaluations, reportName: 'Resumen de evaluaciones'};
+      vue.openReport = true;
+      // console.log('downloadReportEvaluations', {report: vue.report});
+    },
+    async exportEvaluations(reportName) {
+      let vue = this;
+      const reportData = vue.reportData;
+
+      const filtersDescriptions = {
+          "Módulos" : vue.generateNamesArray(reportData.modules, vue.modulo),
+          "Escuelas": vue.generateNamesArray(vue.schools, vue.escuela),
+          "Cursos": vue.generateNamesArray(vue.courses, vue.curso),
+          "Temas": vue.generateNamesArray(vue.topics, vue.tema),
+          "Fecha inicial": vue.date_start,
+          "Fecha final": vue.date_end,
+      }
+      try {
+        let response = await axios({
+            url: `${vue.reportsBaseUrl}/exportar/${vue.reportType}_excel`,
+            method: 'post',
+            data: {
+              workspaceId: vue.workspaceId,
+              adminId: vue.adminId,
+              modulos: vue.modulo,
+              escuelas: vue.escuela,
+              cursos: vue.curso,
+              temas: vue.tema,
+              start: vue.date_start,
+              end: vue.date_end,
+              reportName,
+              filtersDescriptions
+            }
+        });
+
+        if(response.statusText == "OK"){
+          setTimeout(() => {
+              vue.queryStatus("reportes", "descargar_reporte_evaluaciones");
+          }, 500);
+        }
+
+      } catch (ex) {
+        console.log(ex.message)
+      }
+    },
+    /* === EVALUACIONES === */
+
+    /* === EVALUACION DETALLE === */
+    async searchEvaluationDetail(evaluation) {
+      let vue = this;
+      vue.showLoader();
+
+      let response = await axios({
+          url: `${vue.reportsBaseUrl}/exportar/${vue.reportSubType}_data`,
+          method: 'post',
+          data: {
+            topicId: evaluation.topic_id,
+            evaluations: [ evaluation ], // para reusar
+            workspaceId: vue.workspaceId,
+            adminId: vue.adminId,
+
+            modulos: vue.modulo,
+            escuelas: vue.escuela,
+            cursos: vue.curso,
+            temas: vue.tema,
+            start: vue.date_start,
+            end: vue.date_end,
+          }
+      });
+
+      vue.evaluations_details = response.data.data;
+      vue.showTableDataDetail = true;
+      vue.hideLoader();
+    },
+    async searchEvaluationDetailTopics() {
+      let vue = this;
+      vue.showLoader();
+
+      let response = await axios({
+          url: `${vue.reportsBaseUrl}/exportar/${vue.reportSubType}_data`,
+          method: 'post',
+          data: {
+            evaluations: vue.evaluations, // para reusar
+            workspaceId: vue.workspaceId,
+            adminId: vue.adminId,
+
+            modulos: vue.modulo,
+            escuelas: vue.escuela,
+            cursos: vue.curso,
+            temas: vue.evaluations.map((ele) => ele.topic_id), // topics ids
+            start: vue.date_start,
+            end: vue.date_end,
+          }
+      });
+
+      vue.evaluations_details = response.data.data;
+      vue.showTableDataDetail = true;
+      vue.hideLoader();
     },
     downloadReportEvaluationsDetails() {
       let vue = this;
+      vue.temas_ids = vue.evaluations.map((ele) => ele.topic_id);
+
+      vue.report = { callback: vue.exportEvaluationsDetail, reportName: 'Resumen de evaluaciones detalle'};
+      vue.openReport = true;
+
+      console.log('downloadReportEvaluationsDetails');
     },
-    downloadReportPollQuestion(type_poll_question){
+    async exportEvaluationsDetail(reportName) {
       let vue = this;
-      vue.filters.type_poll_question = type_poll_question;
-      if(vue.filters.poll.type.code == 'xcurso'){
-        vue.downloadCoursePoll();
-      }else{
-        vue.downloadFreePoll();
+      const reportData = vue.reportData;
+
+      const filtersDescriptions = {
+          "Módulos" : vue.generateNamesArray(reportData.modules, vue.modulo),
+          "Escuelas": vue.generateNamesArray(vue.schools, vue.escuela),
+          "Cursos": vue.generateNamesArray(vue.courses, vue.curso),
+          "Temas": vue.generateNamesArray(vue.topics, vue.tema),
+          "Fecha inicial": vue.date_start,
+          "Fecha final": vue.date_end,
       }
-    },
-    async downloadFreePoll(){
-      this.showLoader();
-      await this.callApiReport([]);
-      this.hideLoader();
-    },
-    async downloadCoursePoll(){
-      const vue = this;
-      vue.filters.courses_selected = vue.filters.courses.length > 0 ? vue.filters.courses : vue.courses;
-      const groupby_courses_by_school = vue.groupArrayOfObjects(vue.filters.courses_selected,'school_id','get_array'); //Function in mixin.js
-      //If the selected schools are greater than 10, the data will be downloaded in parts
-      const chunk_courses_by_school = vue.sliceIntoChunks(groupby_courses_by_school,15);//Function in mixin.js
-      if (chunk_courses_by_school.length == 1) {
-        vue.showLoader();
-        await this.callApiReport(vue.filters.courses_selected.map(c => c.id));
-      }else{
-        for (const array_courses of chunk_courses_by_school){
-          let get_all_courses_id = [];
-          const content = '('+array_courses.length+')';
-          //message in tooltip (list of name's schools)
-          let schools_name = [];
-          
-          for (const courses of array_courses) {
-            get_all_courses_id = [...get_all_courses_id,...courses.map(c => c.id)];
-            const school = this.schools.find(school => school.id == courses[0].school_id);
-            // schools_name = schools_name.length == 0 ? school.name : schools_name+', '+school.name  
-            schools_name.push(school.name);
-          }
-          this.download_list.push({
-            content,
-            schools: schools_name,
-            status:'pending',
-            url:'',
-            new_name:'',
-            courses_id : get_all_courses_id
-          });
-          this.modalOptions.open = true;
+
+      try {
+        let response = await axios({
+            url: `${vue.reportsBaseUrl}/exportar/${vue.reportSubType}_excel`,
+            method: 'post',
+            data: {
+              evaluations: vue.evaluations, // para reusar
+              workspaceId: vue.workspaceId,
+              adminId: vue.adminId,
+
+              modulos: vue.modulo,
+              escuelas: vue.escuela,
+              cursos: vue.curso,
+              temas: vue.temas_ids, // temas prelistados - ids
+              start: vue.date_start,
+              end: vue.date_end,
+
+              reportName,
+              filtersDescriptions
+            }
+        });
+
+        if(response.statusText == "OK"){
+          setTimeout(() => {
+              vue.queryStatus("reportes", "descargar_reporte_evaluaciones_detalle");
+          }, 500);
         }
-        this.verifyStatusDownload();
+
+      } catch (ex) {
+        console.log(ex.message)
       }
     },
-    verifyStatusDownload(){
-      let vue = this;
-      const find_index_donwload_pending =  vue.download_list.findIndex(dl => dl.status == 'pending');
-      if(find_index_donwload_pending > -1){
-        vue.download_list[find_index_donwload_pending].status = 'processing';
-        vue.callApiReport(vue.download_list[find_index_donwload_pending].courses_id);
-      }else{
-        //if all donwload list is complete.
-        vue.modalOptions.loading = false;
-      }
-      return true;
-    },
-    change_status_download(data){
-      let vue = this;
-      const find_index = vue.download_list.findIndex(dl => dl.status == 'processing');
-      let urlReporte = `${vue.reportsBaseUrl}/${data.ruta_descarga}`;
-      vue.download_list[find_index].url=urlReporte;
-      vue.download_list[find_index].new_name = data.new_name;
-      vue.download_list[find_index].status= (data.alert) ? 'no_data' : 'complete';
-      vue.verifyStatusDownload();
-      return true;
-    },
-    async callApiReport(courses_id){
-      let vue = this;
-      vue.filters.courses_selected = courses_id;
-      await axios.post(`${vue.reportsBaseUrl}/exportar/poll-questions`,vue.filters).then(({data})=>{
-        data.new_name = this.generateFilename(
-                    'Reporte-Encuestas',
-                    ''
-                )
-        if(vue.download_list.length>0){
-          this.change_status_download(data);
-          return true;
-        }
-        if(data.alert){
-          vue.hideLoader();
-          vue.showAlert(data.alert,'warning');
-          return false;
-        }
-        if(data.error){
-          vue.showtAlertError();
-          return false;
-        }
-        vue.queryStatus("reportes", "descargar_reporte_encuesta");
-        data.url = `${vue.reportsBaseUrl}/${data.ruta_descarga}`
-        this.openModalChangeName(data);
-        vue.hideLoader();
-      })
-      .catch((e)=>{
-        console.log(e);
-        vue.showtAlertError();
-      })
-    },
-    showtAlertError(){
-      this.hideLoader();
-      this.showAlert('Ha ocurrido un problema. Contáctate con el equipo de soporte.','warning');
-    },
-    generateFilename(prefix, name) {
-        return prefix + ' ' +
-            name + ' ' +
-            new Date().toISOString().slice(0, 10) +
-            '.xlsx'
-    },
-    openModalChangeName(data){
-      this.filenameDialog = true;
-      this.nameReport = data;
-    },
-    async saveReport({url,new_name}){
-      // La extension la define el back-end, ya que el quien crea el archivo
-      this.showLoader();
-      if(!new_name.includes('.xlsx')){
-        new_name = new_name+'.xlsx';
-      }
-      this.filenameDialog = false;
-      this.nameReport = {};
-      await FileSaver.saveAs(url,new_name);
-      this.hideLoader();
-    },
-    closeModal(){
-      this.modalOptions.open = false;
-      this.modalOptions.loading = true;
-      this.download_list = [];
-    },
-    modifyFilterDate(dates){
-      if(!dates[0]){
-        return false;
-      }
-      let vue=this;
-      vue.filters.date.start =  vue.parseToDateTime(dates[0],'start');
-      vue.filters.date.end =  vue.parseToDateTime(dates[1],'end');
-    },
-    deleteFilterDate(){
-      this.filters.date.end = null;
-      this.filters.date.start = null;
-    },
-    verifyButton(){
-      let vue = this;
-      return 
-    }
+    /* === EVALUACION DETALLE === */
   },
 };
 </script>
