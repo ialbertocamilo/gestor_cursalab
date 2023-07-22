@@ -26,13 +26,13 @@ class GeneralStorageRequest extends FormRequest
         return [
             'limit_allowed_storage' => 'nullable',
             'limit_allowed_users' => 'nullable',
-            'description' => 'required|max:255'
+            'description' => 'nullable|max:255'
         ];
     }
 
     public function messages() {
         return [
-            'description.required' => 'La descripción es requerida.'
+            'description.max' => 'La descripción debe ser menor a 250 caracteres.'
         ];
     }
 }

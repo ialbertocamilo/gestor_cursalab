@@ -302,14 +302,15 @@ class GeneralController extends Controller
                     'user_admin_email' => $user->email_gestor,
                     'workspace_name' => $workspace->name,
 
-                    'storage' => $request->limit_allowed_storage ?? '-',
+                    'storage' => $request->limit_allowed_storage ? $request->limit_allowed_storage.' Gb' : '-',
                     'users' => $request->limit_allowed_users ?? '-',
                     'description' => $request->description ?? '-'
                 ];
 
         // info(['storage_mail' => $storage_mail]);
         // Mail::to('juan@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
-                
+        // info(['storage_mail' => $storage_mail]);
+
         Mail::to('paola@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
         Mail::to('juanjose@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
 

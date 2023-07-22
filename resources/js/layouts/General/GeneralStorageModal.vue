@@ -24,14 +24,16 @@
 							:items="storageItems"
 							item-text="name"
 							item-id="value"
-							label="¿Cuánto almacenamiento deseas asignar?"
+							item-value="value"
+							:prefix="resource.limit_allowed_storage ? '+' : '' "
+							label="¿Cuánto almacenamiento deseas aumentar?"
 						/>
 					</v-col>
 					<v-col cols="6">
 						<DefaultInput
 								clearable
 								v-model="resource.limit_allowed_users"
-								label="¿Cuántos usuarios deseas asignar?"
+								label="¿Cuántos usuarios deseas aumentar?"
 								type="number"
 								:prefix="resource.limit_allowed_users ? '+' : '' "
 								min="0"
@@ -41,7 +43,7 @@
 						<DefaultTextArea
 							clearable
 							v-model="resource.description"
-							label="Descripción"
+							label="Detalle (Opcional)"
 							rows="5"
 						/>
 					</v-col>
@@ -75,10 +77,10 @@ export default {
 				description: null
 			},
 			storageItems: [
-				{ name: '8 Gb', value: 8 },
-				{ name: '16 Gb', value: 16 },
-				{ name: '32 Gb', value: 32 },
-				{ name: '64 Gb', value: 64 }
+				{ name: '+ 8 Gb', value: 8 },
+				{ name: '+ 16 Gb', value: 16 },
+				{ name: '+ 32 Gb', value: 32 },
+				{ name: '+ 64 Gb', value: 64 }
 			]
 		};
 	},
@@ -102,11 +104,11 @@ export default {
 
 			const validateForm = vue.validateForm("storageForm");
 
-			const val_limit_allowed_storage = (vue.TypeOf(vue.resource.limit_allowed_storage) === 'null') ? '' : vue.resource.limit_allowed_storage.trim();
+			const val_limit_allowed_storage = (vue.TypeOf(vue.resource.limit_allowed_storage) === 'null') ? null : vue.resource.limit_allowed_storage;
 			const val_limit_allowed_users = (vue.TypeOf(vue.resource.limit_allowed_users) === 'null') ? '' : vue.resource.limit_allowed_users.trim();
 
 			
-			if (!val_limit_allowed_storage.length && !val_limit_allowed_users.length) 
+			if (!val_limit_allowed_storage && !val_limit_allowed_users.length) 
 				return vue.errorAlert = true;
 			vue.errorAlert = false;
 			
