@@ -293,9 +293,20 @@ class TemaController extends Controller
         $data['isQualified'] = $evaluationType->id === $topic->type_evaluation_id;
 
         $result = Question::import($data);
+
+        if ($result['status'] == 'error') {
+
+            return $this->success($result);
+        }
+
         $data = Question::verifyEvaluation($topic);
 
-        return $this->success($result);
+        // if ($result['status'] == 'error') {
+
+        //     return $this->error($result);
+        // }
+
+        return $this->success($data);
     }
 
     public function deletePregunta(School $school, Course $course, Topic $topic, Question $pregunta)

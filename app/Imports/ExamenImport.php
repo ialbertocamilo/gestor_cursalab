@@ -8,12 +8,13 @@ use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Row;
 
-class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure
+class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure, SkipsEmptyRows
 {
     use Importable, SkipsFailures, SkipsErrors;
 

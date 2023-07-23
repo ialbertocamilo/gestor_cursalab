@@ -8,8 +8,10 @@
                    @onCancel="closeModal"
     >
         <template v-slot:content>
+
             <v-row justify="space-around">
-                <DefaultErrorsImport :errors="errors" />
+                
+                <DefaultErrorsImport :errors="errors" class="mt-3" />
 
                 <v-col cols="12" class="d-flex justify-content-center pb-0">
                     <!-- DEFAULT STEPPER -->
@@ -292,31 +294,43 @@ export default {
                 .post(vue.urlSubida, data)
                 .then((res) => {
 
-                    setTimeout(function () {
-                        vue.showAlert(res.data.data.message)
-                        if (res.data.data.errors && res.data.data.errors.length > 0)
-                            vue.errors = res.data.data.errors
+                    // setTimeout(function () {
+                        // vue.showAlert(res.data.data.message, res.data.data.status)
 
-                        vue.progress_upload = 'ok'
-                        if (res.data.info) {
-                            if (res.data.info.data_no_procesada.length > 0) {
-                                vue.uploadErrors = true;
-                                vue.errores = res.data.info.data_no_procesada
+                        if (res.data.data.errors && res.data.data.errors.length > 0) {
+                            vue.errors = res.data.data.errors
+                            vue.progress_upload = 'error'
+                        } else {
+
+                            if (res.data.info) {
+                                if (res.data.info.data_no_procesada.length > 0) {
+                                    vue.uploadErrors = true;
+                                    vue.errores = res.data.info.data_no_procesada
+                                    vue.progress_upload = 'error'
+                                } else {
+
+                                    vue.progress_upload = 'ok'
+                                }
+                            } else {
+                                
+                                vue.progress_upload = 'ok'
                             }
                         }
 
-                    }, 1500)
+
+                    // }, 1500)
 
                     vue.archivo = null;
                     vue.$refs.dropzone.limpiarArchivo()
-                    setTimeout( () => {
-                        location.reload();
-                    }, 1000)
+                    // setTimeout( () => {
+                    //     location.reload();
+                    // }, 1000)
                 })
-                .catch((err) => {
+                .catch((error) => {
+
                     vue.progress_upload = 'error'
                     vue.archivo = null;
-                    if (err && err.errors)
+                    if (error && error.errors)
                         vue.errors = error.errors
                 });
         },

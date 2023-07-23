@@ -313,8 +313,9 @@ class Question extends BaseModel
             if ($model->failures()->count()) {
 
                 return [
-                    'msg' => 'Se encontraron algunos errores.',
-                    'errors' => $model->failures()
+                    'message' => 'Se encontraron algunos errores.',
+                    'errors' => $model->failures(),
+                    'status' => 'error',
                 ];
             }
 
