@@ -818,7 +818,8 @@ class Topic extends BaseModel
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
-                'mod_evaluaciones' => $course->mod_evaluaciones
+                'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
+                // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }
         $schools_courses = $schools_courses->toArray();

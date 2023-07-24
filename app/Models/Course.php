@@ -1604,4 +1604,19 @@ class Course extends BaseModel
 
         return isset($this->mod_evaluaciones['nro_intentos']) ? $this->mod_evaluaciones['nro_intentos'] : null;
     }
+
+    public function getModEvaluacionesConverted()
+    {
+        $mod_evaluaciones = $this->mod_evaluaciones;
+
+        if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
+            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $this->qualification_type->position);
+
+            return $nota_aprobatoria;
+            // $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            // $course->mod_evaluaciones = $mod_evaluaciones;
+        }
+
+        return $mod_evaluaciones;
+    }
 }
