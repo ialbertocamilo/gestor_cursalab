@@ -69,6 +69,10 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             })
             ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'users_id');
+
+
+
+
         $percent_sent = [];
         $course_settings =Course::getModEval($this->course);
         for ($i = 1; $i < $count; $i++) {
@@ -114,8 +118,16 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             $user_has_course = array_search($user->id,$usersSegmented);
 
             if(!$user_has_course){
-                $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
-                continue;
+
+                // Since array_search searches in associative arrays,
+                // also uses in_array to find user id when $usersSegmented
+                // is a indexed array: [23, 32, 99]
+
+                $user_has_course = in_array($user->id,$usersSegmented);
+                if (!$user_has_course) {
+                    $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
+                    continue;
+                }
             }
             // if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
             //     $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
