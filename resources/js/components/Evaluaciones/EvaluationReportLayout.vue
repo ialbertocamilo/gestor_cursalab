@@ -175,10 +175,8 @@
                         color="primary" 
                         dense 
                         @click="downloadReportEvaluations">
-                      <v-icon>
-                        mdi-file-excel
-                      </v-icon>
 
+                      <span class="fas fa-download mr-1"></span>
                       Descargar resumen
                     </v-btn>
                   </div>
@@ -188,10 +186,7 @@
                       color="primary" 
                       dense
                       @click="downloadReportEvaluationsDetails">
-                      <v-icon>
-                        mdi-file-excel
-                      </v-icon>
-
+                      <span class="fas fa-download mr-1"></span>
                       Descargar detalle
                     </v-btn>
 
@@ -199,8 +194,8 @@
                       color="primary" 
                       dense
                       @click="searchEvaluationDetailTopics">
-                      <v-icon>
-                        mdi-file-eye
+                      <v-icon class="mr-1">
+                        mdi-eye-outline
                       </v-icon>
 
                       Ver detalle
@@ -574,7 +569,7 @@ export default {
       vue.report = { callback: vue.exportEvaluationsDetail, reportName: 'Resumen de evaluaciones detalle'};
       vue.openReport = true;
 
-      console.log('downloadReportEvaluationsDetails');
+      // console.log('downloadReportEvaluationsDetails');
     },
     async exportEvaluationsDetail(reportName) {
       let vue = this;
