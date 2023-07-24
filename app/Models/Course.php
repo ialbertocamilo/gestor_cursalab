@@ -1123,6 +1123,8 @@ class Course extends BaseModel
             ($summary_course->passed > 0 || $grade_average > 0) ? $grade_average : null
             : null;
 
+        $grade_average = calculateValueForQualification($grade_average, $course->qualification_type?->position);
+
         return ['average_grade' => $grade_average, 'status' => $summary_course->status->code ?? 'por-iniciar'];
     }
 

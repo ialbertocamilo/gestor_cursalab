@@ -236,11 +236,15 @@ class RestUserProgressController extends Controller
 
             if ($course->compatible):
 
+
+                $compatible_grade = calculateValueForQualification($course->compatible->grade_average, $course->qualification_type?->position);
+
                 $school_courses->push([
                     'id' => $course->id,
                     'name' => $course_name,
                     'position' => $course_position,
-                    'nota' => $course->compatible->grade_average,
+                    // 'nota' => $course->compatible->grade_average,
+                    'nota' => $compatible_grade,
                     'estado' => 'aprobado',
                     'estado_str' => 'Convalidado',
                     'tags' => $tags,
