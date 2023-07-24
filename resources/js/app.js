@@ -189,6 +189,7 @@ Vue.component("upload-topic-grades-layout", require("./layouts/Masivos/UploadTop
 Vue.component("homeview", require("./layouts/General/DashboardView"));
 
 Vue.component("resumen-encuesta", require("./components/Encuestas/PollReportLayout.vue"));
+Vue.component("resumen-evaluaciones", require("./components/Evaluaciones/EvaluationReportLayout.vue"));
 
 // Workspaces
 
