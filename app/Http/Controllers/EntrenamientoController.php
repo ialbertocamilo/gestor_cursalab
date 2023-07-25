@@ -187,6 +187,14 @@ class EntrenamientoController extends Controller
         $dni_alumno = $request->alumno;
         $entrenador = User::where('document', $dni_entrenador)->first();
         $alumno = User::where('document', $dni_alumno)->first();
+        $hasTrainer = EntrenadorUsuario::where('trainer_id', '<>',$entrenador->id)
+        ->with('trainer:id,document')
+        ->where('user_id', $alumno->id)
+        ->select('id','trainer_id')
+        ->first(); 
+        if($hasTrainer){
+            return response()->json(['error' => true, 'msg' => 'Este usuario esta asignado al entrenador con documento: '.$hasTrainer->trainer->document], 200);
+        }
         if ($entrenador && $alumno) {
             $registro = EntrenadorUsuario::where('trainer_id', $entrenador->id)
                 ->where('user_id', $alumno->id)
