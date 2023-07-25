@@ -556,10 +556,10 @@ export default {
                         permission: "resumen_evaluaciones",
                         role: [
                             "super-user",
-                            "admin",
-                            "trainer",
-                            "reports",
-                            'only-reports'
+                            // "admin",
+                            // "trainer",
+                            // "reports",
+                            // 'only-reports'
                         ]
                     }
                 ]
