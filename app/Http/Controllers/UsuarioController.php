@@ -993,11 +993,13 @@ class UsuarioController extends Controller
         $usuario_master = null;
         $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
 
-        // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones 
-        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email']) {
+        // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
+        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email'] ) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-            $usuario_master->username = $usuario_input['username'];
             $usuario_master->updated_at = now();
+                if (!is_null($usuario_input['username'] || $usuario_master->username != $usuario_input['username'])){
+                    $usuario_master->username = $usuario_input['username'];
+                }
             $usuario_master->save();
             return;
         }

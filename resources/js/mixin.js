@@ -14,12 +14,12 @@ const extensiones = {
     // rise: ["zip", "rise"],
 };
 const default_media_images = {
-    video: "images/default-video-img_285_360.png",
-    audio: "images/default-audio-img_119.png",
-    pdf: "images/default-pdf-img_210.png",
-    excel: "images/default-scorm-img_116_360.png",
-    scorm: "images/default-scorm-img_116_360.png",
-    link: "images/default-scorm-img_116_360.png",
+    video: "/images/default-video-img_285_360.png",
+    audio: "/images/default-audio-img_119.png",
+    pdf: "/images/default-pdf-img_210.png",
+    excel: "/images/default-scorm-img_116_360.png",
+    scorm: "/images/default-scorm-img_116_360.png",
+    link: "/images/default-scorm-img_116_360.png",
 }
 
 export default {
@@ -740,7 +740,7 @@ export default {
 
             const currentUrl = window.location.search;
             const currentParams = new URLSearchParams(currentUrl);
-            const existKey = currentParams.has(mainKey); 
+            const existKey = currentParams.has(mainKey);
 
             let storage = localStorage.getItem(key);
             let status = false;

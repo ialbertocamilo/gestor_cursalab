@@ -149,6 +149,7 @@ class GestorController extends Controller
     private function parse_image($plantilla)
     {
         $type = pathinfo($plantilla, PATHINFO_EXTENSION);
+        $plantilla = str_replace(" ","%20",$plantilla);
         $image = file_get_contents(get_media_url($plantilla));
         return 'data:image/' . $type . ';base64,' . base64_encode($image);
     }
