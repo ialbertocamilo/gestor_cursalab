@@ -69,7 +69,10 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'users_id');
         $percent_sent = [];
-        $course_settings =Course::getModEval($this->course);
+        $course_settings = Course::getModEval($this->course);
+        $max_grade = $this->course->qualification_type->position;
+        $course_settings['max_grade'] = $max_grade;
+
         for ($i = 1; $i < $count; $i++) {
             // info('Inicio');
             $currente_percent = round(($i/$count)*100);
@@ -99,11 +102,11 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
                 continue;
             }
-            if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && ($grade < 0 || $grade > 20)) {
+            if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && ($grade < 0 || $grade > $max_grade)) {
                 $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
                 continue;
             }
-            if (($this->course->assessable) && (count($this->topics) == 0) && ($grade < 0 || $grade > 20)) {
+            if (($this->course->assessable) && (count($this->topics) == 0) && ($grade < 0 || $grade > $max_grade)) {
                 $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
                 continue;
             }
@@ -138,9 +141,11 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
         $min_grade = $course_settings['nota_aprobatoria'];
 
         $grade = $excelData[1];
+        $grade = calculateValueForQualification($grade, 20, $course_settings['max_grade']);
 
-        $topic_summaries = SummaryTopic::disableCache()->whereIn('topic_id', $topics->pluck('id')->toArray())->where('user_id', $user->id)
-            ->get();
+        $topic_summaries = SummaryTopic::disableCache()->whereIn('topic_id', $topics->pluck('id')->toArray())
+                                ->where('user_id', $user->id)
+                                ->get();
 //        info("SUMMARIES ID :: ");
 //        info($topic_summaries->pluck('id')->toArray());
 
