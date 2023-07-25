@@ -404,6 +404,257 @@ class Benefit extends BaseModel
         return $benefit;
     }
 
+    protected function maxBenefitsxUsers()
+    {
+        $workspace_id = get_current_workspace()?->id;
+        $workspace = Workspace::where('id', $workspace_id)->first();
+
+        $response['max_benefits_x_users'] = $workspace?->max_benefits;
+        return $response;
+    }
+
+    protected function updateMaxBenefitsxUsers( $action )
+    {
+        $response = null;
+
+        if(!is_null($action)) {
+
+            try {
+                $workspace_id = get_current_workspace()?->id;
+
+                DB::beginTransaction();
+
+                $workspace = Workspace::where('id', $workspace_id)->first();
+
+                if ($workspace) :
+
+                    $max_benefits = $workspace->max_benefits ?? 0;
+
+                    if($action == 'add')
+                    {
+                        $workspace->max_benefits = $max_benefits + 1;
+                        $workspace->save();
+                    }
+                    else if($action == 'delete')
+                    {
+                        $max_benefits_r = $max_benefits - 1;
+                        $workspace->max_benefits = ($max_benefits_r < 0) ? 0 : $max_benefits_r;
+                        $workspace->save();
+                    }
+
+                    $response = $workspace->max_benefits;
+
+                    cache_clear_model(Workspace::class);
+
+                endif;
+
+                DB::commit();
+            } catch (\Exception $e) {
+                info($e);
+                DB::rollBack();
+                // Error::storeAndNotificateException($e, request());
+                abort(errorExceptionServer());
+            }
+
+            return $response;
+        }
+
+        return $response;
+    }
+
+    protected function assignedSpeaker( $benefit_id, $speaker_id )
+    {
+        $response = null;
+
+        if(!is_null($benefit_id) && !is_null($speaker_id)) {
+
+            try {
+                DB::beginTransaction();
+
+                $benefit = Benefit::where('id', $benefit_id)->first();
+
+                if ($benefit)
+                {
+                    $speaker = Speaker::where('id', $speaker_id)->first();
+
+                    if($speaker) {
+                        $benefit->speaker_id = $speaker?->id;
+                        $benefit->save();
+                    }
+
+                    cache_clear_model(Benefit::class);
+                }
+
+                DB::commit();
+            } catch (\Exception $e) {
+                info($e);
+                DB::rollBack();
+                // Error::storeAndNotificateException($e, request());
+                abort(errorExceptionServer());
+            }
+        }
+
+        return $response;
+    }
+
+    protected function getSuscritos($benefit_id = null)
+    {
+        $segmentados = collect();
+
+        $course = new Course();
+        $benefit = Benefit::with(['segments'])->where('id', $benefit_id)->first();
+
+        $users_query = UserBenefit::leftJoin('users', 'users.id','user_benefits.user_id')
+                    ->with(
+                        ['status' => function($q){
+                            $q->select('id', 'name', 'code');
+                        }],
+                        ['type' => function($q){
+                            $q->select('id', 'name', 'code');
+                        }]
+                    )
+                    ->whereHas('status', function($q) {
+                        $q->where('type', 'user_status');
+                        $q->where(function($t){
+                            $t->where('code', 'approved');
+                            $t->orWhere('code', 'subscribed');
+                        });
+                    })
+                    ->where('user_benefits.benefit_id', $benefit_id)
+                    ->select('users.id','users.surname','users.lastname','users.document','users.name', 'users.fullname','user_benefits.status_id','user_benefits.type_id','user_benefits.id as user_benefits_id');
+
+        $users_ids = $users_query->pluck('id')->toArray();
+        $users = $users_query->get();
+
+        if($benefit)
+        {
+            $segmentados_id = $course->usersSegmented($benefit?->segments, $type = 'users_id');
+            // $segmentados = User::whereIn('id',$segmentados_id)->get();
+            $segmentados = User::whereIn('id',$segmentados_id)
+                                ->whereNotIn('id', $users_ids)
+                                ->select('id','name','surname','lastname','document')
+                                ->get();
+        }
+
+        // $users_id = UserBenefit::whereHas('status', function($q) {
+        //                 // $q->where('id', $user_status_subscribed?->id);
+        //                 $q->where('type', 'user_status');
+        //                 $q->where('code', 'subscribed');
+        //             })
+        //             ->where('benefit_id', $benefit_id)
+        //             ->pluck('user_id')
+        //             ->toArray();
+
+        // $users = User::whereIn('users.id',$users_id)
+        //                 ->select('users.id','users.surname','users.lastname','users.document')
+        //                 ->get();
+
+        $response['users'] = $users;
+        $response['segmentados'] = $segmentados;
+
+        return $response;
+    }
+
+    protected function updateSuscritos( $benefit_id = null, $seleccionados = null )
+    {
+        $response = null;
+
+        if(!is_null($benefit_id) && is_array($seleccionados))
+        {
+            $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+            $user_status_approved = Taxonomy::getFirstData('benefit', 'user_status', 'approved');
+            $user_status_removed = Taxonomy::getFirstData('benefit', 'user_status', 'removed');
+            $type_register_extraordinario = Taxonomy::getFirstData('benefit', 'type_register', 'extraordinario');
+
+            $seleccionados_ids = array_column($seleccionados, 'user_benefits_id');
+            $users_subscribed_in_benefit = UserBenefit::where('benefit_id', $benefit_id)
+                                                ->whereNotIn('id', $seleccionados_ids)
+                                                ->pluck('id');
+
+            $removed_users = UserBenefit::whereIn('id', $users_subscribed_in_benefit)->get();
+            $removed_users->each(function($item) use ($user_status_removed) {
+                $item->status_id = $user_status_removed?->id;
+                $item->save();
+            });
+
+            try {
+                DB::beginTransaction();
+
+                foreach($seleccionados as $sel)
+                {
+                    if(isset($sel['ev_type_register']) && $sel['ev_type_register'] == 'extraordinario'){
+                        if(isset($sel['user_benefits_id']) && !is_null($sel['user_benefits_id']))
+                        {
+                            $ub_id = UserBenefit::where('id', $sel['user_benefits_id'])->first();
+                            if(!is_null($ub_id))
+                            {
+                                $ub_id->type_id = $type_register_extraordinario?->id;
+                                $ub_id->status_id = $user_status_subscribed?->id;
+                                $ub_id->save();
+                            }
+                        }
+                        else
+                        {
+                            $ub_id = UserBenefit::where('user_id', $sel['id'])
+                                                ->where('benefit_id', $benefit_id)
+                                                ->first();
+                            if(!is_null($ub_id))
+                            {
+                                $ub_id->type_id = $type_register_extraordinario?->id;
+                                $ub_id->status_id = $user_status_subscribed?->id;
+                                $ub_id->save();
+                            }
+                            else
+                            {
+                                if(!is_null($sel['id']))
+                                {
+                                    UserBenefit::create([
+                                        'user_id' => $sel['id'],
+                                        'benefit_id' => $benefit_id,
+                                        'status_id' => $user_status_subscribed?->id,
+                                        'type_id' => $type_register_extraordinario?->id
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                    if(isset($sel['ev_user_status']) && $sel['ev_user_status'] == 'approved'){
+                        if(isset($sel['user_benefits_id']) && !is_null($sel['user_benefits_id']))
+                        {
+                            $ub_id = UserBenefit::where('id', $sel['user_benefits_id'])->first();
+                            if(!is_null($ub_id))
+                            {
+                                $ub_id->status_id = $user_status_approved?->id;
+                                $ub_id->save();
+
+                                $mail_user = User::where('id', $ub_id?->user_id)->select('id','email')->first();
+                                $mail_benefit = Benefit::where('id', $ub_id?->benefit_id)->select('id','title')->first();
+                                if(!is_null($mail_user) && !is_null($mail_benefit)) {
+                                    Benefit::sendEmail( 'confirm', $mail_user, $mail_benefit );
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                cache_clear_model(UserBenefit::class);
+
+                DB::commit();
+            } catch (\Exception $e) {
+                info($e);
+                DB::rollBack();
+                // Error::storeAndNotificateException($e, request());
+                abort(errorExceptionServer());
+            }
+
+            return $response;
+        }
+
+        return $response;
+    }
+
+
     // Apis
     protected function registerUserForBenefit( $data )
     {
@@ -1063,6 +1314,10 @@ class Benefit extends BaseModel
                     $imagen = URL::asset('img/benefits/icon_mail_notify.png');
                     $subject = 'Inscripción abierta';
                 }
+                else if($type == 'confirm') {
+                    $imagen = URL::asset('img/benefits/icon_mail_confirm.png');
+                    $subject = 'Felicitaciones, has sido confirmado para acceder a:';
+                }
                 else {
                     $imagen = URL::asset('img/benefits/icon_mail_new.png');
                     $subject = 'Tenemos un nuevo beneficio para ti';
@@ -1090,6 +1345,9 @@ class Benefit extends BaseModel
                 switch ($type) {
                     case 'add':
                         Meeting::addAttendantFromUser($meeting,$users);
+                        Attendant::createOrUpdatePersonalLinkMeeting(
+                            $meeting, false
+                        );
                         break;
                     case 'remove':
                         Meeting::deleteAttendantFromUser($meeting,$users);

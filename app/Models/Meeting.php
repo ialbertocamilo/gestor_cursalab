@@ -309,7 +309,6 @@ class Meeting extends BaseModel
             if($type->code == 'benefits'){
                 $data['model_type'] = 'App\\Models\\BenefitProperty';
             }
-            info($data);
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
 
             #add workspace id
