@@ -252,7 +252,7 @@ class UsuarioController extends Controller
                 $dni_previo = $user['document'];
                 $email_previo = $user['email'];
                 $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
-                info($user);
+                // info($user);
             }
             /********************************************************************/
             User::storeRequest($data, $user);
