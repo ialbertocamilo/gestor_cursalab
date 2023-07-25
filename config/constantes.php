@@ -175,7 +175,7 @@ return [
     'soporte-estados' => [
         'pendiente' => 'Pendiente',
         'revisando' => 'Revisando',
-        'solucionado' => 'Solucionado',
+        'solucionado' => 'Solucionado'
     ],
 
     'soporte-estados-colors' => [

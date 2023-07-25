@@ -12,6 +12,7 @@ use App\Models\MediaTema;
 use App\Models\SummaryUser;
 use App\Models\SummaryTopic;
 use App\Models\SummaryCourse;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +69,10 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             })
             ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'users_id');
+
+
+
+
         $percent_sent = [];
         $course_settings =Course::getModEval($this->course);
         for ($i = 1; $i < $count; $i++) {
@@ -113,15 +118,23 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             $user_has_course = array_search($user->id,$usersSegmented);
 
             if(!$user_has_course){
-                $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
-                continue;
+
+                // Since array_search searches in associative arrays,
+                // also uses in_array to find user id when $usersSegmented
+                // is a indexed array: [23, 32, 99]
+
+                $user_has_course = in_array($user->id,$usersSegmented);
+                if (!$user_has_course) {
+                    $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
+                    continue;
+                }
             }
             // if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
             //     $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
             //     continue;
             // }
 
-            
+
 //            info("TOPICS ID::");
 //            info($topics->pluck('id')->toArray());
             $this->uploadTopicGrades($course_settings, $user, $topics, $excelData[$i]);
@@ -211,8 +224,14 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 'media_progress' => json_encode($user_progress_media)
             ]);
         }
-        
-        SummaryCourse::getCurrentRowOrCreate($this->course, $user);
+
+        // Store last time evaluation datetime to summary course
+
+        if (isset($excelData[6])) {
+            $summaryCourse = SummaryCourse::getCurrentRowOrCreate($this->course, $user);
+            $summaryCourse->last_time_evaluated_at = $this->parseDatetime($excelData[6]);
+            $summaryCourse->save();
+        }
 
         // if ($a_topic_was_created) {
             $this->updated_users_id[] = $user->id;
@@ -257,5 +276,30 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
     public function getNoProcesados()
     {
         return $this->no_procesados;
+    }
+
+    /**
+     * Parse datetime d/m/Y to Y-m-d format
+     * @param $stringDatetime
+     * @return string|null
+     */
+    public function parseDatetime ($stringDatetime) {
+        try {
+            $datetime = Carbon::createFromFormat('d/m/Y H:i', $stringDatetime)
+                ->format('Y-m-d H:i');
+        } catch (Exception $ex) {
+            $datetime = null;
+        }
+
+        if (!$datetime) {
+            try {
+                $datetime = Carbon::createFromFormat('d/m/Y', $stringDatetime)
+                    ->format('Y-m-d');
+            } catch (Exception $ex) {
+                $datetime = null;
+            }
+        }
+
+        return $datetime;
     }
 }
