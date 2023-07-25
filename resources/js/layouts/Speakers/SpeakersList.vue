@@ -141,12 +141,12 @@ export default {
 .bx_max_colaboradores p {
     font-size: 14px;
     margin: 0 6px;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     color: #5458EA;
 }
 .bx_max_colaboradores span {
     font-size: 16px;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     color: #5458EA;
     font-weight: bold;
 }

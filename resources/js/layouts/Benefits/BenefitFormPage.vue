@@ -680,6 +680,7 @@
             width="650px"
             @closeModalSelectSpeaker="modalSelectSpeaker.open = false"
             @confirmSelectSpeaker="confirmSelectSpeaker"
+            @newSpeaker="newSpeaker"
             />
         <ModalSelectLogoPromotor
             :ref="modalLogoPromotor.ref"
@@ -1215,6 +1216,9 @@ export default {
                     vue.selects.lista_encuestas = response.polls
                     vue.selects.list_types = response.types_benefit
                     vue.selects.lista_grupo = response.group
+                    if(vue.benefit_id == '') {
+                        vue.selectGroup = 'free';
+                    }
                 })
             if(vue.benefit_id != '') {
                 let url = `${vue.base_endpoint}/search/${vue.benefit_id}`
@@ -1349,6 +1353,11 @@ console.log(vue.resource);
                 is_default:false
             };
             this.openModalAddLink(newLink)
+        },
+        newSpeaker(){
+            let vue = this;
+            vue.modalSelectSpeaker.open = false
+            window.open(`/speakers/create?mode=assign`)
         }
     }
 }
@@ -1370,7 +1379,7 @@ console.log(vue.resource);
     text-align: center;
     color: #D9D9D9;
     font-weight: 600;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     border-radius: 4px;
     cursor: pointer;
 }
@@ -1399,7 +1408,7 @@ console.log(vue.resource);
 .box_button_duracion .v-input__control .v-input__slot,
 .box_button_duracion .v-input__control .v-input__slot .v-radio .v-label {
     margin-bottom: 0;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     font-size: 14px;
     color: #2A3649;
 }
@@ -1506,7 +1515,7 @@ console.log(vue.resource);
             border-radius: 30px;
             border: 1px solid #5457E7;
             margin-right: 5px;
-            font-family: 'open sans';
+            font-family: 'open sans', "Nunito", sans-serif;
             font-size: 14px;
             color: #5457E7;
             position: relative;
@@ -1516,7 +1525,7 @@ console.log(vue.resource);
             border-radius: 30px;
             border: 1px solid #5457E7;
             margin-right: 5px;
-            font-family: 'open sans';
+            font-family: 'open sans', "Nunito", sans-serif;
             font-size: 14px;
             color: #5457E7;
             padding-right: 28px;
@@ -1543,14 +1552,14 @@ console.log(vue.resource);
     border-radius: 4px;
 }
 .lbl_silabo_bloque {
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     color: #666666;
     font-size: 13px;
 }
 .txt_conf_av {
     font-size: 15px;
     color: #5458EA;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     font-weight: 700;
 }
 </style>

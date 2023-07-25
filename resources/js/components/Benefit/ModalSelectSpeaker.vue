@@ -46,6 +46,17 @@
                     <p class="txt_nf pt-4 text-center" v-if="txt_filter_speaker != null">No se encontraron expositores</p>
                 </div>
             </v-card-text>
+            <div v-if="show_button">
+                <v-col class="py-0">
+                    <DefaultModalActionButton
+                        @cancel="closeModalSelectSpeaker"
+                        @confirm="saveSelectSpeaker"
+                    />
+                </v-col>
+            </div>
+            <div class="row_new_speaker">
+                <span @click="newSpeaker">Crear nuevo expositor</span>
+            </div>
         </v-card>
     </v-dialog>
 </template>
@@ -53,7 +64,16 @@
 
 <script>
 export default {
-    props: ["value", "width", "title", "subtitle", "txt_btn_confirm", "txt_btn_cancel", "options", "content_modal", "title_modal","data"],
+    // props: ["value", "width", "title", "subtitle", "txt_btn_confirm", "txt_btn_cancel", "options", "content_modal", "title_modal","data","show_button"],
+    props: {
+        value: Boolean,
+        width: String,
+        data: [Object, Array],
+        show_button: {
+            type: Boolean,
+            default: false
+        },
+    },
     data() {
         return {
             dialog: false,
@@ -92,6 +112,14 @@ export default {
         confirmSelectSpeaker(value) {
             let vue = this
             vue.$emit('confirmSelectSpeaker', value)
+        },
+        saveSelectSpeaker(value) {
+            let vue = this
+            vue.$emit('saveSelectSpeaker', value)
+        },
+        newSpeaker(value) {
+            let vue = this
+            vue.$emit('newSpeaker', value)
         }
     },
 };
@@ -165,6 +193,21 @@ export default {
                 font-size: 15px;
                 font-weight: bold;
             }
+        }
+    }
+}
+.row_new_speaker {
+    text-align: center;
+    margin: 10px 0 30px;
+    span {
+        font-family: "Nunito", sans-serif;
+        color: #5458EA;
+        cursor: pointer;
+        transition: .5s;
+        font-size: 14px;;
+        &:hover {
+            text-decoration: underline;
+            transition: .5s;
         }
     }
 }

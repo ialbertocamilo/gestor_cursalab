@@ -21,15 +21,15 @@
                         />
                     </v-col>
                     <v-col cols="4">
-                        <div class="bx_max_colaboradores">
+                        <div class="bx_max_colaboradores" v-if="max_benefits_x_users != null">
                             <div class="img"><img src="/img/benefits/max_colaborador.svg"></div>
                             <p>Max cant. permitida por colaborador</p>
-                            <span>5</span>
+                            <span>{{ max_benefits_x_users }}</span>
                             <div class="btns_change_max_col">
-                                <div class="btn_change_max_col_up">
+                                <div class="btn_change_max_col_up" @click="updateMaxBenefitsxUsers('add')">
                                     <img src="/img/benefits/chevron_top.svg">
                                 </div>
-                                <div class="btn_change_max_col_down">
+                                <div class="btn_change_max_col_down" @click="updateMaxBenefitsxUsers('delete')" v-if="max_benefits_x_users > 0">
                                     <img src="/img/benefits/chevron_bottom.svg">
                                 </div>
                             </div>
@@ -47,6 +47,7 @@
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un beneficio')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
                 @addSpeaker="addSpeaker($event)"
+                @gestion_colab="openModalGestionColab($event)"
             />
         </v-card>
 
@@ -80,6 +81,28 @@
             @onConfirm="confirmModalSegment"
             :segmentdata="dataModalSegment"
         />
+        <ModalSelectSpeaker
+            :ref="modalSelectSpeaker.ref"
+            v-model="modalSelectSpeaker.open"
+            :data="modalSelectSpeaker.data"
+            width="650px"
+            @closeModalSelectSpeaker="modalSelectSpeaker.open = false"
+            @confirmSelectSpeaker="confirmSelectSpeaker"
+            @saveSelectSpeaker="saveSelectSpeaker"
+            @newSpeaker="newSpeaker"
+            :show_button="true"
+            />
+        <ModalGestorColaboradores
+            :ref="modalGestorColaboradores.ref"
+            v-model="modalGestorColaboradores.open"
+            :data="modalGestorColaboradores.data"
+            :segmentados="modalGestorColaboradores.segmentados"
+            :seleccionados="modalGestorColaboradores.seleccionados"
+            :benefit_id="modalGestorColaboradores.benefit_id"
+            width="850px"
+            @closemodalGestorColaboradores="modalGestorColaboradores.open = false"
+            @confirmModalGestorColaboradores="confirmModalGestorColaboradores"
+            />
 
     </section>
 </template>
@@ -88,6 +111,9 @@
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectActivity from "../../components/Benefit/ModalSelectActivity";
+import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
+import ModalGestorColaboradores from "../../components/Benefit/ModalGestorColaboradores";
+
 import ModalSegment from "./ModalSegment";
 
 export default {
@@ -95,10 +121,13 @@ export default {
         DefaultStatusModal,
         DefaultDeleteModal,
         ModalSelectActivity,
-        ModalSegment
+        ModalSegment,
+        ModalSelectSpeaker,
+        ModalGestorColaboradores,
     },
     mounted() {
-        let vue = this;
+        let vue = this
+        vue.loadInfo();
     },
     data() {
         return {
@@ -158,6 +187,26 @@ export default {
                 ver_items: false,
                 asignar: false,
                 subida_masiva: false
+            },
+            // modal speaker
+
+            modalSelectSpeaker: {
+                ref: 'modalSelectSpeaker',
+                open: false,
+                data: [],
+                benefit_id: null,
+                speaker_id: null,
+                endpoint: '',
+            },
+            modalGestorColaboradores: {
+                ref: 'modalGestorColaboradores',
+                open: false,
+                data: [],
+                segmentados: [],
+                seleccionados: [],
+                benefit_id: null,
+                speaker_id: null,
+                endpoint: '',
             },
             dataModalSegment: {},
 
@@ -219,6 +268,7 @@ export default {
                 width: '408px'
             },
             file: null,
+            max_benefits_x_users: null,
         }
     },
     methods: {
@@ -238,6 +288,37 @@ export default {
                     console.log(err);
                     this.hideLoader()
                 });
+        },
+        loadInfo() {
+            let vue = this
+            const url = `/beneficios/max_benefits_x_users`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.max_benefits_x_users = data.data.max_benefits_x_users
+                })
+        },
+        updateMaxBenefitsxUsers(action = null) {
+            let vue = this;
+            if(action != null)
+            {
+                this.showLoader()
+                vue.$http.post(`/beneficios/max_benefits_x_users/update`, {'action': action})
+                    .then((res) => {
+                        vue.max_benefits_x_users = res.data.data.max_benefits;
+                        if (res.data.type == "success") {
+                            vue.$notification.success(`${res.data.data.msg}`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+                        }
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
         },
         closeModalSegment() {
             let vue = this
@@ -299,7 +380,8 @@ export default {
             vue.modalSegment.open = true;
         },
         addSpeaker( item ) {
-            console.log(item);
+            console.log(item.id);
+            this.openModalSelectSpeaker(item.id)
         },
         async openModalSelectActivitys() {
             let vue = this
@@ -307,6 +389,127 @@ export default {
         },
         selectTypeActivityModal( value ) {
             window.location.href = '/beneficios/create?type=' + value;
+        },
+        confirmModalGestorColaboradores( benefit_id = null, seleccionados = null) {
+            let vue = this;
+            console.log(benefit_id);
+            console.log(seleccionados);
+            if(benefit_id != null && seleccionados != null)
+            {
+                vue.showLoader();
+
+                vue.$http.post(`/beneficios/colaboradores/update`, {'benefit_id': benefit_id, 'seleccionados': seleccionados})
+                    .then((res) => {
+                        if (res.data.type == "success") {
+                            vue.$notification.success(`${res.data.data.msg}`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+
+                            vue.modalGestorColaboradores.benefit_id = null
+                            vue.modalGestorColaboradores.seleccionados = null
+                            vue.modalGestorColaboradores.segmentados = null
+                            vue.modalGestorColaboradores.open = false
+                        }
+                        this.hideLoader()
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
+        async openModalGestionColab( benefit = null) {
+            let vue = this;
+
+            if(benefit != null)
+            {
+                vue.showLoader();
+
+                vue.modalGestorColaboradores.open = true
+                vue.modalGestorColaboradores.benefit_id = benefit.id
+
+                await vue.$http.post(`/beneficios/colaboradores/suscritos`, {'benefit_id': benefit.id})
+                    .then((res) => {
+                        let res_seleccionados = res.data.data.users;
+                        let res_segmentados = res.data.data.segmentados;
+                        vue.modalGestorColaboradores.seleccionados = res_seleccionados
+                        vue.modalGestorColaboradores.segmentados = res_segmentados
+                        console.log(res_seleccionados);
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
+        async openModalSelectSpeaker( benefit_id = null) {
+            let vue = this;
+
+            vue.showLoader();
+
+            vue.modalSelectSpeaker.open = true
+            vue.modalSelectSpeaker.benefit_id = benefit_id
+
+                await vue.$http.get(`/beneficios/speakers/search`)
+                    .then((res) => {
+                        let res_speakers = res.data.data.data;
+                        vue.modalSelectSpeaker.data = res_speakers
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+        },
+        confirmSelectSpeaker( value ){
+            let vue = this;
+            console.log(value.id);
+            vue.modalSelectSpeaker.speaker_id = value.id
+
+            console.log(vue.modalSelectSpeaker.benefit_id );
+            // vue.modalSelectSpeaker.open = false
+            // vue.modalSelectSpeaker.benefit_id = null
+        },
+        saveSelectSpeaker() {
+            let vue = this;
+            console.log(vue.modalSelectSpeaker.speaker_id );
+            console.log(vue.modalSelectSpeaker.benefit_id );
+            let speaker_id = vue.modalSelectSpeaker.speaker_id;
+            let benefit_id = vue.modalSelectSpeaker.benefit_id;
+
+            if(benefit_id != null && speaker_id != null)
+            {
+                this.showLoader()
+                vue.$http.post(`/beneficios/assigned_speaker`, {'benefit_id': benefit_id, 'speaker_id': speaker_id})
+                    .then((res) => {
+                        if (res.data.type == "success") {
+                            vue.$notification.success(`${res.data.data.msg}`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+
+                            vue.modalSelectSpeaker.speaker_id = null
+                            vue.modalSelectSpeaker.benefit_id = null
+                            vue.modalSelectSpeaker.open = false
+                        }
+                        this.hideLoader()
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+            console.log(vue.modalSelectSpeaker.speaker_id );
+            console.log(vue.modalSelectSpeaker.benefit_id );
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
+        newSpeaker(){
+            window.location.href = `/speakers/create`;
         }
     }
 };
@@ -319,12 +522,12 @@ export default {
 .bx_max_colaboradores p {
     font-size: 14px;
     margin: 0 6px;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     color: #5458EA;
 }
 .bx_max_colaboradores span {
     font-size: 16px;
-    font-family: 'open sans';
+    font-family: 'open sans', "Nunito", sans-serif;
     color: #5458EA;
     font-weight: bold;
 }
@@ -335,5 +538,6 @@ export default {
     align-items: center;
     line-height: 1;
     margin-left: 5px;
+    cursor: pointer;
 }
 </style>
