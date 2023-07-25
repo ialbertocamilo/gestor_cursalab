@@ -71,6 +71,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
         $percent_sent = [];
         $course_settings = Course::getModEval($this->course);
         $max_grade = $this->course->qualification_type->position;
+        $qualification_type_name = $this->course->qualification_type->name;
         $course_settings['max_grade'] = $max_grade;
 
         for ($i = 1; $i < $count; $i++) {
@@ -103,11 +104,11 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 continue;
             }
             if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && ($grade < 0 || $grade > $max_grade)) {
-                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
+                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido. [' . $qualification_type_name . ']');
                 continue;
             }
             if (($this->course->assessable) && (count($this->topics) == 0) && ($grade < 0 || $grade > $max_grade)) {
-                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
+                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido. [' . $qualification_type_name . ']');
                 continue;
             }
 
