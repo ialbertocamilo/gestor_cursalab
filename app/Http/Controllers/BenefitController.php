@@ -54,64 +54,6 @@ class BenefitController extends Controller
         $benefit_id = $data['id'] ?? null;
 
         // Segmentación directa
-        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
-
-        // Segmentación por documento
-        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
-
-        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
-
-        $new_users_assigned = [];
-        $users_segmented = EmailSegment::where('benefit_id', $benefit_id)->pluck('users')->toArray();
-        foreach($users_segmented as $us) {
-            $decode = json_decode($us);
-            if(is_array($decode))
-                $new_users_assigned = array_merge($new_users_assigned, $decode);
-        }
-        $users_assigned = array_diff($users_assigned, $new_users_assigned);
-
-        if(count($users_assigned) > 0)
-        {
-            $push_chunk = 40;
-            $chunk = array_chunk($users_assigned, $push_chunk);
-
-            if(count($chunk) > 1) {
-                foreach ($chunk as $key => $agrupado) {
-                    $email_segment = new EmailSegment();
-                    $email_segment->workspace_id = get_current_workspace()?->id;
-                    $email_segment->benefit_id = $benefit_id;
-                    $email_segment->users = json_encode($agrupado);
-                    $email_segment->chunk = $key + 1;
-                    $email_segment->sent = false;
-                    $email_segment->save();
-                }
-            }
-            else {
-                foreach ($chunk as $key => $agrupado) {
-                    $email_segment = new EmailSegment();
-                    $email_segment->workspace_id = get_current_workspace()?->id;
-                    $email_segment->benefit_id = $benefit_id;
-                    $email_segment->users = json_encode($agrupado);
-                    $email_segment->chunk = $key + 1;
-                    $email_segment->sent = true;
-                    $email_segment->save();
-                    if(is_array($agrupado)) {
-                        foreach($agrupado as $user_id) {
-                            $user = User::where('id', $user_id)->select('email')->first();
-                            if($user) {
-                                $benefit = Benefit::where('id', $benefit_id)->first();
-                                if($benefit) {
-                                    Benefit::sendEmail( 'new', $user, $benefit );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        cache_clear_model(EmailSegment::class);
-
-        // Segmentación directa
         if(isset($data['list_segments']['segments']) &&
         count($data['list_segments']['segments']) > 0)
         {
@@ -198,6 +140,131 @@ class BenefitController extends Controller
         return $this->success($response);
     }
 
+    public function maxBenefitsxUsers()
+    {
+        $response = Benefit::maxBenefitsxUsers();
+
+        return $this->success($response);
+    }
+
+    public function updateMaxBenefitsxUsers(Request $request)
+    {
+        $data = $request->all();
+        $action = $data['action'] ?? null;
+
+        $update = Benefit::updateMaxBenefitsxUsers($action);
+
+        $response = [
+            'msg' => 'Max. Cant. actualizada correctamente.',
+            'max_benefits' => $update,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    public function assignedSpeaker(Request $request)
+    {
+        $data = $request->all();
+        $benefit_id = $data['benefit_id'] ?? null;
+        $speaker_id = $data['speaker_id'] ?? null;
+
+        Benefit::assignedSpeaker($benefit_id, $speaker_id);
+
+        $response = [
+            'msg' => 'Se asignó el expositor correctamente.',
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    public function getSuscritos(Request $request)
+    {
+        $data = $request->all();
+        $benefit_id = $data['benefit_id'] ?? null;
+
+        $data = Benefit::getSuscritos($benefit_id);
+
+        return $this->success($data);
+    }
+
+    public function updateSuscritos(Request $request)
+    {
+        $data = $request->all();
+        $benefit_id = $data['benefit_id'] ?? null;
+        $seleccionados = $data['seleccionados'] ?? null;
+
+        $update = Benefit::updateSuscritos($benefit_id, $seleccionados);
+
+        $response = [
+            'msg' => 'Información actualizada correctamente.',
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    private function sendMailUsersSegmented(Request $request)
+    {
+        $data = $request->all();
+        $benefit_id = $data['id'] ?? null;
+
+        // Segmentación directa
+        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
+
+        // Segmentación por documento
+        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
+
+        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
+
+        $new_users_assigned = [];
+        $users_segmented = EmailSegment::where('benefit_id', $benefit_id)->pluck('users')->toArray();
+        foreach($users_segmented as $us) {
+            $decode = json_decode($us);
+            if(is_array($decode))
+                $new_users_assigned = array_merge($new_users_assigned, $decode);
+        }
+        $users_assigned = array_diff($users_assigned, $new_users_assigned);
+
+        if(count($users_assigned) > 0)
+        {
+            $push_chunk = 40;
+            $chunk = array_chunk($users_assigned, $push_chunk);
+
+            if(count($chunk) > 1) {
+                foreach ($chunk as $key => $agrupado) {
+                    $email_segment = new EmailSegment();
+                    $email_segment->workspace_id = get_current_workspace()?->id;
+                    $email_segment->benefit_id = $benefit_id;
+                    $email_segment->users = json_encode($agrupado);
+                    $email_segment->chunk = $key + 1;
+                    $email_segment->sent = false;
+                    $email_segment->save();
+                }
+            }
+            else {
+                foreach ($chunk as $key => $agrupado) {
+                    $email_segment = new EmailSegment();
+                    $email_segment->workspace_id = get_current_workspace()?->id;
+                    $email_segment->benefit_id = $benefit_id;
+                    $email_segment->users = json_encode($agrupado);
+                    $email_segment->chunk = $key + 1;
+                    $email_segment->sent = true;
+                    $email_segment->save();
+                    if(is_array($agrupado)) {
+                        foreach($agrupado as $user_id) {
+                            $user = User::where('id', $user_id)->select('email')->first();
+                            if($user) {
+                                $benefit = Benefit::where('id', $benefit_id)->first();
+                                if($benefit) {
+                                    Benefit::sendEmail( 'new', $user, $benefit );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cache_clear_model(EmailSegment::class);
+    }
     /**
      * Process request to toggle value of active status (1 or 0)
      *

@@ -23,4 +23,14 @@ Route::controller(BenefitController::class)->group(function() {
     // Speakers
     Route::get('/speakers/search', 'getSpeakers');
 
+    // Gestión de colaboradores
+    Route::post('/colaboradores/suscritos', 'getSuscritos');
+    Route::post('/colaboradores/update', 'updateSuscritos');
+
+    Route::post('/assigned_speaker', 'assignedSpeaker');
+
+
+    Route::get('/max_benefits_x_users', 'maxBenefitsxUsers');
+    Route::post('/max_benefits_x_users/update', 'updateMaxBenefitsxUsers');
+
 });

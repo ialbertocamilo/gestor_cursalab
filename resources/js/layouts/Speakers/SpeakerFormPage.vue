@@ -160,7 +160,7 @@ import Editor from "@tinymce/tinymce-vue";
 
 export default {
     components: {DialogConfirm, Editor},
-    props: [ 'speaker_id' ],
+    props: [ 'speaker_id','mode_assign' ],
     data() {
         return {
             // otros
@@ -239,7 +239,10 @@ export default {
         },
         closeModal() {
             let vue = this
-            window.location.href = vue.base_endpoint;
+            if(vue.mode_assign)
+                window.close()
+            else
+                window.location.href = vue.base_endpoint;
         },
         confirmModal(validateForm = true) {
             let vue = this
