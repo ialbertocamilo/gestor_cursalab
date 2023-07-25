@@ -1,23 +1,6 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter v-model="open_advanced_filter"
-                       @filter="advanced_filter(dataTable, filters, 1)"
-        >
-            <template v-slot:content>
-                <v-row justify="center">
-
-                    <!--                    <v-col cols="12">-->
-                    <!--                        <DefaultAutocomplete-->
-                    <!--                            clearable-->
-                    <!--                            placeholder="Seleccione una Carrera"-->
-                    <!--                            label="Carrera"-->
-                    <!--                            :items="selects.carreras"-->
-                    <!--                            v-model="filters.carrera"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
-                </v-row>
-            </template>
-        </DefaultFilter>
+       
         <v-card flat class="elevation-0 mb-4">
 
             <v-card-title>
@@ -25,44 +8,50 @@
                 <v-spacer/>
                 <div class="ddd-flex justify-content-end">
                     <DefaultActivityButton
-                        :label="'Importar Evaluación'"
+                        :label="'Importar evaluación'"
                         @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
                     />
                     <DefaultModalButton
                         @click="openFormModal(modalOptions, null, 'create')"
-                        :label="'Pregunta'"/>
+                        :label="'Agregar pregunta'"/>
                 </div>
 
             </v-card-title>
-  <!--           <v-row>
-            </v-row> -->
         </v-card>
-        <!--        FILTROS-->
+
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
 
                 <v-row>
                     <div class="col-md-8">
-                        <div class="alert alert-info -mx-2 -mt-2" style="background-color: #5458ea; color: white;" role="alert">
-                            - Cuando un tema es "Evaluable" y de tipo "Calificada" se deben agregar opciones a las preguntas. <br>
-                            - Cuando un tema es "Evaluable" y de tipo "Abierta" no se consideran las opciones, solo se muestran las preguntas para que los usuarios respondan con un texto. <br>
-                            - Al eliminar todas las preguntas el tema se convierte a un tema no evaluable.<br>
-                            <span v-if="evaluation_type == 'qualified'">
-                                - El total de puntos que se puede acumular en las preguntas obligatorias es de 20 puntos. <br>
+                        <div class="alert --alert-info" style="border-color: #5458ea;" role="alert">
+                            <span v-if="evaluation_type == 'qualified'" class="mb-1">
+                                - Cuando un tema es "Evaluable" y de tipo "Calificada" se deben agregar opciones a las preguntas.
+                            </span>
+                            <span v-if="evaluation_type == 'open'" class="mb-1">
+                                - Cuando un tema es "Evaluable" y de tipo "Abierta" no se consideran las opciones, solo se muestran las preguntas para que los usuarios respondan con un texto.
+                            </span>
+                            <span class="mb-1">
+                                - Al eliminar todas las preguntas el tema se convierte a un tema no evaluable.<br>
+                            </span>
+                            <span v-if="evaluation_type == 'qualified'" class="mb-1">
+                                - El total de puntos que se puede acumular en las preguntas obligatorias es de <strong>{{ qualification_type_value }}</strong> puntos. [{{ qualification_type_name }}]
+                            </span>
+                            <span v-if="evaluation_type == 'qualified'" class="mb-1">
                                 - El total de puntos solo considera las preguntas activas.
                             </span>
                         </div>
                     </div>
 
                     <div class="col-md-4 ">
-                        <table class="table table-striped mt-3" style="background-color: #5458ea; color: white;" v-if="evaluation_type == 'qualified'">
+                        <table class="table table-striped" style="background-color: #5458ea; color: white;" v-if="evaluation_type == 'qualified'">
                           <tbody>
                             <tr>
-                              <td>Obligatorio: </td>
+                              <td>Obligatorios: </td>
                               <td>{{ validation.evaluation_data_sum_required }} puntos</td>
                             </tr>
                             <tr>
-                              <td>No Obligatorios: </td>
+                              <td>No obligatorios: </td>
                               <td>{{ validation.evaluation_data_sum_not_required }} puntos</td>
                             </tr>
                             <tr>
@@ -79,38 +68,25 @@
                         <DefaultInput
                             learable dense
                             v-model="filters.q"
-                            label="Buscar por pregunta ..."
+                            label="Buscar pregunta ..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                         />
                     </v-col>
 
-                     <v-col cols="8" v-if="evaluation_type == 'qualified'" class="text-center">
-                          <!-- <div class="card-title --row --mb-2 " style="display:flex;justify-content:space-between;align-items:center;"> -->
-                            <!-- <h5 class="col-md-6" style="text-align: left">Sistema de Evaluación: Base 20</h5> -->
-                        <!--     <div class="mr-3" v-show="status == false && missing_score <= 0">
-                              @if($posteo->ev_verificada)
-                                <button class="btn btn-primary disabled">Evaluación validada</button>
-                              @else
-                                <button class="btn btn-primary" id="verificar_eva">Pendiente de validar</button>
-                              @endif
-                            </div> -->
-                            <!-- <div class="col-md-6 offset-md-3 text-center"> -->
-                                <div class="alert alert-success pa-1" role="alert" v-show="validation.status == true">
-                                  <h6>La evaluación es correcta.</h6>
-                                </div>
-                                <div class="alert alert-danger pa-1" role="alert" v-show="validation.status == false && validation.missing_score != 0">
-                                  <h6>Es necesario asignar {{ validation.missing_score }} punto(s) más para completar la evaluación.</h6>
-                                </div>
-                            <!-- </div> -->
-                          <!-- </div> -->
+                    <v-col cols="8" v-if="evaluation_type == 'qualified'" class="text-center">
+                        <div class="alert alert-success pa-1 pt-2" role="alert" v-show="validation.status == true">
+                          <h6>La evaluación es correcta.</h6>
+                        </div>
+                        <div class="alert alert-danger pa-1" role="alert" v-show="validation.status == false && validation.missing_score != 0">
+                          <h6>Es necesario asignar {{ validation.missing_score }} punto(s) más para completar la evaluación.</h6>
+                        </div>
                     </v-col>
-
                 </v-row>
 
             </v-card-text>
-            {{ $event }}
+
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
@@ -132,6 +108,7 @@
                 @onCancel="closeFormModal(modalOptions)"
                 :evaluable="evaluable"
                 :evaluation_type="evaluation_type"
+                :base_score="parseInt(qualification_type_value)"
             />
             <TemaPreguntasImport
                 width="50vw"
@@ -164,7 +141,6 @@
 </template>
 
 <script>
-// import TemaPreguntaFormModal from "./TemaPreguntaFormModalNew";
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
@@ -184,6 +160,9 @@ export default {
         'status',
         'missing_score',
         'evaluable',
+        'qualification_type',
+        'qualification_type_value',
+        'qualification_type_name',
         'evaluation_type',
         'evaluation_data_sum',
         'evaluation_data_sum_required',
@@ -250,12 +229,6 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     }
-                    // {
-                    //     text: "Actividad",
-                    //     icon: 'fas fa-file',
-                    //     type: 'action',
-                    //     method_name: 'activity'
-                    // },
                 ],
             },
             selects: {
@@ -276,7 +249,8 @@ export default {
                 open: false,
                 base_endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas`,
                 resource: 'Pregunta',
-                confirmLabel: 'Guardar'
+                confirmLabel: 'Guardar',
+                showCloseIcon: true,
             },
             modalDeleteOptions: {
                 open: false,
@@ -331,8 +305,6 @@ export default {
             }, 1000)
         },
         updateData(data){
-            console.log('updateData')
-            console.log(data)
 
             let vue = this
 

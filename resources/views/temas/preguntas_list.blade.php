@@ -9,6 +9,7 @@
 
     $taxonomy = \App\Models\Taxonomy::find($tema->type_evaluation_id);
     $evaluationTypeCode = $taxonomy->code ?? '';
+    $qualification_type = $tema->qualification_type;
 
     // dd($data);
     @endphp
@@ -22,6 +23,9 @@
             evaluable="{{ $tema->type_evaluation_id }}"
             status="{{ $status }}"
             missing_score="{{ $data['score_missing'] ?? 0 }}"
+            qualification_type="{{ $qualification_type->code }}"
+            qualification_type_value="{{ $qualification_type->position }}"
+            qualification_type_name="{{ $qualification_type->name }}"
             evaluation_type="{{ $evaluationTypeCode }}"
             evaluation_data_sum="{{ $data['sum'] ?? 0 }}"
             evaluation_data_sum_required="{{ $data['sum_required'] ?? 0 }}"

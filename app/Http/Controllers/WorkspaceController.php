@@ -95,6 +95,7 @@ class WorkspaceController extends Controller
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
         $workspace['functionalities_selected'] = [];
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+        $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         return $this->success($workspace);
     }
@@ -189,6 +190,8 @@ class WorkspaceController extends Controller
     {
         // Load criteria
 
+        $workspace->load('qualification_type');
+
         $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
 
         foreach ($workspace['criteria'] as $wk_crit) {
@@ -210,6 +213,7 @@ class WorkspaceController extends Controller
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+        $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         return $this->success($workspace);
     }
@@ -380,6 +384,11 @@ class WorkspaceController extends Controller
             ->where('active', ACTIVE)
             ->get();
 
+        $qualification_types = Taxonomy::where('group', 'system')->where('type', 'qualification-type')
+            ->select('id', 'name')
+            ->where('active', ACTIVE)
+            ->get();
+
         $main_menu->each(function ($item) {
             $item->active = false;
         });
@@ -402,7 +411,7 @@ class WorkspaceController extends Controller
         //     $item->active = false;
         // });
 
-        $response = compact('main_menu', 'side_menu');
+        $response = compact('main_menu', 'side_menu', 'qualification_types');
 
         return $compactResponse ? $response : $this->success($response);
     }

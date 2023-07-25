@@ -10,88 +10,249 @@
             <DefaultErrors :errors="errors"/>
 
             <v-form ref="workspaceForm">
-                <v-row class="justify-content-center pt-4">
-                    <v-col cols="6">
-                        <DefaultInput
-                            clearable
-                            v-model="resource.name"
-                            label="Título del workspace"
-                            :rules="rules.name"
-                        />
-                    </v-col>
-                    <v-col cols="6">
-                        <DefaultInput
-                            clearable
-                            v-model="resource.url_powerbi"
-                            label="Link de learning analytics (PowerBI)"
-                        />
-                    </v-col>
-                </v-row>
-                <v-row class="justify-content-center">
-                    <v-col cols="6">
-                        <DefaultSelectOrUploadMultimedia
-                            ref="inputLogo"
-                            v-model="resource.logo"
-                            label="Logotipo (400x142px)"
-                            :file-types="['image']"
-                            :rules="rules.logo"
-                            @onSelect="setFile($event, resource,'logo')"/>
-                    </v-col>
-                    <v-col cols="6">
-                        <DefaultSelectOrUploadMultimedia
-                            ref="inputLogoNegativo"
-                            v-model="resource.logo_negativo"
-                            label="Logotipo negativo (400x142px)"
-                            :file-types="['image']"
-                            @onSelect="setFile($event, resource,'logo_negativo')"/>
-                    </v-col>
-                </v-row>
 
-                <v-row justify="space-around" v-if="is_superuser">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Límite de Usuarios"
-                        >
-                            <template v-slot:content>
+                <v-tabs fixed-tabs v-model="tabs">
+                    <!-- <v-tabs-slider></v-tabs-slider> -->
+                    <v-tab href="#tab-1" :key="1" class="primary--text">
+                        <v-icon>mdi-text-box-outline</v-icon>
+                        <span class="ml-3">Datos generales</span>
+                    </v-tab>
 
-                                <v-col cols="12">
-                                    <DefaultInput
-                                        label="Límite"
-                                        v-model="limit_allowed_users"
-                                        type="number"
-                                        min="0"
-                                        clearable
-                                    />
-                                </v-col>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
+                    <v-tab
+                        href="#tab-2"
+                        :key="2"
+                        class="primary--text"
+                    >
+                        <v-icon>mdi-text-box-edit-outline</v-icon>
+                        <span class="ml-3">Criterios</span>
+                    </v-tab>
 
-                <v-row justify="space-around" v-if="is_superuser">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Funcionalidades"
-                        >
-                            <template v-slot:content>
+                    <v-tab
+                        href="#tab-3"
+                        :key="3"
+                        class="primary--text"
+                        v-if="is_superuser"
+                    >
+                        <v-icon>mdi-text-box-search-outline</v-icon>
+                        <span class="ml-3">Configuración</span>
+                    </v-tab>
 
-                                <v-col cols="12">
+                </v-tabs>
+
+                <v-tabs-items v-model="tabs">
+                    
+                    <v-tab-item :key="1" :value="'tab-1'">
+                        <v-row class="--justify-content-center pt-4">
+                            <v-col cols="6">
+                                <DefaultInput
+                                    clearable
+                                    v-model="resource.name"
+                                    label="Nombre del workspace"
+                                    :rules="rules.name"
+                                    dense
+                                />
+                            </v-col>
+                            
+                        </v-row>
+                        <v-row class="justify-content-center">
+                            <v-col cols="6">
+                                <DefaultSelectOrUploadMultimedia
+                                    ref="inputLogo"
+                                    v-model="resource.logo"
+                                    label="Logotipo (400x142px)"
+                                    :file-types="['image']"
+                                    :rules="rules.logo"
+                                    @onSelect="setFile($event, resource,'logo')"/>
+                            </v-col>
+                            <v-col cols="6">
+                                <DefaultSelectOrUploadMultimedia
+                                    ref="inputLogoNegativo"
+                                    v-model="resource.logo_negativo"
+                                    label="Logotipo negativo (400x142px)"
+                                    :file-types="['image']"
+                                    @onSelect="setFile($event, resource,'logo_negativo')"/>
+                            </v-col>
+                        </v-row>
+
+                    </v-tab-item>
+
+                    <v-tab-item :key="2" :value="'tab-2'">
+
+                        <v-row>
+                            <v-col>
+                                <v-alert
+                                    colored-border
+                                    elevation="2"
+                                    class="mb-0"
+                                >
+                                    <!-- Selecciona los criterios que usa la empresa para segmentar el contenido -->
+                                    <p>En esta sección podrás gestionar los criterios que se mostrarán en la segmentación. Ten en cuenta lo siguiente:</p>
+                                    <v-row>
+                                        <v-col cols="12" class="py-0">
+                                            <small class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
+                                               :key="index">
+                                                <v-icon class="mx-2"
+                                                        style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check
+                                                </v-icon>
+                                                <span>{{ mensaje }}</span>
+                                            </small>
+                                        </v-col>
+                                    </v-row>
+                                </v-alert>
+                            </v-col>
+                        </v-row>
+                        <v-container
+                                id="scroll-target"
+                                class="overflow-y-auto py-0 px-1"
+                                style="min-height: 360px; max-height: 400px"
+                            >
+                                   
+                            <v-row class="mr-1">
+                                <v-col cols="6">
+                                    <v-subheader class="mb-3 px-0">
+                                        <strong>Por defecto</strong>
+                                    </v-subheader>
                                     <v-checkbox
-                                        v-for="functionality in functionalities"
-                                        :key="functionality.id"
-                                        v-model="resource.selected_functionality[functionality.id]"
-                                        :label="functionality.name"
+                                        v-for="criterion in defaultCriteria"
+                                        :key="criterion.id"
+                                        v-model="resource.selected_criteria[criterion.id]"
+                                        :label="generateCriterionTitle(criterion)"
+                                        :disabled="false"
                                     >
+                                        <!-- :disabled="criterion.code === 'module'" -->
                                     </v-checkbox>
                                 </v-col>
+                                <v-col cols="6">
 
+                                    <v-subheader class="mb-3 px-0">
+                                        <strong>Personalizados</strong>
+                                    </v-subheader>
+
+                                    <v-checkbox
+                                        v-for="criterion in customCriteria"
+                                        :key="criterion.id"
+                                        v-model="resource.selected_criteria[criterion.id]"
+                                        :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
+                                        :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
+                                    >
+                                        <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
+
+                                    </v-checkbox>
+                                </v-col>
+                            </v-row>
+
+                        </v-container>
+
+                    </v-tab-item>
+
+                    <v-tab-item :key="3" :value="'tab-3'" v-if="is_superuser">
+
+                        <DefaultSection title="Configuración de sistema de calificación" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row justify="space-around">
+                                    <v-col cols="6">
+                                        <DefaultSelect
+                                            clearable
+                                            :items="selects.qualification_types"
+                                            item-text="name"
+                                            return-object
+                                            v-model="resource.qualification_type"
+                                            label="Sistema de calificación"
+                                            :rules="rules.qualification_type_id"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <DefaultInfoTooltip
+                                            class=""
+                                            top
+                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
+                                    </v-col>
+                                </v-row>
                             </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultModalSection title="Diplomas">
+                        </DefaultSection>
+
+                        <DefaultSection
+                            title="Configuración de límites"
+                            v-if="is_superuser"
+                        >
+                            <template v-slot:content>
+
+                                <v-row justify="space-around" >
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Límite de usuarios"
+                                            v-model="limit_allowed_users"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="8">
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+
+                        
+                        <v-row justify="space-around" v-if="is_superuser">
+                            <v-col cols="12">
+                                <DefaultSection
+                                    title="Configuración de módulos del cliente"
+                                >
+                                    <template v-slot:content>
+
+                                        <v-row justify="space-around">
+
+                                            <v-col cols="4" v-for="functionality in functionalities" :key="functionality.id">
+                                                <v-checkbox
+                                                    v-model="resource.selected_functionality[functionality.id]"
+                                                    :label="functionality.name"
+                                                >
+                                                </v-checkbox>
+                                            </v-col>
+
+                                        </v-row>
+
+                                    </template>
+                                </DefaultSection>
+                            </v-col>
+                        </v-row>
+
+               
+                        <DefaultSection title="Configuración de envío de notificaciones push" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            class="mb-4"
+                                            label="Empezar envío luego de: (en minutos)"
+                                            type="number"
+                                            dense
+                                            v-model="resource.notificaciones_push_envio_inicio" />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Número de usuarios por envío"
+                                            type="number"
+                                            dense
+                                            v-model="resource.notificaciones_push_envio_intervalo"
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Frecuencia de envío por bloques (en minutos)"
+                                            type="number"
+                                            dense
+                                            v-model="resource.notificaciones_push_chunk"
+                                            />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+
+                        <DefaultSection title="Configuración de diplomas" v-if="is_superuser">
                             <template v-slot:content>
                                 <v-row>
                                     <v-col cols="6">
@@ -104,113 +265,41 @@
                                         />
                                     </v-col>
                                     <v-col cols="6" class="d-flex">
-                                        <span class="mt-4 mr-2">¿Activar marca de agua en diploma?</span>
-                                        <div>
-                                            <DefaultToggle
-                                                class="mt-0"
-                                                v-model="resource.marca_agua_estado"
-                                                no-label
-                                                />
-                                        </div>
+                                        <DefaultToggle
+                                            class="mt-5"
+                                            v-model="resource.marca_agua_estado"
+                                            active-label="Mostrar marca de agua en diploma"
+                                            inactive-label="No mostrar marca de agua en diploma"
+                                            />
                                     </v-col>
                                 </v-row>
                             </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
+                        </DefaultSection>
 
-                <v-row>
-                    <v-col cols="12" v-if="is_superuser">
-                        <DefaultModalSection title="Notificaciones Push">
-                                <template v-slot:content>
-                                    <v-row>
-                                        <v-col cols="6">
-                                            <DefaultInput
-                                                class="mb-4"
-                                                label="Empezar envio luego de: (en minutos)"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_envio_inicio" />
-                                            <DefaultInput
-                                                label="Número de usuarios por envio"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_envio_intervalo"
-                                            />
-                                        </v-col>
-                                        <v-col cols="6">
-                                            <DefaultInput
-                                                label="Frecuencia de envio por bloques (en minutos)"
-                                                type="number"
-                                                v-model="resource.notificaciones_push_chunk"
-                                                />
-                                        </v-col>
-                                    </v-row>
-                                </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row>
-
-                <v-row>
-                    <v-col>
-                        <v-subheader class="mt-4 px-0">
-                            <strong>Criterios</strong>
-                        </v-subheader>
-
-                        <v-divider class="mt-0"/>
-
-                        <v-alert
-                            border="top"
-                            colored-border
-                            type="info"
-                            elevation="2"
+                        <DefaultSection
+                            title="Configuración adicional"
+                            v-if="is_superuser"
                         >
-                            Selecciona los criterios que usa la empresa para segmentar el contenido
-                            <v-row>
-                                <v-col cols="12">
-                                    <p class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
-                                       :key="index">
-                                        <v-icon class="mx-2"
-                                                style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check
-                                        </v-icon>
-                                        <span>{{ mensaje }}</span>
-                                    </p>
-                                </v-col>
-                            </v-row>
-                        </v-alert>
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="6">
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Por defecto</strong>
-                        </v-subheader>
-                        <v-checkbox
-                            v-for="criterion in defaultCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="generateCriterionTitle(criterion)"
-                            :disabled="false"
-                        >
-                            <!-- :disabled="criterion.code === 'module'" -->
-                        </v-checkbox>
-                    </v-col>
-                    <v-col cols="6">
+                            <template v-slot:content>
 
-                        <v-subheader class="mb-3 px-0">
-                            <strong>Personalizados</strong>
-                        </v-subheader>
+                                <v-row justify="space-around" >
+                                    <v-col cols="12">
+                                        <DefaultInput
+                                            clearable
+                                            v-model="resource.url_powerbi"
+                                            label="Link de learning analytics (PowerBI)"
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
 
-                        <v-checkbox
-                            v-for="criterion in customCriteria"
-                            :key="criterion.id"
-                            v-model="resource.selected_criteria[criterion.id]"
-                            :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                            :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
-                        >
-                            <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
 
-                        </v-checkbox>
-                    </v-col>
-                </v-row>
+                    </v-tab-item>
+
+                </v-tabs-items>
+                
             </v-form>
         </template>
     </DefaultDialog>
@@ -221,18 +310,13 @@
 
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
-    'logo_marca_agua', 'marca_agua_estado',
+    'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
-    'Los criterios son atributos de los usuarios, que se utilizan para segmentar (asignar) el contenido (cursos).',
-    'Los "criterios por defecto" son datos que se usan de forma obligatoria para todos workspaces.',
-    'Los "criterios personalizados" son datos que se utilizan de forma opcional por cada workspace.',
-    'Al habilitar un "criterio personalizado", es necesario actualizar la data de los usuarios mediante APIs o subida masiva. De esa forma se podrá utilizar el criterio en las segmentaciones.',
-    'Los criterios que se activen, estarán disponibles en todas las secciones donde se realice "segmentación" dentro del workspace.',
-    'Se recomienda utilizar los criterios predefinidos en la configuración inicial y no habilitar los criterios que no se van  a usar en segmentación o no se va a actualizar el dato por cada usuario.',
-    'Es importante saber que si un criterio es activado y utilizado en alguna segmentación, ya no será posible desactivarlo a menos que se eliminen la segmentaciones donde está presente el criterio.'
+    'Los criterios "por defecto" son obligatorios e inalterables, mientras que los "personalizados" son propios del wokspace.',
+    'Para desactivar un criterio, debes retirarlo de las segmentaciones donde fue usado.',
 ];
 
 export default {
@@ -246,6 +330,7 @@ export default {
     // data: () => ({
     data() {
         return {
+            tabs: null,
             is_superuser: false,
             mensajes: mensajes,
             errors: []
@@ -264,11 +349,15 @@ export default {
                 url_powerbi: '',
                 logo: '',
                 logo_negativo: '',
+                qualification_type: '',
                 selected_criteria: {},
                 selected_functionality: {}
             },
             limit_allowed_users: null,
             resource: {
+            },
+            selects: {
+                qualification_types: [],
             },
             defaultCriteria: [],
             functionalities: []
@@ -278,6 +367,7 @@ export default {
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
+                qualification_type_id: this.getRules(['required']),
             }
         }
     }
@@ -296,6 +386,8 @@ export default {
         ,
         resetForm() {
             let vue = this
+
+            vue.selects.qualification_types = []
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
             vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
@@ -390,6 +482,8 @@ export default {
                 .get(url)
                 .then(({data}) => {
                     // vue.hideLoader();
+
+                    vue.selects.qualification_types = data.data.qualification_types
 
                     vue.is_superuser = data.data.is_superuser || false;
 

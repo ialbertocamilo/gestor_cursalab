@@ -8,7 +8,7 @@ class Topic extends BaseModel
 {
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
-        'position', 'visits_count', 'assessable', 'evaluation_verified',
+        'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
         'active', 'active_results', 'position'
     ];
@@ -75,6 +75,11 @@ class Topic extends BaseModel
     public function summaries()
     {
         return $this->hasMany(SummaryTopic::class);
+    }
+
+    public function qualification_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
     public function countQuestionsByTypeEvaluation($code)
@@ -582,6 +587,7 @@ class Topic extends BaseModel
                         'estado_tema' => 'aprobado',
                         'estado_tema_str' => 'Convalidado',
                         'compatible' => true,
+                        'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                     ]);
 
                     continue;
@@ -602,11 +608,14 @@ class Topic extends BaseModel
                     'evaluable' => $topic->assessable ? 'si' : 'no',
                     'tipo_ev' => $topic->evaluation_type->code ?? NULL,
                     'nota' => $topic_status['grade'],
+                    'nota_sistema_nombre' => $topic_status['system_grade_name'] ?? NULL,
+                    'nota_sistema_valor' => $topic_status['system_grade_value'] ?? NULL,
                     'disponible' => $topic_status['available'],
                     'intentos_restantes' => $topic_status['remaining_attempts'],
                     'estado_tema' => $topic_status['status'],
                     //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
+                    'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                 ]);
             }
     
@@ -811,7 +820,8 @@ class Topic extends BaseModel
                 'temas_completados' => $course_status['completed_topics'],
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
-                'mod_evaluaciones' => $course->mod_evaluaciones
+                'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
+                // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }
         $schools_courses = $schools_courses->toArray();
@@ -890,7 +900,9 @@ class Topic extends BaseModel
                 ] : null,
             'status' => $topic_status,
             'topic_requirement' => $topic_requirement?->id,
-            'grade' => $grade,
+            'grade' => calculateValueForQualification($grade, $topic->qualification_type?->position),
+            'system_grade_name' => $topic->qualification_type?->name,
+            'system_grade_value' => $topic->qualification_type?->position,
             'available' => $available_topic,
             'remaining_attempts' => $remaining_attempts,
             'activity' => $summary_topic ?? null,
@@ -988,7 +1000,8 @@ class Topic extends BaseModel
 
         return [
             'available' => $available_topic,
-            'grade' => $topic_grade,
+            // 'grade' => $topic_grade,
+            'grade' => calculateValueForQualification($topic_grade, $topic->qualification_type?->position),
             'status' => $topic_status,
         ];
     }

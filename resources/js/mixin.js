@@ -30,7 +30,7 @@ export default {
                 {label: 'YouTube', icon: 'mdi mdi-youtube', type: 'youtube'},
                 {label: 'Vimeo', icon: 'mdi mdi-vimeo', type: 'vimeo'},
                 {label: 'Video', icon: 'mdi mdi-video', type: 'video'},
-                {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
+                {label: 'Audio', icon: 'mdi mdi-headphones', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
@@ -751,6 +751,46 @@ export default {
             }
 
             return { storage, status };
-        }
+        },
+        async fetchDataReport() {
+            const vue = this;
+            const reportsBaseUrl = vue.getReportsBaseUrl();
+
+            let url = `../usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            const userSession = response.data;  
+            const adminId = response.data.user.id
+            const workspaceId = response.data.session.workspace.id
+
+            // Fetch modules and admins
+
+            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}`
+
+            let response2 = await axios({
+                url: url2,
+                method: 'get'
+            })
+
+            const modules = response2.data.modules
+            const admins = response2.data.admins
+            const VademecumList = response2.data.vademecums
+
+            return  { 
+                // user session
+                userSession,
+                adminId,
+                workspaceId,
+                reportsBaseUrl,
+
+                // admins
+                modules,
+                admins,
+                VademecumList
+            }
+        },
     },
 };

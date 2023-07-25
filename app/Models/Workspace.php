@@ -23,6 +23,7 @@ class Workspace extends BaseModel
         'contact_support',
         'limit_allowed_users',
         'users_with_empty_criteria',
+        'qualification_type_id',
 
         'logo_marca_agua',
         'marca_agua_estado',
@@ -117,6 +118,11 @@ class Workspace extends BaseModel
     public function subworkspaces()
     {
         return $this->hasMany(Workspace::class, 'parent_id');
+    }
+
+    public function qualification_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
     public function app_menu()

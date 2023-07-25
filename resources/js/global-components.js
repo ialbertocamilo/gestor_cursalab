@@ -18,6 +18,7 @@ import DefaultInputDate from "./components/globals/DefaultInputDate";
 import DefaultTextArea from "./components/globals/DefaultTextArea";
 import DefaultFilter from './components/globals/DefaultFilter'
 import DefaultModalSection from "./components/globals/DefaultModalSection";
+import DefaultSection from "./components/globals/DefaultSection";
 import DefaultInfoTooltip from "./components/globals/DefaultInfoTooltip";
 import DefaultFormLabel from "./components/globals/DefaultFormLabel";
 import DefaultDivider from "./components/globals/DefaultDivider";
@@ -56,6 +57,7 @@ export default {
         DefaultTextArea,
         DefaultFilter,
         DefaultModalSection,
+        DefaultSection,
         DefaultInfoTooltip,
         DefaultFormLabel,
         DefaultDivider,
