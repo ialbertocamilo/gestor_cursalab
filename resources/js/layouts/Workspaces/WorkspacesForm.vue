@@ -236,6 +236,9 @@ export default {
             let vue = this
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
+
+            vue.resource.limit_allowed_storage = null;
+            vue.limit_allowed_users = null;
         }
         ,
         closeModal() {

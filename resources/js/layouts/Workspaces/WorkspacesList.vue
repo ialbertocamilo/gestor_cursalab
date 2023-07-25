@@ -304,10 +304,10 @@
                                 <div class="d-flex flex-column w-100">
                                     <div class="mb-2 d-flex justify-space-between">
                                         <div>
-                                            Total: <span class="font-weight-bold" v-text="workspace.size_medias_limit"></span>
+                                            Usado: <span class="font-weight-bold" v-text="workspace.size_medias_storage"></span>
                                         </div>
                                         <div>
-                                            Usado: <span class="font-weight-bold" v-text="workspace.size_medias_storage"></span>
+                                            Total: <span class="font-weight-bold" v-text="workspace.size_medias_limit"></span>
                                         </div>
                                     </div>
 
@@ -361,10 +361,10 @@
                                 <div class="d-flex flex-column w-100">
                                     <div class="mb-2 d-flex justify-space-between">
                                         <div>
-                                            Total: <span class="font-weight-bold" v-text="workspace.users_count_limit"></span>
+                                            Activos: <span class="font-weight-bold" v-text="workspace.users_count_actives"></span>
                                         </div>
                                         <div>
-                                            Activos: <span class="font-weight-bold" v-text="workspace.users_count_actives"></span>
+                                            Total: <span class="font-weight-bold" v-text="workspace.users_count_limit"></span>
                                         </div>
                                     </div>
 
