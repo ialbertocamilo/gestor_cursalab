@@ -1345,6 +1345,9 @@ class Benefit extends BaseModel
                 switch ($type) {
                     case 'add':
                         Meeting::addAttendantFromUser($meeting,$users);
+                        Attendant::createOrUpdatePersonalLinkMeeting(
+                            $meeting, false
+                        );
                         break;
                     case 'remove':
                         Meeting::deleteAttendantFromUser($meeting,$users);
