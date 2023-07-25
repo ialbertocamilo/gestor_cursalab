@@ -48,6 +48,7 @@
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
                 @addSpeaker="addSpeaker($event)"
                 @gestion_colab="openModalGestionColab($event)"
+                @send_emails="openModalCorreoSegmentados($event)"
             />
         </v-card>
 
@@ -103,6 +104,16 @@
             @closemodalGestorColaboradores="modalGestorColaboradores.open = false"
             @confirmModalGestorColaboradores="confirmModalGestorColaboradores"
             />
+        <ModalCorreosSegmentados
+            :ref="modalCorreosSegmentados.ref"
+            v-model="modalCorreosSegmentados.open"
+            :data="modalCorreosSegmentados.data"
+            :users="modalCorreosSegmentados.users"
+            :benefit_id="modalCorreosSegmentados.benefit_id"
+            width="560px"
+            @closeModalCorreoSegmentados="modalCorreosSegmentados.open = false"
+            @confirmModalCorreoSegmentados="confirmModalCorreoSegmentados"
+            />
 
     </section>
 </template>
@@ -113,6 +124,7 @@ import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectActivity from "../../components/Benefit/ModalSelectActivity";
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 import ModalGestorColaboradores from "../../components/Benefit/ModalGestorColaboradores";
+import ModalCorreosSegmentados from "../../components/Benefit/ModalCorreosSegmentados";
 
 import ModalSegment from "./ModalSegment";
 
@@ -124,6 +136,7 @@ export default {
         ModalSegment,
         ModalSelectSpeaker,
         ModalGestorColaboradores,
+        ModalCorreosSegmentados,
     },
     mounted() {
         let vue = this
@@ -175,6 +188,12 @@ export default {
                         method_name: 'gestion_colab'
                     },
                     {
+                        text: "Envio de correos",
+                        icon: 'fas fa-envelope',
+                        type: 'action',
+                        method_name: 'send_emails'
+                    },
+                    {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
@@ -206,6 +225,14 @@ export default {
                 seleccionados: [],
                 benefit_id: null,
                 speaker_id: null,
+                endpoint: '',
+            },
+            modalCorreosSegmentados: {
+                ref: 'modalCorreosSegmentados',
+                open: false,
+                data: [],
+                benefit_id: null,
+                users: null,
                 endpoint: '',
             },
             dataModalSegment: {},
@@ -390,10 +417,63 @@ export default {
         selectTypeActivityModal( value ) {
             window.location.href = '/beneficios/create?type=' + value;
         },
+        confirmModalCorreoSegmentados( benefit_id = null ) {
+            let vue = this;
+console.log(benefit_id);
+            if( benefit_id != null )
+            {
+                vue.showLoader();
+
+                vue.$http.post(`/beneficios/segments/enviar_correo`, {'benefit_id': benefit_id})
+                    .then((res) => {
+                        if (res.data.type == "success") {
+                            vue.$notification.success(`${res.data.data.msg}`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+
+                            vue.modalCorreosSegmentados.benefit_id = null
+                            vue.modalCorreosSegmentados.open = false
+                            vue.modalCorreosSegmentados.users = null
+                        }
+                        this.hideLoader()
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+
+        },
+        async openModalCorreoSegmentados( benefit = null) {
+            let vue = this;
+
+            if(benefit != null)
+            {
+                vue.showLoader();
+console.log(benefit);
+                vue.modalCorreosSegmentados.open = true
+                vue.modalCorreosSegmentados.benefit_id = benefit.id
+
+                await vue.$http.post(`/beneficios/segments/users`, {'benefit_id': benefit.id})
+                    .then((res) => {
+                        let users = res.data.data.users;
+                        vue.modalCorreosSegmentados.users = users
+                        console.log(users);
+                        console.log(vue.modalCorreosSegmentados);
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
         confirmModalGestorColaboradores( benefit_id = null, seleccionados = null) {
             let vue = this;
-            console.log(benefit_id);
-            console.log(seleccionados);
+
             if(benefit_id != null && seleccionados != null)
             {
                 vue.showLoader();

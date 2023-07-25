@@ -1,13 +1,22 @@
 
 
 <template>
-    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
+    <v-dialog
+        class="default-dialog"
+        v-model="value"
+        :width="width"
+        scrollable
+        persistent
+        @click:outside="closemodalGestorColaboradores"
+        :class="{}"
+        content-class="br-dialog"
+    >
         <v-card class="modal_gestor_colab">
             <v-card-title class="default-dialog-title">
                 Gestión de colaboradores
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
-                       @click="closeModal">
+                       @click="closemodalGestorColaboradores">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
@@ -109,7 +118,7 @@
 
             <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
                 <DefaultModalActionButton
-                    @cancel="closeModal"
+                    @cancel="closemodalGestorColaboradores"
                     @confirm="confirm"
                     cancelLabel="Cancelar"
                     confirmLabel="Guardar"
@@ -204,7 +213,7 @@ export default {
         validateRequired(input) {
             return input != undefined && input != null && input != "";
         },
-        closeModal() {
+        closemodalGestorColaboradores() {
             let vue = this;
             vue.resetValidation()
             vue.$emit("closemodalGestorColaboradores");
