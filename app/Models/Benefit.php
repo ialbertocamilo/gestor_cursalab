@@ -1079,7 +1079,7 @@ class Benefit extends BaseModel
             }
             $item->hasMeeting = false;
             if( count($item->silabo) > 0){
-                $benefit->hasMeeting = boolval(Meeting::select('id')->where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$item->silabo->pluck('id'))->first());
+                $item->hasMeeting = boolval(Meeting::select('id')->where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$item->silabo->pluck('id'))->first());
             }
             unset(
                 $item->promotor,
