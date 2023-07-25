@@ -10,6 +10,7 @@ use App\Models\Attendant;
 use App\Models\Criterion;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
+use App\Models\BenefitProperty;
 use App\Models\SourceMultimarca;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
@@ -143,9 +144,19 @@ class MeetingController extends Controller
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
         $meeting->setDateAndTimeToForm();
-
+        $benefits = [];
+        $silabos = [];
+        if($meeting->model_type == 'App\Models\BenefitProperty'){
+            $benefits  = Benefit::select('id','title')->where('workspace_id',get_current_workspace()->id)
+            ->whereHas('type', fn($q) => $q->whereIn('code', ['sesion_online','sesion_hibrida']))
+            ->get();
+            $silabo_selected = BenefitProperty::find($meeting->model_id);
+            $silabos =  BenefitProperty::where('benefit_id',$silabo_selected->benefit_id)->where('type_id',$silabo_selected->type_id)->get();
+            $meeting->model_id = $silabo_selected;
+            $meeting->benefit = $benefits->where('id',$silabo_selected->benefit->id)->first();
+        }
         extract($this->getFormSelects(true), EXTR_OVERWRITE);
-
+        
         return $this->success(get_defined_vars());
     }
 

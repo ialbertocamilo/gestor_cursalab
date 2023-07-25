@@ -7,7 +7,7 @@
         <template v-slot:content>
 
             <div class="px-5">
-                
+
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
                         <strong>Estado de ticket</strong>
@@ -41,7 +41,7 @@
                 </v-row>
 
                 <v-row class="row-support">
-                    
+
                     <v-col cols="6">
                         <v-icon left color="primary">fa-solid fa-th-large</v-icon>
                         <span v-text="resource.module"></span>
@@ -65,7 +65,7 @@
                         </v-img> -->
 
                     </v-col>
-                    
+
                     <v-col cols="6" v-if="resource.user">
                         <v-icon left color="primary">fa-solid fa-id-card</v-icon>
 
@@ -96,7 +96,7 @@
                         <v-icon left color="primary">fa-solid fa-circle</v-icon>
                         <span v-text="resource.user.active ? 'Activo' : 'Inactivo'"></span>
                     </v-col>
-                    
+
                     <v-col cols="6" class="" v-if="resource.email_user">
                         <v-icon left color="primary">fa-solid fa-envelope</v-icon>
                         <span v-text="resource.email_user"></span> <strong> (registrado)</strong>
@@ -104,13 +104,29 @@
 
                     <v-col cols="6" class="" v-if="resource.email_ticket">
                         <v-icon left color="primary">fa-regular fa-envelope</v-icon>
-                        <span v-text="resource.email_ticket"></span> <strong> (proporcionado)</strong>
+                        <span v-text="resource.email_ticket"></span>
+                        <strong> (proporcionado) </strong><br>
+                        <div v-if="resource.email_user.trim() === resource.email_ticket.trim()"
+                             class="mt-3">
+                            <v-icon left color="green">
+                                fa-solid fa-check-circle
+                            </v-icon>
+                            Los correos coinciden
+                        </div>
+                        <div v-if="resource.email_user && (resource.email_user.trim() !== resource.email_ticket.trim())"
+                            class="mt-3">
+                            <v-icon left color="yellow">
+                                fas fa-exclamation-triangle
+                            </v-icon>
+                            Los correos no coinciden
+                        </div>
+
                     </v-col>
 
                      <v-col cols="6" class="">
                         <v-icon left color="primary" medium class="font-bold">fas fa-mobile</v-icon>
                         <!-- <v-icon left color="primary" medium class="font-bold">fab fa-whatsapp-square</v-icon> -->
-                        <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a> 
+                        <a target="_blank" :href="`https://wa.me/51${resource.contact}?text=¡Hola!,%20Vimos%20tu%20solicitud%20enviada%20desde%20la%20plataforma%20de%20capacitación`">{{resource.contact}}</a>
                     </v-col>
                     <v-col cols="6" class="" v-if="resource.last_login">
                         <v-icon left color="primary">fas fa-sign-in-alt</v-icon>
@@ -275,7 +291,7 @@
                 @onCancel="closeFormModal(modalSoporteOptions)"
             />
         </template>
-       
+
 
     </DefaultDialog>
 
@@ -347,7 +363,7 @@ export default {
                 resource: 'Soporte',
                 confirmLabel: 'Guardar',
             },
-         
+
             modalCursosOptions: {
                 ref: 'UsuarioCursosModal',
                 open: false,

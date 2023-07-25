@@ -168,7 +168,7 @@ class Speaker extends BaseModel
         $workspace = get_current_workspace();
         $speakers_items = Speaker::where('active',1)
                         ->where('workspace_id', $workspace->id)
-                        ->orderBy('name', 'DESC')
+                        ->orderBy('name', 'ASC')
                         ->get();
         foreach($speakers_items as $speaker) {
             $speaker->image = $speaker->image ? FileService::generateUrl($speaker->image) : $speaker->image;

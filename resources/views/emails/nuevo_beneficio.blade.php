@@ -12,7 +12,7 @@
     </tr>
     <tr style="background-color:#F9FAFB;margin-top:10px">
         <td style="font-family: 'Poppins', sans-serif;">
-            <h1 style="text-align:center; color:#2A3649; margin: 0;font-weight:bold;font-size: 30px; padding: 0px 46px;">
+            <h1 style="text-align:center; color:#2A3649; margin: 0;font-weight:bold;font-size: 30px; padding: 0px 46px; line-height: 1;">
                 <div style="margin-left: 95%;
                           width:25px;
                           height:5px;
