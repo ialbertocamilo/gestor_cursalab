@@ -59,6 +59,21 @@ class Workspace extends BaseModel
         return $this->hasMany(User::class, 'subworkspace_id');
     }
 
+    public function medias()
+    {
+        return $this->hasMany(Media::class, 'workspace_id');
+    }
+
+    public function polls()
+    {
+        return $this->hasMany(Poll::class, 'workspace_id');
+    }
+
+    public function videotecas()
+    {
+        return $this->hasMany(Videoteca::class, 'workspace_id');
+    }
+
     public function schools()
     {
         return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id');
@@ -67,6 +82,11 @@ class Workspace extends BaseModel
     public function courses()
     {
         return $this->belongsToMany(Course::class);
+    }
+
+    public function functionalities()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'workspace_functionalities', 'workspace_id', 'functionality_id');
     }
 
     public function parent()
@@ -487,52 +507,180 @@ class Workspace extends BaseModel
     public function replicateWithRelations($data)
     {
         $relationships = [
-            // 'schools',
-            'courses.topics',
-            'subworkspaces.schools',
+            'subworkspaces' => [
+                'app_menu', // OK
+                'main_menu', // OK
+                'side_menu', // OK
+                'schools.courses' => [
+                    'topics' => [
+                        'questions',
+                        'medias',
+                        'requirements',
+                    ],
+                    'polls',
+                    'requirements'
+                ],
+            ],
             
-            'users',
+            // 'users',
             
-            'app_menu',
-            'main_menu',
-            'side_menu',
+            'functionalities', // OK
 
-            'criterionWorkspace',
-            'criteriaValue',
+            'criterionWorkspace', // criterion_workspace OK
+            'criteriaValue', // criterion_value_workspace OK
+
+            // 'videotecas' => [
+            //     'modules',
+            //     'tags',
+            // ],
+
+            'medias', // OK
+            'polls.questions', // 
         ];
 
-        $model = $this->replicate();
+        $workspace = $this->replicate();
 
-        $model->update($data);
+        $workspace->push();
 
-        $model->push();
+        $workspace->update($data);
+
+        $workspace->push();
 
         $this->load($relationships);
 
-        $model->subworkspaces()->createMany($this->subworkspaces);
+        $_crit_module = Criterion::where('code', 'module')->first();
 
-        $model->app_menu()->sync($this->app_menu);
-        $model->main_menu()->sync($this->main_menu);
-        $model->side_menu()->sync($this->side_menu);
+        foreach ($this->polls as $_poll) {
 
-        $model->criterionWorkspace()->sync($this->criterionWorkspace);
-        $model->criteriaValue()->sync($this->criteriaValue);
+            $poll = $workspace->polls()->create($_poll->toArray());
 
-        foreach ($model->subworkspaces as $key => $module) {
-            $schools = $this->subworkspaces->where('id', $module->id)->first()->schools;
-            $module->schools()->createMany($schools);
-
-            
+            $poll->questions()->createMany($_poll->questions->toArray());
         }
 
-        // foreach ($this->relations as $relationName => $values){
-        //     $model->{$relationName}()->sync($values);
+        $workspace->refresh();
+
+        foreach ($this->subworkspaces as $_subworkspace) {
+
+            $_subworkspace_data = $_subworkspace->toArray();
+
+
+            $criterion_value = $_crit_module->values()->create([
+                'value_text' => $_subworkspace->name,
+                'active' => ACTIVE
+            ]);
+
+            $_subworkspace_data['criterion_value_id'] = $criterion_value->id;
+
+            $workspace->criteriaValue()->syncWithoutDetaching($criterion_value);
+
+            $subworkspace = $workspace->subworkspaces()->create($_subworkspace_data);
+
+            $subworkspace->app_menu()->syncWithoutDetaching($_subworkspace->app_menu);
+            $subworkspace->main_menu()->syncWithoutDetaching($_subworkspace->main_menu);
+            $subworkspace->side_menu()->syncWithoutDetaching($_subworkspace->side_menu);
+
+            foreach ($_subworkspace->schools as $_school) {
+
+                $current_subworkspaces = $workspace->subworkspaces()->get();
+
+                $school = School::whereRelationIn('subworkspaces', 'id', $current_subworkspaces->pluck('id'))
+                            ->where('external_id', $_school->id)
+                            ->first();
+                
+                if ( ! $school ) {
+
+                    $school_data = $_school->toArray();
+                    $school_data['external_id'] = $_school->id;
+
+                    $school = $subworkspace->schools()->create($school_data);
+                
+                } else {
+
+                    $subworkspace->schools()->syncWithoutDetaching($school);
+                }
+
+                foreach ($_school->courses as $_course) {
+
+                    $course = Course::whereRelation('workspaces', 'id', $workspace->id)
+                                ->where('external_id', $_course->id)
+                                ->first();
+
+                    if ( ! $course ) {
+
+                        $course_data = $_course->toArray();
+                        $course_data['external_id'] = $_course->id;
+
+                        $course = $school->courses()->create($course_data);
+                        
+                        foreach ($_course->topics as $_topic) {
+
+                            $topic_data = $_topic->toArray();
+                            $topic_data['external_id'] = $_topic->id;
+
+                            $topic = $course->topics()->create($topic_data);
+
+                            $topic->medias()->createMany($_topic->medias->toArray());
+                            $topic->questions()->createMany($_topic->questions->toArray());
+
+                            $_requirement = $_topic->requirements->first();
+
+                            if ($_requirement) {
+
+                                $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                                if ($requirement) {
+
+                                    Requirement::updateOrCreate(
+                                        ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                        ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                                    );
+                                }
+                            }
+                        }
+
+                        $workspace->courses()->attach($course);
+
+                        $_c_requirement = $_course->requirements->first();
+
+                        if ($_c_requirement) {
+
+                            $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+                            if ($c_requirement) {
+
+                                Requirement::updateOrCreate(
+                                    ['model_type' => Course::class, 'model_id' => $course->id],
+                                    ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                                );
+                            }
+                        }
+
+                    } else {
+
+                        $school->courses()->syncWithoutDetaching($course);
+                    }
+                }
+            }
+        }
+
+        
+        $workspace->functionalities()->sync($this->functionalities);
+
+        $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
+
+        $workspace->criteriaValue()->createMany($this->criteriaValue->where('criterion_id', '<>', $_crit_module->id)->toArray());
+
+        $workspace->medias()->createMany($this->medias->toArray());
+        // $workspace->polls()->createMany($this->polls);
+
+        // foreach ($this->videotecas as $_videoteca) {
+
+        //     $videoteca = $workspace->videotecas()->create($_videoteca->toArray());
+
+        //     $videoteca->modules()->sync($_videoteca->modules);
+        //     $videoteca->tags()->sync($_videoteca->tags);
         // }
 
-        // foreach ($this->getRelations() as $key => $relation) {
-        //    $model->setAttribute($key, clone $relation);
-        // }
-
-        return $model;
+        return $workspace;
     }
 }

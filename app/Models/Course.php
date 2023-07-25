@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class Course extends BaseModel
 {
     protected $fillable = [
-        'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
+        'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug', 'external_id',
         'assessable', 'freely_eligible', 'type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',

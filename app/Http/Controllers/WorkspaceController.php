@@ -472,6 +472,6 @@ class WorkspaceController extends Controller
         //     $new->{$relationName}()->sync($values);
         // }
 
-        return $this->success(compact('new'));
+        return $this->success(['msg' => 'Workspace duplicado correctamente.']);
     }
 }
