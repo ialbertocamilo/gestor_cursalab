@@ -202,18 +202,22 @@ class BenefitController extends Controller
         return $this->success($response);
     }
 
-    private function sendMailUsersSegmented(Request $request)
+    public function sendEmailSegments(Request $request)
     {
         $data = $request->all();
-        $benefit_id = $data['id'] ?? null;
+        $benefit_id = $data['benefit_id'] ?? null;
 
-        // Segmentación directa
-        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
+        $users_assigned = [];
 
-        // Segmentación por documento
-        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
-
-        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
+        if(!is_null($benefit_id))
+        {
+            $course = new Course();
+            $benefit = Benefit::with(['segments'])->where('id', $benefit_id)->first();
+            if($benefit)
+            {
+                $users_assigned = $course->usersSegmented($benefit?->segments, $type = 'users_id');
+                $users_assigned = array_unique($users_assigned);
+            }
 
         $new_users_assigned = [];
         $users_segmented = EmailSegment::where('benefit_id', $benefit_id)->pluck('users')->toArray();
@@ -222,7 +226,10 @@ class BenefitController extends Controller
             if(is_array($decode))
                 $new_users_assigned = array_merge($new_users_assigned, $decode);
         }
-        $users_assigned = array_diff($users_assigned, $new_users_assigned);
+        if(count($users_assigned) > count($new_users_assigned))
+            $users_assigned = array_diff($users_assigned, $new_users_assigned);
+        else
+            $users_assigned = array_diff($new_users_assigned, $users_assigned);
 
         if(count($users_assigned) > 0)
         {
@@ -264,6 +271,14 @@ class BenefitController extends Controller
             }
         }
         cache_clear_model(EmailSegment::class);
+
+        }
+        $response = [
+            'msg' => 'Se envió los correos a los usuarios segmentados',
+            'benefit' => $benefit,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
     }
     /**
      * Process request to toggle value of active status (1 or 0)
@@ -295,16 +310,19 @@ class BenefitController extends Controller
     public function usersSegmentedBenefit(Request $request)
     {
         $data = $request->all();
-        $benefit_id = $data['id'] ?? null;
+        $benefit_id = $data['benefit_id'] ?? null;
+        $users_assigned = [];
 
-        // Segmentación directa
-        $list_segments_direct = !is_null($benefit_id) ? $this->listSegmentDirect($benefit_id, $data) : null;
-
-        // Segmentación por documento
-        $list_segments_document = !is_null($benefit_id) ? $this->listSegmentDocument($benefit_id, $data) : null;
-
-        $users_assigned = $this->countUsersSegmentedBenefit($list_segments_direct, $list_segments_document);
-
+        if(!is_null($benefit_id))
+        {
+            $course = new Course();
+            $benefit = Benefit::with(['segments'])->where('id', $benefit_id)->first();
+            if($benefit)
+            {
+                $users_assigned = $course->usersSegmented($benefit?->segments, $type = 'users_id');
+                $users_assigned = array_unique($users_assigned);
+            }
+        }
         $msg = 'Total de usuarios asignados';
 
         return $this->success(['msg' => $msg, 'benefit'=>$benefit_id, 'users'=> count($users_assigned)]);
