@@ -587,6 +587,7 @@ class Topic extends BaseModel
                         'estado_tema' => 'aprobado',
                         'estado_tema_str' => 'Convalidado',
                         'compatible' => true,
+                        'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                     ]);
 
                     continue;
@@ -614,6 +615,7 @@ class Topic extends BaseModel
                     'estado_tema' => $topic_status['status'],
                     //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
+                    'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                 ]);
             }
     

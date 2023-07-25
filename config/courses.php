@@ -131,6 +131,7 @@ return [
                 },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
+                'qualification_type:id,code,position,name',
             ],
             'course-view-app-user' => [
                 'segments' => function ($q) {
@@ -163,6 +164,7 @@ return [
                         ->where('active', ACTIVE);
                 },
                 'type:id,code',
+                'qualification_type:id,code,position,name',
                 'topics' => function ($q) use ($user_id) {
                     $q
                         ->where('active', ACTIVE)
@@ -259,6 +261,7 @@ return [
                 },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
+                'qualification_type:id,code,position,name',
             ]
         };
     }
