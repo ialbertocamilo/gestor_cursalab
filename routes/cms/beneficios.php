@@ -15,6 +15,8 @@ Route::controller(BenefitController::class)->group(function() {
     Route::get('/search/{benefit}', 'getData')->name('benefit.getData');
     Route::get('/segments/{benefit}', 'getSegments')->name('benefit.getSegments');
     Route::post('/segments/save', 'saveSegment');
+    Route::post('/segments/users', 'usersSegmentedBenefit');
+    Route::post('/segments/enviar_correo', 'sendEmailSegments');
 	Route::get('/form-selects', 'getFormSelects');
 
     Route::put('/{benefit}/status', 'status');

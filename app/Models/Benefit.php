@@ -529,6 +529,7 @@ class Benefit extends BaseModel
         if($benefit)
         {
             $segmentados_id = $course->usersSegmented($benefit?->segments, $type = 'users_id');
+            $segmentados_id = array_unique($segmentados_id);
             // $segmentados = User::whereIn('id',$segmentados_id)->get();
             $segmentados = User::whereIn('id',$segmentados_id)
                                 ->whereNotIn('id', $users_ids)
