@@ -177,7 +177,7 @@ export default {
                 active: false,
                 items: [
                     {
-                        title: "Sesiones Live",
+                        title: "Gestiona sesiones",
                         icon: "fas fa-chalkboard-teacher",
                         path: "/aulas-virtuales",
                         subpaths: ["aulas-virtuales"],
@@ -402,7 +402,7 @@ export default {
                         ]
                     },
                     {
-                        title: "Checklist",
+                        title: "Gestiona Checklist",
                         icon: "fas fa-tasks",
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],
