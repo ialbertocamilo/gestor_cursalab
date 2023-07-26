@@ -52,12 +52,12 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
                                                   ($size_medias_storage_value['size'] / 1024) / 1024; // kb to mb to gb
         }
 
-
         return [
             'id' => $this->id,
             'name' => $this->name,
             'logo' => get_media_url($this->logo),
-
+            'is_superuser' => auth()->user()->isA('super-user'),
+            
             'users_count_actives' => $users_count_actives,
             'users_count_inactives' => $users_count_inactives,
             'users_count_limit' => $users_count_limit,

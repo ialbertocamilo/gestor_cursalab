@@ -34,7 +34,7 @@
                             @onChange="getEstadisticas"
                         />
                     </v-col>
-                    <v-col  cols="6" offset="1"
+                    <v-col  v-if="canAccessConfiguration" cols="6" offset="1"
                             class="d-flex justify-space-between align-items-center">
                         <div class="d-flex align-items-center w-75">
                             <div class="d-flex flex-column w-90">
@@ -488,6 +488,7 @@ export default {
                     {name: 'Todos', id: null}
                 ],
             },
+            is_superuser: false,
         }
     },
     mounted() {
@@ -501,6 +502,7 @@ export default {
 
             vue.$http.get('/general/workspace-current-status').then(({data}) => {
                 vue.workspace_status = data.data;
+                vue.is_superuser = data.data.is_superuser || false;
             });
         },
         getModulos() {
