@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Services\DashboardService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResourceGeneralWorkspaceStatus extends JsonResource
@@ -28,7 +27,7 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
 
 
         // === sizes by extensions ===
-        $office_sizes = DashboardService::loadSizeByExtensionWorkspace($this->id, 'office');
+/*         $office_sizes = DashboardService::loadSizeByExtensionWorkspace($this->id, 'office');
         $office_sizes = formatSize($office_sizes);
 
         $pdf_sizes = DashboardService::loadSizeByExtensionWorkspace($this->id, 'pdf');
@@ -44,12 +43,12 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
         $image_sizes = formatSize($image_sizes);
 
         $audio_sizes = DashboardService::loadSizeByExtensionWorkspace($this->id, 'audio');
-        $audio_sizes = formatSize($audio_sizes);
+        $audio_sizes = formatSize($audio_sizes); */
         // === sizes by extensions ===
 
          if($size_medias_storage_value['size_unit'] !== 'Gb') {
-            $size_medias_storage_value['size'] = ($size_medias_storage_value['size_unit'] == 'Mb') ? 
-                                                  $size_medias_storage_value['size'] / 1024 : // mb  to gb 
+            $size_medias_storage_value['size'] = ($size_medias_storage_value['size_unit'] == 'Mb') ?
+                                                  $size_medias_storage_value['size'] / 1024 : // mb  to gb
                                                   ($size_medias_storage_value['size'] / 1024) / 1024; // kb to mb to gb
         }
 
@@ -75,43 +74,33 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
                 //     'url' => url('/cursos'),
                 //     'filters' => NULL,
                 // ],
-                'office' => [
-                    'label' =>'Office',
-                    'url' => $url_multimedia,
-                    'filters' =>'office',
-                    'size' => $office_sizes
-                ],
                 'pdf' => [
                     'label' =>'Pdf',
                     'url' => $url_multimedia,
                     'filters' =>'pdf',
-                    'size' => $pdf_sizes
                 ],
                 'scorm' => [
                     'label' =>'Scorm',
                     'url' => $url_multimedia,
                     'filters' =>'scorm',
-                    'size' => $scorm_sizes
                 ],
                 'videos' => [
                     'label' =>'Videos',
                     'url' => $url_multimedia,
                     'filters' =>'video',
-                    'size' => $video_sizes
                 ],
                 'images' => [
-                    'label' =>'Imágenes',
+                    'label' =>'Imagenes',
                     'url' => $url_multimedia,
                     'filters' =>'image',
-                    'size' => $image_sizes
                 ],
                 'audio' => [
                     'label' =>'Audio',
                     'url' => $url_multimedia,
                     'filters' =>'audio',
-                    'size' => $audio_sizes
                 ],
             ],
+
             'route_user_actives' => [
                 'url' => url('/usuarios?module_data=usuarios'),
                 'filters' => [
