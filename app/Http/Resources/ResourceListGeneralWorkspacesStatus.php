@@ -32,6 +32,12 @@ class ResourceListGeneralWorkspacesStatus extends JsonResource
         $size_medias_storage = formatSize($workspace_size_medias);
         $size_medias_storage_value = formatSize($workspace_size_medias, parsed:false);
         
+        if($size_medias_storage_value['size_unit'] !== 'Gb') {
+            $size_medias_storage_value['size'] = ($size_medias_storage_value['size_unit'] == 'Mb') ? 
+                                                    $size_medias_storage_value['size'] / 1024 : // mb  to gb 
+                                                   ($size_medias_storage_value['size'] / 1024) / 1024; // kb to mb
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,

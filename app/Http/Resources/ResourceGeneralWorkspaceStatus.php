@@ -47,6 +47,13 @@ class ResourceGeneralWorkspaceStatus extends JsonResource
         $audio_sizes = formatSize($audio_sizes);
         // === sizes by extensions ===
 
+         if($size_medias_storage_value['size_unit'] !== 'Gb') {
+            $size_medias_storage_value['size'] = ($size_medias_storage_value['size_unit'] == 'Mb') ? 
+                                                  $size_medias_storage_value['size'] / 1024 : // mb  to gb 
+                                                  ($size_medias_storage_value['size'] / 1024) / 1024; // kb to mb to gb
+        }
+
+
         return [
             'id' => $this->id,
             'name' => $this->name,
