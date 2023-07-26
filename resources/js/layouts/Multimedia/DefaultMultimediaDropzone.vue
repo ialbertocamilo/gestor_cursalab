@@ -29,14 +29,58 @@
                 <br>
             </div>
         </vue-dropzone>
+
+        <!-- MODAL ALMACENAMIENTO -->
+        <GeneralStorageModal
+            :ref="modalGeneralStorageOptions.ref"
+            :options="modalGeneralStorageOptions"
+            width="45vw"
+            @onCancel="closeFormModal(modalGeneralStorageOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <!-- MODAL ALMACENAMIENTO -->
+
+        <!-- MODAL EMAIL ENVIADO -->
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
+        <!-- MODAL EMAIL ENVIADO -->
+
+        <!-- === MODAL ALERT STORAGE === -->
+        <DefaultStorageAlertModal
+            :ref="modalAlertStorageOptions.ref"
+            :options="modalAlertStorageOptions"
+            width="25vw"
+            @onCancel="closeFormModal(modalAlertStorageOptions), removeAll()"
+            @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'), 
+                        closeFormModal(modalAlertStorageOptions), 
+                        removeAll()"
+        />
+        <!-- === MODAL ALERT STORAGE === -->
+
     </div>
 </template>
 <script>
-import vue2Dropzone from 'vue2-dropzone'
-import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+
+import DefaultStorageAlertModal from '../Default/DefaultStorageAlertModal.vue';
+import GeneralStorageModal from '../General/GeneralStorageModal.vue';
+import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
+
+import vue2Dropzone from 'vue2-dropzone';
+import 'vue2-dropzone/dist/vue2Dropzone.min.css';
+
+let timeout;
 
 export default {
-    components: {vueDropzone: vue2Dropzone},
+    components: {
+        vueDropzone: vue2Dropzone, 
+        DefaultStorageAlertModal, GeneralStorageModal, GeneralStorageEmailSendModal
+    },
     props: {
         hint: {
             type: String,
@@ -51,6 +95,30 @@ export default {
     },
     data() {
         return {
+            modalAlertStorageOptions: {
+                ref: 'AlertStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Solicitar',
+                persistent: true,
+            },
+            modalGeneralStorageOptions: {
+                ref: 'GeneralStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Enviar',
+                persistent: true
+            },
+            modalGeneralStorageEmailSendOptions: {
+                ref: 'GeneralStorageEmailSendModal',
+                open: false,
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                confirmLabel:'Entendido',
+                persistent: false
+            },
             errorFileType: false,
             types: this.typesAllowed,
             archivo: null,
@@ -97,7 +165,7 @@ export default {
                 setTimeout(() => this.errorFileType = false, 10000)
             } else {
                 this.errorFileType = false
-                this.$emit("onUpload", file);
+                this.checkFileSizeStorageLimit(file);
                 // this.$refs.myVueDropzone.manuallyAddFile(file)
             }
         },
@@ -106,7 +174,6 @@ export default {
             this.archivo = null;
         },
         uploadSuccess(file, response) {
-            console.log(file)
             this.$emit("onUpload", file);
         },
         uploadError(file, message) {
@@ -118,6 +185,38 @@ export default {
         },
         removeAll() {
             this.$refs.myVueDropzone.removeAllFiles()
+        },
+        checkFileSizeStorageLimit(file) {
+            let vue = this;
+
+            vue.showLoader();
+            
+            const dropzoneDom = vue.$refs.myVueDropzone.$refs.dropzoneElement;
+            const dropFiles = dropzoneDom.dropzone.files;
+
+            // == La funcion se recallea ==
+            if(timeout) clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+                const currentSizes = dropFiles.reduce((acc, {size}) => acc + size, 0);
+
+                vue.$http.put('/general/workspaces-storage', { size: currentSizes })
+                .then((res) => {
+                    const data = res.data.data;
+
+                    if(data.file_storage_check) {
+                        vue.openFormModal(vue.modalAlertStorageOptions, null, null, 'Alerta de almacenamiento');
+                    }else {
+                        vue.hideLoader();
+                        vue.$emit("onUpload", file);
+                    }
+                },(err) => {
+                    vue.hideLoader();
+                    // console.log(err);
+                });
+
+            }, 100);
+            // == La funcion se recallea ==
         }
     }
 }

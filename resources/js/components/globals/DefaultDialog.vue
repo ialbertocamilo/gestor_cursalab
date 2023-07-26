@@ -15,12 +15,12 @@
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
-            <v-card-title class="default-dialog-title" v-show="showTitle" v-else>
+            <v-card-title :class="headerClass" v-show="showTitle" v-else>
                 <div v-html="options.title"></div>
                 <v-spacer/>
                 <v-btn
                     v-show="options.showCloseIcon"
-                    icon :ripple="false" color="white"
+                    icon :ripple="false" :color="colorCloseIcon"
                        @click="closeModalFromIcon">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
@@ -100,6 +100,14 @@ export default {
         eventCloseModalFromIcon:{
             type:String,
             default:'onCancel'
+        },
+        headerClass: {
+            type: String,
+            default:'default-dialog-title'
+        },
+        colorCloseIcon:{
+            type: String,
+            default: 'white'
         }
     },
     methods: {

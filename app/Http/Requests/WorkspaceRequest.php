@@ -23,6 +23,7 @@ class WorkspaceRequest extends FormRequest
             'file_logo' => 'required_without:logo',
             'file_logo_negativo' => 'nullable',
             'selected_criteria' => 'nullable',
+            'limit_allowed_storage' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
         ];
