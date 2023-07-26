@@ -677,15 +677,35 @@ class Workspace extends BaseModel
         $workspace->criteriaValue()->createMany($this->criteriaValue->where('criterion_id', '<>', $_crit_module->id)->toArray());
 
         $workspace->medias()->createMany($this->medias->toArray());
-        // $workspace->polls()->createMany($this->polls);
 
-        // foreach ($this->videotecas as $_videoteca) {
+        $modules_id = $this->subworkspaces->pluck('criterion_value_id')->toArray();
 
-        //     $videoteca = $workspace->videotecas()->create($_videoteca->toArray());
+        $_announcements = Announcement::whereRelationIn('criterionValues', 'criterion_value_id', $modules_id)->get();
 
-        //     $videoteca->modules()->sync($_videoteca->modules);
-        //     $videoteca->tags()->sync($_videoteca->tags);
-        // }
+        $modules_ids = $workspace->subworkspaces()->pluck('criterion_value_id')->toArray();
+        $subworkspace_ids = $workspace->subworkspaces()->pluck('id')->toArray();
+
+        foreach ($_announcements as $_announcement) {
+
+            $announcement = Announcement::create($_announcement->toArray());
+
+            $announcement->criterionValues()->sync($modules_ids);
+        }
+
+        foreach ($this->videotecas as $_videoteca) {
+
+            $_videoteca_data = $_videoteca->toArray();
+
+            $_videoteca_data['media_id'] = NULL;
+            $_videoteca_data['preview_id'] = NULL;
+            $_videoteca_data['category_id'] = NULL;
+            $_videoteca_data['external_id'] = $_videoteca_data['id'];
+
+            $videoteca = $workspace->videotecas()->create($_videoteca_data);
+
+            $videoteca->modules()->sync($subworkspace_ids);
+            // $videoteca->tags()->sync($_videoteca->tags);
+        }
 
         return $workspace;
     }
