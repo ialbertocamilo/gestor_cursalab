@@ -4,6 +4,7 @@ namespace App\Models\Massive;
 
 use App\Models\User;
 use App\Models\Massive;
+use App\Models\Workspace;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -21,7 +22,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
     public $rows = [];
     public $error_message = null;
     public $rows_to_activate = 0;
-
+    public $subworkspaces = [];
     public function __construct($data = [])
     {
         $this->name_socket = $this->formatNameSocket('upload-massive', $data['number_socket'] ?? null);
@@ -37,13 +38,14 @@ class ChangeStateUserMassive extends Massive implements ToCollection
         //Delete header
         $rows->shift();
         $this->rows = $rows;
-
         if ($this->state_user_massive == 1 && !$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
             $this->error_message = $message;
             return;
         endif;
-
+        $current_workspace= get_current_workspace();
+        $this->subworkspaces = Workspace::select('id')->where('parent_id',$current_workspace->id)->get()?->pluck('id')->toArray();
+        info($this->subworkspaces);
         // process dni or email <- change state user where dni or email
         $this->processData($rows);
         $this->q_errors = count($this->errors);
@@ -115,8 +117,12 @@ class ChangeStateUserMassive extends Massive implements ToCollection
     {
         $user = User::where(trim($identificator), $user_identifier)->first();
         if ($user) {
-            $user->updateStatusUser($this->state_user_massive, $termination_date);
-            $this->q_change_status++;
+            if(!in_array($user->subworkspace_id,$this->subworkspaces)){
+                $this->setError($user_identifier, $termination_date, 'Este usuario no pertenece a tu workspace');
+            }else{
+                $user->updateStatusUser($this->state_user_massive, $termination_date);
+                $this->q_change_status++;
+            }
         } else {
             //ERRORES
             $message = $this->messageInSpanish ? 'Usuario no encontrado.' : 'Resource not found.';
@@ -135,7 +141,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
     {
         // ,'message'=>'Resource not found.'
         $error = ['value' => $user_identifier];
-        ($termination_date) && $error['termination_date'] = $termination_date;
+        (!$this->state_user_massive) && $error['termination_date'] = $termination_date;
         $error['message'] = $message;
         $this->errors[] = $error;
     }
