@@ -10,7 +10,7 @@ class UserBenefit extends BaseModel
     protected $table = 'user_benefits';
 
     protected $fillable = [
-        'user_id', 'benefit_id', 'status_id', 'type_id'
+        'user_id', 'benefit_id', 'status_id', 'type_id', 'fecha_encuesta', 'fecha_confirmado', 'fecha_registro'
     ];
     protected $hidden = [
         'created_at', 'updated_at', 'deleted_at'

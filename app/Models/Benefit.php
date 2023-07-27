@@ -31,6 +31,7 @@ class Benefit extends BaseModel
         'inicio_inscripcion',
         'fin_inscripcion',
         'fecha_liberacion',
+        'fecha_encuesta',
         'correo',
         'duracion',
         'promotor',
@@ -1055,6 +1056,13 @@ class Benefit extends BaseModel
 
                 if($is_approved || $item->status?->code == 'released') {
                     $item->user_status = ['name' => 'Confirmado', 'code' => 'exchanged'];
+
+                    $now = new Carbon();
+                    $fecha_encuesta = new Carbon($item->fecha_encuesta);
+                    $user_poll = UserBenefit::where('benefit_id', $item->id)->where('user_id', $user_id)->first();
+                    if ($now->gt($fecha_encuesta) && is_null($user_poll?->fecha_encuesta)) {
+                        $item->user_status = ['name' => 'Encuesta', 'code' => 'poll'];
+                    }
                 }
             }
             else if (in_array($item->id, $benefits_user_notified)) {
@@ -1085,9 +1093,10 @@ class Benefit extends BaseModel
 
 
             $item->ubicacion = null;
-            $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
-            $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
-            $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+            $item->inicio_inscripcion = $item->inicio_inscripcion ? Carbon::parse($item->inicio_inscripcion)->format('d/m/Y') : null;
+            $item->fin_inscripcion = $item->fin_inscripcion ? Carbon::parse($item->fin_inscripcion)->format('d/m/Y') : null;
+            $item->fecha_liberacion = $item->fecha_liberacion ? Carbon::parse($item->fecha_liberacion)->format('d/m/Y') : null;
+            $item->fecha_encuesta = $item->fecha_encuesta ? Carbon::parse($item->fecha_encuesta)->format('d/m/Y') : null;
 
             if(!is_null($item->poll_id)) {
                 $item->type_poll = 'interno';
@@ -1202,6 +1211,13 @@ class Benefit extends BaseModel
 
                 if($is_approved || $benefit->status?->code == 'released') {
                     $benefit->user_status = ['name' => 'Confirmado', 'code' => 'exchanged'];
+
+                    $now = new Carbon();
+                    $fecha_encuesta = new Carbon($benefit->fecha_encuesta);
+                    $user_poll = UserBenefit::where('benefit_id', $benefit->id)->where('user_id', $user_id)->first();
+                    if ($now->gt($fecha_encuesta) && is_null($user_poll?->fecha_encuesta)) {
+                        $benefit->user_status = ['name' => 'Encuesta', 'code' => 'poll'];
+                    }
                 }
 
             }
@@ -1245,9 +1261,10 @@ class Benefit extends BaseModel
                 $benefit->direccion = null;
             }
             $benefit->ubicacion = null;
-            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
-            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
-            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+            $benefit->inicio_inscripcion = $benefit->inicio_inscripcion ? Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y') : null;
+            $benefit->fin_inscripcion = $benefit->fin_inscripcion ? Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y') : null;
+            $benefit->fecha_liberacion = $benefit->fecha_liberacion ? Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y') : null;
+            $benefit->fecha_encuesta = $benefit->fecha_encuesta ? Carbon::parse($benefit->fecha_encuesta)->format('d/m/Y') : null;
 
             if(!is_null($benefit->poll_id)) {
                 $benefit->type_poll = 'interno';
