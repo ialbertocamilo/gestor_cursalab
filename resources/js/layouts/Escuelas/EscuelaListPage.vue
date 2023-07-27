@@ -16,7 +16,7 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-                    <v-col cols="3">
+                    <v-col cols="3" v-if="!param_module_id">
                         <!-- <DefaultSelect
                             clearable dense
                             :items="selects.modules"
@@ -177,6 +177,7 @@ export default {
         let vue = this
 
         return {
+            param_module_id: null,
             breadcrumbs: [
                 {title: 'Escuelas', text: null, disabled: true, href: ''},
             ],
@@ -319,21 +320,21 @@ export default {
         changeHeaders(){
             let vue = this;
             const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
-            console.log('indexOrden',indexOrden);
+            // console.log('indexOrden',indexOrden);
             if(vue.filters.modules.length ==1 && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
-                console.log('entra if');
+                // console.log('entra if');
                 vue.$nextTick(() => {
                     if(indexOrden == -1){
                         vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'SchoolSubworkspace', sortable: false}, 1);
-                        console.log('entra set');
+                        // console.log('entra set');
                     }
                 });
             }else{
-                console.log('entra else');
+                // console.log('entra else');
                 if(indexOrden != -1){
                     vue.$nextTick(() => {
                         vue.dataTable.headers.splice(indexOrden, 1);
-                        console.log('entra delete');
+                        // console.log('entra delete');
                     })
                 }
             }
@@ -343,16 +344,21 @@ export default {
 
             let uri = window.location.search.substring(1); 
             let params = new URLSearchParams(uri);
-            let param_module_id = params.get("module_id");
+            vue.param_module_id = params.get("module_id");
 
             // await vue.$nextTick(() => {
-                if (param_module_id) {
+                if (vue.param_module_id) {
 
                     let module_idx = null
 
                     modules.forEach(row => {
 
-                        if ( row.id == param_module_id ) {
+                        if ( row.id == vue.param_module_id ) {
+
+                            vue.breadcrumbs = [
+                                {title: 'Módulos', text: row.name, disabled: false, href: '/modulos'},
+                                {title: 'Escuelas', text: null, disabled: true, href: ''},
+                            ];
 
                             vue.filters.modules.push(row)
 

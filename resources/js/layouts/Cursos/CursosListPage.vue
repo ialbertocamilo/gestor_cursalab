@@ -410,7 +410,7 @@ export default {
                 type_modal:'requirement',
                 content_modal: {
                     requirement: {
-                        title: '¡El curso que deseas desactivar es un prerrequisito! '
+                        title: '¡El curso que deseas desactivar es un pre-requisito! '
                     },
                 }
             },
