@@ -144,7 +144,7 @@ class GestorController extends Controller
         //Procesar imagen por el lado del servidor
         $base64 = $this->parse_image($plantilla_categoria);
         if (!$base64||is_null($base64)){
-          return $this->$error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+            abort(404);
         }
         return array('image' => $base64, 'video' => $categoria->nombre, 'usuario' => $usuario->nombre, 'fecha' => $eva->fecha_emision);
     }
