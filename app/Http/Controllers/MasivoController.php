@@ -124,7 +124,7 @@ class MasivoController extends Controller
 
     public function activeUsers(Request $request)
     {
-        // try {
+        try {
             //code...
             $validator = $this->validateFile($request);
             if (!$validator) {
@@ -155,14 +155,14 @@ class MasivoController extends Controller
                     'errores' => $import->errors
                 ]);
             endif;
-        // } catch (\Throwable $exception) {
-        //     Error::storeAndNotificateException($exception, $request);
-        //     $errorMessage = $exception->getMessage();
-        //     $message = strpos($errorMessage, 'cantidad máxima') !== false ? $errorMessage : 'Ha ocurrido un problema. Contáctate con el equipo de soporte.';
-        //     return response()->json([
-        //         'message'=>$message
-        //     ],500);
-        // }
+        } catch (\Throwable $exception) {
+            Error::storeAndNotificateException($exception, $request);
+            $errorMessage = $exception->getMessage();
+            $message = strpos($errorMessage, 'cantidad máxima') !== false ? $errorMessage : 'Ha ocurrido un problema. Contáctate con el equipo de soporte.';
+            return response()->json([
+                'message'=>$message
+            ],500);
+        }
     }
 
     public function inactiveUsers(Request $request)
