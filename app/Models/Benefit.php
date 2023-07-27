@@ -1199,10 +1199,15 @@ class Benefit extends BaseModel
             }
             else {
                 $item->poll = null;
-                if(count($item->polls) > 0)
+                $item->type_poll = null;
+                if(count($item->polls) > 0) {
                     $item->type_poll = 'externo';
-                else
-                    $item->type_poll = null;
+                    $item->poll = [
+                        'id' => $item->polls[0]?->id ?? null,
+                        'name' => $item->polls[0]?->name ?? null,
+                        'value' => $item->polls[0]?->value ?? null
+                    ];
+                }
             }
             $item->hasMeeting = false;
             if( count($item->silabo) > 0){
@@ -1219,7 +1224,8 @@ class Benefit extends BaseModel
                 $item->speaker_id,
                 $item->status_id,
                 $item->active,
-                $item->user_status
+                $item->user_status,
+                $item->polls,
             );
         }
 
@@ -1367,10 +1373,15 @@ class Benefit extends BaseModel
             }
             else {
                 $benefit->poll = null;
-                if(count($benefit->polls) > 0)
+                $benefit->type_poll = null;
+                if(count($benefit->polls) > 0) {
                     $benefit->type_poll = 'externo';
-                else
-                    $benefit->type_poll = null;
+                    $benefit->poll = [
+                        'id' => $benefit->polls[0]?->id ?? null,
+                        'name' => $benefit->polls[0]?->name ?? null,
+                        'value' => $benefit->polls[0]?->value ?? null
+                    ];
+                }
             }
 
             $benefit->silabo->each(function($item){
@@ -1389,7 +1400,8 @@ class Benefit extends BaseModel
                 $benefit->speaker_id,
                 $benefit->status_id,
                 $benefit->poll_id,
-                $benefit->active
+                $benefit->active,
+                $benefit->polls
             );
         }
 
