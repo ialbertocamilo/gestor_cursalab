@@ -592,7 +592,8 @@ class Benefit extends BaseModel
                             {
                                 $ub_id->type_id = $type_register_extraordinario?->id;
                                 $ub_id->status_id = $user_status_subscribed?->id;
-                                $ub_id->fecha_confirmado = new Carbon();
+                                if(!is_null($ub_id->fecha_registro))
+                                    $ub_id->fecha_registro = new Carbon();
                                 $ub_id->save();
                             }
                         }
@@ -605,7 +606,8 @@ class Benefit extends BaseModel
                             {
                                 $ub_id->type_id = $type_register_extraordinario?->id;
                                 $ub_id->status_id = $user_status_subscribed?->id;
-                                $ub_id->fecha_confirmado = new Carbon();
+                                if(!is_null($ub_id->fecha_registro))
+                                    $ub_id->fecha_registro = new Carbon();
                                 $ub_id->save();
                             }
                             else
@@ -628,6 +630,7 @@ class Benefit extends BaseModel
                                                 if($created_user->status_id != $user_status_approved?->id)
                                                 {
                                                     $created_user->status_id = $user_status_approved?->id;
+                                                    $created_user->fecha_confirmado = new Carbon();
                                                     $created_user->save();
 
                                                     $mail_user = User::where('id', $created_user?->user_id)->select('id','email')->first();
@@ -652,6 +655,7 @@ class Benefit extends BaseModel
                                 if($ub_id->status_id != $user_status_approved?->id)
                                 {
                                     $ub_id->status_id = $user_status_approved?->id;
+                                    $ub_id->fecha_confirmado = new Carbon();
                                     $ub_id->save();
 
                                     $mail_user = User::where('id', $ub_id?->user_id)->select('id','email')->first();
