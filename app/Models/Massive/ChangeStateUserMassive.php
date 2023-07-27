@@ -45,7 +45,6 @@ class ChangeStateUserMassive extends Massive implements ToCollection
         endif;
         $current_workspace= get_current_workspace();
         $this->subworkspaces = Workspace::select('id')->where('parent_id',$current_workspace->id)->get()?->pluck('id')->toArray();
-        info($this->subworkspaces);
         // process dni or email <- change state user where dni or email
         $this->processData($rows);
         $this->q_errors = count($this->errors);
