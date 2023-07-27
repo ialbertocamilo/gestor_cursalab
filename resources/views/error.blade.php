@@ -68,11 +68,14 @@
     </head>
     <body>
         <div class="flex-center position-ref full-height">
-            <div class="content">
-                <div class="alert alert-danger">
-                    {{ $errorMessage }}
-                </div>
+        <div class="content">
+            <div class="alert alert-danger">
+                <!-- Add the diploma.png icon to the corner -->
+                <img src="{{ asset('img/diploma.png') }}" alt="Diploma Icon" style="position: absolute; right: 20px; top: 20px; width: 50px; height: 50px;">
+
+                {{ $errorMessage }}
             </div>
         </div>
+    </div>
     </body>
 </html>
