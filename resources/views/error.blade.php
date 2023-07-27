@@ -72,10 +72,6 @@
                 <div class="alert alert-danger">
                     {{ $errorMessage }}
                 </div>
-
-                <div class="links">
-                    <a href="{{ route('home') }}">Ir al Inicio</a>
-                </div>
             </div>
         </div>
     </body>
