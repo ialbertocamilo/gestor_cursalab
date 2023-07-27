@@ -34,7 +34,7 @@
                             @onChange="getEstadisticas"
                         />
                     </v-col>
-                    <v-col  v-if="canAccessConfiguration" cols="6" offset="1"
+                    <v-col  v-if="is_superuser" cols="6" offset="1"
                             class="d-flex justify-space-between align-items-center">
                         <div class="d-flex align-items-center w-75">
                             <div class="d-flex flex-column w-90">
