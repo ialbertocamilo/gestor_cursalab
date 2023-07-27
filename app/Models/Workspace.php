@@ -22,6 +22,7 @@ class Workspace extends BaseModel
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
+        'limit_allowed_storage',
         'users_with_empty_criteria'
     ];
 
@@ -42,6 +43,10 @@ class Workspace extends BaseModel
         'contact_support' => 'array',
         'limit_allowed_users' => 'array'
     ];
+
+    public function medias() {
+        return $this->hasMany(Media::class, 'workspace_id');
+    }
 
     public function segments()
     {
