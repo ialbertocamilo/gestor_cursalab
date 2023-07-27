@@ -145,21 +145,21 @@ class GestorController extends Controller
         $base64 = $this->parse_image($plantilla_categoria);
         return array('image' => $base64, 'video' => $categoria->nombre, 'usuario' => $usuario->nombre, 'fecha' => $eva->fecha_emision);
     }
-
     private function parse_image($plantilla)
     {
+        $type = pathinfo($plantilla, PATHINFO_EXTENSION);
+        $plantilla = str_replace(" ", "%20", $plantilla);
+
         try {
-            $type = pathinfo($plantilla, PATHINFO_EXTENSION);
-            $plantilla = str_replace(" ", "%20", $plantilla);
             $image = file_get_contents(get_media_url($plantilla));
-
             if ($image === false) {
-                return null;
+                throw new Exception("Failed to fetch the image.");
             }
-
             return 'data:image/' . $type . ';base64,' . base64_encode($image);
         } catch (Exception $e) {
-            $this->error($e->getMessage());
+
+            return $this->error("Error al obtener la plantilla de certificado");
+;
         }
     }
 
