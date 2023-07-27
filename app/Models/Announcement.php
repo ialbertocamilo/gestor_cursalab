@@ -45,6 +45,17 @@ class Announcement extends BaseModel
         );
     }
 
+    // public function subworkspaces(): BelongsToMany
+    // {
+
+    //     return $this->belongsToMany(
+    //         Workspace::class,
+    //         'criterion_value_announcements',
+    //         'announcement_id',
+    //         'criterion_value_id'
+    //     );
+    // }
+
     public function segments()
     {
         return $this->morphMany(Segment::class, 'model');

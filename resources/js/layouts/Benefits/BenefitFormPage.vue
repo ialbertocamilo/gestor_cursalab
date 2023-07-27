@@ -532,36 +532,6 @@
                             </DefaultModalSection>
                         </v-col>
                         <!-- End Speaker -->
-                        <!-- Encuesta -->
-                        <v-col cols="6" v-if="options_modules[8].active">
-                            <DefaultModalSection
-                                title="Encuesta"
-                            >
-                                <template slot="content">
-                                    <div class="box_beneficio_encuesta d-flex justify-content-center">
-                                        <div class="box_input_encuesta">
-                                            <DefaultAutocomplete
-                                                :rules="rules.lista_encuestas"
-                                                dense
-                                                label="Encuesta"
-                                                placeholder="Agrega una encuesta"
-                                                v-model="resource.lista_encuestas"
-                                                :items="selects.lista_encuestas"
-                                                item-text="name"
-                                                item-value="id"
-                                            />
-                                        </div>
-                                        <div class="box_button_encuesta">
-                                            <v-btn color="primary" outlined @click="addLinkExterno">
-                                                <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
-                                                Link externo
-                                            </v-btn>
-                                        </div>
-                                    </div>
-                                </template>
-                            </DefaultModalSection>
-                        </v-col>
-                        <!-- End Encuesta -->
                         <!-- Tags -->
                         <v-col cols="6" v-if="options_modules[5].active">
                             <DefaultModalSection
@@ -623,6 +593,55 @@
                         </v-col>
                         <!-- End Promotor -->
                     </v-row>
+                    <!-- Encuesta -->
+                    <v-row>
+                        <v-col cols="12" v-if="options_modules[8].active">
+                            <DefaultModalSection
+                                title="Encuesta"
+                            >
+                                <template slot="content">
+                                    <v-row>
+                                        <v-col cols="8">
+                                            <div class="box_beneficio_encuesta d-flex justify-content-center">
+                                                <div class="box_input_encuesta">
+                                                    <DefaultAutocomplete
+                                                        :rules="rules.lista_encuestas"
+                                                        dense
+                                                        label="Encuesta"
+                                                        placeholder="Agrega una encuesta"
+                                                        v-model="resource.lista_encuestas"
+                                                        :items="selects.lista_encuestas"
+                                                        item-text="name"
+                                                        item-value="id"
+                                                    />
+                                                </div>
+                                                <div class="box_button_encuesta">
+                                                    <v-btn color="primary" outlined @click="addLinkExterno">
+                                                        <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
+                                                        Link externo
+                                                    </v-btn>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <div class="box_input_encuesta">
+                                                <DefaultInputDate
+                                                    clearable
+                                                    dense
+                                                    :referenceComponent="'modalDateEncuesta'"
+                                                    :options="modalDateEncuesta"
+                                                    v-model="resource.fecha_encuesta"
+                                                    label="Fecha de liberación de encuesta"
+                                                    placeholder="Agregar una fecha"
+                                                />
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+                    <!-- End Encuesta -->
                     <!-- Implementos -->
                     <v-row>
                         <v-col cols="12" v-if="options_modules[6].active">
@@ -719,7 +738,8 @@ const fields = [
     // 'ubicacion_mapa',
     'list_silabos',
     'lista_grupo',
-    'group'
+    'group',
+    'fecha_encuesta'
 ];
 const file_fields = ['image'];
 
@@ -811,6 +831,9 @@ export default {
             modalDateFilter3: {
                 open: false,
             },
+            modalDateEncuesta: {
+                open: false,
+            },
             // silabo time
             silabo_time: null,
             silabo_menu2: false,
@@ -835,6 +858,7 @@ export default {
                 inicio_inscripcion: null,
                 fin_inscripcion: null,
                 fecha_liberacion: null,
+                fecha_encuesta: null,
                 correo: null,
                 list_types: [],
                 lista_encuestas: [],

@@ -19,7 +19,8 @@ class Videoteca extends BaseModel
         'media_id',
         'preview_id',
         'category_id',
-        'active'
+        'active',
+        'external_id',
     ];
 
     protected $casts = [
