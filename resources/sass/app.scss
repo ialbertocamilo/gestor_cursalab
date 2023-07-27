@@ -195,7 +195,7 @@ Override Vue Toastification plugin styles
     font-family: "Nunito", sans-serif;
 }
 .fw-bold {
-    font-weight: 700;
+    font-weight: 700 !important;
 }
 
 .list-style-none{
