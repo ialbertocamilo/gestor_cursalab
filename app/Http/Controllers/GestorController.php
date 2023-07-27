@@ -30,7 +30,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaEscuelaData($usuario_id, $categoria_id);
             return view('ver_certificado', compact('data'));
         } catch (\Throwable $th) {
-            return $this->error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -40,7 +41,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaEscuelaData($usuario_id, $categoria_id);
             return view('certificado', compact('data'));
         } catch (\Throwable $th) {
-            return $this->error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -51,7 +53,8 @@ class GestorController extends Controller
             return view('ver_certificado', compact('data'));
         } catch (\Exception $e) {
             info($e);
-            return $this->error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -61,7 +64,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
             return view('certificado', compact('data'));
         } catch (\Throwable $th) {
-            return $this->error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
