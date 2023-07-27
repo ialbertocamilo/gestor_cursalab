@@ -59,7 +59,7 @@ class EventServiceProvider extends ServiceProvider
 
         Course::observe(CourseObserver::class);
         Topic::observe(TopicObserver::class);
-        Segment::observe(SegmentObserver::class);
+        // Segment::observe(SegmentObserver::class);
         // Curso::observe(CursoObserver::class);
         // Categoria::observe(CategoriaObserver::class);
     }

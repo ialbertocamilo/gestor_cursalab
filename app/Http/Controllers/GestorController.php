@@ -143,16 +143,26 @@ class GestorController extends Controller
         $plantilla_categoria = $categoria->plantilla_diploma != null ? $categoria->plantilla_diploma : $usuario->config->plantilla_diploma;
         //Procesar imagen por el lado del servidor
         $base64 = $this->parse_image($plantilla_categoria);
+        if (!$base64||is_null($base64)){
+          return $this->$error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
+        }
         return array('image' => $base64, 'video' => $categoria->nombre, 'usuario' => $usuario->nombre, 'fecha' => $eva->fecha_emision);
     }
 
     private function parse_image($plantilla)
     {
         $type = pathinfo($plantilla, PATHINFO_EXTENSION);
-        $plantilla = str_replace(" ","%20",$plantilla);
-        $image = file_get_contents(get_media_url($plantilla));
-        return 'data:image/' . $type . ';base64,' . base64_encode($image);
-    }
+        $plantilla = str_replace(" ", "%20", $plantilla);
+
+        $headers = get_headers(get_media_url($plantilla));
+        if ($headers && strpos($headers[0], "200 OK") !== false) {
+            $image = file_get_contents(get_media_url($plantilla));
+            if ($image !== false) {
+                return 'data:image/' . $type . ';base64,' . base64_encode($image);
+            }
+        }
+        return null;
+}
 
     public function descargaArchivo($id)
     {

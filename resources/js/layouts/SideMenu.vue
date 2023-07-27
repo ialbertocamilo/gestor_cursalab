@@ -328,6 +328,7 @@ export default {
                         path: "/escuelas",
                         subpaths: ["escuelas"],
                         selected: false,
+                        isBeta: false,
                         permission: "escuelas",
                         role: [
                             "super-user",
@@ -342,6 +343,7 @@ export default {
                         path: "/cursos",
                         subpaths: ["cursos"],
                         selected: false,
+                        isBeta: false,
                         permission: "cursos",
                         role: [
                             "super-user",
@@ -556,10 +558,10 @@ export default {
                         permission: "resumen_evaluaciones",
                         role: [
                             "super-user",
-                            "admin",
-                            "trainer",
-                            "reports",
-                            'only-reports'
+                            // "admin",
+                            // "trainer",
+                            // "reports",
+                            // 'only-reports'
                         ]
                     }
                 ]
