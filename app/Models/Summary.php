@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use App\Models\Mongo\AuditSummaryUpdate;
 
 class Summary extends BaseModel
 {
@@ -138,9 +139,9 @@ class Summary extends BaseModel
 
         }
     }
-    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false){
+    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default'){
         $users_id_segmented = [];
-        // $course->load('segments.values');
+        // $course->loadMissing('segments');
         if($only_users_has_sc){
             $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
         }else{
@@ -148,16 +149,22 @@ class Summary extends BaseModel
         }
         $chunk_users = array_chunk($users_id_segmented,80);
         foreach ($chunk_users as $users) {
-            self::setSummaryUpdates($users,[$course->id],$summary_course_update);
+            self::setSummaryUpdates($users,[$course->id],$summary_course_update,$event);
         }
     }
-    protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update)
+    protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update,$event)
     {
         $data = [
             'summary_user_update' => true,
             'required_update_at' => now(),
             'is_updating'=>0
         ];
+        AuditSummaryUpdate::create([
+            'user_ids' => $user_ids,
+            'course_ids'=> $course_ids,
+            'summary_course_update' =>$summary_course_update,
+            'type' => $event,
+        ]);
 
         if ($course_ids && $summary_course_update) {
             $course_ids = implode(',',$course_ids);

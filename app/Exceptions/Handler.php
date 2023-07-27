@@ -86,12 +86,14 @@ class Handler extends ExceptionHandler
                 break;
             }
         }
-        if ($exception instanceof TokenMismatchException) {
-            return redirect('/');
-        }
-        if ($exception instanceof NotFoundHttpException) {
-            return redirect('/'); // Redirigir a la página de inicio
-        }
+        // Error 419 - Token mismatch
+        // if ($exception instanceof TokenMismatchException) {
+        //     return redirect('/');
+        // }
+        // Error 404 - Not found
+        // if ($exception instanceof NotFoundHttpException) {
+        //     return redirect('/'); // Redirigir a la página de inicio
+        // }
         // if ($request->wantsJson()) {
         //     // Define the response
         //     $response = [

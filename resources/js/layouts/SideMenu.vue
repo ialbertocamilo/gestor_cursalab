@@ -328,6 +328,7 @@ export default {
                         path: "/escuelas",
                         subpaths: ["escuelas"],
                         selected: false,
+                        isBeta: false,
                         permission: "escuelas",
                         role: [
                             "super-user",
@@ -342,6 +343,7 @@ export default {
                         path: "/cursos",
                         subpaths: ["cursos"],
                         selected: false,
+                        isBeta: false,
                         permission: "cursos",
                         role: [
                             "super-user",

@@ -195,6 +195,15 @@
                         Criterios vacíos
                     </span>
                 </v-tab>
+
+                <v-tab class="justify-content-start py-7"
+                       v-if="isSuperUser"
+                       key='historial-multiples-usuarios'>
+                    <v-icon left>mdi-account-multiple</v-icon>
+                    <span class="pt-2">
+                        Historial de múltiples usuarios
+                    </span>
+                </v-tab>
                 <v-tab class="justify-content-start py-7" key='benefit-report'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
@@ -501,6 +510,14 @@
                             <UsersBenefitReport
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
+                                >
+
+                <v-tab-item v-if="isSuperUser">
+                    <v-card flat>
+                        <v-card-text>
+                            <UsersHistory
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
 
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
@@ -509,6 +526,22 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+
+                <v-tab-item v-if="isSuperUser">
+                    <v-card flat>
+                        <v-card-text>
+                            <UsersHistory
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
             </v-tabs>
         </v-card>
 
@@ -583,11 +616,13 @@ import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
 import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
+import UsersHistory from "../components/Reportes/UsersHistory.vue";
 import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
 
 export default {
     components: {
+        UsersHistory,
         EmptyCriteria,
         ReportPromptModal,
         ReportsHistory,
@@ -658,7 +693,7 @@ export default {
         this.reportsBaseUrl = this.getReportsBaseUrl()
         this.fetchData();
 
-        let uri = window.location.search.substring(1); 
+        let uri = window.location.search.substring(1);
         let params = new URLSearchParams(uri);
         let tab = params.get("tab");
         let section = params.get("section");
