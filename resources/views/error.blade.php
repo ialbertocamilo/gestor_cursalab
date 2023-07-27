@@ -69,7 +69,7 @@
     <body>
         <div class="flex-center position-ref full-height">
         <div class="content">
-            <img src="{{ asset('img/diploma.png') }}" alt="Diploma Icon" style="margin:1rem; width: 151px;">
+            <img src="{{ asset('img/diploma.png') }}" alt="Diploma Icon" style="margin:1rem; width: 90px;">
             <div class="alert alert-danger">
                 {{ $errorMessage }}
             </div>
