@@ -510,7 +510,10 @@
                             <UsersBenefitReport
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
-                                >
+                                />
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
 
                 <v-tab-item v-if="isSuperUser">
                     <v-card flat>
