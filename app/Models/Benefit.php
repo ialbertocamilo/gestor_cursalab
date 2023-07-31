@@ -1462,7 +1462,7 @@ class Benefit extends BaseModel
     protected function sendEmail( $type = null, $user = null, $benefit = null )
     {
         if($type && $user && $benefit){
-            $base_url = env('WEB_BASE_URL') ?? null;
+            $base_url = config('app.web_url') ?? null;
             $email = $user?->email ?? null;
 
             if($base_url) {
