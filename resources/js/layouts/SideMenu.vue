@@ -510,10 +510,11 @@ export default {
                         path: "/votaciones",
                         subpaths: ["diplomas"],
                         selected: false,
+                        isBeta: true,
                         permission: "diplomas",
                         role: [
                             "super-user",
-                            "admin",
+                            // "admin",
                         ]
                     },
 
@@ -523,10 +524,11 @@ export default {
                         path: "/votacion/create",
                         subpaths: ["diploma/create"],
                         selected: false,
+                        isBeta: true,
                         permission: "votacion_create",
                         role: [
                             "super-user",
-                            "admin",
+                            // "admin",
                         ]
                     }
                 ]
@@ -587,6 +589,7 @@ export default {
                         path: "/resumen_evaluaciones",
                         subpaths: ["resumen_evaluaciones"],
                         selected: false,
+                        isBeta: true,
                         permission: "resumen_evaluaciones",
                         role: [
                             "super-user",
