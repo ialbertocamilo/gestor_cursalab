@@ -500,6 +500,38 @@ export default {
                 ]
             },
             {
+                title: "VOTACIONES",
+                icon: "fas fa-paper-plane",
+                active: false,
+                items: [
+                    {
+                        title: "Listar",
+                        icon: "fas fa-list",
+                        path: "/votaciones",
+                        subpaths: ["diplomas"],
+                        selected: false,
+                        permission: "diplomas",
+                        role: [
+                            "super-user",
+                            "admin",
+                        ]
+                    },
+
+                    {
+                        title: "Crear",
+                        icon: "fas fa-plus",
+                        path: "/votacion/create",
+                        subpaths: ["diploma/create"],
+                        selected: false,
+                        permission: "votacion_create",
+                        role: [
+                            "super-user",
+                            "admin",
+                        ]
+                    }
+                ]
+            },
+            {
                 title: "REPORTES",
                 icon: "fas fa-download",
                 active: false,

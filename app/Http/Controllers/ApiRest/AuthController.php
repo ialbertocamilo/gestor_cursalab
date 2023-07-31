@@ -169,7 +169,7 @@ class AuthController extends Controller
     private function respondWithDataAndToken($data)
     {
         $user = Auth::user();
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
@@ -194,6 +194,8 @@ class AuthController extends Controller
         $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma', 'contact_support')
             ->where('id', $user->subworkspace_id)
             ->first();
+
+        info('here data');
 
         $workspace = Workspace::find($user->subworkspace_id);
         // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();

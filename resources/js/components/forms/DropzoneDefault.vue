@@ -109,7 +109,6 @@ export default {
             // this.$emit("onUpload", file);
         },
         addedFile(file) {
-
             let validExt = (this.typesAllowed[0] != '') ? this.validatedFileExtension(file, this.typesAllowed) : true;
             let vue = this;
 
@@ -150,6 +149,13 @@ export default {
         },
         removeAll() {
             this.$refs.myVueDropzone.removeAllFiles()
+        },
+        addManually(file, url = '') {
+            const files = this.$refs.myVueDropzone.dropzone.files;
+             
+            if(files.length === 0) {
+                this.$refs.myVueDropzone.manuallyAddFile(file, url);
+            }
         },
         template() {
             return `<div class="dz-preview dz-file-preview">

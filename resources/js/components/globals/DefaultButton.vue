@@ -23,8 +23,8 @@
 export default {
     props: {
         color: {
-            type: String,
-            default: 'primary'
+            type:String,
+            default:'primary'
         },
         label: {
             type: String,

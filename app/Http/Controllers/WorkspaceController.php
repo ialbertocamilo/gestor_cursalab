@@ -206,6 +206,8 @@ class WorkspaceController extends Controller
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
+        $workspace['criteria_workspace_dates'] = $workspace->subworkpsace_criterion_type(['date']);
+
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
 
         $workspace['is_superuser'] = auth()->user()->isA('super-user');

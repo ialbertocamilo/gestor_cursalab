@@ -34,6 +34,7 @@ class WorkspaceRequest extends FormRequest
             'selected_functionality' => 'nullable',
 
             'qualification_type_id' => 'required',
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable'
         ];
     }
 

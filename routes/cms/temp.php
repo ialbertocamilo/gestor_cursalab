@@ -2,41 +2,42 @@
 
 use App\Http\Controllers\ApiRest\HelperController;
 
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AbconfigController;
-use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\TipoCriterioController;
-use App\Http\Controllers\CriteriosController;
+use App\Http\Controllers\AyudaAppController;
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CicloController;
-use App\Http\Controllers\CursosController;
+use App\Http\Controllers\CompatibleController;
+use App\Http\Controllers\ConvalidacionesController;
+use App\Http\Controllers\CriteriosController;
 use App\Http\Controllers\CurriculasGruposController;
+use App\Http\Controllers\CursosController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiplomaController;
+use App\Http\Controllers\DuplicarController;
+use App\Http\Controllers\Encuestas_respuestaController;
+use App\Http\Controllers\ErroresMasivoController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\IncidenciaController;
+use App\Http\Controllers\MallasController;
+use App\Http\Controllers\MasivoController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MigracionController;
+use App\Http\Controllers\MigrarAvanceController;
+use App\Http\Controllers\Post_electivoController;
 use App\Http\Controllers\PosteoController;
 use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\PushNotificationsFirebaseController;
+use App\Http\Controllers\ReportesSupervisoresController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TipoCriterioController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\GrupoController;
-use App\Http\Controllers\Encuestas_respuestaController;
-use App\Http\Controllers\Post_electivoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Usuario_vigenciaController;
-use App\Http\Controllers\CompatibleController;
-use App\Http\Controllers\MallasController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\GestorController;
-use App\Http\Controllers\MasivoController;
-use App\Http\Controllers\ErroresMasivoController;
-use App\Http\Controllers\IncidenciaController;
-use App\Http\Controllers\DuplicarController;
-use App\Http\Controllers\PushNotificationsFirebaseController;
-use App\Http\Controllers\AyudaAppController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ReportesSupervisoresController;
-use App\Http\Controllers\MigrarAvanceController;
-use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\ConvalidacionesController;
-use App\Http\Controllers\MigracionController;
-use App\Http\Controllers\DiplomaController;
 
 // Route::get('dashboard_pbi', function () {
 //     return view('powerbi.index');
@@ -705,8 +706,17 @@ Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->grou
     Route::post('/migrar_temas', 'migrarTemas');
 });
 
-// DIPLOMAS
+// === DIPLOMAS ===
 Route::prefix('/diploma')->controller(DiplomaController::class)->group(function () {
     Route::view('/create', 'diploma.create_edit')->name('diploma.create');
     Route::view('/edit/{diploma}', 'diploma.create_edit')->name('diploma.edit');
 });
+// === DIPLOMAS ===
+
+// === VOTACIONES ===
+Route::prefix('/votacion')->controller(CampaignController::class)->group(function() {
+    Route::view('/create', 'votaciones.create_edit')->name('votacion.create');
+    Route::view('/edit/{campaign}', 'votaciones.create_edit')->name('votacion.edit');
+    Route::view('/detail/{campaign}', 'votaciones.view_detail')->name('votacion.detail');
+});
+// === VOTACIONES ===

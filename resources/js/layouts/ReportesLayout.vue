@@ -216,6 +216,13 @@
                         Usuarios segmentados al Beneficio
                     </span>
                 </v-tab>
+                <v-tab class="justify-content-start py-7" key='votaciones'>
+                    <v-icon left>fa fa-paper-plane</v-icon>
+                    <span class="pt-2">
+                        Votaciones
+                    </span>
+                </v-tab>
+
                 <!--
 
                 TABS CONTENT
@@ -510,8 +517,10 @@
                             <UsersBenefitReport
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
-                                >
-
+                                />
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
                 <v-tab-item v-if="isSuperUser">
                     <v-card flat>
                         <v-card-text>
@@ -537,6 +546,19 @@
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
 
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+
+                 <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <Votaciones
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
@@ -619,9 +641,12 @@ import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
 import UsersHistory from "../components/Reportes/UsersHistory.vue";
 import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
+import Votaciones from "../components/Reportes/Votaciones.vue";
+
 
 export default {
     components: {
+        Votaciones,
         UsersHistory,
         EmptyCriteria,
         ReportPromptModal,

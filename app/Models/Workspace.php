@@ -29,7 +29,8 @@ class Workspace extends BaseModel
         'marca_agua_estado',
         'notificaciones_push_chunk',
         'notificaciones_push_envio_inicio',
-        'notificaciones_push_envio_intervalo'
+        'notificaciones_push_envio_intervalo',
+        'criterio_id_fecha_inicio_reconocimiento'
     ];
 
     public function sluggable(): array
@@ -123,6 +124,12 @@ class Workspace extends BaseModel
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
+    }
+
+    public function subworkpsace_criterion_type(array $codes) {
+        return $this->criterionWorkspace()->whereHas('field_type', function($query) use ($codes) {
+            $query->whereIn('code', $codes);
+        })->get();
     }
 
     public function app_menu()
@@ -527,9 +534,9 @@ class Workspace extends BaseModel
                     'requirements'
                 ],
             ],
-            
+
             // 'users',
-            
+
             'functionalities', // OK
 
             'criterionWorkspace', // criterion_workspace OK
@@ -541,7 +548,7 @@ class Workspace extends BaseModel
             // ],
 
             'medias', // OK
-            'polls.questions', // 
+            'polls.questions', //
         ];
 
         $workspace = $this->replicate();
@@ -592,14 +599,14 @@ class Workspace extends BaseModel
                 $school = School::whereRelationIn('subworkspaces', 'id', $current_subworkspaces->pluck('id'))
                             ->where('external_id', $_school->id)
                             ->first();
-                
+
                 if ( ! $school ) {
 
                     $school_data = $_school->toArray();
                     $school_data['external_id'] = $_school->id;
 
                     $school = $subworkspace->schools()->create($school_data);
-                
+
                 } else {
 
                     $subworkspace->schools()->syncWithoutDetaching($school);
@@ -617,7 +624,7 @@ class Workspace extends BaseModel
                         $course_data['external_id'] = $_course->id;
 
                         $course = $school->courses()->create($course_data);
-                        
+
                         foreach ($_course->topics as $_topic) {
 
                             $topic_data = $_topic->toArray();
@@ -669,7 +676,7 @@ class Workspace extends BaseModel
             }
         }
 
-        
+
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);

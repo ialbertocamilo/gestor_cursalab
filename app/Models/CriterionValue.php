@@ -71,6 +71,16 @@ class CriterionValue extends BaseModel
             ->get();
     }
 
+    protected function getListForSelectValues($criterion_id, $workspace_id) {
+        $criteria = self::query();
+        
+        return $criteria->with('parents:id,criterion_id,value_text')
+                        ->whereHas('workspaces', function ($q) use ($workspace_id) {
+                            $q->where('id', $workspace_id);
+                        })
+                        ->where('criterion_id', $criterion_id)->get();
+    }
+
     protected function search($request = null)
     {
         $q = self::with('criterion.field_type');
