@@ -414,11 +414,11 @@ class Benefit extends BaseModel
         return $response;
     }
 
-    protected function updateMaxBenefitsxUsers( $action )
+    protected function updateMaxBenefitsxUsers( $value )
     {
         $response = null;
 
-        if(!is_null($action)) {
+        if(!is_null($value)) {
 
             try {
                 $workspace_id = get_current_workspace()?->id;
@@ -429,19 +429,8 @@ class Benefit extends BaseModel
 
                 if ($workspace) :
 
-                    $max_benefits = $workspace->max_benefits ?? 0;
-
-                    if($action == 'add')
-                    {
-                        $workspace->max_benefits = $max_benefits + 1;
-                        $workspace->save();
-                    }
-                    else if($action == 'delete')
-                    {
-                        $max_benefits_r = $max_benefits - 1;
-                        $workspace->max_benefits = ($max_benefits_r < 0) ? 0 : $max_benefits_r;
-                        $workspace->save();
-                    }
+                    $workspace->max_benefits = ($value < 0) ? 0 : $value;
+                    $workspace->save();
 
                     $response = $workspace->max_benefits;
 
@@ -775,6 +764,8 @@ class Benefit extends BaseModel
                         ->where('benefit_id', $benefit_id)
                         ->whereHas('status', function($q){
                             $q->where('code','subscribed');
+                            $q->orWhere('code', 'approved');
+                            $q->orWhere('code', 'exchanged');
                         })
                         ->first();
 
