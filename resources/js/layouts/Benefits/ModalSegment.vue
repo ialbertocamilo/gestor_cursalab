@@ -11,61 +11,34 @@
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
-            <v-card-text class="pt-0">
-
-                <v-stepper non-linear class="stepper_box" v-model="stepper_box">
-                    <v-stepper-items>
-                        <v-stepper-content step="1" class="p-0">
-                                <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step2">
-                                    <v-card-text>
-                                        <!-- (segmentacion) -->
-                                        <div>
-                                            <v-row>
-                                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                                    <span class="text_default lbl_tit">Relaciona el beneficio a los usuarios según criterio o doc. de identidad.</span>
-                                                </v-col>
-                                                <v-col cols="12" class="pb-0 pt-0">
-                                                    <SegmentFormModal
-                                                        :options="modalFormSegmentationOptions"
-                                                        :list_segments="segmentdata.segments"
-                                                        :list_segments_document="segmentdata.segmentation_by_document"
-                                                        width="55vw"
-                                                        model_type="App\Models\Benefit"
-                                                        :model_id="segmentdata.id"
-                                                        ref="modalFormSegmentationOptions"
-                                                        @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-                                                        @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
-                                                        @disabledBtnModal="disabledBtnModal"
-                                                    />
-                                                </v-col>
-                                            </v-row>
-                                        </div>
-                                        <!-- (segmentacion) -->
-                                    </v-card-text>
-                                </v-card>
-                        </v-stepper-content>
-                        <!-- <v-stepper-content step="2" class="p-0">
-                                <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step3">
-                                    <v-card-text>
-                                        <v-row>
-                                            <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                                <span class="text_default lbl_tit">confirmacion</span>
-                                            </v-col>
-                                        </v-row>
-                                    </v-card-text>
-                                </v-card>
-                        </v-stepper-content> -->
-                    </v-stepper-items>
-                    <v-stepper-header class="stepper_dots">
-                        <v-stepper-step step="1">
-                        </v-stepper-step>
-                        <!-- <v-stepper-step step="1" :complete="stepper_box > 1">
-                            <v-divider></v-divider>
-                        </v-stepper-step> -->
-                        <!-- <v-stepper-step step="2">
-                        </v-stepper-step> -->
-                    </v-stepper-header>
-                </v-stepper>
+            <v-card-text class="pt-0 bx_card_modal_segment">
+                <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step2">
+                    <v-card-text>
+                        <!-- (segmentacion) -->
+                        <div>
+                            <v-row>
+                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                    <span class="text_default lbl_tit">Relaciona el beneficio a los usuarios según criterio o doc. de identidad.</span>
+                                </v-col>
+                                <v-col cols="12" class="pb-0 pt-0">
+                                    <SegmentFormModal
+                                        :options="modalFormSegmentationOptions"
+                                        :list_segments="segmentdata.segments"
+                                        :list_segments_document="segmentdata.segmentation_by_document"
+                                        width="55vw"
+                                        model_type="App\Models\Benefit"
+                                        :model_id="segmentdata.id"
+                                        ref="modalFormSegmentationOptions"
+                                        @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                                        @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+                                        @disabledBtnModal="disabledBtnModal"
+                                    />
+                                </v-col>
+                            </v-row>
+                        </div>
+                        <!-- (segmentacion) -->
+                    </v-card-text>
+                </v-card>
 
             </v-card-text>
 
@@ -685,5 +658,8 @@ span.v-stepper__step__step:after {
 }
 .border-error .v-input__slot fieldset {
     border-color: #FF5252 !important;
+}
+.bx_card_modal_segment .bx_steps.bx_step2 {
+    box-shadow: none;
 }
 </style>
