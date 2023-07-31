@@ -225,7 +225,7 @@ class UsuarioController extends Controller
         // $data['subworkspace_id'] = get_current_workspace()?->id;
 
         User::storeRequest($data);
-        $this->current_workspace->sendEmailByLimit();
+        // get_current_workspace()->sendEmailByLimit();
         return $this->success(['msg' => 'Usuario creado correctamente.']);
     }
 
@@ -235,7 +235,7 @@ class UsuarioController extends Controller
         // $data['subworkspace_id'] = get_current_workspace()?->id;
         // info($data);
         User::storeRequest($data, $user);
-        $this->current_workspace->sendEmailByLimit();
+        // get_current_workspace()->sendEmailByLimit();
         return $this->success(['msg' => 'Usuario actualizado correctamente.']);
     }
 
