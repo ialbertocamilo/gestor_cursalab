@@ -126,7 +126,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             info('user_has_course');
             info($user_has_course);
 
-            if(!$user_has_course){
+            if($user_has_course === false ){
                 $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
                 continue;
             }
