@@ -150,9 +150,9 @@ class BenefitController extends Controller
     public function updateMaxBenefitsxUsers(Request $request)
     {
         $data = $request->all();
-        $action = $data['action'] ?? null;
+        $value = $data['value'] ?? null;
 
-        $update = Benefit::updateMaxBenefitsxUsers($action);
+        $update = Benefit::updateMaxBenefitsxUsers($value);
 
         $response = [
             'msg' => 'Max. Cant. actualizada correctamente.',
