@@ -16,6 +16,25 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
 Route::redirect('/', 'login', 301);
+//temporary route
+// Route::get('email_info',function(){
+//     $mail_data=[
+//         'init_date'=> date('d/m/Y', strtotime('-1 day')). ' 6:00 am',
+//         'final_date'=> date('d/m/Y').' 5:30 am',
+//         'workspaces'=>[
+//             [
+//               "workspace_name" => "Intercorp Retail",
+//               "download_url" => "http://localhost:3000/reports/general_api_report_2023-06-05.xlsx"
+//             ],
+//             [
+//               "workspace_name" => "Financiera Oh",
+//               "download_url" => "http://localhost:3000/reports/Financiera-Oh_2023-06-05.xlsx"
+//             ]
+//         ]
+//     ];
+//     return view('emails.email_information_apis',['data'=>$mail_data]);
+// });
+// Route::view('email_limite','emails.email_limite_usuarios');
 
 // login routes
 Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');

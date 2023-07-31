@@ -7,7 +7,7 @@
             <p>
                 Esta API retorna el listado de usuarios según workspace o documento.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

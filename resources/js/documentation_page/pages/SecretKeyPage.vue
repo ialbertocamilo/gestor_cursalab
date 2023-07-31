@@ -51,7 +51,7 @@ export default {
                 example_code:{
                     title:'Ejemplo',
                     tabs:[
-                        'Request', 'Response (200)'
+                        'Request', 'Response (200)','Response (401)','Response (403)'
                     ],
                     content_tabs:[
                         {
@@ -83,6 +83,29 @@ axios(config).then(function (response) {
 {
     "data": {
         "secretKey": "Clave Secreta necesaria para el uso de las API's"
+    }
+}
+`
+                        },{
+                            type:'language-json',
+                            code:
+`
+/*Credenciales incorrectas. Si el problema persiste, por favor, ponte en contacto con el equipo de Cursalab.*/
+{
+    "data": {
+        "message": "Wrong credentials."
+    }
+}
+`
+                        },{
+                            type:'language-json',
+                            code:
+`
+/*El administrador no tiene una clave secreta asociada.
+Por favor, contacta al equipo de Cursalab para verificar esta situación.*/
+{
+    "data": {
+        "secretKey": "This Administrator does not have an associated secretKey."
     }
 }
 `

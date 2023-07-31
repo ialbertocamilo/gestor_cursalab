@@ -38,12 +38,15 @@ class ChangeStateUserMassive extends Massive implements ToCollection
         //Delete header
         $rows->shift();
         $this->rows = $rows;
+        $current_workspace = get_current_workspace();
+
         if ($this->state_user_massive == 1 && !$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
+            $current_workspace->sendEmailByLimit();
             $this->error_message = $message;
             return;
         endif;
-        $current_workspace= get_current_workspace();
+        // $current_workspace= get_current_workspace();
         $this->subworkspaces = Workspace::select('id')->where('parent_id',$current_workspace->id)->get()?->pluck('id')->toArray();
         // process dni or email <- change state user where dni or email
         $this->processData($rows);
