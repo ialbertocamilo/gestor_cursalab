@@ -91,6 +91,9 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             $user = User::disableCache()->with('subworkspace:id,name,mod_evaluaciones,parent_id')
                 ->where('document', $document_user)->first();
 
+            info('user');
+            info($user);
+
             if (!$user) {
                 $this->pushNoProcesados($excelData[$i], 'Usuario no existe');
                 continue;
@@ -113,11 +116,17 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 continue;
             }
 
+            info('usersSegmented');
+            info($usersSegmented);
+
             // $assigned_courses = $user->getCurrentCourses();
             // $user_has_course = $usersSegmented->where('id',$user->id)->first();
             $user_has_course = array_search($user->id,$usersSegmented);
 
-            if(!$user_has_course){
+            info('user_has_course');
+            info($user_has_course);
+
+            if($user_has_course === false ){
                 $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
                 continue;
             }
