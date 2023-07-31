@@ -71,6 +71,27 @@
                 <v-row justify="space-around" v-if="is_superuser">
                     <v-col cols="12">
                         <DefaultModalSection
+                            title="Límite de Almacenamiento"
+                        >
+                            <template v-slot:content>
+
+                                <v-col cols="12">
+                                    <DefaultInput
+                                        label="Límite Gb"
+                                        v-model="resource.limit_allowed_storage"
+                                        type="number"
+                                        min="0"
+                                        clearable
+                                    />
+                                </v-col>
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around" v-if="is_superuser">
+                    <v-col cols="12">
+                        <DefaultModalSection
                             title="Funcionalidades"
                         >
                             <template v-slot:content>
@@ -159,7 +180,7 @@
 <script>
 
 
-const fields = [
+const fields = ['limit_allowed_storage',
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria', 'selected_functionality'
 ];
 const file_fields = ['logo', 'logo_negativo'];
@@ -238,6 +259,9 @@ export default {
             let vue = this
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
+
+            vue.resource.limit_allowed_storage = null;
+            vue.limit_allowed_users = null;
         }
         ,
         closeModal() {

@@ -54,7 +54,7 @@ export default {
                 example_code:{
                     title:'Ejemplo',
                     tabs:[
-                        'Request', 'Response (200)'
+                        'Request', 'Response (200)','Response (401)','Response (403)'
                     ],
                     content_tabs:[
                         {
@@ -90,6 +90,29 @@ axios(config).then(function (response) {
         "token_type": "Tipo de token.(Bearer)",
         "expires_in": "Tiempo de expiración.",
         "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:m:s)"
+    }
+}
+`
+                        },{
+                            type:'language-json',
+                            code:
+`
+/*Credenciales incorrectas. Si el problema persiste, por favor, ponte en contacto con el equipo de Cursalab.*/
+{
+    "data": {
+        "message": "Wrong credentials."
+    }
+}
+`
+                        },{
+                            type:'language-json',
+                            code:
+`
+/*La clave secreta enviada no es correcta o el administrador no tiene una clave asociada.
+Por favor, contacta al equipo de Cursalab para verificar esta situación.*/
+{
+    "data": {
+        "secretKey": "Invalid secret key."
     }
 }
 `

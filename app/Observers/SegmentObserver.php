@@ -15,9 +15,9 @@ class SegmentObserver
      */
     public function created(Segment $segment)
     {
-        if($segment->model_type=='App\\Models\\Course' && $segment->model()->first()->active){
-            Summary::updateUsersByCourse($segment->model()->first(),null,false);
-        }
+        // if($segment->model_type=='App\\Models\\Course' && $segment->model()->first()->active){
+        //     Summary::updateUsersByCourse($segment->model()->first(),null,false,false,'segment_created');
+        // }
     }
 
     /**
@@ -28,12 +28,12 @@ class SegmentObserver
      */
     public function updated(Segment $segment)
     {
-        if($segment->model_type=='App\\Models\\Course' && $segment->wasChanged('updated_at') && $segment->model()->first()->active){
-            Summary::updateUsersByCourse($segment->model()->first(),null,false);
-        }
-        if($segment?->type?->code == 'segmentation-by-document'){
+        // if($segment->model_type=='App\\Models\\Course' && $segment->wasChanged('updated_at') && $segment->model()->first()->active){
+        //     Summary::updateUsersByCourse($segment->model()->first(),null,false,false,'segment_updated');
+        // }
+        // if($segment?->type?->code == 'segmentation-by-document'){
 
-        }
+        // }
     }
 
     /**
@@ -44,9 +44,9 @@ class SegmentObserver
      */
     public function deleted(Segment $segment)
     {
-        if($segment->model_type=='App\\Models\\Course' && $segment->model()->first()->active){
-            Summary::updateUsersByCourse($segment->model()->first(),null,false);
-        }
+        // if($segment->model_type=='App\\Models\\Course' && $segment->model()->first()->active){
+        //     Summary::updateUsersByCourse($segment->model()->first(),null,false,false,'segment_deleted');
+        // }
     }
 
     /**

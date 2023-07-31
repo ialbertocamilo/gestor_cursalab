@@ -173,13 +173,13 @@ export default {
                 ]
             },
             {
-                title: "AULAS VIRTUALES",
+                title: "SESIONES LIVE",
                 icon: "fas fa-chalkboard",
                 active: false,
                 functionality: ['default'],
                 items: [
                     {
-                        title: "Aulas Virtuales",
+                        title: "Gestiona sesiones",
                         icon: "fas fa-chalkboard-teacher",
                         path: "/aulas-virtuales",
                         subpaths: ["aulas-virtuales"],
@@ -422,13 +422,13 @@ export default {
                 ]
             },
             {
-                title: "ENTRENADORES Y CHECKLIST",
+                title: "CHECKLIST",
                 icon: "fas fa-business-time",
                 active: false,
                 functionality: ['default'],
                 items: [
                     {
-                        title: "Entrenadores",
+                        title: "Entrenadores y equipo",
                         icon: "fas fa-user-graduate",
                         path: "/entrenamiento/entrenadores",
                         subpaths: ["entrenamiento/entrenador"],
@@ -442,7 +442,7 @@ export default {
                         ]
                     },
                     {
-                        title: "Checklists",
+                        title: "Gestiona Checklist",
                         icon: "fas fa-tasks",
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],

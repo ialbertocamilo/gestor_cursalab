@@ -1,5 +1,5 @@
 <template>
-    <section class="section-list ">
+    <section class="section-list">
         <DefaultFilter
             v-model="open_advanced_filter"
             @filter="advanced_filter(dataTable, filters, 1)"
@@ -7,10 +7,11 @@
             :disabled-confirm-btn="isValuesObjectEmpty(filters)"
         >
             <template v-slot:content>
-                <v-row>
+                <v-row justify="center">
                     <v-col cols="12">
                         <DefaultSelect
                             clearable
+                            dense
                             :items="selects.sub_workspaces"
                             v-model="filters.subworkspace_id"
                             label="Módulos"
@@ -21,6 +22,7 @@
                     <v-col cols="12">
                         <DefaultSelect
                             clearable
+                            dense
                             :items="selects.statuses"
                             v-model="filters.active"
                             label="Estado"
@@ -37,6 +39,7 @@
                             <DefaultInputDate
                                 v-if="criteria_template[index-2].field_type.code === 'date'"
                                 clearable
+                                dense
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="{ open: false, }"
                                 v-model="filters[selectKey]"
@@ -46,6 +49,7 @@
                             <DefaultAutocomplete
                                 v-else
                                 clearable
+                                dense
                                 :items="value"
                                 v-model="filters[selectKey]"
                                 :label="criteria_template[index-2].name"
@@ -399,9 +403,18 @@ export default {
     },
     mounted() {
         let vue = this
+        
+          // === check localstorage multimedia ===
+        const { status, storage: usuarioStorage } = vue.getStorageUrl('usuarios', 'module_data');
+        // console.log('created_usuarios:', {status, usuarioStorage});
+        
+        if(status) {
+            vue.filters.active = usuarioStorage.active;
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+        // === check localstorage anuncio ===
+        }
         vue.getSelects();
     },
-
     methods: {
         getSelects() {
             let vue = this

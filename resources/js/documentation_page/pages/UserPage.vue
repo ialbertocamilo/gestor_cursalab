@@ -7,7 +7,7 @@
             <p>
                 Este proceso permite crear o actualizar usuarios usando como identificador el número de DNI.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

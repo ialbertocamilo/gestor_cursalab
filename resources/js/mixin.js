@@ -104,7 +104,7 @@ export default {
             setTimeout(() => {
                 // $('#pageloader').css('display', 'none')
                 $('#pageloader').fadeOut()
-            }, 800)
+            }, 250)
         },
         showAlert(msg, type = 'success', title = '') {
             let vue = this
@@ -349,7 +349,7 @@ export default {
             vue.$nextTick(() => {
                 vue.$refs[dialog.ref].loadSelects();
             });
-
+            // console.log('here at openFormModal');
             if (action != 'status' && action != 'delete')
                 vue.hideLoader()
         },
@@ -731,5 +731,38 @@ export default {
             }
             return res;
         },
+        getStorageUrl(key, mainKey = 'media_data') {
+
+            const currentUrl = window.location.search;
+            const currentParams = new URLSearchParams(currentUrl);
+            const existKey = currentParams.has(mainKey); 
+
+            let storage = localStorage.getItem(key);
+            let status = false;
+
+            if(storage && existKey) {
+                storage = JSON.parse(storage);
+                status = true;
+            }
+
+            return { storage, status };
+        },
+        getStorageKeyUrl(url_data, key) {
+            const url = new URL(url_data); 
+            const resourceParams = new URLSearchParams(url.search);
+
+            return { params:resourceParams, url, key:resourceParams.get(key)  }
+        },
+        setStorageUrl(route, filters = null, key = 'module_data') {
+            const vue = this;
+            const dataParams = vue.getStorageKeyUrl(route, key);
+
+            if(vue.TypeOf(filters) === 'null') {
+                vue.openInNewTab(dataParams.url.pathname); // sin filtro sirecto al modulo
+            } else {
+                localStorage.setItem(dataParams.key, JSON.stringify(filters));
+                vue.openInNewTab(route);
+            }
+        }
     },
 };

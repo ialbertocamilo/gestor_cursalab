@@ -46,15 +46,16 @@ class AuthController extends Controller
             $password = $data['password'];
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
-            $credentials1 = $credentials2 = ['password' => $password];
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $password];
             // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
+            $credentials3['email'] = trim($userinput);
 
             $userInstance = new User;
 
             // === validacion de intentos ===
-            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2], true); //permanent
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2 ,$credentials3], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
 
@@ -66,7 +67,7 @@ class AuthController extends Controller
             }
             // === validacion de intentos ===
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
 
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
@@ -132,6 +133,7 @@ class AuthController extends Controller
                     $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
                     $responseAttempts['credentials1'] = $credentials1;
                     $responseAttempts['credentials2'] = $credentials2;
+                    $responseAttempts['credentials3'] = $credentials3;
                     // custom message
                     if($responseAttempts['attempts_fulled'] && $responseAttempts['current_time'] == false){
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
@@ -531,14 +533,14 @@ class AuthController extends Controller
 
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
-
-        $credentials1 = $credentials2 = ['password' => $request->password];
+        
+        $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
         $userinput = $request->email ? $credentials['email'] : $credentials['document'];
-
-        $credentials1['email'] = $userinput;
+        
+        $credentials1['username'] = $userinput;
         $credentials2['document'] = $userinput;
-
-        if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+        $credentials3['email'] = $userinput;
+        if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
             return $this->error('Contraseña no válida, asegúrate de crear una nueva contraseña.', 422);
         }
         // === prov el email a documento ===
@@ -567,7 +569,7 @@ class AuthController extends Controller
 
         if($status == Password::PASSWORD_RESET) {
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
                 $user = Auth::user();
 
                 if(!$request->email) $user->setInitialEmail();

@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AdminStoreRequest;
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Requests\UserStoreRequest;
-use App\Models\Role;
-use App\Models\Taxonomy;
-use App\Models\Workspace;
-use Illuminate\Support\Facades\Hash;
 use Bouncer;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Taxonomy;
+use App\Models\EmailUser;
+use App\Models\Workspace;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreRequest;
 use Illuminate\Support\Facades\Session;
+use App\Http\Requests\AdminStoreRequest;
+use Illuminate\Support\Facades\Redirect;
 use Silber\Bouncer\Database\Role as DatabaseRole;
 
 class UserController extends Controller
@@ -63,8 +64,9 @@ class UserController extends Controller
                 'slug' => $rol->name,
             ]);
         }
-
-        return view('users.create', compact('roles', 'workspaces'));
+        $emails_information = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
+        $emails_information_selected = '';
+        return view('users.create', compact('roles', 'workspaces','emails_information','emails_information_selected'));
     }
 
     /**
@@ -93,7 +95,7 @@ class UserController extends Controller
                 }
             }
         }
-
+        EmailUser::storeUpdate($data,$user);
         return redirect()->route('users.index')
             ->with('info', 'Administrador guardado con éxito');
     }
@@ -143,8 +145,9 @@ class UserController extends Controller
                 }
             }
         }
-
-        return view('users.edit', compact('user', 'workspaces', 'roles', 'workspaces_roles'));
+        $emails_information = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
+        $emails_information_selected = $user->emails_user()->with('type:id,name')->get();
+        return view('users.edit', compact('user', 'workspaces', 'roles', 'workspaces_roles','emails_information','emails_information_selected'));
     }
 
     /**
@@ -158,7 +161,6 @@ class UserController extends Controller
     {
         // 1. Actualizar el usuario
         $data = $request->all();
-//        dd($data);
 
         if (!is_null($request->password)) {
             $data['password'] = $request->password;
@@ -178,7 +180,8 @@ class UserController extends Controller
                 }
             }
         }
-
+        //Actualizar envío de emails
+        EmailUser::storeUpdate($data,$user);
         return redirect()->route('users.index')
             ->with('info', 'Administrador actualizado con éxito');
     }

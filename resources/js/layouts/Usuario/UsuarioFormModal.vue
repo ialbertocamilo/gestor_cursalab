@@ -194,17 +194,56 @@
                 @onCancel="closeModalStatusEdit"
             />
 
+            <!-- MODAL ALMACENAMIENTO -->
+            <GeneralStorageModal
+                :ref="modalGeneralStorageOptions.ref"
+                :options="modalGeneralStorageOptions"
+                width="45vw"
+                @onCancel="closeFormModal(modalGeneralStorageOptions)"
+                @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+                            openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+            />
+            <!-- MODAL ALMACENAMIENTO -->
+
+            <!-- MODAL EMAIL ENVIADO -->
+            <GeneralStorageEmailSendModal
+                :ref="modalGeneralStorageEmailSendOptions.ref"
+                :options="modalGeneralStorageEmailSendOptions"
+                width="35vw"
+                @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+                @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            />
+            <!-- MODAL EMAIL ENVIADO -->
+
+            <!-- === MODAL ALERT STORAGE === -->
+            <DefaultStorageUserAlertModal
+                :ref="modalAlertStorageUsersOptions.ref"
+                :options="modalAlertStorageUsersOptions"
+                width="25vw"
+                @onCancel="closeFormModal(modalAlertStorageUsersOptions)"
+                @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'), 
+                            closeFormModal(modalAlertStorageUsersOptions)"
+            />
+            <!-- === MODAL ALERT STORAGE === -->
+
         </template>
     </DefaultDialog>
 </template>
 
 <script>
+import GeneralStorageModal from '../General/GeneralStorageModal.vue';
+import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
+import DefaultStorageUserAlertModal from '../Default/DefaultStorageUserAlertModal.vue';
+
 import UsuarioCriteriaSection from "./UsuarioCriteriaSection";
 import PasswordGeneratorModal from "./PasswordGeneratorModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
-    components: {UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm},
+    components: {
+        UsuarioCriteriaSection, PasswordGeneratorModal, DialogConfirm,  
+        DefaultStorageUserAlertModal, GeneralStorageModal, GeneralStorageEmailSendModal 
+    },
     props: {
         options: {
             type: Object,
@@ -214,6 +253,30 @@ export default {
     },
     data() {
         return {
+            modalAlertStorageUsersOptions: {
+                ref: 'AlertStorageUsersModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Solicitar',
+                persistent: true,
+            },
+            modalGeneralStorageOptions: {
+                ref: 'GeneralStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Enviar',
+                persistent: true
+            },
+            modalGeneralStorageEmailSendOptions: {
+                ref: 'GeneralStorageEmailSendModal',
+                open: false,
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                confirmLabel:'Entendido',
+                persistent: false
+            },
             errors: [],
             sections: {
                 showCriteria: false
@@ -327,6 +390,17 @@ export default {
             const method = edit ? 'put' : 'post';
 
             if (validateForm && vue.isValid()) {
+
+                // === verificar limite usuarios ===
+                let check_users = false;
+                if (!edit) {
+                    check_users = await vue.checkUsersStorageLimit();
+                    // console.log('check_users limit')
+                    if(check_users) return;
+                }
+                // === verificar limite usuarios ===
+
+
                 let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
                 let data = vue.resource
                 vue.parseCriterionValues()
@@ -431,6 +505,18 @@ export default {
             let vue = this
 
         },
+        async checkUsersStorageLimit() {
+            let vue = this;
+            const response = await vue.$http.get('/general/workspaces-users');
+            const data = response.data.data;
+
+            if (data.user_storage_check) {
+                vue.openFormModal(vue.modalAlertStorageUsersOptions, null, null, 'Alerta de capacidad de usuarios');
+                return data.user_storage_check;
+            }
+            vue.hideLoader();
+            return false;
+        }
     }
 }
 </script>
