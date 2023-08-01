@@ -8,7 +8,7 @@
                 Cada criterio tiene un conjunto de valores que se pueden asociar a los usuarios, por ejemplo si existe un criterio "GÉNERO" este puede tener como valores
                 "Masculino", "Femenino", "Otros". 
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

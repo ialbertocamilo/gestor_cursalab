@@ -1365,7 +1365,7 @@ class Course extends BaseModel
 
         $chunk_users = array_chunk($users_segmented, 80);
         foreach ($chunk_users as $chunked_users) {
-            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update,true);
+            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update,true,'compatibilities_update');
         }
     }
 

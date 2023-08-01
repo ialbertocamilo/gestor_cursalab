@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Course;
-use App\Models\Posteo;
-use App\Models\Usuario;
-use App\Models\Taxonomy;
 use App\Models\Criterion;
-use App\Models\SummaryTopic;
 use App\Models\CriterionValue;
+use App\Models\Media;
+use App\Models\Posteo;
+use App\Models\SummaryTopic;
+use App\Models\Taxonomy;
+use App\Models\User;
+use App\Models\Usuario;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\DB;
 
 class  DashboardService {
@@ -278,5 +281,109 @@ class  DashboardService {
         });
 
         return $result;
+    }
+
+    public static function withCountUsers($q, $user_cursalab, $active = null, $alias = null) 
+    {
+        $user_alias = is_null($alias) ? 'users' : 'users as '.$alias ;
+
+        $q->withCount([$user_alias => function ($q) use($user_cursalab, $active) {
+            if (is_null($active)) {
+                $q->where('type_id','<>',$user_cursalab->id); // todos los usuarios
+            }else{
+                $q->where('type_id','<>',$user_cursalab->id)->where('active', $active); // activos - inactivos
+            }
+        }]);
+    }
+
+    public static function loadWorkspacesStatus()
+    {
+        // === usuario cursalab ===
+        $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
+
+        $userId = null;
+        if (Auth::check()) {
+            $userId = Auth::user()->id;
+        }
+
+        $query = Workspace::generateUserWorkspacesQuery($userId);
+        $query->select('id', 'name', 'logo', 'limit_allowed_users', 'limit_allowed_storage', 'parent_id', 'criterion_value_id');
+        $query->with(['subworkspaces' => function($q) use($user_cursalab) {
+                        $q->select('id', 'criterion_value_id', 'name', 'logo', 'parent_id');
+                        self::withCountUsers($q, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+        }]);
+        self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+
+        return $query->get();
+    }
+
+    public static function loadSizeWorkspaces($workspaces_ids)
+    {
+        return Workspace::select('id', 'name')
+                        ->whereIn('id', $workspaces_ids)
+                        ->withSum('medias', 'size')->get();
+    }
+
+    public static function loadSizeByExtensionWorkspace($workspace_id, $key) {
+        $extensions = config('constantes.extensiones');
+
+        return Media::where('workspace_id', $workspace_id)
+                    ->whereIn('ext', $extensions[$key])
+                    ->sum('size');
+    }
+
+    public static function loadCountUsersWorkspaces() {
+        // === usuario cursalab ===
+        $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
+
+        $workspace = get_current_workspace(); 
+
+        $query = Workspace::where('id', $workspace->id);
+        $query->select('id', 'name', 'logo', 'limit_allowed_users', 'limit_allowed_storage', 'parent_id', 'criterion_value_id');
+        $query->with(['subworkspaces' => function ($q) use ($user_cursalab) {
+                    $q->select('id', 'criterion_value_id', 'name', 'logo', 'parent_id');
+                    self::withCountUsers($q, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+                    // self::withCountUsers($q, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
+        }]);
+        self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+        // self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives')
+        
+        return $query->first();
+    }
+
+    public static function loadCurrentWorkspaceStatus()
+    {
+        // === usuario cursalab ===
+        $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
+        
+        $workspace = get_current_workspace();
+
+        $query = Workspace::where('id', $workspace->id);
+
+        $query->select('id', 'name', 'logo', 'limit_allowed_users', 'limit_allowed_storage', 'parent_id', 'criterion_value_id');
+        $query->with(['subworkspaces' => function ($q) use ($user_cursalab) {
+                    $q->select('id', 'criterion_value_id', 'name', 'logo', 'parent_id');
+                    self::withCountUsers($q, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+                    self::withCountUsers($q, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
+        }]);
+        self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+        self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
+        
+        $query->withSum('medias', 'size');
+
+        return $query->first();
+    }
+
+    public static function loadSubworkspaceStatus($subworkspace_id) {
+        // === usuario cursalab ===
+        $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
+
+        $query = Workspace::select('id', 'name', 'logo', 'limit_allowed_users', 'parent_id')
+              ->where('id', $subworkspace_id)
+              ->with(['parent' => fn($q) => $q->select('id', 'limit_allowed_users', 'parent_id') ]);
+
+        self::withCountUsers($query, $user_cursalab, ACTIVE, alias: 'users_count_actives');
+
+        return $query->first();
     }
 }

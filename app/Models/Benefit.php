@@ -31,6 +31,7 @@ class Benefit extends BaseModel
         'inicio_inscripcion',
         'fin_inscripcion',
         'fecha_liberacion',
+        'fecha_encuesta',
         'correo',
         'duracion',
         'promotor',
@@ -413,11 +414,11 @@ class Benefit extends BaseModel
         return $response;
     }
 
-    protected function updateMaxBenefitsxUsers( $action )
+    protected function updateMaxBenefitsxUsers( $value )
     {
         $response = null;
 
-        if(!is_null($action)) {
+        if(!is_null($value)) {
 
             try {
                 $workspace_id = get_current_workspace()?->id;
@@ -428,19 +429,8 @@ class Benefit extends BaseModel
 
                 if ($workspace) :
 
-                    $max_benefits = $workspace->max_benefits ?? 0;
-
-                    if($action == 'add')
-                    {
-                        $workspace->max_benefits = $max_benefits + 1;
-                        $workspace->save();
-                    }
-                    else if($action == 'delete')
-                    {
-                        $max_benefits_r = $max_benefits - 1;
-                        $workspace->max_benefits = ($max_benefits_r < 0) ? 0 : $max_benefits_r;
-                        $workspace->save();
-                    }
+                    $workspace->max_benefits = ($value < 0) ? 0 : $value;
+                    $workspace->save();
 
                     $response = $workspace->max_benefits;
 
@@ -529,6 +519,7 @@ class Benefit extends BaseModel
         if($benefit)
         {
             $segmentados_id = $course->usersSegmented($benefit?->segments, $type = 'users_id');
+            $segmentados_id = array_unique($segmentados_id);
             // $segmentados = User::whereIn('id',$segmentados_id)->get();
             $segmentados = User::whereIn('id',$segmentados_id)
                                 ->whereNotIn('id', $users_ids)
@@ -590,6 +581,8 @@ class Benefit extends BaseModel
                             {
                                 $ub_id->type_id = $type_register_extraordinario?->id;
                                 $ub_id->status_id = $user_status_subscribed?->id;
+                                if(!is_null($ub_id->fecha_registro))
+                                    $ub_id->fecha_registro = new Carbon();
                                 $ub_id->save();
                             }
                         }
@@ -602,18 +595,42 @@ class Benefit extends BaseModel
                             {
                                 $ub_id->type_id = $type_register_extraordinario?->id;
                                 $ub_id->status_id = $user_status_subscribed?->id;
+                                if(!is_null($ub_id->fecha_registro))
+                                    $ub_id->fecha_registro = new Carbon();
                                 $ub_id->save();
                             }
                             else
                             {
                                 if(!is_null($sel['id']))
                                 {
-                                    UserBenefit::create([
+                                    $created_user = UserBenefit::create([
                                         'user_id' => $sel['id'],
                                         'benefit_id' => $benefit_id,
                                         'status_id' => $user_status_subscribed?->id,
-                                        'type_id' => $type_register_extraordinario?->id
+                                        'type_id' => $type_register_extraordinario?->id,
+                                        'fecha_registro' => new Carbon()
                                     ]);
+
+                                    if(isset($sel['ev_user_status']) && $sel['ev_user_status'] == 'approved'){
+                                        if(isset($sel['user_benefits_id']) && !is_null($sel['user_benefits_id']))
+                                        {
+                                            if(!is_null($created_user))
+                                            {
+                                                if($created_user->status_id != $user_status_approved?->id)
+                                                {
+                                                    $created_user->status_id = $user_status_approved?->id;
+                                                    $created_user->fecha_confirmado = new Carbon();
+                                                    $created_user->save();
+
+                                                    $mail_user = User::where('id', $created_user?->user_id)->select('id','email')->first();
+                                                    $mail_benefit = Benefit::where('id', $created_user?->benefit_id)->select('id','title')->first();
+                                                    if(!is_null($mail_user) && !is_null($mail_benefit)) {
+                                                        Benefit::sendEmail( 'confirm', $mail_user, $mail_benefit );
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -624,13 +641,17 @@ class Benefit extends BaseModel
                             $ub_id = UserBenefit::where('id', $sel['user_benefits_id'])->first();
                             if(!is_null($ub_id))
                             {
-                                $ub_id->status_id = $user_status_approved?->id;
-                                $ub_id->save();
+                                if($ub_id->status_id != $user_status_approved?->id)
+                                {
+                                    $ub_id->status_id = $user_status_approved?->id;
+                                    $ub_id->fecha_confirmado = new Carbon();
+                                    $ub_id->save();
 
-                                $mail_user = User::where('id', $ub_id?->user_id)->select('id','email')->first();
-                                $mail_benefit = Benefit::where('id', $ub_id?->benefit_id)->select('id','title')->first();
-                                if(!is_null($mail_user) && !is_null($mail_benefit)) {
-                                    Benefit::sendEmail( 'confirm', $mail_user, $mail_benefit );
+                                    $mail_user = User::where('id', $ub_id?->user_id)->select('id','email')->first();
+                                    $mail_benefit = Benefit::where('id', $ub_id?->benefit_id)->select('id','title')->first();
+                                    if(!is_null($mail_user) && !is_null($mail_benefit)) {
+                                        Benefit::sendEmail( 'confirm', $mail_user, $mail_benefit );
+                                    }
                                 }
                             }
                         }
@@ -656,6 +677,73 @@ class Benefit extends BaseModel
 
 
     // Apis
+
+    protected function registerPollOfUserForBenefit( $data )
+    {
+        $response['error'] = false;
+        $response['data'] = [];
+
+        $user_id = $data['user'] ?? null;
+        $benefit_id = $data['benefit'] ?? null;
+
+        $is_registered = UserBenefit::where('user_id', $user_id)
+                        ->where('benefit_id', $benefit_id)
+                        ->first();
+
+        if( $is_registered?->fecha_encuesta ) {
+            $response['error'] = true;
+            $response['msg'] = [
+                'title' => 'Ya respondiste esta encuesta',
+                'description' => ['Ya respondiste la encuesta asignada a este beneficio.']
+            ];
+        }
+        else {
+            if($is_registered)
+            {
+                $is_registered->fecha_encuesta = new Carbon();
+                $is_registered->save();
+                cache_clear_model(UserBenefit::class);
+
+                $benefit = Benefit::where('id', $benefit_id)->first();
+
+                $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
+                                    $q->where('code', 'subscribed');
+                                    $q->orWhere('code', 'approved');
+                                    $q->orWhere('code', 'exchanged');
+                                })
+                                ->where('benefit_id', $benefit->id)->count();
+
+                if(!is_null($benefit->cupos) && is_numeric($benefit->cupos)) {
+                    $registrados = $users_subscribed_in_benefit;
+                    $benefit->cupos -= $registrados;
+                    $benefit->cupos = $benefit->cupos < 0 ? 0 : $benefit->cupos;
+                }
+
+                $response['msg'] = [
+                    'title' => 'Encuesta completa',
+                    'description' => ['¡Gracias!<br>Tus comentarios son importantes para nosotros']
+                ];
+                $response['data'] = [
+                    'benefit_id' => $benefit_id,
+                    'user_status' => ['name' => 'Confirmado', 'code' => 'exchanged'],
+                    'subscribed' => true,
+                    'status' => ['name' => 'Confirmado', 'code' => 'exchanged'],
+                    'cupos' => $benefit->cupos ?? null
+                ];
+            }
+            else
+            {
+                $response['error'] = true;
+                $response['msg'] = [
+                    'title' => 'No cuentas con este beneficio',
+                    'description' => ['No estás registrado en este beneficio.']
+                ];
+            }
+        }
+
+        return $response;
+    }
+
     protected function registerUserForBenefit( $data )
     {
         $response['error'] = false;
@@ -676,6 +764,8 @@ class Benefit extends BaseModel
                         ->where('benefit_id', $benefit_id)
                         ->whereHas('status', function($q){
                             $q->where('code','subscribed');
+                            $q->orWhere('code', 'approved');
+                            $q->orWhere('code', 'exchanged');
                         })
                         ->first();
 
@@ -690,6 +780,8 @@ class Benefit extends BaseModel
 
             $benefits_user_registered = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
+                                            $q->orWhere('code', 'approved');
+                                            $q->orWhere('code', 'exchanged');
                                         })
                                         ->where('user_id',$user_id)->count();
             if($benefits_user_registered < $limit_benefits_x_user) {
@@ -697,11 +789,14 @@ class Benefit extends BaseModel
                     DB::beginTransaction();
 
                     $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
+                    $type_register_regular = Taxonomy::getFirstData('benefit', 'type_register', 'regular');
 
                     $is_created = UserBenefit::create([
                         'user_id' => $user_id,
                         'benefit_id' => $benefit_id,
                         'status_id' => $user_status_subscribed?->id,
+                        'type_id' => $type_register_regular?->id,
+                        'fecha_registro' => new Carbon()
                     ]);
                     cache_clear_model(UserBenefit::class);
 
@@ -718,6 +813,8 @@ class Benefit extends BaseModel
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
+                                            $q->orWhere('code', 'approved');
+                                            $q->orWhere('code', 'exchanged');
                                         })
                                         ->where('benefit_id', $benefit->id)->count();
 
@@ -729,7 +826,7 @@ class Benefit extends BaseModel
 
                         $response['msg'] = [
                             'title' => 'Inscripción confirmada',
-                            'description' => ['Te haz inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
+                            'description' => ['Te has inscrito satisfactoriamente al beneficio de <b>'.$benefit->title.'</b>.<br>Recuerda revisar el detalle.']
                         ];
                         $response['data'] = [
                             'benefit_id' => $benefit_id,
@@ -803,6 +900,8 @@ class Benefit extends BaseModel
 
                 $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                     $q->where('code', 'subscribed');
+                                    $q->orWhere('code', 'approved');
+                                    $q->orWhere('code', 'exchanged');
                                 })
                                 ->where('benefit_id', $benefit->id)->count();
 
@@ -854,6 +953,7 @@ class Benefit extends BaseModel
                         ->where('benefit_id', $benefit_id)
                         ->whereHas('status', function($q){
                             $q->where('code', 'subscribed');
+                            $q->orWhere('code', 'approved');
                         })
                         ->first();
 
@@ -873,7 +973,7 @@ class Benefit extends BaseModel
 
                     $is_registered->status_id = $user_status_unsubscribe?->id;
                     $is_registered->save();
-                    $is_registered->delete();
+                    // $is_registered->delete();
                     cache_clear_model(UserBenefit::class);
 
                     $benefit = Benefit::where('id', $benefit_id)->first();
@@ -889,6 +989,8 @@ class Benefit extends BaseModel
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
+                                            $q->orWhere('code', 'approved');
+                                            $q->orWhere('code', 'exchanged');
                                         })
                                         ->where('benefit_id', $benefit->id)->count();
 
@@ -948,6 +1050,7 @@ class Benefit extends BaseModel
 
         $benefits_user_registered = UserBenefit::whereHas('status', function($q){
                                         $q->where('code', 'subscribed');
+                                        $q->orWhere('code', 'approved');
                                     })
                                     ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
         $benefits_user_notified = UserBenefit::whereHas('status', function($q){
@@ -982,8 +1085,8 @@ class Benefit extends BaseModel
 
         if (!is_null($filtro) && !empty($filtro)) {
             $benefits_query->where(function ($query) use ($filtro) {
-                $query->where('benefits.title', 'like', "%$filtro%");
-                $query->orWhere('benefits.description', 'like', "%$filtro%");
+                $query->where('title', 'like', "%$filtro%");
+                $query->orWhere('description', 'like', "%$filtro%");
             });
         }
         if($status_benefit) {
@@ -991,9 +1094,11 @@ class Benefit extends BaseModel
                 $benefits_query->whereIn('id', $benefits_user_registered);
             }
             else if(in_array('subscribed', $status_benefit) && count($status_benefit) > 1) {
-                $benefits_query->whereIn('id', $benefits_user_registered);
-                $benefits_query->orWhereHas('status', function ($query) use ($status_benefit) {
-                    $query->whereIn('code', $status_benefit);
+                $benefits_query->where(function($t) use ($status_benefit, $benefits_user_registered){
+                    $t->whereHas('status', function ($query) use ($status_benefit) {
+                        $query->whereIn('code', $status_benefit);
+                    });
+                    $t->orWhereIn('id', $benefits_user_registered);
                 });
             }
             else {
@@ -1018,6 +1123,8 @@ class Benefit extends BaseModel
             $item->subscribed = false;
             $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                                 $q->where('code', 'subscribed');
+                                                $q->orWhere('code', 'approved');
+                                                $q->orWhere('code', 'exchanged');
                                             })
                                             ->where('benefit_id', $item->id)->count();
             if(!is_null($item->cupos) && is_numeric($item->cupos)) {
@@ -1029,8 +1136,22 @@ class Benefit extends BaseModel
             if(in_array($item->id, $benefits_user_registered)) {
                 $item->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
                 $item->subscribed = true;
-                if($item->status?->code == 'released') {
-                    $item->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                $is_approved = UserBenefit::whereHas('status', function($q){
+                                                    $q->where('code', 'approved');
+                                                })
+                                                ->where('benefit_id', $item->id)
+                                                ->where('user_id', $user_id)
+                                                ->first();
+
+                if($is_approved || $item->status?->code == 'released') {
+                    $item->user_status = ['name' => 'Confirmado', 'code' => 'exchanged'];
+
+                    $now = new Carbon();
+                    $fecha_encuesta = new Carbon($item->fecha_encuesta);
+                    $user_poll = UserBenefit::where('benefit_id', $item->id)->where('user_id', $user_id)->first();
+                    if ($now->gt($fecha_encuesta) && is_null($user_poll?->fecha_encuesta)) {
+                        $item->user_status = ['name' => 'Encuesta', 'code' => 'poll'];
+                    }
                 }
             }
             else if (in_array($item->id, $benefits_user_notified)) {
@@ -1061,9 +1182,10 @@ class Benefit extends BaseModel
 
 
             $item->ubicacion = null;
-            $item->inicio_inscripcion = Carbon::parse($item->inicio_inscripcion)->format('d/m/Y');
-            $item->fin_inscripcion = Carbon::parse($item->fin_inscripcion)->format('d/m/Y');
-            $item->fecha_liberacion = Carbon::parse($item->fecha_liberacion)->format('d/m/Y');
+            $item->inicio_inscripcion = $item->inicio_inscripcion ? Carbon::parse($item->inicio_inscripcion)->format('d/m/Y') : null;
+            $item->fin_inscripcion = $item->fin_inscripcion ? Carbon::parse($item->fin_inscripcion)->format('d/m/Y') : null;
+            $item->fecha_liberacion = $item->fecha_liberacion ? Carbon::parse($item->fecha_liberacion)->format('d/m/Y') : null;
+            $item->fecha_encuesta = $item->fecha_encuesta ? Carbon::parse($item->fecha_encuesta)->format('d/m/Y') : null;
 
             if(!is_null($item->poll_id)) {
                 $item->type_poll = 'interno';
@@ -1072,10 +1194,15 @@ class Benefit extends BaseModel
             }
             else {
                 $item->poll = null;
-                if(count($item->polls) > 0)
+                $item->type_poll = null;
+                if(count($item->polls) > 0) {
                     $item->type_poll = 'externo';
-                else
-                    $item->type_poll = null;
+                    $item->poll = [
+                        'id' => $item->polls[0]?->id ?? null,
+                        'name' => $item->polls[0]?->name ?? null,
+                        'value' => $item->polls[0]?->value ?? null
+                    ];
+                }
             }
             $item->hasMeeting = false;
             if( count($item->silabo) > 0){
@@ -1092,7 +1219,8 @@ class Benefit extends BaseModel
                 $item->speaker_id,
                 $item->status_id,
                 $item->active,
-                $item->user_status
+                $item->user_status,
+                $item->polls,
             );
         }
 
@@ -1121,6 +1249,8 @@ class Benefit extends BaseModel
 
         $benefits_user_registered = UserBenefit::whereHas('status', function($q){
                                         $q->where('code', 'subscribed');
+                                        $q->orWhere('code', 'approved');
+                                        $q->orWhere('code', 'exchanged');
                                     })
                                     ->where('user_id',$user_id)->pluck('benefit_id')->toArray();
 
@@ -1132,6 +1262,8 @@ class Benefit extends BaseModel
 
         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
+                                            $q->orWhere('code', 'approved');
+                                            $q->orWhere('code', 'exchanged');
                                         })
                                         ->where('benefit_id', $benefit_id?->id)->count();
 
@@ -1165,8 +1297,22 @@ class Benefit extends BaseModel
 
                 $benefit->user_status = ['name' => 'Retirarme', 'code' => 'subscribed'];
                 $benefit->subscribed = true;
-                if($benefit->status?->code == 'released') {
-                    $benefit->user_status = ['name' => 'Canjeado', 'code' => 'exchanged'];
+                $is_approved = UserBenefit::whereHas('status', function($q){
+                                                    $q->where('code', 'approved');
+                                                })
+                                                ->where('benefit_id', $benefit->id)
+                                                ->where('user_id', $user_id)
+                                                ->first();
+
+                if($is_approved || $benefit->status?->code == 'released') {
+                    $benefit->user_status = ['name' => 'Confirmado', 'code' => 'exchanged'];
+
+                    $now = new Carbon();
+                    $fecha_encuesta = new Carbon($benefit->fecha_encuesta);
+                    $user_poll = UserBenefit::where('benefit_id', $benefit->id)->where('user_id', $user_id)->first();
+                    if ($now->gt($fecha_encuesta) && is_null($user_poll?->fecha_encuesta)) {
+                        $benefit->user_status = ['name' => 'Encuesta', 'code' => 'poll'];
+                    }
                 }
 
             }
@@ -1210,9 +1356,10 @@ class Benefit extends BaseModel
                 $benefit->direccion = null;
             }
             $benefit->ubicacion = null;
-            $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y');
-            $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y');
-            $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y');
+            $benefit->inicio_inscripcion = $benefit->inicio_inscripcion ? Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y') : null;
+            $benefit->fin_inscripcion = $benefit->fin_inscripcion ? Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y') : null;
+            $benefit->fecha_liberacion = $benefit->fecha_liberacion ? Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y') : null;
+            $benefit->fecha_encuesta = $benefit->fecha_encuesta ? Carbon::parse($benefit->fecha_encuesta)->format('d/m/Y') : null;
 
             if(!is_null($benefit->poll_id)) {
                 $benefit->type_poll = 'interno';
@@ -1221,10 +1368,15 @@ class Benefit extends BaseModel
             }
             else {
                 $benefit->poll = null;
-                if(count($benefit->polls) > 0)
+                $benefit->type_poll = null;
+                if(count($benefit->polls) > 0) {
                     $benefit->type_poll = 'externo';
-                else
-                    $benefit->type_poll = null;
+                    $benefit->poll = [
+                        'id' => $benefit->polls[0]?->id ?? null,
+                        'name' => $benefit->polls[0]?->name ?? null,
+                        'value' => $benefit->polls[0]?->value ?? null
+                    ];
+                }
             }
 
             $benefit->silabo->each(function($item){
@@ -1243,7 +1395,8 @@ class Benefit extends BaseModel
                 $benefit->speaker_id,
                 $benefit->status_id,
                 $benefit->poll_id,
-                $benefit->active
+                $benefit->active,
+                $benefit->polls
             );
         }
 
@@ -1309,7 +1462,7 @@ class Benefit extends BaseModel
     protected function sendEmail( $type = null, $user = null, $benefit = null )
     {
         if($type && $user && $benefit){
-            $base_url = env('WEB_BASE_URL') ?? null;
+            $base_url = config('app.web_url') ?? null;
             $email = $user?->email ?? null;
 
             if($base_url) {

@@ -21,16 +21,12 @@
                         />
                     </v-col>
                     <v-col cols="4">
-                        <div class="bx_max_colaboradores" v-if="max_benefits_x_users != null">
-                            <div class="img"><img src="/img/benefits/max_colaborador.svg"></div>
+                        <div class="bx_max_colaboradores">
                             <p>Max cant. permitida por colaborador</p>
                             <span>{{ max_benefits_x_users }}</span>
                             <div class="btns_change_max_col">
-                                <div class="btn_change_max_col_up" @click="updateMaxBenefitsxUsers('add')">
-                                    <img src="/img/benefits/chevron_top.svg">
-                                </div>
-                                <div class="btn_change_max_col_down" @click="updateMaxBenefitsxUsers('delete')" v-if="max_benefits_x_users > 0">
-                                    <img src="/img/benefits/chevron_bottom.svg">
+                                <div class="btn_change_max_col_up" @click="openModalMaxColaborador">
+                                    <img src="/img/benefits/create.svg" style="width: 15px; margin-top: -2px;">
                                 </div>
                             </div>
                         </div>
@@ -48,6 +44,7 @@
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Beneficio - ${$event.title}`)"
                 @addSpeaker="addSpeaker($event)"
                 @gestion_colab="openModalGestionColab($event)"
+                @send_emails="openModalCorreoSegmentados($event)"
             />
         </v-card>
 
@@ -63,6 +60,15 @@
             :ref="modalStatusOptions.ref"
             @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
             @onCancel="closeFormModal(modalStatusOptions)"
+        />
+
+        <ModalMaxColaborador
+            :ref="modalMaxColaborador.ref"
+            v-model="modalMaxColaborador.open"
+            width="560px"
+            :max_benefits="max_benefits_x_users"
+            @closeModalMaxColaborador="modalMaxColaborador.open = false"
+            @confirmModalMaxColaborador="confirmModalMaxColaborador"
         />
 
         <ModalSelectActivity
@@ -103,6 +109,16 @@
             @closemodalGestorColaboradores="modalGestorColaboradores.open = false"
             @confirmModalGestorColaboradores="confirmModalGestorColaboradores"
             />
+        <ModalCorreosSegmentados
+            :ref="modalCorreosSegmentados.ref"
+            v-model="modalCorreosSegmentados.open"
+            :data="modalCorreosSegmentados.data"
+            :users="modalCorreosSegmentados.users"
+            :benefit_id="modalCorreosSegmentados.benefit_id"
+            width="560px"
+            @closeModalCorreoSegmentados="modalCorreosSegmentados.open = false"
+            @confirmModalCorreoSegmentados="confirmModalCorreoSegmentados"
+            />
 
     </section>
 </template>
@@ -113,18 +129,22 @@ import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectActivity from "../../components/Benefit/ModalSelectActivity";
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 import ModalGestorColaboradores from "../../components/Benefit/ModalGestorColaboradores";
+import ModalCorreosSegmentados from "../../components/Benefit/ModalCorreosSegmentados";
+import ModalMaxColaborador from "../../components/Benefit/ModalMaxColaborador";
 
 import ModalSegment from "./ModalSegment";
 
 export default {
     components: {
-        DefaultStatusModal,
-        DefaultDeleteModal,
-        ModalSelectActivity,
-        ModalSegment,
-        ModalSelectSpeaker,
-        ModalGestorColaboradores,
-    },
+    DefaultStatusModal,
+    DefaultDeleteModal,
+    ModalSelectActivity,
+    ModalSegment,
+    ModalSelectSpeaker,
+    ModalGestorColaboradores,
+    ModalCorreosSegmentados,
+    ModalMaxColaborador
+},
     mounted() {
         let vue = this
         vue.loadInfo();
@@ -175,6 +195,12 @@ export default {
                         method_name: 'gestion_colab'
                     },
                     {
+                        text: "Envio de correos",
+                        icon: 'fas fa-envelope',
+                        type: 'action',
+                        method_name: 'send_emails'
+                    },
+                    {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
@@ -207,6 +233,18 @@ export default {
                 benefit_id: null,
                 speaker_id: null,
                 endpoint: '',
+            },
+            modalCorreosSegmentados: {
+                ref: 'modalCorreosSegmentados',
+                open: false,
+                data: [],
+                benefit_id: null,
+                users: null,
+                endpoint: '',
+            },
+            modalMaxColaborador: {
+                ref: 'BenefitModalMaxColab',
+                open: false,
             },
             dataModalSegment: {},
 
@@ -268,7 +306,7 @@ export default {
                 width: '408px'
             },
             file: null,
-            max_benefits_x_users: null,
+            max_benefits_x_users: 0,
         }
     },
     methods: {
@@ -297,12 +335,12 @@ export default {
                     vue.max_benefits_x_users = data.data.max_benefits_x_users
                 })
         },
-        updateMaxBenefitsxUsers(action = null) {
+        confirmModalMaxColaborador(value = null) {
             let vue = this;
-            if(action != null)
+            if(value != null)
             {
                 this.showLoader()
-                vue.$http.post(`/beneficios/max_benefits_x_users/update`, {'action': action})
+                vue.$http.post(`/beneficios/max_benefits_x_users/update`, {'value': value})
                     .then((res) => {
                         vue.max_benefits_x_users = res.data.data.max_benefits;
                         if (res.data.type == "success") {
@@ -313,10 +351,12 @@ export default {
                             });
                         }
                         this.hideLoader()
+                        vue.modalMaxColaborador.open = false
                     })
                     .catch((err) => {
                         console.log(err);
                         this.hideLoader()
+                        vue.modalMaxColaborador.open = false
                     });
             }
         },
@@ -383,6 +423,10 @@ export default {
             console.log(item.id);
             this.openModalSelectSpeaker(item.id)
         },
+        async openModalMaxColaborador() {
+            let vue = this
+            vue.modalMaxColaborador.open = true
+        },
         async openModalSelectActivitys() {
             let vue = this
             vue.modalSelectActivity.open = true
@@ -390,10 +434,63 @@ export default {
         selectTypeActivityModal( value ) {
             window.location.href = '/beneficios/create?type=' + value;
         },
+        confirmModalCorreoSegmentados( benefit_id = null ) {
+            let vue = this;
+
+            if( benefit_id != null )
+            {
+                vue.showLoader();
+
+                vue.$http.post(`/beneficios/segments/enviar_correo`, {'benefit_id': benefit_id})
+                    .then((res) => {
+                        if (res.data.type == "success") {
+                            vue.$notification.success(`${res.data.data.msg}`, {
+                                timer: 6,
+                                showLeftIcn: false,
+                                showCloseIcn: true
+                            });
+
+                            vue.modalCorreosSegmentados.benefit_id = null
+                            vue.modalCorreosSegmentados.open = false
+                            vue.modalCorreosSegmentados.users = null
+                        }
+                        this.hideLoader()
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+
+        },
+        async openModalCorreoSegmentados( benefit = null) {
+            let vue = this;
+
+            if(benefit != null)
+            {
+                vue.showLoader();
+
+                vue.modalCorreosSegmentados.open = true
+                vue.modalCorreosSegmentados.benefit_id = benefit.id
+
+                await vue.$http.post(`/beneficios/segments/users`, {'benefit_id': benefit.id})
+                    .then((res) => {
+                        let users = res.data.data.users;
+                        vue.modalCorreosSegmentados.users = users
+                        console.log(users);
+                        console.log(vue.modalCorreosSegmentados);
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
         confirmModalGestorColaboradores( benefit_id = null, seleccionados = null) {
             let vue = this;
-            console.log(benefit_id);
-            console.log(seleccionados);
+
             if(benefit_id != null && seleccionados != null)
             {
                 vue.showLoader();

@@ -64,7 +64,13 @@
                             :disabled="options.action === 'edit'"
                         />
                     </v-col>
-
+                    <v-col cols="6">
+                        <DefaultToggle
+                            v-model="resource.can_be_create"
+                            type="can_be_create"
+                            label="Crear desde subida masiva"
+                        />
+                    </v-col>
                     <v-col cols="6" v-if="false">
                         <DefaultToggle
                             v-model="resource.is_default"
@@ -98,7 +104,7 @@
 
 import CriterionValidationsModal from "./CriterionValidationsModal";
 
-const fields = ['name', 'multiple', 'show_in_segmentation', 'field_id', 'position'];
+const fields = ['name', 'multiple', 'show_in_segmentation','can_be_create', 'field_id', 'position'];
 const file_fields = [];
 
 export default {
@@ -120,6 +126,7 @@ export default {
                 field_id: null,
                 multiple: false,
                 show_in_segmentation: false,
+                can_be_create:true,
                 is_default: false,
                 position: 1,
                 default_position: 1,

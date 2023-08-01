@@ -92,8 +92,21 @@ class UsuarioAyudaController extends Controller
             return $this->error('El ticket ya ha sido solucionado y no puede modificarse.', 422, [['El ticket ya ha sido solucionado y no puede modificarse.']]);
         }
 
-        $ticket->status = $request->all()['status'];
-        $ticket->save();
+        $user = auth()->user();
+
+
+        if (isset($request->all()['status'])) {
+            if ($request->all()['status'] === 'solucionado') {
+                $ticket->updateInfoSupport($user->fullname, null);
+            }
+
+            $ticket->status = $request->all()['status'];
+            $ticket->save();
+        }
+
+        if (isset($request->all()['is_contacted'])) {
+            $ticket->updateInfoSupport(null, $user->fullname);
+        }
 
         // if ($ticket->status == 'solucionado' && $ticket->user)
         // {

@@ -1,13 +1,22 @@
 
 
 <template>
-    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
+    <v-dialog
+        class="default-dialog"
+        v-model="value"
+        :width="width"
+        scrollable
+        persistent
+        @click:outside="closemodalGestorColaboradores"
+        :class="{}"
+        content-class="br-dialog"
+    >
         <v-card class="modal_gestor_colab">
             <v-card-title class="default-dialog-title">
                 Gestión de colaboradores
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
-                       @click="closeModal">
+                       @click="closemodalGestorColaboradores">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
@@ -15,12 +24,9 @@
                 <v-row>
                     <v-col cols="12" md="12" lg="12" class="pb-0">
                         <span class="text_default lbl_tit">Otorga beneficio a los colaboradores o retíralos de manera extraordinaria, sin la restricción de cupos ni fecha de matrícula.</span>
-                        <div class="text-center mt-4">
-                            <span class="lbl_tit_center">Búsqueda por documento de identidad o nombre</span>
-                        </div>
+                        <span class="text_default lbl_tit fw-bold"><i class="fas fa-exclamation-triangle" style="color: #FF9800;"></i> Una vez confirmados, no se podrán retirar del beneficio.</span>
                     </v-col>
                     <v-col cols="12" class="pb-0 pt-0">
-                        <!-- asdasdasds -->
                         <v-row justify="space-around">
                             <v-col cols="12" >
                                 <v-row>
@@ -28,7 +34,7 @@
                                         <DefaultInput
                                             clearable dense
                                             v-model="search"
-                                            placeholder="Búsqueda"
+                                            placeholder="Nombre o doc. de identidad"
                                             append-icon="mdi-magnify"
                                             :loading="autocomplete_loading"
                                             class="col-12"
@@ -38,12 +44,12 @@
                                 <v-row>
                                     <v-col cols="6">
                                         <div class="d-flex justify-content-between mx-2">
-                                            <div class="lbl_lists"><span>Lista general de colaboradores</span></div>
+                                            <div class="lbl_lists"><span>Colaboradores segmentados</span></div>
                                             <div class="lbl_lists"><span>Agregar</span></div>
                                         </div>
                                         <div class="box_resultados">
                                             <div class="bx_message" v-if="list_filter_segmentados == null">
-                                                <span class="text_default">Resultados de búsqueda</span>
+                                                <span class="text_default">Colaboradores segmentados</span>
                                             </div>
                                             <ul v-else>
                                                 <li v-for="user in list_filter_segmentados" :key="user.id" class="d-flex align-center justify-content-between">
@@ -60,7 +66,7 @@
                                     </v-col>
                                     <v-col cols="6">
                                         <div class="d-flex justify-content-between mx-2">
-                                            <div class="lbl_lists"><span>Seleccionados</span></div>
+                                            <div class="lbl_lists"><span>Colaboradores registrados</span></div>
                                             <div class="d-flex justify-content-end">
                                                 <div class="lbl_lists mr-2"><span>Confirmar</span></div>
                                                 <div class="lbl_lists"><span>Retirar</span></div>
@@ -68,7 +74,7 @@
                                         </div>
                                         <div class="box_seleccionados">
                                             <div class="bx_message" v-if="list_filter_users == null">
-                                                <span class="text_default">Seleccionados</span>
+                                                <span class="text_default">Colaboradores registrados</span>
                                             </div>
                                             <ul v-else>
                                                 <li v-for="user in list_filter_users" :key="user.id" class="d-flex align-center justify-content-between">
@@ -101,7 +107,6 @@
                                 </v-row>
                             </v-col>
                         </v-row>
-                        <!-- dasdsadasdsadsa -->
                     </v-col>
                 </v-row>
 
@@ -109,7 +114,7 @@
 
             <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
                 <DefaultModalActionButton
-                    @cancel="closeModal"
+                    @cancel="closemodalGestorColaboradores"
                     @confirm="confirm"
                     cancelLabel="Cancelar"
                     confirmLabel="Guardar"
@@ -204,7 +209,7 @@ export default {
         validateRequired(input) {
             return input != undefined && input != null && input != "";
         },
-        closeModal() {
+        closemodalGestorColaboradores() {
             let vue = this;
             vue.resetValidation()
             vue.$emit("closemodalGestorColaboradores");

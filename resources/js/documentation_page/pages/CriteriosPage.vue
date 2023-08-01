@@ -7,7 +7,7 @@
             <p>
                 Los criterios son atributos que tienen los usuarios de la plataforma, los cuales se pueden usar para segmentar los contenidos. 
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

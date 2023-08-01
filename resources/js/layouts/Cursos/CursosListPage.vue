@@ -406,11 +406,11 @@ export default {
             courseValidationModalUpdateStatus: {
                 ref: 'CourseListValidationModalUpdateStatus',
                 open: false,
-                title_modal: 'El curso es prerrequisito',
+                title_modal: 'El curso es pre-requisito',
                 type_modal:'requirement',
                 content_modal: {
                     requirement: {
-                        title: '¡El curso que deseas desactivar es un prerrequisito! '
+                        title: '¡El curso que deseas desactivar es un pre-requisito! '
                     },
                 }
             },

@@ -79,6 +79,20 @@ class RestBenefitController extends Controller
         return response()->json($apiResponse, 200);
     }
 
+    public function registerPollOfUserForBenefit(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = [
+            'user' => $user?->id ?? null,
+            'benefit' => $request->benefit ?? null,
+        ];
+
+        $apiResponse = Benefit::registerPollOfUserForBenefit($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
     public function getConfig()
     {
         $user = Auth::user();

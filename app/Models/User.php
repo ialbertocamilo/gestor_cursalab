@@ -167,7 +167,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->hasMany(CriterionValueUser::class);
     }
-
+    public function emails_user()
+    {
+        return $this->hasMany(EmailUser::class);
+    }
     public function subworkspace()
     {
         return $this->belongsTo(Workspace::class, 'subworkspace_id');
@@ -422,7 +425,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $data['summary_user_update'] = true;
         }
         $user->save();
+        if($user->active){
+            try {   
+                $current_workspace = get_current_workspace();
+                $current_workspace->sendEmailByLimit();
+            } catch (\Throwable $th) {
+                
+            }
+        }
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
+
         if (!$criterion) {
             return true;
         }
@@ -568,7 +580,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
             }
-
+            try {   
+                //code...
+                $current_workspace = get_current_workspace();
+                $current_workspace->sendEmailByLimit();
+            } catch (\Throwable $th) {
+                
+            }
+                //throw $th;
             DB::commit();
         } catch (\Exception $e) {
 

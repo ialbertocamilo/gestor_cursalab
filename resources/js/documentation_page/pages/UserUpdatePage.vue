@@ -7,7 +7,7 @@
             <p>
                 Este proceso permite actualizar usuarios usando como identificador el número de documento.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

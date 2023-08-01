@@ -1200,3 +1200,23 @@ span.lbl_txt_val {
 /*three*/
 /*solo soporta hasta tres por layout*/
 
+
+.text-primary-sub {
+	color: #5458ea;	
+}
+
+.fa-1_4x{
+	font-size: 1.4rem;
+}
+
+.w-90{
+	width: 90%;
+}
+
+.v-progress-linear__content {
+    justify-content: unset !important;
+}
+
+.ml-24-porcent{
+	margin-left: 24%;
+}
