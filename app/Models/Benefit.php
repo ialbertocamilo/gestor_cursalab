@@ -1343,7 +1343,9 @@ class Benefit extends BaseModel
         $benefit = $this;
         $benefit->loadMissing('silabo');
         foreach ($benefit->silabo as $silabo) {
-            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')->where('model_id',$silabo->id)->first();
+            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')
+                        ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
+                        ->where('model_id',$silabo->id)->first();
             if($meeting){
                 switch ($type) {
                     case 'add':
