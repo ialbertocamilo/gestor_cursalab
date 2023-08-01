@@ -453,7 +453,7 @@ class Workspace extends BaseModel
             $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
 
         $current_active_users_count = $q_current_active_users->count();
-        if($current_active_users_count/$workspace_limit > 0.9){
+        if($current_active_users_count/$workspace_limit > 0.97){
             $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
             // $emais_to_send_user = Workspace::where('id',$workspace->id)->with('emails.user:id,email_gestor')
             // ->whereHas('emails',function($q){
