@@ -106,11 +106,11 @@ export default {
                 $('#pageloader').fadeOut()
             }, 250)
         },
-        showAlert(msg, type = 'success', title = '') {
+        showAlert(msg, type = 'success', title = '', timer = 10) {
             let vue = this
             let options = {
                 title: title,
-                timer: 10,
+                timer: timer,
                 showLeftIcn: false,
                 showCloseIcn: true,
             }

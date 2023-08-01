@@ -168,18 +168,33 @@
                                                 <td class="text-center" colspan="6"
                                                     v-text="'No hay multimedias seleccionados'"/>
                                             </tr>
+                                                <!-- style="cursor: pointer" -->
                                             <tr
                                                 v-else
-                                                style="cursor: pointer"
                                                 v-for="(media, media_index) in resource.media" :key="media.media_index">
                                                 <td >
                                                     <div class="multimedia-table-icon mt-2" title="Mover">
                                                         <i class="mdi mdi-drag"/>
                                                     </div>
                                                 </td>
+                                                <!-- :title="media.value || media.file.name " -->
                                                 <td>
-                                                    <div class="multimedia-table-icon mt-2" :title="media.value || media.file.name ">
-                                                        <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                    <div class="multimedia-table-icon mt-2">
+                                                        <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
+                                                            <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td class="">
+                                                    <div class="multimedia-table-icon mt-2 " style="align-items: start;">
+                                                        <a class="media-link" href="javascript:;"  title="Copiar código"
+                                                            @click="copyToClipboard(media.value || media.file.name)">
+                                                            <i :class="'mdi mdi-content-copy'"  style="font-size: 1rem !important; margin-right: 5px;" />
+
+                                                            {{ media.value || media.file.name }}
+                                                            <!-- <span :title="media.value || media.file.name"> -->
+                                                            <!-- </span> -->
+                                                        </a>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -302,6 +317,7 @@ export default {
         return {
             drag: false,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
+            media_url: null,
             resourceDefault: {
                 name: null,
                 course_id: this.course_id,
@@ -561,6 +577,7 @@ export default {
             let url = `${vue.base_endpoint}/${vue.topic_id === '' ? 'form-selects' : `search/${vue.topic_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
@@ -653,6 +670,30 @@ export default {
             }
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
+        },
+        copyToClipboard(text) {
+            let vue = this;
+
+            navigator.clipboard.writeText(text);
+
+            vue.showAlert('Código multimedia copiado', 'success', '', 3);
+        },
+        getFullResourceLink(media) {
+            // let link = ""
+            // let media_url = ""
+            let vue = this;
+
+            if (media.type_id == 'youtube')
+                return 'https://www.youtube.com/embed/' + media.value + '?rel=0&modestbranding=1&showinfo=0';
+
+            if (media.type_id == 'vimeo')
+                return 'https://player.vimeo.com/video/' + media.value;
+            
+            if (media.type_id == 'video' || media.type_id == 'pdf' || media.type_id == 'audio')
+                return vue.media_url + media.value;
+
+            if (media.type_id == 'scorm' || media.type_id == 'genially' || media.type_id == 'link')
+                return media.value;
         }
     }
 }
