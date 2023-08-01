@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Taxonomy;
 use Illuminate\Support\Str;
+use Illuminate\Foundation\Http\FormRequest;
 
 class MeetingRequest extends FormRequest
 {
@@ -27,7 +28,6 @@ class MeetingRequest extends FormRequest
         $meeting_id = ($this->method() == 'PUT')
                         ? $this->segment(2)
                         : 'NULL';
-
         $rules = [
             'name' => 'required|min:5|max:255',
 
@@ -43,8 +43,12 @@ class MeetingRequest extends FormRequest
             'attendants' => 'required',
 
             'description' => 'nullable',
+            'model_id' => 'nullable'
         ];
-
+        $benefit_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'benefits');
+        if($benefit_meeting_type?->id == $this->type){
+            unset($rules['attendants']);   
+        }
         return $rules;
     }
 
@@ -52,6 +56,7 @@ class MeetingRequest extends FormRequest
     {
         $data['host_id'] = $this->has('host') ? $this->host : null;
         $data['type_id'] = $this->has('type') ? $this->type : null;
+        $data['model_id'] = $this->model_id;
 
         $data['starts_at'] = "{$this->date} {$this->time}:00";
         $data['finishes_at'] = carbonFromFormat($data['starts_at'])->addMinutes($this->duration ?? 0)->format('Y-m-d H:i:s');

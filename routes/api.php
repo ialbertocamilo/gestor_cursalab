@@ -66,7 +66,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
 Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
 
     // Route::impersonate();
-    
+
     Route::post('/usuario_upload_file', [RestController::class, 'usuario_upload_file']);
     Route::post('/guardar_token_firebase', [FirebaseController::class, 'guardarToken']);
 
@@ -99,6 +99,8 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::post('vademecum/store-visit/{vademecum}', [RestVademecumController::class, 'storeVisit']);
     Route::get('reports/user-history/{workspaceId?}/{schoolId?}', [RestReportsUsersController::class, 'fetchUserHistory']);
     Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
+    Route::prefix('benefits')->group(base_path('routes/app/benefit.php'));
+
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {

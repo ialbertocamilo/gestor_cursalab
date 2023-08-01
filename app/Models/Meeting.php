@@ -22,7 +22,7 @@ class Meeting extends BaseModel
         'starts_at', 'finishes_at', 'duration', 'started_at', 'finished_at', 'report_generated_at',
         'url_start_generated_at',
         'attendance_call_first_at', 'attendance_call_middle_at', 'attendance_call_last_at',
-        'status_id', 'account_id', 'type_id', 'host_id', 'user_id',
+        'status_id', 'account_id', 'type_id', 'host_id', 'user_id','model_id','model_type'
     ];
 
     protected $hidden = ['raw_data_response'];
@@ -305,7 +305,10 @@ class Meeting extends BaseModel
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
             $host = Usuario::find($data['host_id']);
-
+            
+            if($type->code == 'benefits'){
+                $data['model_type'] = 'App\\Models\\BenefitProperty';
+            }
             $datesHaveChanged = $meeting && $meeting->datesHaveChanged($data);
 
             #add workspace id
@@ -379,6 +382,30 @@ class Meeting extends BaseModel
         return $meeting;
     }
 
+    protected function addAttendantFromUser(Meeting $meeting,array $users ){
+        $users_in_meeting = $meeting->attendants()->get();
+        $user_type = Taxonomy::getFirstData('meeting', 'user','normal');
+        $attendants = [];
+        foreach ($users as $user) {
+            $user_in_meeting = $users_in_meeting->where('usuario_id',$user->id)->first();
+            if(!$user_in_meeting){
+                $attendants[] = [
+                    'usuario_id' => $user->id,
+                    'type_id' => $user_type?->id, 
+                    'id' => null
+                ];
+            }
+        }
+        if(count($attendants)){
+            $meeting->attendants()->sync($attendants,false);
+            // $meeting->sendMeetingPushNotifications($attendants);
+        }
+    }
+
+    protected function deleteAttendantFromUser(Meeting $meeting,array $users){
+        $users_id_to_delete = collect($users)->pluck('id');
+        $meeting->attendants()->where('usuario_id',$users_id_to_delete)->delete();
+    }
     protected function getScheduledAttendanceCall(&$data)
     {
         $starts_at = carbonFromFormat($data['starts_at']);

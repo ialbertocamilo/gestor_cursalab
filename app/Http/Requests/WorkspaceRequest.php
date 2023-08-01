@@ -26,6 +26,7 @@ class WorkspaceRequest extends FormRequest
             'limit_allowed_storage' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
+            'selected_functionality' => 'nullable',
         ];
     }
 

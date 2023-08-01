@@ -44,6 +44,13 @@ Vue.use(VueNotification, {
         color: "#0f5132"
     }
 });
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps , {
+    load: {
+        key: 'AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE',
+        libraries: 'places',
+    },
+})
 
 Vue.use(Toast, {
     position: "bottom-right",
@@ -199,6 +206,12 @@ Vue.component("meetings-layout", require("./layouts/Meetings/MeetingsListPage.vu
 Vue.component("accounts-layout", require("./layouts/Accounts/AccountListPage.vue"));
 
 Vue.component("workspace-rol", require("./components/forms/WorkspaceRol.vue"));
+
+Vue.component("benefit-layout", require("./layouts/Benefits/BenefitsList.vue"));
+Vue.component("benefit-form-page", require("./layouts/Benefits/BenefitFormPage"));
+
+Vue.component("speaker-layout", require("./layouts/Speakers/SpeakersList.vue"));
+Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage"));
 
 const app = new Vue({
     vuetify,

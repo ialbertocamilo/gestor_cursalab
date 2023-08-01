@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\Meeting\GeneralMeetingsExport;
-use App\Exports\Meeting\MeetingExport;
-use App\Http\Requests\MeetingAppRequest;
-use App\Http\Requests\MeetingFinishRequest;
-use App\Http\Requests\MeetingRequest;
-use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
-use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
-use App\Http\Resources\MeetingAppResource;
-use App\Http\Resources\MeetingResource;
-use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Models\Benefit;
+use App\Models\Meeting;
+use App\Models\Usuario;
+use App\Models\Taxonomy;
 use App\Models\Attendant;
 use App\Models\Criterion;
-use App\Models\Meeting;
-use App\Models\SourceMultimarca;
-use App\Models\Taxonomy;
-use App\Models\Usuario;
 use App\Models\Workspace;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\BenefitProperty;
+use App\Models\SourceMultimarca;
+use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Requests\MeetingRequest;
+use App\Exports\Meeting\MeetingExport;
+use App\Http\Resources\MeetingResource;
+use App\Http\Requests\MeetingAppRequest;
+use App\Http\Resources\MeetingAppResource;
+use App\Http\Requests\MeetingFinishRequest;
+use App\Exports\Meeting\GeneralMeetingsExport;
+use App\Http\Requests\Meeting\MeetingSearchAttendantRequest;
+use App\Http\Resources\Meeting\MeetingSearchAttendantsResource;
+use App\Http\Requests\Meeting\MeetingUploadAttendantsFormRequest;
 
 class MeetingController extends Controller
 {
@@ -73,6 +75,17 @@ class MeetingController extends Controller
         $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
         $user_types = Taxonomy::getSelectData('meeting', 'user');
         $types = Taxonomy::getSelectData('meeting', 'type');
+        $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
+        //don't include benefit type if you don't have a benefit activated
+        if(
+            !Benefit::where('workspace_id',get_current_workspace()->id)->where('active',ACTIVE)
+            ->whereHas('type', fn($q) => $q->whereIn('code', ['sesion_online','sesion_hibrida']))
+            ->first()
+        ){
+            $types = collect($types)->filter(function ($type) {
+                return $type['code'] != 'benefits';
+            });
+        }
         $hosts = Usuario::getCurrentHosts();
 
         $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
@@ -131,9 +144,19 @@ class MeetingController extends Controller
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
 
         $meeting->setDateAndTimeToForm();
-
+        $benefits = [];
+        $silabos = [];
+        if($meeting->model_type == 'App\Models\BenefitProperty'){
+            $benefits  = Benefit::select('id','title')->where('workspace_id',get_current_workspace()->id)
+            ->whereHas('type', fn($q) => $q->whereIn('code', ['sesion_online','sesion_hibrida']))
+            ->get();
+            $silabo_selected = BenefitProperty::find($meeting->model_id);
+            $silabos =  BenefitProperty::where('benefit_id',$silabo_selected->benefit_id)->where('type_id',$silabo_selected->type_id)->get();
+            $meeting->model_id = $silabo_selected;
+            $meeting->benefit = $benefits->where('id',$silabo_selected->benefit->id)->first();
+        }
         extract($this->getFormSelects(true), EXTR_OVERWRITE);
-
+        
         return $this->success(get_defined_vars());
     }
 

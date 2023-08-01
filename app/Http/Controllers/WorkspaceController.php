@@ -15,7 +15,7 @@ use App\Models\SegmentValue;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
-
+use App\Models\WorkspaceFunctionality;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -94,6 +94,9 @@ class WorkspaceController extends Controller
 
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
+        $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
+        $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+
         return $this->success($workspace);
     }
 
@@ -144,6 +147,40 @@ class WorkspaceController extends Controller
         $criteria[] = $module_criterion->id;
 
         $workspace->criterionWorkspace()->sync($criteria);
+
+        // Actualizar funcionalidades
+
+        $selected_functionality = json_decode($data['selected_functionality'], true);
+
+        foreach($selected_functionality as $fun_id => $fun) {
+
+            $exist = WorkspaceFunctionality::where('workspace_id', $workspace->id)->where('functionality_id', $fun_id)->first();
+
+            if($exist) {
+                if(!$fun) {
+                    $exist->delete();
+                }
+            }
+            else {
+                if($fun) {
+                    try {
+
+                        DB::beginTransaction();
+                        $data = array('workspace_id'=> $workspace->id, 'functionality_id'=>$fun_id);
+                        WorkspaceFunctionality::create($data);
+
+                        DB::commit();
+                    } catch (\Exception $e) {
+                        info($e);
+                        DB::rollBack();
+                        abort(errorExceptionServer());
+                    }
+                }
+            }
+        }
+
+        cache_clear_model(WorkspaceFunctionality::class);
+
 
         \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
 
@@ -231,21 +268,23 @@ class WorkspaceController extends Controller
             $item->active = false;
         });
 
-        $side_menu = Taxonomy::select('id', 'name')
-                             ->where('group', 'system')
-                             ->where('type', 'side_menu')
-                             ->where('active', ACTIVE);
+        $side_menu = WorkspaceFunctionality::sideMenuApp(get_current_workspace()->id);
 
-        #=== visible glossary only for FP ===
-        $jump_menu = (get_current_workspace()->id !== 25);
-        if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
-        #=== visible glossary only for FP ===
+        // $side_menu = Taxonomy::select('id', 'name')
+        //                      ->where('group', 'system')
+        //                      ->where('type', 'side_menu')
+        //                      ->where('active', ACTIVE);
 
-        $side_menu = $side_menu->get();
+        // #=== visible glossary only for FP ===
+        // $jump_menu = (get_current_workspace()->id !== 25);
+        // if($jump_menu) $side_menu->whereNotIn('name', ['Glosario']);
+        // #=== visible glossary only for FP ===
 
-        $side_menu->each(function ($item) {
-            $item->active = false;
-        });
+        // $side_menu = $side_menu->get();
+
+        // $side_menu->each(function ($item) {
+        //     $item->active = false;
+        // });
 
         $response = compact('main_menu', 'side_menu');
 

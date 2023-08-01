@@ -555,6 +555,43 @@
             </template>
             <!--   ===================================================  -->
 
+            <!-- BENEFICIOS -->
+            <template v-slot:item.benefit_speaker="{ item, header }">
+                <div v-if="item.type != null && item.type.code == 'descuento'">
+                    <div class="text-center" style="color: #b8b8b8;">
+                        No aplica
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="text-center" v-if="item.benefit_speaker">
+                        {{ item.benefit_speaker }}
+                    </div>
+                    <div class="text-center" v-else>
+                        <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar expositor(a)</span>
+                    </div>
+                </div>
+            </template>
+            <template v-slot:item.benefit_type="{ item, header }">
+                <div class="text-center" v-if="item.benefit_type">
+                    {{ item.benefit_type }}
+                </div>
+                <div class="text-center" v-else>
+                    <span class="custom_benefit_type">Pendiente</span>
+                </div>
+            </template>
+            <template v-slot:item.benefit_stars="{ item, header }">
+                <div class="text-center" v-if="item.benefit_stars">
+                    {{ item.benefit_stars }}
+                </div>
+                <div class="text-center" v-else>
+                    <span class="custom_benefit_stars">Pendiente</span>
+                </div>
+            </template>
+            <template v-slot:item.perfil_speaker="{ item, header }">
+                <div class="tbl_perfil_speaker">
+                    <img :src="item.perfil_speaker" v-if="item.perfil_speaker">
+                </div>
+            </template>
 
         </v-data-table>
         <!--   Custom Paginator -->
@@ -872,7 +909,10 @@ export default {
 
             this.hideLoader()
         },
-
+        addSpeaker( item ) {
+            let vue = this
+            vue.$emit('addSpeaker', item)
+        }
     }
 }
 </script>
@@ -884,5 +924,31 @@ thead.v-data-table-header .v-tooltip__content {
 }
 i.v-icon.icon_tooltip {
     color: #000 !important;
+}
+span.custom_link_add_speaker {
+    font-size: 14px;
+    color: #5458EA;
+    font-family: "Nunito", sans-serif;
+    text-decoration: underline;
+    cursor: pointer;
+}
+span.custom_benefit_stars,
+span.custom_benefit_type {
+    color: #C9CED6;
+    font-size: 14px;
+    font-family: "Nunito", sans-serif;
+}
+.tbl_perfil_speaker {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: #D9D9D9;
+    img {
+        max-width: 100%;
+    }
 }
 </style>
