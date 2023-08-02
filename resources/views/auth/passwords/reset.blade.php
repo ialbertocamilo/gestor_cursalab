@@ -31,7 +31,6 @@
       </div>
       <div class="px-4 mt-4 mx-3">
         <p>
-        {{$showErrorModal}}
           ¡Hola!
           <span class="text-primary">
           </span>, para continuar por favor actualiza tu contraseña.
