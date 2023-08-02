@@ -95,7 +95,7 @@ class ForgotPasswordController extends Controller
         $token = str_replace('/', '-', $token);
         DB::table('password_resets')->updateOrInsert(
             ['email' => $user->email_gestor],
-            ['token' => $token, 'created_at' => now()]
+            ['email' => $user->email_gestor,'token' => $token, 'created_at' => now()]
         );
     
         return $token;
