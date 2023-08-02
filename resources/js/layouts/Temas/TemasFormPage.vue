@@ -113,10 +113,10 @@
                                     <th class="text-left white--text"
                                         style="max-width: 25% !important;     justify-content: right !important;"
                                         v-text="'Título'"/>
-                                    <th class="text-center white--text" v-text="'Archivo'"/>
+                                    <th class="text-left white--text" v-text="'Archivo'"/>
                                     <!--                                <th class="text-center white&#45;&#45;text" v-text="'Valor'"/>-->
-                                    <th class="text-center white--text" v-text="'¿Embebido?'"/>
-                                    <th class="text-center white--text" v-text="'¿Descargable?'"/>
+                                    <th class="text-left white--text" v-text="'¿Embebido?'"/>
+                                    <th class="text-left white--text" v-text="'¿Descargable?'"/>
                                     <th class="text-center white--text" v-text="'Eliminar'"/>
                                 </tr>
                                 </thead>
@@ -140,7 +140,9 @@
                                         <td>
                                             <div class="multimedia-box"
                                                  style="height: 40px !important; width: 40px !important;">
-                                                <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
+                                                    <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                </a>
                                             </div>
                                         </td>
                                         <td>
@@ -150,7 +152,17 @@
                                                 dense
                                             />
                                         </td>
-                                        <td>{{ media.value || media.file.name }}</td>
+                                        <!-- <td>{{ media.value || media.file.name }}</td> -->
+                                        <td class="">
+                                            <div class="multimedia-table-icon mt-2 " style="align-items: start;">
+                                                <a class="media-link" href="javascript:;"  title="Copiar código"
+                                                    @click="copyToClipboard(media.value || media.file.name)">
+                                                    <i :class="'mdi mdi-content-copy'"  style="font-size: 1rem !important; margin-right: 5px;" />
+
+                                                    {{ media.value || media.file.name }}
+                                                </a>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <DefaultToggle v-model="media.embed"
@@ -239,6 +251,7 @@ export default {
     data() {
         return {
             drag: false,
+            media_url: null,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             resourceDefault: {
                 name: null,
@@ -485,6 +498,7 @@ export default {
             let url = `${vue.base_endpoint}/${vue.topic_id === '' ? 'form-selects' : `search/${vue.topic_id}`}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     if (vue.topic_id !== '') {
@@ -571,6 +585,30 @@ export default {
             }
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
+        },
+        copyToClipboard(text) {
+            let vue = this;
+
+            navigator.clipboard.writeText(text);
+
+            vue.showAlert('Código multimedia copiado', 'success', '', 3);
+        },
+        getFullResourceLink(media) {
+            // let link = ""
+            // let media_url = ""
+            let vue = this;
+
+            if (media.type_id == 'youtube')
+                return 'https://www.youtube.com/embed/' + media.value + '?rel=0&modestbranding=1&showinfo=0';
+
+            if (media.type_id == 'vimeo')
+                return 'https://player.vimeo.com/video/' + media.value;
+            
+            if (media.type_id == 'video' || media.type_id == 'pdf' || media.type_id == 'audio')
+                return vue.media_url + media.value;
+
+            if (media.type_id == 'scorm' || media.type_id == 'genially' || media.type_id == 'link')
+                return media.value;
         }
     }
 }
