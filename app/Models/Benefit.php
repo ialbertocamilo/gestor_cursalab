@@ -136,7 +136,8 @@ class Benefit extends BaseModel
             $json_maps['location'] = $geometry->location ?? null;
             $json_maps['address'] = $data_maps->formatted_address ?? null;
             $json_maps['url'] = $data_maps->url ?? null;
-            $json_maps['image'] = null;
+            $json_maps['image'] = $data_maps->image_map ?? null;
+            $json_maps['ubicacion'] = $data_maps->ubicacion ?? null;
 
             $data['direccion'] = json_encode($json_maps);
         }
@@ -1181,7 +1182,9 @@ class Benefit extends BaseModel
             $item->status = $item->user_status;
 
 
-            $item->ubicacion = null;
+            $direccion = ($item->direccion) ? json_decode($item->direccion) : null;
+            $item->ubicacion = ($direccion) ? $direccion->ubicacion ?? null : null;
+
             $item->inicio_inscripcion = $item->inicio_inscripcion ? Carbon::parse($item->inicio_inscripcion)->format('d/m/Y') : null;
             $item->fin_inscripcion = $item->fin_inscripcion ? Carbon::parse($item->fin_inscripcion)->format('d/m/Y') : null;
             $item->fecha_liberacion = $item->fecha_liberacion ? Carbon::parse($item->fecha_liberacion)->format('d/m/Y') : null;
@@ -1346,16 +1349,18 @@ class Benefit extends BaseModel
             $direccion = ($benefit->direccion) ? json_decode($benefit->direccion) : null;
             if ($direccion) {
                 $benefit->direccion = (object)[
-                    'lugar' => $direccion->address,
-                    'link' => $direccion->url,
-                    'image' => null,
-                    'referencia' => $benefit->referencia,
+                    'lugar' => $direccion->address ?? null,
+                    'link' => $direccion->url ?? null,
+                    'image' => $direccion->image ?? null,
+                    'ubicacion' => $direccion->ubicacion ?? null,
+                    'referencia' => $benefit->referencia ?? null,
                 ];
+                $benefit->ubicacion = $direccion->ubicacion ?? null;
             }
             else{
                 $benefit->direccion = null;
+                $benefit->ubicacion = null;
             }
-            $benefit->ubicacion = null;
             $benefit->inicio_inscripcion = $benefit->inicio_inscripcion ? Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y') : null;
             $benefit->fin_inscripcion = $benefit->fin_inscripcion ? Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y') : null;
             $benefit->fecha_liberacion = $benefit->fecha_liberacion ? Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y') : null;
