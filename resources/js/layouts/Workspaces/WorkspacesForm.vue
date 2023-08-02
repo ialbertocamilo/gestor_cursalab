@@ -279,90 +279,36 @@
                         <DefaultSection
                             title="Configuración adicional"
                             v-if="is_superuser">
+                            <template v-slot:content>
+
+                                <v-row>
+                                    <v-col cols="6">
+                                     
+                                        <DefaultAutocomplete
+                                            dense
+                                            clearable
+                                            return-object
+                                            item-text="name"
+                                            label="Criterio de fecha en Reconocimiento"
+                                            v-model="resource.criterio_id_fecha_inicio_reconocimiento"
+                                            :items="itemsCriterionDates"
+                                        />
+                                       
+                                    </v-col>
+                                </v-row>
 
                                 <v-row>
                                     <v-col cols="12">
-                                        <DefaultModalSection title="Notificaciones Push">
-                                                <template v-slot:content>
-                                                    <v-row>
-                                                        <v-col cols="6">
-                                                            <DefaultInput
-                                                                class="mb-4"
-                                                                label="Empezar envio luego de: (en minutos)"
-                                                                type="number"
-                                                                v-model="resource.notificaciones_push_envio_inicio" />
-                                                            <DefaultInput
-                                                                label="Número de usuarios por envio"
-                                                                type="number"
-                                                                v-model="resource.notificaciones_push_envio_intervalo"
-                                                            />
-                                                        </v-col>
-                                                        <v-col cols="6">
-                                                            <DefaultInput
-                                                                label="Frecuencia de envio por bloques (en minutos)"
-                                                                type="number"
-                                                                v-model="resource.notificaciones_push_chunk"
-                                                                />
-                                                        </v-col>
-                                                    </v-row>
-                                                </template>
-                                        </DefaultModalSection>
+                                        <DefaultInput
+                                            clearable
+                                            v-model="resource.url_powerbi"
+                                            label="Link de learning analytics (PowerBI)"
+                                            dense
+                                        />
                                     </v-col>
                                 </v-row>
-
-
-                                <v-row>
-                                    <v-col cols="12">
-                                        <DefaultModalSection title="Criterio reconocimiento">
-                                                <template v-slot:content>
-                                                    <v-row>
-                                                        <v-col cols="12">
-                                                            <DefaultAutocomplete
-                                                                clearable
-                                                                return-object
-                                                                item-text="name"
-                                                                label="Seleccione tipo de criterio fecha *"
-                                                                :loading="true"
-                                                                v-model="resource.criterio_id_fecha_inicio_reconocimiento"
-                                                                :items="itemsCriterionDates"
-                                                            />
-                                                        </v-col>
-                                                    </v-row>
-                                                </template>
-                                        </DefaultModalSection>
-                                    </v-col>
-                                </v-row>
-
-                                <v-row>
-                                    <v-col>
-                                        <v-subheader class="mt-4 px-0">
-                                            <strong>Criterios</strong>
-                                        </v-subheader>
-
-                                        <v-divider class="mt-0"/>
-
-                                        <v-alert
-                                            border="top"
-                                            colored-border
-                                            type="info"
-                                            elevation="2"
-                                            />
-                                            <template v-slot:content>
-                                                <v-row justify="space-around" >
-                                                    <v-col cols="12">
-                                                        <DefaultInput
-                                                            clearable
-                                                            v-model="resource.url_powerbi"
-                                                            label="Link de learning analytics (PowerBI)"
-                                                            dense
-                                                        />
-                                                    </v-col>
-                                                </v-row>
-                                            </template>
-
-                                    </v-col>
-                                </v-row>
-                            </DefaultSection>
+                            </template>
+                        </DefaultSection>
                     </v-tab-item>
 
                 </v-tabs-items>

@@ -503,6 +503,7 @@ export default {
                 title: "VOTACIONES",
                 icon: "fas fa-paper-plane",
                 active: false,
+                functionality: ['reconocimiento'],
                 items: [
                     {
                         title: "Listar",
