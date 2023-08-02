@@ -13,7 +13,7 @@
                             class="logo"
                             alt="We connect">
                     </div>
-                    <div :class="` ${canAccessConfiguration ? 'col-sm-2 col-lg-3' : 'col-8' } d-flex justify-content-center flex-column` ">
+                    <div :class="` ${true ? 'col-sm-2 col-lg-3' : 'col-8' } d-flex justify-content-center flex-column` ">
                         <h1>
                             Bienvenido(a) a WeConnect 2.0
                         </h1>
@@ -21,7 +21,7 @@
                             Ingresa a un workspace para administrar  su contenido
                         </h3>
                     </div>
-                    <div v-if="canAccessConfiguration" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
+                    <div v-if="true" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
                         <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
                             <span class="mdi mdi-cloud-outline fa-3x mr-3"></span>
                             <div class="d-flex flex-column">
@@ -48,8 +48,8 @@
                             </div>
                         </div>
 
-                        <div class="d-flex flex-column" 
-                            style="gap:1rem;" 
+                        <div class="d-flex flex-column"
+                            style="gap:1rem;"
                             v-if="false">
                             <v-btn color="primary" @click="openLink('/auditoria')">
                                 <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
@@ -75,7 +75,7 @@
         <v-row v-show="showDetail" class="justify-content-center mt-3 pt-3 pb-3">
             <v-col cols="10">
                 <b class="btn_select_media" @click="showDetail = false">
-                    <span class="fas fa-arrow-left  mr-2"></span> Gestión de almacenamiento y usuarios. 
+                    <span class="fas fa-arrow-left  mr-2"></span> Gestión de almacenamiento y usuarios.
                 </b>
             </v-col>
         </v-row>
@@ -278,7 +278,7 @@
                 </v-row>
             </v-col>
         </v-row>
-        
+
         </div>
 
 
@@ -319,9 +319,9 @@
                                         :value="workspace.size_medias_porcent.porcent"
                                         rounded
                                     >
-                                        <div class="d-flex justify-content-end" 
+                                        <div class="d-flex justify-content-end"
                                             :style="{ width: (workspace.size_medias_porcent.porcent < 10) ? '8%' :workspace.size_medias_porcent.porcent +'%'}">
-                                            <strong 
+                                            <strong
                                                 class="text-white text-right"
                                                 v-text="workspace.size_medias_porcent.porcent + '%'">
                                             </strong>
@@ -329,9 +329,9 @@
                                     </v-progress-linear>
                                 </div>
 
-                                <v-btn 
-                                    class="ml-2" 
-                                    text 
+                                <v-btn
+                                    class="ml-2"
+                                    text
                                     color="primary"
                                     @click="setActiveWorkspaceRoute(workspace.id, true, 'home')">
                                     <v-icon>
@@ -374,9 +374,9 @@
                                         :value="workspace.users_count_porcent.porcent"
                                         rounded
                                     >
-                                        <div class="d-flex justify-content-end" 
+                                        <div class="d-flex justify-content-end"
                                             :style="{ width: (workspace.users_count_porcent.porcent < 10) ? '8%' :workspace.users_count_porcent.porcent +'%'}">
-                                            <strong 
+                                            <strong
                                                 class="text-white text-right"
                                                 v-text="workspace.users_count_porcent.porcent + '%'">
                                             </strong>
@@ -384,10 +384,10 @@
                                     </v-progress-linear>
                                 </div>
 
-                                <v-btn 
-                                    class="ml-2" 
-                                    text 
-                                    color="primary" 
+                                <v-btn
+                                    class="ml-2"
+                                    text
+                                    color="primary"
                                     @click="setActiveWorkspaceRoute(workspace.id, true, 'usuarios')">
                                     <v-icon>
                                         mdi-open-in-new
@@ -689,7 +689,7 @@ export default {
         ,
         /**
          * Update workspace in User's session and
-         * redirect to welcome page
+         * redirect to default page
          *
          * @param workspaceId
          * @param redirect
@@ -706,10 +706,10 @@ export default {
                 .post(url, formData)
                 .then(() => {
 
-                    // Redirect to welcome page
+                    // Redirect to default page
 
                     if (redirect) {
-                        window.location.href = '/welcome';
+                        window.location.href = '/home';
                     }
                 });
         }
@@ -723,7 +723,7 @@ export default {
                 })
         }
         ,
-        setActiveWorkspaceRoute(workspaceId, redirect, route = 'welcome') {
+        setActiveWorkspaceRoute(workspaceId, redirect, route = 'home') {
 
             let vue = this;
 
@@ -735,7 +735,7 @@ export default {
                 .post(url, formData)
                 .then(() => {
 
-                    // Redirect to welcome page
+                    // Redirect to default page
 
                     if (redirect) {
                         window.location.href = '/'+route;

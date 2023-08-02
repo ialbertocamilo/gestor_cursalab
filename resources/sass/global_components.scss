@@ -572,6 +572,18 @@ fieldset.editor {
     }
 }
 
+.multimedia-table-icon {
+
+    a.media-link, a.media-link:hover {
+        text-decoration: none;
+
+        white-space: nowrap !important;
+        max-width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+
 .reporte-filtro-checkbox {
     .v-input--checkbox .v-input--selection-controls__input {
         top: -3px;
