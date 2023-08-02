@@ -81,7 +81,9 @@
             
             @endif
 
+            
             <br>
+            <a href="{{ route('password.update') }}" target="_self" rel="noopener noreferrer" style="color:#0000D2" class="pt-4">Olvidé mi contraseña</a>
           </div>
         </form>
       </div>

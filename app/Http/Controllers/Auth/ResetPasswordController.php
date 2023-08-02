@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ResetsPasswords;
-use Illuminate\Validation\ValidationException;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller
 {
@@ -51,7 +54,54 @@ class ResetPasswordController extends Controller
     {
         $user->password = $password;
     }
+    protected function reset(Request $request)
+    {
+        $this->validate($request, $this->rules(), $this->validationErrorMessages());
+        // Encuentra al usuario por el correo electrónico
+        $user = User::where('email_gestor', $request->email)->where('active',1)->first();
+        $token = $request->token;
+        $password = $request->password;
+        // Verificar si el token es válido y no ha expirado
+        $resetRecord = DB::table('password_resets')
+            ->where('token', $token)
+            ->first();
 
+        if (!$resetRecord || Carbon::parse($resetRecord->created_at)->addHour()->isPast()) {
+            // El token no es válido o ha expirado
+            return redirect()->back()
+                ->withInput($request->only('email'))
+                ->withErrors(['status' => 'El token ha expirado.']);
+        }
+        if (!$user) {
+            return redirect()->back()
+                ->withInput($request->only('email'))
+                ->withErrors(['status' => 'No se pudo restablecer la contraseña.']);
+            // El usuario no existe, realiza acciones adecuadas (redireccionar, mostrar mensaje, etc.)
+        }
+        // Actualiza la contraseña del usuario y elimina el token
+        $user->updatePasswordUser($password);
+        DB::table('password_resets')->where('token', $token)->delete();
+        return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida.');
+    }
+    public function showResetForm(Request $request)
+    {
+        $token = $request->token;
+        // Verificar si el token es válido y no ha expirado
+        $resetRecord = DB::table('password_resets')
+            ->where('token', $token)
+            ->first();
+
+        if (!$resetRecord || Carbon::parse($resetRecord->created_at)->addHour()->isPast()) {
+            // El token no es válido o ha expirado
+            return view('auth.passwords.reset')->with(
+                ['token' => $token, 'email' => null,'showErrorModal' => true ]
+            );
+        }
+
+        return view('auth.passwords.reset')->with(
+            ['token' => $token, 'email' => $resetRecord->email,'showErrorModal'=>false]
+        );
+    }
     public function showResetFormInit(Request $request)
     {
         $currentToken = $request->token;
@@ -71,5 +121,22 @@ class ResetPasswordController extends Controller
 
         return view('auth.passwords.reset_pass', [ 'token' => $currentToken,
                                                    'message' => $is_new_pass ]);
+    }
+    protected function rules()
+    {
+        return [
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed', 
+        ];
+    }
+
+    protected function validationErrorMessages()
+    {
+        return [
+            'password.min' => 'La contraseña debe tener al menos :min caracteres.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+        ];
     }
 }

@@ -1,66 +1,116 @@
+@extends('layouts.appfront')
 
-@extends('layouts.app')
+@section('morecss')
+<style>
+
+.label-material.active{
+  color:#007aff;
+}
+</style>
+@endsection
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
-
-                        <input type="hidden" name="token" value="{{ $token }}">
-
-                        <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ $email ?? old('email') }}" required autofocus>
-
-                                @if ($errors->has('email'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Reset Password') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+<div class="page login-page d-flex justify-content-end align-items-center">
+    <div id="resetErrorModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="resetErrorModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetErrorModalLabel">Error de Restablecimiento de Contraseña</h5>
+                </div>
+                <div class="modal-body">
+                    <p>El token de restablecimiento de contraseña no es válido o ha expirado.</p>
                 </div>
             </div>
         </div>
     </div>
+
+  <div class="content_login_form">
+    <div class="form-holder has-shadow">
+      <div class="logo mt-1 mx-auto text-center">
+        <img src="{{ url('img/logo_cursalab_v2_black.png') }}" alt="cursalab" class="img-fluid" width="270">
+      </div>
+      <div class="px-4 mt-4 mx-3">
+        <p>
+        {{$showErrorModal}}
+          ¡Hola!
+          <span class="text-primary">
+          </span>, para continuar por favor actualiza tu contraseña.
+        </p>
+
+        <p>
+          Elige una contraseña segura y no la utilices en otras cuentas, ni la compartas con nadie.
+        </p>
+      </div>
+
+      <div class="form mt-2">
+        <form method="POST" class="form-validate" autocomplete="off" action="{{ route('password.update') }}">
+          @csrf
+          <input hidden name="token" value="{{ $token }}" >
+          <input hidden name="email" value="{{ $email ?? old('email') }}" >
+
+          <div class="form-group">
+            <input id="reset-password" type="password" name="password" 
+                required data-msg="Por favor ingrese su nueva contraseña" 
+                class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }} no-icon one" autocomplete="off" maxlength="100" autofocus>
+            <div class="one toggle-eye text-muted" 
+                onclick="toggleEyeInputId(this, 'reset-password')">
+              <span class="far fa-eye fa-lg"></span>
+            </div>
+
+            <label for="reset-password" class="label-material active">Nueva contraseña</label>
+            @if ($errors->has('password'))
+            <span class="invalid-feedback" role="alert">
+              <strong>{{ $errors->first('password') }}</strong>
+            </span>
+            @endif
+          </div>
+
+          <div class="form-group">
+            <input id="reset-repassword" type="password" name="password_confirmation" 
+                required data-msg="Por favor repita su nueva contraseña" 
+                class="input-material form-control{{ $errors->has('password_confirmation') ? ' is-invalid' : '' }} no-icon two" autocomplete="off" maxlength="100">
+            <div class="two toggle-eye text-muted" 
+                 onclick="toggleEyeInputId(this, 'reset-repassword')">
+              <span class="far fa-eye fa-lg"></span>
+            </div>
+
+            <label for="reset-repassword" class="label-material">Repetir nueva contraseña</label>
+            @if ($errors->has('repassword'))
+            <span class="invalid-feedback" role="alert">
+              <strong>{{ $errors->first('repassword') }}</strong>
+            </span>
+            @endif
+          </div>
+
+          <div class="form-group mb-0 text-center">
+            <button type="submit" class="btn btn-primary">
+              Actualizar contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="mt-4 text-right copy">
+      <a href="https://cursalab.io/" target="_blank" class="external">
+        <img src="{{ url('img/poweredByCursalab.png') }}" alt="powerby-cursalab" class="img-fluid" width="120">
+      </a>
+    </div>
+  </div>
 </div>
+@if(isset($showErrorModal) && $showErrorModal)
+    <script>
+        // $(document).ready(function () {
+        //     $('#resetErrorModal').modal({backdrop: 'static', keyboard: false});
+        // });
+        document.addEventListener("DOMContentLoaded", function () {
+            // const resetErrorModal = new bootstrap.Modal(document.getElementById("resetErrorModal"));
+            // resetErrorModal.show();
+            const resetErrorModal = new bootstrap.Modal(document.getElementById("resetErrorModal"), {
+                backdrop: "static"
+            });
+            resetErrorModal.show();
+        });
+    </script>
+@endif
 @endsection
