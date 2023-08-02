@@ -51,7 +51,9 @@ class TemaController extends Controller
 
         $evaluation_types = Taxonomy::getDataForSelect('topic', 'evaluation-type');
 
-        $response = compact('tags', 'requisitos', 'evaluation_types');
+        $media_url = get_media_url();
+
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'media_url');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -76,11 +78,15 @@ class TemaController extends Controller
         $topic->tipo_ev = $topic->hide_tipo_ev;
         $requirement = $topic->requirements()->first();
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
+
+        $media_url = get_media_url();
+
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
             'requisitos' => $form_selects['requisitos'],
-            'evaluation_types' => $form_selects['evaluation_types']
+            'evaluation_types' => $form_selects['evaluation_types'],
+            'media_url' => $media_url,
         ]);
     }
 

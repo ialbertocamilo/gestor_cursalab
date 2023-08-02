@@ -13,7 +13,7 @@
                             class="logo"
                             alt="We connect">
                     </div>
-                    <div :class="` ${canAccessConfiguration ? 'col-sm-2 col-lg-3' : 'col-8' } d-flex justify-content-center flex-column` ">
+                    <div :class="` ${true ? 'col-sm-2 col-lg-3' : 'col-8' } d-flex justify-content-center flex-column` ">
                         <h1>
                             Bienvenido(a) a WeConnect 2.0
                         </h1>
@@ -21,7 +21,7 @@
                             Ingresa a un workspace para administrar  su contenido
                         </h3>
                     </div>
-                    <div v-if="canAccessConfiguration" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
+                    <div v-if="true" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
                         <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
                             <span class="mdi mdi-cloud-outline fa-3x mr-3"></span>
                             <div class="d-flex flex-column">
