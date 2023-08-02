@@ -15,10 +15,10 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="resetErrorModalLabel">Error de Restablecimiento de Contraseña</h5>
+                    <h5 class="modal-title" id="resetErrorModalLabel">¡El enlace ha expirado!</h5>
                 </div>
                 <div class="modal-body">
-                    <p>El token de restablecimiento de contraseña no es válido o ha expirado.</p>
+                    <p>Solicita cambiar tu contraseña nuevamente para enviarte un nuevo enlace. <br> Gracias</p>
                 </div>
             </div>
         </div>

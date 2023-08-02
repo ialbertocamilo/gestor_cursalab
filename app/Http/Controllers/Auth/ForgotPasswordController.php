@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Mail\EmailTemplate;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,7 @@ class ForgotPasswordController extends Controller
         }
         $expiration = Carbon::now()->addHour();
         // Generar y almacenar un nuevo token
-        $token = Hash::make($this->broker()->createToken($user, $expiration));
+        $token = Hash::make(Str::random(15));
         $token = str_replace('/', '-', $token);
         DB::table('password_resets')->insert(
             ['email' => $user->email_gestor,'token' => $token, 'created_at' => now()]
