@@ -88,6 +88,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::prefix('/ranking')->group(base_path('routes/app/ranking.php'));
     Route::prefix('videoteca')->group(base_path('routes/app/videoteca.php'));
     Route::prefix('votaciones')->group(base_path('routes/app/votaciones.php'));
+    Route::prefix('users')->group(base_path('routes/app/users.php'));
 
     Route::get('preguntas_seccion_ayuda', [RestAyudaController::class, 'preguntas_seccion_ayuda']);
     Route::get('preguntas_frecuentes', [RestAyudaController::class, 'preguntas_frecuentes']);
