@@ -93,8 +93,7 @@ class ForgotPasswordController extends Controller
         // Generar y almacenar un nuevo token
         $token = Hash::make($this->broker()->createToken($user, $expiration));
         $token = str_replace('/', '-', $token);
-        DB::table('password_resets')->updateOrInsert(
-            ['email' => $user->email_gestor],
+        DB::table('password_resets')->insert(
             ['email' => $user->email_gestor,'token' => $token, 'created_at' => now()]
         );
     
