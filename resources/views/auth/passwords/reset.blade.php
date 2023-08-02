@@ -18,7 +18,7 @@
                     <h5 class="modal-title" id="resetErrorModalLabel">¡El enlace ha expirado!</h5>
                 </div>
                 <div class="modal-body">
-                    <p>Solicita cambiar tu contraseña nuevamente para enviarte un nuevo enlace. <br> Gracias</p>
+                    <p>Solicita cambiar tu contraseña nuevamente para enviarte un nuevo enlace.</p>
                 </div>
             </div>
         </div>
