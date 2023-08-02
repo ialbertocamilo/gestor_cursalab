@@ -30,7 +30,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaEscuelaData($usuario_id, $categoria_id);
             return view('ver_certificado', compact('data'));
         } catch (\Throwable $th) {
-            abort(404);
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -40,7 +41,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaEscuelaData($usuario_id, $categoria_id);
             return view('certificado', compact('data'));
         } catch (\Throwable $th) {
-            abort(404);            //throw $th;
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -51,7 +53,8 @@ class GestorController extends Controller
             return view('ver_certificado', compact('data'));
         } catch (\Exception $e) {
             info($e);
-            abort(404);
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -61,7 +64,8 @@ class GestorController extends Controller
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
             return view('certificado', compact('data'));
         } catch (\Throwable $th) {
-            abort(404);            //throw $th;
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
         }
     }
 
@@ -143,9 +147,7 @@ class GestorController extends Controller
         $plantilla_categoria = $categoria->plantilla_diploma != null ? $categoria->plantilla_diploma : $usuario->config->plantilla_diploma;
         //Procesar imagen por el lado del servidor
         $base64 = $this->parse_image($plantilla_categoria);
-        if (!$base64||is_null($base64)){
-          return $this->$error('Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.');
-        }
+
         return array('image' => $base64, 'video' => $categoria->nombre, 'usuario' => $usuario->nombre, 'fecha' => $eva->fecha_emision);
     }
 
@@ -161,8 +163,8 @@ class GestorController extends Controller
                 return 'data:image/' . $type . ';base64,' . base64_encode($image);
             }
         }
-        return null;
-}
+        return  abort(404);
+    }
 
     public function descargaArchivo($id)
     {
