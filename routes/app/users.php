@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\ApiRest\RestuserController;
+use App\Http\Controllers\ApiRest\RestUserController;
 
-Route::controller(RestuserController::class)->group(function() {
+Route::controller(RestUserController::class)->group(function() {
 
-    Route::get('/', 'courses');
+    Route::post('/password/reset', 'resetPassword');
 
     // Route::get('/cargar_encuestas_curso/{course}', 'loadPoll');
 

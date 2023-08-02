@@ -378,24 +378,27 @@ function calculateValueForQualification($value, $current_system, $main_system = 
 
     return round($new_value, 2);
 }
-function get_type_link(string $linked, string $key = 'type') {
+
+function transform_domain(array $ArrayHost)
+{
+    $arrayAvailableDomains = [ 'youtu' => 'youtube',
+                               'youtube' => 'youtube',
+                               'vimeo' => 'vimeo'];
+    $currentType = NULL;
+
+    foreach($arrayAvailableDomains as $key => $value) {
+        if(in_array($key, $ArrayHost)) {
+            $currentType = $value;
+        }
+    }
+
+    return $currentType;
+}
+
+function get_type_link(string $linked, string $key = 'type') 
+{
     $parsedLinked = parse_url($linked);
     [ 'host' => $host , 'path' => $path ] = $parsedLinked;
-
-    function transform_domain(array $ArrayHost) {
-        $arrayAvailableDomains = [ 'youtu' => 'youtube',
-                                   'youtube' => 'youtube',
-                                   'vimeo' => 'vimeo'];
-        $currentType = NULL;
-
-        foreach($arrayAvailableDomains as $key => $value) {
-            if(in_array($key, $ArrayHost)) {
-                $currentType = $value;
-            }
-        }
-
-        return $currentType;
-    }
 
     $currentType = transform_domain( explode('.', $host) );
     $currentHash = NULL;
@@ -416,19 +419,19 @@ function get_type_link(string $linked, string $key = 'type') {
     return $switchKey[$key];
 }
 
+function getExtensionFileUrl(string $url) {
+    ['path' => $filePath] = parse_url($url);
+
+    $prevPath = explode('.', $filePath);
+    $prevExtension = $prevPath[count($prevPath) - 1];
+    $existScorm = ($prevExtension === 'html'); // type scorm
+
+    $fileExtension = $existScorm ? 'scorm' : $prevExtension;
+    return $fileExtension;
+}
+
 function get_type_media(string $media)
 {
-    function getExtensionFileUrl(string $url) {
-        ['path' => $filePath] = parse_url($url);
-
-        $prevPath = explode('.', $filePath);
-        $prevExtension = $prevPath[count($prevPath) - 1];
-        $existScorm = ($prevExtension === 'html'); // type scorm
-
-        $fileExtension = $existScorm ? 'scorm' : $prevExtension;
-        return $fileExtension;
-    }
-
     $fileExtension = getExtensionFileUrl($media);
 
     $arrayAvailableTypes = [
