@@ -11,7 +11,7 @@ Route::controller(RestCampaignController::class)->group(function() {
 
     /* usuario estados: insignias - requerimientos */
     Route::get('/campaign/requirements/{campaign}/{user}', 'campaignUserRequirements');
-    Route::get('/campaign/badges/{campaign_id}/{user_id}', 'campaignUserBadges');
+    Route::get('/campaign/badges/{campaign}/{user}', 'campaignUserBadges');
     /* usuario estados: insignias - requerimientos */
 
     Route::post('/campaign/contents/send_answer', 'contentSaveAnswer'); # responder encuesta

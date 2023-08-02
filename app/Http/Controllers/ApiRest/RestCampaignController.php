@@ -80,15 +80,17 @@ class RestCampaignController extends Controller
         return $this->success($user_criterion_response);
     }
 
-    public function campaignUserBadges(Request $request) 
+    public function campaignUserBadges(Campaign $campaign, User $user) 
     {
-        $user_campaign = CampaignSummoneds::getSummonedAnswerCandidate($request->campaign_id, $request->user_id);
+        $user = auth()->user();
+
+        $user_campaign = CampaignSummoneds::getSummonedAnswerCandidate($campaign->id, $user->id);
 
         if($user_campaign) {
 
             $user_campaign_response = [
-                'user_id' => (int) $request->user_id,
-                'campaign_id' => (int) $request->campaign_id,
+                'user_id' => (int) $user->id,
+                'campaign_id' => (int) $campaign->id,
                 'first_badge_state' => !(is_null($user_campaign->answer)), 
                 'second_badge_state' => (bool) $user_campaign->candidate_state
             ];
