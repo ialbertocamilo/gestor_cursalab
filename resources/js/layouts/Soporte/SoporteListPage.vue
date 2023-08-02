@@ -4,16 +4,30 @@
             <v-card-title>
                 Soporte
                 <v-spacer/>
-                <DefaultActivityButton label="Administrar Formulario APP"
-                                       @click="goToCategorias"/>
-                <!-- <v-spacer/> -->
+
+                <DefaultActivityButton
+                    v-if="$root.isSuperUser"
+                    label="Administrar Formulario APP"
+                    @click="goToCategorias"/>
+
             </v-card-title>
         </v-card>
 
-        <v-card flat class="elevation-0 mb-4">
-            <v-card-text>
-                <v-row class="justify-content-start">
-                    <v-col>
+
+        <!--
+            Filters drawer
+        ================================================================== -->
+
+        <DefaultFilter
+            v-model="filtersAreShown"
+            @filter="advanced_filter(dataTable, filters, 1)"
+            @cleanFilters="clearFilters(filters)"
+            :hide-confirm-btn="true"
+            :disabled-confirm-btn="isValuesObjectEmpty(filters)"
+        >
+            <template v-slot:content>
+                <v-row justify="center">
+                    <v-col cols="12">
                         <DefaultSelect
                             clearable dense
                             :items="selects.modulos"
@@ -22,7 +36,8 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col>
+
+                    <v-col cols="12">
                         <DefaultSelect
                             clearable dense
                             :items="selects.estados"
@@ -31,17 +46,20 @@
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col>
-                        <DefaultInput
+
+                    <v-col cols="12">
+                        <DefaultSelect
                             clearable dense
-                            v-model="filters.q"
-                            label="Buscar por documento, nombre, ticket..."
-                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                            append-icon="mdi-magnify"
-                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                            :item-value="'reason'"
+                            :item-text="'reason'"
+                            :items="selects.reasons"
+                            v-model="filters.reason"
+                            label="Motivos"
+                            @onChange="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col>
+
+                    <v-col cols="12">
                         <DefaultInputDate
                             clearable
                             dense
@@ -53,7 +71,7 @@
                         />
                     </v-col>
 
-                    <v-col>
+                    <v-col cols="12">
                         <DefaultInputDate
                             clearable
                             dense
@@ -62,6 +80,35 @@
                             v-model="filters.ends_at"
                             label="Fecha fin"
                             @onChange="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
+                </v-row>
+            </template>
+        </DefaultFilter>
+
+
+        <v-card flat class="elevation-0 mb-4">
+            <v-card-text>
+                <v-row class="justify-content-between">
+
+                    <v-col cols="3">
+                        <DefaultInput
+                            clearable dense
+                            v-model="filters.q"
+                            label="Buscar por documento, nombre, ticket..."
+                            @onEnter="refreshDefaultTable(dataTable, filters, 1)"
+                            append-icon="mdi-magnify"
+                            @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
+                        />
+                    </v-col>
+
+                    <v-col cols="3">
+                        <DefaultButton
+                            text
+                            label="Aplicar filtros"
+                            icon="mdi-filter"
+                            @click="filtersAreShown = !filtersAreShown"
+                            class="btn_filter"
                         />
                     </v-col>
                 </v-row>
@@ -115,6 +162,8 @@ export default {
     },
     data() {
         return {
+            filtersAreShown: false,
+            criteria_template: [],
             dateFilterStart: {
                 open: false
             },
@@ -179,7 +228,8 @@ export default {
                 modulo: null,
                 status: null,
                 starts_at: null,
-                ends_at: null
+                ends_at: null,
+                reason: null
             },
             modalOptions: {
                 ref: 'SoporteFormModal',
@@ -225,6 +275,7 @@ export default {
                 .then(({data}) => {
                     vue.selects.modulos = data.data.modulos
                     vue.selects.estados = data.data.estados
+                    vue.selects.reasons = data.data.reasons;
                 })
         },
         goToCategorias() {
@@ -241,6 +292,18 @@ export default {
         confirmModal() {
             // TODO: Call store or update USER
         },
+        clearFilters(obj, table) {
+            this.filters =  {
+                q: '',
+                modulo: null,
+                status: null,
+                starts_at: null,
+                ends_at: null,
+                reason: null
+            }
+
+            this.refreshDefaultTable(this.dataTable, this.filters, 1)
+        }
     }
 }
 </script>

@@ -39,6 +39,10 @@ class UsuarioAyudaController extends Controller
         $modulos = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
         // $modulos = Criterion::getValuesForSelect('module');
         $estados = config('data.soporte-estados');
+        $reasons = Ticket::query()
+            ->select(['reason'])
+            ->distinct('reason')
+            ->get();
 
         return $this->success(get_defined_vars());
     }
