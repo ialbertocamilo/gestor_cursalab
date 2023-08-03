@@ -13,11 +13,6 @@ use Illuminate\Validation\Rules\Password;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\ResetsPasswords;
-use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
-use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
-use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
-use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
-use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
 
 class ResetPasswordController extends Controller
 {
@@ -87,7 +82,7 @@ class ResetPasswordController extends Controller
         }
         // Actualiza la contraseña del usuario y elimina el token
         $user->updatePasswordUser($password);
-        DB::table('password_resets')->where('token', $token)->delete();
+        // DB::table('password_resets')->where('token', $token)->delete();
         $loginController = new LoginController();
         Auth::loginUsingId($user->id);
         $loginController->authenticated($request,$user,false);
@@ -144,16 +139,20 @@ class ResetPasswordController extends Controller
             'email' => 'required|email',
             'password' => ['required', 'confirmed','max:100', "password_available:{$user->id}",
                         Password::min(8)->letters()->numbers()->symbols(),
-                                // ->mixedCase()->symbols()->uncompromised(3),
-
-                        new ContextSpecificWords($user->email),
-                        new ContextSpecificWords($user->email_gestor),
-                        new ContextSpecificWords($user->document),
-                        new ContextSpecificWords($user->name),
-                        new ContextSpecificWords($user->lastname),
-                        new ContextSpecificWords($user->surname),
-                        // new RepetitiveCharacters(),
-                        // new SequentialCharacters(),
+                        function ($attribute, $value, $fail) use ($user) {
+                            $attributesToCheck = ['name', 'lastname', 'surname'];
+                            foreach ($attributesToCheck as $attributeToCheck) {
+                                if (strpos(strtolower($value), strtolower($user->{$attributeToCheck})) !== false) {
+                                    $fail("No puedes incluir tu nombre ni apellido '{$user->$attributeToCheck}' en la contraseña.");
+                                }
+                            }
+                            if (strpos(strtolower($value), strtolower($user->email_gestor)) !== false) {
+                                $fail("No puedes incluir tu correo electronico en la contraseña.");
+                            }
+                            if (strpos(strtolower($value), strtolower($user->document)) !== false) {
+                                $fail("No puedes incluir tu documento en la contraseña.");
+                            }
+                        }
                     ],
         ];
     }

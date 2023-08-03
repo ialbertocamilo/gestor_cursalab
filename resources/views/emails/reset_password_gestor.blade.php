@@ -4,7 +4,7 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                <strong>Hola, {{$data['user']}}. </strong><br> Estas recibiendo este email, porque hemos recibido una solicitud de recuperación
+                <strong>Hola, {{$data['user']}} </strong><br> Estas recibiendo este email, porque hemos recibido una solicitud de recuperación
                 de contraseña para tu cuenta.
             </p>
         </td>

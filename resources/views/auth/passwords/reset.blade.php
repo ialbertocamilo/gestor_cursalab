@@ -75,7 +75,7 @@
             <label for="reset-password" class="label-material active">Nueva contraseña</label>
             @if ($errors->has('password'))
             <span class="invalid-feedback" role="alert">
-              <strong>{{ $errors->first('password') }}</strong>
+              <strong style="font-weight: bolder">{{ $errors->first('password') }}</strong>
             </span>
             @endif
           </div>
