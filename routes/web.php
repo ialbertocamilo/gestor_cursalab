@@ -35,6 +35,14 @@ Route::redirect('/', 'login', 301);
 //     return view('emails.email_information_apis',['data'=>$mail_data]);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
+Route::get('email_reset',function(){
+    $mail_data=[
+        'user'=>'Aldo López',
+        'url_to_reset'=> 'aslkdjasldk',
+        'minutes' => 60
+    ];
+    return view('emails.reset_password_gestor',['data'=>$mail_data]);
+});
 
 // login routes
 Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');

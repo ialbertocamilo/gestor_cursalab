@@ -3,7 +3,7 @@
 
     $user = auth()->user();
     $roles = $user->getRoles();
-    $functionality = \App\Models\WorkspaceFunctionality::functionalities( get_current_workspace()->id );
+    $functionality = \App\Models\WorkspaceFunctionality::functionalities( get_current_workspace()?->id );
     $subworkspace = get_current_workspace();
     $accounts_count = \App\Models\Account::where('active', ACTIVE)
         ->where('workspace_id', $subworkspace->id ?? null)
