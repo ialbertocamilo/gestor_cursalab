@@ -37,7 +37,7 @@ class UserAppPasswordUpdateRequest extends FormRequest
         $user = auth()->user();
 
         $passwordRules = [
-            "required", 'confirmed', 'max:100',
+            "required", 'max:100',
             Password::min(8)->letters()->numbers()->symbols(),
             "password_available:{$user->id}",
             // ->mixedCase()->uncompromised(3),
