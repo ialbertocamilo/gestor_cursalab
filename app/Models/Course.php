@@ -527,7 +527,7 @@ class Course extends BaseModel
                 $school_assigned++;
                 $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
-                if ($course_status['status'] == 'completado') $school_completed++;
+                if ($course_status['status'] == 'completado' || $course_status['status'] == 'aprobado') $school_completed++;
 
                 $topics = $course->topics->sortBy('position')->where('active', ACTIVE);
                 $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
