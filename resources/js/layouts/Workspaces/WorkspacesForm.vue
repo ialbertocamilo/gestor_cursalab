@@ -196,6 +196,7 @@
                                             type="number"
                                             min="0"
                                             clearable
+                                            dense
                                         />
                                     </v-col>
                                     <v-col cols="4">
@@ -213,7 +214,7 @@
                                 >
                                     <template v-slot:content>
 
-                                        <v-row justify="space-around">
+                                        <v-row justify="start">
 
                                             <v-col cols="4" v-for="functionality in functionalities" :key="functionality.id">
                                                 <v-checkbox

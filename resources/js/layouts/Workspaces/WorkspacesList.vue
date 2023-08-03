@@ -2,7 +2,7 @@
     <div class="wrapper">
 
         <v-row class="justify-content-center pt-3 pb-3 --mb-5">
-            <div class="col-6">
+            <div class="col-4">
                 <v-row class="--justify-content-center --pt-3 --pb-3" align="center">
                     <div class="col-3">
                         <img :src="config.logo"
@@ -16,7 +16,7 @@
                     </div>
                 </v-row>
             </div>
-            <div v-if="true" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
+            <div v-if="true" class="col-4 d-flex justify-content-end align-items-center" style="gap: 1.5rem">
                 <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
                     <span class="mdi mdi-cloud-outline fa-3x mr-3"></span>
                     <div class="d-flex flex-column">
@@ -57,7 +57,7 @@
                     </v-btn>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-2">
                 <div v-html="headerTemplate"></div>
             </div>
         </v-row>

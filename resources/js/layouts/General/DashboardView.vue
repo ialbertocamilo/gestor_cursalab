@@ -16,7 +16,7 @@
 
                 <v-spacer/>
 
-                <DefaultSelect
+                <!-- <DefaultSelect
                     class="col-3"
                     dense
                     label="Módulo"
@@ -25,7 +25,7 @@
                     item-text="name"
                     item-value="id"
                     @onChange="getEstadisticas"
-                />
+                /> -->
             </v-card-title>
         </v-card>
 
