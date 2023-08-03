@@ -103,6 +103,9 @@ class Ticket extends BaseModel
         if ($request->status)
             $query->where('status', $request->status);
 
+        if ($request->reason)
+            $query->where('reason', $request->reason);
+
         if ($request->starts_at)
             $query->whereDate('created_at', '>=', $request->starts_at);
 

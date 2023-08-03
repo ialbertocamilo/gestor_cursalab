@@ -738,7 +738,7 @@ export default {
 
                 // Redirect to welcome page
 
-                window.location.href = "/welcome";
+                window.location.href = "/home";
             });
         }
     }

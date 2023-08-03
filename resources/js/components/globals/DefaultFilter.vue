@@ -37,6 +37,7 @@
                         <DefaultButton
                             label="Aplicar"
                             @click="filterData"
+                            v-if="!hideConfirmBtn"
                             :disabled="disabledConfirmBtn"
                         />
                     </v-col>
@@ -66,7 +67,11 @@ export default {
         },
         disabledConfirmBtn: {
             type: Boolean,
+        },
+        hideConfirmBtn: {
+            type: Boolean
         }
+
     },
     data() {
         return {
