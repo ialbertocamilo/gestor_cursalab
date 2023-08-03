@@ -30,6 +30,17 @@
         <img src="{{ url('img/logo_cursalab_v2_black.png') }}" alt="cursalab" class="img-fluid" width="270">
       </div>
       <div class="px-4 mt-4 mx-3">
+        @if (session('info'))
+          <div class="alert-box-fixed-center" style="width: 550px;">
+            <div class="position-relative">
+                <div class="alert alert-success alert-dismissible m-0" role="alert">
+                    {{ session('info') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+            </div>
+          </div>
+        @endif
         <p>
           ¡Hola!
           <span class="text-primary">
@@ -39,6 +50,11 @@
         <p>
           Elige una contraseña segura y no la utilices en otras cuentas, ni la compartas con nadie.
         </p>
+        <ul>
+          <li>Mínimo 8 caracteres, debe incluir al menos una letra, un número y un caracter especial.</li>
+          {{-- <li>No debe incluir caracteres consecutivos o repetidos (Ej: aaaa,1234,abcd).</li> --}}
+          <li>No debe incluir ningún dato personal (Ej: correo, doc. de identidad, nombres o apellidos).</li>
+        </ul>
       </div>
 
       <div class="form mt-2">

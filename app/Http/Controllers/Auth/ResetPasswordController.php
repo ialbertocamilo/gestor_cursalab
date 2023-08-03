@@ -9,8 +9,15 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use LangleyFoxall\LaravelNISTPasswordRules\PasswordRules;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\ContextSpecificWords;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\RepetitiveCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\SequentialCharacters;
+use LangleyFoxall\LaravelNISTPasswordRules\Rules\DerivativesOfContextSpecificWords;
 
 class ResetPasswordController extends Controller
 {
@@ -56,9 +63,9 @@ class ResetPasswordController extends Controller
     }
     protected function reset(Request $request)
     {
-        $this->validate($request, $this->rules(), $this->validationErrorMessages());
-        // Encuentra al usuario por el correo electrónico
         $user = User::where('email_gestor', $request->email)->where('active',1)->first();
+        $this->validate($request, $this->rules($user), $this->validationErrorMessages());
+        // Encuentra al usuario por el correo electrónico
         $token = $request->token;
         $password = $request->password;
         // Verificar si el token es válido y no ha expirado
@@ -81,7 +88,9 @@ class ResetPasswordController extends Controller
         // Actualiza la contraseña del usuario y elimina el token
         $user->updatePasswordUser($password);
         DB::table('password_resets')->where('token', $token)->delete();
-        return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida.');
+        $loginController = new LoginController();
+        Auth::loginUsingId($user->id);
+        $loginController->authenticated($request,$user);
     }
     public function showResetForm(Request $request)
     {
@@ -122,12 +131,24 @@ class ResetPasswordController extends Controller
         return view('auth.passwords.reset_pass', [ 'token' => $currentToken,
                                                    'message' => $is_new_pass ]);
     }
-    protected function rules()
+    protected function rules($user)
     {
         return [
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed', 
+            'password' => ['required', 'confirmed','max:100', "password_available:{$user->id}",
+                        Password::min(8)->letters()->numbers()->symbols(),
+                                // ->mixedCase()->symbols()->uncompromised(3),
+
+                        new ContextSpecificWords($user->email),
+                        new ContextSpecificWords($user->email_gestor),
+                        new ContextSpecificWords($user->document),
+                        new ContextSpecificWords($user->name),
+                        new ContextSpecificWords($user->lastname),
+                        new ContextSpecificWords($user->surname),
+                        // new RepetitiveCharacters(),
+                        // new SequentialCharacters(),
+                    ],
         ];
     }
 
