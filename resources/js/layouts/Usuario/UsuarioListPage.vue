@@ -403,9 +403,18 @@ export default {
     },
     mounted() {
         let vue = this
+        
+          // === check localstorage multimedia ===
+        const { status, storage: usuarioStorage } = vue.getStorageUrl('usuarios', 'module_data');
+        // console.log('created_usuarios:', {status, usuarioStorage});
+        
+        if(status) {
+            vue.filters.active = usuarioStorage.active;
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+        // === check localstorage anuncio ===
+        }
         vue.getSelects();
     },
-
     methods: {
         getSelects() {
             let vue = this

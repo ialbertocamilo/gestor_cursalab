@@ -103,6 +103,9 @@ class Ticket extends BaseModel
         if ($request->status)
             $query->where('status', $request->status);
 
+        if ($request->reason)
+            $query->where('reason', $request->reason);
+
         if ($request->starts_at)
             $query->whereDate('created_at', '>=', $request->starts_at);
 
@@ -133,13 +136,17 @@ class Ticket extends BaseModel
     {
         $subworkspaces = get_current_workspace_indexes();
         $subworkspacesIds = implode(',', $subworkspaces['ids']->toArray());
+        if (!$subworkspacesIds) return;
 
         $usersToUpdate = DB::select(DB::raw("
             select
                 u.id
-            from users u join tickets t on t.user_id = u.id
+            from users u
+                join tickets t on t.user_id = u.id
             where u.last_login > t.created_at
-            and u.subworkspace_id in ($subworkspacesIds)
+                and t.status != 'solucionado'
+                and t.reason = 'Soporte Login'
+                and u.subworkspace_id in ($subworkspacesIds)
         "));
         $usersToUpdateIds = collect($usersToUpdate)->pluck('id');
 
@@ -153,7 +160,7 @@ class Ticket extends BaseModel
             $ticket->status = 'solucionado';
             $ticket->save();
 
-            $this->updateInfoSupport('Plataforma', '');
+            $ticket->updateInfoSupport('Plataforma', '');
         }
     }
 

@@ -5,7 +5,8 @@
                 class="breadcrumb-holder container-fluid card v-card v-sheet theme--light elevation-0"
             >
                 <v-card-title>
-                    Aulas Virtuales
+                    Sesiones Live
+                    <v-spacer/>
                     <DefaultInfoTooltip
                         class="mr-5"
                         bottom
@@ -45,8 +46,9 @@
                     />
 
                     <DefaultModalButton
-                        label="Crear reunión"
-                        class="--btn_crear"
+                        label="Crear sesión"
+                        :icon=false
+                        class="btn_crear"
                         @click="openFormModal(modalFormOptions)"/>
                 </v-card-title>
             </div>
@@ -385,7 +387,7 @@ export default {
             open: false,
             base_endpoint: "/aulas-virtuales",
             confirmLabel: "Guardar",
-            resource: "reunión"
+            resource: "sesión"
         },
         modalFormSegmentationOptions: {
             ref: "SegmentFormModal",
@@ -437,7 +439,7 @@ export default {
                 vue.modalFormOptions,
                 resource,
                 "duplicate",
-                "Crear reunión"
+                "Crear sesión"
             );
         }
         //      async activity() {

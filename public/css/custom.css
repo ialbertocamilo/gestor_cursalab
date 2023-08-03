@@ -1372,7 +1372,7 @@ input[type="color"] {
 }
 
 .table.table-primary-sub tbody tr.no-border td {
-	box-shadow: none !important;	
+	box-shadow: none !important;
 }
 
 table.table-scroll tbody {
@@ -1410,4 +1410,20 @@ table.table-scroll thead, table.table-scroll tbody tr {
 
 .flex-1 {
 	flex: 1 1 0%;
+}
+
+.fa-1_4x{
+	font-size: 1.4rem;
+}
+
+.w-90{
+	width: 90%;
+}
+
+.v-progress-linear__content {
+    justify-content: unset !important;
+}
+
+.ml-24-porcent{
+	margin-left: 24%;
 }

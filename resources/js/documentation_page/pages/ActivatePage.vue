@@ -9,7 +9,7 @@
                 También aplica para la REVERSA DE CESES. <br>
                 Cuando se realiza este proceso se actualiza el dato "termination_date" del usuario a NULO.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true"/>
         </v-card-text>
     </v-card>
 </template>

@@ -16,6 +16,47 @@
                     </div>
                 </v-row>
             </div>
+            <div v-if="true" class="col d-flex justify-content-end align-items-center" style="gap: 1.5rem">
+                <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
+                    <span class="mdi mdi-cloud-outline fa-3x mr-3"></span>
+                    <div class="d-flex flex-column">
+                        <p class="font-weight-bold mb-0">Total utilizado</p>
+                        <span class="fa-2x" v-text="workspaces_total.workspaces_total_storage"></span>
+
+                        <a href class="ml-1" @click.prevent="showDetail = true">
+                            Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <div :class="`${ showDetail && 'd-none' } bg-secondary h-100`" style="width: 1px;"></div>
+
+                <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-center`">
+                    <span class="mdi mdi-account-multiple-outline fa-3x mr-3"></span>
+                    <div class="d-flex flex-column">
+                        <p class="font-weight-bold mb-0">Total usuarios activos</p>
+                        <span class="fa-2x" v-text="workspaces_total.workspaces_total_users.toLocaleString()"></span>
+
+                        <a href class="ml-1" @click.prevent="showDetail = true">
+                            Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column"
+                    style="gap:1rem;"
+                    v-if="false">
+                    <v-btn color="primary" @click="openLink('/auditoria')">
+                        <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
+                        Auditoria
+                    </v-btn>
+
+                    <v-btn color="primary">
+                        <span class="mdi mdi-plus fa-lg mr-2"></span>
+                        Workspace
+                    </v-btn>
+                </div>
+            </div>
             <div class="col-4">
                 <div v-html="headerTemplate"></div>
             </div>
@@ -76,6 +117,23 @@
 
             <v-col cols="1" class=""></v-col>
         </v-row>
+        <!--
+            Workspaces title
+        ======================================== -->
+        <v-row v-show="showDetail" class="justify-content-center mt-3 pt-3 pb-3">
+            <v-col cols="10">
+                <b class="btn_select_media" @click="showDetail = false">
+                    <span class="fas fa-arrow-left  mr-2"></span> Gestión de almacenamiento y usuarios.
+                </b>
+            </v-col>
+        </v-row>
+
+
+        <div v-show="!showDetail">
+
+        <!--
+            Workspaces
+        ======================================== -->
 
         <v-row class="justify-content-center">
             <v-col cols="10" class="workspaces-wrapper">
@@ -86,7 +144,7 @@
                            >
 
                         <div class="row">
-                            <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace" 
+                            <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace"
                             :style="{'height': `${view ? '105px' : 'auto'}`}"
                             >
 
@@ -180,7 +238,7 @@
                                 </button>
 
                             </v-col>
-                  
+
                         </div>
                     </v-col>
                 </v-row>
@@ -196,7 +254,7 @@
                 <small
                     v-text="`${pagination.fromRow} - ${pagination.toRow} de ${pagination.total_rows}`"/>
             </v-col>
-            
+
             <v-col cols="1" class="d-flex align-items-center justify-content-around">
                 <v-icon :disabled="pagination.actual_page === 1" v-text="'mdi-chevron-left'"
                         @click="changePage(false)"/>
@@ -209,6 +267,131 @@
         </v-row>
 
         <v-row class="mb-15"></v-row>
+        </div>
+
+
+        <v-row class="justify-content-center mt-3 pt-3 pb-3" v-show="showDetail">
+            <v-col cols="10" class="workspaces-wrapper">
+                <v-row>
+                    <v-col cols="7">
+                        <v-card elevation="0">
+                            <v-card-title class="justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="mdi mdi-cloud-outline fa-2x mr-3"></span>
+                                    Almacenamiento General
+                                </div>
+                                <div>
+                                    <span v-text="workspaces_total.workspaces_total_storage"></span>
+                                </div>
+                            </v-card-title>
+                        </v-card>
+
+                        <div class="row" v-for="workspace of workspaces_status_total" :key="workspace.id">
+                            <div class="col-3 align-self-center" v-text="workspace.name"></div>
+                            <div class="col-9 d-flex align-items-center">
+                                <div class="d-flex flex-column w-100">
+                                    <div class="mb-2 d-flex justify-space-between">
+                                        <div>
+                                            Usado: <span class="font-weight-bold" v-text="workspace.size_medias_storage"></span>
+                                        </div>
+                                        <div>
+                                            Total: <span class="font-weight-bold" v-text="workspace.size_medias_limit"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                    <v-progress-linear
+                                        :color="workspace.size_medias_porcent.exceded ? 'red' : 'primary'"
+                                        height="25"
+                                        :value="workspace.size_medias_porcent.porcent"
+                                        rounded
+                                    >
+                                        <div class="d-flex justify-content-end"
+                                            :style="{ width: (workspace.size_medias_porcent.porcent < 10) ? '8%' :workspace.size_medias_porcent.porcent +'%'}">
+                                            <strong
+                                                class="text-white text-right"
+                                                v-text="workspace.size_medias_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
+                                    </v-progress-linear>
+                                </div>
+
+                                <v-btn
+                                    class="ml-2"
+                                    text
+                                    color="primary"
+                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'home')">
+                                    <v-icon>
+                                        mdi-open-in-new
+                                    </v-icon>
+                                </v-btn>
+                            </div>
+                        </div>
+
+                    </v-col>
+
+                    <v-col cols="5">
+                        <v-card elevation="0">
+                            <v-card-title class="justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="mdi mdi-account-multiple-outline fa-2x mr-3"></span>
+                                    Total usuarios activos
+                                </div>
+                                <div>
+                                    <span v-text="workspaces_total.workspaces_total_users"></span>
+                                </div>
+                            </v-card-title>
+                        </v-card>
+
+                        <div class="row" v-for="workspace of workspaces_status_total" :key="workspace.id">
+                            <div class="col-12 d-flex align-items-center">
+                                <div class="d-flex flex-column w-100">
+                                    <div class="mb-2 d-flex justify-space-between">
+                                        <div>
+                                            Activos: <span class="font-weight-bold" v-text="workspace.users_count_actives"></span>
+                                        </div>
+                                        <div>
+                                            Total: <span class="font-weight-bold" v-text="workspace.users_count_limit"></span>
+                                        </div>
+                                    </div>
+
+                                    <v-progress-linear
+                                        :color="workspace.users_count_porcent.exceded ? 'red' : 'primary'"
+                                        height="25"
+                                        :value="workspace.users_count_porcent.porcent"
+                                        rounded
+                                    >
+                                        <div class="d-flex justify-content-end"
+                                            :style="{ width: (workspace.users_count_porcent.porcent < 10) ? '8%' :workspace.users_count_porcent.porcent +'%'}">
+                                            <strong
+                                                class="text-white text-right"
+                                                v-text="workspace.users_count_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
+                                    </v-progress-linear>
+                                </div>
+
+                                <v-btn
+                                    class="ml-2"
+                                    text
+                                    color="primary"
+                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'usuarios')">
+                                    <v-icon>
+                                        mdi-open-in-new
+                                    </v-icon>
+                                </v-btn>
+                            </div>
+                        </div>
+                    </v-col>
+                </v-row>
+            </v-col>
+        </v-row>
+
+
+        <!--
+            Modals
+        ======================================== -->
 
         <LogsModal
             :options="modalLogsOptions"
@@ -255,7 +438,7 @@ export default {
     },
     components: {
         WorkspacesForm, LogsModal, WorkspacesDuplicateForm
-        
+
     },
     data: () => ({
         config: {
@@ -263,15 +446,18 @@ export default {
             title: null,
         },
         headerTemplate : '',
-        // superUserRoleId : 1,
-        // configRoleId: 2,
-        // adminRoleId : 3,
-        // selectedWorkspaceId: null,
+        superUserRoleId : 1,
+        configRoleId: 2,
+        adminRoleId : 3,
+        selectedWorkspaceId: null,
         workspaces: [],
         workspacesConfig: [],
         userSession: {},
-        // configurationIsVisible: false,
-        // canAccessConfiguration: false,
+        configurationIsVisible: false,
+        canAccessConfiguration: false,
+        showDetail: false,
+        workspaces_total:{},
+        workspaces_status_total:[],
         workspaceFormModalOptions: {
             ref: 'WorkspacesForm',
             open: false,
@@ -335,16 +521,17 @@ export default {
 
         this.loadData();
         this.initializeHeaderTemplate();
+        this.loadDataStorage();
     },
-    // watch: {
-    //     selectedWorkspaceId () {
-    //         if (this.selectedWorkspaceId > 0) {
-    //             this.setActiveWorkspace(
-    //                 this.selectedWorkspaceId, false
-    //             );
-    //         }
-    //     }
-    // },
+    watch: {
+        selectedWorkspaceId () {
+            if (this.selectedWorkspaceId > 0) {
+                this.setActiveWorkspace(
+                    this.selectedWorkspaceId, false
+                );
+            }
+        }
+    },
     methods: {
         initializeHeaderTemplate() {
             this.headerTemplate = document
@@ -378,9 +565,40 @@ export default {
         }
         ,
         /**
-         * Open form to duplicate workspace
+         * Open form to store workspace, and update the session workspace
          *
          * @param workspaceId
+         */
+        storeWorkspace() {
+
+            this.workspaceFormModalOptions.action = 'create';
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                null,
+                null,
+                'Crear workspace'
+            );
+        }
+        ,
+        /**
+         * Load workspaces list from server
+         */
+        loadData() {
+
+            let vue = this;
+
+            let url = `/workspaces/search`
+
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.workspaces = data.data.data;
+                    this.loadSession();
+                })
+        }
+        ,/**
+         * Load session data from server
          */
         duplicateWorkspace(workspaceId) {
 
@@ -459,7 +677,7 @@ export default {
 
         /**
          * Update workspace in User's session and
-         * redirect to welcome page
+         * redirect to default page
          *
          * @param workspaceId
          * @param redirect
@@ -476,7 +694,7 @@ export default {
                 .post(url, formData)
                 .then(() => {
 
-                    // Redirect to welcome page
+                    // Redirect to default page
 
                     if (redirect) {
                         window.location.href = redirect;
@@ -490,6 +708,48 @@ export default {
                 .post('/logout')
                 .then(() => {
                     window.location.href = '/login';
+                })
+        }
+        ,
+        setActiveWorkspaceRoute(workspaceId, redirect, route = 'home') {
+
+            let vue = this;
+
+            // Submit request to update workspace in session
+
+            let formData = vue.getMultipartFormData('PUT');
+            let url = `/usuarios/session/workspace/${workspaceId}`;
+            this.$http
+                .post(url, formData)
+                .then(() => {
+
+                    // Redirect to default page
+
+                    if (redirect) {
+                        window.location.href = '/'+route;
+                    }
+                });
+        }
+        ,
+         /**
+         * Load workspaces list from server
+         */
+        loadDataStorage() {
+
+            let vue = this;
+
+            let url = `/general/workspaces-status`
+            vue.showLoader();
+
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    const { workspaces_total, workspaces_status_total } = data.data
+
+                    vue.workspaces_total = workspaces_total;
+                    vue.workspaces_status_total = workspaces_status_total;
+
+                    vue.hideLoader();
                 })
         }
     }

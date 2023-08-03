@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\EmailTemplate;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-
-use Illuminate\Support\Facades\DB;
 
 
 class Workspace extends BaseModel
@@ -24,13 +26,13 @@ class Workspace extends BaseModel
         'limit_allowed_users',
         'users_with_empty_criteria',
         'qualification_type_id',
-
         'logo_marca_agua',
         'marca_agua_estado',
         'notificaciones_push_chunk',
         'notificaciones_push_envio_inicio',
         'notificaciones_push_envio_intervalo',
-        'criterio_id_fecha_inicio_reconocimiento'
+        'criterio_id_fecha_inicio_reconocimiento',
+        'limit_allowed_storage'
     ];
 
     public function sluggable(): array
@@ -51,6 +53,10 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array'
     ];
 
+    public function medias() {
+        return $this->hasMany(Media::class, 'workspace_id');
+    }
+
     public function segments()
     {
         return $this->morphMany(Segment::class, 'model');
@@ -61,11 +67,6 @@ class Workspace extends BaseModel
         return $this->hasMany(User::class, 'subworkspace_id');
     }
 
-    public function medias()
-    {
-        return $this->hasMany(Media::class, 'workspace_id');
-    }
-
     public function polls()
     {
         return $this->hasMany(Poll::class, 'workspace_id');
@@ -74,6 +75,11 @@ class Workspace extends BaseModel
     public function videotecas()
     {
         return $this->hasMany(Videoteca::class, 'workspace_id');
+    }
+
+    public function emails()
+    {
+        return $this->hasMany(EmailUser::class, 'workspace_id');
     }
 
     public function schools()
@@ -466,7 +472,51 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    public function sendEmailByLimit($sub_workspace_id = null){
+        $workspace = $this;
 
+        $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$workspace_constraint) return false;
+
+        $workspace_limit = $workspace->getLimitAllowedUsers();
+
+        $q_current_active_users = User::onlyClientUsers()
+            ->where('active', ACTIVE);
+
+        if ($workspace_constraint['type'] === 'by_workspace')
+            $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
+
+        if ($workspace_constraint['type'] === 'by_sub_workspace' && $sub_workspace_id)
+            $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
+
+        $current_active_users_count = $q_current_active_users->count();
+        if($current_active_users_count/$workspace_limit > 0.97){
+            $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
+            // $emais_to_send_user = Workspace::where('id',$workspace->id)->with('emails.user:id,email_gestor')
+            // ->whereHas('emails',function($q){
+            //     'emails.user:id,email_gestor'
+            // })
+            // ->wherehas('emails.user',function($q){
+            //     $q->where('active',ACTIVE)->whereNotNull('email_gestor');
+            // })->select('id','name')->where('type_id',$type_id)->get()->map( fn ($e)=> $e->user->email_gestor);
+            $emais_to_send_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)
+                                    ->wherehas('user',function($q){
+                                            $q->where('active',ACTIVE)->whereNotNull('email_gestor');
+                                    })->get()->map( fn ($e)=> $e->user->email_gestor);
+            if(count($emais_to_send_user) > 0){
+                $mail_data=[
+                    'subject'=>'Limite de usuarios',
+                    'workspace_name' => $workspace->name,
+                    'current_active_users_count'=> $current_active_users_count,
+                    'workspace_limit'=>$workspace_limit
+                ];
+                Mail::to($emais_to_send_user)
+                ->send(new EmailTemplate('emails.email_limite_usuarios', $mail_data));
+            }
+        }
+        return true;
+    }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {
         $workspace = $this;

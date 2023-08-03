@@ -110,14 +110,14 @@
                         <v-icon left color="primary">fa-regular fa-envelope</v-icon>
                         <span v-text="resource.email_ticket"></span>
                         <strong> (proporcionado) </strong><br>
-                        <div v-if="resource.email_user.trim() === resource.email_ticket.trim()"
+                        <div v-if="emailsAreEqual(resource.email_user, resource.email_ticket)"
                              class="mt-3">
                             <v-icon left color="green">
                                 fa-solid fa-check-circle
                             </v-icon>
                             Los correos coinciden
                         </div>
-                        <div v-if="resource.email_user && (resource.email_user.trim() !== resource.email_ticket.trim())"
+                        <div v-if="resource.email_user && (!emailsAreEqual(resource.email_user, resource.email_ticket))"
                              class="mt-3">
                             <v-icon left color="yellow">
                                 fas fa-exclamation-triangle
@@ -482,6 +482,20 @@ export default {
             } catch (ex) {
                 console.log(ex)
             }
+        },
+        emailsAreEqual(email, email2) {
+            if (!email && !email2) {
+                return true
+            }
+
+            if (!email) {
+                email = ''
+            }
+            if (!email2) {
+                email2 = ''
+            }
+
+            return email.trim() === email2.trim()
         }
     }
 }

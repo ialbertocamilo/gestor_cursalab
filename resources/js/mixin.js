@@ -813,5 +813,22 @@ export default {
                 VademecumList
             }
         },
+        getStorageKeyUrl(url_data, key) {
+            const url = new URL(url_data);
+            const resourceParams = new URLSearchParams(url.search);
+
+            return { params:resourceParams, url, key:resourceParams.get(key)  }
+        },
+        setStorageUrl(route, filters = null, key = 'module_data') {
+            const vue = this;
+            const dataParams = vue.getStorageKeyUrl(route, key);
+
+            if(vue.TypeOf(filters) === 'null') {
+                vue.openInNewTab(dataParams.url.pathname); // sin filtro sirecto al modulo
+            } else {
+                localStorage.setItem(dataParams.key, JSON.stringify(filters));
+                vue.openInNewTab(route);
+            }
+        }
     },
 };

@@ -189,7 +189,17 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="8">
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Límite de almacenamiento (Gb)"
+                                            v-model="resource.limit_allowed_storage"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+
                                     </v-col>
                                 </v-row>
                             </template>
@@ -283,7 +293,7 @@
 
                                 <v-row>
                                     <v-col cols="6">
-                                     
+
                                         <DefaultAutocomplete
                                             dense
                                             clearable
@@ -293,7 +303,7 @@
                                             v-model="resource.criterio_id_fecha_inicio_reconocimiento"
                                             :items="itemsCriterionDates"
                                         />
-                                       
+
                                     </v-col>
                                 </v-row>
 
@@ -324,7 +334,7 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -406,6 +416,9 @@ export default {
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
             vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
+
+            vue.resource.limit_allowed_storage = null;
+            vue.limit_allowed_users = null;
         }
         ,
         closeModal() {

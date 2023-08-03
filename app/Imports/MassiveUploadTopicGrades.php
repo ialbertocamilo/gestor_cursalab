@@ -69,6 +69,10 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             })
             ->get();
         $usersSegmented = $this->course->usersSegmented($this->course->segments, $type = 'users_id');
+
+
+
+
         $percent_sent = [];
         $course_settings = Course::getModEval($this->course);
         $max_grade = $this->course->qualification_type->position;

@@ -47,6 +47,16 @@ class AsignarEntrenadorImport implements ToCollection
             if (empty($entrenador_dni)) {
                 continue;
             }
+            $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
+            if ($hasTrainer) {
+                $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+                $temp = [
+                    'dni' => (string)$entrenador_dni,
+                    'nombre' => $entrenador->name,
+                    'msg' => 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document
+                ];
+                $data_no_procesada->push($temp);
+            }
             $entrenador = User::where('document', $entrenador_dni)->where('active', 1)->first();
             if (!$entrenador) {
                 $temp = [

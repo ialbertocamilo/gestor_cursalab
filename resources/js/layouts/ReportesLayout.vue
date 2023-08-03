@@ -525,7 +525,6 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
                 <v-tab-item v-if="isSuperUser">
                     <v-card flat>
                         <v-card-text>
@@ -540,22 +539,6 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
-                <v-tab-item v-if="isSuperUser">
-                    <v-card flat>
-                        <v-card-text>
-                            <UsersHistory
-                                :workspaceId="workspaceId"
-                                :adminId="adminId"
-
-                                :modules="modules"
-                                :reportsBaseUrl="reportsBaseUrl"
-
-                                @generateReport="generateReport($event)"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
-
                  <v-tab-item>
                     <v-card flat>
                         <v-card-text>

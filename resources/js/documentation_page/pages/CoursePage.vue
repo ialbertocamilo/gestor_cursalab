@@ -7,7 +7,7 @@
             <p>
                 Esta API retorna el listado de todos los cursos creados en la plataforma.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

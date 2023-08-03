@@ -557,13 +557,13 @@ class AuthController extends Controller
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
 
-        $credentials1 = $credentials2 = ['password' => $request->password];
+        $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
         $userinput = $request->email ? $credentials['email'] : $credentials['document'];
 
-        $credentials1['email'] = $userinput;
+        $credentials1['username'] = $userinput;
         $credentials2['document'] = $userinput;
-
-        if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+        $credentials3['email'] = $userinput;
+        if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
             return $this->error('Contraseña no válida, asegúrate de crear una nueva contraseña.', 422);
         }
         // === prov el email a documento ===
@@ -592,7 +592,7 @@ class AuthController extends Controller
 
         if($status == Password::PASSWORD_RESET) {
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
                 $user = Auth::user();
 
                 if(!$request->email) $user->setInitialEmail();

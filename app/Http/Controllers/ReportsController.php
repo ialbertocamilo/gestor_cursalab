@@ -36,6 +36,7 @@ class ReportsController extends Controller
         $query = GeneratedReport::query()
             ->with('admin.subworkspace')
             ->where('workspace_id', $workspaceId)
+            ->where('report_type','<>','api_information')
             ->where('created_at', '>=', Carbon::today()->subDays(30)->toDateTimeString())
             ->orderBy('created_at', 'desc');
 

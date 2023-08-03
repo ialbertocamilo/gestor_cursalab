@@ -395,7 +395,7 @@ function transform_domain(array $ArrayHost)
     return $currentType;
 }
 
-function get_type_link(string $linked, string $key = 'type') 
+function get_type_link(string $linked, string $key = 'type')
 {
     $parsedLinked = parse_url($linked);
     [ 'host' => $host , 'path' => $path ] = $parsedLinked;
@@ -452,3 +452,35 @@ function get_type_media(string $media)
 
     return $currentType;
 }
+function formatSize($kilobytes, $precision = 2, $parsed = true) { // desde KB hacia arriba
+    $unit = ["Kb", "Mb", "Gb", "Tb", "Pt"];
+    $exp = floor(log($kilobytes, 1024)) | 0;
+
+    $size = round($kilobytes / (pow(1024, $exp)), $precision);
+    $size_unit = $unit[$exp];
+    if ($parsed) {
+        return $size.' '.$size_unit;
+    }
+
+    return compact('size', 'size_unit');
+}
+
+/*
+    count: valor variable,
+    total: valor total al 100%,
+    limite: solo para exceded
+*/
+function calculate_porcent($count, $total, int $limite = 90)
+{
+    $porcent = 0;
+    $exceded = false;
+
+    if($total > 0) {
+        $porcent = round($count * 100 / $total);
+        $exceded = $porcent >= $limite;
+    }
+
+    return compact('porcent', 'exceded');
+}
+
+

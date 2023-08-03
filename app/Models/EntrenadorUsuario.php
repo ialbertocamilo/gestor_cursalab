@@ -300,6 +300,13 @@ class EntrenadorUsuario extends Model implements Recordable
             $response['msg'] = 'El entrenador que se quiere asignar, es un alumno.';
             return $response;
         }
+        $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
+        if (!is_null($hasTrainer)) {
+            $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+            $response['error'] = true;
+            $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
+            return $response;
+        }
 
         $registro = EntrenadorUsuario::where('trainer_id', $trainer_id)
             ->where('user_id', $user_id)

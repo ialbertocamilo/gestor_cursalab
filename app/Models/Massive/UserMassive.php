@@ -50,7 +50,7 @@ class UserMassive extends Massive implements ToCollection
         $criteria = Criterion::query()
             ->with('field_type:id,code')
             ->where('code', '<>', 'document')
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id','can_be_create')
             ->orderBy('position')
             ->get();
         //Verify statics headers
@@ -66,10 +66,12 @@ class UserMassive extends Massive implements ToCollection
         //        $this->sortRows();
         if (!$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
+            $this->current_workspace->sendEmailByLimit();
             $this->error_message = $message;
             return;
         endif;
         $this->process_user($rows, $headers, $criteria);
+        $this->current_workspace->sendEmailByLimit();
     }
 
     private function process_user($users, $headers, $criteria)
@@ -92,6 +94,7 @@ class UserMassive extends Massive implements ToCollection
                         'criterion_id' => $obj['criterion_id'],
                         'criterion_name' => $obj['criterion_name'],
                         'required' => $obj['required'],
+                        'can_be_create' => $obj['can_be_create'],
                         'value_excel' => $value_excel,
                         'index' => $obj['index'],
                     ]);
@@ -331,6 +334,16 @@ class UserMassive extends Massive implements ToCollection
             ];
         }
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
+        if(!$dc['can_be_create'] && !$criterion_value){
+            $has_error = true;
+            return [
+                'has_error'=>true,
+                'info_error'=>[
+                    'index' => $dc['index'],
+                    'message' => 'Solo puedes subir valores que han sido registrados. Revisa la ortografía y vuelve a intentarlo.'
+                ],
+            ];
+        }
         if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value?->id)->first())) {
             $has_error = true;
             return [
@@ -417,6 +430,7 @@ class UserMassive extends Massive implements ToCollection
                 'header_static_required' => isset($data['required']) ? $data['required'] : true,
                 'criterion_name' => $criterion ? $criterion->name : null,
                 'required' => $criterion ? $criterion->required : true,
+                'can_be_create' => $criterion ? $criterion->can_be_create : true,
                 'name_header' => mb_strtoupper(trim($header_excel)),
                 'index' => $index,
             ]);
@@ -564,7 +578,7 @@ class UserMassive extends Massive implements ToCollection
                 'field_type:id,code'
             ])
             ->where('code', '<>', 'document')
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id','can_be_create')
             ->orderBy('position')
             ->get();
         $headers = $this->process_header($this->excelHeaders, $criteria);
