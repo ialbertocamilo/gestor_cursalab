@@ -147,7 +147,7 @@
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="modalDateFilter1"
                                 v-model="resource.inicio_inscripcion"
-                                label="Inicio de inscripción"
+                                label="Fecha de inicio de inscripción"
                                 placeholder="Indicar fecha"
                                 show-required
                             />
@@ -173,7 +173,7 @@
                                 :referenceComponent="'modalDateFilter3'"
                                 :options="modalDateFilter3"
                                 v-model="resource.fecha_liberacion"
-                                label="Fecha de liberación"
+                                label="Fecha de inicio del beneficio"
                                 placeholder="Indicar fecha"
                                 show-required
                             />
