@@ -82,7 +82,7 @@ class ResetPasswordController extends Controller
         }
         // Actualiza la contraseña del usuario y elimina el token
         $user->updatePasswordUser($password);
-        // DB::table('password_resets')->where('token', $token)->delete();
+        DB::table('password_resets')->where('token', $token)->delete();
         $loginController = new LoginController();
         Auth::loginUsingId($user->id);
         $loginController->authenticated($request,$user,false);
