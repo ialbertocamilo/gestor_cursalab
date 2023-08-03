@@ -336,7 +336,7 @@ class LoginController extends Controller
                     : redirect()->intended($this->redirectPath());
     }
 
-    public function authenticated(Request $request, $user)
+    public function authenticated(Request $request, $user,$redirect=true)
     {
 
         try {
@@ -360,7 +360,9 @@ class LoginController extends Controller
         // When there is more than 1 workspace show
         // workspaces selector, or show welcome page
         // otherwise
-
+        if(!$redirect){
+            return count($workspaces) == 1 ? 'welcome' : 'workspaces.list';
+        }
         if (count($workspaces) > 1) {
 
             // session()->forget('workspace');

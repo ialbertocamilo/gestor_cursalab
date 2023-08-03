@@ -87,10 +87,16 @@ class ResetPasswordController extends Controller
         }
         // Actualiza la contraseña del usuario y elimina el token
         $user->updatePasswordUser($password);
-        DB::table('password_resets')->where('token', $token)->delete();
+        // DB::table('password_resets')->where('token', $token)->delete();
         $loginController = new LoginController();
         Auth::loginUsingId($user->id);
-        $loginController->authenticated($request,$user);
+        $loginController->authenticated($request,$user,false);
+        return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida.');       
+    }
+    // Sobrescribe el método sendResetResponse() para realizar la redirección
+    protected function sendResetResponse($view)
+    {
+        return view($view);
     }
     public function showResetForm(Request $request)
     {
