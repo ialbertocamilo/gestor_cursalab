@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAppPasswordUpdateRequest;
-
+use Illuminate\Support\Str;
 
 class RestUserController extends Controller
 {
@@ -25,7 +25,7 @@ class RestUserController extends Controller
         $user = auth()->user();
         $old_passwords = $user->old_passwords;
 
-        $old_passwords[] = ['password' => bcrypt($password), 'added_at' => now()];
+        $old_passwords[] = ['password' => bcrypt($request->newPassword), 'added_at' => now()];
 
         if (count($old_passwords) > 4) {
             array_shift($old_passwords);
