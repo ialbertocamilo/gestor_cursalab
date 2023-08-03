@@ -58,7 +58,7 @@ class ForgotPasswordController extends Controller
         
         // Error: No se pudo enviar el correo de reinicio de contraseña
         return back()->withErrors(
-            ['email' => '*El correo que ingresaste no se encuentra registrado, intenta con uno distinto']
+            ['email' => '*El correo que ingresaste no se encuentra registrado, intenta con uno distinto.']
         );
             
     }
