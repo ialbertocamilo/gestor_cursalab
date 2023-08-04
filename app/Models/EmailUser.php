@@ -9,7 +9,7 @@ class EmailUser extends Model
 {
     use HasFactory;
     protected $table = 'emails_user';
-    protected $fillable = ['user_id','workspace_id','type_id'];
+    protected $fillable = ['user_id','workspace_id','type_id','last_percent_sent'];
     public $timestamps = false;
 
     public function type()
