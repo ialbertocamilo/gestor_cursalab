@@ -22,12 +22,11 @@
                     <div class="d-flex flex-column">
                         <p class="font-weight-bold mb-0">Almacenamiento utilizado</p>
 
-                        <a href class="--ml-1" @click.prevent="showDetail = true" title="Ver detalle">
+                        <a href class="fa-2x" @click.prevent="showDetail = true" title="Ver detalle">
                             <!-- <span class="fa-2x" v-text="workspaces_total.workspaces_total_storage"> -->
-                            <span class="fa-2x">
-                                <i class="mdi mdi-cloud-outline --fa-2x mr-3"></i>
-                                {{ workspaces_total.workspaces_total_storage }}
-                            </span>
+                            <!-- <span class="fa-2x"> -->
+                            <i class="mdi mdi-cloud-outline --fa-2x mr-3"></i>{{ workspaces_total.workspaces_total_storage }}
+                            <!-- </span> -->
                             <!-- Ver detalle <span class="ml-2 fas fa-arrow-right"></span> -->
                         </a>
                     </div>
@@ -41,11 +40,10 @@
                         <p class="font-weight-bold mb-0">Total usuarios activos</p>
                         <!-- <span class="fa-2x" v-text="workspaces_total.workspaces_total_users.toLocaleString()"> -->
 
-                        <a href class="--ml-1" @click.prevent="showDetail = true" title="Ver detalle">
-                            <span class="fa-2x">
-                                <i class="mdi mdi-account-multiple-outline --fa-2x mr-3"></i>
-                                {{ workspaces_total.workspaces_total_users.toLocaleString() }}
-                            </span>
+                        <a href class="fa-2x" @click.prevent="showDetail = true" title="Ver detalle">
+                            <!-- <span class="fa-2x"> -->
+                            <i class="mdi mdi-account-multiple-outline --fa-2x mr-3"></i>{{ workspaces_total.workspaces_total_users.toLocaleString() }}
+                            <!-- </span> -->
                             <!-- Ver detalle <span class="ml-2 fas fa-arrow-right"></span> -->
                         </a>
                     </div>
