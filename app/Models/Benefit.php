@@ -1163,7 +1163,7 @@ class Benefit extends BaseModel
             else {
                 if($item->status?->code == 'active') {
                     $item->user_status = ['name' => 'Registrarme', 'code' => 'active'];
-                    if($item->cupos == 0)
+                    if(!is_null($item->cupos) && $item->cupos == 0)
                         $item->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
                 }
                 else if($item->status?->code == 'locked') {
@@ -1326,7 +1326,7 @@ class Benefit extends BaseModel
             else {
                 if($benefit->status?->code == 'active') {
                     $benefit->user_status = ['name' => 'Registrarme', 'code' => 'active'];
-                    if($benefit->cupos == 0)
+                    if(!is_null($benefit->cupos) && $benefit->cupos == 0)
                         $benefit->user_status = ['name' => 'Contactarme', 'code' => 'contact-me'];
                 }
                 else if($benefit->status?->code == 'locked') {
