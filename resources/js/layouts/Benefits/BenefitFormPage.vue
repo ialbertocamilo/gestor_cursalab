@@ -176,6 +176,7 @@
                                 label="Fecha de inicio del beneficio"
                                 placeholder="Indicar fecha"
                                 show-required
+                                tooltip="Fecha en la que se libera el beneficio como confirmado y se confirma a los colaboradores en lista."
                             />
                         </v-col>
                         <v-col cols="4">
@@ -186,6 +187,7 @@
                                 v-model="resource.correo"
                                 :rules="rules.correo"
                                 show-required
+                                tooltip="Correo cuando se acaben la fechas de inscripciones puedan coordinar para acceder al beneficio"
                             />
                         </v-col>
                     </v-row>
@@ -203,6 +205,7 @@
                                 item-text="name"
                                 item-value="code"
                                 :rules="rules.group"
+                                tooltip="A que grupo se asignará el beneficio (Generales o IR Academy)"
                             />
                         </v-col>
                     </v-row>

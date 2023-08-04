@@ -43,7 +43,7 @@
                            :disabled="disabled">
                         <img src="/img/calendar_black.png">
                     </v-btn>
-                    <DefaultInfoTooltipForm v-if="tooltip != ''" />
+                    <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
                 </template>
             </v-text-field>
         </template>

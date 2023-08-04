@@ -53,6 +53,9 @@
             <template v-slot:label v-if="showRequired">
                 {{ label }}<RequiredFieldSymbol/>
             </template>
+            <template v-slot:append-outer>
+                <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
+            </template>
         </v-autocomplete>
         <div v-if="multiple && maxValuesSelected > 0">
             {{ localSelected.length }} de {{ maxValuesSelected }}
@@ -141,6 +144,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        tooltip: {
+            type: String,
+            default: ''
+        },
     },
     data() {
         return {
@@ -216,3 +223,11 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+i.v-icon.icon_tooltip {
+    color: #000 !important;
+}
+.v-input.v-select.v-autocomplete .bx_tooltip {
+    right: 5px;
+}
+</style>
