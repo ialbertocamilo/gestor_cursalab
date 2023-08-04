@@ -8,7 +8,7 @@
                 <div v-if="showDetail">
                     <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span>
                     <span class="fas fa-chevron-right mx-2"></span>
-                    <span class="text-body">Gestor de almacenamiento y usuarios.</span>
+                    <span class="text-body">Gestor de almacenamiento y usuarios</span>
                 </div>
                 <div v-else>
                     Dashboard
@@ -16,7 +16,7 @@
 
                 <v-spacer/>
 
-                <!-- <DefaultSelect
+               <!--  <DefaultSelect
                     class="col-3"
                     dense
                     label="Módulo"
@@ -34,7 +34,7 @@
 
                 <!-- === MODULO Y DETALLES === -->
                 <v-row  :class="`${ !showDetail ? 'd-flex' : 'd-none' }`">
-                    <v-col cols="5" class="align-self-center">
+                    <v-col cols="3" class="align-self-center">
                         <DefaultSelect
                             dense
                             label="Módulo"
@@ -45,14 +45,14 @@
                             @onChange="getEstadisticas"
                         />
                     </v-col>
-                    <v-col  v-if="true" cols="6" offset="1"
+                    <v-col  v-if="true" cols="7" offset="2"
                             class="d-flex justify-space-between align-items-center">
                         <div class="d-flex align-items-center w-75">
                             <div class="d-flex flex-column w-90">
                                 <p class="font-weight-bold mb-0">Almacenamiento general</p>
                                 <div class="my-2">
-                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage+' utilizados'"></span>
-                                    de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage"></span>
+                                   utilizados de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
                                 </div>
 
                                 <v-progress-linear
@@ -78,7 +78,7 @@
                                 <p class="font-weight-bold mb-0">Total usuarios activos</p>
                                 <div class="my-2">
                                     <span class="fa-1_4x" v-text="workspace_status.users_count_actives"></span>
-                                    de <span v-text="workspace_status.users_count_limit"></span> disponibles.
+                                    de <span v-text="workspace_status.users_count_limit"></span> disponibles
                                 </div>
 
                                 <v-progress-linear
