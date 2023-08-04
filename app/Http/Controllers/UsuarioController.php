@@ -705,7 +705,10 @@ class UsuarioController extends Controller
 
         // $subworkspace = Workspace::find($subworkspaceId);
         // $mod_eval = $subworkspace->mod_evaluaciones;
-        $mod_eval = Course::getModEval($curso);
+        // $mod_eval = Course::getModEval($curso);
+        $course = Course::find($curso);
+        $mod_eval = $course->getModEvaluacionesConverted();
+        $mod_eval['system'] = $course->qualification_type?->name;
 
         $data = $this->validarDetallesReinicioIntentosMasivo(
             $curso, $tema, $subworkspaceId, $tipo, $mod_eval
@@ -735,10 +738,10 @@ class UsuarioController extends Controller
             // "Desaprobados" only
             $query = SummaryTopic::query()
                     ->join('users', 'users.id', '=', 'summary_topics.user_id')
-                    ->with('user')
+                    ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                     // ->where('summary_topics.source_id')
                     ->where('users.subworkspace_id', $subworkspaceId)
-                    ->select('summary_topics.*')
+                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id')
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -760,11 +763,11 @@ class UsuarioController extends Controller
 
             $query = SummaryTopic::query()
                 ->join('users', 'users.id', '=', 'summary_topics.user_id')
-                ->with('user')
+                ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                 ->where('summary_topics.topic_id', $topicId)
                 // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_topics.*');
+                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id');
 
             // "Desaprobados" only
 
@@ -785,8 +788,9 @@ class UsuarioController extends Controller
 
         // Add "selected" property to each item
 
-        foreach ($users as $key => $user) {
-            $user->selected = false;
+        foreach ($users as $key => $row) {
+            $row->selected = false;
+            $row->grade = calculateValueForQualification($row->grade, $row->topic->qualification_type->position);
         }
 
         return [

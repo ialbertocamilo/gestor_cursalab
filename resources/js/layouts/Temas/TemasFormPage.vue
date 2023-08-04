@@ -185,6 +185,14 @@
                                                         </a>
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    <DefaultInput
+                                                        v-model="media.title"
+                                                        placeholder="Ingrese un título"
+                                                        label="Título"
+                                                        dense
+                                                    />
+                                                </td>
                                                 <td class="">
                                                     <div class="multimedia-table-icon mt-2 " style="align-items: start;">
                                                         <a class="media-link" href="javascript:;"  title="Copiar código"
@@ -197,26 +205,21 @@
                                                         </a>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <DefaultInput
-                                                        v-model="media.title"
-                                                        placeholder="Ingrese un título"
-                                                        label="Título"
-                                                        dense
-                                                    />
-                                                </td>
                                                 <td class="">
                                                     <div class="mt-2">
-                                                        <DefaultToggle v-model="media.embed"
-                                                                       active-label="Embebido"
-                                                                       inactive-label="No embebido"
-                                                                       :disabled="media.disabled"
-                                                                       @onChange="verifyDisabledMediaEmbed"/>
+                                                        <DefaultToggle
+                                                            dense 
+                                                            v-model="media.embed"
+                                                            active-label="Embebido"
+                                                            inactive-label="No embebido"
+                                                            :disabled="media.disabled"
+                                                            @onChange="verifyDisabledMediaEmbed"/>
                                                     </div>
                                                 </td>
                                                 <td class="">
                                                     <div class="mt-2">
                                                         <DefaultToggle
+                                                            dense
                                                             v-model="media.downloadable"
                                                             active-label="Descargable"
                                                             inactive-label="No descargable"

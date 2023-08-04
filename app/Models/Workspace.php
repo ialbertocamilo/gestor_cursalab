@@ -84,7 +84,7 @@ class Workspace extends BaseModel
 
     public function schools()
     {
-        return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id');
+        return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id')->withPivot('position');
     }
 
     public function courses()
@@ -650,16 +650,18 @@ class Workspace extends BaseModel
                             ->where('external_id', $_school->id)
                             ->first();
 
+                $school_position = ['position' => $_school->pivot?->position];
+                
                 if ( ! $school ) {
 
                     $school_data = $_school->toArray();
                     $school_data['external_id'] = $_school->id;
 
-                    $school = $subworkspace->schools()->create($school_data);
-
+                    $school = $subworkspace->schools()->create($school_data, $school_position);
+                
                 } else {
 
-                    $subworkspace->schools()->syncWithoutDetaching($school);
+                    $subworkspace->schools()->syncWithoutDetaching([$school->id => $school_position]);
                 }
 
                 foreach ($_school->courses as $_course) {
