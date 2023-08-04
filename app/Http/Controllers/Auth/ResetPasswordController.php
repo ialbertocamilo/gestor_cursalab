@@ -149,7 +149,7 @@ class ResetPasswordController extends Controller
                             if (strpos(strtolower($value), strtolower($user->email_gestor)) !== false) {
                                 $fail("No puedes incluir tu correo electronico en la contraseña.");
                             }
-                            if (strpos(strtolower($value), strtolower($user->document)) !== false) {
+                            if ($user->document && strpos(strtolower($value), strtolower($user->document)) !== false) {
                                 $fail("No puedes incluir tu documento en la contraseña.");
                             }
                         }
