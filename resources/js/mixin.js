@@ -420,7 +420,15 @@ export default {
                         (v && v.length <= max) || `El campo debe tener menos de ${max} caracteres`;
                     tempRules.push(tempRule);
                 }
-
+                if (labelRule.indexOf("only_max") > -1) {
+                    let split = labelRule.split(":");
+                    let max = split[1];
+                    const tempRule = (v) =>{
+                        if(v) return (v.length <= max) || `El campo debe tener menos de ${max} caracteres`;
+                        else return true;
+                    }
+                    tempRules.push(tempRule);
+                }
                 if (labelRule.indexOf("min") > -1) {
                     let split = labelRule.split(":");
                     let min = split[1];
@@ -735,6 +743,10 @@ export default {
                 res.push(chunk);
             }
             return res;
+        },
+        roundTwoDecimal(num){
+            let m = Number((Math.abs(num)*100).toPrecision(15));
+            return Math.round(m)/100 * Math.sign(num);
         },
         getStorageUrl(key, mainKey = 'media_data') {
 

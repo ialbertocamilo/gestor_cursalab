@@ -219,7 +219,11 @@ Vue.component("benefit-form-page", require("./layouts/Benefits/BenefitFormPage")
 
 Vue.component("speaker-layout", require("./layouts/Speakers/SpeakersList.vue"));
 Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage"));
+/*---Project list views--*/
+Vue.component("project-layout", require("./layouts/Project/ProjectList.vue"));
 
+
+/*----*/ 
 const app = new Vue({
     vuetify,
     store,
