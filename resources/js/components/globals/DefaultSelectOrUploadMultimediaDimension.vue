@@ -2,7 +2,7 @@
     <div>
         <fieldset class="editor position-relative">
             <legend>{{ label }}</legend>
-           {{ getMediaPreview }} - {{ (TypeOf(fileSelected) !== 'undefined') }} - {{ (TypeOf(fileSelected) === 'object' && !fileSelected.ext) }}
+           <!-- {{ getMediaPreview }} - {{ (TypeOf(fileSelected) !== 'undefined') }} - {{ (TypeOf(fileSelected) === 'object' && !fileSelected.ext) }} -->
             <v-card elevation="0" class="mx-4 mtb-10" v-if="description">
                 <small class="text_desc" v-html="description"/>
             </v-card>
