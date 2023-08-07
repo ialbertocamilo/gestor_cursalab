@@ -34,6 +34,7 @@
             <v-btn v-if="appendIcon" plain icon :ripple="false" @click="onClickAppendIcon">
                 <v-icon>{{ appendIcon }}</v-icon>
             </v-btn>
+            <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
         </template>
         <template v-slot:label v-if="showRequired">
             {{ label }}<RequiredFieldSymbol/>
@@ -122,6 +123,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        tooltip: {
+            type: String,
+            default: ''
+        },
     },
     data() {
         return {
@@ -194,7 +199,12 @@ export default {
 
             vue.iconSeePass = !vue.iconSeePass;
             vue.localType = !vue.iconSeePass ? 'text' : 'password';
-        }
+        },
     }
 }
 </script>
+<style lang="scss">
+i.v-icon.icon_tooltip {
+    color: #000 !important;
+}
+</style>

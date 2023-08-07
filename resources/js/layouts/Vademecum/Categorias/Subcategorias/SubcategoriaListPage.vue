@@ -4,7 +4,7 @@
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
             <v-card-title>
-                Vademecum / Categorías / Sub-Categorías
+                Protocolos y documentos / Categorías / Sub-Categorías
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
                 <DefaultModalButton :label="'Subcategoria'" @click="openFormModal(modalOptions)"/>
@@ -61,7 +61,7 @@ export default {
 
         return {
             dataTable: {
-                endpoint: '/vademecum/categorias/' + vue.categoria_id + '/subcategorias/search',
+                endpoint: '/protocolos-y-documentos/categorias/' + vue.categoria_id + '/subcategorias/search',
                 ref: 'SubcategoriaTable',
                 headers: [
                     {text: "Nombre", value: "nombre"},
@@ -108,14 +108,14 @@ export default {
             modalOptions: {
                 ref: 'SubcategoriaFormModal',
                 open: false,
-                base_endpoint: '/vademecum/categorias/' + vue.categoria_id + '/subcategorias',
+                base_endpoint: '/protocolos-y-documentos/categorias/' + vue.categoria_id + '/subcategorias',
                 resource: 'Subcategoria',
                 confirmLabel: 'Guardar',
             },
             modalDeleteOptions: {
                 ref: 'SubcategoriaDeleteModal',
                 open: false,
-                base_endpoint: '/vademecum/categorias/' + vue.categoria_id + '/subcategorias',
+                base_endpoint: '/protocolos-y-documentos/categorias/' + vue.categoria_id + '/subcategorias',
                 contentText: '¿Desea eliminar este registro?',
                 endpoint: '',
             },
@@ -129,7 +129,7 @@ export default {
     methods: {
         getSelects() {
             let vue = this
-            // const url = '/vademecum/categorias/' + vue.categoria_id + `/subcategorias/get-list-selects`
+            // const url = '/protocolos-y-documentos/categorias/' + vue.categoria_id + `/subcategorias/get-list-selects`
             // vue.$http.get(url)
             //     .then(({data}) => {
             //         vue.selects.modulos = data.data.modulos

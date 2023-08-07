@@ -15,7 +15,7 @@
                         <v-divider class="mx-3" /> -->
 
                 <v-row>
-                    
+
                     <v-col cols="6">
                         <DefaultSelect
                            :items="selects.types"
@@ -170,7 +170,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" class="box-meeting-search-attendants mx-3"
+                <v-row justify="space-around" class="box-meeting-search-attendants mx-0"
                        v-if="resource.attendants && resource.attendants.length === 0">
                     <p>No se han agregado asistentes todavía.</p>
                 </v-row>

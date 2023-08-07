@@ -23,6 +23,7 @@
             :no-data-text="noDataText"
             :rules="rules"
             append-icon="mdi-chevron-down"
+            :loading="loading"
         >
             <template v-slot:prepend-item v-if="multiple && showSelectAll">
                 <v-list-item ripple dense @click="toggle">
@@ -52,6 +53,9 @@
             </template>
             <template v-slot:label v-if="showRequired">
                 {{ label }}<RequiredFieldSymbol/>
+            </template>
+            <template v-slot:append-outer>
+                <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
             </template>
         </v-autocomplete>
         <div v-if="multiple && maxValuesSelected > 0">
@@ -141,6 +145,14 @@ export default {
             type: Boolean,
             default: false,
         },
+        loading:{
+            type: Boolean,
+            default: false
+        },
+        tooltip: {
+            type: String,
+            default: ''
+        },
     },
     data() {
         return {
@@ -216,3 +228,11 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+i.v-icon.icon_tooltip {
+    color: #000 !important;
+}
+.v-input.v-select.v-autocomplete .bx_tooltip {
+    right: 5px;
+}
+</style>

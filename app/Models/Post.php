@@ -74,6 +74,12 @@ class Post extends BaseModel
             $query->where('title', 'like', "%$request->q%");
         }
 
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
         $field = $request->sortBy ?? 'position';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 

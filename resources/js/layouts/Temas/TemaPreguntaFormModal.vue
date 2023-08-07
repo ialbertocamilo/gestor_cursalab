@@ -141,19 +141,21 @@
                                 type="number"
                                 label="Puntaje"
                                 placeholder="Ingrese un puntaje"
-                                :min="1" :max="20"
+                                :min="1" :max="base_score"
                                 v-model="resource.score"
                                 class="mt-2"
                             />
 
                     </v-col>
-                    <v-col cols="4">
-                        <div class="row ml-0">
+                    <v-col cols="4" class="d-flex align-items-center">
+                        <div class="">
                             <DefaultToggle v-model="resource.required" active-label="Obligatorio" inactive-label="No obligatorio"/>
                         </div>
                     </v-col>
-                    <v-col cols="4">
-                        <DefaultToggle v-model="resource.active" @onChange="alertStatus"/>
+                    <v-col cols="4" class="d-flex align-items-center">
+                        <div class="">
+                            <DefaultToggle v-model="resource.active" @onChange="alertStatus"/>
+                        </div>
                     </v-col>
                 </v-row>
             </v-form>
@@ -339,8 +341,8 @@ export default {
             }
 
             if(vue.resource.score < 0  || (parseInt(vue.resource.score) > parseInt(vue.base_score)) ){
-                let message = "El puntaje debe ser mayor o igual a 1, o menor o igual a " + parseInt(vue.base_score)
-                vue.errors = [message]
+                let message = "El puntaje debe ser mayor a 0 y menor o igual a " + parseInt(vue.base_score)
+                vue.errors = [[message]]
                 // vue.show_alert_frontend("warning", "El puntaje debe ser mayor o igual a 1, o menor o igual a "+(parseInt(vue.base_score)));
                 return false;
             }

@@ -22,6 +22,9 @@ use App\Listeners\MassiveUploadProgressListener;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
+use Altek\Accountant\Events\{Recording, Recorded};
+use App\Listeners\{RecordingListener, RecordedListener};
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -35,6 +38,13 @@ class EventServiceProvider extends ServiceProvider
         ],
         MassiveUploadProgressEvent::class=>[
             MassiveUploadProgressListener::class
+        ],
+        // === Recording - Recorded ===
+        Recording::class => [
+            RecordingListener::class,
+        ],
+        Recorded::class => [
+            RecordedListener::class,
         ]
     ];
 

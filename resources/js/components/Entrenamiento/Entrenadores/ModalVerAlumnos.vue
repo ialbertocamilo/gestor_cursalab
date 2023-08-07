@@ -120,7 +120,7 @@
                                 {{ item.document }}
                             </v-col>
                             <v-col cols="12" md="4" lg="4" class="py-2">
-                                {{ item.name }}
+                                {{ item.name }} {{ item.lastname }} {{ item.surname }}
                             </v-col>
                             <v-col cols="12" md="2" lg="2" class="py-2">
                                 {{ item.botica }}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SectionUpload;
 use App\Models\School;
 use App\Models\Taxonomy;
 use App\Models\Workspace;
@@ -60,7 +61,13 @@ class UploadTopicGradesController extends Controller
     
             $import = new MassiveUploadTopicGrades($data);
             Excel::import($import, $data['file']);
-    
+
+            // === guardar archivo log ===
+            $codes = [ 'code_section' => 'upload-notes', 
+                       'code_type' => 'upload' ];
+            SectionUpload::storeRequestLog($request, $codes);
+            // === guardar archivo log ===
+
             $info = $import->getNoProcesados();
             $msg = "Se subieron correctamente las notas.";
             return $this->success(compact('info', 'msg'));

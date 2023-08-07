@@ -11,15 +11,16 @@ const extensiones = {
     pdf: ["pdf"],
     excel: ["xls", 'xlsx', 'csv'],
     scorm: ["zip", "scorm"],
+    office:['xls', 'xlsx', 'csv','ppt', 'pptx', 'doc', 'docx'],
     // rise: ["zip", "rise"],
 };
 const default_media_images = {
-    video: "images/default-video-img_285_360.png",
-    audio: "images/default-audio-img_119.png",
-    pdf: "images/default-pdf-img_210.png",
-    excel: "images/default-scorm-img_116_360.png",
-    scorm: "images/default-scorm-img_116_360.png",
-    link: "images/default-scorm-img_116_360.png",
+    video: "/images/default-video-img_285_360.png",
+    audio: "/images/default-audio-img_119.png",
+    pdf: "/images/default-pdf-img_210.png",
+    excel: "/images/default-scorm-img_116_360.png",
+    scorm: "/images/default-scorm-img_116_360.png",
+    link: "/images/default-scorm-img_116_360.png",
 }
 
 export default {
@@ -30,7 +31,7 @@ export default {
                 {label: 'YouTube', icon: 'mdi mdi-youtube', type: 'youtube'},
                 {label: 'Vimeo', icon: 'mdi mdi-vimeo', type: 'vimeo'},
                 {label: 'Video', icon: 'mdi mdi-video', type: 'video'},
-                {label: 'Audio', icon: 'mdi mdi-headset', type: 'audio'},
+                {label: 'Audio', icon: 'mdi mdi-headphones', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
@@ -175,6 +176,18 @@ export default {
             }
             // console.info(logTitle);
             // console.table(tempObj);
+        },
+        getFileExtension(file) {
+            let vue = this;
+            let extension = null;
+            let fileName = (vue.TypeOf(file) === 'object') ? file.name : file;
+                fileName = fileName.split('.');
+
+            return (fileName.pop()).toLowerCase();
+        },
+        getFilepreviewUrl(file) {
+            let vue = this;
+            return (vue.TypeOf(vue.fileSelected) === 'object') ? URL.createObjectURL(file) : file;
         },
         /**
          * Get bucket URL
@@ -459,6 +472,11 @@ export default {
                     const tempRule = (v) => (v && v >= max) || `El valor debe ser menor a ${max}`;
                     tempRules.push(tempRule);
                 }
+                if (labelRule.indexOf("email") > -1) {
+                const tempRule = (v) =>
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || "El formato de correo electrónico es inválido";
+                tempRules.push(tempRule);
+                }
             });
             return tempRules;
         },
@@ -483,6 +501,10 @@ export default {
             } else {
                 resource[resource_prop] = file;
             }
+        },
+        setFileOnly(file, resource, resource_prop) {
+            let vue = this;
+            resource[`file_${resource_prop}`] = file;
         },
         getMultipartFormData(method, data, fields, file_fields = [], array_fields = []) {
             let vue = this;
@@ -735,7 +757,7 @@ export default {
 
             const currentUrl = window.location.search;
             const currentParams = new URLSearchParams(currentUrl);
-            const existKey = currentParams.has(mainKey); 
+            const existKey = currentParams.has(mainKey);
 
             let storage = localStorage.getItem(key);
             let status = false;
@@ -747,8 +769,52 @@ export default {
 
             return { storage, status };
         },
+        openLinkTarget(url) {
+            const targetUrl = window.origin + url;
+            window.open(targetUrl, '_blank');
+        },
+        async fetchDataReport() {
+            const vue = this;
+            const reportsBaseUrl = vue.getReportsBaseUrl();
+
+            let url = `../usuarios/session`
+            let response = await axios({
+                url: url,
+                method: 'get'
+            })
+
+            const userSession = response.data;
+            const adminId = response.data.user.id
+            const workspaceId = response.data.session.workspace.id
+
+            // Fetch modules and admins
+
+            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}`
+
+            let response2 = await axios({
+                url: url2,
+                method: 'get'
+            })
+
+            const modules = response2.data.modules
+            const admins = response2.data.admins
+            const VademecumList = response2.data.vademecums
+
+            return  {
+                // user session
+                userSession,
+                adminId,
+                workspaceId,
+                reportsBaseUrl,
+
+                // admins
+                modules,
+                admins,
+                VademecumList
+            }
+        },
         getStorageKeyUrl(url_data, key) {
-            const url = new URL(url_data); 
+            const url = new URL(url_data);
             const resourceParams = new URLSearchParams(url.search);
 
             return { params:resourceParams, url, key:resourceParams.get(key)  }

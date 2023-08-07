@@ -33,9 +33,9 @@
                 @click:clear="clearDate"
                 :disabled="disabled"
             >
-                <template v-slot:label v-if="showRequired">
+                <template v-slot:label>
                     {{ label }}
-                    <RequiredFieldSymbol/>
+                    <RequiredFieldSymbol  v-if="showRequired"/>
                 </template>
                 <template v-slot:append>
                     <v-btn class="no-background-hover bk_calendar" icon :ripple="false"
@@ -43,6 +43,7 @@
                            :disabled="disabled">
                         <img src="/img/calendar_black.png">
                     </v-btn>
+                    <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
                 </template>
             </v-text-field>
         </template>
@@ -110,7 +111,11 @@ export default {
         rules: {
             type: Object | Array,
         },
-        referenceComponent: String
+        referenceComponent: String,
+        tooltip: {
+            type: String,
+            default: ''
+        },
 
     },
     computed: {
@@ -189,5 +194,8 @@ export default {
 button.bk_calendar span.v-btn__content img {
     max-width: 16px;
     height: auto;
+}
+i.v-icon.icon_tooltip {
+    color: #000 !important;
 }
 </style>

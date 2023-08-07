@@ -7,6 +7,7 @@
         v-model="localSwitch"
         @change="updateValue"
         :disabled="disabled"
+        :dense="dense"
     ></v-switch>
 </template>
 
@@ -30,6 +31,10 @@ export default {
             default: false
         },
         disabled:{
+            type: Boolean,
+            default: false
+        },
+        dense:{
             type: Boolean,
             default: false
         },

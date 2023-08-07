@@ -32,6 +32,7 @@ class AuditResource extends JsonResource
             'total' => $dataProcessed['total'],
             'name' => $this->getRecordableName(),
             'pivot' => $this->pivot ? true : false,
+            'pivot_data' => $this->pivot,
             'created_at' => $this->created_at->format('d/m/Y g:i a'),
             'updated_at' => $this->updated_at->format('d/m/Y g:i a'),
         ];

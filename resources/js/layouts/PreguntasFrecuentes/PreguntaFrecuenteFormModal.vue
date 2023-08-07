@@ -11,20 +11,22 @@
 
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput clearable
-                                      v-model="resource.title"
-                                      label="Pregunta"
-                                      :rules="rules.title"
+                        <DefaultRichText
+                            clearable
+                            v-model="resource.title"
+                            label="Pregunta"
+                            :rules="rules.title"
                         />
                     </v-col>
                 </v-row>
 
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
-                        <DefaultInput clearable
-                                      v-model="resource.content"
-                                      label="Respuesta"
-                                      :rules="rules.content"
+                        <DefaultRichText
+                            clearable
+                            v-model="resource.content"
+                            label="Contenido"
+                            :rules="rules.content"
                         />
                     </v-col>
                 </v-row>

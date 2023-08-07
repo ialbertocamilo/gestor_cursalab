@@ -18,6 +18,7 @@ class AyudaAppResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'check_text_area' => $this->check_text_area ? 'Sí' : 'No',
 
             'position' => $this->position,
             'is_super_user' => auth()->user()->isAn('super-user'),

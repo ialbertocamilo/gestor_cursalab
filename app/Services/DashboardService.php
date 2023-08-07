@@ -160,7 +160,7 @@ class  DashboardService {
                      ->join('courses', 'courses.id', '=', 'topics.course_id')
                      ->join('course_workspace', 'course_workspace.course_id', '=', 'courses.id')
                      ->where('course_workspace.workspace_id', $workspaceId)
-                     ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
+                     ->where(DB::raw('date(summary_topics.created_at)'), '>=', DB::raw("curdate() - INTERVAL 20 DAY"))
                      ->when($module_id ?? null, function ($q) use($module_id){
                         $q->where('users.subworkspace_id',$module_id);
                     })
@@ -214,7 +214,7 @@ class  DashboardService {
                     $q->where('users.subworkspace_id',$module_id);
                 })
                 ->where('users.type_id','<>',$user_cursalab->id)
-                ->where(DB::raw('date(summary_topics.created_at)'), '>=', 'curdate() - INTERVAL 20 DAY')
+                ->where(DB::raw('date(summary_topics.created_at)'), '>=', DB::raw("curdate() - INTERVAL 20 DAY"))
                 ->select([
                     DB::raw('date(summary_topics.created_at) as fechita'),
                     DB::raw('count(*) as cant'),

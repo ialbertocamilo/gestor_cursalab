@@ -26,7 +26,16 @@ class WorkspaceRequest extends FormRequest
             'limit_allowed_storage' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
+
+            'logo_marca_agua' => 'nullable',
+            'marca_agua_estado' => 'nullable',
+            'notificaciones_push_envio_inicio' => 'nullable',
+            'notificaciones_push_envio_intervalo' => 'nullable',
+            'notificaciones_push_chunk' => 'nullable',
             'selected_functionality' => 'nullable',
+
+            'qualification_type_id' => 'required',
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable'
         ];
     }
 
@@ -37,6 +46,13 @@ class WorkspaceRequest extends FormRequest
 
         if ( ! $this->has('active') )
             $data['active'] = true;
+
+        if ($this->has('marca_agua_estado') ) {
+            $data['marca_agua_estado'] = ($this->marca_agua_estado == 'true' ||
+                                          $this->marca_agua_estado == 1 ) ? true : false;
+        }
+
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }

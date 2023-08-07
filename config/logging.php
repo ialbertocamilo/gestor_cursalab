@@ -70,6 +70,13 @@ return [
             'days' => 14,
         ],
 
+        'zoom-activity-log' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/zoom-activity-log.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

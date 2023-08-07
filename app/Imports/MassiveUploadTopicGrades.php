@@ -74,7 +74,11 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
 
 
         $percent_sent = [];
-        $course_settings =Course::getModEval($this->course);
+        $course_settings = Course::getModEval($this->course);
+        $max_grade = $this->course->qualification_type->position;
+        $qualification_type_name = $this->course->qualification_type->name;
+        $course_settings['max_grade'] = $max_grade;
+
         for ($i = 1; $i < $count; $i++) {
             // info('Inicio');
             $currente_percent = round(($i/$count)*100);
@@ -91,6 +95,9 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             $user = User::disableCache()->with('subworkspace:id,name,mod_evaluaciones,parent_id')
                 ->where('document', $document_user)->first();
 
+            info('user');
+            info($user);
+
             if (!$user) {
                 $this->pushNoProcesados($excelData[$i], 'Usuario no existe');
                 continue;
@@ -104,12 +111,12 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
                 continue;
             }
-            if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && ($grade < 0 || $grade > 20)) {
-                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
+            if (($this->course->assessable) && (count($this->topics) > 0 && $this->evaluation_type == 'assessable') && ($grade < 0 || $grade > $max_grade)) {
+                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido. [' . $qualification_type_name . ']');
                 continue;
             }
-            if (($this->course->assessable) && (count($this->topics) == 0) && ($grade < 0 || $grade > 20)) {
-                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido');
+            if (($this->course->assessable) && (count($this->topics) == 0) && ($grade < 0 || $grade > $max_grade)) {
+                $this->pushNoProcesados($excelData[$i], 'La nota está fuera del rango permitido. [' . $qualification_type_name . ']');
                 continue;
             }
 
@@ -117,17 +124,9 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
             // $user_has_course = $usersSegmented->where('id',$user->id)->first();
             $user_has_course = array_search($user->id,$usersSegmented);
 
-            if(!$user_has_course){
-
-                // Since array_search searches in associative arrays,
-                // also uses in_array to find user id when $usersSegmented
-                // is a indexed array: [23, 32, 99]
-
-                $user_has_course = in_array($user->id,$usersSegmented);
-                if (!$user_has_course) {
-                    $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
-                    continue;
-                }
+            if($user_has_course === false ){
+                $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
+                continue;
             }
             // if (!in_array($this->course_id, $assigned_courses->pluck('id')->toArray())) {
             //     $this->pushNoProcesados($excelData[$i], 'El curso seleccionado no está asignado para este usuario');
@@ -151,9 +150,11 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
         $min_grade = $course_settings['nota_aprobatoria'];
 
         $grade = $excelData[1];
+        $grade = calculateValueForQualification($grade, 20, $course_settings['max_grade']);
 
-        $topic_summaries = SummaryTopic::disableCache()->whereIn('topic_id', $topics->pluck('id')->toArray())->where('user_id', $user->id)
-            ->get();
+        $topic_summaries = SummaryTopic::disableCache()->whereIn('topic_id', $topics->pluck('id')->toArray())
+                                ->where('user_id', $user->id)
+                                ->get();
 //        info("SUMMARIES ID :: ");
 //        info($topic_summaries->pluck('id')->toArray());
 
