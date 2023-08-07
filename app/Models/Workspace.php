@@ -449,24 +449,17 @@ class Workspace extends BaseModel
         if ($workspace_constraint['type'] === 'by_workspace')
             $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
 
-        if ($workspace_constraint['type'] === 'by_sub_workspace' && $sub_workspace_id)
-            $q_current_active_users->where('subworkspace_id', $sub_workspace_id);
-
         $current_active_users_count = $q_current_active_users->count();
-        if($current_active_users_count/$workspace_limit > 0.97){
+        $percent = floor($current_active_users_count/$workspace_limit * pow(10, 2)) / pow(10, 2);
+        if( $percent > 0.97){
             $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
-            // $emais_to_send_user = Workspace::where('id',$workspace->id)->with('emails.user:id,email_gestor')
-            // ->whereHas('emails',function($q){
-            //     'emails.user:id,email_gestor'
-            // })
-            // ->wherehas('emails.user',function($q){
-            //     $q->where('active',ACTIVE)->whereNotNull('email_gestor');
-            // })->select('id','name')->where('type_id',$type_id)->get()->map( fn ($e)=> $e->user->email_gestor);
-            $emais_to_send_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)            
+            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)     
+                                    ->where('last_percent_sent','<>',$percent)       
                                     ->wherehas('user',function($q){
                                             $q->where('active',ACTIVE)->whereNotNull('email_gestor');
-                                    })->get()->map( fn ($e)=> $e->user->email_gestor);
-            if(count($emais_to_send_user) > 0){
+                                    })->get();
+            if(count($emails_user) > 0){
+                $emais_to_send_user = $emails_user->map( fn ($e)=> $e->user->email_gestor);
                 $mail_data=[
                     'subject'=>'Limite de usuarios',
                     'workspace_name' => $workspace->name,
@@ -475,6 +468,9 @@ class Workspace extends BaseModel
                 ];
                 Mail::to($emais_to_send_user)
                 ->send(new EmailTemplate('emails.email_limite_usuarios', $mail_data));
+                EmailUser::whereIn('user_id',$emails_user->pluck('user_id'))->where('workspace_id',$workspace->id)->where('type_id',$type_id)->update([
+                    'last_percent_sent' => $percent
+                ]);
             }
         }
         return true;
