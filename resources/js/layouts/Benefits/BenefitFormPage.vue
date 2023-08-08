@@ -147,9 +147,10 @@
                                 :referenceComponent="'modalDateFilter1'"
                                 :options="modalDateFilter1"
                                 v-model="resource.inicio_inscripcion"
-                                label="Inicio de inscripción"
+                                label="Fecha de inicio de inscripción"
                                 placeholder="Indicar fecha"
                                 show-required
+                                :min="new Date().toISOString().substr(0, 10)"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -162,6 +163,8 @@
                                 label="Cierre de inscripción"
                                 placeholder="Indicar fecha"
                                 show-required
+                                :min="minDate(resource.inicio_inscripcion)"
+                                :disabled="resource.inicio_inscripcion == null"
                             />
                         </v-col>
                     </v-row>
@@ -173,9 +176,12 @@
                                 :referenceComponent="'modalDateFilter3'"
                                 :options="modalDateFilter3"
                                 v-model="resource.fecha_liberacion"
-                                label="Fecha de liberación"
+                                label="Fecha de inicio del beneficio"
                                 placeholder="Indicar fecha"
                                 show-required
+                                tooltip="Fecha en la que se libera el beneficio como confirmado y se confirma a los colaboradores en lista."
+                                :min="minDate(resource.fin_inscripcion)"
+                                :disabled="resource.fin_inscripcion == null"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -186,6 +192,7 @@
                                 v-model="resource.correo"
                                 :rules="rules.correo"
                                 show-required
+                                tooltip="Correo cuando se acaben la fechas de inscripciones puedan coordinar para acceder al beneficio"
                             />
                         </v-col>
                     </v-row>
@@ -203,6 +210,7 @@
                                 item-text="name"
                                 item-value="code"
                                 :rules="rules.group"
+                                tooltip="A que grupo se asignará el beneficio (Generales o IR Academy)"
                             />
                         </v-col>
                     </v-row>
@@ -442,6 +450,15 @@
                                                 <GmapMap
                                                     :center="center"
                                                     :zoom="zoom"
+                                                    :options="{
+                                                        zoomControl: false,
+                                                        mapTypeControl: false,
+                                                        scaleControl: false,
+                                                        streetViewControl: false,
+                                                        rotateControl: false,
+                                                        fullscreenControl: false,
+                                                        disableDefaultUi: false
+                                                        }"
                                                     style="height: 300px"
                                                     >
                                                     <GmapMarker
@@ -460,7 +477,7 @@
                                         <v-col cols="12">
                                             <DefaultTextArea
                                                 label="Referencia"
-                                                placeholder="Ingresa una referencia de como llegar al lugar donde se realizara el curso"
+                                                placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
                                                 v-model="resource.referencia"
                                                 :rules="rules.referencia"
                                             />
@@ -708,6 +725,7 @@
             width="650px"
             @closeModalSelectLogoPromotor="modalLogoPromotor.open = false"
             @confirmSelectLogoPromotor="confirmSelectLogoPromotor"
+            @confirmSelectLogoPromotorOrdenador="confirmSelectLogoPromotorOrdenador"
             />
     </section>
 </template>
@@ -739,9 +757,10 @@ const fields = [
     'list_silabos',
     'lista_grupo',
     'group',
-    'fecha_encuesta'
+    'fecha_encuesta',
+    'promotor_imagen'
 ];
-const file_fields = ['image'];
+const file_fields = ['image','promotor_imagen'];
 
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
@@ -808,6 +827,7 @@ export default {
             // otros
             image_promotor_selected: false,
             promotor_imagen: null,
+            promotor_imagen_ordenador: null,
             drag_links: false,
             drag_silabos: false,
             list_links: [],
@@ -853,6 +873,8 @@ export default {
                 // position: null,
                 image: null,
                 file_image: null,
+                promotor_imagen: null,
+                file_promotor_imagen: null,
                 active: true,
                 type_id: null,
                 inicio_inscripcion: null,
@@ -954,6 +976,15 @@ export default {
         this.hideLoader()
     },
     methods: {
+        minDate( date = null ){
+            if(date != null)
+            {
+                let result = new Date(date);
+                result.setDate(result.getDate() + 1);
+                return result.toISOString().substr(0, 10);
+            }
+            return new Date().toISOString().substr(0, 10)
+        },
         actionButtonAddImplement() {
             let vue = this
             if(vue.show_text_add_implement) {
@@ -998,8 +1029,17 @@ export default {
                 vue.image_promotor_selected = true
                 vue.promotor_imagen = value
             }
-            console.log(value);
-            console.log(vue.resource);
+        },
+        confirmSelectLogoPromotorOrdenador( value ){
+            let vue = this;
+            vue.modalLogoPromotor.open = false
+
+            vue.image_promotor_selected = true
+            vue.promotor_imagen_ordenador = null
+            if(value){
+                vue.image_promotor_selected = true
+                vue.promotor_imagen_ordenador = value
+            }
         },
         async openModalSelectSpeaker() {
             let vue = this;
@@ -1147,12 +1187,20 @@ export default {
             let vue = this
             window.location.href = vue.base_endpoint;
         },
+        dataURLtoBlob(dataURL) {
+            // Decode the dataURL
+            var binary = atob(dataURL.split(',')[1]);
+            // Create 8-bit unsigned array
+            var array = [];
+            for(var i = 0; i < binary.length; i++) {
+                array.push(binary.charCodeAt(i));
+            }
+            // Return our Blob object
+            return new Blob([new Uint8Array(array)], {type: 'image/png'});
+        },
         async confirmModal(validateForm = true) {
             let vue = this
             vue.errors = []
-            // html2canvas(vue.$refs.bx_maps_benefit).then(function(canvas) {
-            //     console.log(canvas.toDataURL());
-            // });
 
             if( vue.duracionIlimitado == 'ilimitado' ) {
                 vue.resource.duracion = 'ilimitado'
@@ -1170,6 +1218,10 @@ export default {
 
             if( vue.promotor_imagen != null ) {
                 vue.resource.promotor_imagen_multimedia = vue.promotor_imagen
+            }
+
+            if( vue.promotor_imagen_ordenador != null ) {
+                vue.resource.file_promotor_imagen = vue.promotor_imagen_ordenador
             }
 
             vue.resource.type = vue.selectType
@@ -1198,29 +1250,96 @@ export default {
             let list_links = JSON.stringify(vue.list_links)
             formData.append('list_links', list_links)
 
-            let ubicacion_mapa = JSON.stringify(vue.ubicacion_mapa)
-            formData.append('ubicacion_mapa', ubicacion_mapa)
-
             let lista_implementos = JSON.stringify(vue.lista_implementos)
             formData.append('lista_implementos', lista_implementos)
 
             let speaker = JSON.stringify(vue.resource.speaker)
             formData.append('speaker', speaker)
 
-            vue.$http.post(url, formData)
-                .then(async ({data}) => {
-                    this.hideLoader()
-                    const has_info_messages = data.data.messages.list.length > 0
-                    vue.showAlert(data.data.msg)
-                    setTimeout(() => vue.closeModal(), 2000)
-                })
-                .catch(error => {
-                    if (error && error.errors){
-                        vue.errors = error.errors
+            if( vue.ubicacion_mapa != null )
+            {
+
+                let file_image_maps = null;
+                let bx_canvas = vue.$refs.bx_maps_benefit;
+
+                html2canvas(bx_canvas, {
+                    width: bx_canvas.offsetWidth,
+                    height: bx_canvas.offsetHeight,
+                    allowTaint : true,
+                    logging: true,
+                    profile: true,
+                    useCORS: true,
+                }).then(function(canvas) {
+
+                    file_image_maps = canvas.toDataURL('image/png');
+                    file_image_maps = file_image_maps != null ? vue.dataURLtoBlob(file_image_maps) : null;
+
+                    let data_maps = {
+                        image_map: null,
+                        geometry: null,
+                        formatted_address: null,
+                        url: null,
+                        ubicacion: null,
                     }
-                    console.log(error);
-                    vue.loadingActionBtn = false
-                })
+
+                    data_maps.geometry = vue.ubicacion_mapa.geometry
+                    data_maps.formatted_address = vue.ubicacion_mapa.formatted_address
+                    data_maps.url = vue.ubicacion_mapa.url
+
+                    for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
+                        if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
+                            data_maps.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
+                            break;
+                        }
+                    }
+
+                    let formdata2 = new FormData();
+                    formdata2.append('image', file_image_maps, 'maps_'+ vue.resource.title.replace(/\s/g, '_'))
+                    formdata2.append("model_id", null);
+
+                    vue.$http
+                        .post("/upload-image/beneficios", formdata2)
+                        .then(async (res) => {
+                            data_maps.image_map = res.data.location
+
+                            let ubicacion_mapa = JSON.stringify(data_maps)
+                            formData.append('ubicacion_mapa', ubicacion_mapa)
+
+                            await vue.$http.post(url, formData)
+                                    .then(async ({data}) => {
+                                        vue.hideLoader()
+                                        vue.showAlert(data.data.msg)
+                                        setTimeout(() => vue.closeModal(), 2000)
+                                    })
+                                    .catch(error => {
+                                        if (error && error.errors){
+                                            vue.errors = error.errors
+                                        }
+                                        vue.loadingActionBtn = false
+                                    })
+                        })
+                        .catch((err) => {
+                            console.log("upload failed!");
+                        });
+                });
+            }
+            else
+            {
+                vue.$http.post(url, formData)
+                        .then(async ({data}) => {
+                            this.hideLoader()
+                            vue.showAlert(data.data.msg)
+                            setTimeout(() => vue.closeModal(), 2000)
+                        })
+                        .catch(error => {
+                            if (error && error.errors){
+                                vue.errors = error.errors
+                            }
+                            vue.loadingActionBtn = false
+                        })
+            }
+
+
         },
         async loadData() {
             let vue = this
@@ -1255,7 +1374,7 @@ export default {
 
                         if(response.promotor_imagen != null) {
                             vue.image_promotor_selected = true
-                            vue.promotor_imagen = response.promotor_imagen
+                            // vue.promotor_imagen = response.promotor_imagen
                         }
 
                         if(response.direccion != null && response.direccion.address != null) {

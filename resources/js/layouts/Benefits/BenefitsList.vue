@@ -105,6 +105,7 @@
             :segmentados="modalGestorColaboradores.segmentados"
             :seleccionados="modalGestorColaboradores.seleccionados"
             :benefit_id="modalGestorColaboradores.benefit_id"
+            :benefit_name="modalGestorColaboradores.benefit_name"
             width="850px"
             @closemodalGestorColaboradores="modalGestorColaboradores.open = false"
             @confirmModalGestorColaboradores="confirmModalGestorColaboradores"
@@ -231,6 +232,7 @@ export default {
                 segmentados: [],
                 seleccionados: [],
                 benefit_id: null,
+                benefit_name: null,
                 speaker_id: null,
                 endpoint: '',
             },
@@ -505,6 +507,7 @@ export default {
                             });
 
                             vue.modalGestorColaboradores.benefit_id = null
+                            vue.modalGestorColaboradores.benefit_name = null
                             vue.modalGestorColaboradores.seleccionados = null
                             vue.modalGestorColaboradores.segmentados = null
                             vue.modalGestorColaboradores.open = false
@@ -527,6 +530,7 @@ export default {
 
                 vue.modalGestorColaboradores.open = true
                 vue.modalGestorColaboradores.benefit_id = benefit.id
+                vue.modalGestorColaboradores.benefit_name = benefit.title
 
                 await vue.$http.post(`/beneficios/colaboradores/suscritos`, {'benefit_id': benefit.id})
                     .then((res) => {

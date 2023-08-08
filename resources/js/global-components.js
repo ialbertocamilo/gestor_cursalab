@@ -18,6 +18,7 @@ import DefaultTextArea from "./components/globals/DefaultTextArea";
 import DefaultFilter from './components/globals/DefaultFilter'
 import DefaultModalSection from "./components/globals/DefaultModalSection";
 import DefaultInfoTooltip from "./components/globals/DefaultInfoTooltip";
+import DefaultInfoTooltipForm from "./components/globals/DefaultInfoTooltipForm";
 import DefaultFormLabel from "./components/globals/DefaultFormLabel";
 import DefaultDivider from "./components/globals/DefaultDivider";
 import DefaultSimpleTable from "./components/globals/DefaultSimpleTable";
@@ -55,6 +56,7 @@ export default {
         DefaultFilter,
         DefaultModalSection,
         DefaultInfoTooltip,
+        DefaultInfoTooltipForm,
         DefaultFormLabel,
         DefaultDivider,
         DefaultSimpleTable,
