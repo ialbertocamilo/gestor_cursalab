@@ -17,6 +17,7 @@
                             label="Módulo"
                             item-value='id'
                             item-text='name'
+                            :rules="rules.required"
                             @onChange="getSchoolsByModule()"
                         />
                     </v-col>
@@ -30,7 +31,9 @@
                             label="Escuela"
                             item-value='id'
                             item-text='name'
+                            :rules="rules.required"
                             @onChange="getCoursesBySchool()"
+                            :disabled="!resource.module_id"
                         />
                     </v-col>
                 </v-row>
@@ -43,6 +46,8 @@
                             label="Curso"
                             item-value='id'
                             item-text='name'
+                            :rules="rules.required"
+                            :disabled="!resource.school_id"
                         />
                     </v-col>
                 </v-row>
@@ -91,7 +96,7 @@
             <SelectMultimedia
                 :ref="modalPreviewMultimedia.ref"
                 :options="modalPreviewMultimedia"
-                :custom-filter="fileTypes"
+                :custom-filter="[]"
                 width="85vw"
                 @onClose="closeSelectPreviewMultimediaModal"
                 @onConfirm="onSelectMediaPreview"
@@ -121,13 +126,26 @@ export default {
                 module_id: null,
                 school_id: null,
                 course_id: null,
-                description:''
+                description:'',
+                name:'',
+                count_file:0
             },
-            resource: {},
+            resource: {
+                id: null,
+                module_id: null,
+                school_id: null,
+                course_id: null,
+                description:'',
+                name:'',
+                count_file:0
+            },
             selects: {
                 modules: [],
                 schools: [],
                 courses: [],
+            },
+            rules: {
+                required: this.getRules(['required']),
             },
             modalPreviewMultimedia: {
                 ref: 'modalSelectPreviewMultimedia',
@@ -142,7 +160,8 @@ export default {
             constraints:{
                 max_quantity_upload_files:6,
                 max_size_upload_files:25,
-            }
+            },
+            fileSelected: null,
         };
     },
     methods: {
@@ -175,28 +194,18 @@ export default {
                         : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
-
             if (validateForm) {
-
-                let formData = vue.getMultipartFormData(
-                    method, vue.resource, fields, file_fields
-                );
-
+                const formData = vue.createFormData();
                 vue.$http
                    .post(url, formData)
                    .then(({data}) => {
 
-                        vue.queryStatus("anuncios", "crear_anuncio");
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
-
                    }).catch((error) => {
-
                        if (error && error.errors)
                             vue.errors = error.errors
-
-
                     })
             }
 
@@ -205,10 +214,7 @@ export default {
         ,
         resetSelects() {
             let vue = this
-            vue.selects.modules = []
-            vue.selects.destinos = []
-        }
-        ,
+        },
         async loadData(resource) {
 
             let vue = this
@@ -244,14 +250,19 @@ export default {
         loadSelects() {
             let vue = this;
             let url = `${vue.options.base_endpoint}/get-selects?type=module`
+            vue.selects.schools = [];
+            vue.selects.courses = [];
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.modules = data.data
+
                 })
         },
         getSchoolsByModule(){
             let vue = this;
             let url = `${vue.options.base_endpoint}/get-selects?type=school&module_id=${vue.resource.module_id}`
+            vue.selects.schools = [];
+            vue.selects.courses = [];
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.schools = data.data
@@ -260,6 +271,7 @@ export default {
         getCoursesBySchool(){
             let vue = this;
             let url = `${vue.options.base_endpoint}/get-selects?type=course&school_id=${vue.resource.school_id}`
+            vue.selects.courses = [];
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.courses = data.data
@@ -274,11 +286,11 @@ export default {
         createFormData(){
             let vue = this;
             let formData = new FormData();
-            const resources_file = this.resources.filter(r=>r.type_resource =='file');
+            const resources_file = vue.resources.filter(r=>r.type_resource =='file');
             resources_file.map(rf =>{
                 formData.append("files[]",rf);
             })
-            const resources_media = this.resources.filter(r=>r.type_resource =='media');
+            const resources_media = vue.resources.filter(r=>r.type_resource =='media');
             if(resources_media.length>0){
                 resources_media.forEach((rm,index)=>{
                     const keys = Object.keys(rm);
@@ -287,9 +299,9 @@ export default {
                     })
                 })
             }
-            const keys_tarea = Object.keys(vue.tarea);
+            const keys_tarea = Object.keys(vue.resource);
             keys_tarea.forEach(k => {
-                formData.append(`tarea[${k}]`, vue.tarea[k]);
+                formData.append(`tarea[${k}]`, vue.resource[k]);
             });
             return formData;
         },
@@ -308,6 +320,7 @@ export default {
         },
         onSelectMediaPreview(media) {
             let vue = this;
+            console.log(media);
             if(!media){
                 vue.showAlert('Seleccione un multimedia.','warning')
                 return true;
@@ -315,6 +328,9 @@ export default {
             if(this.resources.find(r=> r.id && r.id==media.id)){
                 vue.showAlert('Este recurso ya ha sido seleccionado.','warning')
                 return true;
+            }
+            if(media.formattedSize.includes('MB')){
+                media.size = media.formattedSize.replace(' MB','');
             }
             if(media.size>vue.constraints.max_size_upload_files){
                 vue.showAlert(`El limite máximo por archivo es de ${vue.constraints.max_size_upload_files} MB`,'warning')

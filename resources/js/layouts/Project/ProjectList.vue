@@ -102,6 +102,7 @@ export default {
                 base_endpoint: '/projects',
                 resource: 'Proyecto',
                 confirmLabel: 'Guardar',
+                action:'create'
             }
         }
     },
