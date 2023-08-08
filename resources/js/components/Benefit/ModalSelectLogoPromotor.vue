@@ -18,11 +18,12 @@
             <v-card-text class="py-8 text-center">
                 <p class="title_act">Selecciona cual archivo utilizarás</p>
                 <div class="bx_items_activitys">
-                    <div class="bx_item_activity" @click="selectLogoPromotorModal('ordenador')">
-                        <input type="file" ref="input_logo_promotor" id="input_logo_promotor" accept="image/*" style="display: none;" @change="handleFileChange($event)">
-                        <div class="img"><img src="/img/benefits/promotor_ordenador.svg"></div>
-                        <h5>Carga del ordenador</h5>
-                        <p>Podras subir una imagen de tu computadora</p>
+                    <div class="bx_item_activity">
+                        <OrdenadorLogoPromotor
+                            :ref="dropzoneDefault"
+                            :types-allowed="['image']"
+                            @onUpload="setMediaPreviewUpload"
+                        />
                     </div>
                     <div class="bx_item_activity" @click="selectLogoPromotorModal('multimedia')">
                         <div class="img"><img src="/img/benefits/promotor_multimedia.svg"></div>
@@ -46,8 +47,9 @@
 
 <script>
 import SelectMultimedia from "../forms/SelectMultimedia";
+import OrdenadorLogoPromotor from "./OrdenadorLogoPromotor.vue";
 export default {
-    components: {SelectMultimedia},
+    components: { SelectMultimedia, OrdenadorLogoPromotor },
     props: ["value", "width", "title", "subtitle", "txt_btn_confirm", "txt_btn_cancel", "options", "content_modal", "title_modal"],
     data() {
         return {
@@ -59,12 +61,12 @@ export default {
                 confirmLabel: 'Seleccionar',
                 cancelLabel: 'Cerrar'
             },
-        fileTypes: {
-            type: Object | Array,
-            default: function () {
-                return []
-            }
-        },
+            fileTypes: {
+                type: Object | Array,
+                default: function () {
+                    return []
+                }
+            },
             dialog: false,
             isLoading: false,
             uploadReady: true,
@@ -77,9 +79,16 @@ export default {
                 isImage: false,
                 isUploaded: false,
             },
+            fileSelected: null,
+            dropzoneDefault: 'dropzoneDefault'
         };
     },
     methods: {
+        setMediaPreviewUpload(file) {
+            let vue = this
+            vue.fileSelected = file
+            vue.$emit('confirmSelectLogoPromotorOrdenador', vue.fileSelected)
+        },
         openSelectPreviewMultimediaModal() {
             let vue = this
             vue.modalPreviewMultimedia.open = true
