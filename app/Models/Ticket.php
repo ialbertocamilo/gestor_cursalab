@@ -155,7 +155,12 @@ class Ticket extends BaseModel
             ->where('reason', 'Soporte Login')
             ->whereIn('user_id', $usersToUpdateIds)
             ->get();
+            
+        $tickets_users_inactive = Ticket::query()->whereHas('user', function ($q) use ($subworkspaces){
+            $q->whereIn('subworkspace_id', $subworkspaces['ids'])->where('active',0);
+        })->where('status', 'pendiente')->get();
 
+        $tickets = $tickets->merge($tickets_users_inactive);
         foreach ($tickets as $ticket) {
             $ticket->status = 'solucionado';
             $ticket->save();

@@ -127,7 +127,9 @@ class Benefit extends BaseModel
     protected function storeRequest($data, $benefit = null)
     {
         $promotor_imagen_multimedia = (isset($data['promotor_imagen_multimedia']) && !is_null($data['promotor_imagen_multimedia'])) ? $data['promotor_imagen_multimedia'] : null;
-        $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+        if(!is_null($promotor_imagen_multimedia)){
+            $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+        }
 
         $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa'])) ? json_decode($data['ubicacion_mapa']) : null;
 

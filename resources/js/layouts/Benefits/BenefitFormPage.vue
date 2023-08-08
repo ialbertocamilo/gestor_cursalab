@@ -150,6 +150,7 @@
                                 label="Fecha de inicio de inscripción"
                                 placeholder="Indicar fecha"
                                 show-required
+                                :min="new Date().toISOString().substr(0, 10)"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -162,6 +163,8 @@
                                 label="Cierre de inscripción"
                                 placeholder="Indicar fecha"
                                 show-required
+                                :min="minDate(resource.inicio_inscripcion)"
+                                :disabled="resource.inicio_inscripcion == null"
                             />
                         </v-col>
                     </v-row>
@@ -177,6 +180,8 @@
                                 placeholder="Indicar fecha"
                                 show-required
                                 tooltip="Fecha en la que se libera el beneficio como confirmado y se confirma a los colaboradores en lista."
+                                :min="minDate(resource.fin_inscripcion)"
+                                :disabled="resource.fin_inscripcion == null"
                             />
                         </v-col>
                         <v-col cols="4">
@@ -720,6 +725,7 @@
             width="650px"
             @closeModalSelectLogoPromotor="modalLogoPromotor.open = false"
             @confirmSelectLogoPromotor="confirmSelectLogoPromotor"
+            @confirmSelectLogoPromotorOrdenador="confirmSelectLogoPromotorOrdenador"
             />
     </section>
 </template>
@@ -751,9 +757,10 @@ const fields = [
     'list_silabos',
     'lista_grupo',
     'group',
-    'fecha_encuesta'
+    'fecha_encuesta',
+    'promotor_imagen'
 ];
-const file_fields = ['image'];
+const file_fields = ['image','promotor_imagen'];
 
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import Editor from "@tinymce/tinymce-vue";
@@ -820,6 +827,7 @@ export default {
             // otros
             image_promotor_selected: false,
             promotor_imagen: null,
+            promotor_imagen_ordenador: null,
             drag_links: false,
             drag_silabos: false,
             list_links: [],
@@ -865,6 +873,8 @@ export default {
                 // position: null,
                 image: null,
                 file_image: null,
+                promotor_imagen: null,
+                file_promotor_imagen: null,
                 active: true,
                 type_id: null,
                 inicio_inscripcion: null,
@@ -966,6 +976,15 @@ export default {
         this.hideLoader()
     },
     methods: {
+        minDate( date = null ){
+            if(date != null)
+            {
+                let result = new Date(date);
+                result.setDate(result.getDate() + 1);
+                return result.toISOString().substr(0, 10);
+            }
+            return new Date().toISOString().substr(0, 10)
+        },
         actionButtonAddImplement() {
             let vue = this
             if(vue.show_text_add_implement) {
@@ -1010,8 +1029,17 @@ export default {
                 vue.image_promotor_selected = true
                 vue.promotor_imagen = value
             }
-            console.log(value);
-            console.log(vue.resource);
+        },
+        confirmSelectLogoPromotorOrdenador( value ){
+            let vue = this;
+            vue.modalLogoPromotor.open = false
+
+            vue.image_promotor_selected = true
+            vue.promotor_imagen_ordenador = null
+            if(value){
+                vue.image_promotor_selected = true
+                vue.promotor_imagen_ordenador = value
+            }
         },
         async openModalSelectSpeaker() {
             let vue = this;
@@ -1192,6 +1220,10 @@ export default {
                 vue.resource.promotor_imagen_multimedia = vue.promotor_imagen
             }
 
+            if( vue.promotor_imagen_ordenador != null ) {
+                vue.resource.file_promotor_imagen = vue.promotor_imagen_ordenador
+            }
+
             vue.resource.type = vue.selectType
             vue.resource.group = vue.selectGroup
 
@@ -1342,7 +1374,7 @@ export default {
 
                         if(response.promotor_imagen != null) {
                             vue.image_promotor_selected = true
-                            vue.promotor_imagen = response.promotor_imagen
+                            // vue.promotor_imagen = response.promotor_imagen
                         }
 
                         if(response.direccion != null && response.direccion.address != null) {

@@ -54,6 +54,8 @@ class BenefitStoreUpdateRequest extends FormRequest
             'promotor_imagen_multimedia' => 'nullable',
             'image' => 'nullable',
             'file_image' => 'nullable',
+            'promotor_imagen' => 'nullable',
+            'file_promotor_imagen' => 'nullable',
             'validateForm' => 'required',
         ];
     }
