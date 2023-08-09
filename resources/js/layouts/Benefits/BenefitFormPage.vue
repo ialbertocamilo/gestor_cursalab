@@ -906,62 +906,7 @@ export default {
                 lista_etiquetas: [],
                 lista_grupo: []
             },
-            loadingActionBtn: false,
-            // courseValidationModal: {
-            //     ref: 'CursoValidacionesModal',
-            //     open: false,
-            //     title_modal: 'El curso es prerrequisito',
-            //     type_modal:'requirement',
-            //     content_modal: {
-            //         requirement: {
-            //             title: '¡El curso que deseas desactivar es un prerrequisito!'
-            //         },
-            //     }
-            // },
-            // courseValidationModalDefault: {
-            //     ref: 'CursoValidacionesModal',
-            //     open: false,
-            //     base_endpoint: '',
-            //     hideConfirmBtn: false,
-            //     hideCancelBtn: false,
-            //     confirmLabel: 'Confirmar',
-            //     cancelLabel: 'Cancelar',
-            //     resource: 'CursosValidaciones',
-            //     persistent: false,
-            //     showCloseIcon: true,
-            //     type: null
-            // },
-            // courseUpdateStatusModal: {
-            //     ref: 'CourseUpdateStatusModal',
-            //     title: 'Actualizar Curso',
-            //     contentText: '¿Desea actualizar este registro?',
-            //     open: false,
-            //     endpoint: '',
-            //     title_modal: 'Cambio de estado de un <b>curso</b>',
-            //     type_modal: 'status',
-            //     status_item_modal: null,
-            //     content_modal: {
-            //         inactive: {
-            //             title: '¡Estás por desactivar un curso!',
-            //             details: [
-            //                 'Los usuarios verán los cambios en su progreso en unos minutos.',
-            //                 'Los usuarios no podrán acceder al curso.',
-            //                 'El diploma del curso no aparecerá para descargar desde el app.',
-            //                 'No podrás ver el curso como opción para la descarga de reportes.',
-            //                 'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
-            //             ],
-            //         },
-            //         active: {
-            //             title: '¡Estás por activar un curso!',
-            //             details: [
-            //                 'Los usuarios verán los cambios en su progreso en unos minutos.',
-            //                 'Los usuarios ahora podrán acceder al curso.',
-            //                 'El diploma del curso ahora aparecerá para descargar desde el app.',
-            //                 'Podrás ver el curso como opción para descargar reportes.'
-            //             ]
-            //         }
-            //     },
-            // },
+            loadingActionBtn: false
         }
     },
     computed: {

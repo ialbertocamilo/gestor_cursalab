@@ -265,7 +265,7 @@ class Benefit extends BaseModel
         ->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
-        $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
+        $sort = !is_null(request()->sortDesc) ? (request()->sortDesc == 'true' ? 'DESC' : 'ASC') : 'DESC';
 
         $benefits_query->orderBy($field, $sort);
 
@@ -682,9 +682,21 @@ class Benefit extends BaseModel
     protected function tagsDefault()
     {
         return [
+            ['code' => 'adaptacion-y-flexibilidad', 'name' => 'Adaptación y flexibilidad', 'edit' => false ],
+            ['code' => 'comunicacion', 'name' => 'Comunicación', 'edit' => false ],
+            ['code' => 'curiosidad', 'name' => 'Curiosidad', 'edit' => false ],
+            ['code' => 'determinacion-en-la-ejecucion', 'name' => 'Determinación en la ejecución', 'edit' => false ],
+            ['code' => 'energizacion-de-personas', 'name' => 'Energización de personas', 'edit' => false ],
+            ['code' => 'foco-en-data', 'name' => 'Foco en Data', 'edit' => false ],
+            ['code' => 'mentalidad-digital', 'name' => 'Mentalidad Digital', 'edit' => false ],
+            ['code' => 'obsesion-por-el-cliente', 'name' => 'Obsesión por el cliente', 'edit' => false ],
+            ['code' => 'orientacion-a-resultados', 'name' => 'Orientación a resultados', 'edit' => false ],
+            ['code' => 'orientacion-al-cliente', 'name' => 'Orientación al cliente', 'edit' => false ],
+            ['code' => 'proactividad', 'name' => 'Proactividad', 'edit' => false ],
+            ['code' => 'trabajo-en-equipo', 'name' => 'Trabajo en Equipo', 'edit' => false ],
             ['code'=> 'basico', 'name'=> "Básico", 'edit' => false ],
             ['code'=> 'intermedio', 'name'=> "Intermedio", 'edit' => false ],
-            ['code'=> 'avanzado', 'name'=> "Avanzado", 'edit' => false ],
+            ['code'=> 'avanzado', 'name'=> "Avanzado", 'edit' => false ]
         ];
     }
 
@@ -1091,9 +1103,9 @@ class Benefit extends BaseModel
 
         $benefits_query->orderBy($field, $sort);
 
-        $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
-            $query->where('code', '<>', 'released');
-        });
+        // $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+        //     $query->where('code', '<>', 'released');
+        // });
 
         if (!is_null($filtro) && !empty($filtro)) {
             $benefits_query->where(function ($query) use ($filtro) {
@@ -1108,7 +1120,13 @@ class Benefit extends BaseModel
             else if(in_array('subscribed', $status_benefit) && count($status_benefit) > 1) {
                 $benefits_query->where(function($t) use ($status_benefit, $benefits_user_registered){
                     $t->whereHas('status', function ($query) use ($status_benefit) {
-                        $query->whereIn('code', $status_benefit);
+                        if(in_array('exchanged', $status_benefit)) {
+                            $query->whereIn('code', $status_benefit);
+                            $query->orWhereIn('code', ['approved']);
+                        }
+                        else{
+                            $query->whereIn('code', $status_benefit);
+                        }
                     });
                     $t->orWhereIn('id', $benefits_user_registered);
                 });
