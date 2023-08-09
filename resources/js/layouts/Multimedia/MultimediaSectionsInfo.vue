@@ -14,7 +14,7 @@
 		                	>
 		                		
 			                	<label class="multimedia-label my-0 mr-2" v-text="label" />
-			                	<a href="javascript:;" @click="openInOtherTabUrl(res)">
+			                	<a href="javascript:;" @click="openInOtherTab(url)">
 			                		{{ res.name }}
 			                	</a>
 		                	</span>
