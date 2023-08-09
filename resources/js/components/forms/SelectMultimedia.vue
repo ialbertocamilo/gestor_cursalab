@@ -14,6 +14,7 @@
                         label="Tipo"
                         item-text="label"
                         item-value="value"
+                        @onChange="getData"
                         dense
                     />
                 </v-col>
