@@ -5,33 +5,36 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProjectStoreRequest;
+use App\Http\Resources\ProjectSearchResourse;
 
 class ProjectController extends Controller
 {
     public function searchProject(Request $request){
-        return $this->success([]);
+        $projects = Project::search($request);
+        ProjectSearchResourse::collection($projects);
+        return $this->success($projects);
     }
     public function store(ProjectStoreRequest $request){
         Project::storeRequest($request);
         return $this->success(['msg'=>'La tarea se creó correctamente.']);
     }
     public function update(ProjectStoreRequest $request){
-        Tarea::updateRequest($request);
+        Project::updateRequest($request);
         return $this->success(['msg'=>'La tarea se actualizó correctamente.']);
     }
 
-    public function changeStatus(Tarea $tarea){
-        Tarea::changeStatus($tarea);
+    public function changeStatus(Project $project){
+        $project->changeStatus();
         return $this->success(['msg'=>'Se cambio el estado correctamente.']);
     }
 
-    public function deleteTarea(Tarea $tarea){
-        Tarea::deleteTarea($tarea);
+    public function deleteProject(Project $project){
+        Project::deleteProject($tarea);
         return $this->success(['msg'=>'Se elimino la tarea correctamente.']);
     }
 
     public function listConstraints(){
-        $constraints = Tarea::listConstraints();
+        $constraints = Project::listConstraints();
         return $this->success($constraints);
     }
     public function getListSelects(Request $request){

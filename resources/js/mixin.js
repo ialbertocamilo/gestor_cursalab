@@ -106,6 +106,18 @@ export default {
                 $('#pageloader').fadeOut()
             }, 250)
         },
+        show_http_errors(errors){
+            if (errors){
+                console.log(errors);
+                const keys_errors = Object.keys(errors);
+                keys_errors.forEach(key => {
+                    const error = errors[key];
+                    error.forEach(msg => {
+                        this.showAlert(msg, 'error')
+                    });
+                });
+            }
+        },
         showAlert(msg, type = 'success', title = '', timer = 10) {
             let vue = this
             let options = {

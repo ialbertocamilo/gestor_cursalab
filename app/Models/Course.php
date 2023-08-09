@@ -55,6 +55,11 @@ class Course extends BaseModel
     {
         return $this->hasMany(Update_usuarios::class, 'curso_id');
     }
+    
+    public function project()
+    {
+        return $this->hasOne(Project::class, 'course_id');
+    }
 
     public function segments()
     {

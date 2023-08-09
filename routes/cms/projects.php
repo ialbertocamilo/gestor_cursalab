@@ -11,6 +11,7 @@ Route::controller(ProjectController::class)->group(function() {
     //Tareas
     Route::post('/store','store');
     Route::post('/update','update');
+    Route::put('/{project}/status', 'changeStatus');
 
     // Route::put('/{tarea}/status','changeStatus']);
 

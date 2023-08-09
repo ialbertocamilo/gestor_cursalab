@@ -16,14 +16,14 @@
             <v-card-text>
                 <v-row justify="start" class="align-items-center">
                     <v-col cols="4">
-                        <!-- <DefaultInput
+                        <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar beneficios"
+                            label="Buscar por nombre del curso"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
-                        /> -->
+                        />
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -31,6 +31,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proyecto')"
             />
             <ProjectFormModal
                 width="50vw"
@@ -39,14 +40,21 @@
                 @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalOptions)"
             />
+            <DefaultStatusModal
+                :options="modalStatusOptions"
+                :ref="modalStatusOptions.ref"
+                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalStatusOptions)"
+            />
         </v-card>
     </section>
 </template>
 <script>
 import ProjectFormModal from "./ProjectFormModal";
+import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 export default {
-    components: {ProjectFormModal},
+    components: {ProjectFormModal,DefaultStatusModal},
     data() {
         return {
             dataTable: {
@@ -54,9 +62,9 @@ export default {
                 endpoint: '/projects/search',
                 ref: 'ProjectTable',
                 headers: [
-                    {text: "Empresa", value: "workspace"},
-                    {text: "Escuela", value: "school"},
-                    {text: "Curso", value: "course"},
+                    {text: "Módulo", value: "subworkspaces",sortable: false},
+                    {text: "Escuela", value: "school",sortable: false},
+                    {text: "Curso", value: "course",sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -103,6 +111,28 @@ export default {
                 resource: 'Proyecto',
                 confirmLabel: 'Guardar',
                 action:'create'
+            },
+            modalStatusOptions: {
+                ref: 'ProjectStatusModal',
+                open: false,
+                base_endpoint: '/projects',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                content_modal: {
+                    inactive: {
+                        title: '¡Estás por desactivar un Proyecto!',
+                        details: [
+                            'Este proyecto ahora no podrá ser visto por los usuarios.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estás por activar un Proyecto!',
+                        details: [
+                            'Este proyecto ahora podrá ser visto por los usuarios.'
+                        ]
+                    }
+                },
+                endpoint: '',
+                width: '408px'
             }
         }
     },

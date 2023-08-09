@@ -5,7 +5,7 @@
                 <p>Los proyectos serán asignados a todos los usuarios segmentados en el curso.</p>
                 <v-row justify="space-around">
                     <v-col cols="12">
-                        <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"
+                        <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"  no-data-text="No hay datos para mostrar."
                             label="Curso" item-value='id' item-text='name' :rules="rules.required"
                             :search-input.sync="search" :loading="isLoading" :disabled="isLoading"></v-autocomplete>
                     </v-col>
@@ -68,14 +68,14 @@ export default {
                 id: null,
                 course_id: null,
                 indications: '',
-                name: '',
+                course_name: '',
                 count_file: 0
             },
             resource: {
                 id: null,
                 course_id: null,
                 indications: '',
-                name: '',
+                course_name: '',
                 count_file: 0
             },
             selects: {
@@ -128,7 +128,7 @@ export default {
             vue.$refs.projectForm.resetValidation()
         }
         ,
-        confirmModal() {
+        async confirmModal() {
 
             let vue = this
 
@@ -147,7 +147,7 @@ export default {
             let method = edit ? 'PUT' : 'POST';
             if (validateForm) {
                 const formData = vue.createFormData();
-                vue.$http
+                await vue.$http
                     .post(url, formData)
                     .then(({ data }) => {
 
@@ -155,8 +155,10 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                     }).catch((error) => {
-                        if (error && error.errors)
-                            vue.errors = error.errors
+                        if (error && error.errors){
+                            const errors = error.errors ? error.errors : error;
+                            vue.show_http_errors(errors);
+                        }
                     })
             }
 

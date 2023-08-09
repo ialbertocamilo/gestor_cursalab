@@ -35,7 +35,7 @@ class ProjectStoreRequest extends FormRequest
         ];
         //Si es nulo se edita el registro,si no lo es se crea
         if(is_null($this->project['id']) || $this->project['id']=='null'){
-            $rules['project.course_id'] =  'required|unique:projects,course_id,active';
+            $rules['project.course_id'] =  "required|unique:projects,course_id,active";
         }else{
             $rules['project.course_id'] =  'required';
             $rules['project.id'] =  'exists:projects,id';
@@ -45,7 +45,6 @@ class ProjectStoreRequest extends FormRequest
     public function messages()
     {
         $constraints = config('project.constraints.admin');
-        info($constraints);
         return [
             'project.id.exists' => 'Error al actualizar el proyecto',
             'project.course_id.required' => 'El dato "Curso" es requerido.',
