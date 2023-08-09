@@ -54,6 +54,7 @@
             :range="range"
             locale="es-ES"
             no-title
+            :min="min"
         >
             <v-spacer></v-spacer>
             <v-btn
@@ -116,6 +117,7 @@ export default {
             type: String,
             default: ''
         },
+        min: String
 
     },
     computed: {

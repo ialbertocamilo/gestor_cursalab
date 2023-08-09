@@ -114,6 +114,7 @@ class BenefitController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'image');
+        $data = Media::requestUploadFile($data, 'promotor_imagen');
 
         $benefit = Benefit::storeRequest($data);
 
@@ -129,6 +130,7 @@ class BenefitController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'image');
+        $data = Media::requestUploadFile($data, 'promotor_imagen');
 
         $benefit = Benefit::storeRequest($data, $benefit);
 
