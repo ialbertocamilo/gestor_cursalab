@@ -363,7 +363,7 @@
                     <v-row justify="space-around" v-if="options_modules[3].active">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Link"
+                                title="Link o código de beneficio"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_links">
@@ -389,6 +389,7 @@
                                                                                 hide-details="auto"
                                                                                 v-model="link.name"
                                                                                 :class="{'border-error': link.hasErrors}"
+                                                                                placeholder="Agregar link o código de bonificación"
                                                                             ></v-textarea>
                                                                         </v-col>
                                                                         <v-col cols="1" class="d-flex align-center">
@@ -558,14 +559,13 @@
                                     <div class="box_beneficio_tags d-flex justify-content-center">
                                         <div class="box_input_etiqueta">
                                             <DefaultAutocomplete
-                                                :rules="rules.lista_etiquetas"
                                                 dense
                                                 label="Tag"
                                                 placeholder="Selecciona un tag"
-                                                v-model="resource.lista_etiquetas"
+                                                v-model="resource.dificultad"
                                                 :items="selects.lista_etiquetas"
                                                 item-text="name"
-                                                item-value="id"
+                                                item-value="code"
                                             />
                                         </div>
                                         <!-- <div class="box_button_etiqueta">
@@ -903,69 +903,65 @@ export default {
             selects: {
                 lista_encuestas: [],
                 list_types: [],
-                lista_etiquetas: [
-                    {id: 1, name: "Básico"},
-                    {id: 2, name: "Intermedio"},
-                    {id: 3, name: "Avanzado"},
-                ],
+                lista_etiquetas: [],
                 lista_grupo: []
             },
             loadingActionBtn: false,
-            courseValidationModal: {
-                ref: 'CursoValidacionesModal',
-                open: false,
-                title_modal: 'El curso es prerrequisito',
-                type_modal:'requirement',
-                content_modal: {
-                    requirement: {
-                        title: '¡El curso que deseas desactivar es un prerrequisito!'
-                    },
-                }
-            },
-            courseValidationModalDefault: {
-                ref: 'CursoValidacionesModal',
-                open: false,
-                base_endpoint: '',
-                hideConfirmBtn: false,
-                hideCancelBtn: false,
-                confirmLabel: 'Confirmar',
-                cancelLabel: 'Cancelar',
-                resource: 'CursosValidaciones',
-                persistent: false,
-                showCloseIcon: true,
-                type: null
-            },
-            courseUpdateStatusModal: {
-                ref: 'CourseUpdateStatusModal',
-                title: 'Actualizar Curso',
-                contentText: '¿Desea actualizar este registro?',
-                open: false,
-                endpoint: '',
-                title_modal: 'Cambio de estado de un <b>curso</b>',
-                type_modal: 'status',
-                status_item_modal: null,
-                content_modal: {
-                    inactive: {
-                        title: '¡Estás por desactivar un curso!',
-                        details: [
-                            'Los usuarios verán los cambios en su progreso en unos minutos.',
-                            'Los usuarios no podrán acceder al curso.',
-                            'El diploma del curso no aparecerá para descargar desde el app.',
-                            'No podrás ver el curso como opción para la descarga de reportes.',
-                            'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
-                        ],
-                    },
-                    active: {
-                        title: '¡Estás por activar un curso!',
-                        details: [
-                            'Los usuarios verán los cambios en su progreso en unos minutos.',
-                            'Los usuarios ahora podrán acceder al curso.',
-                            'El diploma del curso ahora aparecerá para descargar desde el app.',
-                            'Podrás ver el curso como opción para descargar reportes.'
-                        ]
-                    }
-                },
-            },
+            // courseValidationModal: {
+            //     ref: 'CursoValidacionesModal',
+            //     open: false,
+            //     title_modal: 'El curso es prerrequisito',
+            //     type_modal:'requirement',
+            //     content_modal: {
+            //         requirement: {
+            //             title: '¡El curso que deseas desactivar es un prerrequisito!'
+            //         },
+            //     }
+            // },
+            // courseValidationModalDefault: {
+            //     ref: 'CursoValidacionesModal',
+            //     open: false,
+            //     base_endpoint: '',
+            //     hideConfirmBtn: false,
+            //     hideCancelBtn: false,
+            //     confirmLabel: 'Confirmar',
+            //     cancelLabel: 'Cancelar',
+            //     resource: 'CursosValidaciones',
+            //     persistent: false,
+            //     showCloseIcon: true,
+            //     type: null
+            // },
+            // courseUpdateStatusModal: {
+            //     ref: 'CourseUpdateStatusModal',
+            //     title: 'Actualizar Curso',
+            //     contentText: '¿Desea actualizar este registro?',
+            //     open: false,
+            //     endpoint: '',
+            //     title_modal: 'Cambio de estado de un <b>curso</b>',
+            //     type_modal: 'status',
+            //     status_item_modal: null,
+            //     content_modal: {
+            //         inactive: {
+            //             title: '¡Estás por desactivar un curso!',
+            //             details: [
+            //                 'Los usuarios verán los cambios en su progreso en unos minutos.',
+            //                 'Los usuarios no podrán acceder al curso.',
+            //                 'El diploma del curso no aparecerá para descargar desde el app.',
+            //                 'No podrás ver el curso como opción para la descarga de reportes.',
+            //                 'El detalle del curso activos/inactivos aparecerá en “Notas de usuario”.'
+            //             ],
+            //         },
+            //         active: {
+            //             title: '¡Estás por activar un curso!',
+            //             details: [
+            //                 'Los usuarios verán los cambios en su progreso en unos minutos.',
+            //                 'Los usuarios ahora podrán acceder al curso.',
+            //                 'El diploma del curso ahora aparecerá para descargar desde el app.',
+            //                 'Podrás ver el curso como opción para descargar reportes.'
+            //             ]
+            //         }
+            //     },
+            // },
         }
     },
     computed: {
@@ -1359,6 +1355,7 @@ export default {
                     vue.selects.lista_encuestas = response.polls
                     vue.selects.list_types = response.types_benefit
                     vue.selects.lista_grupo = response.group
+                    vue.selects.lista_etiquetas = response.tags
                     if(vue.benefit_id == '') {
                         vue.selectGroup = 'free';
                     }
@@ -1382,7 +1379,7 @@ export default {
                                 vue.$refs.autocompleteMap.$refs.input.value = response.direccion.address
                             }, 2000);
                         }
-console.log(vue.resource);
+
                         if(response.cupos == null)
                             vue.cupoIlimitado = 'ilimitado'
                         else
@@ -1416,6 +1413,10 @@ console.log(vue.resource);
                         if((response.promotor != null && response.promotor != '') ||
                         (response.promotor_imagen != null && response.promotor_imagen != '')) {
                             vue.options_modules[0].active = true
+                        }
+
+                        if(response.dificultad != null && response.dificultad != '') {
+                            vue.options_modules[5].active = true
                         }
 
                         if((response.referencia != null && response.referencia != '') ||

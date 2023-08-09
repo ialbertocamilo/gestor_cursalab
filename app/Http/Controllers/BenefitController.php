@@ -105,7 +105,10 @@ class BenefitController extends Controller
         // Groups
         $group= Taxonomy::getDataForSelect('benefit', 'group');
 
-        $response = compact('polls', 'types_benefit', 'group');
+        // Tags default
+        $tags = Benefit::tagsDefault();
+
+        $response = compact('polls', 'types_benefit', 'group', 'tags');
 
         return $compactResponse ? $response : $this->success($response);
     }

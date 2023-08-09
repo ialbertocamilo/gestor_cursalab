@@ -39,6 +39,7 @@ class Benefit extends BaseModel
         'direccion',
         'referencia',
         'accesible',
+        'dificultad',
 
         'active',
     ];
@@ -678,6 +679,14 @@ class Benefit extends BaseModel
         return $response;
     }
 
+    protected function tagsDefault()
+    {
+        return [
+            ['code'=> 'basico', 'name'=> "Básico", 'edit' => false ],
+            ['code'=> 'intermedio', 'name'=> "Intermedio", 'edit' => false ],
+            ['code'=> 'avanzado', 'name'=> "Avanzado", 'edit' => false ],
+        ];
+    }
 
     // Apis
 
@@ -1209,6 +1218,11 @@ class Benefit extends BaseModel
                     ];
                 }
             }
+            if($item->dificultad)
+            {
+                $name_tag = $this->searchNameForTags($item->dificultad,$this->tagsDefault());
+                $item->dificultad = $name_tag ?? $item->dificultad;
+            }
             $item->hasMeeting = false;
             if( count($item->silabo) > 0){
                 $item->hasMeeting = boolval(Meeting::select('id')->where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$item->silabo->pluck('id'))->first());
@@ -1390,6 +1404,11 @@ class Benefit extends BaseModel
                 $item->value_date = Carbon::parse($item->value_date)->format('d/m/Y');
                 $item->value_time = Carbon::parse($item->value_time)->format('H:i');
             });
+            if($benefit->dificultad)
+            {
+                $name_tag = $this->searchNameForTags($benefit->dificultad,$this->tagsDefault());
+                $benefit->dificultad = $name_tag ?? $benefit->dificultad;
+            }
             $benefit->hasMeeting = false;
             if( count($benefit->silabo) > 0){
                 $benefit->hasMeeting = boolval(Meeting::where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$benefit->silabo->pluck('id'))->first());
@@ -1409,6 +1428,15 @@ class Benefit extends BaseModel
 
         return ['data'=>$benefit];
     }
+
+    private function searchNameForTags($id, $array) {
+        foreach ($array as $key => $val) {
+            if ($val['code'] === $id) {
+                return $val['name'];
+            }
+        }
+        return null;
+     }
 
     protected function config($data)
     {
