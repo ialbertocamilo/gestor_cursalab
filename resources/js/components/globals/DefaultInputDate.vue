@@ -140,8 +140,13 @@ export default {
                     // console.log(vue.date)
                     return dates.join(' - ')
                 }
-                console.log(vue.date)
-                return vue.date
+                else
+                {
+                    if (!vue.date) return vue.date
+
+                    const [year, month, day] = vue.date.split('-')
+                    return `${day}-${month}-${year}`
+                }
             },
             set() {
                 let vue = this
