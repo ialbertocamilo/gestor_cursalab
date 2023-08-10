@@ -5,8 +5,8 @@
                 Token
             </v-card-title>
             <v-card-text class="ml-2">
-                <p>Es una cadena de texto codificado que permite a controlar el acceso al uso de nuestras API's. 
-                    Esta clave será entregada junto con los permisos de administrador del gestor y la fecha de duración es de 1 mes. 
+                <p>Es una cadena de texto codificado que permite a controlar el acceso al uso de nuestras API's.
+                    Esta clave será entregada junto con los permisos de administrador del gestor y la fecha de duración es de 1 mes.
                 </p>
                 <descriptionApi :options="api_description_options" />
             </v-card-text>
@@ -67,8 +67,8 @@ const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"})
 const config = {
     method: 'post',
     url: base_url+'/integrations/auth-user',
-    headers: { 
-        'secretKey': '982alsdh$%as', 
+    headers: {
+        'secretKey': '982alsdh$%as',
         'Content-Type': 'application/json'
     },
     data : data
@@ -89,7 +89,7 @@ axios(config).then(function (response) {
         "access_token": "Token para hacer la consulta.",
         "token_type": "Tipo de token.(Bearer)",
         "expires_in": "Tiempo de expiración.",
-        "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:m:s)"
+        "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:i:s)"
     }
 }
 `
