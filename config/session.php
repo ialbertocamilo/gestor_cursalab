@@ -32,6 +32,7 @@ return [
     */
 
     'lifetime' => env('SESSION_LIFETIME', 120),
+    'app_lifetime' => env('TOKEN_APP_LIFETIME', 480),
 
     'expire_on_close' => false,
 
