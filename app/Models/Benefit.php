@@ -191,7 +191,7 @@ class Benefit extends BaseModel
                             'name' => $silabo->name,
                             'value' => $silabo->value,
                             'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
-                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:m:i') : null,
+                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:i:s') : null,
                             'active' => $silabo->active,
                             'benefit_id' => $benefit->id,
                             'type_id' => $property_silabo->id,
