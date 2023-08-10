@@ -567,7 +567,7 @@
                         {{ item.benefit_speaker }}
                     </div>
                     <div class="text-center" v-else>
-                        <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar expositor(a)</span>
+                        <span class="custom_link_add_speaker" @click="addSpeaker(item)">Agregar facilitador(a)</span>
                     </div>
                 </div>
             </template>

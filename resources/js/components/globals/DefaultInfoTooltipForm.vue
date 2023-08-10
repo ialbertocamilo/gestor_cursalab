@@ -37,7 +37,7 @@ export default {
     top: -10px;
     right: -5px;
 }
-.v-tooltip__content {
+.bx_tooltip .v-tooltip__content {
     width: 300px;
     text-align: center;
     border: 1px solid #5757EA;

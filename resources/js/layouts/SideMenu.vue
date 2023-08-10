@@ -68,6 +68,8 @@
                         v-text="grupo.title"
                         class="grupo_title"
                     ></v-list-item-title>
+                    <div v-if="grupo.isBeta"
+                             class="beta">Beta</div>
                 </template>
                 <div
                     v-for="(item, i) in grupo.items"
@@ -204,6 +206,7 @@ export default {
                 title: "BENEFICIOS",
                 icon: "fas fa-gift",
                 active: false,
+                isBeta: true,
                 functionality: ['benefits'],
                 items: [
                     {
@@ -213,20 +216,18 @@ export default {
                         subpaths: ["beneficios"],
                         selected: false,
                         permission: "beneficios",
-                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
                         ]
                     },
                     {
-                        title: "Expositores",
+                        title: "Facilitadores",
                         icon: "fas fa-gift",
                         path: "/speakers",
                         subpaths: ["speakers"],
                         selected: false,
                         permission: "speakers",
-                        isBeta: true,
                         role: [
                             "super-user",
                             "admin"
@@ -425,6 +426,7 @@ export default {
                 title: "CHECKLIST",
                 icon: "fas fa-business-time",
                 active: false,
+                isBeta: true,
                 functionality: ['default'],
                 items: [
                     {
@@ -447,7 +449,6 @@ export default {
                         path: "/entrenamiento/checklists",
                         subpaths: ["entrenamiento/checklist"],
                         selected: false,
-                        isBeta: true,
                         permission: "checklist",
                         role: [
                             "super-user",
@@ -828,7 +829,7 @@ export default {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.93em;
 }
-
+.v-list-group .beta,
 .list_submenu .beta {
     padding: 2px 10px 2px 10px;
     border-radius: 8px;

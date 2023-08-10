@@ -361,9 +361,11 @@
                     <!-- End Sílabo -->
                     <!-- Links -->
                     <v-row justify="space-around" v-if="options_modules[3].active">
-                        <v-col cols="12">
+                        <v-col cols="12" class="bx_tooltip_card">
                             <DefaultModalSection
                                 title="Link o código de beneficio"
+                                tooltip="El colaborador tendrá acceso a el/los link(s) cuando esté confirmado para su beneficio."
+                                :right="false"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_links">
@@ -520,7 +522,7 @@
                         <!-- Speaker -->
                         <v-col cols="6" v-if="options_modules[4].active">
                             <DefaultModalSection
-                                title="Selecciona tu expositor(a)"
+                                title="Selecciona tu facilitador(a)"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_speaker d-flex">
@@ -528,7 +530,7 @@
                                             <div v-if="!resource.speaker" class="d-flex align-center">
                                                 <div class="bx_speaker_img"></div>
                                                 <div class="bx_speaker_name">
-                                                    <span>Selecciona un expositor(a)</span>
+                                                    <span>Selecciona un facilitador(a)</span>
                                                 </div>
                                             </div>
                                             <div v-if="resource.speaker" class="d-flex align-center">
@@ -542,7 +544,7 @@
                                         </div>
                                         <div class="box_button_speaker">
                                             <v-btn color="primary" outlined @click="openModalSelectSpeaker">
-                                                Seleccionar expositor(a)
+                                                Seleccionar facilitador(a)
                                             </v-btn>
                                         </div>
                                     </div>
@@ -793,7 +795,7 @@ export default {
                 {name: 'Sílabo', code: 'silabo', active: false},
                 {name: 'Ubicación / Mapa', code: 'ubicacion', active: false},
                 {name: 'Agregar link', code: 'links', active: false},
-                {name: 'Expositores', code: 'speaker', active: false},
+                {name: 'Facilitadores', code: 'speaker', active: false},
                 {name: 'Tags', code: 'dificultad', active: false},
                 {name: 'Implementos necesarios', code: 'implementos', active: false},
                 {name: 'Duración', code: 'duracion', active: false},
@@ -1650,5 +1652,16 @@ export default {
     color: #5458EA;
     font-family: 'open sans', "Nunito", sans-serif;
     font-weight: 700;
+}
+.bx_tooltip_card .v-tooltip__content {
+    background-color: #fff;
+    color: #5757EA;
+    border: 1px solid #5757EA;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+    width: 274px;
+}
+.bx_tooltip_card .v-tooltip--bottom .v-tooltip__content {
+    top: 35px !important;
 }
 </style>
