@@ -35,7 +35,7 @@ class MigrarUsuarios extends Command
         $destino = DB::connection('mysql_master');
 
         // Obtener los usuarios de la base de datos de origen
-        $usuarios = $origen->select('SELECT * FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554;');
+        $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554;');
         // Migrar cada usuario a la base de datos de destino
         foreach ($usuarios as $usuario) {
             // Verificar si el usuario ya existe en la base de datos de destino
