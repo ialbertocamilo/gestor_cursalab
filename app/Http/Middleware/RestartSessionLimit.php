@@ -22,6 +22,9 @@ class RestartSessionLimit
     {
         $token = auth()->user()->token();
 
+        info('token');
+        info($token);
+
         $token->touch();
 
         return $next($request);
