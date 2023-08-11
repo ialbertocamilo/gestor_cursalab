@@ -12,7 +12,7 @@ class MigrarUsuarios extends Command
      *
      * @var string
      */
-    protected $signature = 'usuarios:migrar';
+    protected $signature = 'usuarios:migrar_master';
 
     /**
      * The console command description.
@@ -35,8 +35,7 @@ class MigrarUsuarios extends Command
         $destino = DB::connection('mysql_master');
 
         // Obtener los usuarios de la base de datos de origen
-        $usuarios = $origen->table('users')->get();
-
+        $usuarios = $origen->select('SELECT * FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554;');
         // Migrar cada usuario a la base de datos de destino
         foreach ($usuarios as $usuario) {
             // Verificar si el usuario ya existe en la base de datos de destino
@@ -52,9 +51,6 @@ class MigrarUsuarios extends Command
                     'username' => $usuario->username,
                     'email' => $usuario->email,
                     'customer_id' => ENV('CUSTOMER_ID'),
-                    'created_at' => $usuario->created_at,
-                    'updated_at' => $usuario->updated_at,
-                    'delete_at' => $usuario->deleted_at,
                 ]);
             }
         }
