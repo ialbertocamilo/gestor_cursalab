@@ -194,6 +194,7 @@ class UserMassive extends Massive implements ToCollection
                         $q->orWhere('email', $user['email']);
                     }
                 })->where('dni', '<>', $user['document'])->select('email', 'username')->first();
+                info(array($master_username_email));
             }
 
         } else {
@@ -456,18 +457,36 @@ class UserMassive extends Massive implements ToCollection
     }
     public function getStaticHeaders()
     {
-        return collect([
-            ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
-            ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
-            ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
-            ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
-            ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
-            ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
-            ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
-            ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
-            ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
-            ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
-        ]);
+        if (env('MULTIMARCA') === true) {
+
+            return collect([
+                ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
+                // ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
+                // ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
+                ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
+                ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
+                ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
+                ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
+                ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
+                // ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
+                ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
+            ]);
+
+        }else {
+
+            return collect([
+                ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
+                ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
+                ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
+                ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
+                ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
+                ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
+                ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
+                ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
+                ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
+                ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
+            ]);
+        }
     }
 
     private function excelDateToDate($fecha)
