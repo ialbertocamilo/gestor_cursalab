@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use DB;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\Redirect;
 
 class RestartSessionLimit
 
@@ -22,10 +22,9 @@ class RestartSessionLimit
     {
         $token = auth()->user()->token();
 
-        info('token');
-        info($token);
-
-        $token->touch();
+        DB::table('oauth_access_tokens')
+            ->where('id', $token->id)
+            ->update(['updated_at' => now()]);
 
         return $next($request);
     }
