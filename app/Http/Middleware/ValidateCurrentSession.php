@@ -24,7 +24,9 @@ class ValidateCurrentSession
 
         if (!$user->active) {
 
-            return $this->returnError('403', 'User inactive');
+            $user->token()->revoke();
+
+            return response()->json(['error' => 'User inactive logged out'], 403);
         }
 
         return $next($request);
