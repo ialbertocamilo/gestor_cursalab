@@ -25,21 +25,29 @@ class Project extends BaseModel
     protected function getListSelectByType($request){
         $data = [];
         switch ($request->type) {
-            // case 'module':
-            //     $current_workspace = get_current_workspace();
-            //     $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get(); 
-            //     break;
-            // case 'school':
-            //     $data = School::where('active',1)
-            //     ->whereHas('subworkspaces', function ($q) use ($request) {
-            //         $q->where('subworkspace_id', $request->module_id);
-            //     })
-            //     ->has('courses')->select('id','name')->get();
-            //     break;
+            case 'module':
+                $current_workspace = get_current_workspace();
+                $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get(); 
+                break;
+            case 'school':
+                $data = School::where('active',1)
+                ->whereHas('subworkspaces', function ($q) use ($request) {
+                    $q->where('subworkspace_id', $request->subworkspace_id);
+                })
+                ->has('courses.project')->select('id','name')->get();
+                break;
             case 'course':
+                $current_workspace = get_current_workspace();
+                $data = Course::has('project')->whereRelation('workspaces', 'id', $current_workspace->id)->where('active', 1)
+                ->has('schools')->has('topics')->select('id','name')->get();
+                break;
+            case 'search-course':
                 $current_workspace = get_current_workspace();
                 $data = Course::doesntHave('project')->whereRelation('workspaces', 'id', $current_workspace->id)->filtroName($request->q)->where('active', 1)
                 ->has('schools')->has('topics')->select('id','name')->get();
+                break;
+            case 'constraints':
+                $data = config('project.constraints.admin');
                 break;
         }
         return $data;
@@ -51,44 +59,52 @@ class Project extends BaseModel
         ])->select('id','course_id','indications','active');
         // ->withCount('usuario_cursos');
 
+        // FILTERS
         if ($request->q){
             $query->wherehas('course',function($q) use ($request){
                 $q->where('name', 'like', "%$request->q%");
             });
         }
 
-        // if ($request->modulo_id){
-        //     $modulos = $request->modulo_id;
-        //     $query->whereHas('curso', function($q)use($modulos){
-        //         $q->whereIn('config_id', $modulos);
-        //     });
-        // }
-        // if($request->escuela_id){
-        //     $escuelas = $request->escuela_id;
-        //     $query->whereHas('curso', function($q)use($escuelas){
-        //         $q->whereIn('categoria_id', $escuelas);
-        //     });
-        // }
-        // if($request->curso_id){
-        //     $cursos = $request->curso_id;
-        //     $query->whereHas('curso', function($q)use($cursos){
-        //         $q->whereIn('id', $cursos);
-        //     });
-        // }
-        // if (isset($request->active)){
-        //     $query->where('active',$request->active);
-        // }
+        if ($request->subworkspace_id){
+            $subworkspace_id = $request->subworkspace_id;
+            $query->whereHas('course.schools.subworkspaces', function($q)use($subworkspace_id){
+                $q->where('id', $subworkspace_id);
+            });
+        }
+
+        if($request->school_id){
+            $school_id = $request->school_id;
+            $query->whereHas('course.schools', function($q)use($school_id){
+                $q->where('id', $school_id);
+            });
+        }
+
+        if($request->course_id){
+            $course_id = $request->course_id;
+            $query->whereHas('course', function($q)use($course_id){
+                $q->where('id', $course_id);
+            });
+        }
+
+        if ($request->active == 1){
+            $query->where('active', ACTIVE);
+        }
+
+        if ($request->active == 2){
+            $query->where('active', '<>', ACTIVE);
+        }
+
         return $query->orderBy('created_at','desc')->paginate($request->paginate);
     }
-    protected function storeRequest($request, $project = null){
+    protected function storeUpdateRequest($request, $project = null){
         try {
             $request_project = $request->project;
-            $project = new Project();
             DB::beginTransaction();
             if (!$project) {
                 $project = new Project();
+                $project->course_id = $request_project['course_id'];
             }
-            $project->course_id = $request_project['course_id'];
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
             $project->save();
 
@@ -98,6 +114,13 @@ class Project extends BaseModel
             DB::rollBack();
             return $e;
         }
+        return $project;
+    }
+
+    protected function editProject(Project $project){
+        $project->load(['resources' => function ($q) {
+            $q->where('from_resource','media_project_course')->select('id',DB::raw("'media' as type_resource "),'project_id','size','ext','path_file as file','filename as title');
+        },'course:id,name']);
         return $project;
     }
 }

@@ -1,5 +1,58 @@
 <template>
     <section class="section-list">
+        <DefaultFilter
+            v-model="open_advanced_filter"
+            @filter="advanced_filter(dataTable, filters, 1)"
+            @cleanFilters="clearObject(filters)"
+            :disabled-confirm-btn="isValuesObjectEmpty(filters)"
+        >
+            <template v-slot:content>
+                <v-row justify="center">
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            dense
+                            :items="selects.sub_workspaces"
+                            v-model="filters.subworkspace_id"
+                            label="Módulos"
+                            item-text="name"
+                            @onChange="loadSchools()"
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            dense
+                            :items="selects.schools"
+                            v-model="filters.school_id"
+                            label="Escuelas"
+                            item-text="name"
+                            @onChange="loadCourses()"
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            dense
+                            :items="selects.courses"
+                            v-model="filters.course_id"
+                            label="Cursos"
+                            item-text="name"
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <DefaultSelect
+                            clearable
+                            dense
+                            :items="selects.statuses"
+                            v-model="filters.active"
+                            label="Estado"
+                            item-text="name"
+                        />
+                    </v-col>
+                </v-row>
+            </template>
+        </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Proyectos
@@ -25,13 +78,24 @@
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
+                    <v-col cols="8" class="d-flex justify-end">
+                        <DefaultButton
+                            text
+                            label="Aplicar filtros"
+                            icon="mdi-filter"
+                            @click="open_advanced_filter = !open_advanced_filter"
+                            class="btn_filter"
+                        />
+                    </v-col>
                 </v-row>
             </v-card-text>
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                @edit="openFormModal(modalOptions,$event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proyecto')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un proyecto')"
             />
             <ProjectFormModal
                 width="50vw"
@@ -46,15 +110,23 @@
                 @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
+            <DefaultDeleteModal
+                :options="modalDeleteOptions"
+                :ref="modalDeleteOptions.ref"
+                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalDeleteOptions)"
+            />
         </v-card>
     </section>
 </template>
 <script>
 import ProjectFormModal from "./ProjectFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
+import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+
 
 export default {
-    components: {ProjectFormModal,DefaultStatusModal},
+    components: {ProjectFormModal,DefaultStatusModal,DefaultDeleteModal},
     data() {
         return {
             dataTable: {
@@ -98,11 +170,21 @@ export default {
                 ]
             },
             selects: {
-                modules: [],
+                sub_workspaces: [],
+                schools:[],
+                courses:[],
+                statuses: [
+                    {id: null, name: 'Todos'},
+                    {id: 1, name: 'Activos'},
+                    {id: 2, name: 'Inactivos'},
+                ]
             },
             filters: {
                 q: '',
-                active: 1
+                active: 1,
+                subworkspace_id:null,
+                school_id:null,
+                course_id:null
             },
             modalOptions: {
                 ref: 'ProjectFormModal',
@@ -133,47 +215,66 @@ export default {
                 },
                 endpoint: '',
                 width: '408px'
+            },
+            modalDeleteOptions: {
+                ref: 'ProjectDeleteModal',
+                open: false,
+                base_endpoint: '/projects',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
+                content_modal: {
+                    delete: {
+                        title: '¡Estás por eliminar un Proyecto!',
+                        details: [
+                            'Este proyecto no podrá ser visto por los usuarios.',
+                            'La información eliminada no podra recuperarse'
+                        ],
+                    }
+                },
+                width: '408px'
             }
         }
     },
     mounted() {
         let vue = this
         vue.getSelects();
-        // // === check localstorage anuncio ===
-        // if(vue.dataTable.avoid_first_data_load) {
-        //     vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
-        //     const { storage: vademecumStorage } = vue.getStorageUrl('anuncio');
-        //     vue.openFormModal(vue.modalOptions, { id: vademecumStorage.id });
-        // }
-        // === check localstorage anuncio ===
     },
     created() {
         let vue = this;
-
-        // // === check localstorage anuncio ===
-        // const { status, storage: anuncioStorage } = vue.getStorageUrl('anuncio');
-        // if(status) {
-        //     vue.filters.q = anuncioStorage.q;
-        //     vue.filters.module = anuncioStorage.module[0]; // considerar que puede ser multimple
-        //     vue.filters.active = anuncioStorage.active;
-
-        //     vue.dataTable.avoid_first_data_load = true;
-        // }
-        // === check localstorage anuncio ===
     },
     methods: {
-        getSelects() {
+        async getSelects() {
             let vue = this
-            // const url = `/anuncios/get-list-selects`
-            // vue.$http.get(url)
-            //     .then(({data}) => {
-            //         vue.selects.modules = data.data.modules
-            //     })
+            let url = `/projects/get-selects?type=module`
+            vue.$http.get(url)
+                .then(({ data }) => {
+                    vue.selects.sub_workspaces = data.data;
+                }).catch((error) => {
+                });
         },
-        // reset(user) {
-        //     let vue = this
-        //     vue.consoleObjectTable(user, 'User to Reset')
-        // },
+        async loadSchools(){
+            let vue = this
+            vue.selects.schools = [];
+            vue.selects.courses = [];
+
+            let url = `/projects/get-selects?type=school&subworkspace_id=${vue.filters.subworkspace_id}`
+            vue.$http.get(url)
+                .then(({ data }) => {
+                    vue.selects.schools = data.data;
+                }).catch((error) => {
+                });
+        },
+        async loadCourses(){
+            let vue = this
+            let url = `/projects/get-selects?type=course&school_id=${vue.filters.school_id}`
+            vue.selects.courses = [];
+            vue.$http.get(url)
+                .then(({ data }) => {
+                    vue.selects.courses = data.data;
+                }).catch((error) => {
+
+                });
+        },
         activity() {
             console.log('activity')
         },

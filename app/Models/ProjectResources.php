@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
 use App\Traits\CustomAudit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ProjectResources extends Model
+class ProjectResources extends BaseModel
 {
     use HasFactory;
-    use SoftDeletes , CustomAudit;
+
     protected $fillable = ['project_id','type_id','size','path_file','from_resource','filename','ext','type_media'];
 
     public function media()
