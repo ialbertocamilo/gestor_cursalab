@@ -533,10 +533,10 @@ class AuthController extends Controller
 
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
-        
+
         $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
         $userinput = $request->email ? $credentials['email'] : $credentials['document'];
-        
+
         $credentials1['username'] = $userinput;
         $credentials2['document'] = $userinput;
         $credentials3['email'] = $userinput;
@@ -588,4 +588,9 @@ class AuthController extends Controller
         return $this->error('invalid-token', 503, $status);
     }
     // === RESET ===
+
+    public function getRespondWithDataAndToken( $data )
+    {
+        return $this->respondWithDataAndToken( $data );
+    }
 }

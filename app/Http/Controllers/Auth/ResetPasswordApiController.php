@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\Controller;
 use App\Rules\CustomContextSpecificWords;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -57,8 +59,8 @@ class ResetPasswordApiController extends Controller
         $field = request()->email ? 'email' : 'document';
         $value = request()->email ? request()->email : request()->document;
 
-        $user = User::where($field, $value)->first(); 
-        $user_id = $user->id ?? NULL; 
+        $user = User::where($field, $value)->first();
+        $user_id = $user->id ?? NULL;
 
         // info('ResetPasswordApiController');
         // info('request->all()');
@@ -76,13 +78,13 @@ class ResetPasswordApiController extends Controller
             // new ContextSpecificWords($user->name ?? NULL),
             // new ContextSpecificWords($user->lastname ?? NULL),
             // new ContextSpecificWords($user->surname ?? NULL),
-            
+
             new CustomContextSpecificWords($user->email ?? NULL, 'email'),
             new CustomContextSpecificWords($user->document ?? NULL, 'document'),
             new CustomContextSpecificWords($user->name ?? NULL, 'name'),
             new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
             new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
-            
+
             // new RepetitiveCharacters(),
             // new SequentialCharacters(),
         ];
@@ -95,7 +97,7 @@ class ResetPasswordApiController extends Controller
         ];
     }
 
-    protected function validationErrorMessages() 
+    protected function validationErrorMessages()
     {
         return [
                 'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
@@ -112,7 +114,7 @@ class ResetPasswordApiController extends Controller
     // public function reset(Request $request): JsonResponse|RedirectResponse
     public function reset(Request $request)
     {
-        
+
         // $validator = Validator::make($request->all(), $this->rules());
         // if ($validator->fails()) info(['errors' => $validator->errors()]);
 
@@ -151,7 +153,33 @@ class ResetPasswordApiController extends Controller
         // info($response);
         // info(Password::PASSWORD_RESET);
 
+        $data_login = null;
+        if($response == Password::PASSWORD_RESET) {
+
+            $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
+            : $request->only('document', 'password', 'password_confirmation', 'token');
+
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
+            $userinput = $request->email ? $credentials['email'] : $credentials['document'];
+
+            $credentials1['username'] = $userinput;
+            $credentials2['document'] = $userinput;
+            $credentials3['email'] = $userinput;
+
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+                $user = Auth::user();
+
+                if(!$request->email) $user->setInitialEmail();
+                $user->resetAttemptsUser();
+
+                $data_input['os'] = strip_tags($request['os'] ?? '');
+                $data_input['version'] = strip_tags($request['version'] ?? '');
+                $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
+            }
+        }
+
         return response()->json([
+            'data' => $data_login,
             'success' => $response == Password::PASSWORD_RESET
         ]);
     }
