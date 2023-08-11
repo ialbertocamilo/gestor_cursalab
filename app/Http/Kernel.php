@@ -68,6 +68,8 @@ class Kernel extends HttpKernel
         'check-school-workspace' => \App\Http\Middleware\CheckSchoolWorkspace::class,
         'scope-bouncer' => \App\Http\Middleware\ScopeBouncer::class,
         'secretKey' => \App\Http\Middleware\ApiIntegrationsMiddleware::class,
-        'auth.guard' => \App\Http\Middleware\AssignGuard::class
+        'auth.guard' => \App\Http\Middleware\AssignGuard::class,
+        'validated-session' => \App\Http\Middleware\ValidateCurrentSession::class,
+        'extend-session' => \App\Http\Middleware\RestartSessionLimit::class,
     ];
 }
