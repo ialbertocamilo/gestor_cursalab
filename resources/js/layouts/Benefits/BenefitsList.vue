@@ -389,6 +389,16 @@ export default {
                         {
                                 benefit.segments = res_benefit.segments;
 
+                            // if no direct segmentation exists, adds one
+
+                            if (!benefit.segments.find(s => s.type_code === 'direct-segmentation')) {
+                                benefit.segments.push({
+                                    id: `new-segment-${Date.now()}`,
+                                    type_code: 'direct-segmentation',
+                                    criteria_selected: [],
+                                    direct_segmentation: [null]
+                                })
+                            }
                         }
                         else {
                             benefit.segments = [{
