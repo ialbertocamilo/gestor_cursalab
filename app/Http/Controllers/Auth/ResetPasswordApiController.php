@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\Controller;
+use App\Mail\EmailTemplate;
 use App\Rules\CustomContextSpecificWords;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -125,7 +127,7 @@ class ResetPasswordApiController extends Controller
         // database. Otherwise we will parse the error and return the response.
 
         $response = $this->broker()->reset(
-            $this->credentials($request), function ($user, $password) {
+            $this->credentials($request), function ($user, $password) use ($request) {
 
 
                 $old_passwords = $user->old_passwords;
@@ -146,6 +148,16 @@ class ResetPasswordApiController extends Controller
                 $user->last_pass_updated_at = now();
                 $user->setRememberToken(Str::random(60));
                 $user->save();
+
+                if($request->email)
+                {
+                    $mail_data = [ 'subject' => 'Contraseña actualizada',
+                                'user' => $user->name.' '.$user->lastname,
+                                'email' => $request->email,
+                                'password' => $request->password,
+                                ];
+                    Mail::to($request->email)->send(new EmailTemplate('emails.enviar_credenciales_gestor', $mail_data));
+                }
             }
         );
 
