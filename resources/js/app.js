@@ -334,12 +334,11 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-            url = `${this.getReportsBaseUrl()}/${url}`
-            try {
-                FileSaver.saveAs(url, name)
-            } catch (error) {
-                console.log(error)
-            }
+          const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = name;
+            downloadLink.target = '_blank';
+            downloadLink.click();
         }
     }
 });
