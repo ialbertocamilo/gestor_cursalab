@@ -210,7 +210,7 @@
                                 item-text="name"
                                 item-value="code"
                                 :rules="rules.group"
-                                tooltip="A que grupo se asignará el beneficio (Generales o IR Academy)"
+                                tooltip="A qué grupo se asignará el beneficio (Generales o IR Academy)"
                             />
                         </v-col>
                     </v-row>
