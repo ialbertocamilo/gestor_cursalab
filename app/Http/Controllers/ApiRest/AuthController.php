@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
+use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
 use App\Models\{ Usuario, User };
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class SubworkspaceInMaintenance extends Exception {};
@@ -550,7 +552,7 @@ class AuthController extends Controller
         }
         // === prov el email a documento ===
 
-        $status = Password::reset($credentials, function($user, $password) {
+        $status = Password::reset($credentials, function($user, $password) use ($request) {
 
             $old_passwords = $user->old_passwords;
 
@@ -565,6 +567,16 @@ class AuthController extends Controller
             $user->last_pass_updated_at = now(); // actualizacion de contraseña
             $user->setRememberToken(Str::random(60));
             $user->save();
+
+            if($request->email)
+            {
+                $mail_data = [ 'subject' => 'Contraseña actualizada',
+                            'user' => $user->name.' '.$user->lastname,
+                            'email' => $request->email,
+                            'password' => $request->password,
+                            ];
+                Mail::to($request->email)->send(new EmailTemplate('emails.enviar_credenciales_gestor', $mail_data));
+            }
         });
 
         if($status == Password::PASSWORD_RESET) {
