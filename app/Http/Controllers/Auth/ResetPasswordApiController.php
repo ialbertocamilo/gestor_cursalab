@@ -151,7 +151,7 @@ class ResetPasswordApiController extends Controller
 
                 if($request->email)
                 {
-                    $mail_data = [ 'subject' => 'Contraseña actualizada',
+                    $mail_data = [ 'subject' => 'Credenciales para ingreso a la plataforma',
                                 'user' => $user->name.' '.$user->lastname,
                                 'email' => $request->email,
                                 'password' => $request->password,

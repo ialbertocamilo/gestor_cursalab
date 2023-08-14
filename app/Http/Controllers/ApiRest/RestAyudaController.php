@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Requests\SoporteLoginRequest;
 use App\Mail\SendEmailSupportLogin;
 use App\Models\AssignedRole;
@@ -61,7 +62,7 @@ class RestAyudaController extends Controller
         // Set data to store
 
         $user = User::where('document', $dni)->first();
-        
+
         if ($user) {
 
             $data = [
@@ -118,8 +119,51 @@ class RestAyudaController extends Controller
             //     }
             // }
 
-            $ticket = Ticket::create($data);
-            $response = ['error' => false, 'data' => ['ticket' => $ticket->id]];
+            if($user->email == $email)
+            {
+                // Resetea la contraseña del usuario
+                $reset_pass = app(UsuarioController::class)->resetPassword($user, new Request());
+
+                // Crea el ticket como solucionado
+                $data['status'] = 'solucionado';
+                $ticket = Ticket::create($data);
+
+                // Se realiza el login
+                $data_login = null;
+                $credentials['document'] = $user->document;
+                $credentials['password'] = $user->document;
+
+                if(Auth::attempt($credentials))
+                {
+                    $user_log = Auth::user();
+                    $user->resetAttemptsUser();
+
+                    $data_input['os'] = strip_tags($request['os'] ?? '');
+                    $data_input['version'] = strip_tags($request['version'] ?? '');
+                    $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
+                }
+
+                // Se devuelve el login en la respuesta del api
+                $response = [
+                    'error' => false,
+                    'data' => [
+                        'ticket' => $ticket->id,
+                        'auth' => $data_login
+                    ]
+                ];
+
+            }
+            else{
+                $ticket = Ticket::create($data);
+                $response = [
+                    'error' => false,
+                    'data' => [
+                        'ticket' => $ticket->id,
+                        'auth' => null
+                    ]
+                ];
+
+            }
             // $data_email = array(
             //     'nombre' => $name,
             //     'empresa' => $workspace_name,
@@ -161,10 +205,10 @@ class RestAyudaController extends Controller
         return response()->json(compact('preguntas'));
     }
 
-    public function existe_email(Request $request, $email = NULL) 
+    public function existe_email(Request $request, $email = NULL)
     {
         $existe_email = $email ?? false;
-        
+
         if($existe_email) {
             $existe_email = User::where('email', $email)->exists();
         }

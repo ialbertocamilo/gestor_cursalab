@@ -570,7 +570,7 @@ class AuthController extends Controller
 
             if($request->email)
             {
-                $mail_data = [ 'subject' => 'Contraseña actualizada',
+                $mail_data = [ 'subject' => '⚠️ Alerta de ingreso a la plataforma',
                             'user' => $user->name.' '.$user->lastname,
                             'email' => $request->email,
                             'password' => $request->password,
