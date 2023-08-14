@@ -387,10 +387,20 @@ export default {
 
                         if(res_benefit.segments != null && res_benefit.segments.length > 0)
                         {
-                                benefit.segments = res_benefit.segments;
+                            benefit.segments = res_benefit.segments;
 
-                        }
-                        else {
+                            // if no direct segmentation exists, adds one
+
+                            if (!benefit.segments.find(s => s.type_code === 'direct-segmentation')) {
+                                benefit.segments.push({
+                                    id: `new-segment-${Date.now()}`,
+                                    type_code: 'direct-segmentation',
+                                    criteria_selected: [],
+                                    direct_segmentation: [null]
+                                })
+                            }
+
+                        } else {
                             benefit.segments = [{
                                 id: `new-segment-${Date.now()}`,
                                 type_code: 'direct-segmentation',
