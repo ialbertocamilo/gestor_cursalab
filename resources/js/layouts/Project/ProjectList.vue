@@ -93,7 +93,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="openFormModal(modalOptions,$event)"
+                @edit="openFormModal(modalOptions,$event,'edit',`Editar Proyecto - ${$event.course}`)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proyecto')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un proyecto')"
             />
@@ -141,6 +141,13 @@ export default {
                 ],
                 actions: [
                     {
+                        text: "Usuarios",
+                        icon: 'mdi mdi-account',
+                        type: 'route',
+                        count: 'usuarios_count',
+                        route: 'usuarios_route',
+                    },
+                    {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
@@ -174,7 +181,7 @@ export default {
                 schools:[],
                 courses:[],
                 statuses: [
-                    {id: null, name: 'Todos'},
+                    {id: 3, name: 'Todos'},
                     {id: 1, name: 'Activos'},
                     {id: 2, name: 'Inactivos'},
                 ]
@@ -192,7 +199,8 @@ export default {
                 base_endpoint: '/projects',
                 resource: 'Proyecto',
                 confirmLabel: 'Guardar',
-                action:'create'
+                action:'create',
+                create_from_course_list:false,
             },
             modalStatusOptions: {
                 ref: 'ProjectStatusModal',

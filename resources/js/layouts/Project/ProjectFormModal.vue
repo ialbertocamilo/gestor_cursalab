@@ -5,9 +5,12 @@
                 <p>Los proyectos serán asignados a todos los usuarios segmentados en el curso.</p>
                 <v-row justify="space-around">
                     <v-col cols="12">
-                        <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"  no-data-text="No hay datos para mostrar."
-                            label="Curso" item-value='id' item-text='name' :rules="rules.required"
-                            :search-input.sync="search" :loading="isLoading" :disabled="isLoading || options.action === 'edit'"></v-autocomplete>
+                        <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"
+                            no-data-text="No hay datos para mostrar." label="Curso"
+                            item-value='id' item-text='name' :rules="rules.required" :search-input.sync="search"
+                            :loading="isLoading" 
+                            :disabled="isLoading || options.action === 'edit' || options.create_from_course_list"
+                        />
                     </v-col>
                 </v-row>
                 <v-row>
@@ -112,7 +115,7 @@ export default {
             }
             this.debounceTimer = setTimeout(() => {
                 this.searchCourses(val);
-            }, 1500);
+            }, 800);
         },
     },
     methods: {
@@ -155,7 +158,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
                     }).catch((error) => {
-                        if (error && error.errors){
+                        if (error && error.errors) {
                             const errors = error.errors ? error.errors : error;
                             vue.show_http_errors(errors);
                         }
@@ -179,48 +182,57 @@ export default {
             })
 
             let base = `${vue.options.base_endpoint}`
-            if (resource) {
-                let url = `${base}/${resource.id}/edit`
-                await vue.$http.get(url).then(({ data }) => {
-                    vue.resource.id= data.data.id;
-                    vue.resource.course_id = data.data.course_id ;
-                    vue.resource.indications = data.data.indications  ;
-                    vue.resource.course_name = data.data.course_name  ;
-                    vue.resource.count_file = data.data.count_file ;
-                    vue.resources = data.data.resources;
-                    vue.selects.courses.push(data.data.course);
+            if(vue.options.create_from_course_list){
+                vue.$nextTick(() => {
+                    vue.selects.courses.push(vue.options.course);
+                    vue.resource.course_id = vue.options.course.id;
+                    vue.search = vue.options.course.name;
                 })
             }else{
-                vue.resource.id= null;
-                vue.resource.course_id = null ;
-                vue.resource.indications = null  ;
-                vue.resource.course_name = null  ;
-                vue.resource.count_file = null ;
-                vue.resources = [];
-                vue.selects.courses = [];
+                if (resource) {
+                    let url = `${base}/${resource.id}/edit`
+                    await vue.$http.get(url).then(({ data }) => {
+                        vue.resource.id = data.data.id;
+                        vue.resource.course_id = data.data.course_id;
+                        vue.resource.indications = data.data.indications;
+                        vue.resource.course_name = data.data.course_name;
+                        vue.resource.count_file = data.data.count_file;
+                        vue.resources = data.data.resources;
+                        vue.selects.courses.push(data.data.course);
+                    })
+                } else {
+                    vue.resource.id = null;
+                    vue.resource.course_id = null;
+                    vue.resource.indications = null;
+                    vue.resource.course_name = null;
+                    vue.resource.count_file = null;
+                    vue.resources = [];
+                    vue.selects.courses = [];
+                }
             }
 
             return 0;
         },
-        loadSelects() {
+        async loadSelects() {
             let vue = this;
             let url = `${vue.options.base_endpoint}/get-selects?type=constraints`
-            vue.$http.get(url)
+            await vue.$http.get(url)
                 .then(({ data }) => {
                     vue.constraints = data.data;
                     console.log(vue.constraints);
                 }).catch((error) => {
                 });
+            vue.searchCourses();
         },
-        searchCourses(value) {
+        async searchCourses(value) {
             let vue = this;
             // if (this.selects.courses.length > 0) return
-            if(vue.options.action === 'edit') return
+            if (vue.options.action === 'edit' || vue.options.create_from_course_list) return
             // Items have already been requested
             if (vue.isLoading) return
             vue.isLoading = true
             let url = `${vue.options.base_endpoint}/get-selects?type=search-course&q=${value}`
-            vue.$http.get(url)
+            await vue.$http.get(url)
                 .then(({ data }) => {
                     console.log(data);
                     vue.selects.courses = data.data;

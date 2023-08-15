@@ -107,6 +107,8 @@
                         `Compatibilidad del curso - ${$event.name}`
                     )
                 "
+                @create_project="openProjectModal($event)"
+                @edit_project="openProjectModal($event)"
                 @logs="
                     openFormModal(
                         modalLogsOptions,
@@ -190,7 +192,13 @@
                 @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                 @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
             />
-
+            <ProjectFormModal
+                width="50vw"
+                :ref="modalOptionProject.ref"
+                :options="modalOptionProject"
+                @onConfirm="closeFormModal(modalOptionProject, dataTable, filters)"
+                @onCancel="closeFormModal(modalOptionProject)"
+            />
             <CompatibilityFormModal
                 :options="modalFormCompatibilityOptions"
                 width="55vw"
@@ -210,9 +218,11 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
+import ProjectFormModal from "../Project/ProjectFormModal.vue";
 
 export default {
     components: {
+        ProjectFormModal,
         CursosEncuestaModal,
         MoverCursoModal,
         DialogConfirm,
@@ -294,6 +304,30 @@ export default {
                         type: 'action',
                         count: 'encuesta_count',
                         method_name: 'encuesta'
+                    },
+                    {
+                        text: "Crear Proyecto",
+                        icon: 'fas fa-book',
+                        type: 'action',
+                        show_condition:'create_project',
+                        method_name: 'create_project',
+                        // permission_name:'can_show_tarea'
+                    },
+                    {
+                        text: "Editar Proyecto",
+                        icon: 'fas fa-book',
+                        type: 'action',
+                        show_condition:'edit_project',
+                        method_name: 'edit_project',
+                        // permission_name:'can_show_tarea'
+                    },
+                    {
+                        text: "Usuario proyectos",
+                        icon: 'fas fa-book',
+                        show_condition:'project_users',
+                        type: 'route',
+                        route: 'project_users_route',
+                        // permission_name:'can_show_tarea'
                     },
                     {
                         text: "Actualizar Estado",
@@ -436,6 +470,14 @@ export default {
             modalDateFilter1: {
                 open: false,
             },
+            modalOptionProject: {
+                ref: 'ProjectFormModal',
+                open: false,
+                base_endpoint: '/projects',
+                resource: 'Proyecto',
+                confirmLabel: 'Guardar',
+                action:'create'
+            }
         }
     },
     mounted() {
@@ -513,6 +555,21 @@ export default {
             vue.update_model = course
             vue.courseUpdateStatusModal.open = true
             vue.courseUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
+        },
+        openProjectModal(course){
+            let vue = this;
+            let title = 'Crear Proyecto';
+            if(course.create_project){
+                vue.modalOptionProject.course=course
+                vue.modalOptionProject.action='create';
+                vue.modalOptionProject.create_from_course_list = true;
+            }else{
+                vue.modalOptionProject.action='edit';
+                vue.modalOptionProject.create_from_course_list = false;
+                title = `Editar Proyecto - ${course.name}`;
+            }
+            console.log('course',course);
+            vue.openFormModal(vue.modalOptionProject,course.project,null,title);
         },
         async confirmUpdateStatus(validateForm = true) {
             let vue = this

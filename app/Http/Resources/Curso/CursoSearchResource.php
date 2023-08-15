@@ -39,6 +39,11 @@ class CursoSearchResource extends JsonResource
             $position = $this->course_position;
             $pivot_id_selected = $request->school_id  ?? $request->schools[0];
         }
+        //relation projects
+        $create_project = !isset($this->project->id);
+        $edit_project = !$create_project;
+        $project_id = isset($this->project->id) ? $this->project->id : 0;
+        
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -72,7 +77,13 @@ class CursoSearchResource extends JsonResource
             'compatibilities_count' => $this->compatibilities_a_count + $this->compatibilities_b_count,
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
-            'is_super_user'=>auth()->user()->isAn('super-user')
+            'is_super_user'=>auth()->user()->isAn('super-user'),
+
+            'create_project' => $create_project,
+            'edit_project' => $edit_project,
+            'project_users' => ($edit_project && $this->active),
+            'project_users_route' => route('project_users.list', [$project_id]),
+            'project' => $this->project,
         ];
     }
 

@@ -142,7 +142,7 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
-            ->with('schools.subworkspaces')
+            ->with(['schools.subworkspaces','project:id,course_id'])
             // ->with('segments.values', function ($q) {
             //     $q
             //         ->withWhereHas('criterion_value', function ($q) {

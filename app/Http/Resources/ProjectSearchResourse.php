@@ -30,7 +30,7 @@ class ProjectSearchResourse extends JsonResource
             // 'subworkspaces'=> $this->course?->schools->subworkspaces?->pluck('name')->implode(', ') || '',
             // 'usuarios_count' => $this->usuario_cursos_count,
             'usuarios_count' => 0,
-            // 'usuarios_route' => route('tareas_usuarios.list', [$this->id ]),
+            'usuarios_route' => route('project_users.list', [$this->id ]),
         ];
     }
     public function getModulesImages($modules)

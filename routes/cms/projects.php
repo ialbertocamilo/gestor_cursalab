@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectUserController;
 
 Route::controller(ProjectController::class)->group(function() {
 
@@ -15,9 +16,9 @@ Route::controller(ProjectController::class)->group(function() {
     Route::delete('/{project}/destroy','deleteProject');
 
     // //Usuario Tareas
-    // Route::view('/{tarea}/usuarios', 'tareas.usuarios_list')->name('tareas_usuarios.list');
-    // Route::get('/status-list/{type}', [UsuarioTareaController::class, 'listStatus']);
-    // Route::get('/{tarea}/usuarios/search', [UsuarioTareaController::class, 'search']);
+    Route::view('/{tarea}/usuarios', 'projects.users')->name('project_users.list');
+    Route::get('/users/status-list/{type}', [ProjectUserController::class, 'listStatus']);
+    Route::get('/{project}/users/search', [ProjectUserController::class, 'search']);
     // Route::get('/{usuario_tarea_id}/download-zip-files', [UsuarioTareaController::class, 'downloadZipFiles']);
     // Route::post('/{usuario_tarea}/update-usuario-tarea', [UsuarioTareaController::class, 'update']);
 });

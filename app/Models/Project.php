@@ -38,13 +38,26 @@ class Project extends BaseModel
                 break;
             case 'course':
                 $current_workspace = get_current_workspace();
-                $data = Course::has('project')->whereRelation('workspaces', 'id', $current_workspace->id)->where('active', 1)
-                ->has('schools')->has('topics')->select('id','name')->get();
+                $data = Course::has('project')->whereRelation('workspaces', 'id', $current_workspace->id)
+                ->whereHas('schools', function ($q) use ($request) {
+                    $q->where('id', $request->school_id);
+                })->select('id','name')->get();
                 break;
             case 'search-course':
                 $current_workspace = get_current_workspace();
-                $data = Course::doesntHave('project')->whereRelation('workspaces', 'id', $current_workspace->id)->filtroName($request->q)->where('active', 1)
-                ->has('schools')->has('topics')->select('id','name')->get();
+                $data = Course::leftJoin('projects AS p','p.course_id','=','courses.id')
+                ->when(true, function($q) use ($request){
+                    $request->q && $request->q != 'undefined'  ? $q->filtroName($request->q) : $q->doesntHave('project');
+                })
+                ->where('courses.active', 1)
+                ->whereRelation('workspaces', 'id', $current_workspace->id)
+                ->select(
+                    'courses.id',
+                    DB::raw('CASE WHEN p.id IS NULL THEN courses.name ELSE CONCAT(courses.name," (Ya tiene proyecto asignado)") END AS name'),
+                    DB::raw('CASE WHEN p.id IS NULL THEN 0 ELSE 1 END AS disabled')
+                )->whereNull('p.deleted_at')
+                ->paginate(10)->items();
+                
                 break;
             case 'constraints':
                 $data = config('project.constraints.admin');

@@ -593,6 +593,10 @@
                 </div>
             </template>
 
+            <!-- CUSTOM -->
+            <template v-slot:[`item.custom_slot`]="{item}">
+                <slot name="custom_slot" v-bind="{ item }" />
+            </template>
         </v-data-table>
         <!--   Custom Paginator -->
 

@@ -221,6 +221,7 @@ Vue.component("speaker-layout", require("./layouts/Speakers/SpeakersList.vue"));
 Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage"));
 /*---Project list views--*/
 Vue.component("project-layout", require("./layouts/Project/ProjectList.vue"));
+Vue.component("project-users-layout", require("./layouts/Project/ProjectUsersList.vue"));
 
 
 /*----*/ 
