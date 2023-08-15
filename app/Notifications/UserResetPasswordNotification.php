@@ -64,7 +64,7 @@ class UserResetPasswordNotification extends Notification
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        return $this->buildMailMessage($this->resetUrl($notifiable));
+        return $this->buildMailMessage($this->resetUrl($notifiable), $notifiable);
     }
 
     /**
@@ -73,19 +73,23 @@ class UserResetPasswordNotification extends Notification
      * @param  string  $url
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    protected function buildMailMessage($url)
+    protected function buildMailMessage($url, $user)
     {
         $url = preg_replace("/.*\/password\/reset\/(.*)/", '/cambiar-contrasenia/$1', $url);
         $url = rtrim(config('auth.email.base_url_reset'), '/') . '/' . ltrim($url, '/');
 
+        $data = [
+            'subject' => 'Recuperar contraseña',
+            'data' => [
+                'user' => $user->name.' '.$user->lastname,
+                'url_to_reset' => $url,
+                'minutes' => 60,
+            ]
+        ];
+
         return (new MailMessage)
             ->subject(Lang::get('Recuperar contraseña'))
-            ->greeting('Hola,')
-            ->salutation('Saludos, Cursalab.')
-            ->line(Lang::get('Estás recibiendo este email, porque hemos recibido una solicitud de recuperación de contraseña para tu cuenta.'))
-            ->action(Lang::get('Recuperar contraseña'), $url)
-            ->line(Lang::get('El enlace para recuperar la contraseña expirará en :count minutos.', ['count' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire')]))
-            ->line(Lang::get('Si no solicitaste la recuperación de contraseña, no es necesario realizar ninguna acción.'));
+            ->markdown('emails.reset_password_gestor', $data);
     }
 
     /**

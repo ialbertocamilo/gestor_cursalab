@@ -34,6 +34,7 @@
                 Si no solicitaste la recuperación de contraseña, no es necesario realizar ninguna acción. <br>
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
+                ¿No reconoces esta actividad? Contáctate inmediatamente con el equipo de Customer Experience.<br>
                 Este es un mensaje automático, por favor no responder.
             </p>
         </td>

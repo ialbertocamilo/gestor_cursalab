@@ -135,12 +135,10 @@ class RestAyudaController extends Controller
 
                 if(Auth::attempt($credentials))
                 {
-                    $user_log = Auth::user();
-                    $user->resetAttemptsUser();
+                    // === verificar el dni como password ===
+                    Auth::user()->resetAttemptsUser(); // resetea intentos
 
-                    $data_input['os'] = strip_tags($request['os'] ?? '');
-                    $data_input['version'] = strip_tags($request['version'] ?? '');
-                    $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
+                    $data_login = app(AuthController::class)->checkSameDataCredentials($user->document, $user->document);
                 }
 
                 // Se devuelve el login en la respuesta del api
@@ -148,7 +146,7 @@ class RestAyudaController extends Controller
                     'error' => false,
                     'data' => [
                         'ticket' => $ticket->id,
-                        'auth' => $data_login
+                        'recovery' => $data_login
                     ]
                 ];
 
@@ -159,7 +157,7 @@ class RestAyudaController extends Controller
                     'error' => false,
                     'data' => [
                         'ticket' => $ticket->id,
-                        'auth' => null
+                        'recovery' => null
                     ]
                 ];
 
