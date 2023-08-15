@@ -138,7 +138,7 @@ class RestAyudaController extends Controller
                     // === verificar el dni como password ===
                     Auth::user()->resetAttemptsUser(); // resetea intentos
 
-                    $data_login = app(AuthController::class)->checkSameDataCredentials($user->document, $user->document);
+                    $data_login = app(AuthController::class)->checkSameDataCredentials($user->document, $user->document, false);
                 }
 
                 // Se devuelve el login en la respuesta del api
