@@ -38,7 +38,7 @@ class RevokeImpersonationAccessTokens extends Command
         $tokens = DB::table('oauth_access_tokens')
                         ->where('name', 'accessTokenImpersonation')
                         ->where('revoked', 0)
-                        ->where('created_at', '<=', now()->subMinutes(60))
+                        ->where('updated_at', '<=', now()->subMinutes(60))
                         ->get();
 
         $bar = $this->output->createProgressBar($tokens->count());

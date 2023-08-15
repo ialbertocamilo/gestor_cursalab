@@ -44,7 +44,7 @@ class RevokeUsersAccessTokens extends Command
                         ->where('name', 'accessToken')
                         ->whereNotIn('user_id', $users_id)
                         ->where('revoked', 0)
-                        ->where('created_at', '<=', now()->subMinutes($max_minutes))
+                        ->where('updated_at', '<=', now()->subMinutes($max_minutes))
                         ->get();
 
         $bar = $this->output->createProgressBar($tokens->count());
