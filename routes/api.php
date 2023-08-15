@@ -50,8 +50,8 @@ Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 Route::post('/quizz', [AuthController::class, 'quizz']);
 Route::post('/reset', [AuthController::class, 'reset_password']);
 
-Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
-Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
+// Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
+// Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
 Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -63,7 +63,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
-Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 'rest'], function () {
 
     // Route::impersonate();
 

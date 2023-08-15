@@ -9,14 +9,14 @@ Route::controller(RestMeetingController::class)->group(function() {
 
 	// Route::post('/zoom/webhook-end-meeting', 'zoomWebhookEndMeeting');
 
-	Route::get('/get-form-data', 'getFormData');
+	Route::get('/get-form-data', 'getFormData')->middleware('extend-session');
 	Route::post('/store', 'store');
 
 	Route::get('/search-attendants', 'searchAttendants');
 	Route::post('/upload-attendants', 'uploadAttendants');
 
-	Route::post('/{meeting}/start', 'startMeeting');
-	Route::post('/{meeting}/join', 'joinMeeting');
+	Route::post('/{meeting}/start', 'startMeeting')->middleware('extend-session');
+	Route::post('/{meeting}/join', 'joinMeeting')->middleware('extend-session');
 
 	Route::post('/{meeting}/finish', 'finishMeeting');
 	Route::put('/{meeting}/cancel', 'cancel');

@@ -411,20 +411,20 @@ class AuthController extends Controller
     }
     // === RECAPTCHA ===
 
-    public function checkSameDataCredentials($userinput, $password)
+    public function checkSameDataCredentials($userinput, $password, $send_email = true)
     {
         $user = auth()->user();
         $checkCredentials['require_quizz'] = ($userinput === $password) && !((bool) $user->email);
         $checkCredentials['id_user'] = $user->id;
 
         if(!$checkCredentials['require_quizz']) {
-            return $this->sendEmailResetPassword($user, $checkCredentials);
+            return $this->sendEmailResetPassword($user, $checkCredentials, $send_email);
         }
         return $checkCredentials;
         // return $this->sendQuizzQuestionsValidate($user, $checkCredentials);
     }
 
-    public function sendEmailResetPassword($user, $checkCredentials)
+    public function sendEmailResetPassword($user, $checkCredentials, $send_email = true)
     {
         $workspaceName = Workspace::find($user->subworkspace->parent_id)->name;
         $subWorkspaceName = $user->subworkspace->name;
@@ -434,12 +434,16 @@ class AuthController extends Controller
                        'subworkspace' => $subWorkspaceName,
                        'fullname' => $user->name.' '.$user->lastname ];
 
-        $userCallback = function ($user_instance, $token) {
-            // enviar email
-            $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
-        };
+        $status = "passwords.sent";
+        if($send_email)
+        {
+            $userCallback = function ($user_instance, $token) {
+                // enviar email
+                $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
+            };
 
-        $status = Password::sendResetLink(['email' => $user->email], $userCallback);
+            $status = Password::sendResetLink(['email' => $user->email], $userCallback);
+        }
 
         $checkCredentials['recovery_email']['success'] = ($status === Password::RESET_LINK_SENT);
         $checkCredentials['recovery_email']['data'] = $mail_data;
