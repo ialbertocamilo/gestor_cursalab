@@ -334,11 +334,18 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-          const downloadLink = document.createElement('a');
-            downloadLink.href = url;
-            downloadLink.download = name;
-            downloadLink.target = '_blank';
-            downloadLink.click();
+               url = `${this.getReportsBaseUrl()}/${url}`
+            try {
+                FileSaver.saveAs(url, name)
+            } catch (error) {
+                console.log(error)
+            }
+            // reportes utilizando el S3
+            // const downloadLink = document.createElement('a');
+            // downloadLink.href = url;
+            // downloadLink.download = name;
+            // downloadLink.target = '_blank';
+            // downloadLink.click();
         }
     }
 });
