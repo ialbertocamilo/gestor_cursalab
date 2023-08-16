@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\EmailTemplate;
 use App\Rules\CustomContextSpecificWords;
 use App\Models\User;
+use App\Models\WorkspaceFunctionality;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -149,7 +150,10 @@ class ResetPasswordApiController extends Controller
                 $user->setRememberToken(Str::random(60));
                 $user->save();
 
-                if($request->email)
+                $user_workspace = $user->subworkspace->parent_id;
+                $functionality = $user_workspace ? WorkspaceFunctionality::getFunctionality( $user_workspace, 'send-credentials-to-email') : null;
+
+                if($functionality && $request->email)
                 {
                     $mail_data = [ 'subject' => 'Credenciales para ingreso a la plataforma',
                                 'user' => $user->name.' '.$user->lastname,

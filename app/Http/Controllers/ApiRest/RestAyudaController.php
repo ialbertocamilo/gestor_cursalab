@@ -213,4 +213,42 @@ class RestAyudaController extends Controller
 
         return response()->json((bool) $existe_email);
     }
+
+    public function solicitud_cambio_correo(Request $request)
+    {
+        $user = Auth::user();
+        $email = strip_tags($request->email);
+
+        $response = [
+            'error' => true,
+            'data' => [
+                'ticket' => null
+            ]
+        ];
+
+        if ($user) {
+
+            $data = [
+                'dni' => $user?->document,
+                'email' => $email,
+                'contact' => $user?->phone_number,
+                'detail' => 'Solicitud de cambio de correo',
+                'user_id' => $user->id,
+                'workspace_id' => $user->subworkspace?->parent_id,
+                'name' => $user->fullname,
+                'reason' => 'Solicitud de cambio de correo',
+                'status' => 'pendiente',
+            ];
+
+            $ticket = Ticket::create($data);
+            $response = [
+                'error' => false,
+                'data' => [
+                    'ticket' => $ticket->id
+                ]
+            ];
+        }
+
+        return response()->json(compact('response'));
+    }
 }
