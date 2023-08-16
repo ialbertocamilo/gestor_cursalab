@@ -116,8 +116,8 @@ class UserMassive extends Massive implements ToCollection
                     $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
                     $master_user_arr = [
                             'dni' => $data_user['user']['document'],
-                            'username' => $data_user['user']['username'],
-                            'email' => $data_user['user']['email'],
+                            'username' => isset($data_user['user']['username']) ? $data_user['user']['username']: null,
+                            'email' => isset($data_user['user']['email']) && trim($data_user['user']['email']) !== '' ? $data_user['user']['email'] : null,
                             'customer_id' => ENV('CUSTOMER_ID'),
                             'created_at' => now()
                     ];

@@ -355,6 +355,10 @@ class Benefit extends BaseModel
 
             $benefit['segments'] = $segments;
 
+            if (is_array($segments)) {
+                $segments = collect($segments);
+            }
+
             $segmentation_by_document_list = [];
             $segmentation_by_document = $segments->map(function ($item) {
                 return ['segmentation_by_document'=> $item->segmentation_by_document];
