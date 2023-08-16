@@ -101,6 +101,7 @@ Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 're
     Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
     Route::prefix('benefits')->group(base_path('routes/app/benefit.php'));
 
+    Route::post('actualizar_correo', [RestAyudaController::class, 'solicitud_cambio_correo']);
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {

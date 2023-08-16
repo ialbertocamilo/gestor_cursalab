@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User };
+use App\Models\{ Usuario, User, WorkspaceFunctionality};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -572,7 +572,10 @@ class AuthController extends Controller
             $user->setRememberToken(Str::random(60));
             $user->save();
 
-            if($request->email)
+            $user_workspace = $user->subworkspace->parent_id;
+            $functionality = $user_workspace ? WorkspaceFunctionality::getFunctionality( $user_workspace, 'send-credentials-to-email') : null;
+
+            if($functionality && $request->email)
             {
                 $mail_data = [ 'subject' => '⚠️ Alerta de ingreso a la plataforma',
                             'user' => $user->name.' '.$user->lastname,
