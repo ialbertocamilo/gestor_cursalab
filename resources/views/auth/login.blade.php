@@ -72,16 +72,16 @@
               <button type="submit" class="btn btn-primary" id="decrement-timeout-disabled" disabled>
                 {{ __('Ingresar') }}
               </button>
-            
+
             @else
-            
+
               <button type="submit" class="btn btn-primary">
                 {{ __('Ingresar') }}
               </button>
-            
+
             @endif
 
-            
+
             <br>
             <a href="{{ route('password.update') }}" target="_self" rel="noopener noreferrer" style="color:#0000D2" class="pt-4">Olvidé mi contraseña</a>
           </div>
@@ -96,4 +96,11 @@
     </div>
   </div>
 </div>
+<script>
+    // Reloads the login page, to avoid error 419
+
+    setTimeout(() => {
+        location.reload();
+    }, 20 * 60 * 1000); // Every 20 minutes
+</script>
 @endsection
