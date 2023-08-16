@@ -32,7 +32,8 @@ class Workspace extends BaseModel
         'notificaciones_push_envio_inicio',
         'notificaciones_push_envio_intervalo',
         'criterio_id_fecha_inicio_reconocimiento',
-        'limit_allowed_storage'
+        'limit_allowed_storage',
+        'show_logo_in_app',
     ];
 
     public function sluggable(): array

@@ -318,6 +318,16 @@
                                         />
                                     </v-col>
                                 </v-row>
+                                <v-row>
+                                    <v-col cols="12">
+                                        <DefaultToggle
+                                            class="mt-5"
+                                            v-model="resource.show_logo_in_app"
+                                            active-label="Mostrar logo de workspace en la aplicación"
+                                            inactive-label="No mostrar logo del workspace en la aplicación"
+                                            />
+                                    </v-col>
+                                </v-row>
                             </template>
                         </DefaultSection>
                     </v-tab-item>
@@ -335,7 +345,7 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [

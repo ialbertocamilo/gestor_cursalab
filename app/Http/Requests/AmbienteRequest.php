@@ -47,6 +47,8 @@ class AmbienteRequest extends FormRequest
 
             'logo_male' => 'nullable',
             'logo_female' => 'nullable',
+            
+            'template' => 'nullable',
         ];
     }
     public function validationData(): array

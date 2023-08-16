@@ -102,12 +102,12 @@ class AuthImpersonationController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_current_logo', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
         
         if ($workspace_data) {
-            $show_current_logo = $workspace_data->show_current_logo ?? false;
+            $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;
 
-            if ($show_current_logo) {
+            if ($show_logo_in_app) {
                 $workspace_data->logo = get_media_url($workspace_data->logo);
             } else {
                 $ambiente = Ambiente::first();
