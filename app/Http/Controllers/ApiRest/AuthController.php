@@ -209,14 +209,19 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
-        if ($workspace_data) {
-            $workspace_data->logo = get_media_url($workspace_data->logo);
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_current_logo', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
 
-            if ($workspace_data->slug == 'farmacias-peruanas') {
-                $workspace_data->logo = get_media_url($user->subworkspace->logo);
+        if ($workspace_data) {
+            $show_current_logo = $workspace_data->show_current_logo ?? false;
+
+            if ($show_current_logo) {
+                $workspace_data->logo = get_media_url($workspace_data->logo);
+            } else {
+                $ambiente = Ambiente::first();
+                $workspace_data->logo = get_media_url($ambiente->logo);
             }
         }
+
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
