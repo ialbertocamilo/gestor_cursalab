@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginAppImpersonationRequest;
-use App\Models\Error;
-use App\Models\Workspace;
-use App\Models\Usuario;
-use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Error;
+use App\Models\Usuario;
+use App\Models\Ambiente;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
-
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
+
+use Illuminate\Support\Facades\Password;
+use App\Http\Requests\LoginAppImpersonationRequest;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class AuthImpersonationController extends Controller
 {
