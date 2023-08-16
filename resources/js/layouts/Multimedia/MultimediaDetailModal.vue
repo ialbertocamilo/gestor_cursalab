@@ -6,72 +6,126 @@
             @onCancel="closeModal"
             @onConfirm="confirmModal"
         >
+            <!-- :show-card-actions="false" -->
             <template v-slot:content>
+                <v-row class="mb-3">
+                    <div class="col col-8 text-left py-0 text-overflow-ellipsis small" :title="resource.title">
+                        {{ resource.title }}
+                    </div>
+
+                    <div class="col col-2 text-right py-0 text-overflow-ellipsis small" :title="resource.type">{{ resource.type }}</div>
+                    <div class="col col-2 text-right py-0 text-overflow-ellipsis small" :title="resource.formattedSize">{{ resource.formattedSize }}</div>
+                </v-row>
                 <v-row>
-                    <v-col cols="8">
+                    <v-col cols="12" class="py-0">
+                    
                         <v-img
                             :src="resource.preview"
                             :lazy-src="`https://picsum.photos/10/6?image=200`"
-                            aspect-ratio="1.7"
-                            contain/>
-                    </v-col>
-                    <v-col cols="4" class="d-flex flex-column align-center" style="justify-content: space-evenly">
-                        <div class="d-flex justify-content-center flex-column align-center">
-                            <span class="multimedia-label mb-1">
-                                Abrir en otra pestaña
-                            </span>
-                            <DefaultButton
-                                append-icon="mdi-open-in-new"
-                                label="Abrir"
-                                @click="openMultimedia"
-                            />
-                        </div>
-                        <DefaultButton
-                            v-if="resource.ext !== 'scorm'"
-                            append-icon="mdi-download"
-                            label="Descargar"
-                            @click="downloadMultimedia"
+                            max-height="350"
+                            contain
+                            class="grey lighten-5"
                         />
+                            <!-- aspect-ratio="4/3" -->
+
+                        <p class="text-center mb-3">
+                            <!-- <strong>[ {{ resource.created }} ]</strong> -->
+                        </p>
                     </v-col>
                 </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <v-row>
-                            <v-col cols="4" class="multimedia-label" v-text="'Nombre de archivo:'"/>
-                            <v-col cols="8" v-text="resource.title"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Tipo:'"/>
-                            <v-col cols="8" v-text="resource.type"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Peso'"/>
-                            <v-col cols="8" v-text="resource.formattedSize"/>
-                            <v-col cols="4" class="multimedia-label" v-text="'Fecha de creación:'"/>
-                            <v-col cols="8" v-text="resource.created"/>
-                        </v-row>
+
+                <v-row justify="center" class="mx-0">
+                    <v-col cols="12" class="d-flex justify-content-center py-0">
+
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="primary"
+                            @click="openMultimedia"
+                            title="Abrir multimedia externamente"
+                        >
+                            <v-icon color="primary">mdi-open-in-new</v-icon>
+                            <!-- Abrir multimedia -->
+                        </v-btn>
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="primary"
+                            @click="downloadMultimedia"
+                            v-if="resource.ext !== 'scorm'"
+                            title="Descargar multimedia"
+                        >
+                            <v-icon color="primary">mdi-download</v-icon>
+                            <!-- Descargar multimedia -->
+                        </v-btn>
+
+                        <v-btn
+                            class=""
+                            text
+                            elevation="0"
+                            :ripple="false"
+                            color="grey"
+                            @click="modalDeleteOptions.open = true"
+                            v-if="resource.ext !== 'scorm'"
+                            title="Eliminar multimedia"
+                        >
+                            <v-icon color="grey">mdi-trash-can</v-icon>
+                            <!-- Eliminar multimedia -->
+                        </v-btn>
                     </v-col>
-                    <v-col cols="6" v-if="false">
+                   
+                </v-row>
+
+                <v-row v-if="resource.sections">
+
+                    <div class="col col-12 text-center">
+                        <hr class="mt-0">
+
+                        <strong>Secciones donde se utiliza:</strong>
+                    </div>
+
+                    <MultimediaSectionsInfo :resource="resource.sections.courses" label="Cursos" />
+                    <MultimediaSectionsInfo :resource="resource.sections.topics" label="Temas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.schools" label="Escuelas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.announcements" label="Anuncios" />
+                    <MultimediaSectionsInfo :resource="resource.sections.videotecas" label="Videotecas" />
+                    <MultimediaSectionsInfo :resource="resource.sections.vademecums" label="Protocolos y documentos" />
+                    <MultimediaSectionsInfo :resource="resource.sections.modules" label="Módulos" />
+
+                    <!-- <v-col cols="6" v-if="false">
                         <DefaultModalSection
                             title="Ubicación asignada"
                         />
-                    </v-col>
+                    </v-col> -->
                 </v-row>
+               
+                <DialogConfirm
+                    :ref="modalDeleteOptions.ref"
+                    v-model="modalDeleteOptions.open"
+                    :options="modalDeleteOptions"
+                    width="408px"
+                    title="Eliminar Multimedia"
+                    subtitle="¿Está seguro de eliminar el archivo multimedia?"
+                    @onConfirm="confirmDelete"
+                    @onCancel="modalDeleteOptions.open = false"
+                />
             </template>
+
         </DefaultDialog>
-        <DialogConfirm
-            :ref="modalDeleteOptions.ref"
-            v-model="modalDeleteOptions.open"
-            :options="modalDeleteOptions"
-            width="408px"
-            title="Eliminar Multimedia"
-            subtitle="¿Está seguro de eliminar el archivo multimedia?"
-            @onConfirm="confirmDelete"
-            @onCancel="modalDeleteOptions.open = false"
-        />
     </div>
 </template>
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import MultimediaSectionsInfo from "./MultimediaSectionsInfo";
 
 export default {
-    components: {DialogConfirm},
+    components: { DialogConfirm, MultimediaSectionsInfo },
     props: {
         options: {
             type: Object,
@@ -104,18 +158,27 @@ export default {
             resourceDefault: {
                 created_at: null,
                 ext: null,
-                file: null,
+                file_url: null,
                 id: null,
                 title: null,
                 type: null,
             },
-            resource: {},
+            resource: {
+                sections: {
+                    course: [],
+                    topics: [],
+                    schools: [],
+                    announcements: [],
+                    videotecas: [],
+                    vademecums: []
+                }
+            },
         }
     },
     methods: {
         closeModal() {
-            let vue = this
-            vue.$emit('onCancel')
+            let vue = this;
+            vue.$emit('onCancel');
         },
         confirmModal() {
             let vue = this
@@ -164,7 +227,7 @@ export default {
         },
         openMultimedia() {
             let vue = this
-            this.openInNewTab(vue.resource.file)
+            this.openInNewTab(vue.resource.file_url)
         },
         downloadMultimedia() {
             let vue = this

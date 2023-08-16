@@ -10,7 +10,7 @@
         @include('layouts.user-header')
     </script>
     <v-app>
-        <workspaces-list-layout></workspaces-list-layout>
+        <workspaces-list-layout {{ auth()->user()->isAn('super-user') ? 'is_superuser' : '' }}></workspaces-list-layout>
     </v-app>
 
 @endsection

@@ -105,6 +105,7 @@ return [
                 'topics' => function ($q) use ($user_id) {
                     $q->with([
                         'evaluation_type:id,code',
+                        'qualification_type:id,code,position,name',
                         'requirements.summaries_topics' => function ($q) use ($user_id) {
                             $q
                                 ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
@@ -130,6 +131,7 @@ return [
                 },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
+                'qualification_type:id,code,position,name',
             ],
             'course-view-app-user' => [
                 'segments' => function ($q) {
@@ -162,11 +164,13 @@ return [
                         ->where('active', ACTIVE);
                 },
                 'type:id,code',
+                'qualification_type:id,code,position,name',
                 'topics' => function ($q) use ($user_id) {
                     $q
                         ->where('active', ACTIVE)
                         ->with([
                             'evaluation_type:id,code',
+                            'qualification_type:id,code,position,name',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
@@ -232,6 +236,7 @@ return [
                         ->with([
                             'medias.type',
                             'evaluation_type:id,code',
+                            'qualification_type:id,code,position,name',
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
                                     ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
@@ -256,6 +261,7 @@ return [
                 },
                 'compatibilities_a:id',
                 'compatibilities_b:id',
+                'qualification_type:id,code,position,name',
             ]
         };
     }

@@ -31,7 +31,7 @@
                         />
                         <v-img v-else contain width="276" height="200"
                                :src="bucketBaseUrl + '/' + fileSelected" -->
-                    <v-img contain width="276" height="200"
+                    <v-img contain width="90%" height="226"
                            :src="getMediaPreview"
                            v-if="TypeOf(fileSelected) !== 'undefined'"
                     />
@@ -51,7 +51,7 @@
                    @click="openSelectPreviewMultimediaModal"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>
-                Seleccionar multimedia
+                {{ labelButton }}
             </v-btn>
         </transition>
 
@@ -78,6 +78,11 @@ export default {
         label: {
             type: String,
             required: true
+        },
+        labelButton:{
+            type: String,
+            required: false,
+            default:'Seleccionar multimedia'
         },
         description: {
             type: String,
@@ -116,7 +121,7 @@ export default {
         getMediaPreview() {
             let vue = this
             // let preview = this.bucketBaseUrl + '/' + "images/default-scorm-img_116_360.png"
-            let preview = "images/default-scorm-img_116_360.png"
+            let preview = "/images/default-scorm-img_116_360.png"
 
             if (vue.TypeOf(this.fileSelected) === 'string') {
                 const extension = this.fileSelected.split('.').at(-1).toLowerCase()
@@ -144,7 +149,7 @@ export default {
             }
 
             return vue.fileSelected
-                ? this.bucketBaseUrl + '/' + preview
+                ? preview
                 : null
         }
     },

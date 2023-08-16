@@ -33,6 +33,7 @@ class UsuarioSearchResource extends JsonResource
            // 'pruebas_desaprobadas' => true,
             'reporte_route' => route('exportar.node', ['dni' => $this->document]),
             'is_super_user'=>auth()->user()->isAn('super-user'),
+            // 'is_super_user'=> true,
 
             'career' => $this->criterion_values->where('criterion_id', 41)->first()->value_text ?? '----',
             'cycle' => $this->criterion_values->where('criterion_id', 40)->sortBy('position')->last()->value_text ?? '---',

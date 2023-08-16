@@ -11,6 +11,7 @@
                         class="mr-5"
                         bottom
                         text="Recuerda cumplir con el horario de <br> inicio y final de tu reunión." />
+                    <v-spacer/>
                      <!-- {{ usuario_id }} - {{ workspace_id }} -->
 
 <!--                    <v-btn icon color="primary"-->
@@ -21,10 +22,10 @@
 
 
                 <DefaultModalButton v-if="superuser"
-                    label="Configurar Anfitriones"
-                    template="anfitriones"
-                    :icon=false
-                    class="btn_anf"
+                    label="Configurar anfitriones"
+                    icon_name="mdi-contacts-outline"
+                    text
+                    class="---btn_anf"
                     @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id }, 'segmentation', `Segmentación de Anfitriones`)"/>
 
                 <SegmentFormModal
@@ -491,13 +492,13 @@ export default {
 // .tableMeeting button.v-icon.v-icon--disabled {
 //     color: #94DDDB !important;
 // }
-.v-tooltip__content {
-    background-color: #fff;
-    color: #5757EA;
-    border: 1px solid #5757EA;
-    border-radius: 10px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-}
+// .v-tooltip__content {
+//     background-color: #fff;
+//     color: #5757EA;
+//     border: 1px solid #5757EA;
+//     border-radius: 10px;
+//     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+// }
 button.btn_anf.primary {
     background-color: #fff !important;
     color: #5458ea !important;
@@ -515,11 +516,11 @@ button.btn_anf.primary .icon_tmp {
 button.btn_anf.primary .icon_tmp img{
     max-width: 20px;
 }
-button.btn_crear {
-    font-family: "Nunito", sans-serif;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    min-width: 175px !important;
-    height: 42px !important;
-}
+// button.btn_crear {
+//     font-family: "Nunito", sans-serif;
+//     padding-left: 10px !important;
+//     padding-right: 10px !important;
+//     min-width: 175px !important;
+//     height: 42px !important;
+// }
 </style>

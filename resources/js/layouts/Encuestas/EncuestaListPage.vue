@@ -9,7 +9,7 @@
                 <!-- <DefaultActivityButton :label="'Actividad'"
                                        @click="activity"/> -->
                 <DefaultModalButton
-                    :label="'Encuesta'"
+                    :label="'Crear encuesta'"
                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>

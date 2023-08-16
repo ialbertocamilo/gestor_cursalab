@@ -40,12 +40,12 @@ class UserStoreRequest extends FormRequest
 
         if ($this->isMethod('post')) {
             $passwordRules = [
-                "required", 'max:100',  
+                "required", 'max:100',
                 Password::min(8),
             ];
         } else {
             $passwordRules = [
-                "nullable", 'max:100',  
+                "nullable", 'max:100',
                 Password::min(8)->letters()->numbers()->symbols(),
 
                 "password_available:{$id}",
@@ -85,7 +85,8 @@ class UserStoreRequest extends FormRequest
             $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
         }
         if($this->email){
-            $rules['email'] ="required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL" ;
+            // $rules['email'] ="required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL" ;
+            $rules['email'] ="required|email|max:255,email,{$id},id,deleted_at,NULL" ;
         }
         return $rules;
     }
@@ -101,14 +102,14 @@ class UserStoreRequest extends FormRequest
     // {
     //     return [
     //         'name.required' => 'El campo nombre es requerido',
-            
+
     //         'password.required' => 'El campo contraseña es requerido',
     //         'password.min' => 'El campo contraseña debe contener al menos 8 caracteres',
     //         'password.max' => 'El campo contraseña no debe ser mayor a 100 caracteres',
     //         'password.not_regex' => 'El campo contraseña no debe ser similar a tu nro de documento y/o email',
 
     //         'document.unique' => 'Este documento ya ha sido registrado: intente con otro',
-            
+
     //         'email.required' => 'El campo correo es requerido',
     //         'email.email' => 'El campo correo debe tener formato abc@ejemplo.com',
     //         'email.unique' => 'Este correo ya ha sido regitrado: intente con otro'

@@ -12,7 +12,7 @@
                     <DefaultErrors :errors="errors"/>
 
                     <v-row>
-                        <v-col cols="6">
+                        <v-col cols="4">
                             <DefaultInput
                                 dense
                                 label="Nombre"
@@ -23,7 +23,19 @@
                                 counter="120"
                             />
                         </v-col>
-                        <v-col cols="6">
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                show-required
+                                :rules="rules.types"
+                                dense
+                                label="Tipo de curso"
+                                v-model="resource.type_id"
+                                :items="selects.types"
+                                item-text="name"
+                                item-value="id"
+                            />
+                        </v-col>
+                        <v-col cols="4">
                             <DefaultAutocomplete
                                 show-required
                                 :rules="rules.lista_escuelas"
@@ -67,18 +79,7 @@
                                         </template>
                                     </DefaultAutocomplete>
                                 </v-col>
-                                <v-col cols="12">
-                                    <DefaultAutocomplete
-                                        show-required
-                                        :rules="rules.types"
-                                        dense
-                                        label="Tipo de curso"
-                                        v-model="resource.type_id"
-                                        :items="selects.types"
-                                        item-text="name"
-                                        item-value="id"
-                                    />
-                                </v-col>
+                                
                             </v-row>
                         </v-col>
                         <v-col cols="3" class="sep-left">
@@ -137,29 +138,67 @@
                     <v-row justify="space-around" class="menuable">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Evaluaciones"
+                                title="Configuración de calificación"
                             >
                                 <template slot="content">
                                     <v-row justify="center">
 
-                                        <v-col cols="6">
+                                      <!--   <v-col cols="1">
+                                            <DefaultInfoTooltip
+                                                class=""
+                                                top
+                                                text="Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas."
+                                            />
+
+                                        </v-col> -->
+
+                                        <v-col cols="4">
+
+                                            <DefaultSelect
+                                                clearable
+                                                dense
+                                                :items="selects.qualification_types"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.qualification_type"
+                                                label="Sistema de calificación"
+                                                :rules="rules.qualification_type_id"
+                                            />
+                                        </v-col>
+
+                                        <!-- <v-col cols="3">
+                                            <small>*Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</small>
+                                        </v-col> -->
+
+                                        <v-col cols="4">
                                             <DefaultInput
                                                 label="Nota mínima aprobatoria"
                                                 v-model="resource.nota_aprobatoria"
                                                 :rules="rules.nota_aprobatoria"
+                                                type="number"
+                                                :min="0"
+                                                :max="resource.qualification_type.position"
                                                 show-required
                                                 dense
                                                 @onFocus="curso_id && conf_focus ? alertNotaMinima() : null"
                                             />
+                                            <!-- -- {{ new_value }} -->
                                         </v-col>
-                                        <v-col cols="6">
+
+                                        <v-col cols="4">
                                             <DefaultInput
                                                 label="Número de intentos"
                                                 v-model="resource.nro_intentos"
                                                 :rules="rules.nro_intentos"
+                                                type="number"
                                                 show-required
                                                 dense
                                             />
+                                        </v-col>
+
+                                        <v-col cols="12" class="py-1">
+                                            <p class="mb-0">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
                                         </v-col>
                                     </v-row>
                                 </template>
@@ -214,6 +253,70 @@
                                             <div class="v-messages__message">Validar hora de reinicio</div>
                                         </div>
                                     </div>
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
+
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Programación de curso"
+                                :coming-soon="true"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter1"
+                                                v-model="resource.publish_date_1"
+                                                label="Fecha de inicio"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Hora"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter2"
+                                                v-model="resource.publish_date_2"
+                                                label="Fecha de fin"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Hora"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="12" class="py-1">
+                                            <p class="mb-0">** Programar la activación y/o inactivación de un curso.</p>
+                                        </v-col>
+                                    </v-row>
+                                    <!-- <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                        <div style="color: #FF5252" class="v-messages__wrapper">
+                                            <div class="v-messages__message">Validar hora de reinicio</div>
+                                        </div>
+                                    </div> -->
                                 </template>
                             </DefaultModalSection>
                         </v-col>
@@ -298,7 +401,7 @@
 <script>
 const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
-    'plantilla_diploma', 'config_id', 'categoria_id', 'type_id',
+    'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date'
 ];
@@ -346,21 +449,26 @@ export default {
                 scheduled_restarts_horas: null,
                 scheduled_restarts_minutos: 1,
                 lista_escuelas: [],
-                show_certification_date: false
+                show_certification_date: false,
+                qualification_type: {position: 0}
             },
-            resource: {},
+            resource: {
+                qualification_type: {position: 0}
+            },
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 lista_escuelas: this.getRules(['required']),
                 types: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
-                nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
+                nota_aprobatoria: this.getRules(['required']),
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+                qualification_type_id: this.getRules(['required']),
             },
             selects: {
                 requisito_id: [],
                 lista_escuelas: [],
                 types: [],
+                qualification_types: [],
                 duration: [
                     { 'id':'0.50', 'name':'0:30' },
                     { 'id':'1.00', 'name':'1:00' },
@@ -376,11 +484,11 @@ export default {
             courseValidationModal: {
                 ref: 'CursoValidacionesModal',
                 open: false,
-                title_modal: 'El curso es prerrequisito',
+                title_modal: 'El curso es pre-requisito',
                 type_modal:'requirement',
                 content_modal: {
                     requirement: {
-                        title: '¡El curso que deseas desactivar es un prerrequisito!'
+                        title: '¡El curso que deseas desactivar es un pre-requisito!'
                     },
                 }
             },
@@ -441,6 +549,15 @@ export default {
                     }
                 },
             },
+
+            modalDateFilter1: {
+                open: false
+            },
+
+            modalDateFilter2: {
+                open: false
+            },
+            new_value: 0,
         }
     },
     computed: {
@@ -457,7 +574,19 @@ export default {
                 return false
             }
             return true
-        }
+        },
+    },
+    watch: {
+        'resource.qualification_type': function (newValue, oldValue) {
+            let vue = this
+            let value = vue.resource.nota_aprobatoria
+
+            if (value && newValue.position && oldValue.position) {
+
+                vue.new_value = value * newValue.position / oldValue.position
+                vue.resource.nota_aprobatoria = parseFloat(vue.new_value.toFixed(2))
+            }
+        },
     },
     async mounted() {
         this.showLoader()
@@ -474,6 +603,23 @@ export default {
         }
     },
     methods: {
+        calculateBySystem(val) {
+            // console.log(val)
+            // let vue = this
+
+            // let value = vue.resource.nota_aprobatoria
+
+            // if (vue.resource.qualification_type.code == 'vigesimal') {
+            //     vue.new_value = value * vue.resource.qualification_type.position / 2
+            // }
+
+            // if (vue.resource.qualification_type.code == 'centesimal') {
+            //     vue.new_value = value * vue.resource.qualification_type.position / 2
+
+            // }
+
+            // return
+        },
         alertNotaMinima(){
             let vue = this
             vue.deleteConfirmationDialog.open = true
@@ -603,6 +749,7 @@ export default {
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
+                    vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
                     if (vue.curso_id !== '') {
@@ -610,6 +757,8 @@ export default {
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
 
                         vue.resource = Object.assign({}, response.curso)
+                    } else {
+                        vue.resource.qualification_type = response.qualification_type
                     }
                 })
             return 0;

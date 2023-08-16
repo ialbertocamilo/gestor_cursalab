@@ -91,8 +91,8 @@ class VademecumController extends Controller
     public function create()
     {
         $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
-        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
+        $categories = Taxonomy::getDataForSelectWorkspace('vademecum', 'categoria');
+        $subcategories = Taxonomy::getDataForSelectWorkspace('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }
@@ -135,8 +135,8 @@ class VademecumController extends Controller
         $vademecum->scorm = $vademecum->media->file ?? null;
 
         $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id', 'name']);
-        $categories = Taxonomy::getDataForSelect('vademecum', 'categoria');
-        $subcategories = Taxonomy::getDataForSelect('vademecum', 'subcategoria');
+        $categories = Taxonomy::getDataForSelectWorkspace('vademecum', 'categoria');
+        $subcategories = Taxonomy::getDataForSelectWorkspace('vademecum', 'subcategoria');
 
         return $this->success(get_defined_vars());
     }

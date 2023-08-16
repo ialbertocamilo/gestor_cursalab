@@ -113,7 +113,7 @@ class Taxonomy extends Model
             ->where('group', $groupName)
             ->where('active', 1)
             ->orderBy('name', 'ASC')
-            ->get(['name', 'id', 'code', 'name as nombre']);
+            ->get(['name', 'id', 'code', 'name as nombre', 'position']);
     }
 
     protected function getDataForSelectAttrs(string $groupName, string $typeName, array $attributes)
@@ -228,7 +228,7 @@ class Taxonomy extends Model
 
     protected function getSelectData($group, $type, array $filters = [], array $extraFields = [], mixed $relationship = [])
     {
-        $default = ['color', 'icon', 'name', 'id', 'code'];
+        $default = ['color', 'icon', 'name', 'id', 'code', 'position'];
 
         $fields = array_merge($default, $extraFields);
 

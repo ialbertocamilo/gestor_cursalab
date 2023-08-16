@@ -8,6 +8,7 @@
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Sistema de calificación" subtitulo="El sistema de calificación asignado al curso" />
             <list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
             <list-item titulo="Nota" subtitulo="Nota correspondiente a un tema evaluable y calificado" />
             <list-item
@@ -86,6 +87,7 @@
                     <v-row class="text-grey font-weight-bold" no-gutters>
                         <v-col class="col-schools_names px-4">Escuelas</v-col>
                         <v-col class="col-course_name px-4">Curso</v-col>
+                        <v-col class="col-tipo_calificacion px-4">Sistema de calificación</v-col>
                         <v-col class="col-grade px-4">Nota</v-col>
                         <v-col class="col-course_status px-4">Estado</v-col>
                     </v-row>
@@ -258,7 +260,7 @@ export default {
             this.hideLoader()
         },
         titulosCurso(index) {
-            let indexTitulos = ["schools_names","course_name", "grade", "course_status"];
+            let indexTitulos = ["schools_names","course_name", "tipo_calificacion", "grade", "course_status"];
             if (indexTitulos.includes(index)) return true;
         }
     }
@@ -274,6 +276,11 @@ export default {
     .col-course_name {
         flex: 0 0 20%;
         max-width: 20%;
+    }
+
+    .col-tipo_calificacion {
+        flex: 0 0 15%;
+        max-width: 15%;
     }
 
     .col-topic_name {

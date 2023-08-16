@@ -50,10 +50,12 @@ class TemaController extends Controller
         $requisitos = $q_requisitos->orderBy('position')->get();
 
         $evaluation_types = Taxonomy::getDataForSelect('topic', 'evaluation-type');
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
+        $qualification_type = $course->qualification_type;
         $media_url = get_media_url();
 
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'media_url');
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -63,8 +65,9 @@ class TemaController extends Controller
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
         $topic->tags = [];
 
-        $topic->hide_evaluable = $topic->assessable;
+        $topic->load('qualification_type');
 
+        $topic->hide_evaluable = $topic->assessable;
         $topic->hide_tipo_ev = $topic->type_evaluation_id;
 
         $topic->disabled_estado_toggle = false;
@@ -86,6 +89,7 @@ class TemaController extends Controller
             'tags' => $form_selects['tags'],
             'requisitos' => $form_selects['requisitos'],
             'evaluation_types' => $form_selects['evaluation_types'],
+            'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
         ]);
     }
@@ -114,6 +118,7 @@ class TemaController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
+        // info($data);
 
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);
@@ -195,7 +200,7 @@ class TemaController extends Controller
 
     public function search_preguntas(School $school, Course $course, Topic $topic, Request $request)
     {
-        $request->merge(['tema_id' => $topic->id]);
+        $request->merge(['tema_id' => $topic->id, 'current_qualification_value' => $topic->qualification_type->position]);
 
         $preguntas = Topic::search_preguntas($request, $topic);
 
@@ -220,6 +225,7 @@ class TemaController extends Controller
         }
         $pregunta->respuestas = $temp;
 
+        $pregunta->score = calculateValueForQualification($pregunta->score, $topic->qualification_type->position);
 
         return $this->success(['pregunta' => $pregunta]);
     }
@@ -239,11 +245,6 @@ class TemaController extends Controller
         if ($result['status'])
             return $this->error($result['message'], 422, ['errors' => [$result['message']]]);
 
-
-        // info('nuevasRptas');
-        // info($data['nuevasRptas']);
-        // info(json_decode($data['nuevasRptas'], true));
-
         Question::updateOrCreate(
             ['id' => $data['id']],
             [
@@ -257,7 +258,7 @@ class TemaController extends Controller
                 'rpta_ok' => $data['rpta_ok'],
                 'active' => $data['active'],
                 'required' => $data['required'] ?? NULL,
-                'score' => $data['score'] ?? NULL,
+                'score' => $data['score'] ? calculateValueForQualification($data['score'], 20, $topic->qualification_type->position) : NULL,
                 // 'position' => 'despues'
             ]
         );
@@ -297,9 +298,20 @@ class TemaController extends Controller
         $data['isQualified'] = $evaluationType->id === $topic->type_evaluation_id;
 
         $result = Question::import($data);
+
+        if ($result['status'] == 'error') {
+
+            return $this->success($result);
+        }
+
         $data = Question::verifyEvaluation($topic);
 
-        return $this->success($result);
+        // if ($result['status'] == 'error') {
+
+        //     return $this->error($result);
+        // }
+
+        return $this->success($data);
     }
 
     public function deletePregunta(School $school, Course $course, Topic $topic, Question $pregunta)

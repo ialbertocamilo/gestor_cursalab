@@ -45,7 +45,6 @@
                     </v-col>
                 </v-row>
             </v-card-text>
-
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
@@ -141,7 +140,7 @@ export default {
                 ref: 'cursosTable',
                 headers: [
                     {text: "Orden", value: "position", align: 'center', model: 'Topic', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    // {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre", sortable: false},
                     {text: "Evaluable", value: "assessable", sortable: false},
                     {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
