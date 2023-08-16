@@ -161,7 +161,7 @@ class AuthController extends Controller
             info($e);
             Error::storeAndNotificateException($e, request());
             // return $this->error('Server error.', 500);
-            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, []);
 
         }
     }
