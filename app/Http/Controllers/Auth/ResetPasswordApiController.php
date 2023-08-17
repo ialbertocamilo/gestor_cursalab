@@ -194,14 +194,16 @@ class ResetPasswordApiController extends Controller
                 $data_input['version'] = strip_tags($request['version'] ?? '');
                 $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
 
-                $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
-                $mostrar_modal = $ticket_user ? $user?->email != $ticket_user?->email : false;
+                if(is_array($data_login))
+                {
+                    $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
+                    $data_login['mostrar_modal'] = $ticket_user ? $user?->email != $ticket_user?->email : false;
+                }
             }
         }
 
         return response()->json([
             'data' => $data_login,
-            'mostrar_modal' => $mostrar_modal,
             'success' => $response == Password::PASSWORD_RESET
         ]);
     }
