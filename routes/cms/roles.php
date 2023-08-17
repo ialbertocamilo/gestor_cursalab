@@ -6,7 +6,7 @@ Route::controller(RoleController::class)->group(function () {
 
     Route::get('/search', 'search')->name('roles.search');
     // Route::get('/get-list-selects', 'getListSelects');
-    // Route::get('/form-selects', 'getFormSelects');
+    Route::get('/form-selects', 'formData');
     Route::get('/', 'index')->name('roles.index');
 
     Route::get('/create', 'create')->name('roles.create');
