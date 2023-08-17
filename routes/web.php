@@ -182,4 +182,5 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     // === votaciones === 
     Route::prefix('votaciones')->middleware('checkrol:admin')->group(base_path('routes/cms/votaciones.php'));
     // === votaciones === 
+    Route::prefix('menus')->middleware('checkrol:admin')->group(base_path('routes/cms/menus.php'));
 });
