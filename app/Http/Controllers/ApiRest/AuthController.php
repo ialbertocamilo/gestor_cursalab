@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User, WorkspaceFunctionality};
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -594,7 +594,14 @@ class AuthController extends Controller
                 if(!$request->email) $user->setInitialEmail();
                 $user->resetAttemptsUser();
 
-                return $this->respondWithDataAndToken($data_input);
+                $resp = $this->respondWithDataAndToken($data_input);
+
+                if(is_array($resp))
+                {
+                    $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
+                    $resp['mostrar_modal'] = $ticket_user ? $user?->email != $ticket_user?->email : false;
+                }
+                return $resp;
             }
         } else {
 
