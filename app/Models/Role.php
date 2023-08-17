@@ -66,6 +66,12 @@ class Role extends BaseModel
     protected function search($request)
     {
         $query = self::whereNotIn('name', ['developer', 'superadmin']);
+        if ($request->q){
+            $query->where(function($q) use ($request){
+                $q->where('name', 'like', "%$request->q%");
+                $q->orWhere('title', 'like', "%$request->q%");
+            });
+        }
 
         if ($request->filters)
         {

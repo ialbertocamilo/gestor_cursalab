@@ -51,6 +51,8 @@ class Menu extends Model
                 $submenu->name = $children['name'];
                 $submenu->icon = $children['icon'];
                 $submenu->extra_attributes = [
+                    'is_beta'=> $children['path'] ?? false,
+                    'is_beta'=> $children['subpaths'] ?? false,
                     'is_beta'=> $children['is_beta'] ?? false,
                     'show_upgrade'=> $children['show_upgrade'] ?? false
                 ];
