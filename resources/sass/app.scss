@@ -256,3 +256,7 @@ Override Vue Toastification plugin styles
         }
     }
 }
+
+.v-input.v-input--hide-details.v-input--is-disabled .bk_calendar {
+    opacity: 0.5;
+}

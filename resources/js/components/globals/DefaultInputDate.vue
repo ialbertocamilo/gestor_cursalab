@@ -40,7 +40,8 @@
                 <template v-slot:append>
                     <v-btn class="no-background-hover bk_calendar" icon :ripple="false"
                            style="cursor: default"
-                           :disabled="disabled">
+                           :disabled="disabled" append-icon="mdi-magnify">
+
                         <img src="/img/calendar_black.png">
                     </v-btn>
                     <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
