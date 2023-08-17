@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\Controller;
 use App\Mail\EmailTemplate;
+use App\Models\Ticket;
 use App\Rules\CustomContextSpecificWords;
 use App\Models\User;
 use App\Models\WorkspaceFunctionality;
@@ -170,6 +171,7 @@ class ResetPasswordApiController extends Controller
         // info(Password::PASSWORD_RESET);
 
         $data_login = null;
+        $mostrar_modal = false;
         if($response == Password::PASSWORD_RESET) {
 
             $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
@@ -191,11 +193,15 @@ class ResetPasswordApiController extends Controller
                 $data_input['os'] = strip_tags($request['os'] ?? '');
                 $data_input['version'] = strip_tags($request['version'] ?? '');
                 $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
+
+                $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
+                $mostrar_modal = $ticket_user ? $user?->email != $ticket_user?->email : false;
             }
         }
 
         return response()->json([
             'data' => $data_login,
+            'mostrar_modal' => $mostrar_modal,
             'success' => $response == Password::PASSWORD_RESET
         ]);
     }
