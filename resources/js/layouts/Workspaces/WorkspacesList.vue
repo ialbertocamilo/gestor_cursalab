@@ -230,10 +230,27 @@
                                     <button
                                         type="button" class="btn btn-md"
                                         @click="openFormModal(
+                                            modalDeleteOptions,
+                                            workspace,
+                                            'delete',
+                                            `Eliminar workspace - ${workspace.name}`
+                                        )"
+                                        v-show="false"
+                                    >
+                                        <!-- v-show="!view && workspace.is_super_user" -->
+                                        <span class="v-badge">
+                                            <v-icon class="icon" color="primary">mdi-delete</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Eliminar'"/>
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(
                                             modalLogsOptions,
                                             workspace,
                                             'logs',
-                                            `Logs del módulo - ${workspace.name}`
+                                            `Logs del workspace - ${workspace.name}`
                                         )"
                                         v-show="!view && workspace.is_super_user"
                                     >
@@ -406,6 +423,13 @@
             @onCancel="closeSimpleModal(modalLogsOptions)"
         />
 
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+            @onConfirm="closeFormModal(modalDeleteOptions); loadData();"
+        />
+
         <WorkspacesForm
             :options="workspaceFormModalOptions"
             width="60vw"
@@ -430,6 +454,7 @@
 import WorkspacesForm from "./WorkspacesForm";
 import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
+import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
     // props: [ 'header'],
@@ -441,7 +466,7 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal, WorkspacesDuplicateForm
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal
 
     },
     data: () => ({
@@ -521,6 +546,14 @@ export default {
             showCloseIcon: true,
             base_endpoint: "/search",
             persistent: true
+        },
+        modalDeleteOptions: {
+            ref: 'WorkspaceDeleteModal',
+            open: false,
+            base_endpoint: '/workspaces',
+            contentText: '¿Desea eliminar este registro?',
+            endpoint: '',
+            width: '40vw',
         },
     })
     ,

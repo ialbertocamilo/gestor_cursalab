@@ -13,5 +13,6 @@ Route::controller(WorkspaceController::class)->group(function () {
     Route::get('/{workspace}/edit', 'edit');
     Route::put('/{workspace}/update', 'update');
     Route::get('/{workspace}/copy', 'copy');
-    Route::post('/{workspace}/duplicate', 'duplicate');
+    Route::post('/{workspace}/duplicate', 'duplicate')->middleware('checkrol:super-user');
+    Route::delete('/{workspace}/destroy', 'destroy')->middleware('checkrol:super-user');
 });

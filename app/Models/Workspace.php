@@ -73,6 +73,16 @@ class Workspace extends BaseModel
         return $this->hasMany(Poll::class, 'workspace_id');
     }
 
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class, 'workspace_id');
+    }
+
+    public function push_notifications()
+    {
+        return $this->hasMany(PushNotification::class, 'workspace_id');
+    }
+
     public function videotecas()
     {
         return $this->hasMany(Videoteca::class, 'workspace_id');

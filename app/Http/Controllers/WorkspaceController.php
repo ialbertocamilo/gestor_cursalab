@@ -330,12 +330,68 @@ class WorkspaceController extends Controller
         return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
 
-    public function destroy(Workspace $subworkspace)
+    public function destroy(Workspace $workspace)
     {
-        // \File::delete(public_path().'/'.$subworkspace->plantilla_diploma);
-        $subworkspace->delete();
+        // \File::delete(public_path().'/'.$workspace->plantilla_diploma);
+        $workspace->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
+        $workspace->functionalities()->sync([]);
+        $workspace->criterionWorkspace()->sync([]);
+        
+        $workspace->criteriaValue()->sync([]);
+        // $workspace->criteriaValue()->delete();
+
+        $workspace->videotecas()->delete();
+        $workspace->meetings()->delete();
+        $workspace->push_notifications()->delete();
+        // $workspace->medias()->delete(); // don't delete
+
+        foreach ($workspace->subworkspaces as $subworkspace) {
+
+            foreach ($subworkspace->schools as $school) {
+
+                foreach ($school->courses as $course) {
+
+                    foreach ($course->topics as $topic) {
+
+                        $topic->questions()->delete();
+                        $topic->medias()->delete();
+                        $topic->requirements()->delete();
+                    }
+                    
+                    $course->requirements()->delete();
+                    $course->topics()->delete();
+                }
+                
+                $school->courses()->delete();
+            }
+            
+            $subworkspace->schools()->delete();
+
+            foreach ($subworkspace->users as $user) {
+
+                $user->summary()->delete();
+                $user->summary_courses()->delete();
+                $user->summary_topics()->delete();
+                $user->benefits()->delete();
+                $user->segments()->delete();
+                $user->course_data()->delete();
+                $user->criterion_user()->sync([]);
+            }
+
+            $subworkspace->users()->delete();
+        }
+
+        $workspace->subworkspaces()->delete();
+
+        foreach ($workspace->polls as $poll) {
+
+            $poll->questions()->delete();
+        }
+
+        $workspace->polls()->delete();
+
+        return $this->success(['msg' => 'Workspace eliminado correctamente.']);
     }
 
     public function editSubWorkspace(Workspace $subworkspace)

@@ -265,7 +265,7 @@
                                 :coming-soon="true"
                             >
                                 <template slot="content">
-                                    <v-row justify="center">
+                                    <v-row justify="center" disabled>
 
 
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
@@ -276,17 +276,20 @@
                                                 v-model="resource.publish_date_1"
                                                 label="Fecha de inicio"
                                                 dense
+                                                disabled
+
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Hora"
                                                 v-model="resource.scheduled_restarts_dias"
-                                                :disabled="!resource.scheduled_restarts_activado"
                                                 type="number"
                                                 dense
+                                                disabled
                                             />
                                         </v-col>
+                                        <!-- :disabled="!resource.scheduled_restarts_activado" -->
 
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
                                             <DefaultInputDate
@@ -296,17 +299,20 @@
                                                 v-model="resource.publish_date_2"
                                                 label="Fecha de fin"
                                                 dense
+                                                disabled
+
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
                                                 label="Hora"
                                                 v-model="resource.scheduled_restarts_dias"
-                                                :disabled="!resource.scheduled_restarts_activado"
                                                 type="number"
                                                 dense
+                                                disabled
                                             />
                                         </v-col>
+                                        <!-- :disabled="!resource.scheduled_restarts_activado" -->
 
                                         <v-col cols="12" class="py-1">
                                             <p class="mb-0">** Programar la activación y/o inactivación de un curso.</p>
