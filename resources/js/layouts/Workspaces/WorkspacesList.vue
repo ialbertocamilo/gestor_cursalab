@@ -235,8 +235,9 @@
                                             'delete',
                                             `Eliminar workspace - ${workspace.name}`
                                         )"
-                                        v-show="!view && workspace.is_super_user"
+                                        v-show="false"
                                     >
+                                        <!-- v-show="!view && workspace.is_super_user" -->
                                         <span class="v-badge">
                                             <v-icon class="icon" color="primary">mdi-delete</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Eliminar'"/>
