@@ -97,10 +97,10 @@
   </div>
 </div>
 <script>
-    // Reloads the login page, to avoid error 419
+    {{-- Reloads the login page, to avoid error 419 --}}
 
     setTimeout(() => {
         location.reload();
-    }, 20 * 60 * 1000); // Every 20 minutes
+    }, 20 * 60 * 1000);
 </script>
 @endsection
