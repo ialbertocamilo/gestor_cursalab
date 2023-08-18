@@ -216,7 +216,7 @@
                         Usuarios segmentados al Beneficio
                     </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='votaciones'>
+                <v-tab class="justify-content-start py-7" key='votaciones' v-if="isSuperUser">
                     <v-icon left>fa fa-paper-plane</v-icon>
                     <span class="pt-2">
                         Votaciones
@@ -539,7 +539,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                 <v-tab-item>
+                 <v-tab-item v-if="isSuperUser">
                     <v-card flat>
                         <v-card-text>
                             <Votaciones

@@ -611,7 +611,10 @@ class Benefit extends BaseModel
                             {
                                 if(!is_null($sel['id']))
                                 {
-                                    $created_user = UserBenefit::create([
+                                    $created_user = UserBenefit::updateOrCreate([
+                                            'user_id' => $sel['id'],
+                                            'benefit_id' => $benefit_id
+                                        ],[
                                         'user_id' => $sel['id'],
                                         'benefit_id' => $benefit_id,
                                         'status_id' => $user_status_subscribed?->id,
@@ -819,7 +822,10 @@ class Benefit extends BaseModel
                     $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
                     $type_register_regular = Taxonomy::getFirstData('benefit', 'type_register', 'regular');
 
-                    $is_created = UserBenefit::create([
+                    $is_created =  UserBenefit::updateOrCreate([
+                            'user_id' => $user_id,
+                            'benefit_id' => $benefit_id
+                        ],[
                         'user_id' => $user_id,
                         'benefit_id' => $benefit_id,
                         'status_id' => $user_status_subscribed?->id,
@@ -916,7 +922,11 @@ class Benefit extends BaseModel
                 $benefit->save();
             }
             else {
-                $benefit = UserBenefit::create([
+                $benefit = UserBenefit::updateOrCreate([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id
+                ]
+                    ,[
                     'user_id' => $user_id,
                     'benefit_id' => $benefit_id,
                     'status_id' => $user_status_notify?->id,
