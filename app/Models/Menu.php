@@ -30,11 +30,13 @@ class Menu extends Model
     protected function getMenuByUser($user){
         $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id');
         return Menu::list()->filter(function($menu) use ($submenus_id){
+            //Filtrar los submenus según los abilities
             $menu->children = $menu->children->whereIn('id',$submenus_id);
             if(count($menu->children)>0 || $menu->show_upgrade){
                 return $menu;
             }
         })->map(function($menu){
+            //Dar formato para front
             $items = [];
             foreach ($menu->children as $submenu) {
                 $items[]=[

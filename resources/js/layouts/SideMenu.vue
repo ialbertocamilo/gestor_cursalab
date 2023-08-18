@@ -53,58 +53,95 @@
             </v-list>
         </div>
         <v-list class="mx-auto" dark nav rounded expand tile>
-            <v-list-group
-                :value="false"
-                v-for="(grupo, i) in grupos"
-                :key="i"
-                color="white"
-                v-model="grupo.active"
-            >
-                <template v-slot:activator>
-                    <v-list-item-icon>
-                        <v-icon small v-text="grupo.icon"></v-icon>
-                    </v-list-item-icon>
-                    <v-list-item-title
-                        v-text="grupo.title"
-                        class="grupo_title"
-                    ></v-list-item-title>
-                    <div v-if="grupo.is_beta"
-                             class="beta">Beta</div>
-                    <div v-if="grupo.show_upgrade && grupo.items.length==0"
-                             class="beta">Upgrade</div>
-                </template>
-                <div
-                    v-for="(item, i) in grupo.items"
-                    :key="i"
-                    class="list_submenu"
+            <div v-for="(grupo, i) in grupos" :key="i">
+               
+                <v-list-item v-if="grupo.items.length == 0">
+                    <v-badge
+                        color="white"
+                        overlap
+                        class="d-flex"
                     >
-
-                    <v-list-item
-                        dark
-                        dense
-                        :href="`${item.path}`"
-                        @click()
-                        v-model="item.selected"
-                    >
+                    <template v-slot:badge>
+                        <div v-if="grupo.is_beta"
+                            class="tag_beta_upgrade">Beta</div>
+                        <div v-if="grupo.show_upgrade && grupo.items.length==0"
+                            class="tag_beta_upgrade"><img src="/img/image-premiun.svg"> Upgrade</div>
+                    </template>
                         <v-list-item-icon>
-                            <v-icon
-                                small
-                                v-text="item.icon"
-                                class="item_icon"
-                            ></v-icon>
+                            <v-icon small>{{ grupo.icon }}</v-icon>
                         </v-list-item-icon>
                         <v-list-item-title
-                            v-text="item.title"
-                            class="item_title"
-                        ></v-list-item-title>
-                        <div v-if="item.is_beta"
-                             class="beta">Beta</div>
-                    </v-list-item>
-
-
-
-                </div>
-            </v-list-group>
+                            class="grupo_title"
+                        >
+                            {{ grupo.title }}
+                        </v-list-item-title>
+                    </v-badge>
+                </v-list-item>
+                <v-list-group
+                    v-else
+                    dense
+                    :value="false"
+                    color="white"
+                    v-model="grupo.active"
+                >
+                    <template v-slot:activator>
+                        <v-list-item-icon>
+                            <v-icon small>{{ grupo.icon }}</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-title
+                            class="grupo_title"
+                        >
+                            {{ grupo.title }}
+                            <div v-if="grupo.is_beta"
+                                class="tag_beta_upgrade">Beta</div>
+                        </v-list-item-title>
+                    </template>
+                        <!-- <v-list-item-icon>
+                            <v-icon small>{{ grupo.icon }}</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-title
+                            class="grupo_title"
+                        >
+                            <div v-if="grupo.is_beta"
+                                    class="beta">Beta</div>
+                            <div v-if="grupo.show_upgrade && grupo.items.length==0"
+                                    class="beta d-flex"><img src="/img/image-premiun.svg" class="mr-1" alt=""> Upgrade</div>
+                            <div v-text="grupo.title">
+                            </div>
+                        </v-list-item-title> -->
+                    <div
+                        v-for="(item, i) in grupo.items"
+                        :key="i"
+                        class="list_submenu"
+                        >
+    
+                        <v-list-item
+                            dark
+                            dense
+                            :href="`${item.path}`"
+                            @click()
+                            v-model="item.selected"
+                        >
+                            <v-list-item-icon>
+                                <v-icon
+                                    small
+                                    v-text="item.icon"
+                                    class="item_icon"
+                                ></v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-title
+                                v-text="item.title"
+                                class="item_title"
+                            ></v-list-item-title>
+                            <div v-if="item.is_beta"
+                                 class="beta">Beta</div>
+                        </v-list-item>
+    
+    
+    
+                    </div>
+                </v-list-group>
+            </div>
         </v-list>
     </v-card>
 </template>
@@ -803,11 +840,11 @@ export default {
         /**
          * Add new Item by workspace id
          * */
-        // availableItemGroup(in_title, item) {
-        //   let vue = this;
-        //   const index = vue.grupos.findIndex(({title}) => title === in_title);
-        //   vue.grupos[index].items.push(item);
-        // },
+        availableItemGroup(in_title, item) {
+          let vue = this;
+          const index = vue.grupos.findIndex(({title}) => title === in_title);
+          vue.grupos[index].items.push(item);
+        },
         /**
          * Load session data from server
          */
@@ -820,6 +857,7 @@ export default {
             this.$http.get(url).then(({ data }) => {
                 vue.userSession = data;
                 vue.grupos = data.user.menus;
+                vue.setActiveSubmenu();
                 //=== only for "Farmacias Peruanas"
                 const { session:{ workspace } } = data;
                 if(workspace.id === 25) {
@@ -829,6 +867,18 @@ export default {
                 vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 //=== only for "Farmacias Peruanas"
 
+            });
+        },
+        setActiveSubmenu(){
+            const location = window.location.pathname.split("/");
+            this.grupos.forEach(grupo => {
+                grupo.items.forEach(i => {
+                    console.log();
+                    if (this.verify_path(location, i.subpaths)) {
+                        grupo.active = true;
+                        i.selected = true;
+                    }
+                });
             });
         },
         /**
@@ -946,6 +996,19 @@ export default {
     background: #FFF;
     color: #5458EA;
     font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+}
+/* Ocultar el icono de flecha cuando el grupo está vacío */
+.v-list-group__header--dense .v-list-group__header__append-icon {
+  display: none;
+}
+.tag_beta_upgrade{
+    padding: 2px 6px 2px 6px;
+    border-radius: 8px;
+    background: #FFF;
+    color: #5458EA;
+    font-size: 11px;
     font-style: normal;
     font-weight: 400;
 }

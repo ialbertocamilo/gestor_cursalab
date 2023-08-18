@@ -1427,3 +1427,6 @@ table.table-scroll thead, table.table-scroll tbody tr {
 .ml-24-porcent{
 	margin-left: 24%;
 }
+.v-list-group__header__append-icon{
+    min-width: auto !important;
+}
