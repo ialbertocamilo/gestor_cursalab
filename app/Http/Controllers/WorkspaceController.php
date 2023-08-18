@@ -502,10 +502,10 @@ class WorkspaceController extends Controller
      * @param Workspace $workspace
      * @return JsonResponse
      */
-    public function copy(Workspace $workspace): JsonResponse
-    {
-        return $this->success([]);
-    }
+    // public function copy(Workspace $workspace): JsonResponse
+    // {
+    //     return $this->success([]);
+    // }
 
     /**
      * Process request to duplicate record data
@@ -541,4 +541,14 @@ class WorkspaceController extends Controller
 
         return $this->success(['msg' => 'Workspace duplicado correctamente.']);
     }
+
+    public function copy(Workspace $subworkspace)
+    {
+        $items = Workspace::getSchoolsForTree($subworkspace->schools);
+
+        $items_destiny = Workspace::getAvailableForTree($subworkspace);
+
+        return $this->success(compact('items', 'items_destiny'));
+    }
+
 }

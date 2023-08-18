@@ -775,4 +775,82 @@ class Workspace extends BaseModel
 
         return $workspace;
     }
+
+    protected function getSchoolsForTree($schools)
+    {
+        $data = [];
+
+        foreach ($schools as  $school) {
+
+            $school_children = [];
+            $school_parent_key = 'school_' . $school->id;
+
+            foreach ($school->courses as  $course) {
+
+                $children = [];
+                $course_parent_key = $school_parent_key . '-course_' . $course->id;
+
+                foreach ($course->topics as $topic) {
+
+                    $child_key = 'topic_' . $topic->id;
+
+                    $children[] = [
+                        'id' => $course_parent_key . '-' . $child_key,
+                        'name' => $topic->name,
+                        'icon' => 'mdi-bookmark',
+                    ];
+                }
+
+                $course_parent = [
+                    'id' => $course_parent_key,
+                    'name' => $course->name,
+                    'icon' => 'mdi-book',
+                    'children' => $children,
+                ];
+
+                $school_children[] = $course_parent;
+            }
+
+            $parent = [
+                'id' => $school_parent_key,
+                'name' => $school->name,
+                'icon' => 'mdi-school',
+                'children' => $school_children,
+            ];
+            
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
+    protected function getAvailableForTree($_subworkspace)
+    {
+        $data = [];
+
+        $workspace = get_current_workspace();
+
+        foreach ($workspace->subworkspaces as  $subworkspace) {
+
+            if ($subworkspace->id == $_subworkspace->id) {
+                continue;
+            }
+
+            $children = [];
+            $parent_key = 'subworkspace_' . $subworkspace->id;
+
+            $parent = [
+                'id' => $parent_key,
+                'name' => $subworkspace->name,
+                'avatar' => '',
+                'icon' => 'mdi-view-grid',
+                'children' => $children,
+            ];
+
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
 }

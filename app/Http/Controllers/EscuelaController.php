@@ -116,4 +116,14 @@ class EscuelaController extends Controller
     //     $categoria->save();
     //     return $this->success(['info' => 'Estado actualizado con éxito.']);
     // }
+
+    public function copy(School $school)
+    {
+        $items = School::getCoursesForTree($school->courses);
+
+        $items_destiny = School::getAvailableForTree($school);
+
+        return $this->success(compact('school', 'items', 'items_destiny'));
+    }
+
 }
