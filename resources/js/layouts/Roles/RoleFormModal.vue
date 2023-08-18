@@ -62,7 +62,7 @@
                               selectable
                               selected-color="primary"
                             >
-                                <template v-slot:prepend="{ item, open }">
+                                <template v-slot:prepend="{ item }">
                                   <v-icon>
                                     {{ item.icon }}
                                   </v-icon>

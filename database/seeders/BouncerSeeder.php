@@ -119,6 +119,10 @@ class BouncerSeeder extends Seeder
                             'path'=> "/home",
                             'subpaths' => ["home"],
                         ],
+                        'abilities' =>[[
+                            'name' => 'show',
+                            'title' => 'Mostrar submenú',
+                        ]],
                         'roles' => [
                             "super-user",
                             "admin",
@@ -137,6 +141,10 @@ class BouncerSeeder extends Seeder
                             'path'=> "/dashboard_pbi",
                             'subpaths' => ["dashboard_pbi"],
                         ],
+                        'abilities' =>[[
+                            'name' => 'show',
+                            'title' => 'Mostra submenú',
+                        ]],
                         'roles' => [
                             "super-user",
                             "admin",
@@ -159,6 +167,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Gestiona sesiones",
                         'icon' => "fas fa-chalkboard-teacher",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path'=> "/aulas-virtuales/reuniones",
                             'subpaths'=> ["aulas-virtuales/reuniones"],
@@ -171,6 +189,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Cuentas Zoom",
                         'icon' => "fas fa-chalkboard-teacher",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path'=> "/aulas-virtuales/cuentas",
                             'subpaths'=> ["aulas-virtuales/cuentas"],
@@ -191,6 +219,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name'=> "Configuración",
                         'icon' => "fas fa-gift",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/beneficios",
                             'subpaths'=> ["beneficios"],
@@ -206,6 +244,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name'=> "Facilitadores",
                         'icon' => "fas fa-gift",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/speakers",
                             'subpaths'=> ["speakers"],
@@ -229,6 +277,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Módulos",
                         'icon' => "fas fa-th-large",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/modulos",
                             'subpaths' => [
@@ -248,6 +306,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Usuarios",
                         'icon' => "fas fa-users",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/usuarios",
                             'subpaths' => ["usuarios"],
@@ -260,6 +328,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Administradores",
                         'icon' => "fas fa-users-cog",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'roles' => ["super-user"],
                         'extra_attributes'=>[
                             'path' => "/users",
@@ -272,6 +350,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Criteria',
                         'name' => "Criterios",
                         'icon' => "fas fa-clipboard-list",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/criterios",
                             'subpaths' => ["criterios", "valores"],
@@ -284,6 +372,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Supervisor',
                         'name' =>"Supervisores",
                         'icon' =>"fas fa-sitemap",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>"/supervisores",
                             'subpaths' => ["reportes-supervisores"],
@@ -306,6 +404,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Módulos",
                         'icon' => "fas fa-th-large",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/modulos",
                             'subpaths' => [
@@ -327,6 +435,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Escuelas",
                         'icon' => "fas fa-th-large",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/escuelas",
                             'subpaths' => ["escuelas"],
@@ -345,6 +463,16 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'name' => "Cursos",
                         'icon' => "mdi mdi-notebook",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' => "/cursos",
                             'subpaths' => ["cursos"],
@@ -371,6 +499,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Certificate',
                         'name' =>  "Listar",
                         'icon' =>  "fas fa-list",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/diplomas",
                             'subpaths' =>  ["diplomas"],
@@ -386,6 +524,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Certificate',
                         'name' =>  "Crear",
                         'icon' =>  "fas fa-plus",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/diploma/create",
                             'subpaths' =>  ["diploma/create"],
@@ -409,6 +557,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Announcement',
                         'name' =>  "Anuncios",
                         'icon' =>  "far fa-newspaper",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/anuncios",
                             'subpaths' =>  ["anuncios"],
@@ -426,6 +584,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Pool',
                         'name' =>  "Encuestas",
                         'icon' =>  "fas fa-pencil-alt",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/encuestas",
                             'subpaths' =>  ["encuestas"],
@@ -443,6 +611,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Media',
                         'name' =>  "Multimedia",
                         'icon' =>  "fas fa-photo-video",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/multimedia",
                             'subpaths' =>  ["multimedia"],
@@ -459,6 +637,16 @@ class BouncerSeeder extends Seeder
 
                     [
                         'model'=> 'App\Models\Videoteca',
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                          'name' => "Videoteca",
                          'icon' => "fas fa-caret-square-right",
                          'extra_attributes'=>[
@@ -482,6 +670,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Trainer',
                         'name' =>  "Entrenadores y equipo",
                         'icon' =>  "fas fa-user-graduate",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/entrenamiento/entrenadores",
                             'subpaths' =>  ["entrenamiento/entrenador"],
@@ -499,6 +697,16 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Checklist',
                         'name' =>  "Gestiona Checklist",
                         'icon' =>  "fas fa-tasks",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/entrenamiento/checklists",
                             'subpaths' =>  ["entrenamiento/checklist"],
@@ -522,6 +730,12 @@ class BouncerSeeder extends Seeder
                 'children' =>  [
                     [
                         'model'=> 'App\Models\CampaignList',
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'name' =>  "Listar",
                         'icon' =>  "fas fa-list",
                         'extra_attributes'=>[
@@ -540,6 +754,12 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\CampaignCreate',
                         'name' =>  "Crear",
                         'icon' =>  "fas fa-plus",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/votacion/create",
                             'subpaths' =>  ["votacion/create"],
@@ -568,6 +788,12 @@ class BouncerSeeder extends Seeder
                         ],
                         'selected' =>  false,
                         'permission' =>  "reportes",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'roles' =>  [
                             "super-user",
                             "admin",
@@ -582,6 +808,12 @@ class BouncerSeeder extends Seeder
                         'extra_attributes'=>[
                             'path' =>  "/resumen_encuesta",
                             'subpaths' =>  ["resumen_encuesta"],
+                        ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
                         ],
                         'selected' =>  false,
                         'permission' =>  "resumen_encuesta",
@@ -599,6 +831,12 @@ class BouncerSeeder extends Seeder
                         'extra_attributes'=>[
                             'path' =>  "/resumen_evaluaciones",
                             'subpaths' =>  ["resumen_evaluaciones"],
+                        ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
                         ],
                         'selected' =>  false,
                         'isBeta' =>  true,
@@ -622,6 +860,16 @@ class BouncerSeeder extends Seeder
                             'path' =>  "/notificaciones_push",
                             'subpaths' =>  ["notificaciones_push"],
                         ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'create',
+                                'title' => 'Crear',
+                            ],
+                        ],
                         'selected' =>  false,
                         'permission' =>  "notificaciones",
                         'roles' =>  ["super-user", "admin"]
@@ -629,6 +877,12 @@ class BouncerSeeder extends Seeder
                     [
                         'name' =>  "Intentos masivos",
                         'icon' =>  "fas fa-redo-alt",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/intentos-masivos",
                             'subpaths' =>  ["intentos-masivos"],
@@ -644,6 +898,12 @@ class BouncerSeeder extends Seeder
                             'path' =>  "/procesos-masivos",
                             'subpaths' =>  ["procesos-masivos"],
                         ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'selected' =>  false,
                         'permission' =>  "proceso_masivo",
                         'roles' =>  ["super-user", "admin"]
@@ -651,6 +911,12 @@ class BouncerSeeder extends Seeder
                     [
                         'name' =>  "Subida de notas",
                         'icon' =>  "fas fa-share-square",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'extra_attributes'=>[
                             'path' =>  "/importar-notas",
                             'subpaths' =>  ["importar-notas"],
@@ -665,6 +931,12 @@ class BouncerSeeder extends Seeder
                         'extra_attributes'=>[
                             'path' =>  "/documentation-api",
                             'subpaths' =>  ["documentation-api"],
+                        ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
                         ],
                         'selected' =>  false,
                         'permission' =>  "documentation_api",
@@ -685,6 +957,12 @@ class BouncerSeeder extends Seeder
                             'path' =>  "/preguntas-frecuentes",
                             'subpaths' =>  ["preguntas-frecuentes"],
                         ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'selected' =>  false,
                         'roles' =>  ["super-user", "config"]
                     ],
@@ -695,6 +973,12 @@ class BouncerSeeder extends Seeder
                             'path' =>  "/soporte/formulario-ayuda",
                             'subpaths' =>  ["formulario-ayuda"],
                         ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
                         'selected' =>  false,
                         'roles' =>  ["super-user"]
                     ],
@@ -704,6 +988,12 @@ class BouncerSeeder extends Seeder
                         'extra_attributes'=>[
                             'path' => "/soporte",
                             'subpaths' => ["soporte"],
+                        ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
                         ],
                         'selected' => false,
                         'roles' =>  ["super-user", "admin"]
@@ -722,6 +1012,16 @@ class BouncerSeeder extends Seeder
                             'path' =>  "/ambiente",
                             'subpaths' =>  ["ambiente"],
                         ],
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ],
+                            [
+                                'name' => 'edit',
+                                'title' => 'Editar',
+                            ],
+                        ],
                         'selected' =>  false,
                         'roles' =>  ["super-user"]
                     ],
@@ -729,61 +1029,67 @@ class BouncerSeeder extends Seeder
             ]
         ];
         
-        Bouncer::ability([
-            'title' => 'Listar',
-            'name' => 'list'
-        ])->save();
-        Bouncer::ability([
-            'title' => 'Crear',
-            'name' => 'create'
-        ])->save();
+        // Bouncer::ability([
+        //     'title' => 'Listar',
+        //     'name' => 'list'
+        // ])->save();
+        // Bouncer::ability([
+        //     'title' => 'Crear',
+        //     'name' => 'create'
+        // ])->save();
         
-        Bouncer::ability([
-            'title' => 'Editar',
-            'name' => 'edit'
-        ])->save();
+        // Bouncer::ability([
+        //     'title' => 'Editar',
+        //     'name' => 'edit'
+        // ])->save();
 
         
-        Bouncer::ability([
-            'title' => 'Logs',
-            'name' => 'log'
-        ])->save();
+        // Bouncer::ability([
+        //     'title' => 'Logs',
+        //     'name' => 'log'
+        // ])->save();
 
         foreach ($menus as $index_menu => $menu) {
-            // $new_menu = new Taxonomy();
-            // $new_menu->group = 'gestor';
-            // $new_menu->type = 'menu';
-            // $new_menu->position = $index_menu+1;
-            // $new_menu->name = $menu['name'];
-            // $new_menu->icon = $menu['icon'];
-            // $new_menu->extra_attributes = [
-            //     'is_beta'=> $menu['is_beta'] ?? false,
-            //     'show_upgrade'=> $menu['show_upgrade'] ?? false,
-            // ];
-            // $new_menu->save();
+            $new_menu = new Taxonomy();
+            $new_menu->group = 'gestor';
+            $new_menu->type = 'menu';
+            $new_menu->position = $index_menu+1;
+            $new_menu->name = $menu['name'];
+            $new_menu->icon = $menu['icon'];
+            $new_menu->extra_attributes = [
+                'is_beta'=> $menu['is_beta'] ?? false,
+                'show_upgrade'=> $menu['show_upgrade'] ?? false,
+            ];
+            $new_menu->save();
             foreach ($menu['children'] as $index_submenu => $children) {
-            //     $submenu = new Taxonomy();
-            //     $submenu->group = 'gestor';
-            //     $submenu->type = 'submenu';
-            //     $submenu->parent_id = $new_menu->id;
-            //     $submenu->position = $index_submenu+1;
-            //     $submenu->name = $children['name'];
-            //     $submenu->icon = $children['icon'];
-            //     $submenu->extra_attributes = $children['extra_attributes'];
-            //     $submenu->save();
-                    Permission::create([
-                        'name' => 'Eliminar Permisos',
-                        'slug' => 'permisos.destroy',
-                        'description' => 'Eliminar cualquier  post Permiso',
-                    ]);
-                    foreach ($menu['roles'] as $role) {
-                        Permission::create([
-                            'ability_id' => 'Eliminar Permisos',
-                            'entity_type' => 'App\Models\Taxonomy',
-                            'entity_id' => $submenu->id,
-                        ]);
-    
-                }
+                $submenu = new Taxonomy();
+                $submenu->group = 'gestor';
+                $submenu->type = 'submenu';
+                $submenu->parent_id = $new_menu->id;
+                $submenu->position = $index_submenu+1;
+                $submenu->name = $children['name'];
+                $submenu->icon = $children['icon'];
+                $submenu->extra_attributes = $children['extra_attributes'];
+                $submenu->save();
+                    foreach ($children['abilities'] as $ability) {
+                        Bouncer::ability([
+                            'title' => $ability['title'],
+                            'name' =>  $ability['name'],
+                            'entity_id' => $submenu->id
+                        ])->save();
+                    }
+                    // Permission::create([
+                    //     'name' => 'Eliminar Permisos',
+                    //     'slug' => 'permisos.destroy',
+                    //     'description' => 'Eliminar cualquier  post Permiso',
+                    // ]);
+                    // foreach ($menu['roles'] as $role) {
+                    //     Permission::create([
+                    //         'ability_id' => 'Eliminar Permisos',
+                    //         'entity_type' => 'App\Models\Taxonomy',
+                    //         'entity_id' => $submenu->id,
+                    //     ]);
+                    // }
             }
         }
         // // Bouncer::scope()->to($platform_master->id);
@@ -807,8 +1113,8 @@ class BouncerSeeder extends Seeder
         // Bouncer::allow('config')->to($default_actions, Course::class);
         // Bouncer::allow('config')->to($default_actions, Meeting::class);
 
-        Bouncer::allow('admin-users')->to($default_actions, Workspace::class);
-        Bouncer::allow('admin-users')->to($default_actions, User::class);
+        // Bouncer::allow('admin-users')->to($default_actions, Workspace::class);
+        // Bouncer::allow('admin-users')->to($default_actions, User::class);
         // Bouncer::allow('admin-users')->to($default_actions, Role::class);
         // Bouncer::allow('admin-users')->to($default_actions, Permission::class);
 

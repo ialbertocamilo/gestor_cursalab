@@ -2,6 +2,10 @@
     <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirmModal">
         <template v-slot:content>
             <v-row justify="center">
+                <v-col cols="12" class="item-draggable d-flex justify-content-end">
+                        <a target="_BLANK" href="https://pictogrammers.github.io/@mdi/font/2.0.46/">Iconos 1</a>
+                        <a class="ml-4" target="_BLANK" href="https://www.w3schools.com/icons/icons_reference.asp">Iconos 2</a>
+                </v-col>
                 <v-col cols="12" class="item-draggable d-flex justify-content-center">
                     <DefaultButton label="Añadir menú" icon="mdi-plus" :outlined="true" @click="addMenu()" />
                 </v-col>

@@ -77,8 +77,7 @@ class RoleController extends Controller
         $row = Role::create($data);
 
         Bouncer::allow($row->name)->to($data['permissions']);
-
-        return $this->success([], 'Rol registrado correctamente.');
+        return $this->success(['msg'=>'Rol registrado correctamente.']);
     }
 
     public function update(Role $role, RoleRequest $request)
@@ -91,7 +90,7 @@ class RoleController extends Controller
 
         // return redirect()->route('roles.index')
             // ->with('info', 'Rol actualizado correctamente.');
-        return $this->success([], 'Rol actualizado correctamente.');
+        return $this->success(['msg'=>'Rol actualizado correctamente.']);
     }
 
     public function show(Role $role)
@@ -107,8 +106,7 @@ class RoleController extends Controller
     public function remove(Role $role)
     {
         $response = $role->delete();
-
-        return $this->success([], 'Rol eliminado correctamente.');
+        return $this->success(['msg'=>'Rol eliminado correctamente.']);
     }
 
     public function active(Role $role)

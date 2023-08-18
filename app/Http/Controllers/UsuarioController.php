@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\User;
 use App\Models\Cargo;
 use App\Models\Ciclo;
@@ -27,9 +28,9 @@ use App\Models\Workspace;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
-use App\Models\UsuarioMaster;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
+use App\Models\UsuarioMaster;
 use App\Services\FileService;
 use App\Models\CriterionValue;
 use App\Models\Resumen_general;
@@ -37,20 +38,20 @@ use App\Models\Resumen_x_curso;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\UserStoreRequest;
 use Illuminate\Support\Facades\Session;
+use Altek\Accountant\Facades\Accountant;
 use App\Http\Requests\ResetPasswordRequest;
+
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\ApiRest\HelperController;
+
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
-
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Crypt;
-
-use Altek\Accountant\Facades\Accountant;
 
 // use App\Perfil;
 
@@ -69,17 +70,18 @@ class UsuarioController extends Controller
             $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
-
+            $menus = Menu::getMenuByUser($user);
             return [
                 'user' => [
                     'id' => $user->id,
                     'username' => $user->username,
                     'fullname' => $user->fullname,
-                    'roles' => $roles
+                    'roles' => $roles,
+                    'menus' => $menus
                 ],
                 'session' => [
                     'workspace' => $workspace
-                ]
+                ],
             ];
         }
     }
