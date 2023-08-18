@@ -1,5 +1,8 @@
 <template>
-    <div class="card-indicator"
+    <div
+        class="card-indicator"
+        :class="path ? 'link' : '' "
+        @click="navigateTo(path)"
     >
         <v-btn
             elevation="0"
@@ -34,7 +37,25 @@ export default {
         },
         label: {
             required: true
+        },
+        path: {
+            type: String
+        }
+    },
+    methods: {
+        navigateTo(path) {
+
+            if (path) {
+                window.location.href = path;
+            }
+
         }
     }
 }
 </script>
+
+<style scoped>
+    .link{
+        cursor: pointer;
+    }
+</style>
