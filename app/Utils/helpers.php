@@ -484,8 +484,12 @@ function calculate_porcent($count, $total, int $limite = 90)
 }
 
 
-function is_cursalab_superuser()
+function is_cursalab_superuser($only_test_environment = true)
 {
+    if ($only_test_environment != config('app.test_environment')) {
+        return false;
+    }
+
     $is_superuser = auth()->user()->isAn('super-user');
     $email = auth()->user()->email_gestor;
 
