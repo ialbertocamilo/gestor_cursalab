@@ -70,21 +70,24 @@ class DashboardController extends Controller
                     'title' => 'Cursos',
                     'icon' => 'mdi-book',
                     'color' => '#E01717',
-                    'value' => DashboardService::countCourses($workspaceId)
+                    'value' => DashboardService::countCourses($workspaceId),
+                    'path' => '/cursos'
                 ],
 
                 'usuarios' => [
                     'title' => 'Usuarios totales',
                     'icon' => 'mdi-account-group',
                     'color' => '#5458ea',
-                    'value' => DashboardService::countUsers($subworkspace_id)
+                    'value' => DashboardService::countUsers($subworkspace_id),
+                    'path' => '/usuarios'
                 ],
 
                 'usuarios_activos' => [
                     'title' => 'Usuarios activos',
                     'icon' => 'mdi-account-group',
                     'color' => '#22B573',
-                    'value' => $count_active_users
+                    'value' => $count_active_users,
+                    'path' => '/usuarios'
                 ],
 
                 'temas_evaluables' => [
