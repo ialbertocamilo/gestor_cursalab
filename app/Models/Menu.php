@@ -12,7 +12,7 @@ class Menu extends Model
     private $subtype_taxonomy = 'menu';
     
     protected function list(){
-        return Taxonomy::select('id','group' , 'type' ,'position' ,'name','icon','extra_attributes')
+        return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
                 ->with(["children:id,parent_id,group,type,position,name,icon,extra_attributes"])
                 ->where('group',$this->group_taxonomy)->where('type',$this->type_taxonomy)->orderBy('position','ASC')->get()->map(function($menu){
                     $menu->is_beta = $menu->extra_attributes['is_beta'] ?? false;
@@ -29,34 +29,41 @@ class Menu extends Model
     }
     protected function getMenuByUser($user){
         $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id');
-        return Menu::list()->filter(function($menu) use ($submenus_id){
-            //Filtrar los submenus según los abilities
-            $menu->children = $menu->children->whereIn('id',$submenus_id);
-            if(count($menu->children)>0 || $menu->show_upgrade){
-                return $menu;
-            }
-        })->map(function($menu){
+        return Menu::list()
+        // 
+        ->map(function($menu) use ($submenus_id){
             //Dar formato para front
             $items = [];
+            $submenus = $menu->children->whereIn('id',$submenus_id);
+            $show_upgrade = $menu->children->where('show_upgrade',true);
+            $menu->children = $submenus->merge($show_upgrade)->unique('id');
             foreach ($menu->children as $submenu) {
+                $show_upgrade = $submenu->show_upgrade && !in_array($submenu->id,$submenus_id->toArray());
                 $items[]=[
                     'title' => $submenu->name,
                     'icon' => $submenu->icon,
                     'subpaths' => $submenu->extra_attributes['subpaths'],
-                    'path' => $submenu->extra_attributes['path'],
-                    'isBeta'=> $submenu->is_beta,
-                    'showUpgrade'=> $submenu->show_upgrade,
-                    'selected'=>false
+                    'path' => !$show_upgrade ? $submenu->extra_attributes['path'] : '#',
+                    'is_beta'=> $submenu->is_beta,
+                    'show_upgrade'=> $show_upgrade,
                 ];
             } 
-            return [
-                'title' => $menu->name,
-                'icon' => $menu->icon,
-                'active' => false,
-                'is_beta'=> $menu->is_beta,
-                'show_upgrade'=> $menu->show_upgrade,
-                'items' => $items
-            ];
+            if(count($menu->children)>0 || $menu->show_upgrade){
+                // return $menu;
+                return [
+                    'title' => $menu->name,
+                    'description' => $menu->description,
+                    'icon' => $menu->icon,
+                    'active' => false,
+                    'is_beta'=> $menu->is_beta,
+                    'show_upgrade'=> $menu->show_upgrade,
+                    'items' => $items
+                ];
+            }
+        })->filter(function($menu){
+            if($menu){
+                return $menu;
+            }
         })->toArray();
     }
     protected function updateItems($menus){
@@ -66,6 +73,7 @@ class Menu extends Model
                 [
                     'group' => $this->group_taxonomy,
                     'type' => $this->type_taxonomy,
+                    'description' => $menu['description'],
                     'position' => $menu['position'],
                     'name' => $menu['name'],
                     'icon'=> $menu['icon'],

@@ -1,4 +1,4 @@
-<!-- Global site tag (gtag.js) - Google Analytics -->
+{{-- <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="{{config('app.gestor')}}"></script>
 <script>
 
@@ -29,4 +29,4 @@ if( host == "gestiona.inretail.cursalab.io"  || host =='gestiona.demo.cursalab.i
 	@endif
 }
 
-</script>
+</script> --}}

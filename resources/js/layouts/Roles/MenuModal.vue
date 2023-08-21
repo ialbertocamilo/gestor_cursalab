@@ -20,6 +20,18 @@
                                             <div class="mr-2" v-text="menu.name"></div>
                                             <div class="mr-2" v-text="(menu.is_beta) ? '(Beta)' : ''"></div>
                                             <div class="mr-2" v-text="(menu.show_upgrade) ? '(Upgrade)' : ''"></div>
+                                            <div class="mr-2 menu-description">
+                                                <!-- <v-edit-dialog save-text="Guardar" cancel-text="Cancelar" large v-model="menu.description">
+                                                    <div class="menu-description"> -->
+                                                        Descripción: {{ menu.description }}
+                                                    <!-- </div>
+                                                    <template v-slot:input> -->
+                                                        
+                                                        <!-- <v-text-field v-model="menu.description" label="Edit"
+                                                            single-line></v-text-field> -->
+                                                    <!-- </template>
+                                                </v-edit-dialog> -->
+                                            </div>
                                         </div>
                                         <v-spacer></v-spacer>
                                         <v-btn class="btn btn-md" text icon color="primary"
@@ -36,18 +48,27 @@
                                             <v-icon>mdi mdi-delete</v-icon>
                                         </v-btn>
                                 </div>
-                                <div class="item-draggable list d-flex align-items-baseline" v-else>
-                                    <v-text-field class="mx-2" dense v-model="menu.icon" label="Icono" autocomplete="off" />
-                                    <v-text-field dense class="mx-2" v-model="menu.name" requred autocomplete="off"
-                                        label="Título" />
-                                    <v-checkbox class="mx-2" v-model="menu.is_beta" label="Es beta"></v-checkbox>
-                                    <v-checkbox class="mx-2" v-model="menu.show_upgrade"
-                                        label="Mostrar upgrade"></v-checkbox>
-
-                                    <v-btn class="btn btn-md" text icon color="primary"
-                                        @click="editFunctionality(menu_index, false, menu.name)">
-                                        <v-icon>mdi mdi-close</v-icon>
-                                    </v-btn>
+                                <div v-else>
+                                    <div class="item-draggable list d-flex align-items-baseline" e>
+                                        <v-text-field class="mx-2" dense v-model="menu.icon" label="Icono" autocomplete="off" />
+                                        <v-text-field dense class="mx-2" v-model="menu.name" requred autocomplete="off"
+                                            label="Título" />
+                                        <v-checkbox class="mx-2" v-model="menu.is_beta" label="Es beta"></v-checkbox>
+                                        <v-checkbox class="mx-2" v-model="menu.show_upgrade"
+                                            label="Mostrar upgrade"></v-checkbox>
+    
+                                        <v-btn class="btn btn-md" text icon color="primary"
+                                            @click="editFunctionality(menu_index, false, menu.name)">
+                                            <v-icon>mdi mdi-close</v-icon>
+                                        </v-btn>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <DefaultRichText
+                                            :key="menu_index"
+                                            v-model="menu.description"
+                                            label="Descripción"
+                                        />
+                                    </div>
                                 </div>
                                 <transition name="fade">
                                     <ul v-if="menu.expanded" class=" ml-8">
@@ -104,9 +125,10 @@
 </template>
 <script>
 import draggable from 'vuedraggable'
+import DefaultRichText from "../../components/globals/DefaultRichText";
 
 export default {
-    components: { draggable },
+    components: { draggable,DefaultRichText },
     props: {
         options: {
             type: Object,
@@ -281,5 +303,11 @@ export default {
     /* Ajusta la altura máxima deseada */
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 1;
+}
+.menu-description{
+    width: 200px; 
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 </style>
