@@ -108,9 +108,9 @@
                             >
 
                             <v-row class="mr-1">
-                                <v-col cols="6">
+                                <v-col cols="5">
                                     <v-subheader class="mb-3 px-0">
-                                        <strong>Por defecto</strong>
+                                        <strong>Crtierios generales</strong>
                                     </v-subheader>
                                     <v-checkbox
                                         v-for="criterion in defaultCriteria"
@@ -121,9 +121,6 @@
                                     >
                                         <!-- :disabled="criterion.code === 'module'" -->
                                     </v-checkbox>
-                                </v-col>
-                                <v-col cols="6">
-
                                     <v-subheader class="mb-3 px-0">
                                         <strong>Personalizados</strong>
                                     </v-subheader>
@@ -138,6 +135,23 @@
                                         <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
 
                                     </v-checkbox>
+                                </v-col>
+                                <v-col cols="7">
+                                    <v-subheader class="mb-3 px-0 text-center">
+                                        <strong>Secciones disponibles</strong>
+                                    </v-subheader>
+
+                                    <div v-for="criterion in defaultCriteria" :key="criterion.id" class="row col-12 py-0">
+                                        <v-checkbox
+                                            v-for="section in sections" 
+                                            :key="section.code"
+                                            v-model="resource.selected_section_criteria"
+                                            :label="section.name"
+                                            :disabled="false"
+                                            class="mr-5"
+                                        >
+                                        </v-checkbox>
+                                    </div>
                                 </v-col>
                             </v-row>
 
@@ -367,8 +381,13 @@ export default {
             tabs: null,
             is_superuser: false,
             mensajes: mensajes,
-            errors: []
-            ,
+            errors: [],
+            sections: [
+                {name: 'Perfil', code: 'profile'},
+                {name: 'Filtros', code: 'filters'},
+                {name: 'Ranking', code: 'ranking'},
+                {name: 'Reportes', code: 'reports'},
+            ],
             generateCriterionTitle(criterion) {
 
                 let requiredLabel = criterion.required
@@ -385,7 +404,13 @@ export default {
                 logo_negativo: '',
                 qualification_type: '',
                 selected_criteria: {},
-                selected_functionality: {}
+                selected_functionality: {},
+                selected_section_criteria: {
+                    profile: false,
+                    filters: false,
+                    ranking: false,
+                    reports: false,
+                }
             },
             limit_allowed_users: null,
             resource: {
