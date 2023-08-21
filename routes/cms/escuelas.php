@@ -23,6 +23,7 @@ Route::controller(EscuelaController::class)->group(function () {
     Route::get('/form-selects', 'getFormSelects')->name('escuelas.formSelects');
 
     Route::delete('/{school}/destroy', 'destroyEscuela')->name('escuelas.destroyEscuela');
+    Route::post('/{school}/copy-content', 'copyContent')->name('escuelas.copyContent');
 
     Route::put('/{categoria}/status', 'updateStatus');
 });

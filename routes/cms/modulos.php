@@ -13,6 +13,7 @@ Route::controller(WorkspaceController::class)->group(function() {
     Route::get('{subworkspace}/edit', 'editSubWorkspace');
     Route::put('{subworkspace}/update', 'updateSubWorkspace');
     Route::get('{subworkspace}/usuarios', 'usuarios');
+    Route::post('{subworkspace}/copy-content', 'copyContent');
 });
 
 // ESCUELAS

@@ -17,6 +17,9 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
 use App\Models\Ambiente;
+use App\Models\School;
+use App\Models\Course;
+use App\Models\Topic;
 use App\Models\WorkspaceFunctionality;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -520,24 +523,7 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
-        // $new = $workspace->replicate();
         $new = $workspace->replicateWithRelations($data);
-
-
-
-        //save model before you recreate relations (so it has an id)
-        // $new->push();
-
-        // //reset relations on EXISTING MODEL (this way you can control which ones will be loaded
-        // $workspace->relations = [];
-
-        // //load relations on EXISTING MODEL
-        // $workspace->load('subworkspaces', 'schools', 'courses');
-
-        // //re-sync everything
-        // foreach ($this->relations as $relationName => $values){
-        //     $new->{$relationName}()->sync($values);
-        // }
 
         return $this->success(['msg' => 'Workspace duplicado correctamente.']);
     }
@@ -546,9 +532,137 @@ class WorkspaceController extends Controller
     {
         $items = Workspace::getSchoolsForTree($subworkspace->schools);
 
-        $items_destiny = Workspace::getAvailableForTree($subworkspace);
+        $items_destination = Workspace::getAvailableForTree($subworkspace);
 
-        return $this->success(compact('items', 'items_destiny'));
+        return $this->success(compact('items', 'items_destination'));
     }
 
+    public function copyContent(Request $request, Workspace $subworkspace)
+    {
+        $selections = $request->selection_source;
+        $destinations = $request->selection_destination;
+
+        $workspace = get_current_workspace();
+
+        $subworkspace_ids = [];
+
+        foreach ($destinations as $destination) {
+
+            $part = explode('_', $destination);
+            $subworkspace_ids[] = $part[1]; 
+        }
+
+        $data = $this->buildSourceTreeSelection($selections);
+
+        $subworkspaces = Workspace::whereIn('id', $subworkspace_ids)->get();
+        $_schools = School::whereIn('id', $data['school_ids'])->get();
+        $_courses = Course::whereIn('id', $data['course_ids'])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        foreach ($data['schools'] as $school_id => $course_ids) {
+
+            $_school = $_schools->where('id', $school_id)->first();
+
+            $school_data = $_school->toArray();
+            $school_data['external_id'] = $_school->id;
+
+            foreach ($subworkspaces as $subworkspace) {
+
+                $school = $subworkspace->schools()->where('name', $_school->name)->first();
+
+                if ( ! $school ) {
+
+                    $school_position = ['position' => $subworkspace->schools()->count() + 1];
+
+                    $school = $subworkspace->schools()->create($school_data, $school_position);
+                }
+
+                foreach ($course_ids['courses'] as $course_id => $topic_ids) {
+
+                    $_course = $_courses->where('id', $course_id)->first();
+
+                    $course_data = $_course->toArray();
+                    $course_data['external_id'] = $_course->id;
+
+                    $course = $school->courses()->create($course_data);
+
+                    $workspace->courses()->attach($course);
+
+                    foreach ($topic_ids['topics'] as $topic_id) {
+
+                        $_topic = $_topics->where('id', $topic_id)->first();
+
+                        $topic_data = $_topic->toArray();
+                        $topic_data['external_id'] = $_topic->id;
+
+                        $topic = $course->topics()->create($topic_data);
+
+                        $topic->medias()->createMany($_topic->medias->toArray());
+                        $topic->questions()->createMany($_topic->questions->toArray());
+                    }
+                }
+            }
+        }
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($selections)
+    {
+        $schools = [];
+        $school_ids = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        foreach ($selections as $index => $selection) {
+
+            $sections = explode('-', $selection);
+            $data = [];
+
+            foreach ($sections as $position => $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+
+                // $schools[$index][$position] = $row;  
+            }
+
+            $school_id = $data[0]['id'];
+            $course_id = $data[1]['id'] ?? NULL;
+            $topic_id = $data[2]['id'] ?? NULL;
+
+            if ($course_id && $topic_id) {
+
+                $schools[$school_id]['courses'][$course_id]['topics'][] = $topic_id;
+
+            } else {
+                
+                if ($course_id && !$topic_id) { 
+                
+                    $schools[$school_id]['courses'][$course_id]['topics'] = [];
+                
+                } else {
+                    
+                    if (!$course_id && !$topic_id) {
+
+                        $schools[$school_id]['courses'] = [];
+                    }
+                }
+            }
+
+        }
+
+        return compact('school_ids', 'course_ids', 'topic_ids', 'schools');
+    }
 }

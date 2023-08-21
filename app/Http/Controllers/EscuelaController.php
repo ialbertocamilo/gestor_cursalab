@@ -121,9 +121,128 @@ class EscuelaController extends Controller
     {
         $items = School::getCoursesForTree($school->courses);
 
-        $items_destiny = School::getAvailableForTree($school);
+        $items_destination = School::getAvailableForTree($school);
 
-        return $this->success(compact('school', 'items', 'items_destiny'));
+        return $this->success(compact('school', 'items', 'items_destination'));
+    }
+
+    public function copyContent(Request $request, School $school)
+    {
+        $selections = $request->selection_source;
+        $destinations = $request->selection_destination;
+
+        $workspace = get_current_workspace();
+
+        $subworkspace_ids = [];
+
+        foreach ($destinations as $destination) {
+
+            $part = explode('_', $destination);
+            $subworkspace_ids[] = $part[1]; 
+        }
+
+        $data = $this->buildSourceTreeSelection($selections);
+
+        return $data;
+
+        $subworkspaces = Workspace::whereIn('id', $subworkspace_ids)->get();
+        // $_schools = School::whereIn('id', $data['school_ids'])->get();
+        $_courses = Course::whereIn('id', $data['course_ids'])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        // foreach ($data['courses'] as $course_id => $course_ids) {
+
+        //     $_course = $_courses->where('id', $course_id)->first();
+
+        //     $course_data = $_course->toArray();
+        //     $course_data['external_id'] = $_course->id;
+
+        //     foreach ($subworkspaces as $subworkspace) {
+
+        //         $school = $subworkspace->schools()->where('name', $_school->name)->first();
+
+        //         if ( ! $school ) {
+
+        //             $school_position = ['position' => $subworkspace->schools()->count() + 1];
+
+        //             $school = $subworkspace->schools()->create($school_data, $school_position);
+        //         }
+
+        //         foreach ($course_ids['courses'] as $course_id => $topic_ids) {
+
+        //             $_course = $_courses->where('id', $course_id)->first();
+
+        //             $course_data = $_course->toArray();
+        //             $course_data['external_id'] = $_course->id;
+
+        //             $course = $school->courses()->create($course_data);
+
+        //             $workspace->courses()->attach($course);
+
+        //             foreach ($topic_ids['topics'] as $topic_id) {
+
+        //                 $_topic = $_topics->where('id', $topic_id)->first();
+
+        //                 $topic_data = $_topic->toArray();
+        //                 $topic_data['external_id'] = $_topic->id;
+
+        //                 $topic = $course->topics()->create($topic_data);
+
+        //                 $topic->medias()->createMany($_topic->medias->toArray());
+        //                 $topic->questions()->createMany($_topic->questions->toArray());
+        //             }
+        //         }
+        //     }
+        // }
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($selections)
+    {
+        $courses = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        foreach ($selections as $index => $selection) {
+
+            $sections = explode('-', $selection);
+            $data = [];
+
+            foreach ($sections as $position => $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+
+                // $courses[$index][$position] = $row;  
+            }
+
+            $course_id = $data[0]['id'];
+            $topic_id = $data[1]['id'] ?? NULL;
+
+            if ($topic_id) {
+
+                $courses[$course_id]['topics'][] = $topic_id;
+
+            } else {
+                
+                $courses[$course_id]['topics'] = [];
+            }
+
+        }
+
+        return compact('course_ids', 'topic_ids', 'courses');
     }
 
 }

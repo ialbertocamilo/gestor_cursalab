@@ -6,7 +6,7 @@
         @onConfirm="confirmModal"
         :showCardActions="false"
     >
-        <template v-slot:title-icon>
+        <!-- <template v-slot:title-icon>
             <DefaultInfoTooltip class="ml-3" right color="white">
 
                 <template v-slot:content>
@@ -21,15 +21,11 @@
                         <li class="mt-2">
                             Solo se copiarán los contenidos nuevos en el lugar de destino.
                         </li>
-                        <!-- <li class="mt-2"> -->
-                            <!-- Recuerda desactivar el estado del curso. -->
-                        <!-- </li> -->
                     </ul>
                 </template>
                 
             </DefaultInfoTooltip>
-
-        </template>
+        </template> -->
 
         <template v-slot:content>
 
@@ -126,7 +122,7 @@
                                     >
                                         <v-treeview
                                           v-model="selection_schools"
-                                          :items="items_destiny"
+                                          :items="items_destination"
                                           selection-type="leaf"
                                           selectable
                                           selected-color="primary"
@@ -172,7 +168,7 @@ import ButtonsModal from '../../components/Entrenamiento/Checklist/Blocks/Button
 
 const fields = [
     'selection_source', 
-    'selection_destiny', 
+    'selection_destination', 
 ];
 
 const file_fields = [];
@@ -197,7 +193,7 @@ export default {
             errors: [],
             resourceDefault: {
                 items: {},
-                items_destiny: {},
+                items_destination: {},
             },
             limit_allowed_users: null,
             resource: {
@@ -211,7 +207,7 @@ export default {
             selection: [],
             selection_schools: [],
             items: [],
-            items_destiny: [],
+            items_destination: [],
             cancelLabel: 'Cancelar',
             confirmLabel: 'Continuar',
             disabled_btn_next: true,
@@ -328,12 +324,12 @@ export default {
             this.showLoader()
 
             let base = `${vue.options.base_endpoint}`;
-            let url = `${base}/${vue.resource.id}/duplicate`
+            let url = `${base}/${vue.resource.id}/copy-content`
 
             let method = 'POST';
 
             vue.resource.selection_source = vue.selection
-            vue.resource.selection_destiny = vue.selection_schools
+            vue.resource.selection_destination = vue.selection_schools
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields);
 
@@ -373,7 +369,7 @@ export default {
             await vue.$http.get(url)
                 .then(({data}) => {
                     vue.items = data.data.items
-                    vue.items_destiny = data.data.items_destiny
+                    vue.items_destination = data.data.items_destination
 
                     // if (resource) {
                     //     vue.resource = Object.assign({}, data.data.model)
