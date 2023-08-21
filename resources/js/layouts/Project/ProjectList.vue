@@ -55,7 +55,7 @@
         </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Proyectos
+                Tareas
                 <v-spacer/>
                 <DefaultModalButton 
                     label="Proyecto"
@@ -197,7 +197,7 @@ export default {
                 ref: 'ProjectFormModal',
                 open: false,
                 base_endpoint: '/projects',
-                resource: 'Proyecto',
+                resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create',
                 create_from_course_list:false,

@@ -117,7 +117,7 @@ export default {
             },
             criteria_template:[],
             breadcrumbs: [
-                { title: 'Proyectos', text: 'Proyectos', disabled: false, href: `/projects` },
+                { title: 'Tareas', text: 'tareas', disabled: false, href: `/projects` },
                 { title: 'Curso', text: vue.course_name, disabled: false, href: `/cursos?q=${vue.course_name}` },
             ],
             dataTable: {
