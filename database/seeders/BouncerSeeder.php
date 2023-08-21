@@ -2,63 +2,64 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use Bouncer;
 
-use App\Models\Account;
-use App\Models\Attendant;
-use App\Models\Meeting;
-
-use App\Models\Ambiente;
-
-use App\Models\Workspace;
-use App\Models\User;
+use App\Models\Poll;
+use App\Models\Post;
 use App\Models\Role;
-use App\Models\Permission;
+
+use App\Models\User;
 
 use App\Models\Audit;
-
-use App\Models\Taxonomy;
-
 use App\Models\Ayuda;
-use App\Models\AyudaApp;
-use App\Models\Ticket;
-use App\Models\Post;
-
 use App\Models\Error;
+use App\Models\Media;
+
+use App\Models\Topic;
+
+use App\Models\Course;
+
+use App\Models\School;
+use App\Models\Ticket;
+use App\Models\Ability;
+use App\Models\Account;
+
+use App\Models\Meeting;
+
+use App\Models\Segment;
+
+use App\Models\Ambiente;
+use App\Models\AyudaApp;
+use App\Models\Glossary;
+use App\Models\Question;
+use App\Models\Taxonomy;
+use App\Models\Attendant;
 
 use App\Models\CheckList;
 
-use App\Models\School;
-use App\Models\Course;
-use App\Models\Topic;
-use App\Models\Segment;
-use App\Models\Question;
+use App\Models\Criterion;
+use App\Models\Vademecum;
+use App\Models\Videoteca;
+
+use App\Models\Workspace;
+use App\Models\Permission;
+
+
+use App\Models\Supervisor;
 use App\Models\Certificate;
 
-use App\Models\Media;
-
-use App\Models\Poll;
-use App\Models\PollQuestion;
-use App\Models\PollQuestionAnswer;
-
-use App\Models\Criterion;
-use App\Models\CriterionValue;
-
-
-use App\Models\Glossary;
-use App\Models\Vademecum;
+use App\Models\Announcement;
 
 use App\Models\Notification;
 
-use App\Models\Videoteca;
-
-use App\Models\Supervisor;
+use App\Models\PollQuestion;
 
 // use App\Models\Setting;
 // use App\Models\Tag;
-use App\Models\Announcement;
+use App\Models\CriterionValue;
 
-use Bouncer;
+use Illuminate\Database\Seeder;
+use App\Models\PollQuestionAnswer;
 
 class BouncerSeeder extends Seeder
 {
@@ -1048,49 +1049,70 @@ class BouncerSeeder extends Seeder
         //     'title' => 'Logs',
         //     'name' => 'log'
         // ])->save();
-
+        $roles_to_sync = [];
         foreach ($menus as $index_menu => $menu) {
-            $new_menu = new Taxonomy();
-            $new_menu->group = 'gestor';
-            $new_menu->type = 'menu';
-            $new_menu->position = $index_menu+1;
-            $new_menu->name = $menu['name'];
-            $new_menu->icon = $menu['icon'];
-            $new_menu->extra_attributes = [
-                'is_beta'=> $menu['is_beta'] ?? false,
-                'show_upgrade'=> $menu['show_upgrade'] ?? false,
-            ];
-            $new_menu->save();
-            foreach ($menu['children'] as $index_submenu => $children) {
-                $submenu = new Taxonomy();
-                $submenu->group = 'gestor';
-                $submenu->type = 'submenu';
-                $submenu->parent_id = $new_menu->id;
-                $submenu->position = $index_submenu+1;
-                $submenu->name = $children['name'];
-                $submenu->icon = $children['icon'];
-                $submenu->extra_attributes = $children['extra_attributes'];
-                $submenu->save();
-                    foreach ($children['abilities'] as $ability) {
-                        Bouncer::ability([
-                            'title' => $ability['title'],
-                            'name' =>  $ability['name'],
-                            'entity_id' => $submenu->id
-                        ])->save();
-                    }
-                    // Permission::create([
-                    //     'name' => 'Eliminar Permisos',
-                    //     'slug' => 'permisos.destroy',
-                    //     'description' => 'Eliminar cualquier  post Permiso',
-                    // ]);
-                    // foreach ($menu['roles'] as $role) {
-                    //     Permission::create([
-                    //         'ability_id' => 'Eliminar Permisos',
-                    //         'entity_type' => 'App\Models\Taxonomy',
-                    //         'entity_id' => $submenu->id,
-                    //     ]);
-                    // }
+            $new_menu = Taxonomy::where('group','gestor')->where('type','menu')->where('name',$menu['name'])->first();
+            if(!$new_menu){
+                $new_menu = new Taxonomy();
+                $new_menu->group = 'gestor';
+                $new_menu->type = 'menu';
+                $new_menu->position = $index_menu+1;
+                $new_menu->name = $menu['name'];
+                $new_menu->icon = $menu['icon'];
+                $new_menu->extra_attributes = [
+                    'is_beta'=> $menu['is_beta'] ?? false,
+                    'show_upgrade'=> $menu['show_upgrade'] ?? false,
+                ];
+                $new_menu->save();
             }
+            
+            foreach ($menu['children'] as $index_submenu => $children) {
+                $submenu = Taxonomy::where('group','gestor')->where('type','submenu')->where('name',$children['name'])->first();
+                if(!$submenu){
+                    $submenu = new Taxonomy();
+                    $submenu->group = 'gestor';
+                    $submenu->type = 'submenu';
+                    $submenu->parent_id = $new_menu->id;
+                    $submenu->position = $index_submenu+1;
+                    $submenu->name = $children['name'];
+                    $submenu->icon = $children['icon'];
+                    $submenu->extra_attributes = $children['extra_attributes'];
+                    $submenu->save();
+                }
+                $abilities_id = [];
+                foreach ($children['abilities'] as $ability) {
+                    $ability = Ability::where('title',$ability['title'])->where('name',$ability['name'])->where('entity_id',$submenu->id)->first();
+                    if(!$ability){
+                        $ability = new Ability();
+                        $ability->title = $ability['title'];
+                        $ability->name = $ability['name'];
+                        $ability->entity_id = $submenu->id;
+                        $ability->save();
+                        // Bouncer::ability([
+                        //     'title' => $ability['title'],
+                        //     'name' =>  $ability['name'],
+                        //     'entity_id' => $submenu->id
+                        // ])->save();
+                        
+                    }
+                    $abilities_id[] = $ability->id;
+                }
+                foreach ($children['roles'] as  $role_name) {
+                    if(isset($roles_to_sync[$role_name])){
+                        $roles_to_sync[$role_name] = array_merge($roles_to_sync[$role_name],$abilities_id);
+                    }else{
+                        $roles_to_sync[$role_name] = $abilities_id;
+                    }
+                    // $role = Role::where('name',$role_name)->first();
+                    // info([
+                    //     'role'=>
+                    // ]);
+                }
+            }
+        }
+        foreach ($roles_to_sync as $role_name => $abilities_id) {
+            $role = Role::where('name',$role_name)->first();
+            $role->abilities()->sync($abilities_id);
         }
         // // Bouncer::scope()->to($platform_master->id);
 

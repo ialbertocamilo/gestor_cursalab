@@ -67,6 +67,7 @@
                                             :key="menu_index"
                                             v-model="menu.description"
                                             label="Descripción"
+                                            maxLength="2000"
                                         />
                                     </div>
                                 </div>
