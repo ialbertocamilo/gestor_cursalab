@@ -205,6 +205,19 @@
                                                         </a>
                                                     </div>
                                                 </td>
+                                                
+                                                <td class="">
+                                                    <div class="mt-1">
+                                                        <span class="d-flex align-items-center">
+                                                            <img width="32px" 
+                                                                class="mr-2" 
+                                                                :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
+                                                                src="/img/ia_convert.svg"
+                                                            >
+                                                            <p class="m-0" :style="media.ia_convert ? 'color:#5458EA' : 'color:gray'">Ai Convert</p>
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td class="">
                                                     <div class="mt-2">
                                                         <DefaultToggle
@@ -748,5 +761,11 @@ export default {
         width: 50px;
         height: 30px;
     }
+}
+.ia_convert_inactive{
+    filter: invert(42%) sepia(98%) saturate(0%) hue-rotate(349deg) brightness(111%) contrast(100%);
+}
+.ia_convert_active{
+    filter: hue-rotate(225deg);
 }
 </style>
