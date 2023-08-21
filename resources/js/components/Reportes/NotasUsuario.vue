@@ -36,7 +36,7 @@
                         variant="primary"
                         class="text-light"
                         @click="buscarNotasUsuario"
-                        v-bind:disabled="this.search.length >= 8 ? false : true"
+                        v-bind:disabled="this.search.length >= 6 ? false : true"
                     >
                         <b-icon icon="search" class="mr-2"></b-icon>
                         Consultar
@@ -240,7 +240,7 @@ export default {
     },
     methods: {
         async buscarNotasUsuario() {
-            if (this.search.length < 8) return false;
+            if (this.search.length < 6) return false;
 
             let vue = this
             // Show loading spinner
