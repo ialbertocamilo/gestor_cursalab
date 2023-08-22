@@ -40,11 +40,12 @@
                         sense 
                         @mouseover="startTimer(grupo,$event)"
                         v-if="grupo.items.length == 0"
+                        style="cursor: pointer;"
                     >
                         <v-list-item-icon>
                             <v-icon small class="item_icon">{{ grupo.icon }}</v-icon>
                         </v-list-item-icon>
-                        <v-badge>
+                        <v-badge small class="_badge">
                             <template v-slot:badge>
                                 <div v-if="grupo.show_upgrade" class="ml-1 tag_beta_upgrade d-flex align-items-center"><img
                                         src="/img/premiun.svg"> Upgrade</div>
@@ -66,7 +67,7 @@
                                 <v-list-item-icon>
                                     <v-icon small>{{ grupo.icon }}</v-icon>
                                 </v-list-item-icon>
-                                <v-badge>
+                                <v-badge small class="_badge">
                                     <template v-slot:badge>
                                         <div v-if="grupo.show_upgrade" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                             <img src="/img/premiun.svg"> Upgrade</div>
@@ -99,7 +100,7 @@
                                 <v-list-item-icon>
                                     <v-icon small class="item_icon">{{ item.icon }}</v-icon>
                                 </v-list-item-icon>
-                                <v-badge>
+                                <v-badge small class="_badge">
                                     <template v-slot:badge>
                                         <div v-if="item.show_upgrade" class="tag_beta_upgrade d-flex align-items-center"><img
                                                 src="/img/premiun.svg"> Upgrade</div>
@@ -345,7 +346,7 @@ export default {
                 // setTimeout(() => {
                 // this.cardHover.showCard = false;
                 // }, 4000); // Ocultar la tarjeta después de 4 segundos
-            }, 2500);
+            }, 1500);
         },
         cancelTimer() {
             if (this.cardHover.timer) {
@@ -361,7 +362,7 @@ export default {
         startHideTimer() {
             this.cardHover.timer = setTimeout(() => {
                 this.cardHover.showCard = false;
-            }, 2500); // Cambia este valor al tiempo deseado para ocultar la tarjeta
+            }, 2500); // Cambia este valor al tiempo deseado para ocultar 
         },
         cancelHideTimer() {
             if (this.cardHover.timer) {
@@ -457,7 +458,10 @@ export default {
     font-weight: bold !important;
     white-space: normal;
 }
-
+._badge {
+    max-width: 200px;
+    white-space: normal;
+}
 .item_icon {
     color: rgba(255, 255, 255, 0.85);
 }
