@@ -1080,12 +1080,12 @@ class BouncerSeeder extends Seeder
                     $submenu->save();
                 }
                 $abilities_id = [];
-                foreach ($children['abilities'] as $ability) {
-                    $ability = Ability::where('title',$ability['title'])->where('name',$ability['name'])->where('entity_id',$submenu->id)->first();
+                foreach ($children['abilities'] as $children_ability) {
+                    $ability = Ability::where('title',$children_ability['title'])->where('name',$children_ability['name'])->where('entity_id',$submenu->id)->first();
                     if(!$ability){
                         $ability = new Ability();
-                        $ability->title = $ability['title'];
-                        $ability->name = $ability['name'];
+                        $ability->title = $children_ability['title'];
+                        $ability->name = $children_ability['name'];
                         $ability->entity_id = $submenu->id;
                         $ability->save();
                         // Bouncer::ability([
