@@ -219,7 +219,7 @@
                                             'duplicate',
                                             `Duplicar workspace - ${workspace.name}`
                                         )"
-                                        v-show="!view && workspace.is_super_user"
+                                        v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
                                             <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
@@ -251,7 +251,7 @@
                                             'logs',
                                             `Logs del workspace - ${workspace.name}`
                                         )"
-                                        v-show="!view && workspace.is_super_user"
+                                        v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
                                             <v-icon class="icon" color="primary">mdi-database</v-icon>
