@@ -8,12 +8,13 @@ use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Row;
 
-class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure
+class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure, SkipsEmptyRows
 {
     use Importable, SkipsFailures, SkipsErrors;
 
@@ -74,20 +75,24 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
             $obligatorio = trim(strtolower($row['obligatorio']));
             $isRequired = ($obligatorio === 'sí' || $obligatorio === 'si');
 
+            $puntaje = $row['puntaje'] ?? 0;
+
+            $puntaje = calculateValueForQualification($puntaje, 20, $this->maxScore);
+
             // Accumulate score
 
             if ($isRequired) {
-                $this->totalScore += $row['puntaje'] ?? 0;
+                $this->totalScore += $puntaje;
 
                 if ($this->maxScore >= $this->totalScore) {
-                    $score = $row['puntaje'] ?? 0;
+                    $score = $puntaje;
                 } else {
-                    $score = $row['puntaje'] ?? 0;
+                    $score = $puntaje;
                     $isRequired = false;
                 }
 
             } else {
-                $score = $row['puntaje'] ?? 0;
+                $score = $puntaje;
             }
 
             Question::create([
@@ -122,6 +127,7 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
             return [
                 'pregunta' => "required|unique:questions,pregunta,null,id,type_id,{$this->selectQuestionTypeId},topic_id,{$this->topic_id},deleted_at,NULL|max:20000",
                 'respuesta_correcta' => 'required|in:A,B,C,D,E,F,G,H,I,J,a,b,c,d,e,f,g,h,i,j',
+                'puntaje' => 'numeric|max:'.$this->maxScore,
 
                 'a' => 'required|max:5000',
                 'b' => 'required|max:5000',

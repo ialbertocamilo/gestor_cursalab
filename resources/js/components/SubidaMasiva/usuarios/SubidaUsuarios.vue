@@ -59,7 +59,7 @@ const percentLoader = document.getElementById('percentLoader');
 import vuedropzone from "./../dropzone.vue";
 
 export default {
-    props: ['q_error', 'number_socket', 'url_template'],
+    props: ['q_error', 'number_socket', 'url_template', 'process'],
     components: {vuedropzone},
     data() {
         return {
@@ -90,10 +90,11 @@ export default {
                 let data = new FormData();
                 this.showLoader();
                 data.append("file", this.archivo);
+                data.append("process", JSON.stringify(this.process)); // == data section-upload ==
                 // console.log(data);
                 data.append("number_socket", this.number_socket || null);
                 percentLoader.innerHTML = ``;
-                await axios.post('/masivos/create-update-users', data).then((res) => {
+                await axios.post('/procesos-masivos/create-update-users', data).then((res) => {
                     const data = res.data.data;
                     if (data.errores.length > 0) {
                         this.$emit("download-excel-observations", {

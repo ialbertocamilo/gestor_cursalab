@@ -10,9 +10,8 @@
         <v-card flat elevation="0">
             <v-card-text>
                 <v-form ref="TemaForm">
-                    <DefaultSectionLabel label="Contenido General"/>
                     <v-row justify="center">
-                        <v-col cols="6">
+                        <v-col cols="8">
                             <DefaultInput
                                 dense
                                 label="Nombre"
@@ -22,8 +21,6 @@
                                 :rules="rules.name"
                                 counter="120"
                             />
-                        </v-col>
-                        <v-col cols="6">
                             <DefaultAutocomplete
                                 dense
                                 label="Requisito"
@@ -33,27 +30,26 @@
                                 clearable
                                 item-text="name"
                             />
-                        </v-col>
-                    </v-row>
-                    <v-row justify="center">
-                        <v-col cols="8">
-                            <editor
-                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
-                                v-model="resource.content"
-                                :init="{
-                                content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                height: 175,
-                                menubar: false,
-                                language: 'es',
-                                force_br_newlines : true,
-                                force_p_newlines : false,
-                                forced_root_block : '',
-                                plugins: ['lists image preview anchor', 'code', 'paste','link'],
-                                toolbar:
-                                    'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                images_upload_handler: images_upload_handler,
-                            }"/>
+                            <fieldset class="editor mt-2">
+                                <legend>Descripción</legend>
 
+                                <editor
+                                    api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                    v-model="resource.content"
+                                    :init="{
+                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                    height: 185,
+                                    menubar: false,
+                                    language: 'es',
+                                    force_br_newlines : true,
+                                    force_p_newlines : false,
+                                    forced_root_block : '',
+                                    plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                    toolbar:
+                                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                    images_upload_handler: images_upload_handler,
+                                }"/>
+                            </fieldset>
                         </v-col>
                         <v-col cols="4">
                             <DefaultSelectOrUploadMultimedia
@@ -64,32 +60,192 @@
                                 @onSelect="setFile($event, resource,'imagen')"/>
                         </v-col>
                     </v-row>
-                    <DefaultSectionLabel label="Método de Evaluación"/>
-                    <v-row justify="center">
-                        <v-col cols="4">
-                            <DefaultSelect
-                                dense
-                                show-required
-                                label="Evaluable"
-                                v-model="resource.assessable"
-                                :items="selects.assessable"
-                                @onChange="validateTipoEv"
-                            />
-                            <!-- :rules="rules.assessable" -->
-                        </v-col>
-                        <v-col cols="4">
-                            <DefaultSelect
-                                dense
-                                :show-required="resource.assessable === 1"
-                                label="Tipo Evaluación"
-                                v-model="resource.type_evaluation_id"
-                                :items="selects.evaluation_types"
-                                :rules="resource.assessable === 1 ? rules.tipo_ev : []"
-                                :disabled="resource.assessable === '0' || !resource.assessable"
-                                @onChange="showAlertEvaluacion"
-                            />
-                        </v-col>
-                        <v-col cols="4">
+
+                    <DefaultModalSection
+                        title="Método de evaluación"
+                        class="my-5"
+                    >
+                        <template slot="content">
+
+                            <v-row justify="center">
+                                <v-col cols="4">
+                                    <DefaultSelect
+                                        dense
+                                        show-required
+                                        label="Tema evaluable"
+                                        v-model="resource.assessable"
+                                        :items="selects.assessable"
+                                        @onChange="validateTipoEv"
+                                    />
+                                    <!-- :rules="rules.assessable" -->
+                                </v-col>
+
+                                <v-col cols="4">
+                                    <DefaultSelect
+                                        dense
+                                        :show-required="resource.assessable === 1"
+                                        label="Tipo de evaluación"
+                                        v-model="resource.type_evaluation_id"
+                                        :items="selects.evaluation_types"
+                                        :rules="resource.assessable === 1 ? rules.tipo_ev : []"
+                                        :disabled="resource.assessable === '0' || !resource.assessable"
+                                        @onChange="showAlertEvaluacion"
+                                    />
+                                </v-col>
+
+                                <v-col cols="4">
+                                    <DefaultSelect
+                                        v-show="showActiveResults"
+                                        clearable
+                                        dense
+                                        :items="selects.qualification_types"
+                                        item-text="name"
+                                        return-object
+                                        show-required
+                                        v-model="resource.qualification_type"
+                                        label="Sistema de calificación"
+                                        :rules="rules.qualification_type_id"
+                                    />
+                                </v-col>
+
+                            </v-row>
+                            <DefaultSection
+                                v-if="showActiveResults"
+                                title="Resultados de evaluación"
+                                class="mt-4"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                        <v-col cols="2" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                v-model="resource.active_results"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="10">
+                                            * Al activar resultados se visualizarán las respuestas ingresadas (correctas e incorrectas) en la aplicación del usuario al realizar una evaluación.
+                                        </v-col>
+
+                                    </v-row>
+
+                                </template>
+                            </DefaultSection>
+                        </template>
+                    </DefaultModalSection>
+
+
+                    <DefaultModalSection
+                        title="Recursos multimedia"
+                        class="my-5"
+                    >
+                        <template slot="content">
+                            <v-row justify="center">
+                                <v-col cols="12">
+
+                                    <table class="table table-hover table-multimedia">
+                                        <!-- <thead class="--bg-default-primary">
+                                        <tr>
+                                            <th class="text-left" v-text="'Tipo'"/>
+                                            <th class="text-left"
+                                                style="max-width: 25% !important;     justify-content: right !important;"
+                                                v-text="'Título'"/>
+                                            <th class="text-center" v-text="'Archivo'"/>
+                                            <th class="text-center" v-text="'¿Embebido?'"/>
+                                            <th class="text-center" v-text="'¿Descargable?'"/>
+                                            <th class="text-center" v-text="'Eliminar'"/>
+                                        </tr>
+                                        </thead> -->
+                                        <draggable
+                                            v-model="resource.media"
+                                            group="multimedias"
+                                            @start="drag=true"
+                                            @end="drag=false"
+                                            ghost-class="ghost"
+                                            tag="tbody"
+                                        >
+                                            <!--                                    <transition-group type="transition" name="flip-list">-->
+                                            <tr v-if="resource.media && resource.media.length === 0">
+                                                <td class="text-center" colspan="6"
+                                                    v-text="'No hay multimedias seleccionados'"/>
+                                            </tr>
+                                                <!-- style="cursor: pointer" -->
+                                            <tr
+                                                v-else
+                                                v-for="(media, media_index) in resource.media" :key="media.media_index">
+                                                <td >
+                                                    <div class="multimedia-table-icon mt-2" title="Mover">
+                                                        <i class="mdi mdi-drag"/>
+                                                    </div>
+                                                </td>
+                                                <!-- :title="media.value || media.file.name " -->
+                                                <td>
+                                                    <div class="multimedia-table-icon mt-2">
+                                                        <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
+                                                            <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <DefaultInput
+                                                        v-model="media.title"
+                                                        placeholder="Ingrese un título"
+                                                        label="Título"
+                                                        dense
+                                                    />
+                                                </td>
+                                                <td class="">
+                                                    <div class="multimedia-table-icon mt-2 " style="align-items: start;">
+                                                        <a class="media-link" href="javascript:;"  title="Copiar código"
+                                                            @click="copyToClipboard(media.value || media.file.name)">
+                                                            <i :class="'mdi mdi-content-copy'"  style="font-size: 1rem !important; margin-right: 5px;" />
+
+                                                            {{ media.value || media.file.name }}
+                                                            <!-- <span :title="media.value || media.file.name"> -->
+                                                            <!-- </span> -->
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td class="">
+                                                    <div class="mt-2">
+                                                        <DefaultToggle
+                                                            dense 
+                                                            v-model="media.embed"
+                                                            active-label="Embebido"
+                                                            inactive-label="No embebido"
+                                                            :disabled="media.disabled"
+                                                            @onChange="verifyDisabledMediaEmbed"/>
+                                                    </div>
+                                                </td>
+                                                <td class="">
+                                                    <div class="mt-2">
+                                                        <DefaultToggle
+                                                            dense
+                                                            v-model="media.downloadable"
+                                                            active-label="Descargable"
+                                                            inactive-label="No descargable"
+                                                            :disabled="['youtube', 'vimeo', 'scorm', 'link','genially'].includes(media.type_id)"
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <DefaultDeleteBtnIcon
+                                                        title="Eliminar"
+                                                        @click="deleteMedia(media_index)"/>
+                                                </td>
+                                            </tr>
+                                            <!--                                    </transition-group>-->
+                                        </draggable>
+                                    </table>
+                                </v-col>
+
+                            </v-row>
+
+                            <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
+                        </template>
+                    </DefaultModalSection>
+
+                    <v-row>
+                        <v-col cols="2">
                             <DefaultInput
                                 dense
                                 show-required
@@ -98,105 +254,17 @@
                                 :rules="rules.position"
                             />
                         </v-col>
-                    </v-row>
-                    <br>
-                    <DefaultSectionLabel label="Multimedia"/>
-                    <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
-                    <br>
-                    <v-row justify="center">
-                        <v-col cols="12">
+                        <v-col cols="6">
+                            <div class="mt-2">
 
-                            <table class="table table-hover">
-                                <thead class="bg-default-primary">
-                                <tr>
-                                    <th class="text-left white--text" v-text="'Tipo'"/>
-                                    <th class="text-left white--text"
-                                        style="max-width: 25% !important;     justify-content: right !important;"
-                                        v-text="'Título'"/>
-                                    <th class="text-left white--text" v-text="'Archivo'"/>
-                                    <!--                                <th class="text-center white&#45;&#45;text" v-text="'Valor'"/>-->
-                                    <th class="text-left white--text" v-text="'¿Embebido?'"/>
-                                    <th class="text-left white--text" v-text="'¿Descargable?'"/>
-                                    <th class="text-center white--text" v-text="'Eliminar'"/>
-                                </tr>
-                                </thead>
-                                <draggable
-                                    v-model="resource.media"
-                                    group="multimedias"
-                                    @start="drag=true"
-                                    @end="drag=false"
-                                    ghost-class="ghost"
-                                    tag="tbody"
-                                >
-                                    <!--                                    <transition-group type="transition" name="flip-list">-->
-                                    <tr v-if="resource.media && resource.media.length === 0">
-                                        <td class="text-center" colspan="6"
-                                            v-text="'No hay multimedias seleccionados'"/>
-                                    </tr>
-                                    <tr
-                                        v-else
-                                        style="cursor: pointer"
-                                        v-for="(media, media_index) in resource.media" :key="media.media_index">
-                                        <td>
-                                            <div class="multimedia-box"
-                                                 style="height: 40px !important; width: 40px !important;">
-                                                <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
-                                                    <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <DefaultInput
-                                                v-model="media.title"
-                                                placeholder="Ingrese un título"
-                                                dense
-                                            />
-                                        </td>
-                                        <!-- <td>{{ media.value || media.file.name }}</td> -->
-                                        <td class="">
-                                            <div class="multimedia-table-icon mt-2 " style="align-items: start;">
-                                                <a class="media-link" href="javascript:;"  title="Copiar código"
-                                                    @click="copyToClipboard(media.value || media.file.name)">
-                                                    <i :class="'mdi mdi-content-copy'"  style="font-size: 1rem !important; margin-right: 5px;" />
-
-                                                    {{ media.value || media.file.name }}
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <DefaultToggle v-model="media.embed"
-                                                               no-label
-                                                               :disabled="media.disabled"
-                                                               @onChange="verifyDisabledMediaEmbed"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <DefaultToggle
-                                                    v-model="media.downloadable"
-                                                    no-label
-                                                    :disabled="['youtube', 'vimeo', 'scorm', 'link','genially'].includes(media.type_id)"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <DefaultDeleteBtnIcon
-                                                @click="deleteMedia(media_index)"/>
-                                        </td>
-                                    </tr>
-                                    <!--                                    </transition-group>-->
-                                </draggable>
-                            </table>
-                        </v-col>
-
-                    </v-row>
-                    <v-row>
-                        <v-col cols="5">
                             <!--                            <DefaultToggle v-model="resource.active"/>-->
-                            <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"/>
-                            <small v-if="resource.disabled_estado_toggle"
-                                   v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+                                <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"
+                                    active-label="Tema activo"
+                                    inactive-label="Tema inactivo"
+                                />
+                                <small v-if="resource.disabled_estado_toggle"
+                                       v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
+                            </div>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -241,7 +309,7 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'course_id'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
 
 const file_fields = ['imagen'];
 
@@ -251,8 +319,8 @@ export default {
     data() {
         return {
             drag: false,
-            media_url: null,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
+            media_url: null,
             resourceDefault: {
                 name: null,
                 course_id: this.course_id,
@@ -265,20 +333,23 @@ export default {
                 position: null,
                 media: [],
                 active: false,
+                active_results: false,
                 hide_evaluable: null,
                 hide_tipo_ev: null,
                 disabled_estado_toggle: false,
                 has_qualified_questions: 0,
                 has_open_questions: 0,
                 'update-validations': [],
+                qualification_type: {position: 0},
             },
             selects: {
                 assessable: [
-                    {id: 1, nombre: 'Si'},
-                    {id: 0, nombre: 'No'},
+                    {id: 1, nombre: 'Sí, el tema es evaluable'},
+                    {id: 0, nombre: 'No, el tema no es evaluable'},
                 ],
                 evaluation_types: [],
-                requisitos: []
+                requisitos: [],
+                qualification_types: [],
             },
             resource: {},
             rules: {
@@ -327,6 +398,17 @@ export default {
         vue.showLoader()
         await this.loadData()
         vue.hideLoader()
+    },
+    computed: {
+        showActiveResults() {
+            let vue = this;
+
+            if((vue.selects.evaluation_types).length && vue.resource.type_evaluation_id) {
+                const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
+                return (evaluation_type.name === "Calificada")
+            }
+            return false;
+        }
     },
     methods: {
         leavePage() {
@@ -501,9 +583,13 @@ export default {
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
+                    vue.selects.qualification_types = data.data.qualification_types
+
                     if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
+                    } else {
+                        vue.resource.qualification_type = data.data.qualification_type
                     }
                 })
             return 0;
@@ -515,8 +601,8 @@ export default {
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
-                embed: true,
-                downloadable: false,
+                embed: ['office'].includes(multimedia.type) ? false : true,
+                downloadable: ['youtube', 'vimeo', 'scorm', 'link','genially'].includes(multimedia.type) ? false : true,
                 disabled: false,
             })
             vue.verifyDisabledMediaEmbed();
@@ -568,6 +654,8 @@ export default {
             const title = `Debe tener una evaluación ${tipo_ev}`;
             const data = {data: [title]}
 
+            vue.resource.active_results = 0;
+
             // await vue.cleanValidationsModal(vue.topicsValidationModal, vue.topicsValidationModalDefault);
             vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
 
@@ -603,7 +691,7 @@ export default {
 
             if (media.type_id == 'vimeo')
                 return 'https://player.vimeo.com/video/' + media.value;
-            
+
             if (media.type_id == 'video' || media.type_id == 'pdf' || media.type_id == 'audio')
                 return vue.media_url + media.value;
 

@@ -1,6 +1,9 @@
 <template>
     <v-row justify="center" align="center">
-        <v-col cols="12" class="d-flex flex-row" style="justify-content: space-evenly">
+        <v-col cols="9" class="d-flex flex-row" style="justify-content: space-evenly">
+            <strong>+ Agregar nuevo multimedia</strong>
+        </v-col>
+        <v-col cols="9" class="d-flex flex-row" style="justify-content: space-evenly">
             <MultimediaBox
                 v-for="box in mixin_multimedias"
                 :key="box.label"

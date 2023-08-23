@@ -85,7 +85,8 @@
                                     <td>
                                         <strong>{{ property.label }}</strong>
                                     </td>
-                                    <td>{{ property.value }}</td>
+                                    <td v-html="property.value"></td>
+                                    <!-- <td>{{ property.value }}</td> -->
                                 </tr>
                             </tbody>
                         </template>
@@ -99,7 +100,8 @@
                                     <td>
                                         <strong>{{ property.label }}</strong>
                                     </td>
-                                    <td>{{ property.value }}</td>
+                                    <td v-html="property.value"></td>
+                                    <!-- <td>{{ property.value }}</td> -->
                                 </tr>
                             </tbody>
                         </template>

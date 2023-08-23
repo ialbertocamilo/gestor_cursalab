@@ -3,7 +3,7 @@
 		<!-- Resumen del reporte -->
 		<ResumenExpand titulo="Resumen del reporte">
 			<template v-slot:resumen>
-				Descarga el registro de visitas a los documentos Vademecum.
+				Descarga el registro de visitas a los documentos.
 			</template>
 			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
 			<list-item
@@ -14,21 +14,21 @@
 			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
 			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
-			<list-item titulo="Vademecum" subtitulo="Nombre del documento Vademecum (SCORM)" />
+			<list-item titulo="Documento" subtitulo="Nombre del documento (SCORM)" />
 			<list-item
 				titulo="Visitas"
-				subtitulo="Cantidad de veces que el usuario visualiza un documento Vademecum"
+				subtitulo="Cantidad de veces que el usuario visualiza un documento"
 			/>
 			<list-item
 				titulo="Última visita"
-				subtitulo="Fecha de la última visita realizada al Vademecum"
+				subtitulo="Fecha de la última visita realizada al documento"
 			/>
 		</ResumenExpand>
 		<!-- Formulario del reporte -->
 		<form class="row col-md-8 col-xl-5" @submit.prevent="ExportarVademecum">
 			<!-- Grupos -->
 			<div class="col-12">
-				<b-form-text text-variant="muted">Vademecum</b-form-text>
+				<b-form-text text-variant="muted">Documento</b-form-text>
 				<v-select
 					attach
 					solo

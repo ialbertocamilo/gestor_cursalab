@@ -8,13 +8,24 @@
                 <div v-if="showDetail">
                     <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span>
                     <span class="fas fa-chevron-right mx-2"></span>
-                    <span class="text-body">Gestor de almacenamiento y usuarios.</span>
+                    <span class="text-body">Gestor de almacenamiento y usuarios</span>
                 </div>
                 <div v-else>
                     Dashboard
                 </div>
 
                 <v-spacer/>
+
+               <!--  <DefaultSelect
+                    class="col-3"
+                    dense
+                    label="Módulo"
+                    :items="selects.modulo"
+                    v-model="filters.modulo"
+                    item-text="name"
+                    item-value="id"
+                    @onChange="getEstadisticas"
+                /> -->
             </v-card-title>
         </v-card>
 
@@ -23,7 +34,7 @@
 
                 <!-- === MODULO Y DETALLES === -->
                 <v-row  :class="`${ !showDetail ? 'd-flex' : 'd-none' }`">
-                    <v-col cols="5" class="align-self-center">
+                    <v-col cols="3" class="align-self-center">
                         <DefaultSelect
                             dense
                             label="Módulo"
@@ -34,14 +45,14 @@
                             @onChange="getEstadisticas"
                         />
                     </v-col>
-                    <v-col  v-if="true" cols="6" offset="1"
+                    <v-col  v-if="true" cols="7" offset="2"
                             class="d-flex justify-space-between align-items-center">
                         <div class="d-flex align-items-center w-75">
                             <div class="d-flex flex-column w-90">
                                 <p class="font-weight-bold mb-0">Almacenamiento general</p>
                                 <div class="my-2">
-                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage+' utilizados'"></span>
-                                    de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage"></span>
+                                   utilizados de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
                                 </div>
 
                                 <v-progress-linear
@@ -50,9 +61,9 @@
                                         height="20"
                                         rounded
                                     >
-                                     <div class="d-flex justify-content-end" 
+                                     <div class="d-flex justify-content-end"
                                           :style="{ width: (workspace_status.size_medias_porcent.porcent < 10) ? '12%' :workspace_status.  size_medias_porcent.porcent +'%'}">
-                                        <strong 
+                                        <strong
                                             class="text-white text-right"
                                             v-text="workspace_status.size_medias_porcent.porcent + '%'">
                                         </strong>
@@ -67,7 +78,7 @@
                                 <p class="font-weight-bold mb-0">Total usuarios activos</p>
                                 <div class="my-2">
                                     <span class="fa-1_4x" v-text="workspace_status.users_count_actives"></span>
-                                    de <span v-text="workspace_status.users_count_limit"></span> disponibles.
+                                    de <span v-text="workspace_status.users_count_limit"></span> disponibles
                                 </div>
 
                                 <v-progress-linear
@@ -76,9 +87,9 @@
                                         height="20"
                                         rounded
                                     >
-                                    <div class="d-flex justify-content-end" 
+                                    <div class="d-flex justify-content-end"
                                         :style="{ width: (workspace_status.users_count_porcent.porcent < 10) ? '12%' :workspace_status.users_count_porcent.porcent +'%'}">
-                                        <strong 
+                                        <strong
                                             class="text-white text-right"
                                             v-text="workspace_status.users_count_porcent.porcent + '%'">
                                         </strong>
@@ -99,15 +110,15 @@
 
                 <!-- === ALMACENAMIENTO === -->
                 <v-row :class="`${ showDetail ? 'd-flex' : 'd-none' }`">
-                    <v-col 
-                        cols="5" 
+                    <v-col
+                        cols="5"
                         class="d-flex justify-content-start align-self-center">
                         <span class="fa-lg text-body">Visión del espacio y usuarios del workspace</span>
                     </v-col>
                     <v-col cols="7"
                         class="d-flex justify-content-end align-self-center">
-                        <v-btn 
-                            color="primary" 
+                        <v-btn
+                            color="primary"
                             @click="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan')">
                             <span class="mdi mdi-cloud-outline fa-lg mr-2"></span>
                             Aumentar mi plan
@@ -127,6 +138,7 @@
                             :icon="value.icon || 'mdi-book-open'"
                             :icon-color="value.color || 'primary'"
                             :amount="value.value || 0"
+                            :path="value.path"
                             :label="value.title || 'Cargando...'"
                         />
                     </v-col>
@@ -167,9 +179,9 @@
                                 <v-card-title class="p-0 font-weight-bold">Almacenamiento general</v-card-title>
                                 <v-card-text class="p-0">
                                     <div class="my-3 d-flex flex-column">
-                                        <span 
+                                        <span
                                             class="fa-2x mb-3"
-                                            :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
+                                            :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
                                             v-text="workspace_status.size_medias_porcent.porcent+'% '+'utilizado'">
                                         </span>
 
@@ -178,7 +190,7 @@
                                                 Total utilizado:
                                                 <span v-text="workspace_status.size_medias_storage"></span>
                                             </span>
-                                            / 
+                                            /
                                             <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
                                         </span>
                                     </div>
@@ -197,9 +209,9 @@
                                 <v-card-title class="p-0 font-weight-bold">Usuarios Activos</v-card-title>
                                 <v-card-text class="p-0">
                                     <div class="my-3 d-flex flex-column">
-                                        <span 
+                                        <span
                                             class="fa-2x mb-3"
-                                            :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'" 
+                                            :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
                                             v-text="workspace_status.users_count_porcent.porcent+'% '+'utilizado'">
                                         </span>
 
@@ -208,7 +220,7 @@
                                                 Total utilizado:
                                                 <span v-text="workspace_status.users_count_actives"></span>
                                             </span>
-                                            / 
+                                            /
                                             <span v-text="workspace_status.users_count_limit"></span>
                                         </span>
                                     </div>
@@ -226,10 +238,10 @@
                                             <span>Usuarios Activos</span>
                                             <div>
                                                 <span v-text="workspace_status.users_count_actives"></span>
-                                                <v-btn 
-                                                    text 
+                                                <v-btn
+                                                    text
                                                     color="primary"
-                                                    @click="setStorageUrl(workspace_status.route_user_actives.url, 
+                                                    @click="setStorageUrl(workspace_status.route_user_actives.url,
                                                                           workspace_status.route_user_actives.filters)">
                                                     <v-icon>mdi-open-in-new</v-icon>
                                                 </v-btn>
@@ -240,10 +252,10 @@
                                             <span>Usuarios Inactivos</span>
                                             <div>
                                                 <span v-text="workspace_status.users_count_inactives"></span>
-                                                <v-btn 
-                                                    text 
+                                                <v-btn
+                                                    text
                                                     color="primary"
-                                                    @click="setStorageUrl(workspace_status.route_user_inactives.url, 
+                                                    @click="setStorageUrl(workspace_status.route_user_inactives.url,
                                                                           workspace_status.route_user_inactives.filters)">
                                                     <v-icon>mdi-open-in-new</v-icon>
                                                 </v-btn>
@@ -271,7 +283,7 @@
             :options="modalGeneralStorageOptions"
             width="45vw"
             @onCancel="closeFormModal(modalGeneralStorageOptions)"
-            @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+            @onConfirm="closeFormModal(modalGeneralStorageOptions),
                         openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
         />
         <!-- MODAL ALMACENAMIENTO -->
@@ -519,7 +531,7 @@ export default {
             vue.getCardsInfo()
             vue.getEvaluacionesPorFecha()
             vue.getVisitas()
-            vue.getTopBoticas()
+            // vue.getTopBoticas()
             if (change) vue.queryStatus("dashboard", "uso_filtro");
         },
         getCardsInfo(refresh = false) {

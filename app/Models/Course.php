@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 class Course extends BaseModel
 {
     protected $fillable = [
-        'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug',
-        'assessable', 'freely_eligible', 'type_id',
+        'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug', 'external_id',
+        'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date'
@@ -101,6 +101,11 @@ class Course extends BaseModel
         // info($this->compatibilities_b);
 
         return $this->compatibilities_a->merge($this->compatibilities_b);
+    }
+
+    public function qualification_type()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
     public function setActiveAttribute($value)
@@ -1118,6 +1123,8 @@ class Course extends BaseModel
             ($summary_course->passed > 0 || $grade_average > 0) ? $grade_average : null
             : null;
 
+        $grade_average = calculateValueForQualification($grade_average, $course->qualification_type?->position);
+
         return ['average_grade' => $grade_average, 'status' => $summary_course->status->code ?? 'por-iniciar'];
     }
 
@@ -1260,13 +1267,13 @@ class Course extends BaseModel
                 foreach ($grouped as $i => $values) {
 
 
-                    info($idx);
+                    // info($idx);
 
                     $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
 
                         $ids = $values->pluck('criterion_value_id');
 
-                        info($ids);
+                        // info($ids);
 
                         $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                             ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
@@ -1599,4 +1606,33 @@ class Course extends BaseModel
 
         return isset($this->mod_evaluaciones['nro_intentos']) ? $this->mod_evaluaciones['nro_intentos'] : null;
     }
+
+    public function getModEvaluacionesConverted($topic = null)
+    {
+        $course = $this;
+        $main = $topic ?? $course;
+        $mod_evaluaciones = $course->mod_evaluaciones;
+
+        if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
+            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
+
+            $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            // $course->mod_evaluaciones = $mod_evaluaciones;
+        }
+
+        return $mod_evaluaciones;
+    }
+
+    // public function getModEvaluacionesConvertedForTopic($course)
+    // {
+    //     $mod_evaluaciones = $course->mod_evaluaciones;
+
+    //     if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
+    //         $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $this->qualification_type->position);
+
+    //         $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+    //     }
+
+    //     return $mod_evaluaciones;
+    // }
 }

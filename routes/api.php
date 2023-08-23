@@ -53,6 +53,9 @@ Route::post('/reset', [AuthController::class, 'reset_password']);
 // Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
 // Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
+// === endpoint para configuracion de ambiente ===
+Route::get('/config_ambiente', [AuthController::class, 'configuracion_ambiente']);
+
 Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/login/external/{token}', [AuthImpersonationController::class, 'external'])
@@ -61,6 +64,10 @@ Route::group(['prefix' => 'auth', 'middleware' => 'throttle:800'], function () {
 
 Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
+});
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::prefix('users')->group(base_path('routes/app/users.php'));
 });
 
 Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 'rest'], function () {
@@ -84,6 +91,7 @@ Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 're
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
     Route::prefix('/ranking')->group(base_path('routes/app/ranking.php'));
     Route::prefix('videoteca')->group(base_path('routes/app/videoteca.php'));
+    Route::prefix('votaciones')->group(base_path('routes/app/votaciones.php'));
 
     Route::get('preguntas_seccion_ayuda', [RestAyudaController::class, 'preguntas_seccion_ayuda']);
     Route::get('preguntas_frecuentes', [RestAyudaController::class, 'preguntas_frecuentes']);

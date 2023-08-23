@@ -28,6 +28,7 @@ class TemaStoreUpdateRequest extends FormRequest
             'description' => 'nullable',
             'content' => 'nullable',
             'active' => 'required',
+            'active_results' => 'required',
             'position' => 'required',
             'categoria_id' => 'nullable',
             'course_id' => 'required',
@@ -42,7 +43,9 @@ class TemaStoreUpdateRequest extends FormRequest
 
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
-            'validate' => 'required'
+            'validate' => 'required',
+
+            'qualification_type_id' => 'required',
         ];
     }
 
@@ -55,9 +58,14 @@ class TemaStoreUpdateRequest extends FormRequest
 
         $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
         $data['active'] = $active;
+
+        $active_results = ($this->active_results === 'true' or $this->active_results === true or $this->active_results === 1 or $this->active_results === '1');
+        $data['active_results'] = $active_results;
 //
        if ( ! $this->has('assessable') )
             $data['assessable'] = 0;
+
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }

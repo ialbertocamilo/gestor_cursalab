@@ -16,7 +16,7 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-start">
-                    <v-col cols="3">
+                    <v-col cols="3" v-if="!param_module_id">
                         <!-- <DefaultSelect
                             clearable dense
                             :items="selects.modules"
@@ -74,6 +74,7 @@
             <!--        Contenido-->
             <!-- <v-card flat class="elevation-0 mb-4"> -->
             <DefaultTable
+                :avoid_first_data_load="getUrlParamsTotal() > 0"
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
@@ -93,6 +94,15 @@
                         'Actualizar estado'
                     )
                 "
+                @duplicate="
+                    openFormModal(
+                        duplicateFormModalOptions,
+                        $event,
+                        'duplicate',
+                        `Copiar cursos de escuela - ${$event.name}`
+                    )
+                "
+
                 @delete="
                     openFormModal(
                         modalDeleteOptions,
@@ -101,18 +111,8 @@
                         'Eliminar escuela'
                     )
                 "
-                @duplicate="openDuplicarModal($event)"
             />
-                <!-- @delete="deleteEscuela($event)" -->
-
-           <!--  <DialogConfirm
-                v-model="modalDeleteOptions.open"
-                width="450px"
-                title="Eliminar Escuela"
-                subtitle="¿Está seguro de eliminar la escuela?"
-                @onConfirm="confirmDelete"
-                @onCancel="modalDeleteOptions.open = false"
-            /> -->
+                
 
             <EscuelaValidacionesModal
                 width="50vw"
@@ -122,17 +122,13 @@
                 :resource="delete_model"
             />
 
-         <!--    <DefaultStatusModal
-                :options="modalStatusOptions"
-                :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
-                @onCancel="closeFormModal(modalStatusOptions, dataTable, filters)"
-            /> -->
-          <!--   <DuplicarCursos
-                :ref="modalCursosDuplicar.ref"
-                :modalCursosDuplicar="modalCursosDuplicar"
-                @onCancel='closeFormModalDuplicarCursos'
-            /> -->
+            <DuplicateForm
+                :options="duplicateFormModalOptions"
+                width="50vw"
+                :ref="duplicateFormModalOptions.ref"
+                @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(duplicateFormModalOptions)"
+            />
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
@@ -157,9 +153,10 @@ import EscuelaFormModal from "./EscuelaFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
-import DuplicarCursos from './DuplicarCursos';
+// import DuplicarCursos from './DuplicarCursos';
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
+import DuplicateForm from "./DuplicateForm";
 
 export default {
     props: ["workspace_id", "workspace_name"],
@@ -168,7 +165,7 @@ export default {
         EscuelaValidacionesModal,
         DialogConfirm,
         DefaultStatusModal,
-        DuplicarCursos,
+        DuplicateForm,
         DefaultDeleteModal,
         LogsModal
     },
@@ -176,6 +173,7 @@ export default {
         let vue = this
 
         return {
+            param_module_id: null,
             breadcrumbs: [
                 {title: 'Escuelas', text: null, disabled: true, href: ''},
             ],
@@ -205,12 +203,15 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
-                    // {
-                    //     text: "Duplicar",
-                    //     icon: 'fa fa-circle',
-                    //     type: 'action',
-                    //     method_name: 'duplicate'
-                    // },
+                ],
+                more_actions: [
+                    {
+                        text: "Copiar cursos",
+                        icon: 'mdi mdi-content-copy',
+                        type: 'action',
+                        show_condition: "is_cursalab_super_user",
+                        method_name: 'duplicate'
+                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -223,17 +224,17 @@ export default {
                         icon: "mdi mdi-database",
                         type: "action",
                         show_condition: "is_super_user",
-
                         method_name: "logs"
                     }
-
-                    // {
-                    //     text: "Actualizar Estado",
-                    //     icon: 'fa fa-circle',
-                    //     type: 'action',
-                    //     method_name: 'status'
-                    // },
                 ],
+            },
+            duplicateFormModalOptions: {
+                ref: 'DuplicateForm',
+                open: false,
+                action: 'duplicate',
+                base_endpoint: 'escuelas',
+                showCloseIcon: true,
+                confirmLabel: 'Copiar contenidos'
             },
             modalLogsOptions: {
                 ref: "LogsModal",
@@ -318,21 +319,21 @@ export default {
         changeHeaders(){
             let vue = this;
             const indexOrden = vue.dataTable.headers.findIndex(h => h.text == 'Orden');
-            console.log('indexOrden',indexOrden);
+            // console.log('indexOrden',indexOrden);
             if(vue.filters.modules.length ==1 && !vue.filters.q && !vue.filters.active &&  !vue.filters.dates){
-                console.log('entra if');
+                // console.log('entra if');
                 vue.$nextTick(() => {
                     if(indexOrden == -1){
                         vue.dataTable.headers.unshift({text: "Orden", value: "position", align: 'center', model: 'SchoolSubworkspace', sortable: false}, 1);
-                        console.log('entra set');
+                        // console.log('entra set');
                     }
                 });
             }else{
-                console.log('entra else');
+                // console.log('entra else');
                 if(indexOrden != -1){
                     vue.$nextTick(() => {
                         vue.dataTable.headers.splice(indexOrden, 1);
-                        console.log('entra delete');
+                        // console.log('entra delete');
                     })
                 }
             }
@@ -342,16 +343,21 @@ export default {
 
             let uri = window.location.search.substring(1); 
             let params = new URLSearchParams(uri);
-            let param_module_id = params.get("module_id");
+            vue.param_module_id = params.get("module_id");
 
             // await vue.$nextTick(() => {
-                if (param_module_id) {
+                if (vue.param_module_id) {
 
                     let module_idx = null
 
                     modules.forEach(row => {
 
-                        if ( row.id == param_module_id ) {
+                        if ( row.id == vue.param_module_id ) {
+
+                            vue.breadcrumbs = [
+                                {title: 'Módulos', text: row.name, disabled: false, href: '/modulos'},
+                                {title: 'Escuelas', text: null, disabled: true, href: ''},
+                            ];
 
                             vue.filters.modules.push(row)
 

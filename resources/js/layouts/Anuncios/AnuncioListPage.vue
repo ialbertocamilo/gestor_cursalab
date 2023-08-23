@@ -6,7 +6,7 @@
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Actividad'" @click="activity"/> -->
                 <DefaultModalButton
-                    :label="'Anuncio'"
+                    :label="'Crear anuncio'"
                     @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
@@ -50,8 +50,17 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
+                :avoid_first_data_load="dataTable.avoid_first_data_load"
                 @edit="openFormModal(modalOptions, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>anuncio</b>')"
+                @segmentation="
+                    openFormModal(
+                        modalFormSegmentationOptions,
+                        $event,
+                        'segmentation',
+                        `Segmentación del anuncio - ${$event.nombre}`
+                    )
+                "
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminación de un <b>anuncio</b>')"
                 @logs="
                     openFormModal(
@@ -78,6 +87,16 @@
                 @onCancel="closeFormModal(modalStatusOptions)"
             />
 
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                model_type="App\Models\Announcement"
+                :model_id="null"
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            />
+
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
@@ -101,24 +120,27 @@ import AnuncioFormModal from "./AnuncioFormModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
     components: {
         AnuncioFormModal,
         DefaultStatusModal,
         DefaultDeleteModal,
+        SegmentFormModal,
         LogsModal
     },
     data() {
         return {
             dataTable: {
+                avoid_first_data_load: false,
                 endpoint: '/anuncios/search',
                 ref: 'AnuncioTable',
                 headers: [
                     {text: "Banner", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre"},
                     {text: "Fecha de publicación", value: "publish_date", align: 'center', sortable: false},
-                    {text: "Venció", value: "expired", align: 'center', sortable: false},
+                    {text: "Estado de publicación", value: "expired", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -134,6 +156,15 @@ export default {
                         type: 'action',
                         method_name: 'status'
                     },
+                    // {
+                    //     text: "Segmentación",
+                    //     icon: 'fa fa-square',
+                    //     type: 'action',
+                    //     count: 'segments_count',
+                    //     method_name: 'segmentation'
+                    // },
+                ],
+                more_actions: [
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -147,8 +178,6 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     }
-                ],
-                more_actions: [
                     // {
                     //     text: "Actividad",
                     //     icon: 'fas fa-file',
@@ -224,11 +253,40 @@ export default {
                 },
                 width: '408px'
             },
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
+            },
         }
     },
     mounted() {
         let vue = this
         vue.getSelects();
+        // === check localstorage anuncio ===
+        if(vue.dataTable.avoid_first_data_load) {
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+            const { storage: vademecumStorage } = vue.getStorageUrl('anuncio');
+            vue.openFormModal(vue.modalOptions, { id: vademecumStorage.id });
+        }
+        // === check localstorage anuncio ===
+    },
+    created() {
+        let vue = this;
+
+        // === check localstorage anuncio ===
+        const { status, storage: anuncioStorage } = vue.getStorageUrl('anuncio');
+        if(status) {
+            vue.filters.q = anuncioStorage.q;
+            vue.filters.module = anuncioStorage.module[0]; // considerar que puede ser multimple
+            vue.filters.active = anuncioStorage.active;
+
+            vue.dataTable.avoid_first_data_load = true;
+        }
+        // === check localstorage anuncio ===
     },
     methods: {
         getSelects() {

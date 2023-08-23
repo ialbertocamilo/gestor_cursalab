@@ -142,7 +142,7 @@
                 <v-tab class="justify-content-start py-7" key='vademecum'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
-                        Vademecum
+                        Protocolos y documentos
                     </span>
                 </v-tab>
 
@@ -195,6 +195,15 @@
                         Criterios vacíos
                     </span>
                 </v-tab>
+
+                <v-tab class="justify-content-start py-7"
+                       v-if="isSuperUser"
+                       key='historial-multiples-usuarios'>
+                    <v-icon left>mdi-account-multiple</v-icon>
+                    <span class="pt-2">
+                        Historial de múltiples usuarios
+                    </span>
+                </v-tab>
                 <v-tab class="justify-content-start py-7" key='benefit-report'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
@@ -207,12 +216,10 @@
                         Usuarios segmentados al Beneficio
                     </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7"
-                       v-if="isSuperUser"
-                       key='historial-multiples-usuarios'>
-                    <v-icon left>mdi-account-multiple</v-icon>
+                <v-tab class="justify-content-start py-7" key='votaciones' v-if="isSuperUser">
+                    <v-icon left>fa fa-paper-plane</v-icon>
                     <span class="pt-2">
-                        Historial de múltiples usuarios
+                        Votaciones
                     </span>
                 </v-tab>
 
@@ -490,6 +497,20 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
+                <v-tab-item v-if="isSuperUser">
+                    <v-card flat>
+                        <v-card-text>
+                            <UsersHistory
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
@@ -518,16 +539,14 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item v-if="isSuperUser">
+                 <v-tab-item v-if="isSuperUser">
                     <v-card flat>
                         <v-card-text>
-                            <UsersHistory
+                            <Votaciones
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
-
                                 :modules="modules"
                                 :reportsBaseUrl="reportsBaseUrl"
-
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
@@ -607,12 +626,15 @@ import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
 import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
 import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
+import UsersHistory from "../components/Reportes/UsersHistory.vue";
 import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
-import UsersHistory from "../components/Reportes/UsersHistory.vue";
+import Votaciones from "../components/Reportes/Votaciones.vue";
+
 
 export default {
     components: {
+        Votaciones,
         UsersHistory,
         EmptyCriteria,
         ReportPromptModal,

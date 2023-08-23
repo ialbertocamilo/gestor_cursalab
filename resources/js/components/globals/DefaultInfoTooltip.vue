@@ -15,7 +15,11 @@
                 v-text="icon"
             />
         </template>
-        <span v-html="text"/>
+
+        <span v-if="text" v-html="text" />
+
+        <slot name="content"/>
+
     </v-tooltip>
 </template>
 <script>
@@ -27,7 +31,7 @@ export default {
         },
         text: {
             type: String,
-            required: true
+            required: false
         },
         color: {
             default: 'primary'
@@ -35,7 +39,8 @@ export default {
         small: {
             type: Boolean,
             default: false
-        },top: {
+        },
+        top: {
             type: Boolean,
             default: false
         },
@@ -50,6 +55,10 @@ export default {
         right: {
             type: Boolean,
             default: false
+        },
+        size: {
+            type: String,
+            default: ''
         },
     }
 }

@@ -8,6 +8,7 @@ return [
         'gestor'=> env('GTAG_GESTOR',NULL)
     ],
 
+    'test_environment' => env('TEST_ENVIRONMENT', false),
     /*
     |--------------------------------------------------------------------------
     | Application Name

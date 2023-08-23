@@ -4,7 +4,7 @@
         :class="{'font-weight-bold': textBold}"
         elevation="0"
         :ripple="false"
-        color="primary"
+        :color="color"
         @click="click"
         :block="block"
         :disabled="disabled"
@@ -22,6 +22,10 @@
 <script>
 export default {
     props: {
+        color: {
+            type:String,
+            default:'primary'
+        },
         label: {
             type: String,
             default: 'Botón Modal'

@@ -19,7 +19,8 @@ class Videoteca extends BaseModel
         'media_id',
         'preview_id',
         'category_id',
-        'active'
+        'active',
+        'external_id',
     ];
 
     protected $casts = [
@@ -29,6 +30,18 @@ class Videoteca extends BaseModel
     protected $hidden = [
         'created_at', 'updated_at', 'deleted_at'
     ];
+
+    public $defaultRelationships = [
+        'category_id' => 'categoria',
+        'workspace_id' => 'workspace',
+        'media_id' => 'media',
+        'preview_id' => 'preview'
+    ];
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class);
+    }
 
     /*
 

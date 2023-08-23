@@ -356,6 +356,10 @@ class Benefit extends BaseModel
 
             $benefit['segments'] = $segments;
 
+            if (is_array($segments)) {
+                $segments = collect($segments);
+            }
+
             $segmentation_by_document_list = [];
             $segmentation_by_document = $segments->map(function ($item) {
                 return ['segmentation_by_document'=> $item->segmentation_by_document];
@@ -607,7 +611,10 @@ class Benefit extends BaseModel
                             {
                                 if(!is_null($sel['id']))
                                 {
-                                    $created_user = UserBenefit::create([
+                                    $created_user = UserBenefit::updateOrCreate([
+                                            'user_id' => $sel['id'],
+                                            'benefit_id' => $benefit_id
+                                        ],[
                                         'user_id' => $sel['id'],
                                         'benefit_id' => $benefit_id,
                                         'status_id' => $user_status_subscribed?->id,
@@ -815,7 +822,10 @@ class Benefit extends BaseModel
                     $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
                     $type_register_regular = Taxonomy::getFirstData('benefit', 'type_register', 'regular');
 
-                    $is_created = UserBenefit::create([
+                    $is_created =  UserBenefit::updateOrCreate([
+                            'user_id' => $user_id,
+                            'benefit_id' => $benefit_id
+                        ],[
                         'user_id' => $user_id,
                         'benefit_id' => $benefit_id,
                         'status_id' => $user_status_subscribed?->id,
@@ -912,7 +922,11 @@ class Benefit extends BaseModel
                 $benefit->save();
             }
             else {
-                $benefit = UserBenefit::create([
+                $benefit = UserBenefit::updateOrCreate([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id
+                ]
+                    ,[
                     'user_id' => $user_id,
                     'benefit_id' => $benefit_id,
                     'status_id' => $user_status_notify?->id,

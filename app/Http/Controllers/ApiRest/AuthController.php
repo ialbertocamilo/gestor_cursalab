@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality};
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -37,11 +37,15 @@ class AuthController extends Controller
             $data = $request->validated();
 
             // === validacion de recaptcha ===
-            $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
-            if($availableRecaptcha) {
-                $responseRecaptcha = $this->checkRecaptchaData($data);
-                if($responseRecaptcha !== true) return $responseRecaptcha;
+             if(ENV('RECAPTCHA_ENABLED') == true){
+
+                $availableRecaptcha = $this->checkVersionMobileRecaptcha($data);
+                if($availableRecaptcha) {
+                    $responseRecaptcha = $this->checkRecaptchaData($data);
+                    if($responseRecaptcha !== true) return $responseRecaptcha;
+                }
             }
+
             // === validacion de recaptcha ===
 
             $userinput = strip_tags($data['user']);
@@ -49,7 +53,6 @@ class AuthController extends Controller
             $data['os'] = strip_tags($data['os'] ?? '');
             $data['version'] = strip_tags($data['version'] ?? '');
             $credentials1 = $credentials2 = $credentials3 = ['password' => $password];
-            // $key_search = str_contains($userinput, '@') ? 'email' : 'document';
             $credentials1['username'] = trim($userinput);
             $credentials2['document'] = trim($userinput);
             $credentials3['email'] = trim($userinput);
@@ -57,7 +60,7 @@ class AuthController extends Controller
             $userInstance = new User;
 
             // === validacion de intentos ===
-            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2 ,$credentials3], true); //permanent
+            $user_attempts = $userInstance->checkAttemptManualApp([$credentials1, $credentials2, $credentials3], true); //permanent
             if($user_attempts) {
                 $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
 
@@ -70,6 +73,9 @@ class AuthController extends Controller
             // === validacion de intentos ===
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+                // Valida si usuario está inactivo
+                if (!Auth::user()->active)
+                    return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
                 // === verificar el dni como password ===
                 if (trim($userinput) === $password) {
@@ -120,7 +126,6 @@ class AuthController extends Controller
                 // $responseUserData['recaptcha'] = $recaptcha_response; opcional
 
                 // Update flag to update courses
-
                 $user->required_update_at = now();
                 $user->save();
 
@@ -141,7 +146,7 @@ class AuthController extends Controller
                         return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
                     }
 
-                    return $this->error('Intento fallido.', 400, $responseAttempts);
+                    return $this->error('Intento fallido [L2].', 400, $responseAttempts);
                 }
                 // === validacion de intentos ===
 
@@ -157,14 +162,16 @@ class AuthController extends Controller
         catch (Exception $e) {
             info($e);
             Error::storeAndNotificateException($e, request());
-            return $this->error('Server error.', 500);
+            // return $this->error('Server error.', 500);
+            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, []);
+
         }
     }
 
     private function respondWithDataAndToken($data)
     {
         $user = Auth::user();
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
@@ -178,17 +185,19 @@ class AuthController extends Controller
         //     );
         // }
 
-        if (!$user->active)
-            return $this->error('Tu cuenta se encuentra inactiva.
-            Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
+        // if (!$user->active)
+        //     return $this->error('Tu cuenta se encuentra inactiva.
+        //     Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
-        $user->load('criterion_values:id,value_text');
+        $user->load('criterion_values.criterion');
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
         $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma', 'contact_support')
             ->where('id', $user->subworkspace_id)
             ->first();
+
+        info('here data');
 
         $workspace = Workspace::find($user->subworkspace_id);
         // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
@@ -202,17 +211,36 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+
         if ($workspace_data) {
-            $workspace_data->logo = get_media_url($workspace_data->logo);
+            $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;
+
+            if ($show_logo_in_app) {
+                $workspace_data->logo = get_media_url($workspace_data->logo);
+            } else {
+                $ambiente = Ambiente::first();
+                $workspace_data->logo = get_media_url($ambiente->logo);
+            }
         }
+
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
 
+
         $ciclo_actual = null;
         if ($user->subworkspace->parent_id == 25){
             $ciclo_actual = $user->getActiveCycle()?->value_text;
+        }
+
+        $criterios = [];
+
+        foreach ($user->criterion_values as $value) {
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
         }
 
         $user_data = [
@@ -221,7 +249,7 @@ class AuthController extends Controller
             "nombre" => $user->name ?? '',
             "apellido" => $user->lastname ?? '',
             "full_name" => $user->fullname,
-            'criteria' => $user->criterion_values,
+            // 'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
             'module' => $user->subworkspace,
@@ -250,7 +278,7 @@ class AuthController extends Controller
         return [
             'access_token' => $token,
             'bucket_base_url' => get_media_url(),
-            //            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            // 'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
@@ -346,7 +374,7 @@ class AuthController extends Controller
             // $responseAttempts = $this->sendAttempsAppResponse($user_attempts, false);
             $responseAttempts = $this->sendAttempsAppResponse($user_attempts);
             if($returned) return $responseAttempts;
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [IAO].', 400, $responseAttempts);
         }
     }
     // === ATTEMPTS ===
@@ -477,7 +505,7 @@ class AuthController extends Controller
         if($user->attempts == env('ATTEMPTS_LOGIN_MAX_APP')) {
             $user['fulled_attempts'] = true;
             $responseAttempts = $this->sendAttempsAppResponse($user);
-            return $this->error('Intento fallido.', 400, $responseAttempts);
+            return $this->error('Intento fallido [Q].', 400, $responseAttempts);
         }
         // === validacion de intentos ===
 
@@ -619,4 +647,41 @@ class AuthController extends Controller
     {
         return $this->respondWithDataAndToken( $data );
     }
+
+
+    // === AMBIENTE ===
+    public function getMediaUrl($media) {
+        if ($media) {
+           return get_media_url($media);
+        }
+        return $media;
+    }
+
+    public function configuracion_ambiente()
+    {
+        $ambiente = Ambiente::first();
+
+        if($ambiente) {
+            $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
+
+            // gestor
+            $ambiente->fondo = $this->getMediaUrl($ambiente->fondo);
+            $ambiente->logo  = $this->getMediaUrl($ambiente->logo);
+            $ambiente->icono = $this->getMediaUrl($ambiente->icono);
+            $ambiente->logo_empresa = $this->getMediaUrl($ambiente->logo_empresa);
+            // app
+            $ambiente->fondo_app = $this->getMediaUrl($ambiente->fondo_app);
+            $ambiente->logo_app  = $this->getMediaUrl($ambiente->logo_app);
+            $ambiente->logo_cursalab = $this->getMediaUrl($ambiente->logo_cursalab);
+            $ambiente->completed_courses_logo = $this->getMediaUrl($ambiente->completed_courses_logo);
+            $ambiente->enrolled_courses_logo  = $this->getMediaUrl($ambiente->enrolled_courses_logo);
+            $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
+            $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
+            $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
+
+            return response()->json($ambiente);
+        }
+        return response()->json([]);
+    }
+    // === AMBIENTE ===
 }

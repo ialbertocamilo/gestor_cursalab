@@ -1,5 +1,5 @@
 <template>
-    <section style="padding-top: 0 !important;">
+    <section class="py-0">
         <v-row v-show="loading" justify="center">
             <v-col cols="12" style="padding-right: 2.2rem; padding-left: 2.2rem">
                 <v-progress-linear
@@ -8,12 +8,12 @@
                 />
             </v-col>
         </v-row>
-        <v-row justify="space-around" class="mt-1">
+        <v-row justify="space-around" class="">
             <v-col cols="12" class="d-flex justify-content-end py-0 px-8">
-                <div class="lista_media" style="width: 100%">
+                <div class="lista_media py-0" style="width: 100%">
                     <div class="row">
                         <div class="col-12 d-flex justify-center" v-if="!loading && data.length === 0">
-                            <h4>No se encontraron resultados</h4>
+                            <h5>No se encontraron resultados</h5>
                         </div>
                         <div class="col-sm-6 col-md-3 col-lg-2 mt-2"
                              v-else
@@ -74,11 +74,21 @@ export default {
 @import "resources/sass/variables";
 
 .med-box-tag {
-    border-radius: 4px;
-    padding: .3rem 2rem !important;
-    background-color: $primary-default-color;
-    font-size: .9rem !important;
-    color: white;
+    // border-radius: 4px;
+    // padding: .3rem 2rem !important;
+    // background-color: $primary-default-color;
+    // font-size: .9rem !important;
+    // color: white;
+
+    // border-radius: 1em;
+    // padding: 0.3rem 1rem !important;
+    // background-color: #b0b1c7;
+    // color: white;
+
+    border-radius: 1em;
+    padding: 0.2rem 0.7rem!important;
+    background-color: #5458eab3;
+    color: #fff;
 }
 
 .med-box-title {

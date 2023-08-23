@@ -22,7 +22,7 @@
 
                 <ul class="mt-3">
                     <li><small>Se listan los usuarios luego de seleccionar el curso o tema evaluable.</small></li>
-                    <li><small>En el filtro "Tipo de reinicio", las opciones:</small>
+                    <li><small>En el filtro "Usuarios", las opciones:</small>
                         <ul>
                             <li><small>"Solo desaprobados" mostrará a los usuarios que desaprobaron el tema.</small></li>
                             <li><small>"Todos" mostrará a todos los usuarios que realizaron una evaluación del tema (aprobados y desaprobados).</small></li>
@@ -40,7 +40,7 @@
                         outlined
                         dense
                         attach=""
-                        label="Tipo de reinicio"
+                        label="Usuarios"
                         hide-details="auto"
                         :items="items.tipo_reinicio"
                         v-model="select.tipo_reinicio"
@@ -210,10 +210,11 @@
                                                                     :ripple="false"
                                                                 ></v-checkbox>
                                                             </v-col>
-                                                            <v-col cols="2" md="2" lg="2" class="text-center py-0"> ID </v-col>
+                                                            <v-col cols="2" md="2" lg="2" class="text-center py-0"> Documento </v-col>
                                                             <v-col cols="5" md="5" lg="5" class="text-left py-0">
                                                                 Usuario
                                                             </v-col>
+                                                            <!-- <v-col cols="2" md="2" lg="2" class="text-center py-0" v-if="!select.tema"> Tema </v-col> -->
                                                             <v-col cols="2" md="2" lg="2" class="text-center py-0"> Nota </v-col>
                                                             <v-col cols="2" md="2" lg="2" class="text-center py-0">
                                                                 # Intentos
@@ -269,12 +270,22 @@
                                                                         style="align-items: center"
                                                                     >
                                                                         {{ item.user.name }}
+                                                                        {{ item.user.lastname }}
+                                                                        {{ item.user.surname }}
                                                                         <!-- item.usuario.apellido_paterno -->
                                                                         <!-- item.usuario.apellido_materno -->
                                                                     </v-col>
+                                                                    <!-- <v-col cols="5" md="5" lg="5"
+                                                                        class="text-left d-flex"
+                                                                        style="align-items: center"
+                                                                        v-if="!select.tema"
+                                                                    >
+                                                                        {{ item.topic.name }}
+                                                                    </v-col> -->
                                                                     <v-col cols="2" md="2" lg="2"
                                                                         class="text-center d-flex justify-center"
                                                                         style="align-items: center"
+                                                                        :title="item.topic.qualification_type.name"
                                                                     >
                                                                         {{ item.grade }}
                                                                     </v-col>
@@ -295,8 +306,8 @@
                                                                             <strong>Usuarios encontrados:</strong>
                                                                             {{ data_validar.count_usuarios }}
                                                                         </v-col>
-                                                                        <v-col cols="12" md="4" lg="" class="text-center">
-                                                                            <strong>Nota mínima aprobatoria:</strong>
+                                                                        <v-col cols="12" md="4" lg="" class="text-center" :title="data_validar.mod_eval ? data_validar.mod_eval.system : '-'">
+                                                                            <strong>Nota mínima aprobatoria del curso:</strong>
                                                                             {{ data_validar.mod_eval ? data_validar.mod_eval.nota_aprobatoria : "-" }}
                                                                         </v-col>
                                                                         <v-col cols="12" md="4" lg="" class="text-center">
@@ -439,7 +450,7 @@
         getData() {
             let vue = this;
             axios
-                .get("/masivo/usuarios/reinicios_data")
+                .get("/intentos-masivos/reinicios_data")
                 .then((res) => {
                     vue.baseData.modulos = res.data.modules;
                     vue.baseData.escuelas = res.data.schools;
@@ -479,7 +490,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarCursosxEscuela/${vue.select.escuela}`;
+            let url = `/intentos-masivos/buscarCursosxEscuela/${vue.select.escuela}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -504,7 +515,7 @@
                 return;
             }
 
-            let url = `/masivo/usuarios/buscarTemasxCurso/${vue.select.curso}`;
+            let url = `/intentos-masivos/buscarTemasxCurso/${vue.select.curso}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -559,7 +570,7 @@
             };
 
             axios
-                .post("/masivo/usuarios/validarReinicio", data)
+                .post("/intentos-masivos/validarReinicio", data)
                 .then((res) => {
 
                     vue.data_validar.count_usuarios = res.data.data.count_usuarios;
@@ -599,7 +610,7 @@
                 usuarios: vue.data_validar.pruebas.filter((element) => element.selected == true),
             };
             axios
-                .post("/masivo/usuarios/reiniciarIntentosMasivos", data)
+                .post("/intentos-masivos/reiniciarIntentosMasivos", data)
                 .then((res) => {
                     setTimeout(() => {
 

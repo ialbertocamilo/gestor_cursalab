@@ -387,7 +387,7 @@ export default {
 
                         if(res_benefit.segments != null && res_benefit.segments.length > 0)
                         {
-                                benefit.segments = res_benefit.segments;
+                            benefit.segments = res_benefit.segments;
 
                             // if no direct segmentation exists, adds one
 
@@ -399,8 +399,8 @@ export default {
                                     direct_segmentation: [null]
                                 })
                             }
-                        }
-                        else {
+
+                        } else {
                             benefit.segments = [{
                                 id: `new-segment-${Date.now()}`,
                                 type_code: 'direct-segmentation',

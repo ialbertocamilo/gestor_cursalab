@@ -62,6 +62,13 @@ class Criterion extends BaseModel
             ->get();
     }
 
+    protected function getListForSelectWorskpace($workspace_id) {
+        $query = self::whereRelation('workspaces', 'id', $workspace_id)
+                     ->select('id', 'name', 'code', 'description');
+
+        return $query->orderBy('created_at', 'desc')->get();
+    }
+    
     protected function search($request)
     {
         // $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();

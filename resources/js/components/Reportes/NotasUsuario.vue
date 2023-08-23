@@ -8,6 +8,7 @@
 
             <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
+            <list-item titulo="Sistema de calificación" subtitulo="El sistema de calificación asignado al curso" />
             <list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
             <list-item titulo="Nota" subtitulo="Nota correspondiente a un tema evaluable y calificado" />
             <list-item
@@ -24,7 +25,6 @@
             <b-form-input
                 class="col-7"
                 v-model="search"
-                type="number"
                 placeholder="Documento"
                 oninput="javascript: if (this.value.length > 15) this.value = this.value.slice(0, 15);"
                 @keyup.enter="buscarNotasUsuario"
@@ -35,7 +35,7 @@
                         variant="primary"
                         class="text-light"
                         @click="buscarNotasUsuario"
-                        v-bind:disabled="this.search.length >= 8 ? false : true"
+                        v-bind:disabled="this.search.length >= 6 ? false : true"
                     >
                         <b-icon icon="search" class="mr-2"></b-icon>
                         Consultar
@@ -74,6 +74,7 @@
                 <v-subheader class="border text-body-2 align-center">
                     <v-row class="text-grey font-weight-bold" no-gutters>
                         <v-col class="col-curso px-4">Curso</v-col>
+                        <v-col class="col-tipo_calificacion px-4">Sistema de calificación</v-col>
                         <v-col class="col-nota_prom px-4">Nota</v-col>
                         <v-col class="col-visitas px-4">Visitas</v-col>
                         <v-col class="col-reinicios px-4">Reinicios</v-col>
@@ -119,6 +120,7 @@
                         <v-subheader class="pl-0 pr-14">
                             <v-row class="text-center text-weight-bold text-body-2 align-center" no-gutters>
                                 <v-col class="tema-col-tema">Tema</v-col>
+                                <v-col class="tema-col-tipo_calificacion">Sistema de calificación</v-col>
                                 <v-col class="tema-col-nota">Nota</v-col>
                                 <v-col class="tema-col-score">Score</v-col>
                                 <v-col class="tema-col-correctas">Correctas</v-col>
@@ -237,7 +239,7 @@ export default {
     },
     methods: {
         async buscarNotasUsuario() {
-            if (this.search.length < 8) return false;
+            if (this.search.length < 6) return false;
 
             let vue = this
             // Show loading spinner
@@ -275,7 +277,7 @@ export default {
 
         },
         titulosCurso(index) {
-            let indexTitulos = ["modalidad","curso", "nota_prom", "visitas", "reinicios", "resultado"];
+            let indexTitulos = ["modalidad", "tipo_calificacion", "curso", "nota_prom", "visitas", "reinicios", "resultado"];
             if (indexTitulos.includes(index)) return true;
         },
         mostrarTema(index) {
@@ -305,8 +307,12 @@ export default {
         max-width: 5%;
     }
     .col-curso {
-        flex: 0 0 40%;
-        max-width: 40%;
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+    .col-tipo_calificacion {
+        flex: 0 0 18%;
+        max-width: 18%;
     }
     .col-nota_prom {
         flex: 0 0 13%;
@@ -326,8 +332,13 @@ export default {
     }
     // Temas
     .tema-col-tema {
-        flex: 0 0 30%;
-        max-width: 30%;
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+
+    .tema-col-tipo_calificacion {
+        flex: 0 0 10%;
+        max-width: 10%;
     }
 
     .tema-col-nota,

@@ -98,13 +98,18 @@ class CursosController extends Controller
             ]);
         }
 
-        $response = compact('escuelas', 'requisitos', 'types');
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
+
+        $qualification_type = $workspace->qualification_type;
+
+        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type');
 
         return $compactResponse ? $response : $this->success($response);
     }
 
     public function searchCurso(School $school, Course $course)
     {
+        $course->load('qualification_type');
         // $scheduled_restarts = json_decode($course->scheduled_restarts);
         $scheduled_restarts = $course->scheduled_restarts;
         $course->scheduled_restarts_activado = $scheduled_restarts['activado'] ?? false;
@@ -130,11 +135,22 @@ class CursosController extends Controller
 
         $course->lista_escuelas = $schools;
 
+        $mod_evaluaciones = $course->mod_evaluaciones;
+
+        $course->mod_evaluaciones = $course->getModEvaluacionesConverted();
+
+        // if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
+        //     $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $course->qualification_type->position);
+        //     $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+        //     $course->mod_evaluaciones = $mod_evaluaciones;
+        // }
+
         return $this->success([
             'curso' => $course,
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
+            'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
         ]);
     }
 

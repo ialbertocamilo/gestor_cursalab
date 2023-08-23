@@ -46,7 +46,7 @@ class CheckSchoolWorkspace
             
             if ($request->wantsJson()) return abort(403);
 
-            Redirect::to('welcome')->send();
+            Redirect::to('home')->send();
         }
 
         return $next($request);

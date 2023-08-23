@@ -85,8 +85,9 @@ function convert($number)
  */
 function clean_html(?string $text, int $limit = 100)
 {
+    $text = html_entity_decode(strip_tags($text));
 
-    return mb_substr(strip_tags($text), 0, $limit);
+    return mb_substr($text, 0, $limit);
 }
 
 function secret($value)
@@ -333,6 +334,17 @@ function stringConcatEqualNum(array $data, int $num)
 
     return implode('|', $piecesPart);
 }
+
+function get_data_bykeys($data, $keys = [])
+{
+    $new_data = [];
+    foreach ($data as $key => $value) {
+        if(in_array($key, $keys)) $new_data[$key] = $value;
+    }
+
+    return $new_data;
+}
+
 function messageToSlackByChannel($texto,$attachments,$canal){
     $blocks =  [
         "text" => "*".$texto."*",
@@ -358,6 +370,88 @@ function messageToSlackByChannel($texto,$attachments,$canal){
     curl_close($ch);
 }
 
+function calculateValueForQualification($value, $current_system, $main_system = 20)
+{
+    if ($current_system == $main_system) return $value;
+
+    $new_value = $value * $current_system / $main_system;
+
+    return round($new_value, 2);
+}
+
+function transform_domain(array $ArrayHost)
+{
+    $arrayAvailableDomains = [ 'youtu' => 'youtube',
+                               'youtube' => 'youtube',
+                               'vimeo' => 'vimeo'];
+    $currentType = NULL;
+
+    foreach($arrayAvailableDomains as $key => $value) {
+        if(in_array($key, $ArrayHost)) {
+            $currentType = $value;
+        }
+    }
+
+    return $currentType;
+}
+
+function get_type_link(string $linked, string $key = 'type')
+{
+    $parsedLinked = parse_url($linked);
+    [ 'host' => $host , 'path' => $path ] = $parsedLinked;
+
+    $currentType = transform_domain( explode('.', $host) );
+    $currentHash = NULL;
+
+    switch($currentType) {
+        case 'youtube':
+            $query = $parsedLinked['query'] ?? NULL;
+            $currentHash = ($query) ? explode('=', $query)[1] : explode('/', $path)[1];
+        break;
+        case 'vimeo':
+            $currentHash = explode('/', $path)[1];
+        break;
+    }
+
+    $switchKey = [ 'type' => $currentType,
+                   'hash' => $currentHash ];
+
+    return $switchKey[$key];
+}
+
+function getExtensionFileUrl(string $url) {
+    ['path' => $filePath] = parse_url($url);
+
+    $prevPath = explode('.', $filePath);
+    $prevExtension = $prevPath[count($prevPath) - 1];
+    $existScorm = ($prevExtension === 'html'); // type scorm
+
+    $fileExtension = $existScorm ? 'scorm' : $prevExtension;
+    return $fileExtension;
+}
+
+function get_type_media(string $media)
+{
+    $fileExtension = getExtensionFileUrl($media);
+
+    $arrayAvailableTypes = [
+                             'image' => ['jpeg', 'jpg', 'png', 'gif', 'svg', 'webp'],
+                             'video' => ['mp4', 'webm', 'mov'],
+                             'audio' => ['mp3'],
+                             'pdf'   => ['pdf'],
+                             'scorm' => ['zip', 'scorm'],
+                             // 'excel' => ['xls', 'xlsx', 'csv'],
+                             'office' => ['xls', 'xlsx', 'csv','ppt', 'pptx', 'doc', 'docx']
+                          ];
+
+    foreach($arrayAvailableTypes as $key => $value) {
+        if(in_array(strtolower($fileExtension), $value)) {
+            $currentType = $key;
+        }
+    }
+
+    return $currentType;
+}
 function formatSize($kilobytes, $precision = 2, $parsed = true) { // desde KB hacia arriba
     $unit = ["Kb", "Mb", "Gb", "Tb", "Pt"];
     $exp = floor(log($kilobytes, 1024)) | 0;
@@ -374,7 +468,7 @@ function formatSize($kilobytes, $precision = 2, $parsed = true) { // desde KB ha
 /*
     count: valor variable,
     total: valor total al 100%,
-    limite: solo para exceded 
+    limite: solo para exceded
 */
 function calculate_porcent($count, $total, int $limite = 90)
 {
@@ -390,3 +484,14 @@ function calculate_porcent($count, $total, int $limite = 90)
 }
 
 
+function is_cursalab_superuser($only_test_environment = true)
+{
+    if ($only_test_environment != config('app.test_environment')) {
+        return false;
+    }
+
+    $is_superuser = auth()->user()->isAn('super-user');
+    $email = auth()->user()->email_gestor;
+
+    return $is_superuser && str_contains($email, '@cursalab.io');
+}

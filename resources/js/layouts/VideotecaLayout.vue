@@ -245,8 +245,14 @@ export default {
     mounted() {
         let vue = this;
         // vue.getData();
-    },
 
+        // check localstorage videoteca
+        const { status, storage: videotecaStorage } = vue.getStorageUrl('videoteca');
+        if(status) {
+            vue.openFormModal(vue.modalOptions, { id: videotecaStorage.id });
+        }
+        // check localstorage videoteca
+    },
     methods: {
         openTags() {
             let vue = this;

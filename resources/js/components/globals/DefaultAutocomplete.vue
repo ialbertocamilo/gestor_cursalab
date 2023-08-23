@@ -23,6 +23,7 @@
             :no-data-text="noDataText"
             :rules="rules"
             append-icon="mdi-chevron-down"
+            :loading="loading"
         >
             <template v-slot:prepend-item v-if="multiple && showSelectAll">
                 <v-list-item ripple dense @click="toggle">
@@ -143,6 +144,10 @@ export default {
         showRequired: {
             type: Boolean,
             default: false,
+        },
+        loading:{
+            type: Boolean,
+            default: false
         },
         tooltip: {
             type: String,

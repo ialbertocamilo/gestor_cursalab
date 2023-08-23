@@ -22,6 +22,11 @@ class SummaryTopic extends Summary
         'answers' => 'array',
     ];
 
+    public $defaultRelationships = [
+        'topic_id' => 'topic',
+        'user_id' => 'user'
+    ];
+
     protected $dates = [
         'current_quiz_started_at',
         'current_quiz_finishes_at',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Console\Commands\reinicios_programado;
 use App\Http\Requests\WorkspaceRequest;
 use App\Http\Requests\SubWorkspaceRequest;
+use App\Http\Requests\WorkspaceDuplicateRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Resources\SubWorkspaceResource;
 
@@ -15,6 +16,10 @@ use App\Models\SegmentValue;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
+use App\Models\Ambiente;
+use App\Models\School;
+use App\Models\Course;
+use App\Models\Topic;
 use App\Models\WorkspaceFunctionality;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -64,7 +69,118 @@ class WorkspaceController extends Controller
         $workspaces = Workspace::search($request);
         WorkspaceResource::collection($workspaces);
 
-        return $this->success($workspaces);
+        $config = Ambiente::first();
+        $config->logo = get_media_url($config->logo);
+
+        if(ENV('MULTIMARCA') == true){
+            $config->logo = 'https://cursalab2-statics.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
+            $config->titulo = 'CursaLab';
+
+        }
+
+        return $this->success(compact('workspaces', 'config'));
+    }
+
+    public function create(): JsonResponse
+    {
+        // Load criteria
+
+        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+
+        foreach ($workspace['criteria'] as $wk_crit) {
+            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            $in_segment_list = $in_segment->pluck('id')->all();
+            $wk_crit->its_used = true;
+        }
+
+        $workspace['criteria_workspace'] = null;
+        $workspace['limit_allowed_users'] = null;
+        $workspace['is_superuser'] = auth()->user()->isA('super-user');
+        $workspace['functionalities_selected'] = [];
+        $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+        $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
+
+        return $this->success($workspace);
+    }
+
+    public function store(WorkspaceRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        // Upload files
+
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'logo_negativo');
+
+        // Set constraint: limit allowed users
+
+        if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
+
+            $constraint_user['type'] = $data['limit_allowed_users_type'];
+            $constraint_user['quantity'] = intval($data['limit_allowed_users_limit']);
+
+            $data['limit_allowed_users'] = $constraint_user;
+        else:
+            $data['limit_allowed_users'] = null;
+        endif;
+
+        // Update record in database
+
+        $workspace = Workspace::create($data);
+
+        // Save workspace's criteria
+
+        $criteriaSelected = json_decode($data['selected_criteria'], true);
+
+        $criteria = [];
+
+        $module_criterion = Criterion::where('code', 'module')->first();
+
+        foreach ($criteriaSelected as $criterion_id => $is_selected) {
+            if ($is_selected) $criteria[] = $criterion_id;
+        }
+
+        $criteria[] = $module_criterion->id;
+
+        $workspace->criterionWorkspace()->sync($criteria);
+
+
+        // Actualizar funcionalidades
+
+        $selected_functionality = json_decode($data['selected_functionality'], true);
+
+        foreach($selected_functionality as $fun_id => $fun) {
+
+            $exist = WorkspaceFunctionality::where('workspace_id', $workspace->id)->where('functionality_id', $fun_id)->first();
+
+            if($exist) {
+                if(!$fun) {
+                    $exist->delete();
+                }
+            }
+            else {
+                if($fun) {
+                    try {
+
+                        DB::beginTransaction();
+                        $data = array('workspace_id'=> $workspace->id, 'functionality_id'=>$fun_id);
+                        WorkspaceFunctionality::create($data);
+
+                        DB::commit();
+                    } catch (\Exception $e) {
+                        info($e);
+                        DB::rollBack();
+                        abort(errorExceptionServer());
+                    }
+                }
+            }
+        }
+
+        cache_clear_model(WorkspaceFunctionality::class);
+
+        \Artisan::call('modelCache:clear', array('--model' => "App\Models\Criterion"));
+
+        return $this->success(['msg' => 'Workspace creado correctamente.']);
     }
 
     /**
@@ -77,25 +193,32 @@ class WorkspaceController extends Controller
     {
         // Load criteria
 
+        $workspace->load('qualification_type');
+
         $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
 
         foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            $in_segment_list = $in_segment->pluck('id')->all();
-            $wk_crit->its_used = false;
-            if (count($in_segment_list))
-                $wk_crit->its_used = true;
+            $in_segments = SegmentValue::where('criterion_id', $wk_crit->id)->count();
+            // $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
+            // $in_segment_list = $in_segment->pluck('id')->all();
+             $wk_crit->its_used = $in_segments > 0 ? true : false;
+            // $wk_crit->its_used = false;
+            // if (count($in_segment_list))
+                // $wk_crit->its_used = true;
         }
 
         // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
         $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
+        $workspace['criteria_workspace_dates'] = $workspace->subworkpsace_criterion_type(['date']);
 
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
 
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
+        // $workspace['is_superuser'] = true;
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
+        $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         return $this->success($workspace);
     }
@@ -112,9 +235,11 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
+        // info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
+        $data = Media::requestUploadFile($data, 'logo_marca_agua');
 
         // Set constraint: limit allowed users
 
@@ -208,12 +333,68 @@ class WorkspaceController extends Controller
         return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
 
-    public function destroy(Workspace $subworkspace)
+    public function destroy(Workspace $workspace)
     {
-        // \File::delete(public_path().'/'.$subworkspace->plantilla_diploma);
-        $subworkspace->delete();
+        // \File::delete(public_path().'/'.$workspace->plantilla_diploma);
+        $workspace->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
+        $workspace->functionalities()->sync([]);
+        $workspace->criterionWorkspace()->sync([]);
+        
+        $workspace->criteriaValue()->sync([]);
+        // $workspace->criteriaValue()->delete();
+
+        $workspace->videotecas()->delete();
+        $workspace->meetings()->delete();
+        $workspace->push_notifications()->delete();
+        // $workspace->medias()->delete(); // don't delete
+
+        foreach ($workspace->subworkspaces as $subworkspace) {
+
+            foreach ($subworkspace->schools as $school) {
+
+                foreach ($school->courses as $course) {
+
+                    foreach ($course->topics as $topic) {
+
+                        $topic->questions()->delete();
+                        $topic->medias()->delete();
+                        $topic->requirements()->delete();
+                    }
+                    
+                    $course->requirements()->delete();
+                    $course->topics()->delete();
+                }
+                
+                $school->courses()->delete();
+            }
+            
+            $subworkspace->schools()->delete();
+
+            foreach ($subworkspace->users as $user) {
+
+                $user->summary()->delete();
+                $user->summary_courses()->delete();
+                $user->summary_topics()->delete();
+                $user->benefits()->delete();
+                $user->segments()->delete();
+                $user->course_data()->delete();
+                $user->criterion_user()->sync([]);
+            }
+
+            $subworkspace->users()->delete();
+        }
+
+        $workspace->subworkspaces()->delete();
+
+        foreach ($workspace->polls as $poll) {
+
+            $poll->questions()->delete();
+        }
+
+        $workspace->polls()->delete();
+
+        return $this->success(['msg' => 'Workspace eliminado correctamente.']);
     }
 
     public function editSubWorkspace(Workspace $subworkspace)
@@ -264,6 +445,11 @@ class WorkspaceController extends Controller
             ->where('active', ACTIVE)
             ->get();
 
+        $qualification_types = Taxonomy::where('group', 'system')->where('type', 'qualification-type')
+            ->select('id', 'name')
+            ->where('active', ACTIVE)
+            ->get();
+
         $main_menu->each(function ($item) {
             $item->active = false;
         });
@@ -286,7 +472,7 @@ class WorkspaceController extends Controller
         //     $item->active = false;
         // });
 
-        $response = compact('main_menu', 'side_menu');
+        $response = compact('main_menu', 'side_menu', 'qualification_types');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -311,5 +497,172 @@ class WorkspaceController extends Controller
         $subworkspace = Workspace::storeSubWorkspaceRequest($data, $subworkspace);
 
         return $this->success(['msg' => 'Módulo actualizado correctamente.']);
+    }
+
+    /**
+     * Process request to copy record data
+     *
+     * @param Workspace $workspace
+     * @return JsonResponse
+     */
+    // public function copy(Workspace $workspace): JsonResponse
+    // {
+    //     return $this->success([]);
+    // }
+
+    /**
+     * Process request to duplicate record data
+     *
+     * @param Workspace $workspace
+     * @return JsonResponse
+     */
+    public function duplicate(WorkspaceDuplicateRequest $request, Workspace $workspace): JsonResponse
+    {
+        $data = $request->validated();
+
+        $data = Media::requestUploadFile($data, 'logo');
+        $data = Media::requestUploadFile($data, 'logo_negativo');
+
+        $new = $workspace->replicateWithRelations($data);
+
+        return $this->success(['msg' => 'Workspace duplicado correctamente.']);
+    }
+
+    public function copy(Workspace $subworkspace)
+    {
+        $items = Workspace::getSchoolsForTree($subworkspace->schools);
+
+        $items_destination = Workspace::getAvailableForTree($subworkspace);
+
+        return $this->success(compact('items', 'items_destination'));
+    }
+
+    public function copyContent(Request $request, Workspace $subworkspace)
+    {
+        $selections = $request->selection_source;
+        $destinations = $request->selection_destination;
+
+        $workspace = get_current_workspace();
+
+        $subworkspace_ids = [];
+
+        foreach ($destinations as $destination) {
+
+            $part = explode('_', $destination);
+            $subworkspace_ids[] = $part[1]; 
+        }
+
+        $data = $this->buildSourceTreeSelection($selections);
+
+        $subworkspaces = Workspace::whereIn('id', $subworkspace_ids)->get();
+        $_schools = School::whereIn('id', $data['school_ids'])->get();
+        $_courses = Course::whereIn('id', $data['course_ids'])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        foreach ($data['schools'] as $school_id => $course_ids) {
+
+            $_school = $_schools->where('id', $school_id)->first();
+
+            $school_data = $_school->toArray();
+            $school_data['external_id'] = $_school->id;
+
+            foreach ($subworkspaces as $subworkspace) {
+
+                $school = $subworkspace->schools()->where('name', $_school->name)->first();
+
+                if ( ! $school ) {
+
+                    $school_position = ['position' => $subworkspace->schools()->count() + 1];
+
+                    $school = $subworkspace->schools()->create($school_data, $school_position);
+                }
+
+                foreach ($course_ids['courses'] as $course_id => $topic_ids) {
+
+                    $_course = $_courses->where('id', $course_id)->first();
+
+                    $course_data = $_course->toArray();
+                    $course_data['external_id'] = $_course->id;
+
+                    $course = $school->courses()->create($course_data);
+
+                    $workspace->courses()->attach($course);
+
+                    foreach ($topic_ids['topics'] as $topic_id) {
+
+                        $_topic = $_topics->where('id', $topic_id)->first();
+
+                        $topic_data = $_topic->toArray();
+                        $topic_data['external_id'] = $_topic->id;
+
+                        $topic = $course->topics()->create($topic_data);
+
+                        $topic->medias()->createMany($_topic->medias->toArray());
+                        $topic->questions()->createMany($_topic->questions->toArray());
+                    }
+                }
+            }
+        }
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($selections)
+    {
+        $schools = [];
+        $school_ids = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        foreach ($selections as $index => $selection) {
+
+            $sections = explode('-', $selection);
+            $data = [];
+
+            foreach ($sections as $position => $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+
+                // $schools[$index][$position] = $row;  
+            }
+
+            $school_id = $data[0]['id'];
+            $course_id = $data[1]['id'] ?? NULL;
+            $topic_id = $data[2]['id'] ?? NULL;
+
+            if ($course_id && $topic_id) {
+
+                $schools[$school_id]['courses'][$course_id]['topics'][] = $topic_id;
+
+            } else {
+                
+                if ($course_id && !$topic_id) { 
+                
+                    $schools[$school_id]['courses'][$course_id]['topics'] = [];
+                
+                } else {
+                    
+                    if (!$course_id && !$topic_id) {
+
+                        $schools[$school_id]['courses'] = [];
+                    }
+                }
+            }
+
+        }
+
+        return compact('school_ids', 'course_ids', 'topic_ids', 'schools');
     }
 }
