@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-
 class Workspace extends BaseModel
 {
     protected $fillable = [
@@ -26,6 +25,7 @@ class Workspace extends BaseModel
         'limit_allowed_users',
         'users_with_empty_criteria',
         'qualification_type_id',
+
         'logo_marca_agua',
         'marca_agua_estado',
         'notificaciones_push_chunk',
@@ -34,6 +34,7 @@ class Workspace extends BaseModel
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
         'show_logo_in_app',
+        'certificate_template_id',
     ];
 
     public function sluggable(): array

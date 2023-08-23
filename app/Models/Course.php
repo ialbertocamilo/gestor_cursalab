@@ -12,7 +12,7 @@ class Course extends BaseModel
         'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
-        'show_certification_date'
+        'show_certification_date', 'certificate_template_id'
     ];
 
     protected $casts = [

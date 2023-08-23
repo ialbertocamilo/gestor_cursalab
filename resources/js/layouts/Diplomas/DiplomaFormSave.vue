@@ -9,20 +9,23 @@
             <v-form ref="DiplomaForm">
                 <v-row>
                     <v-col cols="12">
-                    	<p>
-                    		Vista previa del diploma. Haz click en "Guardar" para generarlo.
-                    	</p>
+                        <p>
+                            Vista previa del diploma. Haz click en "Guardar" para generarlo.
+                        </p>
                     </v-col>
                     <v-col cols="12">
-                        <img :src="options.resource.preview" class="--img-preview w-100" alt="Previsualización de diploma">
+                        <img
+                            :src="options.resource.preview"
+                            class="--img-preview w-100"
+                            alt="Previsualización de diploma">
                     </v-col>
                     <v-col cols="12">
-                    	<DefaultInput 
-                    		v-model="resource.diploma" 
-                    		clearable 
-                    		label="Nombre diploma" 
-                    		:rules="rules.diploma"
-                		/>
+                        <DefaultInput
+                            v-model="resource.diploma"
+                            clearable
+                            label="Nombre diploma"
+                            :rules="rules.diploma"
+                        />
                     </v-col>
                 </v-row>
             </v-form>
@@ -43,7 +46,9 @@ export default {
         return {
             resource: {},
             rules: {
-              	diploma: this.getRules(['required', 'max:100']),
+                diploma: this.getRules([
+                    'required', 'max:100', 'min:10'
+                ]),
             },
         }
     },
@@ -55,7 +60,6 @@ export default {
             let vue = this;
             vue.resource = {};
             vue.resetFormValidation('DiplomaForm');
-
             vue.$emit('onCancel');
         },
         onConfirm() {

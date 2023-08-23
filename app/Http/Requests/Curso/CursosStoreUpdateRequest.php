@@ -47,6 +47,7 @@ class CursosStoreUpdateRequest extends FormRequest
             'file_imagen' => 'nullable',
             'file_plantilla_diploma' => 'nullable',
             'validateForm' => 'required',
+            'certificate_template_id' => 'nullable'
         ];
     }
 

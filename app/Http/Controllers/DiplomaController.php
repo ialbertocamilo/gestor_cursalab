@@ -29,9 +29,9 @@ class DiplomaController extends Controller
     
     public function show(){
         return view('diplomas.index');
-    }   
+    }
 
-    public function search(Request $request) 
+    public function search(Request $request)
     {
         $diplomas = Diploma::search($request);
         DiplomaSearchResource::collection($diplomas);
@@ -39,16 +39,16 @@ class DiplomaController extends Controller
         return $this->success($diplomas);
     }
 
-    public function getMediaStreamBase64($media_id) 
+    public function getMediaStreamBase64($media_id)
     {
         $media = Media::find($media_id);
         $image = Storage::disk('s3')->get($media->file);
         return "data:image/png;base64,".base64_encode($image);
     }
 
-    public function searchDiploma(Diploma $diploma) 
+    public function searchDiploma(Diploma $diploma)
     {
-        // === fondo de plantilla === 
+        // === fondo de plantilla ===
         $info_bg_decoded = json_decode($diploma->info_bg);
         $info_bg_decoded->src = $this->getMediaStreamBase64($info_bg_decoded->media_id);
 
@@ -69,13 +69,15 @@ class DiplomaController extends Controller
         $diploma['s_objects_text'] = $array_text;
 
         // === imagen plantilla completa ===
+        info(['diploma' => $diploma->toArray() ]);
+
         $plantilla = Storage::disk('s3')->get($diploma->path_image);
         $plantilla = "data:image/png;base64," . base64_encode($plantilla);
         
         return response()->json(compact('diploma', 'plantilla'));
     }
 
-    public function update(Diploma $diploma, Request $request) 
+    public function update(Diploma $diploma, Request $request)
     {
         // === images a bases 64 ====
         $images_bases64 = Diploma::getBasesFromImages($request->get('edit_plantilla'));
@@ -96,27 +98,40 @@ class DiplomaController extends Controller
             $info_s_objects = []; // s_objects[]
 
             foreach ($e_statics as $e_static) {
-                $font = realpath('.').'/fonts/tahoma.ttf';
-                $e_static_type = $e_static['type']; 
-                
+                // $font = realpath('.').'/fonts/tahoma.ttf';
+                $e_static_type = $e_static['type'];
+
                 switch ($e_static_type) {
                     case 'i-text':
+                        //  === para el font ===
+                        $fontName = 'calisto-mt.ttf';
+                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold-italic.ttf';
+                        }else if($e_static['fontStyle'] === 'italic') {
+                            $fontName = 'calisto-mt-italic.ttf';
+                        }else if($e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold.ttf';
+                        }
+
+                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        //  === para el font ===
+
                         $rgb = $this->hex2rgb($e_static['fill']);
                         $color = imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
                         $lines = preg_split('/\n|\r/',$e_static['text']);
 
                         // resize font;
                         $divideSize = $e_static['fontSize'] / 3.3;
-                        $fontsize = $e_static['fontSize'] - $divideSize; 
+                        $fontsize = $e_static['fontSize'] - $divideSize;
 
                         imagettftext(
-                            $im, 
+                            $im,
                             $fontsize,
                             0,
-                            $e_static['left']-$x, 
-                            $e_static['top']-$y, 
-                            $color, 
-                            $font, 
+                            $e_static['left']-$x,
+                            $e_static['top']-$y,
+                            $color,
+                            $font,
                             utf8_decode($e_static['text'])
                         );
                         
@@ -128,10 +143,10 @@ class DiplomaController extends Controller
                         $this->imagecopymerge_alpha(
                             $im, // destino base
                             $im2, // fuente base
-                            $e_static['left']-$x, 
+                            $e_static['left']-$x,
                             $e_static['top']-$y,
-                            0, 
-                            0, 
+                            0,
+                            0,
                             $e_static['width']*$e_static['scaleX'],
                             $e_static['height']*$e_static['scaleY'],
                             100);
@@ -153,9 +168,11 @@ class DiplomaController extends Controller
                         'id'=>$e_dinamic['id'],
                         'id_formato'=>$e_dinamic['id_formato'],
                         'left'=>$e_dinamic['left'],
+                        // 'left_calc'=>$e_dinamic['left'] - $x,
                         'centrado'=>$e_dinamic['centrado'],
                         'fontSize'=>$e_dinamic['fontSize'],
                         'top'=>$e_dinamic['top'],
+                        // 'top_calc'=>$e_dinamic['top'] - $y,
                         'height'=>$e_dinamic['height'],
                         'width'=>$e_dinamic['width'],
                         'fontWeight'=>$e_dinamic['fontWeight'],
@@ -168,9 +185,11 @@ class DiplomaController extends Controller
             // === guarda imagen - media y retorna id ===
             $info_bg = Diploma::pushType_image($bg, $nombre_plantilla, true, $images_bases64);
 
-            $nombre_plantilla_final = Media::generateNameFile($nombre_plantilla, 'jpg'); 
+            $nombre_plantilla_final = Media::generateNameFile($nombre_plantilla, 'jpg');
             $path = 'images/diplomas/'.$nombre_plantilla_final;
             $preview = $this->jpg_to_base64($im);
+
+            // info(['preview' => $preview]);
 
             // === guarda imagen - media ===
             $media = Diploma::uploadMediaBase64($nombre_plantilla_final, $path, $preview);
@@ -183,7 +202,7 @@ class DiplomaController extends Controller
             $diploma->s_objects = json_encode($info_s_objects);
             $diploma->d_objects = json_encode($info_d_objects);
 
-            $diploma->save(); 
+            $diploma->save();
 
             return response()->json(['error' => false]);
         }
@@ -208,27 +227,41 @@ class DiplomaController extends Controller
             $info_s_objects = []; // s_objects[]
 
             foreach ($e_statics as $e_static) {
-                $font = realpath('.').'/fonts/tahoma.ttf';
-                $e_static_type = $e_static['type']; 
-                
+                // $font = realpath('.').'/fonts/tahoma.ttf';
+                $e_static_type = $e_static['type'];
+
                 switch ($e_static_type) {
                     case 'i-text':
+
+                        //  === para el font ===
+                        $fontName = 'calisto-mt.ttf';
+                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold-italic.ttf';
+                        }else if($e_static['fontStyle'] === 'italic') {
+                            $fontName = 'calisto-mt-italic.ttf';
+                        }else if($e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold.ttf';
+                        }
+
+                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        //  === para el font ===
+
                         $rgb = $this->hex2rgb($e_static['fill']);
                         $color = imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
                         $lines = preg_split('/\n|\r/',$e_static['text']);
 
                         // resize font;
                         $divideSize = $e_static['fontSize'] / 3.3;
-                        $fontsize = $e_static['fontSize'] - $divideSize; 
+                        $fontsize = $e_static['fontSize'] - $divideSize;
 
                         imagettftext(
-                            $im, 
+                            $im,
                             $fontsize,
                             0,
-                            $e_static['left']-$x, 
-                            $e_static['top']-$y, 
-                            $color, 
-                            $font, 
+                            $e_static['left']-$x,
+                            $e_static['top']-$y,
+                            $color,
+                            $font,
                             utf8_decode($e_static['text'])
                         );
 
@@ -240,10 +273,10 @@ class DiplomaController extends Controller
                         $this->imagecopymerge_alpha(
                             $im, // destino base
                             $im2, // fuente base
-                            $e_static['left']-$x, 
+                            $e_static['left']-$x,
                             $e_static['top']-$y,
-                            0, 
-                            0, 
+                            0,
+                            0,
                             $e_static['width']*$e_static['scaleX'],
                             $e_static['height']*$e_static['scaleY'],
                             100);
@@ -265,9 +298,11 @@ class DiplomaController extends Controller
                         'id'=>$e_dinamic['id'],
                         'id_formato'=>$e_dinamic['id_formato'],
                         'left'=>$e_dinamic['left'],
+                        // 'left_calc'=>$e_dinamic['left'] - $x,
                         'centrado'=>$e_dinamic['centrado'],
                         'fontSize'=>$e_dinamic['fontSize'],
                         'top'=>$e_dinamic['top'],
+                        // 'top_calc'=>$e_dinamic['top'] - $y,
                         'height'=>$e_dinamic['height'],
                         'width'=>$e_dinamic['width'],
                         'fontWeight'=>$e_dinamic['fontWeight'],
@@ -280,9 +315,11 @@ class DiplomaController extends Controller
             // === guarda imagen - media y retorna id ===
             $info_bg = Diploma::pushType_image($bg, $nombre_plantilla);
 
-            $nombre_plantilla_final = $nombre_plantilla.'_'.rand(0,100).'.jpg'; 
+            $nombre_plantilla_final = $nombre_plantilla.'_'.rand(0,100).'.jpg';
             $path = 'images/'.$nombre_plantilla_final;
             $preview = $this->jpg_to_base64($im);
+
+            // info(['preview' => $preview]);
 
             // === guarda imagen - media ===
             $media = Diploma::uploadMediaBase64($nombre_plantilla_final, $path, $preview);
@@ -296,15 +333,17 @@ class DiplomaController extends Controller
             $diploma->s_objects = json_encode($info_s_objects);
             $diploma->d_objects = json_encode($info_d_objects);
 
-            $diploma->save(); 
+            $diploma->save();
 
             return response()->json(['error' => false]);
         }
         return response()->json(['error' => true]);
     }
-    public function get_diploma($image,$d_per,$info,$real_info) {
-        $e_dinamics = json_decode($d_per,true);
-        $bg_info = json_decode($info,true);
+    public function get_diploma($image, $d_per, $info, $real_info) {
+
+        $e_dinamics = json_decode($d_per, true);
+        $bg_info = json_decode($info, true);
+
         $x = $bg_info['left'];
         $y = $bg_info['top'];
         $width = $bg_info['width'];
@@ -316,7 +355,7 @@ class DiplomaController extends Controller
             if($e_dinamic['type']=='text'){
                 $rgb = $this->hex2rgb($e_dinamic['fill']);
                 $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
-                $text = $this->get_text($e_dinamic,$real_info);
+                $text = $this->get_text($e_dinamic, $real_info);
                 $text = wordwrap($text, 30, "multiline");
                 
                 // \Log::info('left original'.$e_dinamic['left']);
@@ -361,7 +400,7 @@ class DiplomaController extends Controller
         //         $ancho = imagesx($image)*0.12;
         //         $alto = round($ancho  * imagesy($watermark) / imagesx($watermark) );
         //         $watermark = $this->getImageResized($watermark,$ancho,$alto);
-        //         imagecopymerge($image, $watermark,$bg_info['width'] - $ancho, $bg_info['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40); 
+        //         imagecopymerge($image, $watermark,$bg_info['width'] - $ancho, $bg_info['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40);
         //     }
         // }
         $preview = $this->jpg_to_base64($image);
@@ -389,7 +428,7 @@ class DiplomaController extends Controller
         // Match Dingbats
         $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
         $clean_text = preg_replace($regexDingbats, '', $clean_text);
-        $clean_text = preg_replace('/[^ -\x{2122}]\s+|\s*[^ -\x{2122}]/u','',$clean_text); 
+        $clean_text = preg_replace('/[^ -\x{2122}]\s+|\s*[^ -\x{2122}]/u','',$clean_text);
         return $clean_text;
     }
 
@@ -411,7 +450,7 @@ class DiplomaController extends Controller
 
         // Fusionar las imágenes con opacidad
         imagecopymerge($dst_im, $copy, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct);
-    } 
+    }
 
     public function get_preview_data(Request $request){
         $data = $request->get('info');
@@ -429,36 +468,49 @@ class DiplomaController extends Controller
 
             // putenv('GDFONTPATH=' . realpath('.'));
             foreach ($e_statics as $e_static) {
-                $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
                 switch ($e_static['type']) {
                     case 'i-text':
+
+                        //  === para el font ===
+                        $fontName = 'calisto-mt.ttf';
+                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold-italic.ttf';
+                        }else if($e_static['fontStyle'] === 'italic') {
+                            $fontName = 'calisto-mt-italic.ttf';
+                        }else if($e_static['fontWeight'] === 'bold') {
+                            $fontName = 'calisto-mt-bold.ttf';
+                        }
+
+                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        //  === para el font ===
+
                         $rgb = $this->convertHexadecimalToRGB($e_static['fill']);
                         $color = imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
 
                         // resize font;
                         $divideSize = $e_static['fontSize'] / 3.3;
-                        $fontsize = $e_static['fontSize'] - $divideSize; 
+                        $fontsize = $e_static['fontSize'] - $divideSize;
 
                         imagettftext(
-                            $im, 
+                            $im,
                             $fontsize,
                             0,
-                            $e_static['left']-$x, 
-                            $e_static['top']-$y, 
-                            $color, 
-                            $font, 
+                            $e_static['left']-$x,
+                            $e_static['top']-$y,
+                            $color,
+                            $font,
                             utf8_decode($e_static['text'])
                         );
 
 
                         /*  imagettftext(
-                            $im, 
+                            $im,
                             $e_static['fontSize']-2,
                             0,
-                            $e_static['left']-$x-16, 
-                            $e_static['top']-$y+$e_static['height']/count($lines)-3, 
-                            $color, 
-                            $font, 
+                            $e_static['left']-$x-16,
+                            $e_static['top']-$y+$e_static['height']/count($lines)-3,
+                            $color,
+                            $font,
                             utf8_decode($e_static['text'])
                         ); */
 
@@ -472,10 +524,10 @@ class DiplomaController extends Controller
                         $this->imagecopymerge_alpha(
                             $im, // destino base
                             $im2, // fuente base
-                            $e_static['left']-$x, 
+                            $e_static['left']-$x,
                             $e_static['top']-$y,
-                            0, 
-                            0, 
+                            0,
+                            0,
                             $e_static['width']*$e_static['scaleX'],
                             $e_static['height']*$e_static['scaleY'],
                             100);
@@ -494,15 +546,15 @@ class DiplomaController extends Controller
                             'start - x-position [left]' => ($star_x - $x),
                             'start - y-position [top]' => ($star_y - $y),
 
-                            'calc [width]' =>  $e_static['width'] * $e_static['scaleX'], 
+                            'calc [width]' =>  $e_static['width'] * $e_static['scaleX'],
                             'calc [height]' => $e_static['height'] * $e_static['scaleY'],
 
                         ]); */
 
-                            /* imagecopymerge($im, $im2,$e_static['left']-$x, 
+                            /* imagecopymerge($im, $im2,$e_static['left']-$x,
                             $e_static['top']-$y,
-                            100, 
-                            200, 
+                            100,
+                            200,
                             $e_static['width']*$e_static['scaleX'],
                             $e_static['height']*$e_static['scaleY'],
                             100); */
@@ -518,12 +570,16 @@ class DiplomaController extends Controller
 
                     $text = $this->get_text($e_dinamic);
                     $text = wordwrap($text, 30, "multiline");
+
                     $left = $e_dinamic['left']-$x;
-                    $fontsize =  $e_dinamic['fontSize']- ($e_dinamic['fontSize']*$e_dinamic['zoomX']);
-                    $top = $e_dinamic['top']-$y+$e_dinamic['fontSize'];
+                    $top = $e_dinamic['top']-$y;
+                    $fontsize =  $e_dinamic['fontSize'] - ($e_dinamic['fontSize'] * $e_dinamic['zoomX']);
+                    // $top = $e_dinamic['top']-$y+$e_dinamic['fontSize']; v1
+
                     ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
                     ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
                     ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+
                     //Centrado multilinea
                     $explode_text = explode('multiline',$text);
                     foreach ($explode_text as $e_text) {
@@ -532,8 +588,10 @@ class DiplomaController extends Controller
                             $left = ($bg['width']/2) - (($calculateTextBox['width']/2));
                             // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
                         }
+
                         imagettftext($im,$fontsize,0 ,$left,$top , $color, $font, utf8_decode($e_text));
                         $top = $top + $fontsize+(0.2*$fontsize);
+
                     }
                 }
             }
@@ -546,7 +604,7 @@ class DiplomaController extends Controller
             //         $ancho = imagesx($im)*0.12;
             //         $alto = round($ancho  * imagesy($watermark) / imagesx($watermark) );
             //         $watermark = $this->getImageResized($watermark,$ancho,$alto);
-            //         imagecopymerge($im, $watermark,$bg['width'] - $ancho, $bg['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40); 
+            //         imagecopymerge($im, $watermark,$bg['width'] - $ancho, $bg['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40);
             //     }
             // }
         }
@@ -593,7 +651,7 @@ class DiplomaController extends Controller
                       "top"    => $top  - $rtop,
                       "width"  => $rright - $rleft + 1,
                       "height" => $rbottom - $rtop + 1 );
-      } 
+      }
     public function getImageResized($image, int $newWidth, int $newHeight) {
         $newImg = imagecreatetruecolor($newWidth, $newHeight);
         // imagealphablending($newImg, false);
@@ -659,19 +717,19 @@ class DiplomaController extends Controller
             case 'users':
                 // $d = DB::table($e_dinamic['id']);
                 // if($real){
-                //     $d = $d->select('name','lastname','surname')->where('id',$real['usuario_id'])->first(); 
+                //     $d = $d->select('name','lastname','surname')->where('id',$real['usuario_id'])->first();
                 // }else{
                 //     switch ($e_dinamic['id_formato']) {
                 //         case "1":
                 //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name) as len_full_name'))->orderBy('len_full_name','desc')->first();
                 //         break;
-                //         case "2": 
+                //         case "2":
                 //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname) as len_full_name'))->orderBy('len_full_name','desc')->first();
                 //         break;
-                //         case "3": 
+                //         case "3":
                 //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
                 //         break;
-                //         case "4": 
+                //         case "4":
                 //             $d = $d->select('name','lastname','surname',DB::raw('LENGTH(name)+LENGTH(lastname)+LENGTH(surname) as len_full_name'))->orderBy('len_full_name','desc')->first();
                 //         break;
                 //     }
@@ -680,7 +738,7 @@ class DiplomaController extends Controller
                 // $text = 'Usuario';
                 $text = 'Usuario Prueba Cursalab Powered';
                 // $text = $d->name;
-                // Estos id son definidos en el front (Diplomas/index.js) en el metodo context_menu() 
+                // Estos id son definidos en el front (Diplomas/index.js) en el metodo context_menu()
                 // switch ($e_dinamic['id_formato']) {
                 //     case "2": $text = $text . ' Cursalab'; break;
                 //     // case "2": $text = $br[0].' '.$d->lastname; break;
@@ -690,19 +748,22 @@ class DiplomaController extends Controller
                 //     // case "4": $text = $d->name.' '.$d->lastname.' '.$d->surname;break;
                 // }
             break;
+            case 'course-average-grade':
+                $text = 18;
+                break;
             case 'courses':
                 // info(['real_cursos' => $real]);
                 // $q = DB::table($e_dinamic['id']);
                 // $q = $q->select('name',DB::raw('LENGTH(name) as len_nombre'))->orderBy('len_nombre','desc')->first();
                     // $q = $q->random(1)[0];
                 //}
-                $text = 'Curso de buenas prácticas de programación 2023'; 
-                // $text = $q->name; 
+                $text = 'Curso de buenas prácticas de programación 2023';
+                // $text = $q->name;
                 $upper_string= false;
             break;
             case 'fecha':
                 // info(['real_fecha' => $real]);
-                $fecha_emision = date('Y-m-d H:i:s'); 
+                $fecha_emision = date('Y-m-d H:i:s');
                 $text = Carbon::parse($fecha_emision)->formatLocalized($e_dinamic['id_formato']);
                 if(str_contains($e_dinamic['id_formato'],'de')){
                     $text = str_replace($this->dias_EN, $this->dias_ES, $text);
@@ -710,9 +771,9 @@ class DiplomaController extends Controller
                 }
                 $upper_string= false;
                 // $text = $c->formatLocalized($e_dinamic['id_formato']);
-            break;  
+            break;
         }
-        if($upper_string){ 
+        if($upper_string){
             return ucwords(mb_strtolower($text));
         }
         return $text;
