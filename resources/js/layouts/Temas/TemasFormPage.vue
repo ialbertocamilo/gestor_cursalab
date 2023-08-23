@@ -577,6 +577,7 @@ export default {
                 formData.append(`medias[${index}][tipo]`, el.type_id)
                 formData.append(`medias[${index}][embed]`, Number(el.embed))
                 formData.append(`medias[${index}][descarga]`, Number(el.downloadable))
+                formData.append(`medias[${index}][ia_convert]`, Number(el.ia_convert))
             })
         },
         deleteMedia(media_index) {
@@ -611,6 +612,7 @@ export default {
             let vue = this
             vue.resource.media.push({
                 title: multimedia.titulo,
+                ia_convert: multimedia.ia_convert || null,
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
@@ -766,6 +768,6 @@ export default {
     filter: invert(42%) sepia(98%) saturate(0%) hue-rotate(349deg) brightness(111%) contrast(100%);
 }
 .ia_convert_active{
-    filter: hue-rotate(225deg);
+    filter: hue-rotate(360deg);
 }
 </style>

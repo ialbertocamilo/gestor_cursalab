@@ -25,6 +25,9 @@
                             :file-types="[filterType]"
                             @onSelect="setMultimedia"/>
                     </v-col>
+                    <v-col cols="12" v-if="['video','audio','pdf'].includes(filterType)">
+                        <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/>
+                    </v-col>
                 </v-row>
             </v-form>
         </template>
@@ -52,6 +55,7 @@ export default {
             titulo: null,
             multimedia: null,
             file_multimedia: null,
+            ia_convert:null,
             rules: {
                 titulo: this.getRules(['required']),
             }
@@ -76,6 +80,7 @@ export default {
             if (validateForm) {
                 const data = {
                     titulo: vue.titulo,
+                    ia_convert:vue.ia_convert,
                     file: vue.TypeOf(vue.multimedia) === 'object' ? vue.multimedia : null,
                     valor: vue.TypeOf(vue.multimedia) === 'string' ? vue.multimedia : null,
                     type: vue.type

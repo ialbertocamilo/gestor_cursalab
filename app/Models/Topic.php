@@ -172,6 +172,7 @@ class Topic extends BaseModel
                         'title' => $media['titulo'] ?? '',
                         'embed' => $media['embed'],
                         'downloadable' => $media['descarga'],
+                        'ia_convert' => $media['ia_convert'] ?? 0,
                         'type_id' => $media['tipo'],
                         'created_at' => $now,
                         'updated_at' => $now,

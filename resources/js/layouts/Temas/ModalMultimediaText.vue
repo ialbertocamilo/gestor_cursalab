@@ -23,6 +23,9 @@
                             v-model="url"
                             :rules="rules.url"/>
                     </v-col>
+                    <v-col cols="12" v-if="type == 'youtube'">
+                        <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/>
+                    </v-col>
                 </v-row>
             </v-form>
         </template>
@@ -42,6 +45,7 @@ export default {
         return {
             titulo: null,
             url: null,
+            ia_convert:null,
             rules: {
                 titulo: this.getRules(['required']),
                 url: this.getRules(['required']),
@@ -62,6 +66,7 @@ export default {
                 const data = {
                     titulo: vue.titulo,
                     valor: vue.url,
+                    ia_convert: vue.ia_convert,
                     type:vue.type
                 }
                 vue.cleanValues()
