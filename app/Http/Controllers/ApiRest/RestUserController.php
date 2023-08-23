@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,9 +39,47 @@ class RestUserController extends Controller
         $user->save();
 
         return $this->success(['message' => 'Contraseña actualizada correctamente.']);
-        
+
         // return response()->json([
         //     'success' => $response == Password::PASSWORD_RESET
         // ]);
+    }
+
+    /**
+     * Load user's visible notifications
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function loadNotifications(Request $request) {
+
+        $user = auth()->user();
+        $notications = UserNotification::query()
+            ->where('user_id', $user->id)
+            ->where('is_visible', 1)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($notications);
+    }
+
+    /**
+     * Update user's notification visible and read statuses
+     *
+     * @param Request $request
+     * @param UserNotification $userNotification
+     * @return JsonResponse
+     */
+    public function updateNoficationStatus(Request $request, UserNotification $userNotification) {
+
+        if (isset($request['markAsRead'])) {
+            $userNotification->markAsRead();
+        }
+
+        if (isset($request['hide'])) {
+            $userNotification->hide();
+        }
+
+        return response()->json(['success' => true]);
     }
 }
