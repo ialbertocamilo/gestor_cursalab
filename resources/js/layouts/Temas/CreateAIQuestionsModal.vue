@@ -1,147 +1,149 @@
 <template>
-    <DefaultDialog
-        :options="options"
-        title=""
-        styleTitle="width:100vw !important"
-        :width="options.width"
-        @onCancel="closeModal"
-        @onConfirm="confirmModal"
-        no-padding-card-text
-    >
-        <template v-slot:content>
-            <v-form ref="TemaMultimediaTextForm" @submit.prevent="null">
-                <v-row>
-                    <v-col cols="5">
-                        <div>
-                            <span class="rounded-border-primary">1</span>
-                            <span class="ml-1 color-default-primary">Indicaciones</span>
-                        </div>
-                        <v-divider class="border-color-divider"></v-divider>
-                        <ul>
-                            <li>Crea la preguntas para tu examen con Inteligencia Artificial.</li>
-                            <li>Puedes elegir el tipo de preguntas que deseas que contenga tu examen.</li>
-                            <li>Al dar clic en el botón <b>Generar evaluación</b> se crearán las preguntas según la configuración indicada.</li>
-                            <li>Podrás editar, eliminar y seleccionar la preguntas obligatorias de tu evaluación y luego dar clic en el botón <b>Guadar evaluación</b>.</li>
-                        </ul>
-                        <v-divider class="border-color-divider"></v-divider>
-                        <div>
-                            <span class="rounded-border-primary">2</span> 
-                            <span class="ml-1 color-default-primary">Configuración</span>
-                        </div>
-                        <v-divider class="border-color-divider"></v-divider>
-                        <div class="d-flex justify-space-between align-items-center">
-                            <span>Dificultad</span>
-                            <v-chip-group
-                                mandatory
-                                active-class="primary--text"
-                                v-model="configuration.level"
-                            >
-                                <v-chip
-                                    v-for="level in levels"
-                                    :key="level"
-                                    :style="configuration.level != level ? 'color:gray' : '' "
-                                >
-                                    {{ level }}
-                                </v-chip>
-                            </v-chip-group>
-                        </div>
-                        <div class="d-flex justify-space-between align-items-center">
-                            <span>Generar el tipo de pregunta</span>
-                            <div class="pt-4">
-                                <v-switch
-                                    v-model="generate_quantity"
-                                    @change="changeConfiguration"
-                                    inset
-                                ></v-switch>
+    <div>
+        <DefaultDialog
+            :options="options"
+            title=""
+            styleTitle="width:100vw !important"
+            :width="options.width"
+            @onCancel="closeModal"
+            @onConfirm="confirmModal"
+            no-padding-card-text
+        >
+            <template v-slot:content>
+                <v-form ref="TemaMultimediaTextForm" @submit.prevent="null">
+                    <v-row>
+                        <v-col cols="5">
+                            <div>
+                                <span class="rounded-border-primary">1</span>
+                                <span class="ml-1 color-default-primary">Indicaciones</span>
                             </div>
-                        </div>
-                        <div>
-                            <v-row>
-                                <v-col cols="8" class="pb-0 pl-10">Tipos de preguntas</v-col>
-                                <v-col cols="4" class="pb-0">Cantidad</v-col>
-                            </v-row>
                             <v-divider class="border-color-divider"></v-divider>
-                            <v-row v-for="(question,index) in configuration.type_questions" :key="index">
-                                <v-col cols="8" class="d-flex py-0">
-                                    <v-checkbox
-                                        v-model="question.checked"
-                                        :label="question.name"
-                                    ></v-checkbox>
-                                    <!-- <span v-text="question.name"></span> -->
-                                </v-col>
-                                <v-col cols="4" class="py-0">
-                                    <DefaultInput dense outlined v-model="question.quantity" :disabled="!question.checked"></DefaultInput>
-                                </v-col>
-                            </v-row>
-                            <v-divider class="border-color-divider my-0"></v-divider>
-                            <v-row>
-                                <v-col cols="8" class="pt-0 pl-10">Total</v-col>
-                                <v-col cols="4" class="pt-0">{{ configuration.type_questions.reduce((sum, question) => parseInt(sum) + (parseInt(question.quantity) || 0 ), 0) }}</v-col>
-                            </v-row>
-                        </div>
-                    </v-col>
-                    <v-col cols="7">
-                        <div>
-                            <span class="rounded-border-primary">3</span>
-                            <span class="ml-1 color-default-primary">Resultado</span>
-                        </div>
-                        <div class="container-questions py-1 my-4">
-                            <!-- <transition-group name="fade" mode="out-in"> -->
-                            <div class="m-3 px-5 py-2 card-question" v-for="(question,index) in questions" :key="index">
-                                <span v-text="question.question" class="mb-1"></span>
-                                <span v-for="(option,index) in question.options" :key="index" v-text="option.text" :style="option.isCorrect ? 'background:#ddddfa' :''"></span>
-                                <div class="d-flex justify-end">
-                                    <v-btn color="primary" icon>
-                                        <v-icon 
-                                            small 
-                                            @click="openFormModal(modalQuesitonOptions, question,null, 'Edición de preguntas')"
-                                        >
-                                             mdi mdi-pencil
-                                        </v-icon> 
-                                    </v-btn>
-                                    <v-btn color="primary" icon><v-icon small> mdi-rotate-45 mdi-pin</v-icon> </v-btn>
-
-                                    <v-btn color="primary" icon><v-icon small> far fa-trash-alt</v-icon> </v-btn>
-                                    
+                            <ul>
+                                <li>Crea la preguntas para tu examen con Inteligencia Artificial.</li>
+                                <li>Puedes elegir el tipo de preguntas que deseas que contenga tu examen.</li>
+                                <li>Al dar clic en el botón <b>Generar evaluación</b> se crearán las preguntas según la configuración indicada.</li>
+                                <li>Podrás editar, eliminar y seleccionar la preguntas obligatorias de tu evaluación y luego dar clic en el botón <b>Guadar evaluación</b>.</li>
+                            </ul>
+                            <v-divider class="border-color-divider"></v-divider>
+                            <div>
+                                <span class="rounded-border-primary">2</span> 
+                                <span class="ml-1 color-default-primary">Configuración</span>
+                            </div>
+                            <v-divider class="border-color-divider"></v-divider>
+                            <div class="d-flex justify-space-between align-items-center">
+                                <span>Dificultad</span>
+                                <v-chip-group
+                                    mandatory
+                                    active-class="primary--text"
+                                    v-model="configuration.level"
+                                >
+                                    <v-chip
+                                        v-for="level in levels"
+                                        :key="level"
+                                        :style="configuration.level != level ? 'color:gray' : '' "
+                                    >
+                                        {{ level }}
+                                    </v-chip>
+                                </v-chip-group>
+                            </div>
+                            <div class="d-flex justify-space-between align-items-center">
+                                <span>Generar el tipo de pregunta</span>
+                                <div class="pt-4">
+                                    <v-switch
+                                        v-model="generate_quantity"
+                                        @change="changeConfiguration"
+                                        inset
+                                    ></v-switch>
                                 </div>
                             </div>
-                            <!-- </transition-group> -->
-                        </div>
+                            <div>
+                                <v-row>
+                                    <v-col cols="8" class="pb-0 pl-10">Tipos de preguntas</v-col>
+                                    <v-col cols="4" class="pb-0">Cantidad</v-col>
+                                </v-row>
+                                <v-divider class="border-color-divider"></v-divider>
+                                <v-row v-for="(question,index) in configuration.type_questions" :key="index">
+                                    <v-col cols="8" class="d-flex py-0">
+                                        <v-checkbox
+                                            v-model="question.checked"
+                                            :label="question.name"
+                                        ></v-checkbox>
+                                        <!-- <span v-text="question.name"></span> -->
+                                    </v-col>
+                                    <v-col cols="4" class="py-0">
+                                        <DefaultInput dense outlined v-model="question.quantity" :disabled="!question.checked"></DefaultInput>
+                                    </v-col>
+                                </v-row>
+                                <v-divider class="border-color-divider my-0"></v-divider>
+                                <v-row>
+                                    <v-col cols="8" class="pt-0 pl-10">Total</v-col>
+                                    <v-col cols="4" class="pt-0">{{ configuration.type_questions.reduce((sum, question) => parseInt(sum) + (parseInt(question.quantity) || 0 ), 0) }}</v-col>
+                                </v-row>
+                            </div>
+                        </v-col>
+                        <v-col cols="7">
+                            <div>
+                                <span class="rounded-border-primary">3</span>
+                                <span class="ml-1 color-default-primary">Resultado</span>
+                            </div>
+                            <div class="container-questions py-1 my-4">
+                                <!-- <transition-group name="fade" mode="out-in"> -->
+                                <div class="m-3 px-5 py-2 card-question" v-for="(question,index) in questions" :key="index">
+                                    <span v-text="question.question" class="mb-1"></span>
+                                    <span v-for="(option,index) in question.options" :key="index" v-text="option.text" :style="option.isCorrect ? 'background:#ddddfa' :''"></span>
+                                    <div class="d-flex justify-end">
+                                        <v-btn color="primary" icon @click="openEditQuestionModal(question,index)">
+                                            <v-icon 
+                                                small 
+                                            >
+                                                 mdi mdi-pencil
+                                            </v-icon> 
+                                        </v-btn>
+                                        <v-btn color="primary" icon><v-icon small> mdi-rotate-45 mdi-pin</v-icon> </v-btn>
+    
+                                        <v-btn color="primary" icon><v-icon small> far fa-trash-alt</v-icon> </v-btn>
+                                        
+                                    </div>
+                                </div>
+                                <!-- </transition-group> -->
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </template>
+            <template v-slot:card-actions>
+                <v-row>
+                    <v-col cols="5" class="d-flex justify-space-between align-items-center">
+                        <DefaultButton @click="resetValues()" text label="Resetear" />
+                        <v-btn
+                            class="mx-1"
+                            elevation="0"
+                            color="primary"
+                            outlined
+                            @click="generateQuestions()"
+                        >
+                            Generar evaluación con AI
+                            <img width="22px" 
+                                class="ml-2" 
+                                style="filter: hue-rotate(360deg);"
+                                src="/img/ia_convert.svg"
+                            >
+                        </v-btn>
+    
+                    </v-col>
+                    <v-col cols="7" class="d-flex justify-end">
+                        <DefaultButton  label="Guardar evaluación" />
                     </v-col>
                 </v-row>
-            </v-form>
-        </template>
-        <template v-slot:card-actions>
-            <v-row>
-                <v-col cols="5" class="d-flex justify-space-between align-items-center">
-                    <DefaultButton @click="resetValues()" text label="Resetear" />
-                    <v-btn
-                        class="mx-1"
-                        elevation="0"
-                        color="primary"
-                        outlined
-                        @click="generateQuestions()"
-                    >
-                        Generar evaluación con AI
-                        <img width="22px" 
-                            class="ml-2" 
-                            style="filter: hue-rotate(360deg);"
-                            src="/img/ia_convert.svg"
-                        >
-                    </v-btn>
-
-                </v-col>
-                <v-col cols="7"></v-col>
-            </v-row>
-        </template>
-        <CreateAIQuestionsModal
-            width="40vw"
-            :ref="modalQuesitonOptions.ref"
-            :options="modalQuesitonOptions"
-            @onConfirm="closeFormModal(modalQuesitonOptions)"
-            @onCancel="closeFormModal(modalQuesitonOptions) "
+            </template>
+        </DefaultDialog>
+        <EditAIQuestionsModal
+            :ref="modalQuestionOptions.ref"
+            :options="modalQuestionOptions"
+            @onConfirm="confirmQuestionModal "
+            @onCancel="closeFormModal(modalQuestionOptions)"
         />
-    </DefaultDialog>
+    </div>
 </template>
 <script>
 import EditAIQuestionsModal from './EditAIQuestionsModal';
@@ -202,13 +204,28 @@ export default {
                     correctAnswer: 1
                 }
             ],
-            modalQuesitonOptions: {
+            modalQuestionOptions: {
                 ref: 'EditModalQuestion',
+                title_modal:'Edición de preguntas',
+                width:'45vw',
                 open: false,
-                base_endpoint: ``,
+                base_endpoint: `question`,
                 resource: 'Question',
                 confirmLabel: 'Guardar',
                 showCloseIcon: true,
+            },
+            openEditQuestionModal(question,index){
+                let vue = this;
+                question.index = index;
+                vue.openFormModal(vue.modalQuestionOptions, question,null, 'Edición de preguntas');
+            },
+            confirmQuestionModal(question){
+                let vue = this;
+                vue.questions[question.index] = {
+                    question:question.question,
+                    options:question.options,
+                }
+                vue.closeFormModal(vue.modalQuestionOptions)
             }
         }
     },
