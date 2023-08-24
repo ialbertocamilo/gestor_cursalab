@@ -449,9 +449,22 @@ class Workspace extends BaseModel
         $values = Taxonomy::getDataByGroupAndType('system', $type);
 
         $data = [];
+        $assigned = [];
 
         foreach ($values as $value) {
-            $data[$value->code] = in_array($value->code, $codes);
+
+            $available = in_array($value->code, $codes);
+
+            if ($type == 'side_menu' && in_array($value->code, ['cursoslibres', 'cursosextra']) && $available) {
+
+                $assigned = $assigned ?? $user->checkCoursesTypeAssigned();
+
+                $data[$value->code] =  $assigned[$value->code];
+
+            } else {
+
+                $data[$value->code] = $available;
+            }
         }
 
         return $data;

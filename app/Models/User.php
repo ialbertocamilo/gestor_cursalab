@@ -1573,4 +1573,34 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $all_courses;
     }
+
+    public function checkCoursesTypeAssigned()
+    {
+        $user = $this;
+        $workspace = $user->subworkspace->parent;
+
+        $cursoslibres = false;
+        $cursosextra = false;
+
+        $courses_free = $workspace->whereHas('courses.type', function($q){
+            $q->where('code', 'free');
+        })->count();
+
+        $courses_extra = $workspace->whereHas('courses.type', function($q){
+            $q->where('code', 'extra-curricular');
+        })->count();
+
+        if ($courses_extra > 0 || $courses_free > 0) {
+
+            $user->getCurrentCourses(withRelations: 'user-progress');
+
+            $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular')->count();
+            $free_courses = $assigned_courses->where('type.code', 'free')->count();
+
+            $cursoslibres = $extracurricular_courses > 0;
+            $cursosextra = $free_courses > 0;
+        }
+
+        return compact('cursoslibres', 'cursosextra');
+    }
 }
