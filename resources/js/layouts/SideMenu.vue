@@ -123,11 +123,20 @@
                 </v-card-actions>
             </v-card>
         </transition>
+        <ModalUpgrade
+            :options="ModalUpgradeOptions"
+            width="55vw"
+            :model_id="null"
+            :ref="ModalUpgradeOptions.ref"
+            @onCancel="closeSimpleModal(ModalUpgradeOptions)"
+        />
+        
     </div>
 </template>
 
 <script>
-
+import ModalUpgrade from './ModalUpgrade';
+const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
 const SUB_ITEM_GLOSARY = {
     title: "Glosario",
     icon: "fas fa-book",
@@ -149,6 +158,7 @@ const SUB_ITEM_VADEMECUM = {
 };
 
 export default {
+    components:{ModalUpgrade},
     data: () => ({
         logoIsLoaded: true,
         workspacesListIsVisible: false,
@@ -162,6 +172,16 @@ export default {
             title: 'Beneficios',
             description: ' Listado de beneficios',
             show_upgrade:null
+        },
+        ModalUpgradeOptions:{
+            ref: 'ModalUpgradeModal',
+            open: true,
+            base_endpoint: '/upgrade',
+            confirmLabel: 'Solicítalo hoy',
+            resource: 'Upgrade',
+            width:'70vw',
+            title_modal: `${img_rocket}Accede a más soluciones${img_rocket}`,
+            action: null
         }
     }),
     props: {
@@ -271,23 +291,22 @@ export default {
             this.$http.get(url).then(({ data }) => {
                 vue.userSession = data;
                 vue.grupos = data.user.menus;
-                vue.setActiveSubmenu();
                 //=== only for "Farmacias Peruanas"
                 const { session: { workspace } } = data;
                 if (workspace.id === 25) {
                       vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
                 }
-
+                vue.setActiveSubmenu();
                 // vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 // === only for "Farmacias Peruanas"
 
             });
         },
         setActiveSubmenu() {
+            let vue = this;
             const location = window.location.pathname.split("/");
-            this.grupos.forEach(grupo => {
+            vue.grupos.forEach(grupo => {
                 grupo.items.forEach(i => {
-                    console.log();
                     if (this.verify_path(location, i.subpaths)) {
                         grupo.active = true;
                         i.selected = true;
