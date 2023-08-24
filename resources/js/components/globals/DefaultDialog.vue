@@ -9,7 +9,7 @@
     >
         <v-card>
             <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
-                <span v-html="options.title_modal ? options.title_modal : options.title"></span>
+                <span :style="styleTitle" v-html="options.title_modal ? options.title_modal : options.title"></span>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
@@ -104,6 +104,10 @@ export default {
         headerClass: {
             type: String,
             default:'default-dialog-title'
+        },
+        styleTitle:{
+            type: String,
+            default:''
         },
         colorCloseIcon:{
             type: String,

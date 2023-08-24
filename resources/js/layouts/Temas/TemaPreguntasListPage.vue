@@ -4,18 +4,38 @@
         <v-card flat class="elevation-0 mb-4">
 
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
-                <v-spacer/>
-                <div class="ddd-flex justify-content-end">
-                    <DefaultActivityButton
-                        :label="'Importar evaluación'"
-                        @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
-                    />
-                    <DefaultModalButton
-                        @click="openFormModal(modalOptions, null, 'create')"
-                        :label="'Agregar pregunta'"/>
-                </div>
-
+                <v-row>
+                    <v-col cols="6">
+                        <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                    </v-col>
+                    <v-col cols="6">
+                        <div class="ddd-flex justify-content-end">
+                            <v-btn
+                                class="mx-1"
+                                elevation="0"
+                                color="primary"
+                                @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
+                            >
+                                <img width="22px" 
+                                    class="mr-2" 
+                                    style="filter: brightness(3);"
+                                    src="/img/ia_convert.svg"
+                                >
+                                Crear con AI
+                            </v-btn>
+                            <DefaultActivityButton
+                                :outlined="true"
+                                :label="'Importar evaluación'"
+                                @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
+                            />
+                            <DefaultModalButton
+                                :text="true"
+                                @click="openFormModal(modalOptions, null, 'create')"
+                                :label="'Agregar pregunta'"/>
+                        </div>
+                    </v-col>
+                </v-row>
+                <!-- <v-spacer/> -->
             </v-card-title>
         </v-card>
 
@@ -135,7 +155,13 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
-
+            <CreateAIQuestionsModal
+                width="80vw"
+                :ref="modalCreateQuestionsOptions.ref"
+                :options="modalCreateQuestionsOptions"
+                @onConfirm="closeFormModal(modalCreateQuestionsOptions, dataTable, filters);refreshDefaultTable(dataTable, filters)"
+                @onCancel="closeFormModal(modalCreateQuestionsOptions);refreshDefaultTable(dataTable, filters) "
+            />
         </v-card>
     </section>
 </template>
@@ -145,9 +171,9 @@ import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import LogsModal from "../../components/globals/Logs";
-
+import CreateAIQuestionsModal from "./CreateAIQuestionsModal"
 export default {
-    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal},
+    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal,CreateAIQuestionsModal},
     props: [
         'modulo_id',
         'modulo_name',
@@ -264,6 +290,15 @@ export default {
                         ],
                     }
                 },
+            },
+            modalCreateQuestionsOptions:{
+                ref: 'CreateQuestions',
+                open: false,
+                base_endpoint: `/questions`,
+                confirmLabel: 'Guardar',
+                title_modal: 'Creación de evaluación',
+                hideCancelBtn: true,
+                hideConfirmBtn: true,
             },
             modalTemaPreguntasImport: {
                 ref: 'TemaPreguntasImport',
