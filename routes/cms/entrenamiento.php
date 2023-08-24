@@ -13,7 +13,7 @@ use App\Http\Controllers\EntrenamientoController;
 Route::controller(EntrenamientoController::class)->group(function() {
 
 	// ENTRENADORES
-	Route::prefix('/entrenadores')->group(function () {
+	Route::prefix('/entrenadores')->middleware('hasHability:trainer')->group(function () {
 		Route::view('/', 'entrenamiento.entrenadores.index')->name('entrenamiento.entrenadores');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'search');
@@ -33,7 +33,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 	});
 
 	// CHECKLIST
-	Route::prefix('/checklists')->group(function () {
+	Route::prefix('/checklists')->middleware('hasHability:checklist')->group(function () {
 		Route::view('/', 'entrenamiento.checklist.index')->name('entrenamiento.checklist');
 		// ->middleware('permission:entrenamiento.index');
 		Route::get('/search', 'searchChecklist');

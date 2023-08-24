@@ -81,19 +81,6 @@
                                 {{ grupo.title }}
                             </v-list-item-title>
                         </template>
-                        <!-- <v-list-item-icon>
-                                <v-icon small>{{ grupo.icon }}</v-icon>
-                            </v-list-item-icon>
-                            <v-list-item-title
-                                class="grupo_title"
-                            >
-                                <div v-if="grupo.is_beta"
-                                        class="beta">Beta</div>
-                                <div v-if="grupo.show_upgrade && grupo.items.length==0"
-                                        class="beta d-flex"><img src="/img/image-premiun.svg" class="mr-1" alt=""> Upgrade</div>
-                                <div v-text="grupo.title">
-                                </div>
-                            </v-list-item-title> -->
                         <div v-for="(item, i) in grupo.items" :key="i" class="list_submenu">
     
                             <v-list-item dark dense :href="`${item.path}`" @click="()=>{}" v-model="item.selected">
@@ -291,7 +278,7 @@ export default {
                       vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
                 }
 
-                vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
+                // vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
                 // === only for "Farmacias Peruanas"
 
             });

@@ -26,12 +26,15 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports','only-reports');
-
+        // $q = User::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports','only-reports');
+        $q = User::whereRelation('roles', function ($query) {
+            $query->where('name', '<>', 'super-user');
+        });
         if ($request->has('q'))
            $q->filterText($request->q);
-
-        $users = $q->orderBy('name')->paginate();
+        // info($q->getBindings());
+        // dd($q->toSql());
+        $users = $q->orderBy('id','desc')->paginate();
 
         $super_user = auth()->user()->isAn('super-user');
         return view('users.index', compact('users', 'super_user'));

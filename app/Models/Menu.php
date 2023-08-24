@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Menu extends Model
 {
@@ -12,7 +13,8 @@ class Menu extends Model
     private $subtype_taxonomy = 'menu';
     
     protected function list(){
-        return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
+        return cache()->remember('list-menus', 1440,function () {
+            return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
                 ->with(["children:id,parent_id,group,type,position,name,icon,extra_attributes"])
                 ->where('group',$this->group_taxonomy)->where('type',$this->type_taxonomy)->orderBy('position','ASC')->get()->map(function($menu){
                     $menu->is_beta = $menu->extra_attributes['is_beta'] ?? false;
@@ -26,19 +28,18 @@ class Menu extends Model
                     unset($menu->extra_attributes);
                     return $menu;
                 });
+            });
     }
     protected function getMenuByUser($user){
-        $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id');
-        return Menu::list()
-        // 
-        ->map(function($menu) use ($submenus_id){
+        $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
+        return Menu::list()->map(function($menu) use ($submenus_id){
             //Dar formato para front
             $items = [];
             $submenus = $menu->children->whereIn('id',$submenus_id);
             $show_upgrade = $menu->children->where('show_upgrade',true);
             $menu->children = $submenus->merge($show_upgrade)->unique('id');
             foreach ($menu->children as $submenu) {
-                $show_upgrade = $submenu->show_upgrade && !in_array($submenu->id,$submenus_id->toArray());
+                $show_upgrade = $submenu->show_upgrade && !in_array($submenu->id,$submenus_id);
                 $items[]=[
                     'title' => $submenu->name,
                     'icon' => $submenu->icon,
@@ -50,13 +51,14 @@ class Menu extends Model
             } 
             if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
+                $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;
                 return [
                     'title' => $menu->name,
                     'description' => $menu->description,
                     'icon' => $menu->icon,
                     'active' => false,
                     'is_beta'=> $menu->is_beta,
-                    'show_upgrade'=> $menu->show_upgrade,
+                    'show_upgrade'=> $show_upgrade,
                     'items' => $items
                 ];
             }
@@ -98,5 +100,7 @@ class Menu extends Model
                 $submenu->save();
             }
         }
+        Cache::forget('list-menus'); //limpiar cache
+        self::list(); //volver a guardar la consulta en cache
     }
 }

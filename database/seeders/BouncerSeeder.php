@@ -111,6 +111,7 @@ class BouncerSeeder extends Seeder
                 'icon' => "fas fa-dice-d6",
                 'children' => [
                     [
+                        'code' => 'dashboard',
                         'model' => 'powerbi.index',
                         'group'=>'gestor',
                         'type' => 'submenu',
@@ -135,6 +136,7 @@ class BouncerSeeder extends Seeder
                     [
                         'model'=> 'App\Services\DashboardService',
                         'group'=>'gestor',
+                        'code' => 'learning-analytics',
                         'type' => 'submenu',
                         'name' => "Learning Analytics",
                         'icon' => "fas fa-chart-line",
@@ -166,6 +168,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Meeting',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'meetings',
                         'name' => "Gestiona sesiones",
                         'icon' => "fas fa-chalkboard-teacher",
                         'abilities' =>[
@@ -188,6 +191,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Account',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'account-meetings',
                         'name' => "Cuentas Zoom",
                         'icon' => "fas fa-chalkboard-teacher",
                         'abilities' =>[
@@ -219,6 +223,7 @@ class BouncerSeeder extends Seeder
                         'group'=>'gestor',
                         'type' => 'submenu',
                         'name'=> "Configuración",
+                        'code' => 'benefits',
                         'icon' => "fas fa-gift",
                         'abilities' =>[
                             [
@@ -243,6 +248,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Speaker',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'speaker',
                         'name'=> "Facilitadores",
                         'icon' => "fas fa-gift",
                         'abilities' =>[
@@ -276,6 +282,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Workspace',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'modules',
                         'name' => "Módulos",
                         'icon' => "fas fa-th-large",
                         'abilities' =>[
@@ -304,6 +311,7 @@ class BouncerSeeder extends Seeder
                     [
                         'model'=> 'App\Models\User',
                         'group'=>'gestor',
+                        'code' => 'users',
                         'type' => 'submenu',
                         'name' => "Usuarios",
                         'icon' => "fas fa-users",
@@ -327,6 +335,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Usuario',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'admins',
                         'name' => "Administradores",
                         'icon' => "fas fa-users-cog",
                         'abilities' =>[
@@ -349,6 +358,7 @@ class BouncerSeeder extends Seeder
                         'group'=>'gestor',
                         'type' => 'submenu',
                         'model'=> 'App\Models\Criteria',
+                        'code' => 'criteria',
                         'name' => "Criterios",
                         'icon' => "fas fa-clipboard-list",
                         'abilities' =>[
@@ -372,6 +382,7 @@ class BouncerSeeder extends Seeder
                         'type' => 'submenu',
                         'model'=> 'App\Models\Supervisor',
                         'name' =>"Supervisores",
+                        'code' => 'supervisor',
                         'icon' =>"fas fa-sitemap",
                         'abilities' =>[
                             [
@@ -403,6 +414,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Workspace',
                         'group'=>'gestor',
                         'type' => 'submenu',
+                        'code' => 'modules',
                         'name' => "Módulos",
                         'icon' => "fas fa-th-large",
                         'abilities' =>[
@@ -433,6 +445,7 @@ class BouncerSeeder extends Seeder
                     [
                         'model'=> 'App\Models\School',
                         'group'=>'gestor',
+                        'code' => 'school',
                         'type' => 'submenu',
                         'name' => "Escuelas",
                         'icon' => "fas fa-th-large",
@@ -463,6 +476,7 @@ class BouncerSeeder extends Seeder
                         'group'=>'gestor',
                         'type' => 'submenu',
                         'name' => "Cursos",
+                        'code' => 'course',
                         'icon' => "mdi mdi-notebook",
                         'abilities' =>[
                             [
@@ -500,6 +514,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Certificate',
                         'name' =>  "Listar",
                         'icon' =>  "fas fa-list",
+                        'code' => 'list-certificate',
                         'abilities' =>[
                             [
                                 'name' => 'show',
@@ -525,6 +540,7 @@ class BouncerSeeder extends Seeder
                         'model'=> 'App\Models\Certificate',
                         'name' =>  "Crear",
                         'icon' =>  "fas fa-plus",
+                        'code' => 'create-certificate',
                         'abilities' =>[
                             [
                                 'name' => 'show',
@@ -555,9 +571,28 @@ class BouncerSeeder extends Seeder
                 'functionality' =>  ['default'],
                 'children' =>  [
                     [
+                        'code'=>'vademecun',
+                        'name' => "Protocolos y Documentos",
+                        'icon' => "fas fa-file-invoice",
+                        'abilities' =>[
+                            [
+                                'name' => 'show',
+                                'title' => 'Mostrar submenú',
+                            ]
+                        ],
+                        'extra_attributes'=>[
+                            'path' => "/protocolos-y-documentos",
+                            'subpaths' => ["protocolos-y-documentos"],
+                        ],
+                        'selected' => false,
+                        'permission' => "vademecum",
+                        'roles' => ["super-user", "admin", "content-manager"]
+                    ],
+                    [
                         'model'=> 'App\Models\Announcement',
                         'name' =>  "Anuncios",
                         'icon' =>  "far fa-newspaper",
+                        'code' => 'announcement',
                         'abilities' =>[
                             [
                                 'name' => 'show',
@@ -582,6 +617,7 @@ class BouncerSeeder extends Seeder
                         ]
                     ],
                     [
+                        'code' => 'pool',
                         'model'=> 'App\Models\Pool',
                         'name' =>  "Encuestas",
                         'icon' =>  "fas fa-pencil-alt",
@@ -609,6 +645,7 @@ class BouncerSeeder extends Seeder
                         ]
                     ],
                     [
+                        'code' => 'media',
                         'model'=> 'App\Models\Media',
                         'name' =>  "Multimedia",
                         'icon' =>  "fas fa-photo-video",
@@ -637,6 +674,7 @@ class BouncerSeeder extends Seeder
                     ],
 
                     [
+                        'code' => 'videoteca',
                         'model'=> 'App\Models\Videoteca',
                         'abilities' =>[
                             [
@@ -670,6 +708,7 @@ class BouncerSeeder extends Seeder
                     [
                         'model'=> 'App\Models\Trainer',
                         'name' =>  "Entrenadores y equipo",
+                        'code' => 'trainer',
                         'icon' =>  "fas fa-user-graduate",
                         'abilities' =>[
                             [
@@ -695,6 +734,7 @@ class BouncerSeeder extends Seeder
                         ]
                     ],
                     [
+                        'code' => 'checklist',
                         'model'=> 'App\Models\Checklist',
                         'name' =>  "Gestiona Checklist",
                         'icon' =>  "fas fa-tasks",
@@ -730,6 +770,7 @@ class BouncerSeeder extends Seeder
                 'functionality' =>  ['reconocimiento'],
                 'children' =>  [
                     [
+                        'code' => 'list-campaign',
                         'model'=> 'App\Models\CampaignList',
                         'abilities' =>[
                             [
@@ -737,7 +778,7 @@ class BouncerSeeder extends Seeder
                                 'title' => 'Mostrar submenú',
                             ]
                         ],
-                        'name' =>  "Listar",
+                        'name' =>  "Campaña",
                         'icon' =>  "fas fa-list",
                         'extra_attributes'=>[
                             'path' =>  "/votaciones",
@@ -753,7 +794,8 @@ class BouncerSeeder extends Seeder
 
                     [
                         'model'=> 'App\Models\CampaignCreate',
-                        'name' =>  "Crear",
+                        'code' => 'create-campaign',
+                        'name' =>  "Crear Campaña",
                         'icon' =>  "fas fa-plus",
                         'abilities' =>[
                             [
@@ -783,6 +825,7 @@ class BouncerSeeder extends Seeder
                     [
                         'name' =>  "General",
                         'icon' =>  "fas fa-download",
+                        'code' => 'report',
                         'extra_attributes'=>[
                             'path' =>  "/exportar/node",
                             'subpaths' =>  ["exportar/node"],
@@ -804,8 +847,9 @@ class BouncerSeeder extends Seeder
                         ]
                     ],
                     [
-                        'name' =>  "Encuestas",
+                        'name' =>  "Reporte de Encuestas",
                         'icon' =>  "fas fa-poll",
+                        'code' => 'poll-report',
                         'extra_attributes'=>[
                             'path' =>  "/resumen_encuesta",
                             'subpaths' =>  ["resumen_encuesta"],
@@ -829,6 +873,7 @@ class BouncerSeeder extends Seeder
                     [
                         'name' =>  "Evaluaciones",
                         'icon' =>  "fas fa-file-alt",
+                        'code' => 'evaluation-report',
                         'extra_attributes'=>[
                             'path' =>  "/resumen_evaluaciones",
                             'subpaths' =>  ["resumen_evaluaciones"],
@@ -857,6 +902,7 @@ class BouncerSeeder extends Seeder
                     [
                         'name' =>  "Notificaciones push",
                         'icon' =>  "fas fa-envelope-open-text",
+                        'code' => 'push-notification',
                         'extra_attributes'=>[
                             'path' =>  "/notificaciones_push",
                             'subpaths' =>  ["notificaciones_push"],
@@ -877,6 +923,7 @@ class BouncerSeeder extends Seeder
                     ],
                     [
                         'name' =>  "Intentos masivos",
+                        'code' => 'attemps-massive',
                         'icon' =>  "fas fa-redo-alt",
                         'abilities' =>[
                             [
@@ -894,6 +941,7 @@ class BouncerSeeder extends Seeder
                     ],
                     [
                         'name' =>  "Procesos masivos",
+                        'code' => 'process-massive',
                         'icon' =>  "fas fa-share-square",
                         'extra_attributes'=>[
                             'path' =>  "/procesos-masivos",
@@ -911,6 +959,7 @@ class BouncerSeeder extends Seeder
                     ],
                     [
                         'name' =>  "Subida de notas",
+                        'code' => 'upload-grades-massive',
                         'icon' =>  "fas fa-share-square",
                         'abilities' =>[
                             [
@@ -927,6 +976,7 @@ class BouncerSeeder extends Seeder
                         'roles' =>  ["super-user", "admin"]
                     ],
                     [
+                        'code' => 'documentation-api',
                         'name' =>  "Documentación API",
                         'icon' =>  "fas fa-file",
                         'extra_attributes'=>[
@@ -952,6 +1002,7 @@ class BouncerSeeder extends Seeder
                 'functionality' =>  ['default'],
                 'children' =>  [
                     [
+                        'code' => 'frequent-questions',
                         'name' =>  "Preguntas frecuentes",
                         'icon' =>  "far fa-question-circle",
                         'extra_attributes'=>[
@@ -968,6 +1019,7 @@ class BouncerSeeder extends Seeder
                         'roles' =>  ["super-user", "config"]
                     ],
                     [
+                        'code' => 'help-form',
                         'name' =>  "Formulario de Ayuda",
                         'icon' =>  "far fa-clipboard",
                         'extra_attributes'=>[
@@ -984,6 +1036,7 @@ class BouncerSeeder extends Seeder
                         'roles' =>  ["super-user"]
                     ],
                     [
+                        'code' => 'support',
                         'name' => "Soporte",
                         'icon' => "fas fa-headset",
                         'extra_attributes'=>[
@@ -1007,6 +1060,7 @@ class BouncerSeeder extends Seeder
                 'active' =>  false,
                 'children' =>  [
                     [
+                        'code'=>'configuration-environment',
                         'name' =>  "Ambiente",
                         'icon' =>  "fas fa-cog",
                         'extra_attributes'=>[
@@ -1074,6 +1128,7 @@ class BouncerSeeder extends Seeder
                     $submenu->type = 'submenu';
                     $submenu->parent_id = $new_menu->id;
                     $submenu->position = $index_submenu+1;
+                    $submenu->code = $children['code'];
                     $submenu->name = $children['name'];
                     $submenu->icon = $children['icon'];
                     $submenu->extra_attributes = $children['extra_attributes'];

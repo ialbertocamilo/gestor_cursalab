@@ -252,13 +252,13 @@ class Workspace extends BaseModel
         // Get user's assigned roles
 
         $assignedRoles = AssignedRole::getUserAssignedRoles($userId);
-        $allowedRoles = [
-            Role::CONFIG,
-            Role::ADMIN,
-            Role::CONTENT_MANAGER,
-            Role::TRAINER,
-            Role::REPORTS
-        ];
+        // $allowedRoles = [
+        //     Role::CONFIG,
+        //     Role::ADMIN,
+        //     Role::CONTENT_MANAGER,
+        //     Role::TRAINER,
+        //     Role::REPORTS
+        // ];
 
         // Get list of workspaces the user is allowed to
         // access to, according to its role
@@ -266,7 +266,7 @@ class Workspace extends BaseModel
         $workspacesIds = AssignedRole::query()
             ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
             ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            // ->whereIn('assigned_roles.role_id', $allowedRoles)
             ->where('users.id', $userId)
             ->select('assigned_roles.*')
             ->pluck('scope');
