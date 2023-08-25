@@ -177,7 +177,7 @@ class DiplomaController extends Controller
                         'width'=>$e_dinamic['width'],
                         'fontWeight'=>$e_dinamic['fontWeight'],
                         'fontStyle' => $e_dinamic['fontStyle'],
-                        'zoomX'=> $e_dinamic['zoomX'],
+                        'zoomX'=> $e_dinamic['zoomX'] ?? null,
                     ];
                 }
             }
@@ -307,7 +307,7 @@ class DiplomaController extends Controller
                         'width'=>$e_dinamic['width'],
                         'fontWeight'=>$e_dinamic['fontWeight'],
                         'fontStyle' => $e_dinamic['fontStyle'],
-                        'zoomX'=> $e_dinamic['zoomX'],
+                        'zoomX'=> $e_dinamic['zoomX'] ?? null,
                     ];
                 }
             }
@@ -364,7 +364,12 @@ class DiplomaController extends Controller
                 //     $box =imagettfbbox ($e_dinamic['fontSize'], 0,$font,$text );
                 //     $left = ($bg_info['width']/2) - ($box[2]/2);
                 // }
-                $fontsize =  $e_dinamic['fontSize']- ($e_dinamic['fontSize']*$e_dinamic['zoomX']);
+                
+                $fontsize =  $e_dinamic['fontSize'];
+
+                if (isset($e_dinamic['zoomX']) && $e_dinamic['zoomX']) {
+                    $fontsize =  $fontsize - ($fontsize * $e_dinamic['zoomX']);
+                }
                 // \Log::info('top original'.$e_dinamic['top']);
                 // $top = $e_dinamic['top']-$y+$e_dinamic['fontSize'];
                 $top = $e_dinamic['top']-$y+$fontsize;
@@ -571,7 +576,11 @@ class DiplomaController extends Controller
                     $text = $this->get_text($e_dinamic);
                     $text = wordwrap($text, 35, "multiline");
 
-                    $fontsize =  $e_dinamic['fontSize'] - ($e_dinamic['fontSize'] * $e_dinamic['zoomX']);
+                    $fontsize =  $e_dinamic['fontSize'];
+
+                    if (isset($e_dinamic['zoomX']) && $e_dinamic['zoomX']) {
+                        $fontsize =  $fontsize - ($fontsize * $e_dinamic['zoomX']);
+                    }
 
                     $left = $e_dinamic['left']-$x;
                     $top = $e_dinamic['top']-$y+$fontsize; // v1
