@@ -122,7 +122,7 @@ class Certificate extends Model
         $size = Storage::disk('s3')->size($path);
 
         try {
-            $save_size = round($size  / 1024);
+            $save_size = round(($size / 1024) / 1024);
         } catch (\Exception $exception) {
             $save_size = 0;
         }
