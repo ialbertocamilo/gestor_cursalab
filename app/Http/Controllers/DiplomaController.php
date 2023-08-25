@@ -391,12 +391,11 @@ class DiplomaController extends Controller
                     foreach ($explode_text as $e_text) {
                         if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
                             $calculateTextBox = $this->calculateTextBox($fontsize, 0, $font, trim($e_text));
-                            $left = ($bg_info['width']/2) - (($calculateTextBox['width']/2));
-                            // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
+                            $left = ($width/2) - (($calculateTextBox['width']/2));
                         }
 
                         imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
-                        $top = $top + $fontsize+(0.2*$fontsize);
+                        $top = $top + $fontsize + (0.2*$fontsize);
                     }
                 }
             }
@@ -566,15 +565,16 @@ class DiplomaController extends Controller
 
                     //Centrado multilinea
                     $explode_text = explode('multiline',$text);
-                    
                     foreach ($explode_text as $e_text) {
                         if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
                             $calculateTextBox = $this->calculateTextBox($fontsize, 0, $font, trim($e_text));
-                            $left = ($width/2) - (($calculateTextBox['width']/2));
+                            $left = ($bg['width']/2) - (($calculateTextBox['width']/2));
+                            // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
                         }
 
                         imagettftext($im,$fontsize,0 ,$left,$top , $color, $font, utf8_decode($e_text));
                         $top = $top + $fontsize+(0.2*$fontsize);
+
                     }
                 }
             }
