@@ -48,12 +48,12 @@
                 </v-col>
                 <v-col>
                     <div class="container-switch p-1">
-                        <div class="px-3 py-2" :class="total_access ? 'switch-inactive' : 'switch-active' " @click="total_access=false">
-                            <img width="20px" class="mx-1" src="/img/ic_round-dashboard-customize.svg">
+                        <div class="px-3 py-2" :class="total_access ? 'switch-inactive' : 'switch-active' " @click="setFunctionalities(false)">
+                            <img width="20px" class="mx-1" :class="total_access ? 'image-inactive' : 'image-active' " src="/img/ic_round-dashboard-customize.svg">
                             Módulos adicionales
                         </div>
-                        <div class="px-3 py-2" :class="total_access ? 'switch-active' : 'switch-inactive' " @click="total_access=true">
-                            <img width="20px" class="mx-1" src="/img/rocket.svg">
+                        <div class="px-3 py-2" :class="total_access ? 'switch-active' : 'switch-inactive' " @click="setFunctionalities(true)">
+                            <img width="20px" :class="total_access ? 'image-active' : 'image-inactive' " class="mx-1" src="/img/rocket.svg">
                             Acceso total
                         </div>
                         <!-- <div class="text">{{ isActive ? 'Inacti' : inactiveText }}</div> -->
@@ -71,6 +71,7 @@
                             item-value="name"
                             clearable
                             v-model="resource.functionalities" 
+                            return-object
                             :items="functionalities"
                             countShowValues="4"
                             label="Funcionalidades y servicios adicionales"
@@ -142,13 +143,33 @@ export default {
         },
         async confirmModal() {
             let vue = this
-            
+            vue.showLoader();
+            vue.$http.put('general/workspace-plan', { ...vue.resource })
+            .then((res) => {
+                vue.hideLoader();
+                vue.$emit("onConfirm");
+                // vue.showAlert(data.data.msg);
+            }).catch(error => {
+                if (error && error.errors) vue.errors = error.errors;
+            });
+            // vue.$emit('onConfirm')
         },
         async loadData() {
             let vue = this
+            vue.resource =  {
+				limit_allowed_storage: null,
+				limit_allowed_users: null,
+				description: null,
+                functionalities:[]
+			};
         },
         loadSelects() {
             let vue = this
+        },
+        setFunctionalities(value){
+            let vue = this;
+            vue.total_access = value;
+            vue.resource.functionalities = vue.total_access ? vue.functionalities : [];
         },
     }
 }
@@ -169,6 +190,7 @@ export default {
     background: #5457E7;
     box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+    transition: all 300ms ease-in-out;
 }
 .switch-inactive{
     color: #A9B2B9;
@@ -179,5 +201,13 @@ export default {
     font-weight: 500;
     line-height: 18px; 
     cursor: pointer;
+    transition: all 300ms ease-in-out;
+}
+.image-inactive{
+    filter: invert(42%) sepia(98%) saturate(0%) hue-rotate(349deg) brightness(111%) contrast(100%);
+    /* transition: all 2s ease-in-out; */
+}
+.image-active{
+    filter: hue-rotate(360deg);
 }
 </style>

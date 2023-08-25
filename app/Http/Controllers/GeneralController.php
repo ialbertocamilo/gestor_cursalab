@@ -295,22 +295,20 @@ class GeneralController extends Controller
 
         $workspace = get_current_workspace();
         $user = Auth::user();
-
+        $functionalities_name  = implode(', ',collect($request->functionalities)->pluck('name')->toArray());
         $storage_mail = [ 
                     'subject' => 'Solicitud de Almacenamiento',
                     'user_admin' => $user->getFullnameAttribute(),
                     'user_admin_email' => $user->email_gestor,
                     'workspace_name' => $workspace->name,
-
                     'storage' => $request->limit_allowed_storage ? $request->limit_allowed_storage.' Gb' : '-',
                     'users' => $request->limit_allowed_users ?? '-',
-                    'description' => $request->description ?? '-'
+                    'description' => $request->description ?? '-',
+                    'functionalities_name' => $functionalities_name
                 ];
-
         // info(['storage_mail' => $storage_mail]);
         // Mail::to('juan@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
         // info(['storage_mail' => $storage_mail]);
-
         Mail::to('paola@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
         Mail::to('juanjose@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
 

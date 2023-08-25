@@ -117,7 +117,11 @@
                 <v-card-text class="" style="font-style: 'Nunito', sans-serif"  v-html="cardHover.description">
                 </v-card-text>
                 <v-card-actions class="text-center d-flex justify-content-center" v-if="cardHover.show_upgrade">
-                    <v-btn color="primary"  style="font-style: 'Nunito', sans-serif;background:#5457E7">
+                    <v-btn 
+                        color="primary"  
+                        @click="openFormModal(ModalUpgradeOptions)"
+                        style="font-style: 'Nunito', sans-serif;background:#5457E7"
+                    >
                         <img src="/img/premiun.svg"> Accede a más funciones
                     </v-btn>
                 </v-card-actions>
@@ -129,6 +133,14 @@
             :model_id="null"
             :ref="ModalUpgradeOptions.ref"
             @onCancel="closeSimpleModal(ModalUpgradeOptions)"
+            @onConfirm="closeFormModal(ModalUpgradeOptions),openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
         />
         
     </div>
@@ -136,6 +148,8 @@
 
 <script>
 import ModalUpgrade from './ModalUpgrade';
+import GeneralStorageEmailSendModal from './General/GeneralStorageEmailSendModal.vue';
+
 const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
 const SUB_ITEM_GLOSARY = {
     title: "Glosario",
@@ -147,18 +161,18 @@ const SUB_ITEM_GLOSARY = {
     role: ["super-user", "admin", "content-manager", "trainer"]
 };
 
-const SUB_ITEM_VADEMECUM = {
-    title: "Protocolos y Documentos",
-    icon: "fas fa-file-invoice",
-    path: "/protocolos-y-documentos",
-    subpaths: ["protocolos-y-documentos"],
-    selected: false,
-    permission: "vademecum",
-    role: ["super-user", "admin", "content-manager", "trainer-TEST"]
-};
+// const SUB_ITEM_VADEMECUM = {
+//     title: "Protocolos y Documentos",
+//     icon: "fas fa-file-invoice",
+//     path: "/protocolos-y-documentos",
+//     subpaths: ["protocolos-y-documentos"],
+//     selected: false,
+//     permission: "vademecum",
+//     role: ["super-user", "admin", "content-manager", "trainer-TEST"]
+// };
 
 export default {
-    components:{ModalUpgrade},
+    components:{ModalUpgrade,GeneralStorageEmailSendModal},
     data: () => ({
         logoIsLoaded: true,
         workspacesListIsVisible: false,
@@ -175,14 +189,22 @@ export default {
         },
         ModalUpgradeOptions:{
             ref: 'ModalUpgradeModal',
-            open: true,
+            open: false,
             base_endpoint: '/upgrade',
             confirmLabel: 'Solicítalo hoy',
             resource: 'Upgrade',
             width:'70vw',
             title_modal: `${img_rocket}Accede a más soluciones${img_rocket}`,
             action: null
-        }
+        },
+        modalGeneralStorageEmailSendOptions: {
+            ref: 'GeneralStorageEmailSendModal',
+            open: false,
+            showCloseIcon: true,
+            hideCancelBtn: true,
+            confirmLabel:'Entendido',
+            persistent: false
+        },
     }),
     props: {
         roles: {
