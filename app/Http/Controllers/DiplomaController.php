@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DiplomaSearchResource;
 use App\Models\Media;
+use App\Models\User;
+use App\Models\Course;
+use App\Models\SummaryCourse;
 use App\Models\{ Certificate as Diploma };
 use Carbon\Carbon;
 use File;
