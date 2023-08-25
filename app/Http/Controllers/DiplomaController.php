@@ -359,8 +359,8 @@ class DiplomaController extends Controller
         if ($headers && strpos($headers[0], "200 OK") !== false) {
 
             $image = file_get_contents(get_media_url($pathImage));
+            $image = imagecreatefromstring($image);
 
-            // $image = imagecreatefromstring($image);
             foreach ($e_dinamics as $e_dinamic) {
                 $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
                 if($e_dinamic['type']=='text'){
