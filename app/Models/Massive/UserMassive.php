@@ -178,6 +178,7 @@ class UserMassive extends Massive implements ToCollection
         }
         //verify username and email fields are unique
         $user_username_email = null;
+        $master_username_email = null;
         if (isset($user['document'])) {
             $user_username_email = User::where(function ($q) use ($user) {
                 isset($user['username']) && $q->orWhere('username', $user['username']);
@@ -185,7 +186,6 @@ class UserMassive extends Massive implements ToCollection
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
 
             if (env('MULTIMARCA') === true) {
-                $master_username_email = null;
                 $master_username_email = UsuarioMaster::where(function ($q) use ($user) {
                     if (isset($user['username'])) {
                         $q->orWhere('username', $user['username']);
