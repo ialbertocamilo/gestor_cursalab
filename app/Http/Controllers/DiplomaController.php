@@ -803,7 +803,7 @@ class DiplomaController extends Controller
             $certificateTemplateId = $user->subworkspace->certificate_template_id;
         }
 
-        $editableTemplate = Certificate::find($certificateTemplateId);
+        $editableTemplate = Diploma::find($certificateTemplateId);
 
         if ($editableTemplate) {
             $backgroundInfo = json_decode($editableTemplate->info_bg);
