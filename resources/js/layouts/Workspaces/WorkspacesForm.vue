@@ -200,7 +200,14 @@
                                         />
                                     </v-col>
                                     <v-col cols="4">
-
+                                        <DefaultInput
+                                            label="Límite de evaluaciones generadas"
+                                            v-model="resource.limit_allowed_ia_evaluations"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
                                     </v-col>
                                 </v-row>
                             </template>
@@ -345,7 +352,8 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 
+    'show_logo_in_app','limits'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [

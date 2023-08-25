@@ -13,11 +13,12 @@
                 Modifica el contenido y luego guarda los cambios
             </v-row>
             <v-row class="my-2">
-                <DefaultInput label="Pregunta" dense outlined v-model="question.question"></DefaultInput>
+                <DefaultInput label="Pregunta" dense outlined v-model="localQuestion.question"></DefaultInput>
             </v-row>
-            <v-row class="my-2 d-flex align-items-center" v-for="(options,index) in question.options" :key="index">
+            <v-row class="my-2 d-flex align-items-center" v-for="(options,index) in localQuestion.options" :key="index">
                 <DefaultInput label="Alternativa" dense outlined v-model="options.text"></DefaultInput>
                 <v-checkbox
+                    @change="updateCorrectAnswer(index)"
                     class="mt-6"
                     v-model="options.isCorrect"
                 ></v-checkbox>
@@ -41,7 +42,7 @@ export default {
     },
     data() {
         return {
-            question:{}
+            localQuestion:{}
         }
     },
     methods:{
@@ -50,7 +51,8 @@ export default {
             vue.$emit('onCancel')
         },
         loadData(question){
-            this.question = question;
+            // this.localQuestion = Object.assign({}, question);
+            this.localQuestion = JSON.parse(JSON.stringify(question));
         },
         loadSelects (){
 
@@ -59,18 +61,23 @@ export default {
 
         },
         confirmModal() {
-            let vue = this
-            vue.$emit('onConfirm',vue.question)
+            let vue = this;
+            vue.$emit('onConfirm',vue.localQuestion)
         },
         addOption(){
-            this.question.options.push(
+            this.localQuestion.options.push(
                 { text: "", isCorrect: false }
             );
         },
         deleteOption(index){
-            console.log(index);
-            this.question.options.splice(index,1);
+            this.localQuestion.options.splice(index,1);
         },
+        updateCorrectAnswer(index){
+            this.localQuestion.correctAnswer = index;
+            this.localQuestion.options.map((option,idx)=>{
+                option.isCorrect = (idx == index);
+            })
+        }
 
     }
 }

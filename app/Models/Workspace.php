@@ -24,6 +24,7 @@ class Workspace extends BaseModel
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
+        'limits',
         'users_with_empty_criteria',
         'qualification_type_id',
         'logo_marca_agua',
@@ -51,7 +52,8 @@ class Workspace extends BaseModel
         'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
-        'limit_allowed_users' => 'array'
+        'limit_allowed_users' => 'array',
+        'limits' => 'json',
     ];
 
     public function medias() {

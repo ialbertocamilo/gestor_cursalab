@@ -132,7 +132,7 @@
     
                     </v-col>
                     <v-col cols="7" class="d-flex justify-end">
-                        <DefaultButton  label="Guardar evaluación" />
+                        <DefaultButton class="mr-12"  label="Guardar evaluación" />
                     </v-col>
                 </v-row>
             </template>
@@ -168,8 +168,8 @@ export default {
                     { checked: true, type: 'analogies', name: 'Analogías', quantity: 5 },
                 ],
             },
-            questionsTemplate:[],
-            questions:[
+            questions:[],
+            questionsTemplate:[
                 {
                     question: "¿Cuál es el problema de salud que presenta la cliente?",
                     options: [
@@ -179,7 +179,7 @@ export default {
                     { text: "Problemas de circulación", isCorrect: false },
                     { text: "Alergia a medicamentos", isCorrect: false }
                     ],
-                    anwer: 0
+                    correctAnswer: 0
                 },
                 {
                     question: "¿Con qué frecuencia utiliza la cliente zapatos ajustados?",
@@ -190,19 +190,63 @@ export default {
                     { text: "Nunca", isCorrect: false },
                     { text: "Solo para eventos especiales", isCorrect: false }
                     ],
+                    correctAnswer: 1
+                },
+                {
+                    question: "¿Cuál es la recomendación final para la cliente?",
+                    options: [
+                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
+                    { text: "Consultar con un médico", isCorrect: false },
+                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
+                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
+                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
+                    ],
                     correctAnswer: 2
                 },
                 {
                     question: "¿Cuál es la recomendación final para la cliente?",
                     options: [
                     { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: true },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: false },
+                    { text: "Consultar con un médico", isCorrect: false },
+                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
                     { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
                     { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
                     ],
-                    correctAnswer: 1
-                }
+                    correctAnswer: 2
+                },
+                {
+                    question: "¿Cuál es la recomendación final para la cliente?",
+                    options: [
+                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
+                    { text: "Consultar con un médico", isCorrect: false },
+                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
+                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
+                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
+                    ],
+                    correctAnswer: 2
+                },
+                {
+                    question: "¿Cuál es la recomendación final para la cliente?",
+                    options: [
+                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
+                    { text: "Consultar con un médico", isCorrect: false },
+                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
+                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
+                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
+                    ],
+                    correctAnswer: 2
+                },
+                {
+                    question: "¿Cuál es la recomendación final para la cliente?",
+                    options: [
+                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
+                    { text: "Consultar con un médico", isCorrect: false },
+                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
+                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
+                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
+                    ],
+                    correctAnswer: 2
+                },
             ],
             modalQuestionOptions: {
                 ref: 'EditModalQuestion',
@@ -214,19 +258,6 @@ export default {
                 confirmLabel: 'Guardar',
                 showCloseIcon: true,
             },
-            openEditQuestionModal(question,index){
-                let vue = this;
-                question.index = index;
-                vue.openFormModal(vue.modalQuestionOptions, question,null, 'Edición de preguntas');
-            },
-            confirmQuestionModal(question){
-                let vue = this;
-                vue.questions[question.index] = {
-                    question:question.question,
-                    options:question.options,
-                }
-                vue.closeFormModal(vue.modalQuestionOptions)
-            }
         }
     },
     methods: {
@@ -244,11 +275,20 @@ export default {
 
         },
         generateQuestions(){
-            this.questionsTemplate.forEach(element => {
-                setInterval(() => {
-                    this.questions.push(element);
-                }, 5000);
-            });
+            this.addItemWithTimeout(this.questionsTemplate,0);
+            // this.questionsTemplate.forEach(element => {
+            //     setInterval(() => {
+            //         this.questions.push(element);
+            //     }, 5000);
+            // });
+        },
+        addItemWithTimeout(new_questions,index) {
+            this.questions.push(new_questions[index]);
+            if (this.questions.length != new_questions.length && new_questions[index+1]) {
+                setTimeout(() => {
+                    this.addItemWithTimeout(new_questions,index+1);
+                }, 1000);
+            }
         },
         confirmModal() {
             let vue = this
@@ -300,6 +340,19 @@ export default {
             numberLess = Math.min(Math.max(numberLess, 1), 6);
             numbers.push(numberLess);
             return numbers;
+        },
+        openEditQuestionModal(question,index){
+            let vue = this;
+            question.index = index;
+            vue.openFormModal(vue.modalQuestionOptions, question,null, 'Edición de preguntas');
+        },
+        confirmQuestionModal(question){
+            let vue = this;
+            console.log('entra',question,vue.questions[question.index]);
+            vue.questions[question.index].question=question.question;
+            vue.questions[question.index].options=question.options;
+            vue.questions[question.index].correctAnswer=question.correctAnswer;
+            vue.closeFormModal(vue.modalQuestionOptions)
         }
     }
 }
@@ -322,11 +375,14 @@ export default {
 .container-questions{
     background-color: #eaeaea;
     border-radius: 8px;
+    max-height: 50vh;
+    overflow: auto;
 }
 .card-question{
     background-color: white;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
+    transition: all 500ms ease-in;
 }
 </style>

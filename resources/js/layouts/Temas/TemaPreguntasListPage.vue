@@ -296,7 +296,7 @@ export default {
                 open: false,
                 base_endpoint: `/questions`,
                 confirmLabel: 'Guardar',
-                title_modal: 'Creación de evaluación',
+                title_modal: `Creación de evaluación con AI (${this.tema_name})`,
                 hideCancelBtn: true,
                 hideConfirmBtn: true,
             },
