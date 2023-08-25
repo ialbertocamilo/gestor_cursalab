@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\GestorController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\DiplomaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WorkspaceController;
