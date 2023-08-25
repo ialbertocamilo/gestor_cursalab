@@ -350,7 +350,7 @@ class DiplomaController extends Controller
 
         $x = $bg_info['left'];
         $y = $bg_info['top'];
-        $width = $bg_info['width'];
+        // $width = $bg_info['width'];
 
         $image = file_get_contents(get_media_url($pathImage));
 
