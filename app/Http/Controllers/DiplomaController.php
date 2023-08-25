@@ -743,6 +743,8 @@ class DiplomaController extends Controller
 
         } catch (\Throwable $th) {
 
+            info($th);
+
             $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
             return view('error', compact('errorMessage'));
         }
