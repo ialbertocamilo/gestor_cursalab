@@ -360,6 +360,7 @@ class DiplomaController extends Controller
 
             $image = file_get_contents(get_media_url($pathImage));
             $image = imagecreatefromstring($image);
+            $width = imagesx($image);
 
             foreach ($e_dinamics as $e_dinamic) {
                 $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
@@ -565,16 +566,15 @@ class DiplomaController extends Controller
 
                     //Centrado multilinea
                     $explode_text = explode('multiline',$text);
+                    
                     foreach ($explode_text as $e_text) {
                         if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
                             $calculateTextBox = $this->calculateTextBox($fontsize, 0, $font, trim($e_text));
-                            $left = ($bg['width']/2) - (($calculateTextBox['width']/2));
-                            // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
+                            $left = ($width/2) - (($calculateTextBox['width']/2));
                         }
 
                         imagettftext($im,$fontsize,0 ,$left,$top , $color, $font, utf8_decode($e_text));
                         $top = $top + $fontsize+(0.2*$fontsize);
-
                     }
                 }
             }
