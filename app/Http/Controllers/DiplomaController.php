@@ -739,7 +739,7 @@ class DiplomaController extends Controller
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
 
             if (!$data['old_template']) {
-                $data['image'] = $this->get_diploma($pathImage, $dObjects, $backgroundInfo, $data);
+                $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
             }
 
             return view('certificate_template', compact('data'));
