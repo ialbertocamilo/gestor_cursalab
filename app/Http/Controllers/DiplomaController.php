@@ -69,7 +69,7 @@ class DiplomaController extends Controller
         $diploma['s_objects_text'] = $array_text;
 
         // === imagen plantilla completa ===
-        info(['diploma' => $diploma->toArray() ]);
+        // info(['diploma' => $diploma->toArray() ]);
 
         $plantilla = Storage::disk('s3')->get($diploma->path_image);
         $plantilla = "data:image/png;base64," . base64_encode($plantilla);
@@ -347,8 +347,7 @@ class DiplomaController extends Controller
         $x = $bg_info['left'];
         $y = $bg_info['top'];
         $width = $bg_info['width'];
-        // $font = 'fonts/tahoma.ttf';
-        // $b_64 = base64_encode($image);
+
         $image = imagecreatefromstring($image);
         foreach ($e_dinamics as $e_dinamic) {
             $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
@@ -367,7 +366,8 @@ class DiplomaController extends Controller
                 // }
                 $fontsize =  $e_dinamic['fontSize']- ($e_dinamic['fontSize']*$e_dinamic['zoomX']);
                 // \Log::info('top original'.$e_dinamic['top']);
-                $top = $e_dinamic['top']-$y+$e_dinamic['fontSize'];
+                // $top = $e_dinamic['top']-$y+$e_dinamic['fontSize'];
+                $top = $e_dinamic['top']-$y+$fontsize;
                 // \Log::info('top del obejt'.$top);
                 // imagettftext($image,$fontsize,0 ,$left,$top , $color, $font, utf8_decode($text));
                 ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
@@ -569,12 +569,12 @@ class DiplomaController extends Controller
                     $color = imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
 
                     $text = $this->get_text($e_dinamic);
-                    $text = wordwrap($text, 30, "multiline");
+                    $text = wordwrap($text, 35, "multiline");
+
+                    $fontsize =  $e_dinamic['fontSize'] - ($e_dinamic['fontSize'] * $e_dinamic['zoomX']);
 
                     $left = $e_dinamic['left']-$x;
-                    $top = $e_dinamic['top']-$y;
-                    $fontsize =  $e_dinamic['fontSize'] - ($e_dinamic['fontSize'] * $e_dinamic['zoomX']);
-                    // $top = $e_dinamic['top']-$y+$e_dinamic['fontSize']; v1
+                    $top = $e_dinamic['top']-$y+$fontsize; // v1
 
                     ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
                     ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';

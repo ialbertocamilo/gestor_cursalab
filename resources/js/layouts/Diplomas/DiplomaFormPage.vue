@@ -24,7 +24,7 @@
             <div class="mx-8 mb-0 d-flex justify-content-center">
                 <v-row class="mt-0 container-box">
 
-                    <div id="overlay-div" class="overlay-div mx-4 mt-3" v-show="overlay"> 
+                    <div id="overlay-div" class="overlay-div ma-auto mt-5" v-show="overlay"> 
                         <v-file-input
                             full-width
                             prepend-icon=""
@@ -32,7 +32,7 @@
                             ref="overlayFile"
                             v-model="bg_image"
                             accept="image/*"
-                            height="67vh"
+                            height="40vh"
                             @change="set_plantilla()"
                         />
                         <div class="overlay-icon">
@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <v-col cols="12" md="12" sm="12">
+                    <v-col cols="12" md="12" sm="12" class="d-flex align-items-center justify-center">
                         <!-- === CANVAS-MENU === -->
                         <div class="c_menu text-center elevation-4 mx-2 my-1 px-2 py-1" id="c_menu" 
                              style="display: none; flex-direction: row; align-items: center; border-radius: .3rem; grid-gap: .5rem;">
@@ -126,7 +126,7 @@
                         <!-- === CANVAS-MENU === -->
 
                         <!-- === CANVAS === -->
-                        <div v-show="!overlay" class="col-12">
+                        <div v-show="!overlay" class="">
                             <canvas ref="canvasElement" id="canvas" class="canvas-style"></canvas>
                         </div>
                         <!-- === CANVAS === -->
@@ -1071,8 +1071,8 @@ export default {
 .overlay-div{
     position: relative;
     display: flex;
-    width: 100%;
-    height: 56vh;
+    width: 600px;
+/*    height: auto;*/
     background-color: #ffffff;
     border-radius: .5rem;
 }
@@ -1096,8 +1096,8 @@ export default {
     pointer-events: none;
     color: #A9A9A9;
     width: auto;
-    top: 42%;
-    left: 46%;
+    top: 36%;
+    left: 35%;
     background-color: #ffffff;
     padding: 1rem 1.5rem;
     border-radius: .5rem;
@@ -1119,15 +1119,33 @@ export default {
 }
 
 .container-box  {
-    height: 65vh;
+/*    height: 450px;*/
+    height: 450px;
     background-color: #D4D4D4;
     border-radius: 0.5rem;
 }
 
+.canvas-container {
+/*    width: 100% !important;*/
+/*    position: initial !important;*/
+/*    margin: auto !important;*/
+}
 .canvas-style {
+    margin: auto !important;
     border-radius: 0.5rem;
-    width: 100%;
-    height: 100%;
+/*    width: 650px !important;*/
+    height: auto !important;
+/*    max-height: 500px !important;*/
+}
+
+canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+/*    position: relative !important;*/
+/*    width: 550px;*/
 }
 
 </style>
