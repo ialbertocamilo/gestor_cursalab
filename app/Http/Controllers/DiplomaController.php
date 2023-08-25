@@ -806,8 +806,8 @@ class DiplomaController extends Controller
         $editableTemplate = Diploma::find($certificateTemplateId);
 
         if ($editableTemplate) {
-            $backgroundInfo = json_decode($editableTemplate->info_bg);
-            $dObjects = json_decode($editableTemplate->d_objects);
+            $backgroundInfo = json_decode($editableTemplate->info_bg, true);
+            $dObjects = json_decode($editableTemplate->d_objects, true);
             $pathImage = $editableTemplate->path_image;
 
             // $backgroundImage = $this->parse_image($editableTemplate->path_image, true);
