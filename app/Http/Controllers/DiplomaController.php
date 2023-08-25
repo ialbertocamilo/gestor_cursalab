@@ -352,62 +352,74 @@ class DiplomaController extends Controller
         $y = $bg_info['top'];
         // $width = $bg_info['width'];
 
-        $image = file_get_contents(get_media_url($pathImage));
+        $pathImage = str_replace(" ", "%20", $pathImage);
 
-        // $image = imagecreatefromstring($image);
-        foreach ($e_dinamics as $e_dinamic) {
-            $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
-            if($e_dinamic['type']=='text'){
-                $rgb = $this->hex2rgb($e_dinamic['fill']);
-                $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
-                $text = $this->get_text($e_dinamic, $real_info);
-                $text = wordwrap($text, 35, "multiline");
-                
-                $fontsize =  $e_dinamic['fontSize'];
+        $headers = get_headers(get_media_url($pathImage));
 
-                if (isset($e_dinamic['zoomX']) && $e_dinamic['zoomX']) {
-                    $fontsize =  $fontsize - ($fontsize * $e_dinamic['zoomX']);
-                }
+        if ($headers && strpos($headers[0], "200 OK") !== false) {
 
-                $left = $e_dinamic['left']-$x;
-                $top = $e_dinamic['top']-$y+$fontsize;
+            $image = file_get_contents(get_media_url($pathImage));
 
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
-                ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+            // $image = imagecreatefromstring($image);
+            foreach ($e_dinamics as $e_dinamic) {
+                $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
+                if($e_dinamic['type']=='text'){
+                    $rgb = $this->hex2rgb($e_dinamic['fill']);
+                    $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
+                    $text = $this->get_text($e_dinamic, $real_info);
+                    $text = wordwrap($text, 35, "multiline");
+                    
+                    $fontsize =  $e_dinamic['fontSize'];
 
-                //Eliminar emogis
-                $text = trim($this->remove_emoji($text));
-                //Centrado multilinea
-                $explode_text = explode('multiline',$text);
-
-                foreach ($explode_text as $e_text) {
-                    if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
-                        $calculateTextBox = $this->calculateTextBox($fontsize, 0, $font, trim($e_text));
-                        $left = ($bg_info['width']/2) - (($calculateTextBox['width']/2));
-                        // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
+                    if (isset($e_dinamic['zoomX']) && $e_dinamic['zoomX']) {
+                        $fontsize =  $fontsize - ($fontsize * $e_dinamic['zoomX']);
                     }
 
-                    imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
-                    $top = $top + $fontsize+(0.2*$fontsize);
+                    $left = $e_dinamic['left']-$x;
+                    $top = $e_dinamic['top']-$y+$fontsize;
+
+                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
+                    ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
+                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+
+                    //Eliminar emogis
+                    $text = trim($this->remove_emoji($text));
+                    //Centrado multilinea
+                    $explode_text = explode('multiline',$text);
+
+                    foreach ($explode_text as $e_text) {
+                        if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
+                            $calculateTextBox = $this->calculateTextBox($fontsize, 0, $font, trim($e_text));
+                            $left = ($bg_info['width']/2) - (($calculateTextBox['width']/2));
+                            // info($bg['width'].'-'.$calculateTextBox['width'].'-'.$left.'-'.$text.' .');
+                        }
+
+                        imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
+                        $top = $top + $fontsize+(0.2*$fontsize);
+                    }
                 }
             }
+            
+            //Añadir marca de agua al 10% de la imagen total
+            // $ambiente = DB::table('config_general')->select('marca_agua')->first();
+            // if(!is_null($ambiente->marca_agua)){
+            //     $marca_agua = json_decode($ambiente->marca_agua);
+            //     if($marca_agua->estado){
+            //         $watermark = imagecreatefrompng($marca_agua->url);
+            //         $ancho = imagesx($image)*0.12;
+            //         $alto = round($ancho  * imagesy($watermark) / imagesx($watermark) );
+            //         $watermark = $this->getImageResized($watermark,$ancho,$alto);
+            //         imagecopymerge($image, $watermark,$bg_info['width'] - $ancho, $bg_info['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40);
+            //     }
+            // }
+
+            $preview = $this->jpg_to_base64($image);
+
+            return $preview;
         }
-        
-        //Añadir marca de agua al 10% de la imagen total
-        // $ambiente = DB::table('config_general')->select('marca_agua')->first();
-        // if(!is_null($ambiente->marca_agua)){
-        //     $marca_agua = json_decode($ambiente->marca_agua);
-        //     if($marca_agua->estado){
-        //         $watermark = imagecreatefrompng($marca_agua->url);
-        //         $ancho = imagesx($image)*0.12;
-        //         $alto = round($ancho  * imagesy($watermark) / imagesx($watermark) );
-        //         $watermark = $this->getImageResized($watermark,$ancho,$alto);
-        //         imagecopymerge($image, $watermark,$bg_info['width'] - $ancho, $bg_info['height']-$alto, 0, 0,imagesx($watermark), imagesy($watermark), 40);
-        //     }
-        // }
-        $preview = $this->jpg_to_base64($image);
-        return $preview;
+
+        return abort(404);
+
     }
     function remove_emoji($text) {
         $clean_text = "";
