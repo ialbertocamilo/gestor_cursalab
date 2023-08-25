@@ -107,7 +107,7 @@ class GestorController extends Controller
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
-        $template_certification = '';
+        // $template_certification = '';
 
         // Load editable template from course,
         // school or module
@@ -173,7 +173,7 @@ class GestorController extends Controller
 
 
         $fecha = $summary_course->certification_issued_at;
-        $base64 = $this->parse_image($template_certification);
+        // $base64 = $this->parse_image($template_certification);
 
         return array(
             'show_certification_date' => $course_to_export->show_certification_date,
