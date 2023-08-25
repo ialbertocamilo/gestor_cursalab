@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAppPasswordUpdateRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RestUserController extends Controller
@@ -53,12 +54,8 @@ class RestUserController extends Controller
      */
     public function loadNotifications(Request $request) {
 
-        $user = auth()->user();
-        $notications = UserNotification::query()
-            ->where('user_id', $user->id)
-            ->where('is_visible', 1)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $user = User::find(32353);//;auth()->user();
+        $notications = UserNotification::loadUserNotifications($user->id);
 
         return response()->json($notications);
     }
