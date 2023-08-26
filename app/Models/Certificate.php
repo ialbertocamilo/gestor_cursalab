@@ -428,8 +428,8 @@ class Certificate extends Model
                             $im,
                             $fontsize,
                             0,
-                            $e_static['left']-$x,
-                            $e_static['top']-$y,
+                            $e_static['left'] - $x,
+                            $e_static['top'] - $y + $fontsize,
                             $color,
                             $font,
                             utf8_decode($e_static['text'])
@@ -582,8 +582,8 @@ class Certificate extends Model
                     $fontsize =  $fontsize - ($fontsize * $e_dinamic['zoomX']);
                 }
 
-                $left = $e_dinamic['left']-$x;
-                $top = $e_dinamic['top']-$y+$fontsize;
+                $left = $e_dinamic['left'] - $x;
+                $top = $e_dinamic['top'] - $y + $fontsize;
 
                 ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
                 ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
@@ -592,7 +592,7 @@ class Certificate extends Model
                 //Eliminar emogis
                 $text = trim(Certificate::remove_emoji($text));
                 //Centrado multilinea
-                $explode_text = explode('multiline',$text);
+                $explode_text = explode('multiline', $text);
 
                 foreach ($explode_text as $e_text) {
 

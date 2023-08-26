@@ -136,8 +136,8 @@ class DiplomaController extends Controller
         $c_data = collect($data['objects']);
         $background = $data['backgroundImage'];
         
-        $e_statics = $c_data->where('static',true);
-        $e_dinamics = $c_data->where('static',false);
+        $e_statics = $c_data->where('static', true);
+        $e_dinamics = $c_data->where('static', false);
 
         if ($background) {
             $image = Diploma::image_create($background['src'],1,1,1,1);
@@ -175,7 +175,7 @@ class DiplomaController extends Controller
                             $fontsize,
                             0,
                             $e_static['left'] - $x,
-                            $e_static['top'] - $y + $e_static['fontSize'],
+                            $e_static['top'] - $y + $fontsize,
                             $color,
                             $font,
                             utf8_decode($e_static['text'])
