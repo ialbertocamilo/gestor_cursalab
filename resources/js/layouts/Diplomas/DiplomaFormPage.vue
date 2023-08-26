@@ -31,7 +31,7 @@
                             ref="overlayFile"
                             v-model="bg_image"
                             accept="image/*"
-                            height="40vh"
+                            height="405px"
                             @change="set_plantilla()"
                         />
                         <div class="overlay-icon">
