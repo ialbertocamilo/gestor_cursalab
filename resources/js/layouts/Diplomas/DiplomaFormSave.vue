@@ -8,22 +8,22 @@
         <template v-slot:content>
             <v-form ref="DiplomaForm">
                 <v-row>
-                    <v-col cols="12">
+                    <!-- <v-col cols="12">
                         <p>
                             Vista previa del diploma. Haz click en "Guardar" para generarlo.
                         </p>
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12">
                         <img
                             :src="options.resource.preview"
-                            class="--img-preview w-100"
+                            class="img-preview w-100"
                             alt="Previsualización de diploma">
                     </v-col>
                     <v-col cols="12">
                         <DefaultInput
                             v-model="resource.diploma"
                             clearable
-                            label="Nombre diploma"
+                            label="Nombre de la plantilla"
                             :rules="rules.diploma"
                         />
                     </v-col>
@@ -47,7 +47,7 @@ export default {
             resource: {},
             rules: {
                 diploma: this.getRules([
-                    'required', 'max:100', 'min:10'
+                    'required', 'max:100', 'min:5'
                 ]),
             },
         }

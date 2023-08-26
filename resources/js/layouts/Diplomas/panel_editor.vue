@@ -7,13 +7,7 @@
                 <v-icon>mdi-notebook</v-icon>
             </v-btn>
         </div>
-        <div class="css-tooltip css-tooltip--bottom"
-             data-tooltip="Nota del curso">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('15', false, 'course-average-grade', 1, 76)"
-                   text>
-                <v-icon>mdi-numeric-9-plus-circle-outline</v-icon>
-            </v-btn>
-        </div>
+        
         <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Nombre del usuario">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del usuario', false, 'users', 1)"
@@ -21,11 +15,20 @@
                 <v-icon>mdi-account</v-icon>
             </v-btn>
         </div>
+        
         <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Fecha">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('14/03/2023', false, 'fecha', '%d/%m/%Y')"
                     text>
                 <v-icon>mdi-calendar</v-icon>
+            </v-btn>
+        </div>
+
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="Nota del curso">
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('15', false, 'course-average-grade', 1, 76)"
+                   text>
+                <v-icon>mdi-numeric-9-plus-circle-outline</v-icon>
             </v-btn>
         </div>
 
@@ -41,7 +44,7 @@
              data-tooltip="Imagen">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="click_input('input_image')"
                     text>
-                <v-icon>mdi-camera</v-icon>
+                <v-icon>mdi-image</v-icon>
             </v-btn>
             <input @change="emitir_add_image()" class="input_img" type="file" id="input_image">
         </div>
