@@ -602,7 +602,7 @@ class Certificate extends Model
                     }
 
                     imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
-                    // $top = $top + $fontsize + (0.2*$fontsize);
+                    $top = $top + $fontsize + (0.2*$fontsize);
                 }
             }
         }
