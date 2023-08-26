@@ -175,7 +175,7 @@ class DiplomaController extends Controller
                             $fontsize,
                             0,
                             $e_static['left'] - $x,
-                            $e_static['top'] - $y + $fontsize,
+                            $e_static['top'] - $y + $e_static['fontSize'],
                             $color,
                             $font,
                             utf8_decode($e_static['text'])
