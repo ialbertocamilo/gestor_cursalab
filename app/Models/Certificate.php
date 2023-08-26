@@ -598,7 +598,7 @@ class Certificate extends Model
 
                     if(isset($e_dinamic['centrado']) && ($e_dinamic['centrado']=="true")){
                         $calculateTextBox = Certificate::calculateTextBox($fontsize, 0, $font, trim($e_text));
-                        $left = ($background['width']/2) - (($calculateTextBox['width']/2));
+                        $left = ($background['image_width']/2) - (($calculateTextBox['width']/2));
                     }
 
                     imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
