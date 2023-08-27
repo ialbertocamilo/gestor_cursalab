@@ -3,7 +3,14 @@
         <v-col cols="4" lg="2" class="text-center">
             <img
                 v-if="activeTemplate"
-                :src="activeTemplate.image" height="100" class="--my-7">
+                :src="activeTemplate.image" height="100" class="--my-7 clickable"
+                @click="modalDiplomaPreviewOptions.open = true"
+                title="Ver preview"
+            />
+            <img
+                v-else
+                src="/img/noimage.png" height="100" class="--primary"
+            />
         </v-col>
 
         <v-col cols="8" lg="6" class="">
@@ -43,18 +50,18 @@
 
                     <span class="ml-4">
                         <v-icon
-                            :color="itHasFeature('course-average-grade', activeTemplate) ? '#5751e6' : '#e0e0e0'">
-                            mdi-check-circle
-                        </v-icon>
-                        Nota
-                    </span>
-
-                    <span class="ml-4">
-                        <v-icon
                             :color="itHasFeature('fecha', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
                         </v-icon>
                         Fecha
+                    </span>
+
+                    <span class="ml-4">
+                        <v-icon
+                            :color="itHasFeature('course-average-grade', activeTemplate) ? '#5751e6' : '#e0e0e0'">
+                            mdi-check-circle
+                        </v-icon>
+                        Nota
                     </span>
                 </v-col>
 
@@ -72,12 +79,26 @@
             </div>
         </v-col>
 
+        <DiplomaPreviewModal 
+            width="50vh"
+            :ref="modalDiplomaPreviewOptions.ref"
+            :options="modalDiplomaPreviewOptions"
+            @onConfirm="closeFormModal(modalDiplomaPreviewOptions)"
+            @onCancel="closeFormModal(modalDiplomaPreviewOptions)"
+        />
+
     </v-row>
 </template>
 
 <script>
 
+import DiplomaPreviewModal from '../../layouts/Diplomas/DiplomaPreviewModal.vue';
+
 export default {
+    components:{ 
+        DiplomaPreviewModal, 
+        // DiplomaFormSave,  
+    },
     props: {
         value: null
     }
@@ -85,13 +106,27 @@ export default {
     data() {
         return {
             certificateTemplates: [],
-            activeTemplate: null
+            activeTemplate: null,
+            modalDiplomaPreviewOptions:{
+                ref: 'DiplomaPreviewModal',
+                open: false,
+                title: "Previsualización",
+                confirmLabel: 'Cerrar',
+                subTitle:'',
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                resource: {
+                    preview: null
+                }
+            },
         }
     }
     ,
     watch : {
         value (newId, oldId) {
             this.activeTemplate = this.certificateTemplates.find(i => i.id === newId)
+
+            this.modalDiplomaPreviewOptions.resource.preview = this.activeTemplate ? this.activeTemplate.image : null;
         },
         activeTemplate (newId, oldId) {
             if (newId) {
