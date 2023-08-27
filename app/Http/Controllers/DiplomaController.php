@@ -352,9 +352,6 @@ class DiplomaController extends Controller
             'backgroundInfo' => $backgroundInfo ?? [],
             'dObjects' => $dObjects ?? [],
             'pathImage' => $pathImage ?? null,
-            
         );
     }
-
-    
 }
