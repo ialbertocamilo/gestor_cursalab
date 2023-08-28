@@ -62,7 +62,7 @@ class WorkspaceRequest extends FormRequest
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
 
-        $criteria_workspace = json_decode($this->criteria_workspace, true);
+        $criteria_workspace = $this->criteria_workspace ? json_decode($this->criteria_workspace, true) : [];
 
         $data['criteria'] = [];
 
