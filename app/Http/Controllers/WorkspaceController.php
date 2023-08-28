@@ -125,7 +125,10 @@ class WorkspaceController extends Controller
         $workspace = Workspace::create($data);
 
         // Save workspace's criteria
-        $workspace->criterionWorkspace()->sync($data['criteria']);
+        
+        if ( !empty($data['criteria']) ) {
+            $workspace->criterionWorkspace()->sync($data['criteria']);
+        }
 
 
         // Actualizar funcionalidades
@@ -224,7 +227,10 @@ class WorkspaceController extends Controller
 
         // Save workspace's criteria
 
-        $workspace->criterionWorkspace()->sync($data['criteria']);
+        if ( !empty($data['criteria']) ) {
+            $workspace->criterionWorkspace()->sync($data['criteria']);
+        }
+
 
         // Actualizar funcionalidades
 
