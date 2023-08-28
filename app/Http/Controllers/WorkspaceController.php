@@ -125,20 +125,7 @@ class WorkspaceController extends Controller
         $workspace = Workspace::create($data);
 
         // Save workspace's criteria
-
-        $criteriaSelected = json_decode($data['selected_criteria'], true);
-
-        $criteria = [];
-
-        $module_criterion = Criterion::where('code', 'module')->first();
-
-        foreach ($criteriaSelected as $criterion_id => $is_selected) {
-            if ($is_selected) $criteria[] = $criterion_id;
-        }
-
-        $criteria[] = $module_criterion->id;
-
-        $workspace->criterionWorkspace()->sync($criteria);
+        $workspace->criterionWorkspace()->sync($data['criteria']);
 
 
         // Actualizar funcionalidades
@@ -237,7 +224,7 @@ class WorkspaceController extends Controller
 
         // Save workspace's criteria
 
-        $workspace->criterionWorkspace()->sync($criteria);
+        $workspace->criterionWorkspace()->sync($data['criteria']);
 
         // Actualizar funcionalidades
 

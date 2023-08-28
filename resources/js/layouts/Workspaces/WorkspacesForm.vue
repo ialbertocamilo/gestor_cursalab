@@ -114,6 +114,8 @@
                                     </v-subheader>
 
                                     <v-row v-for="criterion in resource.criteria_workspace" :key="criterion ? criterion.id : null">
+
+                                        <hr>
                                         <v-col cols="3" v-if="criterion">
                                             <DefaultToggle
                                                 class="--mt-5"
@@ -131,12 +133,13 @@
                                                     <v-checkbox
                                                         v-model="field.available"
                                                         :label="field.name"
-                                                        :disabled="!criterion.available ? true : false"
+                                                        :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
                                                     >
                                                     </v-checkbox>
                                                 </v-col>
                                             </v-row>
                                         </v-col>
+                                        <hr>
                                     </v-row>    
 
 
@@ -358,7 +361,7 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'criteria_workspace',
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app'
 ];

@@ -37,7 +37,7 @@ class WorkspaceRequest extends FormRequest
 
             'qualification_type_id' => 'required',
             'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
-            'criteria_workspace' => 'nullable'
+            'criteria' => 'required'
         ];
     }
 
@@ -62,7 +62,7 @@ class WorkspaceRequest extends FormRequest
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
 
-        $criteria_workspace = json_decode($data['criteria_workspace'], true);
+        $criteria_workspace = json_decode($this->criteria_workspace, true);
 
         $data['criteria'] = [];
 

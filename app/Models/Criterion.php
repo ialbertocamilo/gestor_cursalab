@@ -164,22 +164,47 @@ class Criterion extends BaseModel
 
         foreach ($criteria as $key => $criterion) {
 
-            $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
+            if ($criterion->code == 'module') {
+
+                $criterion_available = true;
+                $criterion_disabled = true;
+
+            } else {
+
+                $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
+
+                $criterion_available = $workspace ? ($current ? true : false) : true;
+                $criterion_disabled = false;
+            }
 
             $criteria_workspace[$key] = [
                 'criterion_id' => $criterion->id,
                 'code' => $criterion->code,
                 'name' => $criterion->name,
-                'available' => $workspace ? ($current ? true : false) : true,
-                'disabled' => $criterion->code == 'module' ? true : false,
+                'available' => $criterion_available,
+                'disabled' => $criterion_disabled,
             ]; 
 
             foreach ($custom_pivot_fields as $code => $name) {
+
+                $field_disabled = false;
+                
+                if ($criterion->code == 'module') {
+
+                    $field_available = true;
+                    $field_disabled = true;
+
+                } else {
+
+                    $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
+                }
+
+
                 $criteria_workspace[$key]['fields'][$code] = [
                     'code' => $code,
                     'name' => $name,
-                    'available' => $workspace ? ($current ? $current->pivot->$code : false) : true,
-                    // 'disabled' => false,
+                    'available' => $field_available,
+                    'disabled' => $field_disabled,
                 ]; 
             }
         }
