@@ -35,17 +35,17 @@
             <v-list class="mx-auto" dark nav rounded expand tile>
                 <div v-for="(grupo, i) in grupos" :key="i">
                     <v-list-item 
+                        v-if="grupo.items.length == 0"
                         @mouseleave="cancelTimer"
+                        @mouseover="startTimer(grupo,$event)"
                         dark 
                         sense 
-                        @mouseover="startTimer(grupo,$event)"
-                        v-if="grupo.items.length == 0"
                         style="cursor: pointer;"
                     >
                         <v-list-item-icon>
                             <v-icon small class="item_icon">{{ grupo.icon }}</v-icon>
                         </v-list-item-icon>
-                        <v-badge small class="_badge">
+                        <v-badge small class="_badge" overlap>
                             <template v-slot:badge>
                                 <div v-if="grupo.show_upgrade" class="ml-1 tag_beta_upgrade d-flex align-items-center"><img
                                         src="/img/premiun.svg"> Upgrade</div>
@@ -67,9 +67,9 @@
                                 <v-list-item-icon>
                                     <v-icon small>{{ grupo.icon }}</v-icon>
                                 </v-list-item-icon>
-                                <v-badge small class="_badge">
+                                <v-badge small class="_badge" overlap>
                                     <template v-slot:badge>
-                                        <div v-if="grupo.show_upgrade" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                        <div v-if="grupo.show_upgrade && !item.is_beta" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                             <img src="/img/premiun.svg"> Upgrade</div>
                                         <div v-if="grupo.is_beta" class="ml-1 tag_beta_upgrade d-flex align-items-center">Beta
                                         </div>
@@ -82,14 +82,13 @@
                             </v-list-item-title>
                         </template>
                         <div v-for="(item, i) in grupo.items" :key="i" class="list_submenu">
-    
                             <v-list-item dark dense :href="`${item.path}`" @click="()=>{}" v-model="item.selected">
                                 <v-list-item-icon>
                                     <v-icon small class="item_icon">{{ item.icon }}</v-icon>
                                 </v-list-item-icon>
-                                <v-badge small class="_badge">
+                                <v-badge small class="_badge" overlap> 
                                     <template v-slot:badge>
-                                        <div v-if="item.show_upgrade" class="tag_beta_upgrade d-flex align-items-center"><img
+                                        <div  @click="openFormModal(ModalUpgradeOptions)" v-if="item.show_upgrade && !item.is_beta" class="tag_beta_upgrade d-flex align-items-center"><img
                                                 src="/img/premiun.svg"> Upgrade</div>
                                         <div v-if="item.is_beta" class="tag_beta_upgrade d-flex align-items-center">Beta</div>
                                     </template>
@@ -104,10 +103,10 @@
         <transition name="fade">
             <v-card
                 v-if="cardHover.showCard"
-                width="20vw"
+                :width="cardHover.width"
                 flat tile
                 class="card-popup"
-                :style="{ top: cardHover.cardTop }"
+                :style="{ top: cardHover.cardTop,left: cardHover.cardLeft }"
                 @mouseenter="cancelHideTimer"
                 @mouseleave="startHideTimer"
             >
@@ -185,7 +184,10 @@ export default {
             timer: null,
             title: 'Beneficios',
             description: ' Listado de beneficios',
-            show_upgrade:null
+            show_upgrade:null,
+            // cardTop:0,
+            // cardLeft:0,
+            width:'22vw'
         },
         ModalUpgradeOptions:{
             ref: 'ModalUpgradeModal',
@@ -358,39 +360,38 @@ export default {
             });
         },
         startTimer({title,description,show_upgrade}, event) {
-            if (this.cardHover.timer) {
-                clearTimeout(this.cardHover.timer);
-                this.cardHover.timer = null;
+            let vue = this;
+            if (vue.cardHover.timer) {
+                clearTimeout(vue.cardHover.timer);
+                vue.cardHover.timer = null;
             }
-
+            const viewportWidth = window.innerWidth;
+            const leftPostion =((parseInt(vue.cardHover.width.replace("vw", "")) * viewportWidth) / 100 ) +225 //225px es la medida del nav-container (custom.css);
             const topPosition = event.currentTarget.getBoundingClientRect().top;
-            this.cardHover.cardTop = `${topPosition}px`;
-            this.cardHover.timer = setTimeout(() => {
-                this.cardHover.title = title;
-                this.cardHover.description = description;
-                this.cardHover.show_upgrade = show_upgrade;
-                this.cardHover.showCard = true;
-                this.startHideTimer();
+            vue.cardHover.cardTop = `${topPosition}px`;
+            vue.cardHover.cardLeft = `${leftPostion}px`;
+            vue.cardHover.timer = setTimeout(() => {
+                vue.cardHover.title = title;
+                vue.cardHover.description = description;
+                vue.cardHover.show_upgrade = show_upgrade;
+                vue.cardHover.showCard = true;
+                vue.startHideTimer();
                 // setTimeout(() => {
                 // this.cardHover.showCard = false;
                 // }, 4000); // Ocultar la tarjeta después de 4 segundos
-            }, 1500);
+            }, 1000);
         },
         cancelTimer() {
             if (this.cardHover.timer) {
                 clearTimeout(this.cardHover.timer);
                 this.cardHover.timer = null;
             }
-            // setTimeout(() => {
-            //     if(!this.cardHover.timer){
-            //         this.cardHover.showCard = false;
-            //     }
-            // }, 1000);
+            this.startHideTimer();
         },
         startHideTimer() {
             this.cardHover.timer = setTimeout(() => {
                 this.cardHover.showCard = false;
-            }, 2500); // Cambia este valor al tiempo deseado para ocultar 
+            }, 2500); 
         },
         cancelHideTimer() {
             if (this.cardHover.timer) {
@@ -461,6 +462,7 @@ export default {
     font-weight: 400;
     letter-spacing: 0.1px;
     color: #E5E6FC;
+    /* width: min-content; */
 }
 
 .list_submenu .v-list-item {
@@ -523,6 +525,8 @@ export default {
     font-size: 11px;
     font-style: normal;
     font-weight: 400;
+    margin-left: 8px;
+    margin-top: -8px;
 }
 /* POPUP */
 .card-popup {

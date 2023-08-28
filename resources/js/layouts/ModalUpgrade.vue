@@ -156,12 +156,10 @@ export default {
         },
         async loadData() {
             let vue = this
-            vue.resource =  {
-				limit_allowed_storage: null,
-				limit_allowed_users: null,
-				description: null,
-                functionalities:[]
-			};
+            vue.resource.limit_allowed_storage =  null;
+            vue.resource.limit_allowed_users =  null;
+            vue.resource.description =  null;
+            vue.resource.functionalities = [];
         },
         loadSelects() {
             let vue = this

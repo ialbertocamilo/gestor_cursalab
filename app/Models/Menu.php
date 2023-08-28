@@ -66,7 +66,7 @@ class Menu extends Model
             if($menu){
                 return $menu;
             }
-        })->toArray();
+        })->values()->toArray();
     }
     protected function updateItems($menus){
         foreach ($menus as $index => $menu) {
