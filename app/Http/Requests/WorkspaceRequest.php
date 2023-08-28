@@ -36,7 +36,8 @@ class WorkspaceRequest extends FormRequest
             'selected_functionality' => 'nullable',
 
             'qualification_type_id' => 'required',
-            'criterio_id_fecha_inicio_reconocimiento' => 'nullable'
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
+            'criteria_workspace' => 'nullable'
         ];
     }
 
@@ -59,6 +60,25 @@ class WorkspaceRequest extends FormRequest
         }
 
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
+
+
+        $criteria_workspace = json_decode($data['criteria_workspace'], true);
+
+        $data['criteria'] = [];
+
+        foreach ($criteria_workspace as $row) {
+
+            if ($row['available']) {
+
+                $fields = [];
+
+                foreach ($row['fields'] as $field) {
+                    $fields[$field['code']] = $field['available'] ? 1 : NULL;
+                }
+
+                $data['criteria'][$row['criterion_id']] = $fields;
+            }
+        }
 
         return $this->merge($data)->all();
     }

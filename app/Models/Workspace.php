@@ -36,6 +36,15 @@ class Workspace extends BaseModel
         'show_logo_in_app',
     ];
 
+    public $custom_pivot_fields = [
+        'available_in_profile' => 'Perfil',
+        'available_in_ranking' => 'Ranking',
+        'available_in_reports' => 'Reportes',
+        'available_in_segmentation' => 'Segmentación',
+        'available_in_user_creation' => 'Creación de usuario',
+        'required_in_user_creation' => 'Requerido',
+    ];
+
     public function sluggable(): array
     {
         return [
@@ -115,12 +124,9 @@ class Workspace extends BaseModel
 
     public function criterionWorkspace()
     {
-        return $this->belongsToMany(
-            Criterion::class
-        // 'criterion_workspace',
-        // 'workspace_id',
-        // 'criterion_id'
-        );
+        $custom_pivot_fields = array_keys($this->custom_pivot_fields);
+
+        return $this->belongsToMany(Criterion::class)->withPivot($custom_pivot_fields);
     }
 
     public function criteriaValue()

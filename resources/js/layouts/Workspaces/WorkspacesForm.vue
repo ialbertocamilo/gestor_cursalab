@@ -107,52 +107,53 @@
                                 style="min-height: 360px; max-height: 400px"
                             >
 
-                            <v-row class="mr-1">
-                                <v-col cols="5">
+                            <v-row class="mr-1 custom-row-checkbox">
+                                <v-col cols="12" v-if="resource.criteria_workspace">
                                     <v-subheader class="mb-3 px-0">
-                                        <strong>Crtierios generales</strong>
+                                        <strong>Criterios y disponibilidad</strong>
                                     </v-subheader>
-                                    <v-checkbox
-                                        v-for="criterion in defaultCriteria"
-                                        :key="criterion.id"
-                                        v-model="resource.selected_criteria[criterion.id]"
-                                        :label="generateCriterionTitle(criterion)"
-                                        :disabled="false"
-                                    >
-                                        <!-- :disabled="criterion.code === 'module'" -->
-                                    </v-checkbox>
-                                    <v-subheader class="mb-3 px-0">
+
+                                    <v-row v-for="criterion in resource.criteria_workspace" :key="criterion ? criterion.id : null">
+                                        <v-col cols="3" v-if="criterion">
+                                            <DefaultToggle
+                                                class="--mt-5"
+                                                dense
+                                                v-model="criterion.available"
+                                                :disabled="criterion.disabled"
+                                                :active-label="criterion.name"
+                                                :inactive-label="criterion.name"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="9" v-if="criterion">
+                                            <v-row justify="start">
+                                                <v-col cols="4" v-for="field in criterion.fields" :key="field.code" class="py-0">
+                                                    <v-checkbox
+                                                        v-model="field.available"
+                                                        :label="field.name"
+                                                        :disabled="!criterion.available ? true : false"
+                                                    >
+                                                    </v-checkbox>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                    </v-row>    
+
+
+                                    <!-- <v-subheader class="mb-3 px-0">
                                         <strong>Personalizados</strong>
                                     </v-subheader>
 
                                     <v-checkbox
                                         v-for="criterion in customCriteria"
                                         :key="criterion.id"
-                                        v-model="resource.selected_criteria[criterion.id]"
+                                        v-model="resource.criteria_workspace[criterion.id]"
                                         :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                                        :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
+                                        :disabled="criterion.its_used && resource.criteria_workspace[criterion.id]"
                                     >
-                                        <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
-
-                                    </v-checkbox>
+                                    </v-checkbox> -->
                                 </v-col>
-                                <v-col cols="7">
-                                    <v-subheader class="mb-3 px-0 text-center">
-                                        <strong>Secciones disponibles</strong>
-                                    </v-subheader>
 
-                                    <div v-for="criterion in defaultCriteria" :key="criterion.id" class="row col-12 py-0">
-                                        <v-checkbox
-                                            v-for="section in sections" 
-                                            :key="section.code"
-                                            v-model="resource.selected_section_criteria"
-                                            :label="section.name"
-                                            :disabled="false"
-                                            class="mr-5"
-                                        >
-                                        </v-checkbox>
-                                    </div>
-                                </v-col>
                             </v-row>
 
                         </v-container>
@@ -357,7 +358,7 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 'criteria_workspace',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app'
 ];
@@ -403,14 +404,14 @@ export default {
                 logo: '',
                 logo_negativo: '',
                 qualification_type: '',
-                selected_criteria: {},
+                criteria_workspace: [],
                 selected_functionality: {},
-                selected_section_criteria: {
-                    profile: false,
-                    filters: false,
-                    ranking: false,
-                    reports: false,
-                }
+                // selected_section_criteria: {
+                //     profile: false,
+                //     filters: false,
+                //     ranking: false,
+                //     reports: false,
+                // }
             },
             limit_allowed_users: null,
             resource: {
@@ -419,12 +420,9 @@ export default {
                 qualification_types: [],
             },
             defaultCriteria: [],
-            functionalities: []
-            ,
-            customCriteria: []
-            ,
-            itemsCriterionDates: []
-            ,
+            functionalities: [],
+            customCriteria: [],
+            itemsCriterionDates: [],
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
@@ -487,7 +485,7 @@ export default {
                     method, vue.resource, fields, file_fields
                 );
                 formData.set(
-                    'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
+                    'criteria_workspace', JSON.stringify(vue.resource.criteria_workspace)
                 );
                 formData.set(
                     'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
@@ -559,17 +557,17 @@ export default {
                     // Filter criteria in two collections,
                     // according its "required" properties
 
-                    vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
-                    vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
+                    // vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
+                    // vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
 
                     // Update content of selected criteria
 
-                    vue.resource.selected_criteria = {};
-                    data.data.criteria.forEach(c => {
-                        vue.resource.selected_criteria[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.criteria_workspace
-                        );
-                    });
+                    // vue.resource.criteria_workspace = {};
+                    // data.data.criteria.forEach(c => {
+                    //     vue.resource.criteria_workspace[c.id] = vue.criterionExistsInCriteriaValue(
+                    //         c.id, data.data.criteria_workspace
+                    //     );
+                    // });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
@@ -589,8 +587,7 @@ export default {
         }
         ,
         loadSelects() {
-        }
-        ,
+        },
         criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
 
             let exists = false;
@@ -602,7 +599,6 @@ export default {
                         exists = true;
                 });
             }
-
 
             return exists;
         }

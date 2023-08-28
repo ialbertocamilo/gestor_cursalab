@@ -83,18 +83,14 @@ class WorkspaceController extends Controller
 
     public function create(): JsonResponse
     {
-        // Load criteria
+        $selection = Criterion::getSelectionCheckbox();
 
-        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+        $workspace['criteria_workspace'] = $selection['criteria_workspace'];
+        $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
-        foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            $in_segment_list = $in_segment->pluck('id')->all();
-            $wk_crit->its_used = true;
-        }
 
-        $workspace['criteria_workspace'] = null;
         $workspace['limit_allowed_users'] = null;
+
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
         $workspace['functionalities_selected'] = [];
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
@@ -191,30 +187,15 @@ class WorkspaceController extends Controller
      */
     public function edit(Workspace $workspace): JsonResponse
     {
-        // Load criteria
-
         $workspace->load('qualification_type');
 
-        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+        $selection = Criterion::getSelectionCheckbox($workspace);
 
-        foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segments = SegmentValue::where('criterion_id', $wk_crit->id)->count();
-            // $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            // $in_segment_list = $in_segment->pluck('id')->all();
-             $wk_crit->its_used = $in_segments > 0 ? true : false;
-            // $wk_crit->its_used = false;
-            // if (count($in_segment_list))
-                // $wk_crit->its_used = true;
-        }
-
-        // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
-        $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
-        $workspace['criteria_workspace_dates'] = $workspace->subworkpsace_criterion_type(['date']);
+        $workspace['criteria_workspace'] = $selection['criteria_workspace'];
+        $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
-
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
-        // $workspace['is_superuser'] = true;
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
@@ -233,9 +214,6 @@ class WorkspaceController extends Controller
     public function update(WorkspaceRequest $request, Workspace $workspace): JsonResponse
     {
         $data = $request->validated();
-
-        // Upload files
-        // info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
@@ -258,18 +236,6 @@ class WorkspaceController extends Controller
         $workspace->update($data);
 
         // Save workspace's criteria
-
-        $criteriaSelected = json_decode($data['selected_criteria'], true);
-
-        $criteria = [];
-
-        $module_criterion = Criterion::where('code', 'module')->first();
-
-        foreach ($criteriaSelected as $criterion_id => $is_selected) {
-            if ($is_selected) $criteria[] = $criterion_id;
-        }
-
-        $criteria[] = $module_criterion->id;
 
         $workspace->criterionWorkspace()->sync($criteria);
 

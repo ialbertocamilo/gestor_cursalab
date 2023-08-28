@@ -153,4 +153,37 @@ class Criterion extends BaseModel
 
         return $temp;
     }
+
+    protected function getSelectionCheckbox($workspace = null)
+    {
+        $custom_pivot_fields = (new Workspace)->custom_pivot_fields;
+        $criterionWorkspace = $workspace ? $workspace->criterionWorkspace : NULL;
+
+        $criteria = Criterion::with('field_type')->where('active', ACTIVE)->get();
+        $criteria_workspace = [];
+
+        foreach ($criteria as $key => $criterion) {
+
+            $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
+
+            $criteria_workspace[$key] = [
+                'criterion_id' => $criterion->id,
+                'code' => $criterion->code,
+                'name' => $criterion->name,
+                'available' => $workspace ? ($current ? true : false) : true,
+                'disabled' => $criterion->code == 'module' ? true : false,
+            ]; 
+
+            foreach ($custom_pivot_fields as $code => $name) {
+                $criteria_workspace[$key]['fields'][$code] = [
+                    'code' => $code,
+                    'name' => $name,
+                    'available' => $workspace ? ($current ? $current->pivot->$code : false) : true,
+                    // 'disabled' => false,
+                ]; 
+            }
+        }
+
+        return compact('criteria', 'criteria_workspace');
+    }
 }
