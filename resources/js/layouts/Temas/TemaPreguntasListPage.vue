@@ -297,6 +297,8 @@ export default {
                 base_endpoint: `/questions`,
                 confirmLabel: 'Guardar',
                 title_modal: `Creación de evaluación con AI (${this.tema_name})`,
+                topic_id: this.tema_id,
+                workspace_id: this.modulo_id,
                 hideCancelBtn: true,
                 hideConfirmBtn: true,
             },

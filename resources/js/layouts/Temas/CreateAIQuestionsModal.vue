@@ -275,12 +275,23 @@ export default {
 
         },
         generateQuestions(){
+            let vue = this;
+            // const url = 'http://localhost:5000/generate-questions';
+            // const data = {
+            //     topic_id: vue.options.topic_id,
+            //     workspace_id: vue.options.workspace_id,
+            //     configuration: vue.configuration
+            // }
+            // vue.$http.post(url, data).then(async ({data}) => {
+                
+            // }).catch(async (error) => {
+            // })
             this.addItemWithTimeout(this.questionsTemplate,0);
-            // this.questionsTemplate.forEach(element => {
-            //     setInterval(() => {
-            //         this.questions.push(element);
-            //     }, 5000);
-            // });
+            this.questionsTemplate.forEach(element => {
+                setInterval(() => {
+                    this.questions.push(element);
+                }, 5000);
+            });
         },
         addItemWithTimeout(new_questions,index) {
             this.questions.push(new_questions[index]);
