@@ -266,3 +266,97 @@ Override Vue Toastification plugin styles
 .v-text-field--filled {
     border-radius: 0px !important;
 }
+
+
+/*
+
+Skeletons
+
+---------------------------------------- */
+
+.skeleton {
+    overflow: hidden;
+    position: relative;
+}
+
+.skeleton:after {
+    content: '';
+    top: 0;
+    transform: translateX(100%);
+    width: inherit;
+    height: inherit;
+    position: absolute;
+    z-index: 1;
+    animation: slide 1s infinite;
+}
+
+.skeleton:after {
+    background: linear-gradient(
+            to right,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,0.8) 50%,
+            rgba(128,186,232,0) 99%,
+            rgba(125,185,232,0) 100%
+    );
+}
+
+.skeleton.purple:after {
+    background: linear-gradient(
+            to right,
+            rgba(210,210,210,0) 0%,
+            rgba(210,210,210,0.8) 50%,
+            rgba(128,186,232,0) 99%,
+            rgba(128,186,232,0) 100%
+    );
+}
+
+@keyframes slide {
+    0% { transform:translateX(-100%) }
+    100% { transform:translateX(100%) }
+}
+
+
+// Sidemenu skeletons
+
+.sidemenu-container .skeleton-wrapper {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10px;
+    margin-top: 84px;
+}
+
+.sidemenu-container .skeleton-wrapper .skeleton {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background: #aaa9f2;
+}
+
+// Dashboard skeletons
+
+.dashboard.skeleton-wrapper .skeleton {
+    background: #e6e6e6;
+    border: 7px solid white;
+}
+
+.dashboard.skeleton-wrapper .skeleton.module-selector {
+    position: relative;
+    height: 140px;
+}
+
+.dashboard.skeleton-wrapper .skeleton.charts {
+    position: relative;
+    height: 540px;
+}
+
+.dashboard.skeleton-wrapper .skeleton.card {
+    position: relative;
+    height: 90px;
+}
+
+// Table skeletons
+

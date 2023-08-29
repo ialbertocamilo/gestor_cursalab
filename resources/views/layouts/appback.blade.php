@@ -64,6 +64,9 @@ if (isset($fullScreen)) {
 
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
+
+
+
                 {{-- <v-app> --}}
                 <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" :functionality="{{ json_encode($functionality) }}"/>
                 {{-- </v-app> --}}
@@ -122,7 +125,34 @@ if (isset($fullScreen)) {
                 </div>
             @endif
 
-            @yield('content')
+                {{--
+                    Dashboard skeleton
+                ======================================== --}}
+
+                @if (Route::is('home'))
+                    <div class="dashboard skeleton-wrapper position-relative p-4">
+
+                        <div class="row m-0">
+                            <div class=" card skeleton module-selector"></div>
+                        </div>
+
+                        <div class="row justify-content-between m-0 mt-4">
+                            <div class="col-2 card skeleton"></div>
+                            <div class="col-2 card skeleton"></div>
+                            <div class="col-2 card skeleton"></div>
+                            <div class="col-2 card skeleton"></div>
+                            <div class="col-2 card skeleton"></div>
+                        </div>
+
+                        <div class="row m-0 mt-4 justify-content-between">
+                            <div class="col-6 skeleton charts"></div>
+                            <div class="col-6 skeleton charts"></div>
+                        </div>
+                    </div>
+                @endif
+
+
+                @yield('content')
 
         </div>
         <div id="content_polls" style="display: none;">
