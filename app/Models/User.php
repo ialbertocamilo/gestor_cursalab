@@ -1584,7 +1584,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot('available_in_profile', 1)->get();
         $criterion_values = $this->criterion_values->whereIn('criterion_id', $criterionWorkspace->pluck('id'));
 
-        // $criterion = $criterionWorkspace->where('id', $value->criterion->id)->first();
+        $criterios = [];
+        
         foreach ($criterion_values as $value) {
 
             $criterios[] = [
@@ -1593,7 +1594,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ];
         }
 
-        return $criterion_values;
+        return $criterios;
     }
 
     public function getCriteriaFilteredByWorkspace($field)
