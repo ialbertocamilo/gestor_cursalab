@@ -269,4 +269,11 @@ Override Vue Toastification plugin styles
 
 .custom-row-checkbox .v-input--checkbox .v-label {
     top: 4px !important;
+
+}
+
+.custom-row-switch .v-input--switch .v-label {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }

@@ -203,7 +203,7 @@
                                     <button
                                         type="button" class="btn btn-md"
                                         @click="editWorkspace(workspace.id, workspace.name)"
-                                        v-show="!view && workspace.is_super_user"
+                                        v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
                                             <v-icon class="icon" color="primary">mdi-pencil</v-icon>

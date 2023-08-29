@@ -22,6 +22,7 @@
                         href="#tab-2"
                         :key="2"
                         class="primary--text"
+                        v-if="is_superuser"
                     >
                         <v-icon>mdi-text-box-edit-outline</v-icon>
                         <span class="ml-3">Criterios</span>
@@ -76,16 +77,14 @@
 
                     </v-tab-item>
 
-                    <v-tab-item :key="2" :value="'tab-2'">
-
-                        <v-row>
+                    <v-tab-item :key="2" :value="'tab-2'" v-if="is_superuser">
+                        <!-- <v-row class="">
                             <v-col>
                                 <v-alert
                                     colored-border
                                     elevation="2"
                                     class="mb-0"
                                 >
-                                    <!-- Selecciona los criterios que usa la empresa para segmentar el contenido -->
                                     <p>En esta sección podrás gestionar los criterios que se mostrarán en la segmentación. Ten en cuenta lo siguiente:</p>
                                     <v-row>
                                         <v-col cols="12" class="py-0">
@@ -100,66 +99,53 @@
                                     </v-row>
                                 </v-alert>
                             </v-col>
-                        </v-row>
-                        <v-container
-                                id="scroll-target"
-                                class="overflow-y-auto py-0 px-1"
-                                style="min-height: 360px; max-height: 400px"
-                            >
+                        </v-row> -->
+                        
 
-                            <v-row class="mr-1 custom-row-checkbox">
-                                <v-col cols="12" v-if="resource.criteria_workspace">
-                                    <v-subheader class="mb-3 px-0">
-                                        <strong>Criterios y disponibilidad</strong>
-                                    </v-subheader>
+                        <DefaultSection title="Criterios disponibles y secciones de uso" v-if="is_superuser">
+                            <template v-slot:content>
 
-                                    <v-row v-for="criterion in resource.criteria_workspace" :key="criterion ? criterion.id : null">
+                                <v-container
+                                    id="scroll-target"
+                                    class="overflow-y-auto py-0 px-1"
+                                    style="min-height: 360px; max-height: 600px"
+                                >
+                                    <v-row class="mr-1 custom-row-checkbox">
+                                        <v-col cols="12" v-if="resource.criteria_workspace">
+                                            <v-row v-for="criterion in resource.criteria_workspace" :key="criterion ? criterion.id : null" class="mb-5" style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">
 
-                                        <hr>
-                                        <v-col cols="3" v-if="criterion">
-                                            <DefaultToggle
-                                                class="--mt-5"
-                                                dense
-                                                v-model="criterion.available"
-                                                :disabled="criterion.disabled"
-                                                :active-label="criterion.name"
-                                                :inactive-label="criterion.name"
-                                            />
-                                        </v-col>
-
-                                        <v-col cols="9" v-if="criterion">
-                                            <v-row justify="start">
-                                                <v-col cols="4" v-for="field in criterion.fields" :key="field.code" class="py-0">
-                                                    <v-checkbox
-                                                        v-model="field.available"
-                                                        :label="field.name"
-                                                        :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
-                                                    >
-                                                    </v-checkbox>
+                                                <v-col cols="3" v-if="criterion" class="d-flex align-items-center custom-row-switch">
+                                                    <DefaultToggle
+                                                        class="--mt-5"
+                                                        dense
+                                                        :title="criterion.name"
+                                                        v-model="criterion.available"
+                                                        :disabled="criterion.disabled"
+                                                        :active-label="criterion.name"
+                                                        :inactive-label="criterion.name"
+                                                    />
                                                 </v-col>
-                                            </v-row>
+
+                                                <v-col cols="9" v-if="criterion">
+                                                    <v-row justify="start">
+                                                        <v-col cols="4" v-for="field in criterion.fields" :key="field.code" class="py-0 pr-0">
+                                                            <v-checkbox
+                                                                hide-details
+                                                                v-model="field.available"
+                                                                :label="field.name"
+                                                                :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
+                                                            >
+                                                            </v-checkbox>
+                                                        </v-col>
+                                                    </v-row>
+                                                </v-col>
+                                            </v-row>    
                                         </v-col>
-                                        <hr>
-                                    </v-row>    
+                                    </v-row>
+                                </v-container>
 
-
-                                    <!-- <v-subheader class="mb-3 px-0">
-                                        <strong>Personalizados</strong>
-                                    </v-subheader>
-
-                                    <v-checkbox
-                                        v-for="criterion in customCriteria"
-                                        :key="criterion.id"
-                                        v-model="resource.criteria_workspace[criterion.id]"
-                                        :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                                        :disabled="criterion.its_used && resource.criteria_workspace[criterion.id]"
-                                    >
-                                    </v-checkbox> -->
-                                </v-col>
-
-                            </v-row>
-
-                        </v-container>
+                            </template>
+                        </DefaultSection>
 
                     </v-tab-item>
 
@@ -232,10 +218,11 @@
                                 >
                                     <template v-slot:content>
 
-                                        <v-row justify="start">
+                                        <v-row justify="start" class="custom-row-checkbox">
 
                                             <v-col cols="4" v-for="functionality in functionalities" :key="functionality.id">
                                                 <v-checkbox
+                                                    hide-details
                                                     v-model="resource.selected_functionality[functionality.id]"
                                                     :label="functionality.name"
                                                 >

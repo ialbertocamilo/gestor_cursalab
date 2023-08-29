@@ -41,9 +41,9 @@ class Workspace extends BaseModel
         'available_in_ranking' => 'Ranking',
         'available_in_reports' => 'Reportes',
         'available_in_segmentation' => 'Segmentación',
-        'available_in_user_filters' => 'Filtro de usuarios',
         // 'available_in_user_creation' => 'Creación de usuario',
-        'required_in_user_creation' => 'Requerido en Usuario',
+        'required_in_user_creation' => 'Crear Usuario',
+        'available_in_user_filters' => 'Filtro Usuarios',
     ];
 
     public function sluggable(): array

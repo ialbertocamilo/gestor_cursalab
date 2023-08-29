@@ -703,8 +703,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
                 ->with('field_type:id,name,code')
-                ->whereRelation('workspaces', 'id', $workspace->id)
-                ->where('is_default', INACTIVE)
+                ->whereHas('workspaces', function($query) use ($workspace){
+                    $query->where('workspace_id', $workspace->id);
+                    $query->where('available_in_user_filters', 1);
+                })
+                // ->whereRelation('workspaces', 'id', $workspace->id)
+                // ->where('is_default', INACTIVE)
                 ->orderBy('name')
                 ->get();
 
@@ -1573,4 +1577,32 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $all_courses;
     }
+
+    public function getProfileCriteria()
+    {
+        $workspace = $user->subworkspace->parent;
+        $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot('available_in_profile', 1)->get();
+        $criterion_values = $this->criterion_values->whereIn('criterion_id', $criterionWorkspace->pluck('id'));
+
+        // $criterion = $criterionWorkspace->where('id', $value->criterion->id)->first();
+        foreach ($criterion_values as $value) {
+
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
+        }
+
+        return $values;
+    }
+
+    public function getCriteriaFilteredByWorkspace($field)
+    {
+        $workspace = $user->subworkspace->parent;
+        $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot($field, 1)->get();
+
+        return $criterionWorkspace;
+    }
+
+    // public function filter
 }

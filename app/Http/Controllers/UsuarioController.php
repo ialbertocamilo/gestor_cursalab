@@ -123,22 +123,26 @@ class UsuarioController extends Controller
             ->with([
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
-                    $q
-                        ->select('id', 'criterion_id', 'value_date', 'value_text as name')
-                        ->whereRelation('workspaces', 'id', $workspace->id);
+                    $q->select('id', 'criterion_id', 'value_date', 'value_text as name');
+                    $q->whereRelation('workspaces', 'id', $workspace->id);
                 }
             ])
-            ->where('is_default', INACTIVE)
-            ->whereRelation('workspaces', 'id', $workspace->id)
-            ->orderBy('name')
+            // ->where('is_default', INACTIVE)
+            ->whereHas('workspaces', function($query) use ($workspace){
+                $query->where('workspace_id', $workspace->id);
+                $query->where('available_in_user_filters', 1);
+            })
+            // ->whereRelation('workspaces', 'id', $workspace->id)
+            ->orderByDesc('name')
             ->get();
 
         $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
             ->with('field_type:id,name,code')
-            ->where('is_default', INACTIVE)
+            // ->where('is_default', INACTIVE)
             ->whereIn('id', $criteria_workspace->pluck('id'))
-            ->orderBy('name')
+            ->orderByDesc('name')
             ->get();
+
         $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
         $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
         $usersWithEmptyCriteria = count($users);

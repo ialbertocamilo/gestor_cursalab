@@ -159,10 +159,12 @@ class Criterion extends BaseModel
         $custom_pivot_fields = (new Workspace)->custom_pivot_fields;
         $criterionWorkspace = $workspace ? $workspace->criterionWorkspace : NULL;
 
-        $criteria = Criterion::with('field_type')->where('active', ACTIVE)->get();
+        $criteria = Criterion::with('field_type')->where('active', ACTIVE)->orderByDesc('is_default')->get();
         $criteria_workspace = [];
 
         foreach ($criteria as $key => $criterion) {
+
+            $in_segments = SegmentValue::where('criterion_id', $criterion->id)->count();
 
             if ($criterion->code == 'module') {
 
@@ -188,7 +190,7 @@ class Criterion extends BaseModel
             foreach ($custom_pivot_fields as $code => $name) {
 
                 $field_disabled = false;
-                
+
                 if ($criterion->code == 'module') {
 
                     $field_available = true;
@@ -198,7 +200,6 @@ class Criterion extends BaseModel
 
                     $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
                 }
-
 
                 $criteria_workspace[$key]['fields'][$code] = [
                     'code' => $code,

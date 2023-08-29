@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Config;
 
 class RestRankController extends Controller
 {
-    /***********************************REDISEÑO******************* */
     public function ranking_v2()
     {
         $user = auth()->user();
@@ -26,31 +25,20 @@ class RestRankController extends Controller
             'ranking' => $this->loadRankingByCriterion($user),
         ];
 
-        if ($user->subworkspace->parent_id === 25):
-            $user_grupo_value = $user->criterion_values()
-                ->whereRelation('criterion', 'code', 'grupo')
-                ->first();
-            if ($user_grupo_value)
-                $response[] = [
-                    'label' => 'Área',
-                    'code' => 'grupo',
-                    'ranking' => [],
-//                'ranking' => $this->loadRankingByCriterion($user, 'grupo'),
-//                'ranking' => $this->loadRankingByCriterion($user, 29),
-                ];
+        $criteria = $user->getCriteriaFilteredByWorkspace('available_in_ranking');
 
-            $user_botica_value = $user->criterion_values()
-                ->whereRelation('criterion', 'code', 'botica')
-                ->first();
-            if ($user_botica_value)
+        foreach ($criteria as $criterion) {
+
+            $user_grupo_value = $user->criterion_values()->where('criterion_id', $criterion->id)->first();
+
+            if ($user_grupo_value) {
                 $response[] = [
-                    'label' => 'Sede',
-                    'code' => 'botica',
+                    'label' => $criterion->name,
+                    'code' => $criterion->code,
                     'ranking' => [],
-//                'ranking' => $this->loadRankingByCriterion($user, 'botica'),
-//                'ranking' => $this->loadRankingByCriterion($user, 28),
                 ];
-        endif;
+            }
+        }
 
         return $this->success($response);
     }
@@ -166,11 +154,9 @@ class RestRankController extends Controller
 
     public function cargarRankingGeneral($user)
     {
-
         return $this->cargar_ranking($user, 'general');
     }
 
-    /*--------------------------------------------------------SUBFUNCIONES----------------------------------------------------------------*/
     private function cargar_ranking($user, $tipo, $data = null)
     {
         $ranking_usuario = $this->cargar_position_user($user, $tipo, $data);
@@ -182,7 +168,6 @@ class RestRankController extends Controller
                     ->where('subworkspace_id', $user->subworkspace_id);
             });
 
-
         $ranking = $q_ranking->whereRelation('user', 'active', ACTIVE)
             ->whereNotNull('last_time_evaluated_at')
             ->orderBy('score', 'desc')
@@ -193,6 +178,7 @@ class RestRankController extends Controller
         $temp = [];
         $i = 0;
         $current = false;
+
         foreach ($ranking as $rank) {
             $i++;
             $current = $i === $ranking_usuario['position'];
@@ -217,8 +203,8 @@ class RestRankController extends Controller
 
     private function cargar_position_user($user, $tipo, $data)
     {
-
         $summary_user = SummaryUser::getCurrentRow($user);
+
         if (!$summary_user) return ['position' => null];
 
         if ($tipo == 'general')
@@ -252,6 +238,4 @@ class RestRankController extends Controller
             'position' => $position
         ];
     }
-
-
 }
