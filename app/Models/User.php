@@ -1593,7 +1593,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ];
         }
 
-        return $values;
+        return $criterion_values;
     }
 
     public function getCriteriaFilteredByWorkspace($field)
