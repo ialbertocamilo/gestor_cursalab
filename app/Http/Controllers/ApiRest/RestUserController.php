@@ -54,7 +54,7 @@ class RestUserController extends Controller
      */
     public function loadNotifications(Request $request) {
 
-        $user = User::find(32353);//;auth()->user();
+        $user = auth()->user();
         $notications = UserNotification::loadUserNotifications($user->id);
 
         return response()->json($notications);
