@@ -1580,7 +1580,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function getProfileCriteria()
     {
-        $workspace = $user->subworkspace->parent;
+        $workspace = $this->subworkspace->parent;
         $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot('available_in_profile', 1)->get();
         $criterion_values = $this->criterion_values->whereIn('criterion_id', $criterionWorkspace->pluck('id'));
 
@@ -1598,7 +1598,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function getCriteriaFilteredByWorkspace($field)
     {
-        $workspace = $user->subworkspace->parent;
+        $workspace = $this->subworkspace->parent;
         $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot($field, 1)->get();
 
         return $criterionWorkspace;
