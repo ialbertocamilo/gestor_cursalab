@@ -168,7 +168,7 @@ if (isset($fullScreen)) {
                         </div>
                     </div>
 
-                @else
+                @elseif (!Route::is('workspaces-list'))
 
                     <div class="table-gui skeleton-wrapper position-relative p-4">
 
