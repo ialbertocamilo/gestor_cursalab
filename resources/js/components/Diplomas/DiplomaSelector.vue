@@ -158,7 +158,8 @@ export default {
                 certificates.forEach(c => {
                     this.certificateTemplates.push({
                         id: c.id,
-                        title: this.generateTitle(c.title, c),
+                        // title: this.generateTitle(c.title, c),
+                        title: c.title,
                         image: c.image,
                         d_objects: c.d_objects
                     })
