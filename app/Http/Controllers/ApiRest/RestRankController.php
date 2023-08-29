@@ -33,7 +33,7 @@ class RestRankController extends Controller
 
             if ($user_value) {
                 $response[] = [
-                    'label' => $criterion->name . " - [{$user_value->value_text}]",
+                    'label' => "[{$criterion->name}] " . $user_value->value_text,
                     'code' => $criterion->code,
                     'ranking' => [],
                 ];
