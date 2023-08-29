@@ -29,11 +29,11 @@ class RestRankController extends Controller
 
         foreach ($criteria as $criterion) {
 
-            $user_grupo_value = $user->criterion_values()->where('criterion_id', $criterion->id)->first();
+            $user_value = $user->criterion_values()->where('criterion_id', $criterion->id)->first();
 
-            if ($user_grupo_value) {
+            if ($user_value) {
                 $response[] = [
-                    'label' => $criterion->name . " - [{$user_grupo_value->name}]",
+                    'label' => $criterion->name . " - [{$user_value->value_text}]",
                     'code' => $criterion->code,
                     'ranking' => [],
                 ];
