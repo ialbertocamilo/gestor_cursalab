@@ -65,6 +65,21 @@ if (isset($fullScreen)) {
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
 
+                {{-- Sidemenu skeleton --}}
+
+                <div class="skeleton-wrapper">
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                </div>
 
 
                 {{-- <v-app> --}}
@@ -125,15 +140,18 @@ if (isset($fullScreen)) {
                 </div>
             @endif
 
+
+                @yield('content')
+
                 {{--
-                    Dashboard skeleton
-                ======================================== --}}
+        Dashboard skeleton
+    ======================================== --}}
 
                 @if (Route::is('home'))
                     <div class="dashboard skeleton-wrapper position-relative p-4">
 
                         <div class="row m-0">
-                            <div class=" card skeleton module-selector"></div>
+                            <div class="col-12 card skeleton module-selector"></div>
                         </div>
 
                         <div class="row justify-content-between m-0 mt-4">
@@ -149,10 +167,185 @@ if (isset($fullScreen)) {
                             <div class="col-6 skeleton charts"></div>
                         </div>
                     </div>
+
+                @else
+
+                    <div class="table-gui skeleton-wrapper position-relative p-4">
+
+                        <div class="row m-0">
+                            <div class="col-12 card skeleton filters-selector"></div>
+                        </div>
+
+                        <div class="row m-0 mt-4">
+                            <div class="col-12">
+                                <div class="skeleton header-skeleton"></div>
+                                <div class="body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 @endif
-
-
-                @yield('content')
 
         </div>
         <div id="content_polls" style="display: none;">

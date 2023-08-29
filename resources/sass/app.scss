@@ -360,3 +360,50 @@ Skeletons
 
 // Table skeletons
 
+
+.table-gui.skeleton-wrapper .skeleton {
+    background: #e6e6e6;
+}
+
+.table-gui.skeleton-wrapper .skeleton.filters-selector {
+    position: relative;
+    height: 140px;
+    border-radius: 10px;
+    border: none;
+}
+
+.table-gui.skeleton-wrapper .skeleton.charts {
+    position: relative;
+    height: 540px;
+}
+
+.table-gui.skeleton-wrapper .skeleton.header-skeleton {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: 100%;
+    height: 48px;
+}
+
+.table-gui.skeleton-wrapper .body {
+    position: relative;
+    background: white;
+    padding: 2rem;
+}
+
+.table-gui.skeleton-wrapper .body .row {
+    height: 70px;
+}
+
+.table-gui.skeleton-wrapper .skeleton.bar {
+    position: relative;
+    height: 20.6px;
+    width: 100%;
+    border-radius: 15px;
+}
+
+.table-gui.skeleton-wrapper .skeleton.icon {
+    position: relative;
+    height: 32px;
+    width: 42px;
+    border-radius: 5px;
+}
