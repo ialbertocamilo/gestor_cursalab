@@ -169,85 +169,7 @@ export default {
                 ],
             },
             questions:[],
-            questionsTemplate:[
-                {
-                    question: "¿Cuál es el problema de salud que presenta la cliente?",
-                    options: [
-                    { text: "Callos en los pies", isCorrect: true },
-                    { text: "Dolor en los pechos", isCorrect: false },
-                    { text: "Hipersensibilidad cutánea", isCorrect: false },
-                    { text: "Problemas de circulación", isCorrect: false },
-                    { text: "Alergia a medicamentos", isCorrect: false }
-                    ],
-                    correctAnswer: 0
-                },
-                {
-                    question: "¿Con qué frecuencia utiliza la cliente zapatos ajustados?",
-                    options: [
-                    { text: "Una vez a la semana", isCorrect: false },
-                    { text: "A diario", isCorrect: true },
-                    { text: "Rara vez", isCorrect: false },
-                    { text: "Nunca", isCorrect: false },
-                    { text: "Solo para eventos especiales", isCorrect: false }
-                    ],
-                    correctAnswer: 1
-                },
-                {
-                    question: "¿Cuál es la recomendación final para la cliente?",
-                    options: [
-                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: false },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
-                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
-                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
-                    ],
-                    correctAnswer: 2
-                },
-                {
-                    question: "¿Cuál es la recomendación final para la cliente?",
-                    options: [
-                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: false },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
-                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
-                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
-                    ],
-                    correctAnswer: 2
-                },
-                {
-                    question: "¿Cuál es la recomendación final para la cliente?",
-                    options: [
-                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: false },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
-                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
-                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
-                    ],
-                    correctAnswer: 2
-                },
-                {
-                    question: "¿Cuál es la recomendación final para la cliente?",
-                    options: [
-                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: false },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
-                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
-                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
-                    ],
-                    correctAnswer: 2
-                },
-                {
-                    question: "¿Cuál es la recomendación final para la cliente?",
-                    options: [
-                    { text: "Utilizar productos de higiene diariamente", isCorrect: false },
-                    { text: "Consultar con un médico", isCorrect: false },
-                    { text: "Evitar el uso de calzado ajustado", isCorrect: true },
-                    { text: "Realizar técnicas de eliminación de callos dos veces a la semana", isCorrect: false },
-                    { text: "Aplicar el tratamiento reparador todas las noches", isCorrect: false }
-                    ],
-                    correctAnswer: 2
-                },
-            ],
+
             modalQuestionOptions: {
                 ref: 'EditModalQuestion',
                 title_modal:'Edición de preguntas',
@@ -284,17 +206,12 @@ export default {
                 configuration: vue.configuration
             }
             vue.$http.post(url, data).then(async ({data}) => {
-                
+                const questionsTemplate = data.message
+                this.addItemWithTimeout(questionsTemplate,0);
             }).catch(async (error) => {
             
             })
             
-            // this.addItemWithTimeout(this.questionsTemplate,0);
-            // this.questionsTemplate.forEach(element => {
-            //     setInterval(() => {
-            //         this.questions.push(element);
-            //     }, 5000);
-            // });
         },
         addItemWithTimeout(new_questions,index) {
             this.questions.push(new_questions[index]);
@@ -389,7 +306,7 @@ export default {
 .container-questions{
     background-color: #eaeaea;
     border-radius: 8px;
-    max-height: 50vh;
+    max-height: 100vh;
     overflow: auto;
 }
 .card-question{
