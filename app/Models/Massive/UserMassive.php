@@ -162,7 +162,7 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
-            if(strpos($dc['value_excel'],'=')===0){
+            if(strpos($dt['value_excel'],'=')===0){
                 $has_error = true;
                 $errors_index[] = [
                     'index' => $dt['index'],
