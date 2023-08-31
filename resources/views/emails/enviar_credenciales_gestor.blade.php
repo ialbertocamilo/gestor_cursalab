@@ -4,7 +4,7 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                <strong>Hola, {{$data['user']}} </strong><br> Estás recibiendo este email, porque se ha ingresado y actualizado la contraseña para el ingreso a tu cuenta.
+                <strong>Hola, {{$data['user']}} </strong><br> Estás recibiendo este email, porque se ha actualizado la contraseña para el ingreso a tu cuenta.
             </p>
         </td>
     </tr>
@@ -29,10 +29,10 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                Por medidas de seguridad tu contraseña es encriptada, solo tu puedes saber la contraseña que escogiste.
+                Por medidas de seguridad tu contraseña es encriptada, solo tú puedes saber la contraseña que escogiste.
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                <span style="font-weight:bold;">¿No reconoces esta actividad?</span> Contáctate inmediatamente con el equipo de <b style="color: #5457E7;">Customer Experience.</b><br>Este es un mensaje automático, por favor no responder.
+                <span style="font-weight:bold;">¿No reconoces esta actividad?</span> Contáctate inmediatamente con el equipo de <b style="color: #5457E7;">Customer Success.</b><br>Este es un mensaje automático, por favor no responder.
             </p>
         </td>
     </tr>
