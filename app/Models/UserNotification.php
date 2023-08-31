@@ -139,12 +139,13 @@ class UserNotification extends BaseModel
                 'created_at',
                 DB::raw('date(created_at) created_date')
             ])
-            ->whereDate('created_at', '>', now()->subDays(5))
+            //->whereDate('created_at', '>', now()->subDays(5))
             ->get();
 
         // Group notifications by date
 
         Carbon::setLocale('es');
+
         foreach ($notications as &$notication) {
             $date = $notication->created_at;
             $notication->created_date =
@@ -152,6 +153,15 @@ class UserNotification extends BaseModel
 
         }
 
-        return $notications->groupBy('created_date')->toArray();
+        $responseNotifications = [];
+        $groupedNotifications = $notications->groupBy('created_date')->toArray();
+        foreach ($groupedNotifications as $groupName => $notifications) {
+            $responseNotifications[] = [
+                'date' => $groupName,
+                'notifications' => $notifications
+            ];
+        }
+
+        return $responseNotifications;
     }
 }
