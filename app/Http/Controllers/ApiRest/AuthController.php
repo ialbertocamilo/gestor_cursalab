@@ -602,13 +602,14 @@ class AuthController extends Controller
 
             $user_workspace = $user->subworkspace->parent_id;
             $functionality = $user_workspace ? WorkspaceFunctionality::getFunctionality( $user_workspace, 'send-credentials-to-email') : null;
+            $hide_password = $request->password ? '******' . substr($request->password, -3) : '******';
 
             if($functionality && $request->email)
             {
                 $mail_data = [ 'subject' => '⚠️ Alerta de ingreso a la plataforma',
                             'user' => $user->name.' '.$user->lastname,
                             'email' => $request->email,
-                            'password' => $request->password,
+                            'password' => $hide_password
                             ];
                 Mail::to($request->email)->send(new EmailTemplate('emails.enviar_credenciales_gestor', $mail_data));
             }
