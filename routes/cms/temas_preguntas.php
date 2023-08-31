@@ -10,6 +10,7 @@ Route::controller(TemaController::class)->group(function() {
 	Route::get('/search', 'search_preguntas')->name('temas.search');
 	Route::get('/{pregunta}', 'showPregunta')->name('temas.showPregunta');
 	Route::post('/store', 'storePregunta')->name('temas.storePregunta');
+	Route::post('/store-ai-question', 'storeAIQuestion')->name('temas.storeAIQuestion');
 	Route::post('/import', 'importPreguntas')->name('temas.importPreguntas');
 	Route::delete('/{pregunta}', 'deletePregunta')->name('temas.deletePregunta');
 });

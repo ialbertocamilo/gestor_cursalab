@@ -229,7 +229,33 @@ class TemaController extends Controller
 
         return $this->success(['pregunta' => $pregunta]);
     }
-
+    public function storeAIQuestion(School $school, Course $course, Topic $topic,Request $request){
+        $question_type_code = $topic->evaluation_type->code === 'qualified'
+        ? 'select-options'
+        : 'written-answer';
+        $type_id =  Taxonomy::getFirstData('question', 'type', $question_type_code)?->id;
+        $questions = $request->all();
+        $insert_questions = [];
+        
+        foreach ($questions as $question) {
+            $options = [];
+            foreach ($question['options'] as $key => $option) {
+                $options[$key+1] = $option['text'];
+            }
+            $insert_questions[] = [
+                'topic_id' => $topic->id,
+                'type_id' => $type_id,
+                // 'rptas_json' => $data['nuevasRptas'],
+                'rptas_json' => $options,
+                'rpta_ok' => $question['correctAnswer'] + 1,
+                'active' => 1,
+                'required' => 0,
+                'score' => calculateValueForQualification(1, 20, $topic->qualification_type->position),
+            ];
+        }
+        dd($insert_questions);
+        // $result = Question::checkScoreLeft($topic, $data['id'], $data);
+    }
     public function storePregunta(
         School $school, Course $course, Topic $topic, TemaPreguntaStoreRequest $request
     )

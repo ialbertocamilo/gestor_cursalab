@@ -294,7 +294,7 @@ export default {
             modalCreateQuestionsOptions:{
                 ref: 'CreateQuestions',
                 open: false,
-                base_endpoint: `/questions`,
+                base_endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas`,
                 confirmLabel: 'Guardar',
                 title_modal: `Creación de evaluación con AI (${this.tema_name})`,
                 topic_id: this.tema_id,
