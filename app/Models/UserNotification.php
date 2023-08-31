@@ -139,7 +139,7 @@ class UserNotification extends BaseModel
                 'created_at',
                 DB::raw('date(created_at) created_date')
             ])
-            //->whereDate('created_at', '>', now()->subDays(5))
+            ->whereDate('created_at', '>', now()->subDays(5))
             ->get();
 
         // Group notifications by date
