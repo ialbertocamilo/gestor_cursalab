@@ -10,7 +10,7 @@
     </tr>
     <tr style="background-color:#F9FAFB;">
         <td colspan="2" style="font-family: 'Poppins', sans-serif; padding:0; ">
-            <div style="margin: 10px 95px;background-color:#FFFFFF;padding: 20px 0px;border-radius: 1rem;">
+            <div style="margin: 10px auto;background-color:#FFFFFF;padding: 20px 0px;border-radius: 1rem;max-width: 350px;">
 
                 <div style="width:25px; height:5px; margin-left:-4rem; border-radius:4px; background: #FFCD0C;"></div>
                 <p style="color:#120C29; text-align:center; font-size: 1rem; margin-bottom:0px;margin-top:3px;">
