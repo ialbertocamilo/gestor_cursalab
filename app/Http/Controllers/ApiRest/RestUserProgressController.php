@@ -95,7 +95,14 @@ class RestUserProgressController extends Controller
                                 ->get();
                                 
         foreach ($schools as $school_id => $courses) {
-            $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
+            // $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
+            $school_workspace = $positions_schools->where('school_id', $school_id)->first();
+            if(!$school_workspace){
+                // la escuela no pertenece al módulo del usuario
+                continue;
+            }
+            $school_position = $school_workspace?->position;
+
             $school = $courses->first()->schools->where('id', $school_id)->first();
             $courses_data = $this->getSchoolProgress($courses,$positions_courses,$school_id);
 
