@@ -225,12 +225,12 @@ class Criterion extends BaseModel
         return $criteria;
     }
 
-    protected function overrideCriterionWorkspaceTitle(&$criterionWorkspace)
+    protected function overrideCriterionWorkspaceTitle($criterionWorkspace)
     {
-        foreach ($criterionWorkspace as $key => $criterion) {
+        foreach ($criterionWorkspace as $criterion) {
             $criterion->name = $workspace->pivot->criterion_title ?? $criterion->name;
         }
 
-        // return $criterionWorkspace;
+        return $criterionWorkspace;
     }
 }
