@@ -228,9 +228,9 @@ class Criterion extends BaseModel
     protected function overrideCriterionWorkspaceTitle($criterionWorkspace)
     {
         foreach ($criterionWorkspace as $criterion) {
-            $criterion->name = $workspace->pivot->criterion_title ?? $criterion->name;
+            $criterion->name = $criterion->pivot->criterion_title ?? $criterion->name;
         }
 
-        return $criterionWorkspace;
+        // return $criterionWorkspace;
     }
 }
