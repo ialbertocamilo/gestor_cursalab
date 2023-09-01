@@ -1588,9 +1588,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         
         foreach ($criterion_values as $value) {
 
+            $criterion = $criterionWorkspace->where('id', $value->criterion->id)->first();
+
             $criterios[] = [
                 'valor' => $value->value_text,
-                'tipo' => $value->criterion->name ?? null,
+                'tipo' => $criterion->pivot->criterion_title ?? $criterion->name ?? null,
             ];
         }
 
