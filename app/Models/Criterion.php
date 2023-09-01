@@ -38,7 +38,9 @@ class Criterion extends BaseModel
 
     public function workspaces()
     {
-        return $this->belongsToMany(Workspace::class);
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
+
+        return $this->belongsToMany(Workspace::class)->withPivot($custom_pivot_fields);
     }
 
     public function field_type()
@@ -156,7 +158,7 @@ class Criterion extends BaseModel
 
     protected function getSelectionCheckbox($workspace = null)
     {
-        $custom_pivot_fields = (new Workspace)->custom_pivot_fields;
+        $custom_pivot_fields = Workspace::CUSTOM_PIVOT_FIELDS;
         $criterionWorkspace = $workspace ? $workspace->criterionWorkspace : NULL;
 
         $criteria = Criterion::with('field_type')->where('active', ACTIVE)->orderByDesc('is_default')->get();
@@ -166,17 +168,15 @@ class Criterion extends BaseModel
 
             $in_segments = SegmentValue::where('criterion_id', $criterion->id)->count();
 
+            $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
+
+            $criterion_available = $workspace ? ($current ? true : false) : true;
+            $criterion_disabled = false;
+
             if ($criterion->code == 'module') {
 
                 $criterion_available = true;
                 $criterion_disabled = true;
-
-            } else {
-
-                $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
-
-                $criterion_available = $workspace ? ($current ? true : false) : true;
-                $criterion_disabled = false;
             }
 
             $criteria_workspace[$key] = [
@@ -187,29 +187,55 @@ class Criterion extends BaseModel
                 'disabled' => $criterion_disabled,
             ]; 
 
-            foreach ($custom_pivot_fields as $code => $name) {
+            foreach ($custom_pivot_fields as $code => $row) {
 
                 $field_disabled = false;
 
+                $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
+                
                 if ($criterion->code == 'module') {
 
                     $field_available = true;
                     $field_disabled = true;
-
-                } else {
-
-                    $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
                 }
 
                 $criteria_workspace[$key]['fields'][$code] = [
                     'code' => $code,
-                    'name' => $name,
+                    'name' => $row['name'],
+                    'type' => $row['type'],
                     'available' => $field_available,
                     'disabled' => $field_disabled,
+                    'text' => $row['type'] == 'text' ? ($current->pivot->$code ?? $criterion->name) : NULL,
                 ]; 
             }
         }
 
         return compact('criteria', 'criteria_workspace');
+    }
+
+    protected function setCriterionNameByCriterionTitle($criteria)
+    {
+        foreach ($criteria as $key => $criterion) {
+
+            $workspace = $criterion->workspaces->first();
+
+            $criterion->name = $workspace->pivot->criterion_title ?? $criterion->name;
+        }
+
+        return $criteria;
+    }
+
+    protected function overrideCriterionWorkspaceTitle($criterionWorkspace)
+    {
+        // $criterionWorkspace = $workspace->criterionWorkspace;
+
+        foreach ($criterionWorkspace as $key => $criterion) {
+
+            // $workspace = $criterion->workspaces->first();
+
+            $criterion->name = $workspace->pivot->criterion_title ?? $criterion->name;
+        }
+
+        // return $criteria;
     }
 }

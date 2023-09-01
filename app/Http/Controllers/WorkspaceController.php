@@ -227,6 +227,9 @@ class WorkspaceController extends Controller
 
         // Save workspace's criteria
 
+        info('data_criteria');
+        info($data['criteria']);
+
         if ( !empty($data['criteria']) ) {
             $workspace->criterionWorkspace()->sync($data['criteria']);
         }

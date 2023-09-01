@@ -1602,6 +1602,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $workspace = $this->subworkspace->parent;
         $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot($field, 1)->get();
 
+        Criterion::overrideCriterionWorkspaceTitle($criterionWorkspace);
+
         return $criterionWorkspace;
     }
 

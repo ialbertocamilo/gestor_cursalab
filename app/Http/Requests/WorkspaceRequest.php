@@ -73,7 +73,14 @@ class WorkspaceRequest extends FormRequest
                 $fields = [];
 
                 foreach ($row['fields'] as $field) {
-                    $fields[$field['code']] = $field['available'] ? 1 : NULL;
+
+                    if ($field['type'] == 'boolean') {
+                        $fields[$field['code']] = $field['available'] ? 1 : NULL;
+                    }
+
+                    if ($field['type'] == 'text') {
+                        $fields[$field['code']] = $field['text'] ?? NULL;
+                    }
                 }
 
                 $data['criteria'][$row['criterion_id']] = $fields;

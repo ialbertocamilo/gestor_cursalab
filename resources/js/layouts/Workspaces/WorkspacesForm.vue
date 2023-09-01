@@ -108,7 +108,7 @@
                                 <v-container
                                     id="scroll-target"
                                     class="overflow-y-auto py-0 px-1"
-                                    style="min-height: 360px; max-height: 600px"
+                                    style="min-height: 360px; max-height: 450px;"
                                 >
                                     <v-row class="mr-1 custom-row-checkbox">
                                         <v-col cols="12" v-if="resource.criteria_workspace">
@@ -124,18 +124,35 @@
                                                         :active-label="criterion.name"
                                                         :inactive-label="criterion.name"
                                                     />
+                                                    <!-- <DefaultInput
+                                                        clearable
+                                                        v-model="resource.name"
+                                                        label="Título del criterio"
+                                                        :rules="rules.name"
+                                                        dense
+                                                    /> -->
                                                 </v-col>
 
                                                 <v-col cols="9" v-if="criterion">
                                                     <v-row justify="start">
-                                                        <v-col cols="4" v-for="field in criterion.fields" :key="field.code" class="py-0 pr-0">
+                                                        <v-col :cols="field.type == 'boolean' ? 4 : 12" v-for="field in criterion.fields" :key="field.code" class="py-0 pr-0">
                                                             <v-checkbox
+                                                                v-if="field.type == 'boolean'"
                                                                 hide-details
                                                                 v-model="field.available"
                                                                 :label="field.name"
                                                                 :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
-                                                            >
-                                                            </v-checkbox>
+                                                            />
+
+                                                            <DefaultInput
+                                                                v-if="field.type == 'text'"
+                                                                clearable
+                                                                v-model="field.text"
+                                                                :label="field.name"
+                                                                :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
+                                                                dense
+                                                                class="mb-3 mx-1"
+                                                            />
                                                         </v-col>
                                                     </v-row>
                                                 </v-col>

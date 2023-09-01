@@ -125,6 +125,10 @@ class UsuarioController extends Controller
                 'values' => function ($q) use ($workspace) {
                     $q->select('id', 'criterion_id', 'value_date', 'value_text as name');
                     $q->whereRelation('workspaces', 'id', $workspace->id);
+                },
+                'workspaces' => function ($q) use ($workspace) {
+                    $q->select('id', 'name');
+                    $q->where('id', $workspace->id);
                 }
             ])
             // ->where('is_default', INACTIVE)
@@ -136,12 +140,22 @@ class UsuarioController extends Controller
             ->orderByDesc('name')
             ->get();
 
+        // $criteria_workspace = Criterion::setCriterionNameByCriterionTitle($criteria_workspace);
+
         $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
-            ->with('field_type:id,name,code')
+            ->with([
+                'field_type:id,name,code',
+                'workspaces' => function ($q) use ($workspace) {
+                    $q->select('id', 'name');
+                    $q->where('id', $workspace->id);
+                }
+            ])
             // ->where('is_default', INACTIVE)
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderByDesc('name')
             ->get();
+            
+        $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
         $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
         $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);

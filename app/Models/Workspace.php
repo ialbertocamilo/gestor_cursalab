@@ -36,14 +36,42 @@ class Workspace extends BaseModel
         'show_logo_in_app',
     ];
 
-    public $custom_pivot_fields = [
-        'available_in_profile' => 'Perfil',
-        'available_in_ranking' => 'Ranking',
-        'available_in_reports' => 'Reportes',
-        'available_in_segmentation' => 'Segmentación',
-        // 'available_in_user_creation' => 'Creación de usuario',
-        'required_in_user_creation' => 'Crear Usuario',
-        'available_in_user_filters' => 'Filtro Usuarios',
+    const CUSTOM_PIVOT_FIELDS = [
+        'criterion_title' => [
+            'name' => 'Título de criterio',
+            'type' => 'text',
+        ],
+
+        'available_in_profile' => [
+            'name' => 'Perfil',
+            'type' => 'boolean',
+        ],
+
+        'available_in_ranking' => [
+            'name' => 'Ranking',
+            'type' => 'boolean',
+        ],
+
+        'available_in_reports' => [
+            'name' => 'Reportes',
+            'type' => 'boolean',
+        ],
+
+        'available_in_segmentation' => [
+            'name' => 'Segmentación',
+            'type' => 'boolean',
+        ],
+
+        'required_in_user_creation' => [
+            'name' => 'Crear Usuario',
+            'type' => 'boolean',
+        ],
+
+        'available_in_user_filters' => [
+            'name' => 'Filtro Usuarios',
+            'type' => 'boolean',
+        ],
+
     ];
 
     public function sluggable(): array
@@ -125,7 +153,7 @@ class Workspace extends BaseModel
 
     public function criterionWorkspace()
     {
-        $custom_pivot_fields = array_keys($this->custom_pivot_fields);
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
 
         return $this->belongsToMany(Criterion::class)->withPivot($custom_pivot_fields);
     }
