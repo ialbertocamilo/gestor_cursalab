@@ -1608,6 +1608,4 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $criterionWorkspace;
     }
-
-    // public function filter
 }

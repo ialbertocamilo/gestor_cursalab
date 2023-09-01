@@ -230,7 +230,5 @@ class Criterion extends BaseModel
         foreach ($criterionWorkspace as $criterion) {
             $criterion->name = $criterion->pivot->criterion_title ?? $criterion->name;
         }
-
-        // return $criterionWorkspace;
     }
 }
