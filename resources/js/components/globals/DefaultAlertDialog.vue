@@ -10,7 +10,7 @@
         <v-card>
             <v-card-title class="default-dialog-title">
                 <span v-html="options.title"></span>
-                <v-btn icon :ripple="false" color="white"
+                <v-btn v-if="showCloseButton" icon :ripple="false" color="white"
                        @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
@@ -57,6 +57,10 @@ export default {
             type: Boolean,
             default: false
         },
+        showCloseButton:{
+            type: Boolean,
+            default: true
+        }
     },
     methods: {
         closeModal() {

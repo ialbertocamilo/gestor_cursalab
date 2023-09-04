@@ -3,29 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Post;
 use App\Models\Curso;
 use App\Models\Media;
+use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Posteo;
+use App\Models\School;
 use App\Models\Abconfig;
+
 use App\Models\Pregunta;
+
+use App\Models\Question;
+use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\MediaTema;
-use App\Models\TagRelationship;
-
+use App\Models\Workspace;
 use Illuminate\Http\Request;
-
+use App\Models\TagRelationship;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
 use App\Http\Resources\Posteo\PosteoPreguntasResource;
 use App\Http\Requests\TemaPregunta\TemaPreguntaStoreRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaDeleteRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaImportRequest;
-use App\Models\Course;
-use App\Models\Post;
-use App\Models\Question;
-use App\Models\School;
-use App\Models\Taxonomy;
-use App\Models\Topic;
 
 class TemaController extends Controller
 {
@@ -83,7 +84,7 @@ class TemaController extends Controller
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
 
         $media_url = get_media_url();
-
+        $limits_ia_convert = Workspace::getLimitAIConvert();
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
@@ -91,6 +92,7 @@ class TemaController extends Controller
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
+            'limits_ia_convert'=>$limits_ia_convert
         ]);
     }
 
@@ -236,24 +238,27 @@ class TemaController extends Controller
         $type_id =  Taxonomy::getFirstData('question', 'type', $question_type_code)?->id;
         $questions = $request->all();
         $insert_questions = [];
-        
+        $score = (int)(20/count($questions));
         foreach ($questions as $question) {
             $options = [];
             foreach ($question['options'] as $key => $option) {
                 $options[$key+1] = $option['text'];
             }
             $insert_questions[] = [
+                'pregunta' => $question['question'],
                 'topic_id' => $topic->id,
                 'type_id' => $type_id,
                 // 'rptas_json' => $data['nuevasRptas'],
-                'rptas_json' => $options,
+                'rptas_json' => json_encode($options),
                 'rpta_ok' => $question['correctAnswer'] + 1,
                 'active' => 1,
                 'required' => 0,
-                'score' => calculateValueForQualification(1, 20, $topic->qualification_type->position),
+                'score' => calculateValueForQualification($score, 20, $topic->qualification_type->position),
             ];
         }
-        dd($insert_questions);
+        Question::insert($insert_questions);
+        // dd($insert_questions);
+        return $this->success(['message'=>'Preguntas creadas correctamente.']);
         // $result = Question::checkScoreLeft($topic, $data['id'], $data);
     }
     public function storePregunta(

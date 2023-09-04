@@ -154,21 +154,20 @@
             @onCancel="closeFormModal(modalDeleteOptions)"
             @onConfirm="closeFormModal(modalDeleteOptions),deleteQuestion()"
         >
-        <template v-slot:content>
-            <p>Una vez eliminada la pregunta no podrá recuperarse.</p>
-            <p>
-                <strong>¿Está seguro de eliminar esta pregunta?</strong>
-            </p>
-        </template>
-    </DefaultAlertDialog>
+            <template v-slot:content>
+                <p>Una vez eliminada la pregunta no podrá recuperarse.</p>
+                <p>
+                    <strong>¿Está seguro de eliminar esta pregunta?</strong>
+                </p>
+            </template>
+        </DefaultAlertDialog>
     </div>
 </template>
 <script>
 import EditAIQuestionsModal from './EditAIQuestionsModal';
-import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
-    components:{EditAIQuestionsModal,DefaultDeleteModal},
+    components:{EditAIQuestionsModal},
     props: {
         options: {
             type: Object,
@@ -235,7 +234,7 @@ export default {
         resetValidation (){
 
         },
-        generateQuestions(){
+        async generateQuestions(){
             let vue = this;
             const url = `${vue.jarvisBaseUrl}/generate-questions`;
             vue.showLoader();
@@ -244,7 +243,7 @@ export default {
                 workspace_id: vue.options.workspace_id,
                 configuration: vue.configuration
             }
-            vue.$http.post(url, data).then(async ({data}) => {
+            await vue.$http.post(url, data).then(async ({data}) => {
                 vue.hideLoader();
                 // 
                 const questionsTemplate = data.message
@@ -254,14 +253,13 @@ export default {
             })
             
         },
-        saveQuestions(){
+        async saveQuestions(){
             let vue = this;
+            vue.showLoader();
             const url = `${vue.options.base_endpoint}/store-ai-question`;
-            vue.$http.post(url, vue.questions).then(async ({data}) => {
+            await vue.$http.post(url, vue.questions).then(async ({data}) => {
                 vue.hideLoader();
-                // 
-                const questionsTemplate = data.message
-                this.addItemWithTimeout(questionsTemplate,0);
+                vue.$emit('onConfirm');
             }).catch(async (error) => {
                 vue.hideLoader();
             })
@@ -283,19 +281,7 @@ export default {
         },
         confirmModal() {
             let vue = this
-            // event.preventDefault();
-            // const validateForm = vue.validateForm('TemaMultimediaTextForm')
-            // if (validateForm) {
-            //     const data = {
-            //         titulo: vue.titulo,
-            //         ia_convert:vue.ia_convert,
-            //         file: vue.TypeOf(vue.multimedia) === 'object' ? vue.multimedia : null,
-            //         valor: vue.TypeOf(vue.multimedia) === 'string' ? vue.multimedia : null,
-            //         type: vue.type
-            //     }
-            //     vue.$emit('onConfirm', data)
-            //     vue.closeModal()
-            // }
+            
         },
         changeConfiguration(value){
             let vue = this;

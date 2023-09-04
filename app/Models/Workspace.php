@@ -34,6 +34,7 @@ class Workspace extends BaseModel
         'notificaciones_push_envio_intervalo',
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
+        'limits',
         'show_logo_in_app',
     ];
 
@@ -55,6 +56,7 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array',
         'limits' => 'json',
     ];
+
 
     public function medias() {
         return $this->hasMany(Media::class, 'workspace_id');
@@ -776,5 +778,18 @@ class Workspace extends BaseModel
         }
 
         return $workspace;
+    }
+
+    protected function getLimitAIConvert(){
+        $workspace = get_current_workspace();
+        $limits = self::where('id',$workspace->id)->select('limits')->first()?->limits;
+        $media_ia_converted = MediaTema::where('ia_convert',1)->whereHas('topic.course.workspaces',function($q) use ($workspace){
+            $q->whereIn('id',[$workspace->id]);
+        })->count();
+        return [
+            'limit_allowed_media_convert' => (int) $limits['limit_allowed_media_convert'] ?? 0,
+            'limit_allowed_ia_evaluations' => (int) $limits['limit_allowed_ia_evaluations'] ?? 0,
+            'media_ia_converted' => $media_ia_converted ?? 0,
+        ];
     }
 }

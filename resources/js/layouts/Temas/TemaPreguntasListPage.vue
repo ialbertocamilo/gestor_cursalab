@@ -159,9 +159,36 @@
                 width="80vw"
                 :ref="modalCreateQuestionsOptions.ref"
                 :options="modalCreateQuestionsOptions"
-                @onConfirm="closeFormModal(modalCreateQuestionsOptions, dataTable, filters);refreshDefaultTable(dataTable, filters)"
+                @onConfirm="
+                    closeFormModal(modalCreateQuestionsOptions, dataTable, filters);
+                    refreshDefaultTable(dataTable, filters),
+                    openConfirmCreateQuestion()"
                 @onCancel="closeFormModal(modalCreateQuestionsOptions);refreshDefaultTable(dataTable, filters) "
             />
+            <DefaultAlertDialog 
+                :options="modalInfoCreateQuestion"
+                :hideCancelBtn="modalInfoCreateQuestion.hideCancelBtn"
+                :confirmLabel="modalInfoCreateQuestion.confirmLabel"
+                :showCloseButton = "false"
+                width="40vw"
+                :ref="modalInfoCreateQuestion.ref"
+                @onCancel="closeFormModal(modalInfoCreateQuestion)"
+                @onConfirm="closeFormModal(modalInfoCreateQuestion)"
+            >
+                <template v-slot:content>
+                    <div style="border-radius: 10px;" class="d-flex flex-column align-items-center justify-content-center elevation-2">
+                        <div class="my-8">
+                            <img src="/img/check_confirm.svg">
+                        </div>
+                        <div>
+                            <p style="color:#57BFE3">¡Excelente tu evaluación se creo correctamente!</p>
+                        </div>
+                    </div>
+                    <p class="mt-4">
+                        <strong>Recuerda cuentas con 10 evaluaciones por realizar con AI.</strong>
+                    </p>
+                </template>
+            </DefaultAlertDialog>
         </v-card>
     </section>
 </template>
@@ -313,7 +340,13 @@ export default {
                 hideConfirmBtn: true,
                 topicUrl: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/search/${vue.tema_id}`,
             },
-
+            modalInfoCreateQuestion:{
+                open: false,
+                ref:'ModalInfoCreateQuestion',
+                title: 'Evaluación creada',
+                hideCancelBtn:true,
+                confirmLabel:'Entendido'
+            },
             delete_model: null
         }
     },
@@ -385,6 +418,10 @@ export default {
 
                     // vue.updateData(data)
                 })
+        },
+        openConfirmCreateQuestion(){
+            let vue = this;
+            vue.openSimpleModal(vue.modalInfoCreateQuestion);
         }
     }
 

@@ -253,7 +253,7 @@
 
                             </v-row>
 
-                            <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
+                            <TemaMultimediaTypes :limits="limits_ia_convert" @addMultimedia="addMultimedia($event)"/>
                         </template>
                     </DefaultModalSection>
 
@@ -404,6 +404,7 @@ export default {
                     }
                 },
             },
+            limits_ia_convert:{}
         }
     },
     async mounted() {
@@ -598,7 +599,7 @@ export default {
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
-
+                    vue.limits_ia_convert = data.data.limits_ia_convert;
                     if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
@@ -610,6 +611,9 @@ export default {
         },
         addMultimedia(multimedia) {
             let vue = this
+            if(multimedia.ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted +1;
+            }
             vue.resource.media.push({
                 title: multimedia.titulo,
                 ia_convert: multimedia.ia_convert || null,

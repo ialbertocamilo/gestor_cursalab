@@ -24,7 +24,8 @@
                             :rules="rules.url"/>
                     </v-col>
                     <v-col cols="12" v-if="type == 'youtube'">
-                        <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/>
+                        <AiSection :limits="limits" @onChange="changeIaConvertValue" />
+                        <!-- <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/> -->
                     </v-col>
                 </v-row>
             </v-form>
@@ -32,7 +33,9 @@
     </DefaultDialog>
 </template>
 <script>
+import AiSection from './AiSection.vue'
 export default {
+    components:{AiSection},
     props: {
         options: {
             type: Object,
@@ -40,6 +43,10 @@ export default {
         },
         width: String,
         type: String,
+        limits:{
+            type: Object,
+            required: false
+        },
     },
     data() {
         return {
@@ -79,6 +86,10 @@ export default {
             vue.url = null
             vue.$refs['TemaMultimediaTextForm'].reset()
         },
+        changeIaConvertValue(value){
+           let vue = this;
+           vue.ia_convert = value;
+        }
     }
 }
 </script>

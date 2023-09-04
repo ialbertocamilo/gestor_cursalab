@@ -105,10 +105,14 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
-
+        
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
+        $data['limits'] = [
+            'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
+        ];
         // Set constraint: limit allowed users
 
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
@@ -230,7 +234,6 @@ class WorkspaceController extends Controller
     public function update(WorkspaceRequest $request, Workspace $workspace): JsonResponse
     {
         $data = $request->validated();
-
         // Upload files
         // info(['data' => $request->all() ]);
 
@@ -239,7 +242,10 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo_marca_agua');
 
         // Set constraint: limit allowed users
-
+        $data['limits'] = [
+            'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
+        ];
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
 
             $constraint_user['type'] = $data['limit_allowed_users_type'];

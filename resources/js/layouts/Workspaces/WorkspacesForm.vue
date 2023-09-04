@@ -178,7 +178,7 @@
                         >
                             <template v-slot:content>
 
-                                <v-row justify="space-around" >
+                                <v-row >
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Límite de usuarios"
@@ -201,8 +201,18 @@
                                     </v-col>
                                     <v-col cols="4">
                                         <DefaultInput
+                                            label="Límite de multimedias convertidos"
+                                            v-model="resource.limits.limit_allowed_media_convert"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
                                             label="Límite de evaluaciones generadas"
-                                            v-model="resource.limit_allowed_ia_evaluations"
+                                            v-model="resource.limits.limit_allowed_ia_evaluations"
                                             type="number"
                                             min="0"
                                             clearable
@@ -484,13 +494,11 @@ export default {
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-
                         vue.resetForm();
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
                         this.hideLoader();
                         vue.$emit('onConfirm');
-
                     }).catch((error) => {
                     this.hideLoader();
                     if (error && error.errors)
@@ -508,6 +516,8 @@ export default {
                 formData.append('limit_allowed_users_type', 'by_workspace');
                 formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
             }
+            formData.append('limit_allowed_media_convert', vue.resource.limits.limit_allowed_media_convert);
+            formData.append('limit_allowed_ia_evaluations', vue.resource.limits.limit_allowed_ia_evaluations);
         },
         /**
          * Load data from server

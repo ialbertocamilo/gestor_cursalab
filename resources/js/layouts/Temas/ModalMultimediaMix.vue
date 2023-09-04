@@ -26,7 +26,7 @@
                             @onSelect="setMultimedia"/>
                     </v-col>
                     <v-col cols="12" v-if="['video','audio','pdf'].includes(filterType)">
-                        <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/>
+                        <AiSection :limits="limits" @onChange="changeIaConvertValue" />
                     </v-col>
                 </v-row>
             </v-form>
@@ -34,8 +34,9 @@
     </DefaultDialog>
 </template>
 <script>
-
+import AiSection from './AiSection.vue'
 export default {
+    components : {AiSection},
     props: {
         options: {
             type: Object,
@@ -44,6 +45,10 @@ export default {
         filterType: {
             type: String,
             required: true
+        },
+        limits:{
+            type: Object,
+            required: false
         },
         width: String,
         type: String,
@@ -92,6 +97,10 @@ export default {
         setMultimedia(multimedia) {
             let vue = this
             vue.multimedia = multimedia
+        },
+        changeIaConvertValue(value){
+           let vue = this;
+           vue.ia_convert = value;
         }
     }
 }
