@@ -245,6 +245,7 @@ const app = new Vue({
         document.querySelector('.dashboard.skeleton-wrapper').remove();
         document.querySelector('.table-gui.skeleton-wrapper').remove();
 
+
         this.fetchSessionData()
         this.listenReportsNotifications()
     },

@@ -144,8 +144,8 @@ if (isset($fullScreen)) {
                 @yield('content')
 
                 {{--
-        Dashboard skeleton
-    ======================================== --}}
+                    Dashboard skeleton
+                ======================================== --}}
 
                 @if (Route::is('home'))
                     <div class="dashboard skeleton-wrapper position-relative p-4">
@@ -154,12 +154,12 @@ if (isset($fullScreen)) {
                             <div class="col-12 card skeleton module-selector"></div>
                         </div>
 
-                        <div class="row justify-content-between m-0 mt-4">
-                            <div class="col-2 card skeleton"></div>
-                            <div class="col-2 card skeleton"></div>
-                            <div class="col-2 card skeleton"></div>
-                            <div class="col-2 card skeleton"></div>
-                            <div class="col-2 card skeleton"></div>
+                        <div class="row justify-content-between m-0 mt-4 bg-white">
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
                         </div>
 
                         <div class="row m-0 mt-4 justify-content-between">
