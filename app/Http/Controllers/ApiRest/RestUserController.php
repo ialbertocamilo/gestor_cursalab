@@ -39,6 +39,16 @@ class RestUserController extends Controller
         $user->setRememberToken(Str::random(60));
         $user->save();
 
+        // Generate app notification for user
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            [$user->id],
+            UserNotification::PASSWORD_RESET,
+            [ ],
+            null
+        );
+
         return $this->success(['message' => 'Contraseña actualizada correctamente.']);
 
         // return response()->json([

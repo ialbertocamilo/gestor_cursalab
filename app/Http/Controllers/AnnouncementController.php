@@ -103,6 +103,10 @@ class AnnouncementController extends Controller
 
         $announcement->criterionValues()->sync($modulesIds);
 
+        // Register notifications
+
+        Announcement::registerNotificationsForAnnouncement($announcement->id);
+
 
         return $this->success(['msg' => 'Anuncio creado correctamente.']);
     }

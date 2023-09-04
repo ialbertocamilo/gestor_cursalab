@@ -63,7 +63,7 @@ class UserNotification extends BaseModel
      * @return void
      */
     public static function createNotifications(
-        $workspaceId, $userIds, $notficationType, $contentValues, $path
+        $workspaceId, $userIds, $notficationType, $contentValues, $path = null
     ): void
     {
         // Generate message content replacing values in message template
@@ -111,14 +111,12 @@ class UserNotification extends BaseModel
         // Generate SQL script to insert all rows in one statement
 
         if (count($values)) {
-            info('notifications start:', now());
             $statement = "
                 insert into
                     user_notifications (
                        workspace_id, type_id, path, content, user_id, created_at)
                     values " . implode(',', $values);
             DB::select(DB::raw($statement));
-            info('notifications finished:', now());
         }
     }
 
