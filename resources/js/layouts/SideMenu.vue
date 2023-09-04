@@ -110,8 +110,12 @@
                 @mouseenter="cancelHideTimer"
                 @mouseleave="startHideTimer"
             >
-                <v-card-title class="d-flex justify-content-center py-2">
-                    <div class="font-weight-bold" style="font-style: 'Nunito', sans-serif;color:#5457E7" v-text="cardHover.title"></div>
+                <v-card-title class="default-dialog-title mod_head" style="background: white !important;">
+                    <span class="font-weight-bold" style="font-style: 'Nunito', sans-serif;color:#5457E7" v-text="cardHover.title"></span>
+                    <v-btn icon :ripple="false" color="white"
+                        @click="closeModal">
+                        <v-icon v-text="'mdi-close'"/>
+                    </v-btn>
                 </v-card-title>
                 <v-card-text class="" style="font-style: 'Nunito', sans-serif"  v-html="cardHover.description">
                 </v-card-text>
@@ -185,8 +189,6 @@ export default {
             title: 'Beneficios',
             description: ' Listado de beneficios',
             show_upgrade:null,
-            // cardTop:0,
-            // cardLeft:0,
             width:'22vw'
         },
         ModalUpgradeOptions:{
@@ -398,6 +400,14 @@ export default {
                 clearTimeout(this.cardHover.timer);
                 this.cardHover.timer = null;
             }
+        },
+        closeModal(){
+            let vue =this;
+            this.cardHover.timer = null;
+            vue.cardHover.title = '';
+            vue.cardHover.description = '';
+            vue.cardHover.show_upgrade = false;
+            vue.cardHover.showCard = false;
         }
     }
 };
@@ -525,8 +535,8 @@ export default {
     font-size: 11px;
     font-style: normal;
     font-weight: 400;
-    margin-left: 8px;
-    margin-top: -8px;
+    margin-left: 8px !important;
+    margin-top: -8px !important;
 }
 /* POPUP */
 .card-popup {
