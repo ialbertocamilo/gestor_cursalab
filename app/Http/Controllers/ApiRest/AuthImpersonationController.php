@@ -125,14 +125,7 @@ class AuthImpersonationController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
-        $criterios = [];
-
-        foreach ($user->criterion_values as $value) {
-            $criterios[] = [
-                'valor' => $value->value_text,
-                'tipo' => $value->criterion->name ?? null,
-            ];
-        }
+        $criterios = $user->getProfileCriteria();
 
         $user_data = [
             "id" => $user->id,

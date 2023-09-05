@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Requests\SoporteLoginRequest;
 use App\Mail\SendEmailSupportLogin;
 use App\Models\AssignedRole;
@@ -118,8 +119,49 @@ class RestAyudaController extends Controller
             //     }
             // }
 
-            $ticket = Ticket::create($data);
-            $response = ['error' => false, 'data' => ['ticket' => $ticket->id]];
+            if($user->email == $email)
+            {
+                // Resetea la contraseña del usuario
+                $reset_pass = app(UsuarioController::class)->resetPassword($user, new Request());
+
+                // Crea el ticket como solucionado
+                $data['status'] = 'solucionado';
+                $ticket = Ticket::create($data);
+
+                // Se realiza el login
+                $data_login = null;
+                $credentials['document'] = $user->document;
+                $credentials['password'] = $user->document;
+
+                if(Auth::attempt($credentials))
+                {
+                    // === verificar el dni como password ===
+                    Auth::user()->resetAttemptsUser(); // resetea intentos
+
+                    $data_login = app(AuthController::class)->checkSameDataCredentials($user->document, $user->document, false);
+                }
+
+                // Se devuelve el login en la respuesta del api
+                $response = [
+                    'error' => false,
+                    'data' => [
+                        'ticket' => $ticket->id,
+                        'recovery' => $data_login
+                    ]
+                ];
+
+            }
+            else{
+                $ticket = Ticket::create($data);
+                $response = [
+                    'error' => false,
+                    'data' => [
+                        'ticket' => $ticket->id,
+                        'recovery' => null
+                    ]
+                ];
+
+            }
             // $data_email = array(
             //     'nombre' => $name,
             //     'empresa' => $workspace_name,
@@ -186,5 +228,42 @@ class RestAyudaController extends Controller
         ], $codigo_http);
     }
 
+    public function solicitud_cambio_correo(Request $request)
+    {
+        $user = Auth::user();
+        $email = strip_tags($request->email);
+
+        $response = [
+            'error' => true,
+            'data' => [
+                'ticket' => null
+            ]
+        ];
+
+        if ($user) {
+
+            $data = [
+                'dni' => $user?->document,
+                'email' => $email,
+                'contact' => $user?->phone_number,
+                'detail' => 'Solicitud de cambio de correo',
+                'user_id' => $user->id,
+                'workspace_id' => $user->subworkspace?->parent_id,
+                'name' => $user->fullname,
+                'reason' => 'Solicitud de cambio de correo',
+                'status' => 'pendiente',
+            ];
+
+            $ticket = Ticket::create($data);
+            $response = [
+                'error' => false,
+                'data' => [
+                    'ticket' => $ticket->id
+                ]
+            ];
+        }
+
+        return response()->json(compact('response'));
+    }
 
 }

@@ -703,8 +703,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
                 ->with('field_type:id,name,code')
-                ->whereRelation('workspaces', 'id', $workspace->id)
-                ->where('is_default', INACTIVE)
+                ->whereHas('workspaces', function($query) use ($workspace){
+                    $query->where('workspace_id', $workspace->id);
+                    $query->where('available_in_user_filters', 1);
+                })
+                // ->whereRelation('workspaces', 'id', $workspace->id)
+                // ->where('is_default', INACTIVE)
                 ->orderBy('name')
                 ->get();
 
@@ -1602,5 +1606,35 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         return compact('cursoslibres', 'cursosextra');
+    }
+    public function getProfileCriteria()
+    {
+        $workspace = $this->subworkspace->parent;
+        $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot('available_in_profile', 1)->get();
+        $criterion_values = $this->criterion_values->whereIn('criterion_id', $criterionWorkspace->pluck('id'));
+
+        $criterios = [];
+        
+        foreach ($criterion_values as $value) {
+
+            $criterion = $criterionWorkspace->where('id', $value->criterion->id)->first();
+
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $criterion->pivot->criterion_title ?? $criterion->name ?? null,
+            ];
+        }
+
+        return $criterios;
+    }
+
+    public function getCriteriaFilteredByWorkspace($field)
+    {
+        $workspace = $this->subworkspace->parent;
+        $criterionWorkspace = $workspace->criterionWorkspace()->wherePivot($field, 1)->get();
+
+        Criterion::overrideCriterionWorkspaceTitle($criterionWorkspace);
+
+        return $criterionWorkspace;
     }
 }

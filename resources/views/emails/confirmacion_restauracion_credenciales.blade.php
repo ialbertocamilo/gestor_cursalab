@@ -4,8 +4,8 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                <strong>Hola, {{$data['user']}} </strong><br> Estas recibiendo este email, porque hemos recibido una solicitud de recuperación
-                de contraseña para tu cuenta.
+                <strong>Hola,</strong><br>
+                Tus credenciales han sido restauradas, <strong>coloca tu doc. de identidad como usuario y contraseña</strong> para actualizar tu contraseña e ingresar a la plataforma <strong>{{ $data['workspace'] }}</strong>.
             </p>
         </td>
     </tr>
@@ -16,8 +16,8 @@
                 <div style="width:25px; height:5px; margin-left:-4rem; border-radius:4px; background: #FFCD0C;"></div>
                 <p
                     style="color:#120C29; text-align:center; font-size: 1.5rem; margin-bottom:18px;margin-top:3px; font-weight:bold;">
-                    <a target="_blank" href="{{ $data['url_to_reset'] }}">
-                        Recupera tu contraseña aquí
+                    <a target="_blank" href="{{ $data['url'] }}">
+                        Ir a la plataforma
                     </a>
                 </p>
                 <div
@@ -30,11 +30,9 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                El enlace para para recuperar contraseña expirará en  {{ $data['minutes'] }} minutos.
-                Si no solicitaste la recuperación de contraseña, no es necesario realizar ninguna acción. <br>
+                <span style="color:#CD0033; font-weight:bold;">¿No reconoces esta actividad?</span> Contáctate inmediatamente con el equipo de Customer Experience.<br>
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
-                ¿No reconoces esta actividad? Contáctate inmediatamente con el equipo de Customer Experience.<br>
                 Este es un mensaje automático, por favor no responder.
             </p>
         </td>
