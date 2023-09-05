@@ -1592,7 +1592,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if ($courses_extra > 0 || $courses_free > 0) {
 
-            $user->getCurrentCourses(withRelations: 'user-progress');
+            $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
 
             $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular')->count();
             $free_courses = $assigned_courses->where('type.code', 'free')->count();
