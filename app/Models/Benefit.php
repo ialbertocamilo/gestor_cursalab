@@ -1472,6 +1472,8 @@ class Benefit extends BaseModel
 
     protected function config($data)
     {
+        $tab = Taxonomy::where('group','benefit')->where('type','group')->where('code','ir-academy')->select('name')->first();
+        $tab_name = $tab?->name ?? 'IR Academy';
         $response = [
             "buscador" => [
                 "filtros_status" => [
@@ -1482,19 +1484,19 @@ class Benefit extends BaseModel
                 ],
                 "filtros_tipo" => [
                     ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                    ["name" =>  $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                 ]
             ],
             "tabs"=> [
                 [
-                    "name" => "IR Academy",
+                    "name" =>  $tab_name,
                     "code" => "ir-academy",
                     "filtros_status" => [
                         ["name" => "Activos", "code"=> "active", "checked" => true],
                         ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1506,7 +1508,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1518,7 +1520,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                     ]
                 ]
             ]
