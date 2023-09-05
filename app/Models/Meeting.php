@@ -387,10 +387,10 @@ class Meeting extends BaseModel
         $user_type = Taxonomy::getFirstData('meeting', 'user','normal');
         $attendants = [];
         foreach ($users as $user) {
-            $user_in_meeting = $users_in_meeting->where('usuario_id',$user->id)->first();
+            $user_in_meeting = $users_in_meeting->where('usuario_id',$user['id'])->first();
             if(!$user_in_meeting){
                 $attendants[] = [
-                    'usuario_id' => $user->id,
+                    'usuario_id' => $user['id'],
                     'type_id' => $user_type?->id, 
                     'id' => null
                 ];

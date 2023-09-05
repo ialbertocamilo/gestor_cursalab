@@ -671,7 +671,12 @@ class Benefit extends BaseModel
                 }
 
                 cache_clear_model(UserBenefit::class);
-
+                $users_approved = collect($seleccionados)->where('ev_user_status','approved')->all();
+                if(count($users_approved)>0){
+                    $benefit = Benefit::where('id',$benefit_id)->first();
+                    $benefit->syncUsersInBenefitsMeeting($users_approved);
+                }
+                // dd($users_approved);
                 DB::commit();
             } catch (\Exception $e) {
                 info($e);
@@ -842,7 +847,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users);
+                            // $benefit->syncUsersInBenefitsMeeting($users);
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -1022,7 +1027,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users, 'remove');
+                            // $benefit->syncUsersInBenefitsMeeting($users, 'remove');
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -1566,7 +1571,10 @@ class Benefit extends BaseModel
         $benefit->loadMissing('silabo');
         foreach ($benefit->silabo as $silabo) {
             $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')
-                        ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
+                        ->whereHas('status',function($q){
+                            $q->whereIn('code',['reserved','scheduled','in-progress']);
+                        })
+                        // ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
                         ->where('model_id',$silabo->id)->first();
             if($meeting){
                 switch ($type) {
