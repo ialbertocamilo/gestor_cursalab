@@ -51,6 +51,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
 
 use Altek\Accountant\Facades\Accountant;
+use App\Mail\EmailTemplate;
+use Illuminate\Support\Facades\Mail;
 
 // use App\Perfil;
 
@@ -972,6 +974,21 @@ class UsuarioController extends Controller
         ];
 
         $user->update($data);
+
+        if($user->email)
+        {
+            $user_workspace = $user->subworkspace->parent_id;
+            $workspace_name = $user_workspace ? Workspace::where('id', $user_workspace)->first('name') : null;
+
+            $base_url = config('app.web_url') ?? null;
+
+            $mail_data = [ 'subject' => 'Credenciales restauradas',
+                            'url' => $base_url,
+                            'workspace' => $workspace_name?->name,
+                        ];
+
+            Mail::to($user->email)->send(new EmailTemplate('emails.confirmacion_restauracion_credenciales', $mail_data));
+        }
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
     }

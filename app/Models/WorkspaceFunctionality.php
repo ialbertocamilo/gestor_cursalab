@@ -77,4 +77,14 @@ class WorkspaceFunctionality extends Model
 
         return $new_side_menu;
     }
+
+    protected function getFunctionality($workspace_id, $code)
+    {
+        $functionalities = WorkspaceFunctionality::whereHas('functionality', function($c) use ($code){
+                                $c->where('code', $code);
+                            })
+                            ->where('workspace_id', $workspace_id)
+                            ->first();
+        return $functionalities;
+    }
 }
