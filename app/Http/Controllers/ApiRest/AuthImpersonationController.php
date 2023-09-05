@@ -156,8 +156,8 @@ class AuthImpersonationController extends Controller
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
         $api_url = config('app.url');
 

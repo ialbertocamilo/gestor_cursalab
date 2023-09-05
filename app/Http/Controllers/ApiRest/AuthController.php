@@ -195,7 +195,7 @@ class AuthController extends Controller
             ->where('id', $user->subworkspace_id)
             ->first();
 
-        info('here data');
+        // info('here data');
 
         $workspace = Workspace::find($user->subworkspace_id);
         // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
@@ -269,8 +269,8 @@ class AuthController extends Controller
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
 
         return [

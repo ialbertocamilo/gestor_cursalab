@@ -444,7 +444,7 @@ class Workspace extends BaseModel
 
     }
 
-    protected function getFullAppMenu($type, $codes)
+    protected function getFullAppMenu($type, $codes, $user)
     {
         $values = Taxonomy::getDataByGroupAndType('system', $type);
 
