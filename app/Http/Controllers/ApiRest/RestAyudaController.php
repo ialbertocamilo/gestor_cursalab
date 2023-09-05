@@ -32,7 +32,8 @@ class RestAyudaController extends Controller
                 $pregunta = Post::select('title')->where('id',$motivo)->first();
                 $motivo = $pregunta->title ?? '';
             }
-            $id = Ticket::insertGetId(array(
+
+            $ticket = Ticket::create(array(
                 'user_id' => $user->id,
                 'reason' => $motivo,
                 'detail' => $detalle,
@@ -42,6 +43,8 @@ class RestAyudaController extends Controller
                 'name'=>$user->fullname,
                 'status' => 'pendiente'
             ));
+            $id = $ticket->id;
+
             // $modulo = Abconfig::where('id', $user->config_id)->select('etapa')->first();
             // $mensaje = '*_Nueva incidencia:_* \n Empresa: Universidad Corporativa \n Módulo: ' . $modulo->etapa . ' \n DNI : ' . $user->dni . ' \n Ticket: #' . $id . ' \n Motivo : ' . $motivo . ' \n Enlace: ' . env('URL_GESTOR') . 'usuario_ayuda/index?id=' . $id;
             // UsuarioAyuda::send_message_to_slack($mensaje);
