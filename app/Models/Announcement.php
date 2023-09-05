@@ -208,7 +208,7 @@ class Announcement extends BaseModel
             $usersIds,
             UserNotification::NEW_ANNOUNCEMENT,
             [ ],
-            null
+            'anuncios'
         );
     }
 }
