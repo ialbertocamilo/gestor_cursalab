@@ -268,6 +268,7 @@ class AuthController extends Controller
         $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
         $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
+        $config_data->meetings_upload_template = 'template.xlsx';
 
         return [
             'access_token' => $token,
