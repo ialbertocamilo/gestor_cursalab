@@ -457,7 +457,7 @@ class Workspace extends BaseModel
 
             if ($type == 'side_menu' && in_array($value->code, ['cursoslibres', 'cursosextra']) && $available) {
 
-                $assigned = $assigned ?? $user->checkCoursesTypeAssigned();
+                $assigned = empty($assigned) ? $user->checkCoursesTypeAssigned() : $assigned;
 
                 $data[$value->code] =  $assigned[$value->code];
 
