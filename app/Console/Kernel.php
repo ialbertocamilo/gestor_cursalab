@@ -56,6 +56,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('mongo:save-data')->dailyAt('03:00');
 
+        // Notifications
+
+        $schedule->command('notifications:clear')->dailyAt('05:00');
+
         // Criteria
 
         $schedule->command('criteria:check-empty')->everyThreeHours();
