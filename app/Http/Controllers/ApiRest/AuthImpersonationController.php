@@ -223,6 +223,8 @@ class AuthImpersonationController extends Controller
 
         } catch (\Exception $e) {
 
+            info($e);
+
             return $this->error('Error found.', http_code: 503);
         }
     }
