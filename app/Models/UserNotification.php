@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Jenssegers\Mongodb\Eloquent\Model;
+use Jenssegers\Mongodb\Schema\Blueprint;
 
-class UserNotification extends BaseModel
+class UserNotification extends Model
 {
+    protected $connection = 'mongodb';
 
     // Notifications types
 
@@ -21,20 +23,18 @@ class UserNotification extends BaseModel
     public const NEW_DOCUMENT = 'new-document';
     public const NEW_ANNOUNCEMENT = 'new-announcement';
 
-    protected $table = 'user_notifications';
+    protected $collection = 'user_notifications';
 
     protected $fillable = [
         'path',
         'content',
         'user_id',
         'is_read',
-        'is_visible'
+        'is_visible',
+        'workspace_id',
+        'type_id'
     ];
 
-    public function type()
-    {
-        return $this->belongsTo(Taxonomy::class, 'type_id', 'id');
-    }
 
     public function markAsRead() {
         $this->is_read = 1;
@@ -66,6 +66,11 @@ class UserNotification extends BaseModel
         $workspaceId, $userIds, $notficationType, $contentValues, $path = null
     ): void
     {
+
+        if (UserNotification::count() === 0) {
+            self::addUniqueIndexToCollection();
+        }
+
         // Generate message content replacing values in message template
 
         $taxonomy = Taxonomy::query()
@@ -81,42 +86,31 @@ class UserNotification extends BaseModel
             $content = str_ireplace('{' . $key . '}', $value, $content);
         }
 
-        // Get users who have already unread notifications
-
-        $notifiedUsers = self::query()
-            ->where('path', $path)
-            ->where('workspace_id', $workspaceId)
-            ->where('content', $content)
-            ->where('is_visible', 1)
-            ->select('user_id')
-            ->groupBy('user_id')
-            ->get()
-            ->pluck('user_id')
-            ->toArray();
-
         // Create notifications for each user
 
         $values = [];
-
         foreach ($userIds as $userId) {
 
-            // Exclude user if it has been already notified
+            $notification = self::query()
+                ->where('workspace_id', $workspaceId)
+                ->where('type_id', $taxonomy->id)
+                ->where('is_visible', 1)
+                ->where('user_id', $userId)
+                ->select()->first();
 
-            if (!in_array($userId, $notifiedUsers)) {
-                $createdAt = now();
-                $values[] = "($workspaceId, $taxonomy->id, '$path', '$content', $userId, '$createdAt')";
+            if (!$notification) {
+                UserNotification::create([
+                    'workspace_id' => $workspaceId,
+                    'user_id' => $userId,
+                    'type_id' => $taxonomy->id,
+                    'path' => $path,
+                    'content' => $content,
+                    'is_visible' => 1,
+                    'is_read' => 0,
+                    'created_at' => now(),
+                    'updated_at' => null
+                ]);
             }
-        }
-
-        // Generate SQL script to insert all rows in one statement
-
-        if (count($values)) {
-            $statement = "
-                insert into
-                    user_notifications (
-                       workspace_id, type_id, path, content, user_id, created_at)
-                    values " . implode(',', $values);
-            DB::select(DB::raw($statement));
         }
     }
 
@@ -126,7 +120,7 @@ class UserNotification extends BaseModel
     public static function loadUserNotifications ($userId): array
     {
 
-        $notications = UserNotification::with('type')
+        $notications = UserNotification::query()
             ->where('user_id', $userId)
             ->where('is_visible', 1)
             ->orderBy('created_at', 'desc')
@@ -134,10 +128,9 @@ class UserNotification extends BaseModel
                 'id', 'user_id', 'workspace_id',
                 'path', 'content', 'is_visible',
                 'is_read', 'type_id',
-                'created_at',
-                DB::raw('date(created_at) created_date')
+                'created_at'
             ])
-            ->whereDate('created_at', '>', now()->subDays(5))
+            ->where('created_at', '>', now()->subDays(5))
             ->get();
 
         // Group notifications by date
@@ -148,6 +141,7 @@ class UserNotification extends BaseModel
             $date = $notication->created_at;
             $notication->created_date =
                 $date->day . ' de ' .  $date->monthName . ' ' . $date->year;
+            $notication->type = Taxonomy::find($notication->type_id);
 
         }
 
@@ -161,5 +155,19 @@ class UserNotification extends BaseModel
         }
 
         return $responseNotifications;
+    }
+
+    /**
+     * Add unique index to avoid duplicates
+     * @return void
+     */
+    public static function addUniqueIndexToCollection() {
+
+        Schema::connection('mongodb')
+            ->table('user_notifications', function (Blueprint $collection) {
+                $collection->unique([
+                    'workspace_id', 'is_visible', 'user_id', 'type_id'
+                ]);
+        });
     }
 }
