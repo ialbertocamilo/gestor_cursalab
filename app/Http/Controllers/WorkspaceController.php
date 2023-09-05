@@ -379,7 +379,7 @@ class WorkspaceController extends Controller
                 $user->benefits()->delete();
                 $user->segments()->delete();
                 $user->course_data()->delete();
-                $user->criterion_user()->sync([]);
+                $user->criterion_values()->sync([]);
             }
 
             $subworkspace->users()->delete();
