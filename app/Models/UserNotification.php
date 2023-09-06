@@ -10,6 +10,7 @@ use Jenssegers\Mongodb\Schema\Blueprint;
 class UserNotification extends Model
 {
     protected $connection = 'mongodb';
+    protected $primaryKey = 'id';
 
     // Notifications types
 
