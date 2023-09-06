@@ -6,7 +6,9 @@ use App\Models\Benefit;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\UserBenefit;
+use App\Models\UserNotification;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class BenefitsNotifyUsers extends Command
 {
@@ -65,6 +67,7 @@ class BenefitsNotifyUsers extends Command
                 $item->save();
             }
         });
+
         cache_clear_model(UserBenefit::class);
 
         $this->info("\n ------- Beneficios - Fin ------- \n");

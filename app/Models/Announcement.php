@@ -169,4 +169,46 @@ class Announcement extends BaseModel
     public static function saveModules($announcementId, $modulesId)
     {
     }
+
+    /**
+     * Register notifications for all active users in announcement's modules
+     * @param $announcementId
+     * @return void
+     */
+    public static function registerNotificationsForAnnouncement($announcementId): void
+    {
+
+        // Load announcement's subworkspaces ids
+
+        $subworkspacesIds = DB::select(DB::raw('
+                select w.id
+                from criterion_value_announcements cva
+                    join workspaces w on w.criterion_value_id = cva.criterion_value_id
+                where cva.announcement_id = :announcement_id
+            '),['announcement_id' => $announcementId]
+        );
+
+        $subworkspacesIds = collect($subworkspacesIds)
+            ->pluck('id')
+            ->toArray();
+
+        // Load users ids from subworkspaces
+
+        $usersIds = User::query()
+            ->whereIn('subworkspace_id', $subworkspacesIds)
+            ->where('active', 1)
+            ->select('id')
+            ->pluck('id')
+            ->toArray();
+
+        // Register notifications
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            $usersIds,
+            UserNotification::NEW_ANNOUNCEMENT,
+            [ ],
+            'anuncios'
+        );
+    }
 }
