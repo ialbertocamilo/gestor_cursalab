@@ -639,6 +639,19 @@ class Benefit extends BaseModel
                                                         Benefit::sendEmail( 'confirm', $mail_user, $mail_benefit );
                                                     }
                                                 }
+
+                                                // Create app notification for notification
+
+                                                $benefit = Benefit::find($benefit_id);
+                                                UserNotification::createNotifications(
+                                                    $benefit->workspace_id,
+                                                    [$sel['id']],
+                                                    UserNotification::NEW_BENEFIFT,
+                                                    [
+                                                        'benefitName' => $benefit->name
+                                                    ],
+                                                    "beneficio?beneficio=$benefit->id"
+                                                );
                                             }
                                         }
                                     }
@@ -869,7 +882,21 @@ class Benefit extends BaseModel
                             'status' => ['name' => 'Retirarme', 'code' => 'subscribed'],
                             'cupos' => $benefit->cupos ?? null
                         ];
+
+                        // Create app notification for notification
+
+                        UserNotification::createNotifications(
+                            $benefit->workspace_id,
+                            [$user_id],
+                            UserNotification::NEW_BENEFIFT,
+                            [
+                                'benefitName' => $benefit->name
+                            ],
+                            "beneficio?beneficio=$benefit->id"
+                        );
                     }
+
+
 
                     DB::commit();
 
@@ -931,6 +958,18 @@ class Benefit extends BaseModel
                     'benefit_id' => $benefit_id,
                     'status_id' => $user_status_notify?->id,
                 ]);
+
+                // Create app notification for notification
+
+                UserNotification::createNotifications(
+                    $benefit->workspace_id,
+                    [$user_id],
+                    UserNotification::NEW_BENEFIFT,
+                    [
+                        'benefitName' => $benefit->name
+                    ],
+                    "beneficio?beneficio=$benefit->id"
+                );
             }
             cache_clear_model(UserBenefit::class);
 

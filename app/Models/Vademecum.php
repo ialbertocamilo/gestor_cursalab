@@ -288,7 +288,7 @@ class Vademecum extends Model
             $usersIds,
             UserNotification::NEW_DOCUMENT,
             [ ],
-            null
+            'vademecum'
         );
     }
 
