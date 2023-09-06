@@ -68,33 +68,6 @@ class BenefitsNotifyUsers extends Command
             }
         });
 
-        // Generate app notifications for each user
-
-        DB::beginTransaction();
-        try {
-
-            $grouped_by_benefit = $users_benefit->groupBy('benefit_id');
-            foreach ($grouped_by_benefit as $benefit_id => $benefit_users) {
-                $users_ids = $benefit_users->pluck('user_id')->toArray();
-                $benefit = Benefit::find($benefit_id);
-
-                UserNotification::createNotifications(
-                    $benefit->workspace_id,
-                    $users_ids,
-                    UserNotification::NEW_BENEFIFT,
-                    [
-                        'benefitName' => $benefit->name
-                    ],
-                    "beneficio?beneficio=$benefit->id"
-                );
-            }
-
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollback();
-        }
-
         cache_clear_model(UserBenefit::class);
 
         $this->info("\n ------- Beneficios - Fin ------- \n");
