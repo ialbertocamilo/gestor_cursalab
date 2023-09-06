@@ -214,6 +214,7 @@ class Vademecum extends Model
         try {
 
             DB::beginTransaction();
+            $registerNotifications = false;
 
             if ($item) {
 
@@ -225,9 +226,15 @@ class Vademecum extends Model
                 $item = $this->create($data);
                 $message = 'Registro creado correctamente';
 
+                $registerNotifications = true;
             }
 
             $item->modules()->sync($data['modules']);
+
+
+            if ($registerNotifications) {
+                self::registerNotificationsForDocument($item->id);
+            }
 
             DB::commit();
 
@@ -241,6 +248,48 @@ class Vademecum extends Model
         }
 
         return ['status' => 'success', 'message' => $message];
+    }
+
+    /**
+     * Register notifications for all active users in vademecum's modules
+     * @param $vademecumId
+     * @return void
+     */
+    public static function registerNotificationsForDocument($vademecumId): void
+    {
+
+        // Load vademecum's subworkspaces ids
+
+        $subworkspacesIds = DB::select(DB::raw('
+                select w.id
+                from vademecum_module vm
+                    join workspaces w on w.criterion_value_id = vm.module_id
+                where vm.vademecum_id = :vademecumId
+            '),['vademecumId' => $vademecumId]
+        );
+
+        $subworkspacesIds = collect($subworkspacesIds)
+            ->pluck('id')
+            ->toArray();
+
+        // Load users ids from subworkspaces
+
+        $usersIds = User::query()
+            ->whereIn('subworkspace_id', $subworkspacesIds)
+            ->where('active', 1)
+            ->select('id')
+            ->pluck('id')
+            ->toArray();
+
+        // Register notifications
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            $usersIds,
+            UserNotification::NEW_DOCUMENT,
+            [ ],
+            'vademecum'
+        );
     }
 
     public function prepareTaxonomy($row, $key, $type)

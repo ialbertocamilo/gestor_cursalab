@@ -4,10 +4,12 @@ namespace App\Http\Controllers\ApiRest;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAppPasswordUpdateRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RestUserController extends Controller
@@ -37,10 +39,54 @@ class RestUserController extends Controller
         $user->setRememberToken(Str::random(60));
         $user->save();
 
+        // Generate app notification for user
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            [$user->id],
+            UserNotification::PASSWORD_RESET,
+            [ ],
+            null
+        );
+
         return $this->success(['message' => 'Contraseña actualizada correctamente.']);
-        
+
         // return response()->json([
         //     'success' => $response == Password::PASSWORD_RESET
         // ]);
+    }
+
+    /**
+     * Load user's visible notifications
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function loadNotifications(Request $request) {
+
+        $user = auth()->user();
+        $notications = UserNotification::loadUserNotifications($user->id);
+
+        return response()->json($notications);
+    }
+
+    /**
+     * Update user's notification visible and read statuses
+     *
+     * @param Request $request
+     * @param UserNotification $userNotification
+     * @return JsonResponse
+     */
+    public function updateNoficationStatus(Request $request, UserNotification $userNotification) {
+
+        if (isset($request['markAsRead'])) {
+            $userNotification->markAsRead();
+        }
+
+        if (isset($request['hide'])) {
+            $userNotification->hide();
+        }
+
+        return response()->json(['success' => true]);
     }
 }

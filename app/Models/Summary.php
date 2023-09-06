@@ -151,6 +151,22 @@ class Summary extends BaseModel
         foreach ($chunk_users as $users) {
             self::setSummaryUpdates($users,[$course->id],$summary_course_update,$event);
         }
+
+        // Create notifications for users assigned to course
+
+        $school = $course->schools->first();
+        if ($school) {
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                $users_id_segmented,
+                UserNotification::NEW_COURSE,
+                [
+                    'courseName' => $course->name
+                ],
+                'escuela/'.$school->id.'/cursos/' . $course->id . '/tema'
+            );
+        }
+
     }
     protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update,$event)
     {

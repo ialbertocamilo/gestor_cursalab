@@ -4,7 +4,7 @@ use App\Http\Controllers\WorkspaceController;
 
 Route::controller(WorkspaceController::class)->group(function () {
 
-    Route::get('/list', 'list');
+    Route::get('/list', 'list')->name('workspaces-list');
     Route::get('/create', 'create');
     Route::post('/store', 'store');
     Route::get('/criterios', 'list_criterios')->name('criteriawk.list');

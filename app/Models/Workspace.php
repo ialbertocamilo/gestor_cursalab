@@ -36,6 +36,44 @@ class Workspace extends BaseModel
         'show_logo_in_app',
     ];
 
+    const CUSTOM_PIVOT_FIELDS = [
+        'criterion_title' => [
+            'name' => 'Título de criterio',
+            'type' => 'text',
+        ],
+
+        'available_in_profile' => [
+            'name' => 'Perfil',
+            'type' => 'boolean',
+        ],
+
+        'available_in_ranking' => [
+            'name' => 'Ranking',
+            'type' => 'boolean',
+        ],
+
+        'available_in_reports' => [
+            'name' => 'Reportes',
+            'type' => 'boolean',
+        ],
+
+        'available_in_segmentation' => [
+            'name' => 'Segmentación',
+            'type' => 'boolean',
+        ],
+
+        'required_in_user_creation' => [
+            'name' => 'Crear Usuario',
+            'type' => 'boolean',
+        ],
+
+        'available_in_user_filters' => [
+            'name' => 'Filtro Usuarios',
+            'type' => 'boolean',
+        ],
+
+    ];
+
     public function sluggable(): array
     {
         return [
@@ -115,12 +153,9 @@ class Workspace extends BaseModel
 
     public function criterionWorkspace()
     {
-        return $this->belongsToMany(
-            Criterion::class
-        // 'criterion_workspace',
-        // 'workspace_id',
-        // 'criterion_id'
-        );
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
+
+        return $this->belongsToMany(Criterion::class)->withPivot($custom_pivot_fields);
     }
 
     public function criteriaValue()
@@ -444,14 +479,27 @@ class Workspace extends BaseModel
 
     }
 
-    protected function getFullAppMenu($type, $codes)
+    protected function getFullAppMenu($type, $codes, $user)
     {
         $values = Taxonomy::getDataByGroupAndType('system', $type);
 
         $data = [];
+        $assigned = [];
 
         foreach ($values as $value) {
-            $data[$value->code] = in_array($value->code, $codes);
+
+            $available = in_array($value->code, $codes);
+
+            if ($type == 'side_menu' && in_array($value->code, ['cursoslibres', 'cursosextra']) && $available) {
+
+                $assigned = empty($assigned) ? $user->checkCoursesTypeAssigned() : $assigned;
+
+                $data[$value->code] =  $assigned[$value->code];
+
+            } else {
+
+                $data[$value->code] = $available;
+            }
         }
 
         return $data;

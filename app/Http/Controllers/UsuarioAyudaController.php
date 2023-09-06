@@ -102,6 +102,8 @@ class UsuarioAyudaController extends Controller
         if (isset($request->all()['status'])) {
             if ($request->all()['status'] === 'solucionado') {
                 $ticket->updateInfoSupport($user->fullname, null);
+
+                Ticket::notifyUserAboutSolvedTicket($ticket);
             }
 
             $ticket->status = $request->all()['status'];

@@ -40,6 +40,10 @@ return [
         'showIosLink' => env('SHOW_IOS_LINK'),
     ],
 
+    'meetings' => [
+        'app_upload_template' => 'http://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/Plantilla-Importar-Invitados.xlsx',
+    ],
+
     // Evaluation Quiz Config
 
     'quizzes' => [
