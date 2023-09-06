@@ -95,6 +95,7 @@ class UserNotification extends Model
                 ->where('workspace_id', $workspaceId)
                 ->where('type_id', $taxonomy->id)
                 ->where('is_visible', 1)
+                ->where('path', $path)
                 ->where('user_id', $userId)
                 ->select()->first();
 
