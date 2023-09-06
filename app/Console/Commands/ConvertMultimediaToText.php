@@ -55,7 +55,6 @@ class ConvertMultimediaToText extends Command
             if(in_array($media->type_id,['pdf','video','audio'])){
                 $params['relative_path'] =$media->value;
                 $response = Http::withOptions(['verify' => false])->timeout(1500)->post(env('JARVIS_BASE_URL').'/convert_file', $params);
-                dd($response);
             }
             // if ($text_result) {
             //     $fileName = $media->id.'_'.$media->topic_id.'_'.$media->type_id.'_'.rand(1,5000);
