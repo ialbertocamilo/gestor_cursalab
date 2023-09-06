@@ -10,7 +10,6 @@ use Jenssegers\Mongodb\Schema\Blueprint;
 class UserNotification extends Model
 {
     protected $connection = 'mongodb';
-    protected $primaryKey = 'id';
 
     // Notifications types
 
@@ -140,6 +139,7 @@ class UserNotification extends Model
 
         foreach ($notications as &$notication) {
             $date = $notication->created_at;
+            $notication->id = $notication->_id;
             $notication->created_date =
                 $date->day . ' de ' .  $date->monthName . ' ' . $date->year;
             $notication->type = Taxonomy::find($notication->type_id);

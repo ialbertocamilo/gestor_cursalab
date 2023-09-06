@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Benefit\BenefitStoreUpdateRequest;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 use App\Models\Benefit;
@@ -82,6 +83,25 @@ class BenefitController extends Controller
         }
 
         $msg = 'Beneficio segmentado.';
+
+        // Create notification for segmented users
+
+        $suscritos = Benefit::getSuscritos($benefit_id);
+        if (isset($suscritos['segmentados'])) {
+            $usersIds = $suscritos['segmentados']->pluck('id')->toArray();
+            $benefit = Benefit::find($benefit_id);
+            UserNotification::createNotifications(
+                $benefit->workspace_id,
+                [$usersIds],
+                UserNotification::NEW_BENEFIFT,
+                [
+                    'benefitName' => $benefit->name
+                ],
+                "beneficio?beneficio=$benefit_id"
+            );
+        }
+
+
 
         return $this->success(['msg' => $msg, 'benefit'=>$benefit_id]);
     }
