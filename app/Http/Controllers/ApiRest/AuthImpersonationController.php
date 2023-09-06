@@ -125,7 +125,14 @@ class AuthImpersonationController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
-        $criterios = $user->getProfileCriteria();
+        $criterios = [];
+
+        foreach ($user->criterion_values as $value) {
+            $criterios[] = [
+                'valor' => $value->value_text,
+                'tipo' => $value->criterion->name ?? null,
+            ];
+        }
 
         $user_data = [
             "id" => $user->id,
@@ -149,10 +156,9 @@ class AuthImpersonationController extends Controller
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
         $config_data->filters = config('data.filters');
-        $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
         $api_url = config('app.url');
 
         return [
