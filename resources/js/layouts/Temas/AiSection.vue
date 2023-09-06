@@ -1,8 +1,8 @@
 <template>
     <div>
-        <DefaultToggle activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI"
+        <DefaultToggle activeLabel="¿Deseas generar evaluaciones automáticas con este contenido?" inactiveLabel="¿Deseas generar evaluaciones automáticas con este contenido?"
             @onChange="changeIaConvertValue" :disabled="limits.media_ia_converted >= limits.limit_allowed_media_convert" :value="false" />
-        <div class="mt-4 d-flex align-items-center">
+        <!-- <div class="mt-4 d-flex align-items-center">
             <v-btn class="py-1" color="primary" outlined text
                 style="border-radius: 15px;border-color: #5458ea;height: auto;">
                 <span>{{limits.media_ia_converted}}/{{limits.limit_allowed_media_convert }}</span>
@@ -11,7 +11,7 @@
             <span class="ml-2">
                 Para alcanzar la cantidad máxima de opciones para la transcripción de contenido multimedia a AI
             </span>
-        </div>
+        </div> -->
         <div class="mt-4 d-flex align-items-center">
             <span>
                 Quieres seguir disfrutando de los beneficios que te brinda la AI

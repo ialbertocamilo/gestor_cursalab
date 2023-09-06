@@ -47,40 +47,15 @@ class ConvertMultimediaToText extends Command
                 'topic_id' => $media->topic->id,
                 'media_topic_id' => $media->id
             ];
-            switch ($media->type_id) {
-                case 'youtube':
-                    $link = 'https://www.youtube.com/watch?v=' . $media->value;
-                    $params['url'] =$link;
-                    // $params = [
-                    //     'url' => $link,
-                    //     'workspace_id'=> $media->topic->course->workspaces->first()?->id,
-                    //     'topic_id' => $media->topic->id,
-                    //     'media_topic_id' => $media->id
-                    // ];
-                    $response = Http::withOptions(['verify' => false])->timeout(1500)->post('http://localhost:5000/process_youtube', $params);
-                    // dd($response->body());
-                    // if ($response->successful()) {
-                    //     $text_result = $response->body();
-                    // }
-                    break;
-                case 'pdf':
-                    $params['relative_path'] =$media->value;
-                    $response = Http::withOptions(['verify' => false])->timeout(1500)->post('http://localhost:5000/convert_file', $params);
-                    // // $s3_path = FileService::generateUrl($media->value,'s3');
-                    // // $client = new Client();
-                    dd($response->body());
-                    // $response = $client->post('http://localhost:5000/upload_file', [
-                    //     'multipart' => [
-                    //         [
-                    //             'name' => 'file',
-                    //             'contents' => fopen($s3_path, 'r'),
-                    //         ],
-                    //     ],
-                    // ]);
-                    // $text_result = $response->getBody()->getContents();
-                default:
-                    # code...
-                    break;
+            if($media->type_id == 'youtube'){
+                $link = 'https://www.youtube.com/watch?v=' . $media->value;
+                $params['url'] =$link;
+                $response = Http::withOptions(['verify' => false])->timeout(1500)->post(env('JARVIS_BASE_URL').'/process_youtube', $params);
+            }
+            if(in_array($media->type_id,['pdf','video','audio'])){
+                $params['relative_path'] =$media->value;
+                $response = Http::withOptions(['verify' => false])->timeout(1500)->post(env('JARVIS_BASE_URL').'/convert_file', $params);
+                dd($response);
             }
             // if ($text_result) {
             //     $fileName = $media->id.'_'.$media->topic_id.'_'.$media->type_id.'_'.rand(1,5000);

@@ -780,15 +780,16 @@ class Workspace extends BaseModel
         return $workspace;
     }
 
-    protected function getLimitAIConvert(){
+    protected function getLimitAIConvert($topic){
         $workspace = get_current_workspace();
         $limits = self::where('id',$workspace->id)->select('limits')->first()?->limits;
-        $media_ia_converted = MediaTema::where('ia_convert',1)->whereHas('topic.course.workspaces',function($q) use ($workspace){
-            $q->whereIn('id',[$workspace->id]);
-        })->count();
+        $media_ia_converted = ($topic) ? MediaTema::where('ia_convert',1)->where('topic_id',$topic->id)->count() : 0;
+        $limit_allowed_media_convert =  $limits['limit_allowed_media_convert'] ?? 0;
+        $limit_allowed_ia_evaluations =  $limits['limit_allowed_ia_evaluations'] ?? 0;
+
         return [
-            'limit_allowed_media_convert' => (int) $limits['limit_allowed_media_convert'] ?? 0,
-            'limit_allowed_ia_evaluations' => (int) $limits['limit_allowed_ia_evaluations'] ?? 0,
+            'limit_allowed_media_convert' => (int) $limit_allowed_media_convert,
+            'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
             'media_ia_converted' => $media_ia_converted ?? 0,
         ];
     }
