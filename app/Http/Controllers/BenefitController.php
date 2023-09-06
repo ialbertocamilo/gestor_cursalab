@@ -97,7 +97,7 @@ class BenefitController extends Controller
                 [
                     'benefitName' => $benefit->name
                 ],
-                "beneficio?beneficio=$benefit_id"
+                "beneficios?beneficio=$benefit_id"
             );
         }
 
