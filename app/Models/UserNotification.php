@@ -164,11 +164,11 @@ class UserNotification extends Model
      */
     public static function addUniqueIndexToCollection() {
 
-        Schema::connection('mongodb')
-            ->table('user_notifications', function (Blueprint $collection) {
-                $collection->unique([
-                    'workspace_id', 'is_visible', 'user_id', 'type_id'
-                ]);
-        });
+//        Schema::connection('mongodb')
+//            ->table('user_notifications', function (Blueprint $collection) {
+//                $collection->unique([
+//                    'workspace_id', 'is_visible', 'user_id', 'type_id'
+//                ]);
+//        });
     }
 }
