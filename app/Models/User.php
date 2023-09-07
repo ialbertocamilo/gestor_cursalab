@@ -1601,8 +1601,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular')->count();
             $free_courses = $assigned_courses->where('type.code', 'free')->count();
 
-            $cursoslibres = $extracurricular_courses > 0;
-            $cursosextra = $free_courses > 0;
+            $cursoslibres = $free_courses > 0;
+            $cursosextra = $extracurricular_courses > 0;
         }
 
         return compact('cursoslibres', 'cursosextra');
