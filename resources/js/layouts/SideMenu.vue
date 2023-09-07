@@ -363,6 +363,9 @@ export default {
         },
         startTimer({title,description,show_upgrade}, event) {
             let vue = this;
+            if(!description){
+                return false;
+            }
             if (vue.cardHover.timer) {
                 clearTimeout(vue.cardHover.timer);
                 vue.cardHover.timer = null;
