@@ -79,7 +79,7 @@
                                         </template>
                                     </DefaultAutocomplete>
                                 </v-col>
-                                
+
                             </v-row>
                         </v-col>
                         <v-col cols="3" class="sep-left">
@@ -334,22 +334,17 @@
                                 title="Configuración de diploma"
                             >
                                 <template slot="content">
-                                    <v-row justify="center">
-                                        <v-col cols="6" class="d-flex justify-content-center align-items-center">
-                                            <DefaultToggle
-                                                v-model="resource.show_certification_date"
-                                                active-label="Mostrar fecha en diploma"
-                                                inactive-label="No mostrar fecha en diploma"
-                                            />
-                                        </v-col>
 
-                                        <v-col cols="6">
-                                            * El diploma incluirá la fecha en la que el usuario aprobó el curso.
-                                            <br>
-                                            * Ejemplo: 02 de Enero del 2022
-                                        </v-col>
+                                    <div class="p-3 mt-3">
+                                        <DefaultToggle
+                                            :active-label="'Mostrar diploma al usuario'"
+                                            :inactive-label="'Mostrar diploma al usuario'"
+                                            v-model="resource.show_certification_to_user"/>
+                                    </div>
 
-                                    </v-row>
+<!--                                    <DiplomaSelector-->
+<!--                                        v-if="resource.show_certification_to_user"-->
+<!--                                        v-model="resource.certificate_template_id"/>-->
 
                                 </template>
                             </DefaultModalSection>
@@ -409,7 +404,8 @@ const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
-    'duration', 'investment', 'show_certification_date'
+    'duration', 'investment', 'show_certification_date', 'certificate_template_id',
+    'activate_at', 'deactivate_at', 'show_certification_to_user'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -456,7 +452,8 @@ export default {
                 scheduled_restarts_minutos: 1,
                 lista_escuelas: [],
                 show_certification_date: false,
-                qualification_type: {position: 0}
+                qualification_type: {position: 0},
+                show_certification_to_user: null,
             },
             resource: {
                 qualification_type: {position: 0}
