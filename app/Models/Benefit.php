@@ -383,6 +383,7 @@ class Benefit extends BaseModel
 
             $inicio_inscripcion = new Carbon($benefit->inicio_inscripcion);
             $fin_inscripcion = new Carbon($benefit->fin_inscripcion);
+            $fin_inscripcion->setTime(23, 59, 59);
             $fecha_liberacion = new Carbon($benefit->fecha_liberacion);
             $now = Carbon::now();
 
