@@ -15,7 +15,11 @@
                 v-text="icon"
             />
         </template>
-        <span v-html="text"/>
+
+        <span v-if="text" v-html="text" />
+
+        <slot name="content"/>
+
     </v-tooltip>
 </template>
 <script>
@@ -27,7 +31,7 @@ export default {
         },
         text: {
             type: String,
-            required: true
+            required: false
         },
         color: {
             default: 'primary'

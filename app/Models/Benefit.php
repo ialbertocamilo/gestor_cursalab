@@ -383,6 +383,7 @@ class Benefit extends BaseModel
 
             $inicio_inscripcion = new Carbon($benefit->inicio_inscripcion);
             $fin_inscripcion = new Carbon($benefit->fin_inscripcion);
+            $fin_inscripcion->setTime(23, 59, 59);
             $fecha_liberacion = new Carbon($benefit->fecha_liberacion);
             $now = Carbon::now();
 
@@ -611,7 +612,10 @@ class Benefit extends BaseModel
                             {
                                 if(!is_null($sel['id']))
                                 {
-                                    $created_user = UserBenefit::create([
+                                    $created_user = UserBenefit::updateOrCreate([
+                                            'user_id' => $sel['id'],
+                                            'benefit_id' => $benefit_id
+                                        ],[
                                         'user_id' => $sel['id'],
                                         'benefit_id' => $benefit_id,
                                         'status_id' => $user_status_subscribed?->id,
@@ -668,7 +672,12 @@ class Benefit extends BaseModel
                 }
 
                 cache_clear_model(UserBenefit::class);
-
+                $users_approved = collect($seleccionados)->where('ev_user_status','approved')->all();
+                if(count($users_approved)>0){
+                    $benefit = Benefit::where('id',$benefit_id)->first();
+                    $benefit->syncUsersInBenefitsMeeting($users_approved);
+                }
+                // dd($users_approved);
                 DB::commit();
             } catch (\Exception $e) {
                 info($e);
@@ -819,7 +828,10 @@ class Benefit extends BaseModel
                     $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
                     $type_register_regular = Taxonomy::getFirstData('benefit', 'type_register', 'regular');
 
-                    $is_created = UserBenefit::create([
+                    $is_created =  UserBenefit::updateOrCreate([
+                            'user_id' => $user_id,
+                            'benefit_id' => $benefit_id
+                        ],[
                         'user_id' => $user_id,
                         'benefit_id' => $benefit_id,
                         'status_id' => $user_status_subscribed?->id,
@@ -836,7 +848,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users);
+                            // $benefit->syncUsersInBenefitsMeeting($users);
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -864,6 +876,8 @@ class Benefit extends BaseModel
                             'cupos' => $benefit->cupos ?? null
                         ];
                     }
+
+
 
                     DB::commit();
 
@@ -916,7 +930,11 @@ class Benefit extends BaseModel
                 $benefit->save();
             }
             else {
-                $benefit = UserBenefit::create([
+                $benefit = UserBenefit::updateOrCreate([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id
+                ]
+                    ,[
                     'user_id' => $user_id,
                     'benefit_id' => $benefit_id,
                     'status_id' => $user_status_notify?->id,
@@ -1012,7 +1030,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users, 'remove');
+                            // $benefit->syncUsersInBenefitsMeeting($users, 'remove');
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -1462,6 +1480,8 @@ class Benefit extends BaseModel
 
     protected function config($data)
     {
+        $tab = Taxonomy::where('group','benefit')->where('type','group')->where('code','ir-academy')->select('name')->first();
+        $tab_name = $tab?->name ?? 'IR Academy';
         $response = [
             "buscador" => [
                 "filtros_status" => [
@@ -1472,19 +1492,19 @@ class Benefit extends BaseModel
                 ],
                 "filtros_tipo" => [
                     ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                    ["name" =>  $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                 ]
             ],
             "tabs"=> [
                 [
-                    "name" => "IR Academy",
+                    "name" =>  $tab_name,
                     "code" => "ir-academy",
                     "filtros_status" => [
                         ["name" => "Activos", "code"=> "active", "checked" => true],
                         ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1496,7 +1516,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1508,7 +1528,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                     ]
                 ]
             ]
@@ -1554,7 +1574,10 @@ class Benefit extends BaseModel
         $benefit->loadMissing('silabo');
         foreach ($benefit->silabo as $silabo) {
             $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')
-                        ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
+                        ->whereHas('status',function($q){
+                            $q->whereIn('code',['reserved','scheduled','in-progress']);
+                        })
+                        // ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
                         ->where('model_id',$silabo->id)->first();
             if($meeting){
                 switch ($type) {

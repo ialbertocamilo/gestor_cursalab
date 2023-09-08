@@ -601,8 +601,8 @@ export default {
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
-                embed: true,
-                downloadable: false,
+                embed: ['office'].includes(multimedia.type) ? false : true,
+                downloadable: ['youtube', 'vimeo', 'scorm', 'link','genially'].includes(multimedia.type) ? false : true,
                 disabled: false,
             })
             vue.verifyDisabledMediaEmbed();

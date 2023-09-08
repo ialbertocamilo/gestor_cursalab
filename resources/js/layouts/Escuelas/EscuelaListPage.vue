@@ -94,6 +94,15 @@
                         'Actualizar estado'
                     )
                 "
+                @duplicate="
+                    openFormModal(
+                        duplicateFormModalOptions,
+                        $event,
+                        'duplicate',
+                        `Copiar cursos de escuela - ${$event.name}`
+                    )
+                "
+
                 @delete="
                     openFormModal(
                         modalDeleteOptions,
@@ -102,18 +111,8 @@
                         'Eliminar escuela'
                     )
                 "
-                @duplicate="openDuplicarModal($event)"
             />
-                <!-- @delete="deleteEscuela($event)" -->
-
-           <!--  <DialogConfirm
-                v-model="modalDeleteOptions.open"
-                width="450px"
-                title="Eliminar Escuela"
-                subtitle="¿Está seguro de eliminar la escuela?"
-                @onConfirm="confirmDelete"
-                @onCancel="modalDeleteOptions.open = false"
-            /> -->
+                
 
             <EscuelaValidacionesModal
                 width="50vw"
@@ -123,17 +122,13 @@
                 :resource="delete_model"
             />
 
-         <!--    <DefaultStatusModal
-                :options="modalStatusOptions"
-                :ref="modalStatusOptions.ref"
-                @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
-                @onCancel="closeFormModal(modalStatusOptions, dataTable, filters)"
-            /> -->
-          <!--   <DuplicarCursos
-                :ref="modalCursosDuplicar.ref"
-                :modalCursosDuplicar="modalCursosDuplicar"
-                @onCancel='closeFormModalDuplicarCursos'
-            /> -->
+            <DuplicateForm
+                :options="duplicateFormModalOptions"
+                width="50vw"
+                :ref="duplicateFormModalOptions.ref"
+                @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(duplicateFormModalOptions)"
+            />
 
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
@@ -158,9 +153,10 @@ import EscuelaFormModal from "./EscuelaFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
-import DuplicarCursos from './DuplicarCursos';
+// import DuplicarCursos from './DuplicarCursos';
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import LogsModal from "../../components/globals/Logs";
+import DuplicateForm from "./DuplicateForm";
 
 export default {
     props: ["workspace_id", "workspace_name"],
@@ -169,7 +165,7 @@ export default {
         EscuelaValidacionesModal,
         DialogConfirm,
         DefaultStatusModal,
-        DuplicarCursos,
+        DuplicateForm,
         DefaultDeleteModal,
         LogsModal
     },
@@ -207,12 +203,15 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
-                    // {
-                    //     text: "Duplicar",
-                    //     icon: 'fa fa-circle',
-                    //     type: 'action',
-                    //     method_name: 'duplicate'
-                    // },
+                ],
+                more_actions: [
+                    {
+                        text: "Copiar cursos",
+                        icon: 'mdi mdi-content-copy',
+                        type: 'action',
+                        show_condition: "is_cursalab_super_user",
+                        method_name: 'duplicate'
+                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -225,17 +224,17 @@ export default {
                         icon: "mdi mdi-database",
                         type: "action",
                         show_condition: "is_super_user",
-
                         method_name: "logs"
                     }
-
-                    // {
-                    //     text: "Actualizar Estado",
-                    //     icon: 'fa fa-circle',
-                    //     type: 'action',
-                    //     method_name: 'status'
-                    // },
                 ],
+            },
+            duplicateFormModalOptions: {
+                ref: 'DuplicateForm',
+                open: false,
+                action: 'duplicate',
+                base_endpoint: 'escuelas',
+                showCloseIcon: true,
+                confirmLabel: 'Copiar contenidos'
             },
             modalLogsOptions: {
                 ref: "LogsModal",

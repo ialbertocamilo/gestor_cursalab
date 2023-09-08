@@ -17,6 +17,7 @@
             </v-card-title>
             <v-card-title :class="headerClass" v-show="showTitle" v-else>
                 <div v-html="options.title"></div>
+                <slot name="title-icon"/>
                 <v-spacer/>
                 <v-btn
                     v-show="options.showCloseIcon"
@@ -25,7 +26,7 @@
                     <v-icon v-text="'mdi-close'"/>
                 </v-btn>
             </v-card-title>
-            <v-card-text :class="{'py-5': !noPaddingCardText}">
+            <v-card-text :class="{'py-3': !noPaddingCardText}">
                 <div class="bx_content" v-if="options.type_modal == 'requirement'">
                     <div class="bx_header">
                         <div class="img"><img src="/img/modal_alert.png"></div>

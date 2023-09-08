@@ -19,9 +19,11 @@ Route::controller(EscuelaController::class)->group(function () {
 
 
     Route::get('/search/{school}', 'searchCategoria')->name('escuelas.searchEscuela');
+    Route::get('/copy/{school}', 'copy')->name('escuelas.copy')->middleware('checkrol:super-user');
     Route::get('/form-selects', 'getFormSelects')->name('escuelas.formSelects');
 
     Route::delete('/{school}/destroy', 'destroyEscuela')->name('escuelas.destroyEscuela');
+    Route::post('/{school}/copy-content', 'copyContent')->name('escuelas.copyContent');
 
     Route::put('/{categoria}/status', 'updateStatus');
 });

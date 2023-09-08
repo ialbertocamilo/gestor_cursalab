@@ -46,7 +46,8 @@ class FileService {
     public static function generateUrl($path = '', $cdn = 'cdn'): string
     {
         // Initiliaze path value if it is not set
-        if (!$path) $path = '';
+        // if (!$path) $path = '';
+        if (!$path) return '';
 
         if (str_starts_with($path, 'https://')) return $path;
 
@@ -67,5 +68,14 @@ class FileService {
         // $path = trim($path, '\\');
 
         // return "$base/$path";
+    }
+
+    public static function getRootUrl($cdn = 'cdn'): string
+    {
+
+        $full_url = Storage::disk($cdn)->url('');
+        // $full_url = str_replace("%5C", '/', $full_url);
+
+        return $full_url;
     }
 }

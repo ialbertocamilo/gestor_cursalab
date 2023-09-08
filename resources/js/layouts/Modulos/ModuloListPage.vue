@@ -60,6 +60,15 @@
                     )
                 "
                 @edit="openFormModal(modalOptions, $event, 'edit')"
+
+                @duplicate="
+                    openFormModal(
+                        duplicateFormModalOptions,
+                        $event,
+                        'duplicate',
+                        `Copiar escuelas de módulo - ${$event.name}`
+                    )
+                "
             />
             <ModuloFormModal
                 width="60vw"
@@ -68,6 +77,15 @@
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalOptions)"
             />
+
+            <DuplicateForm
+                :options="duplicateFormModalOptions"
+                width="50vw"
+                :ref="duplicateFormModalOptions.ref"
+                @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(duplicateFormModalOptions)"
+            />
+
             <LogsModal
                 :options="modalLogsOptions"
                 width="55vw"
@@ -76,6 +94,7 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
+
             <DefaultAlertDialog
                 :ref="modalDeleteOptions.ref"
                 :options="modalDeleteOptions">
@@ -88,10 +107,11 @@
 <script>
 import ModuloFormModal from "./ModuloFormModal";
 import LogsModal from "../../components/globals/Logs";
+import DuplicateForm from "../Escuelas/DuplicateForm";
 
 export default {
     props: ["config_id"],
-    components: { ModuloFormModal, LogsModal },
+    components: { ModuloFormModal, LogsModal, DuplicateForm  },
     data() {
         return {
             active_users_count: '-',
@@ -131,6 +151,15 @@ export default {
                         type: 'action',
                         method_name: 'edit'
                     },
+                ],
+                 more_actions: [
+                    {
+                        text: "Copiar escuelas",
+                        icon: 'mdi mdi-content-copy',
+                        type: 'action',
+                        method_name: 'duplicate',
+                        show_condition: "is_cursalab_super_user"
+                    },
                     {
                         text: "Logs",
                         icon: "mdi mdi-database",
@@ -138,7 +167,7 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     }
-                ]
+                ],
             },
             selects: {
                 modules: []
@@ -175,7 +204,15 @@ export default {
                 contentText: "¿Desea eliminar este registro?",
                 open: false,
                 endpoint: ""
-            }
+            },
+            duplicateFormModalOptions: {
+                ref: 'DuplicateForm',
+                open: false,
+                action: 'duplicate',
+                base_endpoint: '/modulos',
+                showCloseIcon: true,
+                confirmLabel: 'Copiar contenidos'
+            },
         };
     },
     mounted() {

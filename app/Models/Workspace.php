@@ -36,6 +36,44 @@ class Workspace extends BaseModel
         'show_logo_in_app',
     ];
 
+    const CUSTOM_PIVOT_FIELDS = [
+        'criterion_title' => [
+            'name' => 'Título de criterio',
+            'type' => 'text',
+        ],
+
+        'available_in_profile' => [
+            'name' => 'Perfil',
+            'type' => 'boolean',
+        ],
+
+        'available_in_ranking' => [
+            'name' => 'Ranking',
+            'type' => 'boolean',
+        ],
+
+        'available_in_reports' => [
+            'name' => 'Reportes',
+            'type' => 'boolean',
+        ],
+
+        'available_in_segmentation' => [
+            'name' => 'Segmentación',
+            'type' => 'boolean',
+        ],
+
+        'required_in_user_creation' => [
+            'name' => 'Crear Usuario',
+            'type' => 'boolean',
+        ],
+
+        'available_in_user_filters' => [
+            'name' => 'Filtro Usuarios',
+            'type' => 'boolean',
+        ],
+
+    ];
+
     public function sluggable(): array
     {
         return [
@@ -73,6 +111,16 @@ class Workspace extends BaseModel
         return $this->hasMany(Poll::class, 'workspace_id');
     }
 
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class, 'workspace_id');
+    }
+
+    public function push_notifications()
+    {
+        return $this->hasMany(PushNotification::class, 'workspace_id');
+    }
+
     public function videotecas()
     {
         return $this->hasMany(Videoteca::class, 'workspace_id');
@@ -105,12 +153,9 @@ class Workspace extends BaseModel
 
     public function criterionWorkspace()
     {
-        return $this->belongsToMany(
-            Criterion::class
-        // 'criterion_workspace',
-        // 'workspace_id',
-        // 'criterion_id'
-        );
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
+
+        return $this->belongsToMany(Criterion::class)->withPivot($custom_pivot_fields);
     }
 
     public function criteriaValue()
@@ -434,14 +479,27 @@ class Workspace extends BaseModel
 
     }
 
-    protected function getFullAppMenu($type, $codes)
+    protected function getFullAppMenu($type, $codes, $user)
     {
         $values = Taxonomy::getDataByGroupAndType('system', $type);
 
         $data = [];
+        $assigned = [];
 
         foreach ($values as $value) {
-            $data[$value->code] = in_array($value->code, $codes);
+
+            $available = in_array($value->code, $codes);
+
+            if ($type == 'side_menu' && in_array($value->code, ['cursoslibres', 'cursosextra']) && $available) {
+
+                $assigned = empty($assigned) ? $user->checkCoursesTypeAssigned() : $assigned;
+
+                $data[$value->code] =  $assigned[$value->code];
+
+            } else {
+
+                $data[$value->code] = $available;
+            }
         }
 
         return $data;
@@ -765,4 +823,82 @@ class Workspace extends BaseModel
 
         return $workspace;
     }
+
+    protected function getSchoolsForTree($schools)
+    {
+        $data = [];
+
+        foreach ($schools as  $school) {
+
+            $school_children = [];
+            $school_parent_key = 'school_' . $school->id;
+
+            foreach ($school->courses as  $course) {
+
+                $children = [];
+                $course_parent_key = $school_parent_key . '-course_' . $course->id;
+
+                foreach ($course->topics as $topic) {
+
+                    $child_key = 'topic_' . $topic->id;
+
+                    $children[] = [
+                        'id' => $course_parent_key . '-' . $child_key,
+                        'name' => $topic->name,
+                        'icon' => 'mdi-bookmark',
+                    ];
+                }
+
+                $course_parent = [
+                    'id' => $course_parent_key,
+                    'name' => $course->name,
+                    'icon' => 'mdi-book',
+                    'children' => $children,
+                ];
+
+                $school_children[] = $course_parent;
+            }
+
+            $parent = [
+                'id' => $school_parent_key,
+                'name' => $school->name,
+                'icon' => 'mdi-school',
+                'children' => $school_children,
+            ];
+            
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
+    protected function getAvailableForTree($_subworkspace)
+    {
+        $data = [];
+
+        $workspace = get_current_workspace();
+
+        foreach ($workspace->subworkspaces as  $subworkspace) {
+
+            if ($subworkspace->id == $_subworkspace->id) {
+                continue;
+            }
+
+            $children = [];
+            $parent_key = 'subworkspace_' . $subworkspace->id;
+
+            $parent = [
+                'id' => $parent_key,
+                'name' => $subworkspace->name,
+                'avatar' => '',
+                'icon' => 'mdi-view-grid',
+                'children' => $children,
+            ];
+
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
 }

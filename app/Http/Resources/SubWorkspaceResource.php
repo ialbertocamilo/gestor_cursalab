@@ -38,6 +38,7 @@ class SubWorkspaceResource extends JsonResource
 
             'schools_route' => route('escuelas.list', ['module_id' => $sub_workspace->id]),
             'is_super_user'=>auth()->user()->isAn('super-user'),
+            'is_cursalab_super_user'=> is_cursalab_superuser(),
             // 'escuelas_route' => route('escuelas.list', $sub_workspace->id),
             'users_route' => route('usuarios.list', ['subworkspace_id' => $sub_workspace->id]),
             // 'carreras_route' => route('carreras.index'),

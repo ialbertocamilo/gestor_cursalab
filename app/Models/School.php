@@ -160,4 +160,79 @@ class School extends BaseModel
             $this->name .= "{$active}";
         }
     }
+
+    protected function getCoursesForTree($courses)
+    {
+        $data = [];
+
+        foreach ($courses as  $course) {
+
+            $children = [];
+            $parent_key = 'course_' . $course->id;
+
+            foreach ($course->topics as $topic) {
+
+                $child_key = 'topic_' . $topic->id;
+
+                $children[] = [
+                    'id' => $parent_key . '-' . $child_key,
+                    'name' => $topic->name,
+                    'icon' => 'mdi-bookmark',
+                ];
+            }
+
+            $parent = [
+                'id' => $parent_key,
+                'name' => $course->name,
+                'avatar' => '',
+                'icon' => 'mdi-book',
+                'children' => $children,
+            ];
+
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
+    protected function getAvailableForTree($_school)
+    {
+        $data = [];
+
+        $workspace = get_current_workspace();
+
+        foreach ($workspace->subworkspaces as  $subworkspace) {
+
+            $children = [];
+            $parent_key = 'subworkspace_' . $subworkspace->id;
+
+            foreach ($subworkspace->schools as $school) {
+
+                if ($school->id == $_school->id) {
+                    continue;
+                }
+
+                $child_key = 'school_' . $school->id;
+
+                $children[] = [
+                    'id' => $parent_key . '-' . $child_key,
+                    'name' => $school->name,
+                    'icon' => 'mdi-school',
+                ];
+            }
+
+            $parent = [
+                'id' => $parent_key,
+                'name' => $subworkspace->name,
+                'avatar' => '',
+                'icon' => 'mdi-view-grid',
+                'children' => $children,
+            ];
+
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
 }

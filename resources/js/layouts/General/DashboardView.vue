@@ -138,6 +138,7 @@
                             :icon="value.icon || 'mdi-book-open'"
                             :icon-color="value.color || 'primary'"
                             :amount="value.value || 0"
+                            :path="value.path"
                             :label="value.title || 'Cargando...'"
                         />
                     </v-col>
