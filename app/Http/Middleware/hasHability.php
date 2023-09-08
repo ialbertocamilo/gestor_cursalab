@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Models\Taxonomy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 
 class hasHability
 {
