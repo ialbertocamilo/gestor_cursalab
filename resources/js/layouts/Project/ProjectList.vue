@@ -58,7 +58,7 @@
                 Tareas
                 <v-spacer/>
                 <DefaultModalButton 
-                    label="Proyecto"
+                    label="Tarea"
                     icon_name="mdi-plus"
                     @click="openFormModal(modalOptions)"
                 />
@@ -93,7 +93,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="openFormModal(modalOptions,$event,'edit',`Editar Proyecto - ${$event.course}`)"
+                @edit="openFormModal(modalOptions,$event,'edit',`Editar Tarea - ${$event.course}`)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proyecto')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un proyecto')"
             />
@@ -209,13 +209,13 @@ export default {
                 contentText: '¿Desea cambiar de estado a este registro?',
                 content_modal: {
                     inactive: {
-                        title: '¡Estás por desactivar un Proyecto!',
+                        title: '¡Estás por desactivar una Tarea!',
                         details: [
                             'Este proyecto ahora no podrá ser visto por los usuarios.'
                         ],
                     },
                     active: {
-                        title: '¡Estás por activar un Proyecto!',
+                        title: '¡Estás por activar una Tarea!',
                         details: [
                             'Este proyecto ahora podrá ser visto por los usuarios.'
                         ]
@@ -232,7 +232,7 @@ export default {
                 endpoint: '',
                 content_modal: {
                     delete: {
-                        title: '¡Estás por eliminar un Proyecto!',
+                        title: '¡Estás por eliminar una Tarea!',
                         details: [
                             'Este proyecto no podrá ser visto por los usuarios.',
                             'La información eliminada no podra recuperarse'
