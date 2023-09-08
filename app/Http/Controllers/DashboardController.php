@@ -41,7 +41,7 @@ class DashboardController extends Controller
         $current_workspace = get_current_workspace();
         $modulos = $current_workspace?->subworkspaces->toArray() ?? [];
         if($modulos){
-            return view('home', compact('data'));
+            return view('home', []);
         }
         $subworkspace_id = request('modulo_id', NULL);
         // $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
