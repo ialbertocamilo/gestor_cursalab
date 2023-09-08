@@ -39,7 +39,7 @@ class DashboardController extends Controller
             cache()->flush();
 
         $current_workspace = get_current_workspace();
-        $modulos = $current_workspace?->subworkspaces->toArray() ?? [];
+        $modulos = $current_workspace?->subworkspaces->toArray();
         if($modulos){
             return view('home', []);
         }
