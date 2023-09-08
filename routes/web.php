@@ -138,7 +138,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('soporte')->middleware('hasHability:support')->group(base_path('routes/cms/soporte.php'));
 
 
-    Route::prefix('users')->middleware('hasHability:users')->group(base_path('routes/cms/users.php'));
+    Route::prefix('users')->middleware('checkrol:super-user')->group(base_path('routes/cms/users.php'));
     // Route::prefix('permisos')->middleware('checkrol:super-user')->group(base_path('routes/cms/permisos.php'));
     Route::prefix('roles')->middleware('checkrol:super-user')->group(base_path('routes/cms/roles.php'));
 
@@ -149,7 +149,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     // Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
 
 
-    Route::prefix('usuarios')->middleware('checkrol:super-user')->group(base_path('routes/cms/usuarios.php'));
+    Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
     // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));
