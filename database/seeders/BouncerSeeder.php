@@ -415,7 +415,7 @@ class BouncerSeeder extends Seeder
                         'group'=>'gestor',
                         'type' => 'submenu',
                         'code' => 'modules',
-                        'name' => "Módulos",
+                        'name' => "_Módulos",
                         'icon' => "fas fa-th-large",
                         'abilities' =>[
                             [
