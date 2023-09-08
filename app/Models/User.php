@@ -1614,6 +1614,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $criterion_values = $this->criterion_values->whereIn('criterion_id', $criterionWorkspace->pluck('id'));
 
         $criterios = [];
+
+        if ($this->document) {
+            $criterios[] = [
+                'valor' => $this->document, 
+                'tipo' => 'Doc. Identidad',
+            ];
+        }
+
+        if ($this->email) {
+            $criterios[] = [
+                'valor' => $this->email, 
+                'tipo' => 'Correo',
+            ];
+        }
         
         foreach ($criterion_values as $value) {
 
