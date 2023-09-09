@@ -13,21 +13,35 @@ class Menu extends Model
     private $subtype_taxonomy = 'menu';
     
     protected function list(){
-        return cache()->remember('list-menus', 1440,function () {
-            return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
-                ->with(["children:id,parent_id,group,type,position,name,icon,extra_attributes"])
-                ->where('group',$this->group_taxonomy)->where('type',$this->type_taxonomy)->orderBy('position','ASC')->get()->map(function($menu){
-                    $menu->is_beta = $menu->extra_attributes['is_beta'] ?? false;
-                    $menu->show_upgrade = $menu->extra_attributes['show_upgrade'] ?? false;
-                    foreach ($menu->children as $submenu) {
-                        $submenu->is_beta = $submenu->extra_attributes['is_beta'] ?? false;
-                        $submenu->show_upgrade = $submenu->extra_attributes['show_upgrade'] ?? false;
-                        // unset($submenu->extra_attributes);
-                        unset($submenu->children);
-                    }
-                    unset($menu->extra_attributes);
-                    return $menu;
-                });
+        // return cache()->remember('list-menus', 1440,function () {
+        //     return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
+        //         ->with(["children:id,parent_id,group,type,position,name,icon,extra_attributes"])
+        //         ->where('group',$this->group_taxonomy)->where('type',$this->type_taxonomy)->orderBy('position','ASC')->get()->map(function($menu){
+        //             $menu->is_beta = $menu->extra_attributes['is_beta'] ?? false;
+        //             $menu->show_upgrade = $menu->extra_attributes['show_upgrade'] ?? false;
+        //             foreach ($menu->children as $submenu) {
+        //                 $submenu->is_beta = $submenu->extra_attributes['is_beta'] ?? false;
+        //                 $submenu->show_upgrade = $submenu->extra_attributes['show_upgrade'] ?? false;
+        //                 // unset($submenu->extra_attributes);
+        //                 unset($submenu->children);
+        //             }
+        //             unset($menu->extra_attributes);
+        //             return $menu;
+        //         });
+        //     });
+        return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
+            ->with(["children:id,parent_id,group,type,position,name,icon,extra_attributes"])
+            ->where('group',$this->group_taxonomy)->where('type',$this->type_taxonomy)->orderBy('position','ASC')->get()->map(function($menu){
+                $menu->is_beta = $menu->extra_attributes['is_beta'] ?? false;
+                $menu->show_upgrade = $menu->extra_attributes['show_upgrade'] ?? false;
+                foreach ($menu->children as $submenu) {
+                    $submenu->is_beta = $submenu->extra_attributes['is_beta'] ?? false;
+                    $submenu->show_upgrade = $submenu->extra_attributes['show_upgrade'] ?? false;
+                    // unset($submenu->extra_attributes);
+                    unset($submenu->children);
+                }
+                unset($menu->extra_attributes);
+                return $menu;
             });
     }
     protected function getMenuByUser($user){
