@@ -285,6 +285,11 @@ function get_media_url($path = '', $cdn = 'cdn')
     return FileService::generateUrl($path, $cdn);
 }
 
+function get_media_root_url($cdn = 'cdn')
+{
+    return FileService::getRootUrl($cdn);
+}
+
 function excelDateToDate($fecha)
 {
     try {

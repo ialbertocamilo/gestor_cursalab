@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\Role;
+use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\PasswordReset;
 use App\Http\Requests\ResetPasswordRequest;
-use App\Models\User;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 
 class LoginController extends Controller
@@ -142,7 +143,9 @@ class LoginController extends Controller
 
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
-
+            // $roles = Role::getRolesAdminNames();
+            // if ( $user->isAn(...$roles))
+            // {
             if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             {
                 if ($request->hasSession()) {
@@ -350,7 +353,6 @@ class LoginController extends Controller
         // Load user's workspaces
 
         $workspaces =  Workspace::loadUserWorkspaces($user->id);
-
         // Save first workspace in session, to be used
         // as the default workspace, since user has not
         // selected a workspace yet

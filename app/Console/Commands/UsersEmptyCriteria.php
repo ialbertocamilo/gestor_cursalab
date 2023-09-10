@@ -79,10 +79,10 @@ class UsersEmptyCriteria extends Command
                     'workspaceName' => $workspace->name
                 ];
 
+                // 'kevin@cursalab.io'
                 Mail::to([
                     'elvis@cursalab.io',
                     'tecnologia@cursalab.io',
-                    'kevin@cursalab.io'
                 ])
                     ->send(new EmailTemplate('emails.empty_criteria_notification', $data));
             }

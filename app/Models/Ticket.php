@@ -155,7 +155,7 @@ class Ticket extends BaseModel
             ->where('reason', 'Soporte Login')
             ->whereIn('user_id', $usersToUpdateIds)
             ->get();
-            
+
         $tickets_users_inactive = Ticket::query()->whereHas('user', function ($q) use ($subworkspaces){
             $q->whereIn('subworkspace_id', $subworkspaces['ids'])->where('active',0);
         })->where('status', 'pendiente')->get();
@@ -166,9 +166,27 @@ class Ticket extends BaseModel
             $ticket->save();
 
             $ticket->updateInfoSupport('Plataforma', '');
+
+            self::notifyUserAboutSolvedTicket($ticket);
         }
     }
 
+    /**
+     * Create a notification for user when its ticket is solved
+     * @param Ticket $ticket
+     * @return void
+     */
+    public static function notifyUserAboutSolvedTicket(Ticket $ticket): void
+    {
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            [$ticket->user_id],
+            UserNotification::TICKET_SOLVED,[
+                'ticketNumber' => $ticket->id
+            ]
+        );
+    }
 
     /**
      * Update values in info_support column

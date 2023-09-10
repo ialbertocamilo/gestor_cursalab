@@ -238,6 +238,18 @@ const app = new Vue({
         workspaceId: 0
     },
     mounted() {
+
+        // Since content is ready,  destroy skeletons
+
+        let skeleton1 = document.querySelector('.sidemenu-container .skeleton-wrapper');
+        let skeleton2 = document.querySelector('.dashboard.skeleton-wrapper');
+        let skeleton3 =  document.querySelector('.table-gui.skeleton-wrapper');
+
+        if (skeleton1) skeleton1.remove();
+        if (skeleton2) skeleton2.remove();
+        if (skeleton3) skeleton3.remove();
+
+
         this.fetchSessionData()
         this.listenReportsNotifications()
     },
