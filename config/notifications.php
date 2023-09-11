@@ -17,7 +17,8 @@ return [
         'new-benefit' => 'Tienes un beneficio asignado: <b>{benefitName}</b> disponible dentro de la plataforma'
     ],
     'files' => [
-        'new-document' => 'Tienes un nuevo documento disponible en la plataforma'
+        'new-document' => 'Tienes un nuevo documento disponible en la plataforma',
+        'new-video' => 'Tienes un nuevo video disponible en la plataforma'
     ],
     'announcements' => [
         'new-announcement' => 'Tienes un nuevo anuncio dentro de la plataforma.'

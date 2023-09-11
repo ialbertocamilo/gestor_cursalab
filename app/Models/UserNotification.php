@@ -22,6 +22,8 @@ class UserNotification extends Model
     public const NEW_BENEFIFT = 'new-benefit';
     public const NEW_DOCUMENT = 'new-document';
     public const NEW_ANNOUNCEMENT = 'new-announcement';
+    public const NEW_VIDEO = 'new-video';
+    public const FROM_PUSH = 'from-push';
 
     protected $collection = 'user_notifications';
 
@@ -95,8 +97,9 @@ class UserNotification extends Model
                 ->where('workspace_id', $workspaceId)
                 ->where('type_id', $taxonomy->id)
                 ->where('is_visible', 1)
-                ->where('path', $path)
                 ->where('user_id', $userId)
+                ->where('content', $content)
+                ->where('path', $path)
                 ->select()->first();
 
             if (!$notification) {
