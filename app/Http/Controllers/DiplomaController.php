@@ -245,7 +245,7 @@ class DiplomaController extends Controller
             
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
 
-            if (!$data['old_template']) {
+            if ($data['old_template'] === false) {
                 $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
             }
 
@@ -342,7 +342,7 @@ class DiplomaController extends Controller
         $fecha = $summary_course->certification_issued_at;
 
         return array(
-            'old_template' => !$editableTemplate,
+            'old_template' => $editableTemplate ? false : true,
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
             'grade' => (int) $summary_course->grade_average,

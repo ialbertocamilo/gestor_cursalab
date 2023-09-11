@@ -16,7 +16,7 @@
 
     <div class="container" id="certi" download="canvasexport.png">
         
-        @if($data['old_template'])
+        @if($data['old_template'] === true)
 
             <img src="{{ $data['image'] }}" alt="Certificado">
             <span class="nombre default">{{ $data['usuario'] }}</span>
