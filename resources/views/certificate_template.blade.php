@@ -19,8 +19,8 @@
         @if($data['old_template'] === true)
 
             <img src="{{ $data['image'] }}" alt="Certificado">
-            <span class="nombre default">{{ $data['usuario'] }}</span>
-            <span class="curso default">{{ $data['curso'] }}</span>
+            <span class="nombre default">{{ $data['users'] }}</span>
+            <span class="curso default">{{ $data['courses'] }}</span>
         
             @if ($data['show_certification_date'])
                 <span class="fecha">{{ fechaCastellano($data['fecha']) }}</span>
