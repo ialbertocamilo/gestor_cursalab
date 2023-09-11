@@ -511,7 +511,7 @@ class EntrenamientoController extends Controller
         //         'avance' => $checklist_rpta->porcentaje
         //     ]);
         // });
-        // $usuario->checklists = $checklistTemp;
+        $usuario->checklists = $checklists;
         // $usuario->cargo = '';
         // $usuario->botica = '';
         // $usuario->grupo_nombre = '';
