@@ -356,6 +356,18 @@ export default {
         // vue.getSelects();
         vue.getData();
     },
+    created() {
+        let vue = this;
+
+        // === check localstorage multimedia ===
+        const { status, storage: multimediaStorage } = vue.getStorageUrl('multimedia', 'module_data');
+        // console.log('multimedia',{status, multimediaStorage});
+        if(status) {
+            vue.filters.tipo = [multimediaStorage];
+            vue.avoid_first_data_load = true;
+        }
+        // === check localstorage anuncio ===
+    },
     methods: {
         getData(page = null) {
             let vue = this

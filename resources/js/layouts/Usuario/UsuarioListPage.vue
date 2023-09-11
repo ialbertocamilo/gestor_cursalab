@@ -34,7 +34,7 @@
                     <template v-for="(value, selectKey, index) in selects">
 
                         <v-col cols="12"
-                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
+                               v-if="!['sub_workspaces', 'active', 'module'].includes(selectKey) && criteria_template[index-2]">
 
                             <DefaultInputDate
                                 v-if="criteria_template[index-2].field_type.code === 'date'"
@@ -403,9 +403,18 @@ export default {
     },
     mounted() {
         let vue = this
+        
+          // === check localstorage multimedia ===
+        const { status, storage: usuarioStorage } = vue.getStorageUrl('usuarios', 'module_data');
+        // console.log('created_usuarios:', {status, usuarioStorage});
+        
+        if(status) {
+            vue.filters.active = usuarioStorage.active;
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+        // === check localstorage anuncio ===
+        }
         vue.getSelects();
     },
-
     methods: {
         getSelects() {
             let vue = this

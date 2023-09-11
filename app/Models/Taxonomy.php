@@ -40,6 +40,7 @@ class Taxonomy extends Model
         'alias',
         'icon',
         'color',
+        'extra_attributes',
         'slug',
         'active',
         'description',
@@ -54,7 +55,9 @@ class Taxonomy extends Model
         'created_at', 'updated_at', 'deleted_at'
     ];
 
-
+    protected $casts = [
+        'extra_attributes' => 'json',
+    ];
     /*
 
         Relationships

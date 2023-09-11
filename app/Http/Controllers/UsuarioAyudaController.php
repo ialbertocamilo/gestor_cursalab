@@ -39,6 +39,10 @@ class UsuarioAyudaController extends Controller
         $modulos = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
         // $modulos = Criterion::getValuesForSelect('module');
         $estados = config('data.soporte-estados');
+        $reasons = Ticket::query()
+            ->select(['reason'])
+            ->distinct('reason')
+            ->get();
 
         return $this->success(get_defined_vars());
     }
@@ -98,6 +102,8 @@ class UsuarioAyudaController extends Controller
         if (isset($request->all()['status'])) {
             if ($request->all()['status'] === 'solucionado') {
                 $ticket->updateInfoSupport($user->fullname, null);
+
+                Ticket::notifyUserAboutSolvedTicket($ticket);
             }
 
             $ticket->status = $request->all()['status'];

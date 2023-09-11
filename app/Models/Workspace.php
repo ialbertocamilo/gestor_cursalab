@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\EmailTemplate;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-
-use Illuminate\Support\Facades\DB;
 
 
 class Workspace extends BaseModel
@@ -24,12 +26,52 @@ class Workspace extends BaseModel
         'limit_allowed_users',
         'users_with_empty_criteria',
         'qualification_type_id',
-
         'logo_marca_agua',
         'marca_agua_estado',
         'notificaciones_push_chunk',
         'notificaciones_push_envio_inicio',
-        'notificaciones_push_envio_intervalo'
+        'notificaciones_push_envio_intervalo',
+        'criterio_id_fecha_inicio_reconocimiento',
+        'limit_allowed_storage',
+        'show_logo_in_app',
+    ];
+
+    const CUSTOM_PIVOT_FIELDS = [
+        'criterion_title' => [
+            'name' => 'Título de criterio',
+            'type' => 'text',
+        ],
+
+        'available_in_profile' => [
+            'name' => 'Perfil',
+            'type' => 'boolean',
+        ],
+
+        'available_in_ranking' => [
+            'name' => 'Ranking',
+            'type' => 'boolean',
+        ],
+
+        'available_in_reports' => [
+            'name' => 'Reportes',
+            'type' => 'boolean',
+        ],
+
+        'available_in_segmentation' => [
+            'name' => 'Segmentación',
+            'type' => 'boolean',
+        ],
+
+        'required_in_user_creation' => [
+            'name' => 'Crear Usuario',
+            'type' => 'boolean',
+        ],
+
+        'available_in_user_filters' => [
+            'name' => 'Filtro Usuarios',
+            'type' => 'boolean',
+        ],
+
     ];
 
     public function sluggable(): array
@@ -50,6 +92,10 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array'
     ];
 
+    public function medias() {
+        return $this->hasMany(Media::class, 'workspace_id');
+    }
+
     public function segments()
     {
         return $this->morphMany(Segment::class, 'model');
@@ -60,19 +106,29 @@ class Workspace extends BaseModel
         return $this->hasMany(User::class, 'subworkspace_id');
     }
 
-    public function medias()
-    {
-        return $this->hasMany(Media::class, 'workspace_id');
-    }
-
     public function polls()
     {
         return $this->hasMany(Poll::class, 'workspace_id');
     }
 
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class, 'workspace_id');
+    }
+
+    public function push_notifications()
+    {
+        return $this->hasMany(PushNotification::class, 'workspace_id');
+    }
+
     public function videotecas()
     {
         return $this->hasMany(Videoteca::class, 'workspace_id');
+    }
+
+    public function emails()
+    {
+        return $this->hasMany(EmailUser::class, 'workspace_id');
     }
 
     public function schools()
@@ -97,12 +153,9 @@ class Workspace extends BaseModel
 
     public function criterionWorkspace()
     {
-        return $this->belongsToMany(
-            Criterion::class
-        // 'criterion_workspace',
-        // 'workspace_id',
-        // 'criterion_id'
-        );
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
+
+        return $this->belongsToMany(Criterion::class)->withPivot($custom_pivot_fields);
     }
 
     public function criteriaValue()
@@ -123,6 +176,12 @@ class Workspace extends BaseModel
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
+    }
+
+    public function subworkpsace_criterion_type(array $codes) {
+        return $this->criterionWorkspace()->whereHas('field_type', function($query) use ($codes) {
+            $query->whereIn('code', $codes);
+        })->get();
     }
 
     public function app_menu()
@@ -238,13 +297,13 @@ class Workspace extends BaseModel
         // Get user's assigned roles
 
         $assignedRoles = AssignedRole::getUserAssignedRoles($userId);
-        $allowedRoles = [
-            Role::CONFIG,
-            Role::ADMIN,
-            Role::CONTENT_MANAGER,
-            Role::TRAINER,
-            Role::REPORTS
-        ];
+        // $allowedRoles = [
+        //     Role::CONFIG,
+        //     Role::ADMIN,
+        //     Role::CONTENT_MANAGER,
+        //     Role::TRAINER,
+        //     Role::REPORTS
+        // ];
 
         // Get list of workspaces the user is allowed to
         // access to, according to its role
@@ -252,7 +311,7 @@ class Workspace extends BaseModel
         $workspacesIds = AssignedRole::query()
             ->join('users', 'users.id', '=', 'assigned_roles.entity_id')
             ->where('assigned_roles.entity_type', AssignedRole::USER_ENTITY)
-            ->whereIn('assigned_roles.role_id', $allowedRoles)
+            // ->whereIn('assigned_roles.role_id', $allowedRoles)
             ->where('users.id', $userId)
             ->select('assigned_roles.*')
             ->pluck('scope');
@@ -420,14 +479,27 @@ class Workspace extends BaseModel
 
     }
 
-    protected function getFullAppMenu($type, $codes)
+    protected function getFullAppMenu($type, $codes, $user)
     {
         $values = Taxonomy::getDataByGroupAndType('system', $type);
 
         $data = [];
+        $assigned = [];
 
         foreach ($values as $value) {
-            $data[$value->code] = in_array($value->code, $codes);
+
+            $available = in_array($value->code, $codes);
+
+            if ($type == 'side_menu' && in_array($value->code, ['cursoslibres', 'cursosextra']) && $available) {
+
+                $assigned = empty($assigned) ? $user->checkCoursesTypeAssigned() : $assigned;
+
+                $data[$value->code] =  $assigned[$value->code];
+
+            } else {
+
+                $data[$value->code] = $available;
+            }
         }
 
         return $data;
@@ -459,7 +531,47 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    public function sendEmailByLimit($sub_workspace_id = null){
+        $workspace = $this;
 
+        $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
+
+        if (!$workspace_constraint) return false;
+
+        $workspace_limit = $workspace->getLimitAllowedUsers();
+
+        $q_current_active_users = User::onlyClientUsers()
+            ->where('active', ACTIVE);
+
+        if ($workspace_constraint['type'] === 'by_workspace')
+            $q_current_active_users->whereRelation('subworkspace', 'parent_id', $workspace->id);
+
+        $current_active_users_count = $q_current_active_users->count();
+        $percent = floor($current_active_users_count/$workspace_limit * pow(10, 2)) / pow(10, 2);
+        if( $percent > 0.97){
+            $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
+            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)     
+                                    ->where('last_percent_sent','<>',$percent)       
+                                    ->wherehas('user',function($q){
+                                            $q->where('active',ACTIVE)->whereNotNull('email_gestor');
+                                    })->get();
+            if(count($emails_user) > 0){
+                $emais_to_send_user = $emails_user->map( fn ($e)=> $e->user->email_gestor);
+                $mail_data=[
+                    'subject'=>'Limite de usuarios',
+                    'workspace_name' => $workspace->name,
+                    'current_active_users_count'=> $current_active_users_count,
+                    'workspace_limit'=>$workspace_limit
+                ];
+                Mail::to($emais_to_send_user)
+                ->send(new EmailTemplate('emails.email_limite_usuarios', $mail_data));
+                EmailUser::whereIn('user_id',$emails_user->pluck('user_id'))->where('workspace_id',$workspace->id)->where('type_id',$type_id)->update([
+                    'last_percent_sent' => $percent
+                ]);
+            }
+        }
+        return true;
+    }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {
         $workspace = $this;
@@ -527,9 +639,9 @@ class Workspace extends BaseModel
                     'requirements'
                 ],
             ],
-            
+
             // 'users',
-            
+
             'functionalities', // OK
 
             'criterionWorkspace', // criterion_workspace OK
@@ -541,7 +653,7 @@ class Workspace extends BaseModel
             // ],
 
             'medias', // OK
-            'polls.questions', // 
+            'polls.questions', //
         ];
 
         $workspace = $this->replicate();
@@ -619,7 +731,7 @@ class Workspace extends BaseModel
                         $course_data['external_id'] = $_course->id;
 
                         $course = $school->courses()->create($course_data);
-                        
+
                         foreach ($_course->topics as $_topic) {
 
                             $topic_data = $_topic->toArray();
@@ -671,7 +783,7 @@ class Workspace extends BaseModel
             }
         }
 
-        
+
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
@@ -711,4 +823,82 @@ class Workspace extends BaseModel
 
         return $workspace;
     }
+
+    protected function getSchoolsForTree($schools)
+    {
+        $data = [];
+
+        foreach ($schools as  $school) {
+
+            $school_children = [];
+            $school_parent_key = 'school_' . $school->id;
+
+            foreach ($school->courses as  $course) {
+
+                $children = [];
+                $course_parent_key = $school_parent_key . '-course_' . $course->id;
+
+                foreach ($course->topics as $topic) {
+
+                    $child_key = 'topic_' . $topic->id;
+
+                    $children[] = [
+                        'id' => $course_parent_key . '-' . $child_key,
+                        'name' => $topic->name,
+                        'icon' => 'mdi-bookmark',
+                    ];
+                }
+
+                $course_parent = [
+                    'id' => $course_parent_key,
+                    'name' => $course->name,
+                    'icon' => 'mdi-book',
+                    'children' => $children,
+                ];
+
+                $school_children[] = $course_parent;
+            }
+
+            $parent = [
+                'id' => $school_parent_key,
+                'name' => $school->name,
+                'icon' => 'mdi-school',
+                'children' => $school_children,
+            ];
+            
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
+    protected function getAvailableForTree($_subworkspace)
+    {
+        $data = [];
+
+        $workspace = get_current_workspace();
+
+        foreach ($workspace->subworkspaces as  $subworkspace) {
+
+            if ($subworkspace->id == $_subworkspace->id) {
+                continue;
+            }
+
+            $children = [];
+            $parent_key = 'subworkspace_' . $subworkspace->id;
+
+            $parent = [
+                'id' => $parent_key,
+                'name' => $subworkspace->name,
+                'avatar' => '',
+                'icon' => 'mdi-view-grid',
+                'children' => $children,
+            ];
+
+            $data[] = $parent;
+        }
+
+        return $data;
+    }
+
 }

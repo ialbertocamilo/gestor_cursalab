@@ -23,8 +23,10 @@ class WorkspaceRequest extends FormRequest
             'file_logo' => 'required_without:logo',
             'file_logo_negativo' => 'nullable',
             'selected_criteria' => 'nullable',
+            'limit_allowed_storage' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
+            'show_logo_in_app' => 'nullable',
 
             'logo_marca_agua' => 'nullable',
             'marca_agua_estado' => 'nullable',
@@ -34,6 +36,8 @@ class WorkspaceRequest extends FormRequest
             'selected_functionality' => 'nullable',
 
             'qualification_type_id' => 'required',
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
+            'criteria' => 'required'
         ];
     }
 
@@ -50,7 +54,38 @@ class WorkspaceRequest extends FormRequest
                                           $this->marca_agua_estado == 1 ) ? true : false;
         }
 
+        if ($this->has('show_logo_in_app') ) {
+            $data['show_logo_in_app'] = ($this->show_logo_in_app == 'true' ||
+                                          $this->show_logo_in_app == 1 ) ? true : false;
+        }
+
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
+
+
+        $criteria_workspace = $this->criteria_workspace ? json_decode($this->criteria_workspace, true) : [];
+
+        $data['criteria'] = [];
+
+        foreach ($criteria_workspace as $row) {
+
+            if ($row['available']) {
+
+                $fields = [];
+
+                foreach ($row['fields'] as $field) {
+
+                    if ($field['type'] == 'boolean') {
+                        $fields[$field['code']] = $field['available'] ? 1 : NULL;
+                    }
+
+                    if ($field['type'] == 'text') {
+                        $fields[$field['code']] = $field['text'] ?? NULL;
+                    }
+                }
+
+                $data['criteria'][$row['criterion_id']] = $fields;
+            }
+        }
 
         return $this->merge($data)->all();
     }

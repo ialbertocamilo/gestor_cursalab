@@ -26,8 +26,8 @@ class AmbienteRequest extends FormRequest
             'logo_empresa' => 'nullable',
 
             //app
-            'titulo_login_app' => 'required|min:5|max:255',
-            'subtitulo_login_app' => 'required|min:5|max:255',
+            'titulo_login_app' => 'nullable|max:255',
+            'subtitulo_login_app' => 'nullable|max:255',
 
             'form_login_transparency' => 'nullable',
             'form_login_position' => 'nullable',
@@ -47,6 +47,8 @@ class AmbienteRequest extends FormRequest
 
             'logo_male' => 'nullable',
             'logo_female' => 'nullable',
+            
+            'template' => 'nullable',
         ];
     }
     public function validationData(): array

@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\Controller;
+use App\Mail\EmailTemplate;
+use App\Models\Ticket;
 use App\Rules\CustomContextSpecificWords;
 use App\Models\User;
+use App\Models\WorkspaceFunctionality;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -57,8 +63,8 @@ class ResetPasswordApiController extends Controller
         $field = request()->email ? 'email' : 'document';
         $value = request()->email ? request()->email : request()->document;
 
-        $user = User::where($field, $value)->first(); 
-        $user_id = $user->id ?? NULL; 
+        $user = User::where($field, $value)->first();
+        $user_id = $user->id ?? NULL;
 
         // info('ResetPasswordApiController');
         // info('request->all()');
@@ -76,13 +82,13 @@ class ResetPasswordApiController extends Controller
             // new ContextSpecificWords($user->name ?? NULL),
             // new ContextSpecificWords($user->lastname ?? NULL),
             // new ContextSpecificWords($user->surname ?? NULL),
-            
+
             new CustomContextSpecificWords($user->email ?? NULL, 'email'),
             new CustomContextSpecificWords($user->document ?? NULL, 'document'),
             new CustomContextSpecificWords($user->name ?? NULL, 'name'),
             new CustomContextSpecificWords($user->lastname ?? NULL, 'lastname'),
             new CustomContextSpecificWords($user->surname ?? NULL, 'surname'),
-            
+
             // new RepetitiveCharacters(),
             // new SequentialCharacters(),
         ];
@@ -95,10 +101,10 @@ class ResetPasswordApiController extends Controller
         ];
     }
 
-    protected function validationErrorMessages() 
+    protected function validationErrorMessages()
     {
         return [
-                'password.password_available' => 'Has usado esa contraseña previamente, intenta con una nueva.',
+                'password.password_available' => 'Has usado esta contraseña previamente, intenta con una nueva.',
                 'email.email' => 'El campo correo electrónico no es un correo válido'
             ];
     }
@@ -112,7 +118,7 @@ class ResetPasswordApiController extends Controller
     // public function reset(Request $request): JsonResponse|RedirectResponse
     public function reset(Request $request)
     {
-        
+
         // $validator = Validator::make($request->all(), $this->rules());
         // if ($validator->fails()) info(['errors' => $validator->errors()]);
 
@@ -123,7 +129,7 @@ class ResetPasswordApiController extends Controller
         // database. Otherwise we will parse the error and return the response.
 
         $response = $this->broker()->reset(
-            $this->credentials($request), function ($user, $password) {
+            $this->credentials($request), function ($user, $password) use ($request) {
 
 
                 $old_passwords = $user->old_passwords;
@@ -144,6 +150,20 @@ class ResetPasswordApiController extends Controller
                 $user->last_pass_updated_at = now();
                 $user->setRememberToken(Str::random(60));
                 $user->save();
+
+                $user_workspace = $user->subworkspace->parent_id;
+                $functionality = $user_workspace ? WorkspaceFunctionality::getFunctionality( $user_workspace, 'send-credentials-to-email') : null;
+                $hide_password = $request->password ? '******' . substr($request->password, -3) : '******';
+
+                if($functionality && $request->email)
+                {
+                    $mail_data = [ 'subject' => "Contraseña actualizada 🔐",
+                                'user' => $user->name.' '.$user->lastname,
+                                'email' => $request->email,
+                                'password' => $hide_password
+                                ];
+                    Mail::to($request->email)->send(new EmailTemplate('emails.enviar_credenciales_gestor', $mail_data));
+                }
             }
         );
 
@@ -151,7 +171,40 @@ class ResetPasswordApiController extends Controller
         // info($response);
         // info(Password::PASSWORD_RESET);
 
+        $data_login = null;
+        $mostrar_modal = false;
+        if($response == Password::PASSWORD_RESET) {
+
+            $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
+            : $request->only('document', 'password', 'password_confirmation', 'token');
+
+            $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
+            $userinput = $request->email ? $credentials['email'] : $credentials['document'];
+
+            $credentials1['username'] = $userinput;
+            $credentials2['document'] = $userinput;
+            $credentials3['email'] = $userinput;
+
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+                $user = Auth::user();
+
+                if(!$request->email) $user->setInitialEmail();
+                $user->resetAttemptsUser();
+
+                $data_input['os'] = strip_tags($request['os'] ?? '');
+                $data_input['version'] = strip_tags($request['version'] ?? '');
+                $data_login = app(AuthController::class)->getRespondWithDataAndToken($data_input);
+
+                if(is_array($data_login))
+                {
+                    $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
+                    $data_login['mostrar_modal'] = $ticket_user ? $user?->email != $ticket_user?->email : false;
+                }
+            }
+        }
+
         return response()->json([
+            'data' => $data_login,
             'success' => $response == Password::PASSWORD_RESET
         ]);
     }

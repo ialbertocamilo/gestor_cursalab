@@ -442,6 +442,9 @@ return [
 
         // App\Models\Videoteca
         'workspace_id' => 'Módulo',
+        'newPassword' => 'nueva contraseña',
+        'newPasswordConfirmation' => 'repetir nueva contraseña',
+        'oldPassword' => 'contraseña actual',
 
     ],
 

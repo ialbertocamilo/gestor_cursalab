@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Benefit\BenefitStoreUpdateRequest;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 use App\Models\Benefit;
@@ -83,6 +84,25 @@ class BenefitController extends Controller
 
         $msg = 'Beneficio segmentado.';
 
+        // Create notification for segmented users
+
+        $suscritos = Benefit::getSuscritos($benefit_id);
+        if (isset($suscritos['segmentados'])) {
+            $usersIds = $suscritos['segmentados']->pluck('id')->toArray();
+            $benefit = Benefit::find($benefit_id);
+            UserNotification::createNotifications(
+                $benefit->workspace_id,
+                [$usersIds],
+                UserNotification::NEW_BENEFIFT,
+                [
+                    'benefitName' => $benefit->name
+                ],
+                "beneficio?beneficio=$benefit_id"
+            );
+        }
+
+
+
         return $this->success(['msg' => $msg, 'benefit'=>$benefit_id]);
     }
 
@@ -105,7 +125,10 @@ class BenefitController extends Controller
         // Groups
         $group= Taxonomy::getDataForSelect('benefit', 'group');
 
-        $response = compact('polls', 'types_benefit', 'group');
+        // Tags default
+        $tags = Benefit::tagsDefault();
+
+        $response = compact('polls', 'types_benefit', 'group', 'tags');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -114,6 +137,7 @@ class BenefitController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'image');
+        $data = Media::requestUploadFile($data, 'promotor_imagen');
 
         $benefit = Benefit::storeRequest($data);
 
@@ -129,6 +153,7 @@ class BenefitController extends Controller
     {
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'image');
+        $data = Media::requestUploadFile($data, 'promotor_imagen');
 
         $benefit = Benefit::storeRequest($data, $benefit);
 

@@ -7,11 +7,13 @@ Route::controller(WorkspaceController::class)->group(function() {
     Route::view('/', 'abconfigs.list')->name('abconfigs.list');
     Route::post('store', 'storeSubWorkspace');
     Route::get('/search', 'searchSubWorkspace');
+    Route::get('/copy/{subworkspace}', 'copy')->middleware('checkrol:super-user');
     Route::get('/form-selects', 'getFormSelects');
     Route::get('/get-list-selects', 'getListSubworkspaceSelects');
     Route::get('{subworkspace}/edit', 'editSubWorkspace');
     Route::put('{subworkspace}/update', 'updateSubWorkspace');
     Route::get('{subworkspace}/usuarios', 'usuarios');
+    Route::post('{subworkspace}/copy-content', 'copyContent');
 });
 
 // ESCUELAS

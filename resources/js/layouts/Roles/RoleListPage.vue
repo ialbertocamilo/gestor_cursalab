@@ -9,6 +9,10 @@
                 <!--                <DefaultActivityButton-->
                 <!--                    :label="'Actividad'"-->
                 <!--                    @click="activity"/>-->
+                <DefaultButton
+                    :label="'Gestionar Menús'"
+                    :outlined="true"
+                    @click="openFormModal(modalMenuOptions, null,null ,'Gestionar menús')"/>
                 <DefaultModalButton
                     :label="'Crear rol'"
                     @click="openFormModal(modalOptions, null, 'create')"/>
@@ -76,6 +80,13 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
+            <MenuModal
+                :options="modalMenuOptions"
+                width="55vw"
+                :model_id="null"
+                :ref="modalMenuOptions.ref"
+                @onCancel="closeSimpleModal(modalMenuOptions)"
+            />
             <DefaultAlertDialog
                 :ref="modalDeleteOptions.ref"
                 :options="modalDeleteOptions">
@@ -88,10 +99,11 @@
 <script>
 import RoleFormModal from "./RoleFormModal";
 import LogsModal from "../../components/globals/Logs";
+import MenuModal from "./MenuModal";
 
 export default {
     props: ["config_id"],
-    components: { RoleFormModal, LogsModal },
+    components: { RoleFormModal, LogsModal,MenuModal },
     data() {
         return {
             active_users_count: '-',
@@ -162,6 +174,16 @@ export default {
                     // groups: [],
                     // cargos: [],
                 }
+            },
+            modalMenuOptions:{
+                ref: 'ModalMenuModal',
+                open: false,
+                base_endpoint: '/menu',
+                confirmLabel: 'Guardar',
+                resource: 'Menu',
+                width:'85vw',
+                title: '',
+                action: null
             },
             modalLogsOptions: {
                 ref: "LogsModal",

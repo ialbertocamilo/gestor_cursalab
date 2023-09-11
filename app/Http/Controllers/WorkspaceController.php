@@ -17,6 +17,9 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Models\Taxonomy;
 use App\Models\Ambiente;
+use App\Models\School;
+use App\Models\Course;
+use App\Models\Topic;
 use App\Models\WorkspaceFunctionality;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -80,18 +83,14 @@ class WorkspaceController extends Controller
 
     public function create(): JsonResponse
     {
-        // Load criteria
+        $selection = Criterion::getSelectionCheckbox();
 
-        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+        $workspace['criteria_workspace'] = $selection['criteria_workspace'];
+        $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
-        foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            $in_segment_list = $in_segment->pluck('id')->all();
-            $wk_crit->its_used = true;
-        }
 
-        $workspace['criteria_workspace'] = null;
         $workspace['limit_allowed_users'] = null;
+
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
         $workspace['functionalities_selected'] = [];
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
@@ -126,20 +125,10 @@ class WorkspaceController extends Controller
         $workspace = Workspace::create($data);
 
         // Save workspace's criteria
-
-        $criteriaSelected = json_decode($data['selected_criteria'], true);
-
-        $criteria = [];
-
-        $module_criterion = Criterion::where('code', 'module')->first();
-
-        foreach ($criteriaSelected as $criterion_id => $is_selected) {
-            if ($is_selected) $criteria[] = $criterion_id;
+        
+        if ( !empty($data['criteria']) ) {
+            $workspace->criterionWorkspace()->sync($data['criteria']);
         }
-
-        $criteria[] = $module_criterion->id;
-
-        $workspace->criterionWorkspace()->sync($criteria);
 
 
         // Actualizar funcionalidades
@@ -188,28 +177,15 @@ class WorkspaceController extends Controller
      */
     public function edit(Workspace $workspace): JsonResponse
     {
-        // Load criteria
-
         $workspace->load('qualification_type');
 
-        $workspace['criteria'] = Criterion::where('active', ACTIVE)->get();
+        $selection = Criterion::getSelectionCheckbox($workspace);
 
-        foreach ($workspace['criteria'] as $wk_crit) {
-            $in_segments = SegmentValue::where('criterion_id', $wk_crit->id)->count();
-            // $in_segment = SegmentValue::where('criterion_id', $wk_crit->id)->get();
-            // $in_segment_list = $in_segment->pluck('id')->all();
-             $wk_crit->its_used = $in_segments > 0 ? true : false;
-            // $wk_crit->its_used = false;
-            // if (count($in_segment_list))
-                // $wk_crit->its_used = true;
-        }
+        $workspace['criteria_workspace'] = $selection['criteria_workspace'];
+        $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
-        // $workspace['criteria_workspace'] = CriterionValue::getCriteriaFromWorkspace($workspace->id);
-        $workspace['criteria_workspace'] = $workspace->criterionWorkspace->toArray();
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
-
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
-        // $workspace['is_superuser'] = true;
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
@@ -228,9 +204,6 @@ class WorkspaceController extends Controller
     public function update(WorkspaceRequest $request, Workspace $workspace): JsonResponse
     {
         $data = $request->validated();
-
-        // Upload files
-        // info(['data' => $request->all() ]);
 
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
@@ -254,19 +227,13 @@ class WorkspaceController extends Controller
 
         // Save workspace's criteria
 
-        $criteriaSelected = json_decode($data['selected_criteria'], true);
+        info('data_criteria');
+        info($data['criteria']);
 
-        $criteria = [];
-
-        $module_criterion = Criterion::where('code', 'module')->first();
-
-        foreach ($criteriaSelected as $criterion_id => $is_selected) {
-            if ($is_selected) $criteria[] = $criterion_id;
+        if ( !empty($data['criteria']) ) {
+            $workspace->criterionWorkspace()->sync($data['criteria']);
         }
 
-        $criteria[] = $module_criterion->id;
-
-        $workspace->criterionWorkspace()->sync($criteria);
 
         // Actualizar funcionalidades
 
@@ -328,12 +295,68 @@ class WorkspaceController extends Controller
         return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
 
-    public function destroy(Workspace $subworkspace)
+    public function destroy(Workspace $workspace)
     {
-        // \File::delete(public_path().'/'.$subworkspace->plantilla_diploma);
-        $subworkspace->delete();
+        // \File::delete(public_path().'/'.$workspace->plantilla_diploma);
+        $workspace->delete();
 
-        return back()->with('info', 'Eliminado Correctamente');
+        $workspace->functionalities()->sync([]);
+        $workspace->criterionWorkspace()->sync([]);
+        
+        $workspace->criteriaValue()->sync([]);
+        // $workspace->criteriaValue()->delete();
+
+        $workspace->videotecas()->delete();
+        $workspace->meetings()->delete();
+        $workspace->push_notifications()->delete();
+        // $workspace->medias()->delete(); // don't delete
+
+        foreach ($workspace->subworkspaces as $subworkspace) {
+
+            foreach ($subworkspace->schools as $school) {
+
+                foreach ($school->courses as $course) {
+
+                    foreach ($course->topics as $topic) {
+
+                        $topic->questions()->delete();
+                        $topic->medias()->delete();
+                        $topic->requirements()->delete();
+                    }
+                    
+                    $course->requirements()->delete();
+                    $course->topics()->delete();
+                }
+                
+                $school->courses()->delete();
+            }
+            
+            $subworkspace->schools()->delete();
+
+            foreach ($subworkspace->users as $user) {
+
+                $user->summary()->delete();
+                $user->summary_courses()->delete();
+                $user->summary_topics()->delete();
+                $user->benefits()->delete();
+                $user->segments()->delete();
+                $user->course_data()->delete();
+                $user->criterion_values()->sync([]);
+            }
+
+            $subworkspace->users()->delete();
+        }
+
+        $workspace->subworkspaces()->delete();
+
+        foreach ($workspace->polls as $poll) {
+
+            $poll->questions()->delete();
+        }
+
+        $workspace->polls()->delete();
+
+        return $this->success(['msg' => 'Workspace eliminado correctamente.']);
     }
 
     public function editSubWorkspace(Workspace $subworkspace)
@@ -444,10 +467,10 @@ class WorkspaceController extends Controller
      * @param Workspace $workspace
      * @return JsonResponse
      */
-    public function copy(Workspace $workspace): JsonResponse
-    {
-        return $this->success([]);
-    }
+    // public function copy(Workspace $workspace): JsonResponse
+    // {
+    //     return $this->success([]);
+    // }
 
     /**
      * Process request to duplicate record data
@@ -462,25 +485,146 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
-        // $new = $workspace->replicate();
         $new = $workspace->replicateWithRelations($data);
 
-
-
-        //save model before you recreate relations (so it has an id)
-        // $new->push();
-
-        // //reset relations on EXISTING MODEL (this way you can control which ones will be loaded
-        // $workspace->relations = [];
-
-        // //load relations on EXISTING MODEL
-        // $workspace->load('subworkspaces', 'schools', 'courses');
-
-        // //re-sync everything
-        // foreach ($this->relations as $relationName => $values){
-        //     $new->{$relationName}()->sync($values);
-        // }
-
         return $this->success(['msg' => 'Workspace duplicado correctamente.']);
+    }
+
+    public function copy(Workspace $subworkspace)
+    {
+        $items = Workspace::getSchoolsForTree($subworkspace->schools);
+
+        $items_destination = Workspace::getAvailableForTree($subworkspace);
+
+        return $this->success(compact('items', 'items_destination'));
+    }
+
+    public function copyContent(Request $request, Workspace $subworkspace)
+    {
+        $selections = $request->selection_source;
+        $destinations = $request->selection_destination;
+
+        $workspace = get_current_workspace();
+
+        $subworkspace_ids = [];
+
+        foreach ($destinations as $destination) {
+
+            $part = explode('_', $destination);
+            $subworkspace_ids[] = $part[1]; 
+        }
+
+        $data = $this->buildSourceTreeSelection($selections);
+
+        $subworkspaces = Workspace::whereIn('id', $subworkspace_ids)->get();
+        $_schools = School::whereIn('id', $data['school_ids'])->get();
+        $_courses = Course::whereIn('id', $data['course_ids'])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        foreach ($data['schools'] as $school_id => $course_ids) {
+
+            $_school = $_schools->where('id', $school_id)->first();
+
+            $school_data = $_school->toArray();
+            $school_data['external_id'] = $_school->id;
+
+            foreach ($subworkspaces as $subworkspace) {
+
+                $school = $subworkspace->schools()->where('name', $_school->name)->first();
+
+                if ( ! $school ) {
+
+                    $school_position = ['position' => $subworkspace->schools()->count() + 1];
+
+                    $school = $subworkspace->schools()->create($school_data, $school_position);
+                }
+
+                foreach ($course_ids['courses'] as $course_id => $topic_ids) {
+
+                    $_course = $_courses->where('id', $course_id)->first();
+
+                    $course_data = $_course->toArray();
+                    $course_data['external_id'] = $_course->id;
+
+                    $course = $school->courses()->create($course_data);
+
+                    $workspace->courses()->attach($course);
+
+                    foreach ($topic_ids['topics'] as $topic_id) {
+
+                        $_topic = $_topics->where('id', $topic_id)->first();
+
+                        $topic_data = $_topic->toArray();
+                        $topic_data['external_id'] = $_topic->id;
+
+                        $topic = $course->topics()->create($topic_data);
+
+                        $topic->medias()->createMany($_topic->medias->toArray());
+                        $topic->questions()->createMany($_topic->questions->toArray());
+                    }
+                }
+            }
+        }
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($selections)
+    {
+        $schools = [];
+        $school_ids = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        foreach ($selections as $index => $selection) {
+
+            $sections = explode('-', $selection);
+            $data = [];
+
+            foreach ($sections as $position => $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+
+                // $schools[$index][$position] = $row;  
+            }
+
+            $school_id = $data[0]['id'];
+            $course_id = $data[1]['id'] ?? NULL;
+            $topic_id = $data[2]['id'] ?? NULL;
+
+            if ($course_id && $topic_id) {
+
+                $schools[$school_id]['courses'][$course_id]['topics'][] = $topic_id;
+
+            } else {
+                
+                if ($course_id && !$topic_id) { 
+                
+                    $schools[$school_id]['courses'][$course_id]['topics'] = [];
+                
+                } else {
+                    
+                    if (!$course_id && !$topic_id) {
+
+                        $schools[$school_id]['courses'] = [];
+                    }
+                }
+            }
+
+        }
+
+        return compact('school_ids', 'course_ids', 'topic_ids', 'schools');
     }
 }

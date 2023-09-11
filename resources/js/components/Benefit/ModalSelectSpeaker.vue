@@ -10,7 +10,7 @@
         content-class="br-dialog"
     >
         <v-card class="card_modal_select_speaker">
-            <p class="title_act">Elige un expositor(a)</p>
+            <p class="title_act">Elige un facilitador(a)</p>
             <div class="bx_close_modal">
                 <v-btn icon :ripple="false" @click="closeModalSelectSpeaker">
                     <v-icon v-text="'mdi-close'"/>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <div v-else>
-                    <p class="txt_nf pt-4 text-center" v-if="txt_filter_speaker != null">No se encontraron expositores</p>
+                    <p class="txt_nf pt-4 text-center" v-if="txt_filter_speaker != null">No se encontraron facilitadores</p>
                 </div>
             </v-card-text>
             <div v-if="show_button">
@@ -55,7 +55,7 @@
                 </v-col>
             </div>
             <div class="row_new_speaker">
-                <span @click="newSpeaker">Crear nuevo expositor</span>
+                <span @click="newSpeaker">Crear nuevo facilitador</span>
             </div>
         </v-card>
     </v-dialog>

@@ -15,7 +15,7 @@ class Criterion extends BaseModel
         'show_as_parent', 'show_in_reports', 'show_in_ranking',
         'show_in_profile', 'show_in_segmentation', 'is_default',
         'show_in_form', 'required', 'editable_configuration',
-        'editable_segmentation', 'multiple', 'active', 'description',
+        'editable_segmentation', 'multiple', 'active', 'description','can_be_create'
     ];
 
     protected $casts = [
@@ -38,7 +38,9 @@ class Criterion extends BaseModel
 
     public function workspaces()
     {
-        return $this->belongsToMany(Workspace::class);
+        $custom_pivot_fields = array_keys(Workspace::CUSTOM_PIVOT_FIELDS);
+
+        return $this->belongsToMany(Workspace::class)->withPivot($custom_pivot_fields);
     }
 
     public function field_type()
@@ -62,6 +64,13 @@ class Criterion extends BaseModel
             ->get();
     }
 
+    protected function getListForSelectWorskpace($workspace_id) {
+        $query = self::whereRelation('workspaces', 'id', $workspace_id)
+                     ->select('id', 'name', 'code', 'description');
+
+        return $query->orderBy('created_at', 'desc')->get();
+    }
+    
     protected function search($request)
     {
         // $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();
@@ -145,5 +154,81 @@ class Criterion extends BaseModel
         $temp['type'] = 'field_id_was_changed';
 
         return $temp;
+    }
+
+    protected function getSelectionCheckbox($workspace = null)
+    {
+        $custom_pivot_fields = Workspace::CUSTOM_PIVOT_FIELDS;
+        $criterionWorkspace = $workspace ? $workspace->criterionWorkspace : NULL;
+
+        $criteria = Criterion::with('field_type')->where('active', ACTIVE)->orderByDesc('is_default')->get();
+        $criteria_workspace = [];
+
+        foreach ($criteria as $key => $criterion) {
+
+            $in_segments = SegmentValue::where('criterion_id', $criterion->id)->count();
+
+            $current = $workspace ? $criterionWorkspace->where('id', $criterion->id)->first() : NULL;
+
+            $criterion_available = $workspace ? ($current ? true : false) : true;
+            $criterion_disabled = false;
+
+            if ($criterion->code == 'module') {
+
+                $criterion_available = true;
+                $criterion_disabled = true;
+            }
+
+            $criteria_workspace[$key] = [
+                'criterion_id' => $criterion->id,
+                'code' => $criterion->code,
+                'name' => $criterion->name,
+                'available' => $criterion_available,
+                'disabled' => $criterion_disabled,
+            ]; 
+
+            foreach ($custom_pivot_fields as $code => $row) {
+
+                $field_disabled = false;
+
+                $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
+                
+                if ($criterion->code == 'module') {
+
+                    $field_available = true;
+                    $field_disabled = true;
+                }
+
+                $criteria_workspace[$key]['fields'][$code] = [
+                    'code' => $code,
+                    'name' => $row['name'],
+                    'type' => $row['type'],
+                    'available' => $field_available,
+                    'disabled' => $field_disabled,
+                    'text' => $row['type'] == 'text' ? ($current->pivot->$code ?? $criterion->name) : NULL,
+                ]; 
+            }
+        }
+
+        return compact('criteria', 'criteria_workspace');
+    }
+
+    protected function setCriterionNameByCriterionTitle($criteria)
+    {
+        foreach ($criteria as $key => $criterion) {
+
+            $workspace = $criterion->workspaces->first();
+
+            $criterion->name = $workspace->pivot->criterion_title ?? $criterion->name;
+        }
+
+        return $criteria;
+    }
+
+    protected function overrideCriterionWorkspaceTitle($criterionWorkspace)
+    {
+        foreach ($criterionWorkspace as $criterion) {
+            $criterion->name = $criterion->pivot->criterion_title ?? $criterion->name;
+        }
     }
 }

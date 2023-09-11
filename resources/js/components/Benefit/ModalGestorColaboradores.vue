@@ -13,7 +13,7 @@
     >
         <v-card class="modal_gestor_colab">
             <v-card-title class="default-dialog-title">
-                Gestión de colaboradores
+                Gestión de colaboradores - {{ benefit_name }}
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closemodalGestorColaboradores">
@@ -137,6 +137,7 @@ export default {
         value: Boolean,
         width: String,
         benefit_id: Number,
+        benefit_name: String,
     },
     data() {
         return {

@@ -8,7 +8,7 @@
                 Este proceso permite únicamente crear usuarios mediante el envió de sus datos personales y sus criterios correspondientes. <br>
                 La validación de creación de usuario se hace mediante el valor del documento, en caso el documento ya se encuentre registrado no se creará ni actualizará los datos la api lo retornará dentro del listado de errores.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

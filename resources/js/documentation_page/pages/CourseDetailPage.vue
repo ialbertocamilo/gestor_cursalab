@@ -7,7 +7,7 @@
             <p>
                 Esta API retorna el progreso de los usuarios que tienen asignado este curso.
             </p>
-            <descriptionApi :options="api_description_options" />
+            <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>

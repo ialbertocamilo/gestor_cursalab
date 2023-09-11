@@ -65,9 +65,12 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkrol' => \App\Http\Middleware\CheckRol::class,
+        'hasHability' => \App\Http\Middleware\hasHability::class,
         'check-school-workspace' => \App\Http\Middleware\CheckSchoolWorkspace::class,
         'scope-bouncer' => \App\Http\Middleware\ScopeBouncer::class,
         'secretKey' => \App\Http\Middleware\ApiIntegrationsMiddleware::class,
-        'auth.guard' => \App\Http\Middleware\AssignGuard::class
+        'auth.guard' => \App\Http\Middleware\AssignGuard::class,
+        'validated-session' => \App\Http\Middleware\ValidateCurrentSession::class,
+        'extend-session' => \App\Http\Middleware\RestartSessionLimit::class,
     ];
 }

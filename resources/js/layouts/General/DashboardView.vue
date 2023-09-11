@@ -3,11 +3,20 @@
         <v-card flat class="elevation-0 mb-4">
             <!--            Título con breadcumb-->
             <!--            TODO: Add breadcumb-->
-            <v-card-title class="title_prim">
-                Dashboard
+            <v-card-title>
+
+                <div v-if="showDetail">
+                    <span class="btn_select_media text-muted" @click="showDetail = false">Dashboard</span>
+                    <span class="fas fa-chevron-right mx-2"></span>
+                    <span class="text-body">Gestor de almacenamiento y usuarios</span>
+                </div>
+                <div v-else>
+                    Dashboard
+                </div>
+
                 <v-spacer/>
 
-                <DefaultSelect
+               <!--  <DefaultSelect
                     class="col-3"
                     dense
                     label="Módulo"
@@ -16,14 +25,16 @@
                     item-text="name"
                     item-value="id"
                     @onChange="getEstadisticas"
-                />
+                /> -->
             </v-card-title>
         </v-card>
-        <!--        FILTROS-->
-        <!-- <v-card flat class="elevation-0 mb-4">
+
+        <v-card flat class="elevation-0 mb-4">
             <v-card-text>
-                <v-row class="justify-content-start">
-                    <v-col cols="5">
+
+                <!-- === MODULO Y DETALLES === -->
+                <v-row  :class="`${ !showDetail ? 'd-flex' : 'd-none' }`">
+                    <v-col cols="3" class="align-self-center">
                         <DefaultSelect
                             dense
                             label="Módulo"
@@ -34,62 +45,307 @@
                             @onChange="getEstadisticas"
                         />
                     </v-col>
+                    <v-col  v-if="true" cols="7" offset="2"
+                            class="d-flex justify-space-between align-items-center">
+                        <div class="d-flex align-items-center w-75">
+                            <div class="d-flex flex-column w-90">
+                                <p class="font-weight-bold mb-0">Almacenamiento general</p>
+                                <div class="my-2">
+                                    <span class="fa-1_4x" v-text="workspace_status.size_medias_storage"></span>
+                                   utilizados de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                </div>
+
+                                <v-progress-linear
+                                        :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
+                                        :value="workspace_status.size_medias_porcent.porcent"
+                                        height="20"
+                                        rounded
+                                    >
+                                     <div class="d-flex justify-content-end"
+                                          :style="{ width: (workspace_status.size_medias_porcent.porcent < 10) ? '12%' :workspace_status.  size_medias_porcent.porcent +'%'}">
+                                        <strong
+                                            class="text-white text-right"
+                                            v-text="workspace_status.size_medias_porcent.porcent + '%'">
+                                        </strong>
+                                    </div>
+                                </v-progress-linear>
+
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center w-75">
+                            <div class="d-flex flex-column w-90">
+                                <p class="font-weight-bold mb-0">Total usuarios activos</p>
+                                <div class="my-2">
+                                    <span class="fa-1_4x" v-text="workspace_status.users_count_actives"></span>
+                                    de <span v-text="workspace_status.users_count_limit"></span> disponibles
+                                </div>
+
+                                <v-progress-linear
+                                        :color="workspace_status.users_count_porcent.exceded ? 'red' : 'primary' "
+                                        :value="workspace_status.users_count_porcent.porcent"
+                                        height="20"
+                                        rounded
+                                    >
+                                    <div class="d-flex justify-content-end"
+                                        :style="{ width: (workspace_status.users_count_porcent.porcent < 10) ? '12%' :workspace_status.users_count_porcent.porcent +'%'}">
+                                        <strong
+                                            class="text-white text-right"
+                                            v-text="workspace_status.users_count_porcent.porcent + '%'">
+                                        </strong>
+                                    </div>
+                                </v-progress-linear>
+
+                            </div>
+                        </div>
+
+                        <div class="w-25">
+                            <a href class="ml-1" @click.prevent="showDetail = true">
+                                Ver detalle <span class="ml-2 fas fa-arrow-right"></span>
+                            </a>
+                        </div>
+                    </v-col>
                 </v-row>
+                <!-- === MODULO Y DETALLES === -->
+
+                <!-- === ALMACENAMIENTO === -->
+                <v-row :class="`${ showDetail ? 'd-flex' : 'd-none' }`">
+                    <v-col
+                        cols="5"
+                        class="d-flex justify-content-start align-self-center">
+                        <span class="fa-lg text-body">Visión del espacio y usuarios del workspace</span>
+                    </v-col>
+                    <v-col cols="7"
+                        class="d-flex justify-content-end align-self-center">
+                        <v-btn
+                            color="primary"
+                            @click="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan')">
+                            <span class="mdi mdi-cloud-outline fa-lg mr-2"></span>
+                            Aumentar mi plan
+                        </v-btn>
+                    </v-col>
+                </v-row>
+                <!-- === ALMACENAMIENTO === -->
 
             </v-card-text>
-        </v-card> -->
-        <v-card flat class="elevation-0 mb-4 bg-transparent">
-            <v-row>
-                <v-col  v-for="(value, key) in apiData.estadisticas" :key="key">
-                    <CardIndicator
-                        :icon="value.icon || 'mdi-book-open'"
-                        :icon-color="value.color || 'primary'"
-                        :amount="value.value || 0"
-                        :label="value.title || 'Cargando...'"
-                    />
-                </v-col>
-            </v-row>
         </v-card>
 
-        <v-card flat class="elevation-0 mb-4">
-            <v-row class="justify-space-around px-5 py-3">
-                <v-col cols="6" class="d-flex flex-column">
-                    <GeneralGraphic
-                        :graphic_data="apiData.graficos.evaluacionesPorFecha"
-                        @refreshCache="getEvaluacionesPorFecha(true)"
-                    />
-                </v-col>
+        <section v-show="!showDetail">
+            <v-card flat class="elevation-0 mb-4 bg-transparent">
+                <v-row>
+                    <v-col  v-for="(value, key) in apiData.estadisticas" :key="key">
+                        <CardIndicator
+                            :icon="value.icon || 'mdi-book-open'"
+                            :icon-color="value.color || 'primary'"
+                            :amount="value.value || 0"
+                            :path="value.path"
+                            :label="value.title || 'Cargando...'"
+                        />
+                    </v-col>
+                </v-row>
+            </v-card>
+            <v-card flat class="elevation-0 mb-4">
+                <v-row class="p-3">
+                    <v-col cols="6" class="d-flex flex-column">
+                        <GeneralGraphic
+                            :graphic_data="apiData.graficos.evaluacionesPorFecha"
+                            @refreshCache="getEvaluacionesPorFecha(true)"
+                        />
+                    </v-col>
+                    <v-col cols="6" class="d-flex flex-column">
+                        <GeneralGraphic
+                            :graphic_data="apiData.graficos.visitas"
+                            @refreshCache="getVisitas(true)"
+                        />
+                    </v-col>
+    <!--                <v-col cols="12" class="d-flex flex-column">-->
+    <!--                    <GeneralGraphic-->
+    <!--                        :graphic_data="apiData.graficos.topBoticas"-->
+    <!--                        @refreshCache="getTopBoticas(true)"-->
+    <!--                    />-->
+    <!--                </v-col>-->
+                </v-row>
+            </v-card>
+        </section>
 
-                <v-col cols="6" class="d-flex flex-column">
-                    <GeneralGraphic
-                        :graphic_data="apiData.graficos.visitas"
-                        @refreshCache="getVisitas(true)"
-                    />
-                </v-col>
-<!--                <v-col cols="12" class="d-flex flex-column">-->
-<!--                    <GeneralGraphic-->
-<!--                        :graphic_data="apiData.graficos.topBoticas"-->
-<!--                        @refreshCache="getTopBoticas(true)"-->
-<!--                    />-->
-<!--                </v-col>-->
-            </v-row>
-        </v-card>
-        <!-- <Fab/> -->
+        <section v-show="showDetail" class="pt-0">
+            <v-card flat class="elevation-0 mb-4">
+                <v-card-text>
+                    <v-row>
+
+                        <v-col cols="7" class="px-5 py-6 border-right">
+
+                            <v-card class="p-4 mb-7 elevation-0 border">
+                                <v-card-title class="p-0 font-weight-bold">Almacenamiento general</v-card-title>
+                                <v-card-text class="p-0">
+                                    <div class="my-3 d-flex flex-column">
+                                        <span
+                                            class="fa-2x mb-3"
+                                            :class="workspace_status.size_medias_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
+                                            v-text="workspace_status.size_medias_porcent.porcent+'% '+'utilizado'">
+                                        </span>
+
+                                        <span>
+                                            <span class="font-weight-bold">
+                                                Total utilizado:
+                                                <span v-text="workspace_status.size_medias_storage"></span>
+                                            </span>
+                                            /
+                                            <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                        </span>
+                                    </div>
+
+                                    <v-progress-linear
+                                            :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
+                                            :value="workspace_status.size_medias_porcent.porcent"
+                                            height="20"
+                                            rounded
+                                        >
+                                    </v-progress-linear>
+                                </v-card-text>
+                            </v-card>
+
+                            <v-card class="p-4 elevation-0 border">
+                                <v-card-title class="p-0 font-weight-bold">Usuarios Activos</v-card-title>
+                                <v-card-text class="p-0">
+                                    <div class="my-3 d-flex flex-column">
+                                        <span
+                                            class="fa-2x mb-3"
+                                            :class="workspace_status.users_count_porcent.exceded ? 'text-danger' : 'text-primary-sub'"
+                                            v-text="workspace_status.users_count_porcent.porcent+'% '+'utilizado'">
+                                        </span>
+
+                                        <span>
+                                            <span class="font-weight-bold">
+                                                Total utilizado:
+                                                <span v-text="workspace_status.users_count_actives"></span>
+                                            </span>
+                                            /
+                                            <span v-text="workspace_status.users_count_limit"></span>
+                                        </span>
+                                    </div>
+
+                                    <v-progress-linear
+                                            :color="workspace_status.users_count_porcent.exceded ? 'red' : 'primary' "
+                                            :value="workspace_status.users_count_porcent.porcent"
+                                            height="20"
+                                            rounded
+                                        >
+                                    </v-progress-linear>
+
+                                    <ul class="px-0 mb-0 mt-4">
+                                        <li class="d-flex grey lighten-5 justify-content-between align-items-center p-2 rounded mb-2">
+                                            <span>Usuarios Activos</span>
+                                            <div>
+                                                <span v-text="workspace_status.users_count_actives"></span>
+                                                <v-btn
+                                                    text
+                                                    color="primary"
+                                                    @click="setStorageUrl(workspace_status.route_user_actives.url,
+                                                                          workspace_status.route_user_actives.filters)">
+                                                    <v-icon>mdi-open-in-new</v-icon>
+                                                </v-btn>
+                                            </div>
+                                        </li>
+
+                                        <li class="d-flex grey lighten-5 justify-content-between align-items-center p-2 rounded">
+                                            <span>Usuarios Inactivos</span>
+                                            <div>
+                                                <span v-text="workspace_status.users_count_inactives"></span>
+                                                <v-btn
+                                                    text
+                                                    color="primary"
+                                                    @click="setStorageUrl(workspace_status.route_user_inactives.url,
+                                                                          workspace_status.route_user_inactives.filters)">
+                                                    <v-icon>mdi-open-in-new</v-icon>
+                                                </v-btn>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </v-card-text>
+                            </v-card>
+
+                        </v-col>
+
+                        <v-col cols="5" class="align-self-center text-center px-5 py-6">
+                           <img class="w-75" src="/img/user-storage-image.png" alt="user-storage-image" />
+                        </v-col>
+
+                    </v-row>
+                </v-card-text>
+            </v-card>
+        </section>
+
+        <!-- MODAL ALMACENAMIENTO -->
+        <GeneralStorageModal
+            :ref="modalGeneralStorageOptions.ref"
+            :options="modalGeneralStorageOptions"
+            width="45vw"
+            @onCancel="closeFormModal(modalGeneralStorageOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageOptions),
+                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <!-- MODAL ALMACENAMIENTO -->
+
+        <!-- MODAL EMAIL ENVIADO -->
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
+        <!-- MODAL EMAIL ENVIADO -->
+
     </section>
 </template>
 <script>
+
 import CardIndicator from "./CardIndicator";
 import GeneralGraphic from "./GeneralGraphic";
-// const cardInfo = {
-//     title: '',
-//     icon: '',
-//     color: 'primary',
-//     value: 0
-// }
+import GeneralStorageModal from './GeneralStorageModal.vue';
+import GeneralStorageEmailSendModal from './GeneralStorageEmailSendModal.vue';
+
 export default {
-    components: {CardIndicator, GeneralGraphic},
+    components: { CardIndicator, GeneralGraphic, GeneralStorageModal, GeneralStorageEmailSendModal },
     data() {
         return {
+            modalGeneralStorageOptions: {
+                ref: 'GeneralStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Enviar',
+                persistent: true
+            },
+            modalGeneralStorageEmailSendOptions: {
+                ref: 'GeneralStorageEmailSendModal',
+                open: false,
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                confirmLabel:'Entendido',
+                persistent: false
+            },
+            showDetail: false,
+            workspace_status: {
+                size_medias_storage: "0 Gb",
+                size_medias_limit: 0,
+
+                users_count_actives: 0,
+                users_count_inactives: 0,
+                users_count_limit: 0,
+
+                users_count_porcent: {
+                    porcent: 0,
+                    exceded: false
+                },
+                size_medias_porcent: {
+                    porcent: 0,
+                    exceded: false
+                },
+                routes_redirects: []
+            },
             apiData: {
                 estadisticas: {
                     usuarios: {},
@@ -244,13 +500,23 @@ export default {
                     {name: 'Todos', id: null}
                 ],
             },
+            is_superuser: false,
         }
     },
     mounted() {
         this.getModulos()
         this.getEstadisticas(false);
+        this.getWorkspaceData();
     },
     methods: {
+        getWorkspaceData() {
+            let vue = this;
+
+            vue.$http.get('/general/workspace-current-status').then(({data}) => {
+                vue.workspace_status = data.data;
+                vue.is_superuser = data.data.is_superuser || false;
+            });
+        },
         getModulos() {
             let vue = this
             vue.$http.get('/general/modulos')

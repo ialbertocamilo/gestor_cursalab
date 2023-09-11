@@ -36,8 +36,50 @@ import defaultTabs from '../components/default_tabs.vue';
 export default {
     components: {defaultTabs},
     props: {
-        options:Object
+        options:Object,
+        set_responses:{
+            dafault:false
+        }
+    },
+    mounted(){
+        this.setDefaultResponses();
+    },
+    methods:{
+        setDefaultResponses(){
+            if(this.set_responses){
+                this.options.example_code.tabs = [...this.options.example_code.tabs,...['Response (401)','Response (403)']];
+                const content_tabs = [
+                {
+                            type:'language-json',
+                            code:
+`
+/*Token inválido. Puedes consultar la API para generar un nuevo token. 
+En caso de que el mensaje persista, por favor, ponte en contacto con el equipo de Cursalab.*/
+{
+    "data": {
+        "message": "Invalid token." || "Token expired."
     }
+}
+`
+                        },{
+                            type:'language-json',
+                            code:
+`
+/*La clave secreta enviada no es correcta o el administrador no tiene una clave asociada.
+Por favor, contacta al equipo de Cursalab para verificar esta situación.*/
+{
+    "data": {
+        "secretKey": "Invalid secret key."
+    }
+}
+`
+                        }
+                ];
+                this.options.example_code.content_tabs = [...this.options.example_code.content_tabs,...content_tabs];
+            }
+        }
+    }
+
 }
 </script>
 <style>

@@ -30,7 +30,7 @@
                                         label="Link Genially" 
                                     />
                                 </v-col>
-                                <v-col cols="6">
+                                <!-- <v-col cols="6">
                                     <DefaultInput 
                                         v-model="resource.color_primario"
                                         type="color" 
@@ -45,7 +45,7 @@
                                         clearable 
                                         label="Color secundario" 
                                     />
-                                </v-col>
+                                </v-col> -->
 
                                <!--  <v-col cols="3">
                                     <DefaultInput 
@@ -357,6 +357,16 @@
                                             <DefaultToggle class="mt-0" v-model="resource.show_blog_btn" no-label/>
                                         </div>
                                     </div>
+                                    <hr>
+                                    <div class="d-flex align-items-center">
+                                         <DefaultInput 
+                                            v-model="resource.template" 
+                                            clearable 
+                                            class="mt-3" 
+                                            placeholder="template-default" 
+                                            label="Código de plantilla" 
+                                        />
+                                    </div>
                                 </v-col>
                             </v-row>
 
@@ -419,7 +429,7 @@ const fields = [
     // gestor
     'link_genially', 'color_primario', 'color_secundario',
     'titulo', 'titulo_login',
-    'fondo', 'logo', 'icono', 'logo_empresa',
+    'fondo', 'logo', 'icono', 'logo_empresa', 'template',
     //app
     'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
     'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',

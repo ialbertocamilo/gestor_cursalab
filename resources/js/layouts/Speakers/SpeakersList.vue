@@ -2,9 +2,9 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Expositores
+                Facilitadores
                 <v-spacer/>
-                <DefaultModalButton :label="'Agregar expositor(a)'" @click="openCRUDPage('/speakers/create')"/>
+                <DefaultModalButton :label="'Agregar facilitador(a)'" @click="openCRUDPage('/speakers/create')"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -14,7 +14,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar expositores"
+                            label="Buscar facilitadores"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -28,7 +28,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openModalSelectActivitys($event)"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un expositor(a)')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un facilitador(a)')"
                 @addSpeaker="addSpeaker($event)"
             />
         </v-card>
@@ -107,9 +107,9 @@ export default {
                 endpoint: '',
                 content_modal: {
                     delete: {
-                        title: '¡Estás por eliminar un expositor(a)!',
+                        title: '¡Estás por eliminar un facilitador(a)!',
                         details: [
-                            'Este expositor(a) no podrá ser visto por los usuarios.',
+                            'Este facilitador(a) no podrá ser visto por los usuarios.',
                             'La información eliminada no podra recuperarse'
                         ],
                     }

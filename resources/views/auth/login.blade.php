@@ -13,7 +13,7 @@
   <div class="content_login_form">
     <div class="form-holder has-shadow">
       <div class="logo mt-5 mx-auto text-center">
-        <img src="img/logo_cursalab_v2_black.png" alt="cursalab" class="img-fluid" width="270">
+        <img src="img/logo_cursalab_v3_black.png" alt="cursalab" class="img-fluid" width="270">
       </div>
       <div class="titulo text-center mt-3 mb-1">
         <h3>¡Bienvenido!</h3>
@@ -72,16 +72,18 @@
               <button type="submit" class="btn btn-primary" id="decrement-timeout-disabled" disabled>
                 {{ __('Ingresar') }}
               </button>
-            
+
             @else
-            
+
               <button type="submit" class="btn btn-primary">
                 {{ __('Ingresar') }}
               </button>
-            
+
             @endif
 
+
             <br>
+            <a href="{{ route('password.update') }}" target="_self" rel="noopener noreferrer" style="color:#0000D2" class="pt-4">Olvidé mi contraseña</a>
           </div>
         </form>
       </div>
@@ -89,9 +91,16 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
-        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid" width="120">
+        <img src="img/poweredByCursalab_v2.png" alt="..." class="img-fluid" width="120">
       </a>
     </div>
   </div>
 </div>
+<script>
+    {{-- Reloads the login page, to avoid error 419 --}}
+
+    setTimeout(() => {
+        location.reload();
+    }, 20 * 60 * 1000);
+</script>
 @endsection

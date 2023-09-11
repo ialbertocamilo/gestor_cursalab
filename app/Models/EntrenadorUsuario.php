@@ -269,7 +269,7 @@ class EntrenadorUsuario extends Model implements Recordable
             $value->carrera = '';
             $value->advanced_percentage = $value->advanced_percentage ?? 0;
             $value->assigned = $value->assigned ?? 0;
-            $value->name = $value->fullname ?? $value->getFullnameAttribute();
+            $value->full_name = $value->getFullnameAttribute();
         });
         $response['alumnos'] = $dataAlumnos;
         $response['total_alumnos'] = count($dataAlumnos);
@@ -298,6 +298,13 @@ class EntrenadorUsuario extends Model implements Recordable
         if (!is_null($is_trainer)) {
             $response['error'] = true;
             $response['msg'] = 'El entrenador que se quiere asignar, es un alumno.';
+            return $response;
+        }
+        $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
+        if (!is_null($hasTrainer)) {
+            $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+            $response['error'] = true;
+            $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
             return $response;
         }
 

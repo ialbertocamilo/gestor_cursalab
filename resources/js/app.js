@@ -124,9 +124,10 @@ Vue.component("usuario-ayuda", require("./layouts/UsuarioAyuda.vue"));
 Vue.component("soporte-layout", require("./layouts/Soporte/SoporteListPage.vue"));
 Vue.component("soporte-ayuda-layout", require("./layouts/Soporte/Ayudas/AyudaListPage.vue"));
 
-// diplomas
+/* === diplomas ===*/
 Vue.component("diploma-layout", require("./layouts/Diplomas/DiplomasListPage"));
 Vue.component("diploma-form-page", require("./layouts/Diplomas/DiplomaFormPage"));
+/* === diplomas ===*/
 
 // Gestor views
 Vue.component("blocks-layout", require("./layouts/Blocks/BlockListPage"));
@@ -222,6 +223,12 @@ Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage")
 /*---Project list views--*/
 Vue.component("project-layout", require("./layouts/Project/ProjectList.vue"));
 Vue.component("project-users-layout", require("./layouts/Project/ProjectUsersList.vue"));
+/*=== votaciones ===*/
+Vue.component("votacion-layout", require("./layouts/Votaciones/VotacionesListPage.vue"));
+Vue.component("votacion-form-page", require("./layouts/Votaciones/VotacionesFormPage.vue"));
+Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesListDetailPage.vue"));
+/*=== votaciones ===*/
+
 
 
 /*----*/ 
@@ -236,6 +243,18 @@ const app = new Vue({
         workspaceId: 0
     },
     mounted() {
+
+        // Since content is ready,  destroy skeletons
+
+        let skeleton1 = document.querySelector('.sidemenu-container .skeleton-wrapper');
+        let skeleton2 = document.querySelector('.dashboard.skeleton-wrapper');
+        let skeleton3 =  document.querySelector('.table-gui.skeleton-wrapper');
+
+        if (skeleton1) skeleton1.remove();
+        if (skeleton2) skeleton2.remove();
+        if (skeleton3) skeleton3.remove();
+
+
         this.fetchSessionData()
         this.listenReportsNotifications()
     },
@@ -332,12 +351,18 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-            url = `${this.getReportsBaseUrl()}/${url}`
+               url = `${this.getReportsBaseUrl()}/${url}`
             try {
                 FileSaver.saveAs(url, name)
             } catch (error) {
                 console.log(error)
             }
+            // reportes utilizando el S3
+            // const downloadLink = document.createElement('a');
+            // downloadLink.href = url;
+            // downloadLink.download = name;
+            // downloadLink.target = '_blank';
+            // downloadLink.click();
         }
     }
 });

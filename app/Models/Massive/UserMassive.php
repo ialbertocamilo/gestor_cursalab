@@ -50,7 +50,7 @@ class UserMassive extends Massive implements ToCollection
         $criteria = Criterion::query()
             ->with('field_type:id,code')
             ->where('code', '<>', 'document')
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id','can_be_create')
             ->orderBy('position')
             ->get();
         //Verify statics headers
@@ -66,10 +66,12 @@ class UserMassive extends Massive implements ToCollection
         //        $this->sortRows();
         if (!$this->validateLimitAllowedUsers()):
             $message = config('errors.limit-errors.limit-user-allowed');
+            $this->current_workspace->sendEmailByLimit();
             $this->error_message = $message;
             return;
         endif;
         $this->process_user($rows, $headers, $criteria);
+        $this->current_workspace->sendEmailByLimit();
     }
 
     private function process_user($users, $headers, $criteria)
@@ -92,6 +94,7 @@ class UserMassive extends Massive implements ToCollection
                         'criterion_id' => $obj['criterion_id'],
                         'criterion_name' => $obj['criterion_name'],
                         'required' => $obj['required'],
+                        'can_be_create' => $obj['can_be_create'],
                         'value_excel' => $value_excel,
                         'index' => $obj['index'],
                     ]);
@@ -113,8 +116,8 @@ class UserMassive extends Massive implements ToCollection
                     $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
                     $master_user_arr = [
                             'dni' => $data_user['user']['document'],
-                            'username' => $data_user['user']['username'],
-                            'email' => $data_user['user']['email'],
+                            'username' => isset($data_user['user']['username']) ? $data_user['user']['username']: null,
+                            'email' => isset($data_user['user']['email']) && trim($data_user['user']['email']) !== '' ? $data_user['user']['email'] : null,
                             'customer_id' => ENV('CUSTOMER_ID'),
                             'created_at' => now()
                     ];
@@ -159,7 +162,14 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
-
+            if(strpos($dt['value_excel'],'=')===0){
+                $has_error = true;
+                $errors_index[] = [
+                    'index' => $dt['index'],
+                    'message' => 'No debe incluir fórmula de Excel.'
+                ];
+                continue;
+            }
             if ($dt['code'] == 'active') {
                 if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
                     $has_error = true;
@@ -175,6 +185,7 @@ class UserMassive extends Massive implements ToCollection
         }
         //verify username and email fields are unique
         $user_username_email = null;
+        $master_username_email = null;
         if (isset($user['document'])) {
             $user_username_email = User::where(function ($q) use ($user) {
                 isset($user['username']) && $q->orWhere('username', $user['username']);
@@ -182,7 +193,6 @@ class UserMassive extends Massive implements ToCollection
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
 
             if (env('MULTIMARCA') === true) {
-                $master_username_email = null;
                 $master_username_email = UsuarioMaster::where(function ($q) use ($user) {
                     if (isset($user['username'])) {
                         $q->orWhere('username', $user['username']);
@@ -191,6 +201,7 @@ class UserMassive extends Massive implements ToCollection
                         $q->orWhere('email', $user['email']);
                     }
                 })->where('dni', '<>', $user['document'])->select('email', 'username')->first();
+                info(array($master_username_email));
             }
 
         } else {
@@ -294,7 +305,7 @@ class UserMassive extends Massive implements ToCollection
                 }
                 if (is_array($dc['value_excel'])) {
                     foreach ($dc['value_excel'] as $key => $value_excel) {
-                        $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel);
+                        $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel,$code_criterion);
                         if($criterion_value['has_error']){
                             $has_error = $criterion_value['has_error'];
                             $errors_index[] = $criterion_value['info_error'];
@@ -304,7 +315,7 @@ class UserMassive extends Massive implements ToCollection
                         $user['criterion_list_final'][] =  $criterion_value['criterion_value']->id;
                     }
                 }else{
-                    $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel']);
+                    $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel'],$code_criterion);
                     if($criterion_value['has_error']){
                         $has_error = $criterion_value['has_error'];
                         $errors_index[] = $criterion_value['info_error'];
@@ -318,7 +329,7 @@ class UserMassive extends Massive implements ToCollection
 
         return compact('has_error', 'user', 'errors_index');
     }
-    private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
+    private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel,$code_criterion){
         $has_error = false;
         if (strpos($value_excel, "=") === 0) {
             $has_error = true;
@@ -331,6 +342,16 @@ class UserMassive extends Massive implements ToCollection
             ];
         }
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
+        if(!$dc['can_be_create'] && !$criterion_value && $code_criterion != 'date'){
+            $has_error = true;
+            return [
+                'has_error'=>true,
+                'info_error'=>[
+                    'index' => $dc['index'],
+                    'message' => 'Solo puedes subir valores que han sido registrados. Revisa la ortografía y vuelve a intentarlo.'
+                ],
+            ];
+        }
         if ($dc['criterion_code'] == 'module' && (!$criterion_value || !$this->subworkspaces->where('criterion_value_id', $criterion_value?->id)->first())) {
             $has_error = true;
             return [
@@ -417,6 +438,7 @@ class UserMassive extends Massive implements ToCollection
                 'header_static_required' => isset($data['required']) ? $data['required'] : true,
                 'criterion_name' => $criterion ? $criterion->name : null,
                 'required' => $criterion ? $criterion->required : true,
+                'can_be_create' => $criterion ? $criterion->can_be_create : true,
                 'name_header' => mb_strtoupper(trim($header_excel)),
                 'index' => $index,
             ]);
@@ -442,18 +464,36 @@ class UserMassive extends Massive implements ToCollection
     }
     public function getStaticHeaders()
     {
-        return collect([
-            ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
-            ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
-            ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
-            ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
-            ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
-            ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
-            ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
-            ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
-            ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
-            ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
-        ]);
+        if (env('MULTIMARCA') === true) {
+
+            return collect([
+                ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
+                // ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
+                // ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
+                ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
+                ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
+                ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
+                ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
+                ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
+                // ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
+                ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
+            ]);
+
+        }else {
+
+            return collect([
+                ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
+                ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
+                ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
+                ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
+                ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
+                ['required' => false, 'header_name' => 'APELLIDO MATERNO', 'code' => 'surname'],
+                ['required' => true, 'header_name' => 'DOCUMENTO', 'code' => 'document'],
+                ['required' => false, 'header_name' => 'NÚMERO DE TELÉFONO', 'code' => 'phone_number'],
+                ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
+                ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
+            ]);
+        }
     }
 
     private function excelDateToDate($fecha)
@@ -564,7 +604,7 @@ class UserMassive extends Massive implements ToCollection
                 'field_type:id,code'
             ])
             ->where('code', '<>', 'document')
-            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id')
+            ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id','can_be_create')
             ->orderBy('position')
             ->get();
         $headers = $this->process_header($this->excelHeaders, $criteria);

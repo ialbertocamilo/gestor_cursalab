@@ -285,6 +285,11 @@ function get_media_url($path = '', $cdn = 'cdn')
     return FileService::generateUrl($path, $cdn);
 }
 
+function get_media_root_url($cdn = 'cdn')
+{
+    return FileService::getRootUrl($cdn);
+}
+
 function excelDateToDate($fecha)
 {
     try {
@@ -339,7 +344,7 @@ function get_data_bykeys($data, $keys = [])
 {
     $new_data = [];
     foreach ($data as $key => $value) {
-        if(in_array($key, $keys)) $new_data[$key] = $value; 
+        if(in_array($key, $keys)) $new_data[$key] = $value;
     }
 
     return $new_data;
@@ -377,4 +382,118 @@ function calculateValueForQualification($value, $current_system, $main_system = 
     $new_value = $value * $current_system / $main_system;
 
     return round($new_value, 2);
+}
+
+function transform_domain(array $ArrayHost)
+{
+    $arrayAvailableDomains = [ 'youtu' => 'youtube',
+                               'youtube' => 'youtube',
+                               'vimeo' => 'vimeo'];
+    $currentType = NULL;
+
+    foreach($arrayAvailableDomains as $key => $value) {
+        if(in_array($key, $ArrayHost)) {
+            $currentType = $value;
+        }
+    }
+
+    return $currentType;
+}
+
+function get_type_link(string $linked, string $key = 'type')
+{
+    $parsedLinked = parse_url($linked);
+    [ 'host' => $host , 'path' => $path ] = $parsedLinked;
+
+    $currentType = transform_domain( explode('.', $host) );
+    $currentHash = NULL;
+
+    switch($currentType) {
+        case 'youtube':
+            $query = $parsedLinked['query'] ?? NULL;
+            $currentHash = ($query) ? explode('=', $query)[1] : explode('/', $path)[1];
+        break;
+        case 'vimeo':
+            $currentHash = explode('/', $path)[1];
+        break;
+    }
+
+    $switchKey = [ 'type' => $currentType,
+                   'hash' => $currentHash ];
+
+    return $switchKey[$key];
+}
+
+function getExtensionFileUrl(string $url) {
+    ['path' => $filePath] = parse_url($url);
+
+    $prevPath = explode('.', $filePath);
+    $prevExtension = $prevPath[count($prevPath) - 1];
+    $existScorm = ($prevExtension === 'html'); // type scorm
+
+    $fileExtension = $existScorm ? 'scorm' : $prevExtension;
+    return $fileExtension;
+}
+
+function get_type_media(string $media)
+{
+    $fileExtension = getExtensionFileUrl($media);
+
+    $arrayAvailableTypes = [
+                             'image' => ['jpeg', 'jpg', 'png', 'gif', 'svg', 'webp'],
+                             'video' => ['mp4', 'webm', 'mov'],
+                             'audio' => ['mp3'],
+                             'pdf'   => ['pdf'],
+                             'scorm' => ['zip', 'scorm'],
+                             // 'excel' => ['xls', 'xlsx', 'csv'],
+                             'office' => ['xls', 'xlsx', 'csv','ppt', 'pptx', 'doc', 'docx']
+                          ];
+
+    foreach($arrayAvailableTypes as $key => $value) {
+        if(in_array(strtolower($fileExtension), $value)) {
+            $currentType = $key;
+        }
+    }
+
+    return $currentType;
+}
+function formatSize($kilobytes, $precision = 2, $parsed = true) { // desde KB hacia arriba
+    $unit = ["Kb", "Mb", "Gb", "Tb", "Pt"];
+    $exp = floor(log($kilobytes, 1024)) | 0;
+
+    $size = round($kilobytes / (pow(1024, $exp)), $precision);
+    $size_unit = $unit[$exp];
+    if ($parsed) {
+        return $size.' '.$size_unit;
+    }
+
+    return compact('size', 'size_unit');
+}
+
+/*
+    count: valor variable,
+    total: valor total al 100%,
+    limite: solo para exceded
+*/
+function calculate_porcent($count, $total, int $limite = 90)
+{
+    $porcent = 0;
+    $exceded = false;
+
+    if($total > 0) {
+        $porcent = round($count * 100 / $total);
+        $exceded = $porcent >= $limite;
+    }
+
+    return compact('porcent', 'exceded');
+}
+
+
+function is_cursalab_superuser($only_test_environment = true)
+{
+    $right_environment = $only_test_environment ? config('app.test_environment') : true;
+    $is_superuser = auth()->user()->isAn('super-user');
+    $email = auth()->user()->email_gestor;
+
+    return $is_superuser && str_contains($email, '@cursalab.io') && $right_environment;
 }

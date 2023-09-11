@@ -27,6 +27,7 @@ select[multiple] option {
 	overflow-y: auto;
 	overflow-x: hidden;
 	height: 100vh;
+	scrollbar-width:thin;
 }
 
 /**/
@@ -1128,11 +1129,6 @@ span.lbl_txt_val {
 /* spinner */
 
 /* valoracion nps */
-
-.shadow-md{
-	box-shadow: 0px 5px 28px -2px rgba(0,0,0,0.10);
-}
-
 .form-control.is-valid.no-icon,
 .form-control.is-invalid.no-icon {
 	background-image: none !important;
@@ -1312,4 +1308,126 @@ input[type="color"] {
 
 .css-tooltip--left::after {
   	margin-right: 8px;
+}
+/*css tooltip*/
+
+.border-solid-primary {
+	border: 1px solid #5457E7 !important;
+}
+
+.table.table-primary-sub.table-bordered-rounded{
+	border-style: hidden;
+	border-radius: 10px;
+    box-shadow: 0 0 0 1px #5457E7 !important;
+}
+
+.rounded-sm {
+	border-radius: 6px !important;
+}
+
+.rounded-md {
+	border-radius: 10px !important;
+}
+
+.rounded-lg {
+	border-radius: 20px !important;
+}
+
+.rounded-left-md{
+	border-top-left-radius: 9px !important;
+	border-bottom-left-radius: 9px !important;
+}
+
+.shadow-md{
+	box-shadow: 0px 5px 28px -2px rgba(0,0,0,0.10) !important;
+}
+
+.flex-none{
+	flex: none !important;
+}
+
+.scroll-default::-webkit-scrollbar {
+	width: 12px; /* width of the entire scrollbar */
+}
+
+.scroll-default::-webkit-scrollbar-track {
+	background: transparent; /* color of the tracking area */
+}
+
+.scroll-default::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.2); /* color of the scroll thumb */
+	border-radius: 20px;
+}
+
+/*table con border radius */
+.table.table-primary-sub thead th {
+	box-shadow: inset 0px -2px 0 -1px #5457E7 !important;
+}
+
+.table.table-primary-sub tbody td {
+	box-shadow: inset 0px 2px 0 -1px #5457E7 !important;
+}
+
+.table.table-primary-sub td.border-0{
+	border: 0 !important;
+}
+
+.table.table-primary-sub tbody tr.no-border td {
+	box-shadow: none !important;
+}
+
+table.table-scroll tbody {
+  display: block;
+  overflow-y: scroll;
+}
+
+table.table-scroll thead, table.table-scroll tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-style: hidden;
+}
+/*table con border radius */
+
+.v-expansion-panel.no-shadow:before{
+  box-shadow: none;
+}
+
+.bg-primary-sub {
+	background-color:  #5457E7 !important;
+}
+
+.gap-md {
+	gap: 2rem;
+}
+
+.gap{
+	gap: 1rem;
+}
+
+.h-1 {
+	height: 1.4rem;
+}
+
+.flex-1 {
+	flex: 1 1 0%;
+}
+
+.fa-1_4x{
+	font-size: 1.4rem;
+}
+
+.w-90{
+	width: 90%;
+}
+
+.v-progress-linear__content {
+    justify-content: unset !important;
+}
+
+.ml-24-porcent{
+	margin-left: 24%;
+}
+.v-list-group__header__append-icon{
+    min-width: auto !important;
 }

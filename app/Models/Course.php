@@ -483,7 +483,7 @@ class Course extends BaseModel
             ->get();
 
         $data = [];
-        $positions_schools = SchoolSubworkspace::select('school_id','position')
+        $positions_schools = SchoolSubworkspace::select('school_id','position','subworkspace_id')
                                 ->where('subworkspace_id',$user->subworkspace_id)
                                 ->whereIn('school_id',array_keys($schools->all()))
                                 ->get();
@@ -507,9 +507,13 @@ class Course extends BaseModel
 
 
         foreach ($schools as $school_id => $courses) {
-
+            $school_workspace = $positions_schools->where('school_id', $school_id)->first();
+            if(!$school_workspace){
+                // la escuela no pertenece al módulo del usuario
+                continue;
+            }
+            $school_position = $school_workspace?->position;
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
             $school_courses = [];
             $school_completed = 0;
             $school_assigned = 0;
@@ -537,7 +541,7 @@ class Course extends BaseModel
                 $school_assigned++;
                 $last_topic = null;
                 $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
-                if ($course_status['status'] == 'completado') $school_completed++;
+                if ($course_status['status'] == 'completado' || $course_status['status'] == 'aprobado') $school_completed++;
 
                 $topics = $course->topics->sortBy('position')->where('active', ACTIVE);
                 $summary_topics = $summary_topics_user->whereIn('topic_id', $topics->pluck('id'));
@@ -1377,7 +1381,7 @@ class Course extends BaseModel
 
         $chunk_users = array_chunk($users_segmented, 80);
         foreach ($chunk_users as $chunked_users) {
-            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update,true);
+            SummaryUser::setSummaryUpdates($chunked_users, $courses_to_update,true,'compatibilities_update');
         }
     }
 

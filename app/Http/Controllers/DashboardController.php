@@ -39,8 +39,10 @@ class DashboardController extends Controller
             cache()->flush();
 
         $current_workspace = get_current_workspace();
-        $modulos = $current_workspace->subworkspaces->toArray();
-
+        $modulos = $current_workspace?->subworkspaces->toArray();
+        if(!$modulos){
+            return view('home', []);
+        }
         $subworkspace_id = request('modulo_id', NULL);
         // $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);
         $workspaceId = $current_workspace->id;
@@ -70,21 +72,24 @@ class DashboardController extends Controller
                     'title' => 'Cursos',
                     'icon' => 'mdi-book',
                     'color' => '#E01717',
-                    'value' => DashboardService::countCourses($workspaceId)
+                    'value' => DashboardService::countCourses($workspaceId),
+                    'path' => '/cursos'
                 ],
 
                 'usuarios' => [
                     'title' => 'Usuarios totales',
                     'icon' => 'mdi-account-group',
                     'color' => '#5458ea',
-                    'value' => DashboardService::countUsers($subworkspace_id)
+                    'value' => DashboardService::countUsers($subworkspace_id),
+                    'path' => '/usuarios'
                 ],
 
                 'usuarios_activos' => [
                     'title' => 'Usuarios activos',
                     'icon' => 'mdi-account-group',
                     'color' => '#22B573',
-                    'value' => $count_active_users
+                    'value' => $count_active_users,
+                    'path' => '/usuarios'
                 ],
 
                 'temas_evaluables' => [

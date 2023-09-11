@@ -2,41 +2,42 @@
 
 use App\Http\Controllers\ApiRest\HelperController;
 
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AbconfigController;
-use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\TipoCriterioController;
-use App\Http\Controllers\CriteriosController;
+use App\Http\Controllers\AyudaAppController;
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CicloController;
-use App\Http\Controllers\CursosController;
+use App\Http\Controllers\CompatibleController;
+use App\Http\Controllers\ConvalidacionesController;
+use App\Http\Controllers\CriteriosController;
 use App\Http\Controllers\CurriculasGruposController;
+use App\Http\Controllers\CursosController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiplomaController;
+use App\Http\Controllers\DuplicarController;
+use App\Http\Controllers\Encuestas_respuestaController;
+use App\Http\Controllers\ErroresMasivoController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\GestorController;
+use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\IncidenciaController;
+use App\Http\Controllers\MallasController;
+use App\Http\Controllers\MasivoController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MigracionController;
+use App\Http\Controllers\MigrarAvanceController;
+use App\Http\Controllers\Post_electivoController;
 use App\Http\Controllers\PosteoController;
 use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\PushNotificationsFirebaseController;
+use App\Http\Controllers\ReportesSupervisoresController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TipoCriterioController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\GrupoController;
-use App\Http\Controllers\Encuestas_respuestaController;
-use App\Http\Controllers\Post_electivoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Usuario_vigenciaController;
-use App\Http\Controllers\CompatibleController;
-use App\Http\Controllers\MallasController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\GestorController;
-use App\Http\Controllers\MasivoController;
-use App\Http\Controllers\ErroresMasivoController;
-use App\Http\Controllers\IncidenciaController;
-use App\Http\Controllers\DuplicarController;
-use App\Http\Controllers\PushNotificationsFirebaseController;
-use App\Http\Controllers\AyudaAppController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ReportesSupervisoresController;
-use App\Http\Controllers\MigrarAvanceController;
-use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\ConvalidacionesController;
-use App\Http\Controllers\MigracionController;
-use App\Http\Controllers\DiplomaController;
 
 // Route::get('dashboard_pbi', function () {
 //     return view('powerbi.index');
@@ -45,7 +46,7 @@ use App\Http\Controllers\DiplomaController;
 // Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView']);
 
 // DOCUMENTACIÓN DE APIS
-Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
+// Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 // Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
 // Route::post('register', 'Auth\RegisterController@register');
 
@@ -399,15 +400,7 @@ Route::controller(UsuarioController::class)->group(function () {
     // // ->middleware('permission:usuarios.edit');
 
     // USUARIOS RESET MASIVO
-    Route::prefix('/intentos-masivos')->group(function () {
-        Route::get('/', 'index_reinicios')->name('usuarios.index_reinicios');
-        // ->middleware('permission:usuarios.index_reinicios');
-        Route::get('reinicios_data', 'reinicios_data');
-        Route::get('buscarCursosxEscuela/{school_id}', 'buscarCursosxEscuela');
-        Route::get('buscarTemasxCurso/{course_id}', 'buscarTemasxCurso');
-        Route::post('validarReinicio', 'validarReinicioIntentos');
-        Route::post('reiniciarIntentosMasivos', 'reiniciarIntentosMasivos');
-    });
+    
 
     // Route::get('usuarios/getInitialData/{usuario_id}', 'getInitialData');
     // Route::get('usuarios/getCarrerasxModulo/{config_id}', 'getCarrerasxModulo');
@@ -641,14 +634,14 @@ Route::controller(DuplicarController::class)->group(function () {
 
 // SOPORTE //
 
-Route::controller(PushNotificationsFirebaseController::class)->group(function () {
+// Route::controller(PushNotificationsFirebaseController::class)->group(function () {
 
-    // NOTIFICACIONES PUSH PERSONALIZADAS DESDE EL GESTOR //
-    Route::get('notificaciones_push', 'index');
-    // ->middleware('permission:notificaciones_push.index')->name('notificaciones_push.index');
-    Route::get('notificaciones_push/getData', 'getData');
-    Route::post('notificaciones_push/enviarNotificacionCustom', 'enviarNotificacionCustom');
-});
+//     // NOTIFICACIONES PUSH PERSONALIZADAS DESDE EL GESTOR //
+//     Route::get('notificaciones_push', 'index');
+//     // ->middleware('permission:notificaciones_push.index')->name('notificaciones_push.index');
+//     Route::get('notificaciones_push/getData', 'getData');
+//     Route::post('notificaciones_push/enviarNotificacionCustom', 'enviarNotificacionCustom');
+// });
 
 // Route::controller(HelperController::class)->group(function () {
 
@@ -695,18 +688,27 @@ Route::prefix('/dashboard')->controller(DashboardController::class)->group(funct
 //});
 
 // MIGRAR AVANCE
-Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->group(function () {
-    Route::view('/', 'migracion.avance')->name('masivo.migrar_avance');
-    Route::get('/getData', 'getData');
-    Route::get('/list_categorias/{config_id}', 'listCategorias');
-    Route::get('/list_cursos/{categoriad_id}', 'listCursos');
-    Route::get('/list_temas/{curso_id}', 'listTemas');
-    Route::get('/get_duplicates_data/{tipo}/{id}/{categoria_id}', 'getDuplicatesData');
-    Route::post('/migrar_temas', 'migrarTemas');
-});
+// Route::prefix('/migrar_avance')->controller(MigrarAvanceController::class)->group(function () {
+//     Route::view('/', 'migracion.avance')->name('masivo.migrar_avance');
+//     Route::get('/getData', 'getData');
+//     Route::get('/list_categorias/{config_id}', 'listCategorias');
+//     Route::get('/list_cursos/{categoriad_id}', 'listCursos');
+//     Route::get('/list_temas/{curso_id}', 'listTemas');
+//     Route::get('/get_duplicates_data/{tipo}/{id}/{categoria_id}', 'getDuplicatesData');
+//     Route::post('/migrar_temas', 'migrarTemas');
+// });
 
-// DIPLOMAS
-Route::prefix('/diploma')->controller(DiplomaController::class)->group(function () {
-    Route::view('/create', 'diploma.create_edit')->name('diploma.create');
-    Route::view('/edit/{diploma}', 'diploma.create_edit')->name('diploma.edit');
-});
+// === DIPLOMAS ===
+// Route::prefix('/diploma')->controller(DiplomaController::class)->group(function () {
+//     Route::view('/create', 'diploma.create_edit')->name('diploma.create');
+//     Route::view('/edit/{diploma}', 'diploma.create_edit')->name('diploma.edit');
+// });
+// === DIPLOMAS ===
+
+// === VOTACIONES ===
+// Route::prefix('/votacion')->controller(CampaignController::class)->group(function() {
+//     Route::view('/create', 'votaciones.create_edit')->name('votacion.create');
+//     Route::view('/edit/{campaign}', 'votaciones.create_edit')->name('votacion.edit');
+//     Route::view('/detail/{campaign}', 'votaciones.view_detail')->name('votacion.detail');
+// });
+// === VOTACIONES ===

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\User;
 use App\Models\Cargo;
 use App\Models\Ciclo;
@@ -27,9 +28,9 @@ use App\Models\Workspace;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
-use App\Models\UsuarioMaster;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
+use App\Models\UsuarioMaster;
 use App\Services\FileService;
 use App\Models\CriterionValue;
 use App\Models\Resumen_general;
@@ -37,20 +38,24 @@ use App\Models\Resumen_x_curso;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\UserStoreRequest;
 use Illuminate\Support\Facades\Session;
+use Altek\Accountant\Facades\Accountant;
 use App\Http\Requests\ResetPasswordRequest;
+
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\ApiRest\HelperController;
+
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
 
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Crypt;
 
-use Altek\Accountant\Facades\Accountant;
+use App\Mail\EmailTemplate;
+use Illuminate\Support\Facades\Mail;
 
 // use App\Perfil;
 
@@ -69,17 +74,18 @@ class UsuarioController extends Controller
             $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
-
+            $menus = Menu::getMenuByUser($user);
             return [
                 'user' => [
                     'id' => $user->id,
                     'username' => $user->username,
                     'fullname' => $user->fullname,
-                    'roles' => $roles
+                    'roles' => $roles,
+                    'menus' => $menus
                 ],
                 'session' => [
                     'workspace' => $workspace
-                ]
+                ],
             ];
         }
     }
@@ -123,22 +129,40 @@ class UsuarioController extends Controller
             ->with([
                 'field_type:id,name,code',
                 'values' => function ($q) use ($workspace) {
-                    $q
-                        ->select('id', 'criterion_id', 'value_date', 'value_text as name')
-                        ->whereRelation('workspaces', 'id', $workspace->id);
+                    $q->select('id', 'criterion_id', 'value_date', 'value_text as name');
+                    $q->whereRelation('workspaces', 'id', $workspace->id);
+                },
+                'workspaces' => function ($q) use ($workspace) {
+                    $q->select('id', 'name');
+                    $q->where('id', $workspace->id);
                 }
             ])
-            ->where('is_default', INACTIVE)
-            ->whereRelation('workspaces', 'id', $workspace->id)
-            ->orderBy('name')
+            // ->where('is_default', INACTIVE)
+            ->whereHas('workspaces', function($query) use ($workspace){
+                $query->where('workspace_id', $workspace->id);
+                $query->where('available_in_user_filters', 1);
+            })
+            // ->whereRelation('workspaces', 'id', $workspace->id)
+            ->orderByDesc('name')
             ->get();
 
+        // $criteria_workspace = Criterion::setCriterionNameByCriterionTitle($criteria_workspace);
+
         $criteria_template = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')
-            ->with('field_type:id,name,code')
-            ->where('is_default', INACTIVE)
+            ->with([
+                'field_type:id,name,code',
+                'workspaces' => function ($q) use ($workspace) {
+                    $q->select('id', 'name');
+                    $q->where('id', $workspace->id);
+                }
+            ])
+            // ->where('is_default', INACTIVE)
             ->whereIn('id', $criteria_workspace->pluck('id'))
-            ->orderBy('name')
+            ->orderByDesc('name')
             ->get();
+            
+        $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
+
         $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
         $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
         $usersWithEmptyCriteria = count($users);
@@ -641,7 +665,7 @@ class UsuarioController extends Controller
         }
 
         $user->update(['active' => $status]);
-
+        $current_workspace->sendEmailByLimit();
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 
@@ -705,7 +729,10 @@ class UsuarioController extends Controller
 
         // $subworkspace = Workspace::find($subworkspaceId);
         // $mod_eval = $subworkspace->mod_evaluaciones;
-        $mod_eval = Course::getModEval($curso);
+        // $mod_eval = Course::getModEval($curso);
+        $course = Course::find($curso);
+        $mod_eval = $course->getModEvaluacionesConverted();
+        $mod_eval['system'] = $course->qualification_type?->name;
 
         $data = $this->validarDetallesReinicioIntentosMasivo(
             $curso, $tema, $subworkspaceId, $tipo, $mod_eval
@@ -735,10 +762,10 @@ class UsuarioController extends Controller
             // "Desaprobados" only
             $query = SummaryTopic::query()
                     ->join('users', 'users.id', '=', 'summary_topics.user_id')
-                    ->with('user')
+                    ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                     // ->where('summary_topics.source_id')
                     ->where('users.subworkspace_id', $subworkspaceId)
-                    ->select('summary_topics.*')
+                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id')
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -760,11 +787,11 @@ class UsuarioController extends Controller
 
             $query = SummaryTopic::query()
                 ->join('users', 'users.id', '=', 'summary_topics.user_id')
-                ->with('user')
+                ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                 ->where('summary_topics.topic_id', $topicId)
                 // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_topics.*');
+                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id');
 
             // "Desaprobados" only
 
@@ -785,8 +812,9 @@ class UsuarioController extends Controller
 
         // Add "selected" property to each item
 
-        foreach ($users as $key => $user) {
-            $user->selected = false;
+        foreach ($users as $key => $row) {
+            $row->selected = false;
+            $row->grade = calculateValueForQualification($row->grade, $row->topic->qualification_type->position);
         }
 
         return [
@@ -950,6 +978,21 @@ class UsuarioController extends Controller
         ];
 
         $user->update($data);
+
+        if($user->email)
+        {
+            $user_workspace = $user->subworkspace->parent_id;
+            $workspace_name = $user_workspace ? Workspace::where('id', $user_workspace)->first('name') : null;
+
+            $base_url = config('app.web_url') ?? null;
+
+            $mail_data = [ 'subject' => 'Credenciales restauradas',
+                            'url' => $base_url,
+                            'workspace' => $workspace_name?->name,
+                        ];
+
+            Mail::to($user->email)->send(new EmailTemplate('emails.confirmacion_restauracion_credenciales', $mail_data));
+        }
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);
     }

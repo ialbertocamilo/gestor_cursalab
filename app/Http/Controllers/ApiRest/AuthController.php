@@ -5,15 +5,17 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
                         PasswordResetAppRequest };
+use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{ Usuario, User, Ambiente };
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class SubworkspaceInMaintenance extends Exception {};
@@ -161,7 +163,7 @@ class AuthController extends Controller
             info($e);
             Error::storeAndNotificateException($e, request());
             // return $this->error('Server error.', 500);
-            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, $responseAttempts);
+            return $this->error('Validación de identidad fallida. Por favor, contáctate con tu administrador.', 400, []);
 
         }
     }
@@ -169,7 +171,7 @@ class AuthController extends Controller
     private function respondWithDataAndToken($data)
     {
         $user = Auth::user();
-        $user->tokens()->delete();
+        // $user->tokens()->delete();
         $token = $user->createToken('accessToken')->accessToken;
 
         // Stop login to users from specific workspaces
@@ -195,6 +197,8 @@ class AuthController extends Controller
             ->where('id', $user->subworkspace_id)
             ->first();
 
+        // info('here data');
+
         $workspace = Workspace::find($user->subworkspace_id);
         // $matricula_actual = Matricula::select('carrera_id', 'ciclo_id')->where('usuario_id', $user->id)->where('estado', 1)->where('presente', 1)->orderBy('id', 'DESC')->first();
         // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
@@ -207,14 +211,19 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
-        if ($workspace_data) {
-            $workspace_data->logo = get_media_url($workspace_data->logo);
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
 
-            if ($workspace_data->slug == 'farmacias-peruanas') {
-                $workspace_data->logo = get_media_url($user->subworkspace->logo);
+        if ($workspace_data) {
+            $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;
+
+            if ($show_logo_in_app) {
+                $workspace_data->logo = get_media_url($workspace_data->logo);
+            } else {
+                $ambiente = Ambiente::first();
+                $workspace_data->logo = get_media_url($ambiente->logo);
             }
         }
+
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
@@ -225,14 +234,7 @@ class AuthController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
-        $criterios = [];
-
-        foreach ($user->criterion_values as $value) {
-            $criterios[] = [
-                'valor' => $value->value_text,
-                'tipo' => $value->criterion->name ?? null,
-            ];
-        }
+        $criterios = $user->getProfileCriteria();
 
         $user_data = [
             "id" => $user->id,
@@ -257,18 +259,20 @@ class AuthController extends Controller
             // "botica" => $user->botica,
             // "sexo" => $user->sexo,
             // "cargo" => $user->cargo,
+            'criterios' => $criterios,
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
+        $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
 
         return [
             'access_token' => $token,
-            'bucket_base_url' => get_media_url(),
+            'bucket_base_url' => get_media_root_url(),
             // 'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
             'usuario' => $user_data
@@ -430,20 +434,20 @@ class AuthController extends Controller
     }
     // === RECAPTCHA ===
 
-    public function checkSameDataCredentials($userinput, $password)
+    public function checkSameDataCredentials($userinput, $password, $send_email = true)
     {
         $user = auth()->user();
         $checkCredentials['require_quizz'] = ($userinput === $password) && !((bool) $user->email);
         $checkCredentials['id_user'] = $user->id;
 
         if(!$checkCredentials['require_quizz']) {
-            return $this->sendEmailResetPassword($user, $checkCredentials);
+            return $this->sendEmailResetPassword($user, $checkCredentials, $send_email);
         }
         return $checkCredentials;
         // return $this->sendQuizzQuestionsValidate($user, $checkCredentials);
     }
 
-    public function sendEmailResetPassword($user, $checkCredentials)
+    public function sendEmailResetPassword($user, $checkCredentials, $send_email = true)
     {
         $workspaceName = Workspace::find($user->subworkspace->parent_id)->name;
         $subWorkspaceName = $user->subworkspace->name;
@@ -453,12 +457,16 @@ class AuthController extends Controller
                        'subworkspace' => $subWorkspaceName,
                        'fullname' => $user->name.' '.$user->lastname ];
 
-        $userCallback = function ($user_instance, $token) {
-            // enviar email
-            $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
-        };
+        $status = "passwords.sent";
+        if($send_email)
+        {
+            $userCallback = function ($user_instance, $token) {
+                // enviar email
+                $user_instance->sendPasswordRecoveryNotification($user_instance, $token);
+            };
 
-        $status = Password::sendResetLink(['email' => $user->email], $userCallback);
+            $status = Password::sendResetLink(['email' => $user->email], $userCallback);
+        }
 
         $checkCredentials['recovery_email']['success'] = ($status === Password::RESET_LINK_SENT);
         $checkCredentials['recovery_email']['data'] = $mail_data;
@@ -555,13 +563,13 @@ class AuthController extends Controller
         $credentials = ($request->email) ? $request->only('email', 'password', 'password_confirmation', 'token')
                                          : $request->only('document', 'password', 'password_confirmation', 'token');
 
-        $credentials1 = $credentials2 = ['password' => $request->password];
+        $credentials1 = $credentials2 = $credentials3 = ['password' => $request->password];
         $userinput = $request->email ? $credentials['email'] : $credentials['document'];
 
-        $credentials1['email'] = $userinput;
+        $credentials1['username'] = $userinput;
         $credentials2['document'] = $userinput;
-
-        if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+        $credentials3['email'] = $userinput;
+        if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
             return $this->error('Contraseña no válida, asegúrate de crear una nueva contraseña.', 422);
         }
         // === prov el email a documento ===
@@ -571,7 +579,7 @@ class AuthController extends Controller
         }
         // === prov el email a documento ===
 
-        $status = Password::reset($credentials, function($user, $password) {
+        $status = Password::reset($credentials, function($user, $password) use ($request) {
 
             $old_passwords = $user->old_passwords;
 
@@ -586,17 +594,38 @@ class AuthController extends Controller
             $user->last_pass_updated_at = now(); // actualizacion de contraseña
             $user->setRememberToken(Str::random(60));
             $user->save();
+
+            $user_workspace = $user->subworkspace->parent_id;
+            $functionality = $user_workspace ? WorkspaceFunctionality::getFunctionality( $user_workspace, 'send-credentials-to-email') : null;
+            $hide_password = $request->password ? '******' . substr($request->password, -3) : '******';
+
+            if($functionality && $request->email)
+            {
+                $mail_data = [ 'subject' => "Contraseña actualizada 🔐",
+                            'user' => $user->name.' '.$user->lastname,
+                            'email' => $request->email,
+                            'password' => $hide_password
+                            ];
+                Mail::to($request->email)->send(new EmailTemplate('emails.enviar_credenciales_gestor', $mail_data));
+            }
         });
 
         if($status == Password::PASSWORD_RESET) {
 
-            if (Auth::attempt($credentials1) || Auth::attempt($credentials2)) {
+            if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
                 $user = Auth::user();
 
                 if(!$request->email) $user->setInitialEmail();
                 $user->resetAttemptsUser();
 
-                return $this->respondWithDataAndToken($data_input);
+                $resp = $this->respondWithDataAndToken($data_input);
+
+                if(is_array($resp))
+                {
+                    $ticket_user = Ticket::where('user_id', $user?->id)->where('status', 'pendiente')->where('reason', 'Soporte Login')->first();
+                    $resp['mostrar_modal'] = $ticket_user ? $user?->email != $ticket_user?->email : false;
+                }
+                return $resp;
             }
         } else {
 
@@ -610,6 +639,10 @@ class AuthController extends Controller
     }
     // === RESET ===
 
+    public function getRespondWithDataAndToken( $data )
+    {
+        return $this->respondWithDataAndToken( $data );
+    }
 
 
     // === AMBIENTE ===

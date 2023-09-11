@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginAppImpersonationRequest;
-use App\Models\Error;
-use App\Models\Workspace;
-use App\Models\Usuario;
-use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Error;
+use App\Models\Usuario;
+use App\Models\Ambiente;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
-
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
+
+use Illuminate\Support\Facades\Password;
+use App\Http\Requests\LoginAppImpersonationRequest;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class AuthImpersonationController extends Controller
 {
@@ -102,14 +103,19 @@ class AuthImpersonationController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+        
         if ($workspace_data) {
-            $workspace_data->logo = get_media_url($workspace_data->logo);
+            $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;
 
-            if ($workspace_data->slug == 'farmacias-peruanas') {
-                $workspace_data->logo = get_media_url($user->subworkspace->logo);
+            if ($show_logo_in_app) {
+                $workspace_data->logo = get_media_url($workspace_data->logo);
+            } else {
+                $ambiente = Ambiente::first();
+                $workspace_data->logo = get_media_url($ambiente->logo);
             }
         }
+
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
         }
@@ -119,14 +125,7 @@ class AuthImpersonationController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
-        $criterios = [];
-
-        foreach ($user->criterion_values as $value) {
-            $criterios[] = [
-                'valor' => $value->value_text,
-                'tipo' => $value->criterion->name ?? null,
-            ];
-        }
+        $criterios = $user->getProfileCriteria();
 
         $user_data = [
             "id" => $user->id,
@@ -150,9 +149,10 @@ class AuthImpersonationController extends Controller
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
+        $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
         $api_url = config('app.url');
 
         return [
@@ -163,7 +163,7 @@ class AuthImpersonationController extends Controller
                 'reportes_url'=>env('REPORTES_URL')
             ],
             'access_token' => $token,
-            'bucket_base_url' => get_media_url(),
+            'bucket_base_url' => get_media_root_url(),
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
@@ -216,6 +216,8 @@ class AuthImpersonationController extends Controller
             return $this->error('Wrong token.', http_code: 503);
 
         } catch (\Exception $e) {
+
+            info($e);
 
             return $this->error('Error found.', http_code: 503);
         }

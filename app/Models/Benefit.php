@@ -39,6 +39,7 @@ class Benefit extends BaseModel
         'direccion',
         'referencia',
         'accesible',
+        'dificultad',
 
         'active',
     ];
@@ -127,7 +128,9 @@ class Benefit extends BaseModel
     protected function storeRequest($data, $benefit = null)
     {
         $promotor_imagen_multimedia = (isset($data['promotor_imagen_multimedia']) && !is_null($data['promotor_imagen_multimedia'])) ? $data['promotor_imagen_multimedia'] : null;
-        $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+        if(!is_null($promotor_imagen_multimedia)){
+            $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
+        }
 
         $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa'])) ? json_decode($data['ubicacion_mapa']) : null;
 
@@ -136,7 +139,8 @@ class Benefit extends BaseModel
             $json_maps['location'] = $geometry->location ?? null;
             $json_maps['address'] = $data_maps->formatted_address ?? null;
             $json_maps['url'] = $data_maps->url ?? null;
-            $json_maps['image'] = null;
+            $json_maps['image'] = $data_maps->image_map ?? null;
+            $json_maps['ubicacion'] = $data_maps->ubicacion ?? null;
 
             $data['direccion'] = json_encode($json_maps);
         }
@@ -187,7 +191,7 @@ class Benefit extends BaseModel
                             'name' => $silabo->name,
                             'value' => $silabo->value,
                             'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
-                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:m:i') : null,
+                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:i:s') : null,
                             'active' => $silabo->active,
                             'benefit_id' => $benefit->id,
                             'type_id' => $property_silabo->id,
@@ -261,7 +265,7 @@ class Benefit extends BaseModel
         ->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
-        $sort = request()->sortDesc == 'true' ? 'DESC' : 'ASC';
+        $sort = !is_null(request()->sortDesc) ? (request()->sortDesc == 'true' ? 'DESC' : 'ASC') : 'DESC';
 
         $benefits_query->orderBy($field, $sort);
 
@@ -352,6 +356,10 @@ class Benefit extends BaseModel
 
             $benefit['segments'] = $segments;
 
+            if (is_array($segments)) {
+                $segments = collect($segments);
+            }
+
             $segmentation_by_document_list = [];
             $segmentation_by_document = $segments->map(function ($item) {
                 return ['segmentation_by_document'=> $item->segmentation_by_document];
@@ -375,6 +383,7 @@ class Benefit extends BaseModel
 
             $inicio_inscripcion = new Carbon($benefit->inicio_inscripcion);
             $fin_inscripcion = new Carbon($benefit->fin_inscripcion);
+            $fin_inscripcion->setTime(23, 59, 59);
             $fecha_liberacion = new Carbon($benefit->fecha_liberacion);
             $now = Carbon::now();
 
@@ -603,7 +612,10 @@ class Benefit extends BaseModel
                             {
                                 if(!is_null($sel['id']))
                                 {
-                                    $created_user = UserBenefit::create([
+                                    $created_user = UserBenefit::updateOrCreate([
+                                            'user_id' => $sel['id'],
+                                            'benefit_id' => $benefit_id
+                                        ],[
                                         'user_id' => $sel['id'],
                                         'benefit_id' => $benefit_id,
                                         'status_id' => $user_status_subscribed?->id,
@@ -660,7 +672,12 @@ class Benefit extends BaseModel
                 }
 
                 cache_clear_model(UserBenefit::class);
-
+                $users_approved = collect($seleccionados)->where('ev_user_status','approved')->all();
+                if(count($users_approved)>0){
+                    $benefit = Benefit::where('id',$benefit_id)->first();
+                    $benefit->syncUsersInBenefitsMeeting($users_approved);
+                }
+                // dd($users_approved);
                 DB::commit();
             } catch (\Exception $e) {
                 info($e);
@@ -675,6 +692,26 @@ class Benefit extends BaseModel
         return $response;
     }
 
+    protected function tagsDefault()
+    {
+        return [
+            ['code' => 'adaptacion-y-flexibilidad', 'name' => 'Adaptación y flexibilidad', 'edit' => false ],
+            ['code' => 'comunicacion', 'name' => 'Comunicación', 'edit' => false ],
+            ['code' => 'curiosidad', 'name' => 'Curiosidad', 'edit' => false ],
+            ['code' => 'determinacion-en-la-ejecucion', 'name' => 'Determinación en la ejecución', 'edit' => false ],
+            ['code' => 'energizacion-de-personas', 'name' => 'Energización de personas', 'edit' => false ],
+            ['code' => 'foco-en-data', 'name' => 'Foco en Data', 'edit' => false ],
+            ['code' => 'mentalidad-digital', 'name' => 'Mentalidad Digital', 'edit' => false ],
+            ['code' => 'obsesion-por-el-cliente', 'name' => 'Obsesión por el cliente', 'edit' => false ],
+            ['code' => 'orientacion-a-resultados', 'name' => 'Orientación a resultados', 'edit' => false ],
+            ['code' => 'orientacion-al-cliente', 'name' => 'Orientación al cliente', 'edit' => false ],
+            ['code' => 'proactividad', 'name' => 'Proactividad', 'edit' => false ],
+            ['code' => 'trabajo-en-equipo', 'name' => 'Trabajo en Equipo', 'edit' => false ],
+            ['code'=> 'basico', 'name'=> "Básico", 'edit' => false ],
+            ['code'=> 'intermedio', 'name'=> "Intermedio", 'edit' => false ],
+            ['code'=> 'avanzado', 'name'=> "Avanzado", 'edit' => false ]
+        ];
+    }
 
     // Apis
 
@@ -791,7 +828,10 @@ class Benefit extends BaseModel
                     $user_status_subscribed = Taxonomy::getFirstData('benefit', 'user_status', 'subscribed');
                     $type_register_regular = Taxonomy::getFirstData('benefit', 'type_register', 'regular');
 
-                    $is_created = UserBenefit::create([
+                    $is_created =  UserBenefit::updateOrCreate([
+                            'user_id' => $user_id,
+                            'benefit_id' => $benefit_id
+                        ],[
                         'user_id' => $user_id,
                         'benefit_id' => $benefit_id,
                         'status_id' => $user_status_subscribed?->id,
@@ -808,7 +848,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users);
+                            // $benefit->syncUsersInBenefitsMeeting($users);
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -836,6 +876,8 @@ class Benefit extends BaseModel
                             'cupos' => $benefit->cupos ?? null
                         ];
                     }
+
+
 
                     DB::commit();
 
@@ -888,7 +930,11 @@ class Benefit extends BaseModel
                 $benefit->save();
             }
             else {
-                $benefit = UserBenefit::create([
+                $benefit = UserBenefit::updateOrCreate([
+                    'user_id' => $user_id,
+                    'benefit_id' => $benefit_id
+                ]
+                    ,[
                     'user_id' => $user_id,
                     'benefit_id' => $benefit_id,
                     'status_id' => $user_status_notify?->id,
@@ -984,7 +1030,7 @@ class Benefit extends BaseModel
                         if($user){
                             $users = [];
                             array_push($users, $user);
-                            $benefit->syncUsersInBenefitsMeeting($users, 'remove');
+                            // $benefit->syncUsersInBenefitsMeeting($users, 'remove');
                         }
 
                         $users_subscribed_in_benefit = UserBenefit::whereHas('status', function($q){
@@ -1079,9 +1125,9 @@ class Benefit extends BaseModel
 
         $benefits_query->orderBy($field, $sort);
 
-        $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
-            $query->where('code', '<>', 'released');
-        });
+        // $benefits_query->whereHas('status', function ($query) use ($status_benefit) {
+        //     $query->where('code', '<>', 'released');
+        // });
 
         if (!is_null($filtro) && !empty($filtro)) {
             $benefits_query->where(function ($query) use ($filtro) {
@@ -1096,7 +1142,13 @@ class Benefit extends BaseModel
             else if(in_array('subscribed', $status_benefit) && count($status_benefit) > 1) {
                 $benefits_query->where(function($t) use ($status_benefit, $benefits_user_registered){
                     $t->whereHas('status', function ($query) use ($status_benefit) {
-                        $query->whereIn('code', $status_benefit);
+                        if(in_array('exchanged', $status_benefit)) {
+                            $query->whereIn('code', $status_benefit);
+                            $query->orWhereIn('code', ['approved']);
+                        }
+                        else{
+                            $query->whereIn('code', $status_benefit);
+                        }
                     });
                     $t->orWhereIn('id', $benefits_user_registered);
                 });
@@ -1181,7 +1233,9 @@ class Benefit extends BaseModel
             $item->status = $item->user_status;
 
 
-            $item->ubicacion = null;
+            $direccion = ($item->direccion) ? json_decode($item->direccion) : null;
+            $item->ubicacion = ($direccion) ? $direccion->ubicacion ?? null : null;
+
             $item->inicio_inscripcion = $item->inicio_inscripcion ? Carbon::parse($item->inicio_inscripcion)->format('d/m/Y') : null;
             $item->fin_inscripcion = $item->fin_inscripcion ? Carbon::parse($item->fin_inscripcion)->format('d/m/Y') : null;
             $item->fecha_liberacion = $item->fecha_liberacion ? Carbon::parse($item->fecha_liberacion)->format('d/m/Y') : null;
@@ -1203,6 +1257,11 @@ class Benefit extends BaseModel
                         'value' => $item->polls[0]?->value ?? null
                     ];
                 }
+            }
+            if($item->dificultad)
+            {
+                $name_tag = $this->searchNameForTags($item->dificultad,$this->tagsDefault());
+                $item->dificultad = $name_tag ?? $item->dificultad;
             }
             $item->hasMeeting = false;
             if( count($item->silabo) > 0){
@@ -1346,16 +1405,18 @@ class Benefit extends BaseModel
             $direccion = ($benefit->direccion) ? json_decode($benefit->direccion) : null;
             if ($direccion) {
                 $benefit->direccion = (object)[
-                    'lugar' => $direccion->address,
-                    'link' => $direccion->url,
-                    'image' => null,
-                    'referencia' => $benefit->referencia,
+                    'lugar' => $direccion->address ?? null,
+                    'link' => $direccion->url ?? null,
+                    'image' => $direccion->image ?? null,
+                    'ubicacion' => $direccion->ubicacion ?? null,
+                    'referencia' => $benefit->referencia ?? null,
                 ];
+                $benefit->ubicacion = $direccion->ubicacion ?? null;
             }
             else{
                 $benefit->direccion = null;
+                $benefit->ubicacion = null;
             }
-            $benefit->ubicacion = null;
             $benefit->inicio_inscripcion = $benefit->inicio_inscripcion ? Carbon::parse($benefit->inicio_inscripcion)->format('d/m/Y') : null;
             $benefit->fin_inscripcion = $benefit->fin_inscripcion ? Carbon::parse($benefit->fin_inscripcion)->format('d/m/Y') : null;
             $benefit->fecha_liberacion = $benefit->fecha_liberacion ? Carbon::parse($benefit->fecha_liberacion)->format('d/m/Y') : null;
@@ -1383,6 +1444,11 @@ class Benefit extends BaseModel
                 $item->value_date = Carbon::parse($item->value_date)->format('d/m/Y');
                 $item->value_time = Carbon::parse($item->value_time)->format('H:i');
             });
+            if($benefit->dificultad)
+            {
+                $name_tag = $this->searchNameForTags($benefit->dificultad,$this->tagsDefault());
+                $benefit->dificultad = $name_tag ?? $benefit->dificultad;
+            }
             $benefit->hasMeeting = false;
             if( count($benefit->silabo) > 0){
                 $benefit->hasMeeting = boolval(Meeting::where('model_type','App\\Models\\BenefitProperty')->whereIn('model_id',$benefit->silabo->pluck('id'))->first());
@@ -1403,8 +1469,19 @@ class Benefit extends BaseModel
         return ['data'=>$benefit];
     }
 
+    private function searchNameForTags($id, $array) {
+        foreach ($array as $key => $val) {
+            if ($val['code'] === $id) {
+                return $val['name'];
+            }
+        }
+        return null;
+     }
+
     protected function config($data)
     {
+        $tab = Taxonomy::where('group','benefit')->where('type','group')->where('code','ir-academy')->select('name')->first();
+        $tab_name = $tab?->name ?? 'IR Academy';
         $response = [
             "buscador" => [
                 "filtros_status" => [
@@ -1415,19 +1492,19 @@ class Benefit extends BaseModel
                 ],
                 "filtros_tipo" => [
                     ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                    ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                    ["name" =>  $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                 ]
             ],
             "tabs"=> [
                 [
-                    "name" => "IR Academy",
+                    "name" =>  $tab_name,
                     "code" => "ir-academy",
                     "filtros_status" => [
                         ["name" => "Activos", "code"=> "active", "checked" => true],
                         ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
                     ],
                     "filtros_tipo" => [
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1439,7 +1516,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> false, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],
                 [
@@ -1451,7 +1528,7 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
-                        ["name" => "IR Academy", "code"=> "ir-academy", "show"=> true, "checked" => true]
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> true, "checked" => true]
                     ]
                 ]
             ]
@@ -1462,7 +1539,7 @@ class Benefit extends BaseModel
     protected function sendEmail( $type = null, $user = null, $benefit = null )
     {
         if($type && $user && $benefit){
-            $base_url = env('WEB_BASE_URL') ?? null;
+            $base_url = config('app.web_url') ?? null;
             $email = $user?->email ?? null;
 
             if($base_url) {
@@ -1496,7 +1573,12 @@ class Benefit extends BaseModel
         $benefit = $this;
         $benefit->loadMissing('silabo');
         foreach ($benefit->silabo as $silabo) {
-            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')->where('model_id',$silabo->id)->first();
+            $meeting = Meeting::where('model_type','App\\Models\\BenefitProperty')
+                        ->whereHas('status',function($q){
+                            $q->whereIn('code',['reserved','scheduled','in-progress']);
+                        })
+                        // ->whereRelation('status', 'code', 'in',['reserved','scheduled','in-progress'])
+                        ->where('model_id',$silabo->id)->first();
             if($meeting){
                 switch ($type) {
                     case 'add':

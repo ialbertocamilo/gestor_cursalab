@@ -50,8 +50,8 @@ Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 Route::post('/quizz', [AuthController::class, 'quizz']);
 Route::post('/reset', [AuthController::class, 'reset_password']);
 
-Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
-Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
+// Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
+// Route::post('/test/send-log', [AuthImpersonationController::class, 'login']);
 
 // === endpoint para configuracion de ambiente ===
 Route::get('/config_ambiente', [AuthController::class, 'configuracion_ambiente']);
@@ -66,7 +66,11 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
-Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::prefix('users')->group(base_path('routes/app/users.php'));
+});
+
+Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 'rest'], function () {
 
     // Route::impersonate();
 
@@ -87,6 +91,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
     Route::prefix('/ranking')->group(base_path('routes/app/ranking.php'));
     Route::prefix('videoteca')->group(base_path('routes/app/videoteca.php'));
+    Route::prefix('votaciones')->group(base_path('routes/app/votaciones.php'));
 
     Route::get('preguntas_seccion_ayuda', [RestAyudaController::class, 'preguntas_seccion_ayuda']);
     Route::get('preguntas_frecuentes', [RestAyudaController::class, 'preguntas_frecuentes']);
@@ -104,6 +109,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'rest'], function () {
     Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
     Route::prefix('benefits')->group(base_path('routes/app/benefit.php'));
 
+    Route::post('actualizar_correo', [RestAyudaController::class, 'solicitud_cambio_correo']);
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {

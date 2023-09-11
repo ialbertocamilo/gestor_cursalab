@@ -66,7 +66,7 @@
                         class="my-5"
                     >
                         <template slot="content">
-                            
+
                             <v-row justify="center">
                                 <v-col cols="4">
                                     <DefaultSelect
@@ -239,7 +239,7 @@
                                 </v-col>
 
                             </v-row>
-                            
+
                             <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
                         </template>
                     </DefaultModalSection>
@@ -256,7 +256,7 @@
                         </v-col>
                         <v-col cols="6">
                             <div class="mt-2">
-                                
+
                             <!--                            <DefaultToggle v-model="resource.active"/>-->
                                 <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"
                                     active-label="Tema activo"
@@ -601,8 +601,8 @@ export default {
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
-                embed: true,
-                downloadable: false,
+                embed: ['office'].includes(multimedia.type) ? false : true,
+                downloadable: ['youtube', 'vimeo', 'scorm', 'link','genially'].includes(multimedia.type) ? false : true,
                 disabled: false,
             })
             vue.verifyDisabledMediaEmbed();
@@ -691,7 +691,7 @@ export default {
 
             if (media.type_id == 'vimeo')
                 return 'https://player.vimeo.com/video/' + media.value;
-            
+
             if (media.type_id == 'video' || media.type_id == 'pdf' || media.type_id == 'audio')
                 return vue.media_url + media.value;
 

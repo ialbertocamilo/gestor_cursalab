@@ -1,29 +1,76 @@
 <template>
     <div class="wrapper">
 
-        <v-row class="justify-content-center pt-3 pb-3 --mb-5">
-            <div class="col-6">
+        <v-row class="justify-content-center py-4 --mb-5">
+            <div class="col-4">
                 <v-row class="--justify-content-center --pt-3 --pb-3" align="center">
-                    <div class="col-3">
+                    <div class="col-5">
                         <img :src="config.logo"
                              class="logo"
                             alt="Logo">
                     </div>
-                    <div class="col-6">
+                    <div class="col-7">
                         <h1>Mis workspaces</h1>
-                        <h3>Bienvenido(a) a {{ config.titulo }}</h3>
-                        <small>Ingresa a un workspace para administrar su contenido</small>
+                        <h3>Bienvenido a {{ config.titulo }}</h3>
+                        <!-- <small>Ingresa a un workspace para administrar su contenido</small> -->
                     </div>
                 </v-row>
             </div>
-            <div class="col-4">
+            <div v-if="true" class="col-4 d-flex justify-content-center align-items-center" style="gap: 1.5rem">
+                <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-end`">
+                    <!-- <i class="mdi mdi-cloud-outline fa-2x mr-3"></i> -->
+                    <div class="d-flex flex-column">
+                        <p class="font-weight-bold mb-0">Almacenamiento utilizado</p>
+
+                        <a href class="fa-2x" @click.prevent="showDetail = true" title="Ver detalle">
+                            <!-- <span class="fa-2x" v-text="workspaces_total.workspaces_total_storage"> -->
+                            <!-- <span class="fa-2x"> -->
+                            <i class="mdi mdi-cloud-outline --fa-2x mr-3"></i>{{ workspaces_total.workspaces_total_storage }}
+                            <!-- </span> -->
+                            <!-- Ver detalle <span class="ml-2 fas fa-arrow-right"></span> -->
+                        </a>
+                    </div>
+                </div>
+
+                <div :class="`${ showDetail && 'd-none' } bg-secondary --h-100`" style="width: 1px; height: 75%;"></div>
+
+                <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-end`">
+                    <!-- <i class="mdi mdi-account-multiple-outline fa-2x mr-3"></i> -->
+                    <div class="d-flex flex-column">
+                        <p class="font-weight-bold mb-0">Total usuarios activos</p>
+                        <!-- <span class="fa-2x" v-text="workspaces_total.workspaces_total_users.toLocaleString()"> -->
+
+                        <a href class="fa-2x" @click.prevent="showDetail = true" title="Ver detalle">
+                            <!-- <span class="fa-2x"> -->
+                            <i class="mdi mdi-account-multiple-outline --fa-2x mr-3"></i>{{ workspaces_total.workspaces_total_users.toLocaleString() }}
+                            <!-- </span> -->
+                            <!-- Ver detalle <span class="ml-2 fas fa-arrow-right"></span> -->
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column"
+                    style="gap:1rem;"
+                    v-if="false">
+                    <v-btn color="primary" @click="openLink('/auditoria')">
+                        <span class="mdi mdi-note-text-outline fa-lg mr-2"></span>
+                        Auditoria
+                    </v-btn>
+
+                    <v-btn color="primary">
+                        <span class="mdi mdi-plus fa-lg mr-2"></span>
+                        Workspace
+                    </v-btn>
+                </div>
+            </div>
+            <div class="col-2">
                 <div v-html="headerTemplate"></div>
             </div>
         </v-row>
 
         <v-row justify="space-between" class="py-6" style="background-color: #F9FAFB;"></v-row>
 
-        <v-row justify="space-between" class="mt-5" >
+        <v-row justify="space-between" class="mt-5" v-show="!showDetail">
 
             <v-col cols="1" class=""></v-col>
 
@@ -76,111 +123,285 @@
 
             <v-col cols="1" class=""></v-col>
         </v-row>
+        <!--
+            Workspaces title
+        ======================================== -->
+        <v-row v-show="showDetail" class="justify-content-center mt-3 py-3">
+            <v-col cols="10">
+                <b class="btn_select_media" @click="showDetail = false">
+                    <span class="fas fa-arrow-left  mr-2"></span> Gestión de almacenamiento y usuarios
+                </b>
+            </v-col>
+        </v-row>
 
-        <v-row class="justify-content-center">
-            <v-col cols="10" class="workspaces-wrapper">
-                <v-row class="mb-5">
-                    <v-col v-for="workspace in workspaces"
-                           :key="workspace.id"
-                           :cols="view ? '3' : '12'" class="workspace"
-                           >
 
-                        <div class="row">
-                            <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace" 
-                            :style="{'height': `${view ? '105px' : 'auto'}`}"
-                            >
+        <div v-show="!showDetail">
 
-                                <img v-bind:src="workspace.logo"
-                                     class="img-logo"
-                                     alt=""
-                                     >
-                            </v-col>
-                            <v-col :cols="view ? '12' : '3'" class=" justify-content-center bg-white text-bold d-flex align-items-center">
-                                <span>{{ workspace.name }}</span>
-                            </v-col>
+            <!--
+                Workspaces
+            ======================================== -->
 
-                            <v-col :cols="view ? '12' : '6'" :class="'stats pt-4 pb-2 d-flex  align-items-center workspace-badge ' + (view ? 'justify-content-around' : 'justify-content-end')"
-                                :style="{'background-color': `${view ? 'rgba(165, 166, 246, 0.2)' : 'white'}`}"
-                            >
+            <v-row class="justify-content-center">
+                <v-col cols="10" class="workspaces-wrapper">
+                    <v-row class="mb-5">
+                        <v-col v-for="workspace in workspaces"
+                               :key="workspace.id"
+                               :cols="view ? '3' : '12'" class="workspace"
+                               >
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    title="Ir a módulos"
-                                    @click="setActiveWorkspace(workspace.id, '/modulos')"
+                            <div class="row">
+                                <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace"
+                                :style="{'height': `${view ? '105px' : 'auto'}`}"
                                 >
-                                    <v-badge class="" :content="'' + workspace.modules_count">
-                                        <v-icon class="icon" color="primary">mdi-sitemap</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Módulos'"/>
-                                    </v-badge>
-                                </button>
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    title="Ir a usuarios"
-                                    @click="setActiveWorkspace(workspace.id, '/usuarios')"
+                                    <img v-bind:src="workspace.logo"
+                                         class="img-logo"
+                                         alt=""
+                                         >
+                                </v-col>
+                                <v-col :cols="view ? '12' : '3'" class=" justify-content-center bg-white text-bold d-flex align-items-center">
+                                    <span>{{ workspace.name }}</span>
+                                </v-col>
+
+                                <v-col :cols="view ? '12' : '6'" :class="'stats pt-4 pb-2 d-flex  align-items-center workspace-badge ' + (view ? 'justify-content-around' : 'justify-content-end')"
+                                    :style="{'background-color': `${view ? 'rgba(165, 166, 246, 0.2)' : 'white'}`}"
                                 >
-                                    <v-badge :content="'' + workspace.users_count">
-                                        <v-icon class="icon" color="primary">mdi-account-group</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Usuarios'"/>
-                                    </v-badge>
-                                </button>
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    title="Ir a cursos"
-                                    @click="setActiveWorkspace(workspace.id, '/cursos')"
-                                >
-                                    <v-badge :content="'' + workspace.courses_count">
-                                        <v-icon class="icon" color="primary">mdi-notebook</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Cursos'"/>
-                                    </v-badge>
-                                </button>
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        title="Ir a módulos"
+                                        @click="setActiveWorkspace(workspace.id, '/modulos')"
+                                    >
+                                        <v-badge class="" :content="'' + workspace.modules_count">
+                                            <v-icon class="icon" color="primary">mdi-sitemap</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Módulos'"/>
+                                        </v-badge>
+                                    </button>
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    @click="editWorkspace(workspace.id, workspace.name)"
-                                    v-show="!view && workspace.is_super_user"
-                                >
-                                    <span class="v-badge">
-                                        <v-icon class="icon" color="primary">mdi-pencil</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Editar'"/>
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        title="Ir a usuarios"
+                                        @click="setActiveWorkspace(workspace.id, '/usuarios')"
+                                    >
+                                        <v-badge :content="'' + workspace.users_count">
+                                            <v-icon class="icon" color="primary">mdi-account-group</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Usuarios'"/>
+                                        </v-badge>
+                                    </button>
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    @click="openFormModal(
-                                        workspaceDuplicateFormModalOptions,
-                                        workspace,
-                                        'duplicate',
-                                        `Duplicar workspace - ${workspace.name}`
-                                    )"
-                                    v-show="!view && workspace.is_super_user"
-                                >
-                                    <span class="v-badge">
-                                        <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        title="Ir a cursos"
+                                        @click="setActiveWorkspace(workspace.id, '/cursos')"
+                                    >
+                                        <v-badge :content="'' + workspace.courses_count">
+                                            <v-icon class="icon" color="primary">mdi-notebook</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Cursos'"/>
+                                        </v-badge>
+                                    </button>
 
-                                <button
-                                    type="button" class="btn btn-md"
-                                    @click="openFormModal(
-                                        modalLogsOptions,
-                                        workspace,
-                                        'logs',
-                                        `Logs del módulo - ${workspace.name}`
-                                    )"
-                                    v-show="!view && workspace.is_super_user"
-                                >
-                                    <span class="v-badge">
-                                        <v-icon class="icon" color="primary">mdi-database</v-icon>
-                                        <br> <span class="table-default-icon-title" v-text="'Log'"/>
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="editWorkspace(workspace.id, workspace.name)"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" color="primary">mdi-pencil</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Editar'"/>
+                                        </span>
+                                    </button>
 
-                            </v-col>
-                  
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(
+                                            workspaceDuplicateFormModalOptions,
+                                            workspace,
+                                            'duplicate',
+                                            `Duplicar workspace - ${workspace.name}`
+                                        )"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(
+                                            modalDeleteOptions,
+                                            workspace,
+                                            'delete',
+                                            `Eliminar workspace - ${workspace.name}`
+                                        )"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" color="primary">mdi-delete</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Eliminar'"/>
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(
+                                            modalLogsOptions,
+                                            workspace,
+                                            'logs',
+                                            `Logs del workspace - ${workspace.name}`
+                                        )"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" color="primary">mdi-database</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Log'"/>
+                                        </span>
+                                    </button>
+
+                                </v-col>
+
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+
+
+            <v-row class="justify-content-end">
+
+                <v-col cols="1" class=""></v-col>
+
+                <v-col cols="1" class="d-flex align-items-end justify-end">
+                    <small
+                        v-text="`${pagination.fromRow} - ${pagination.toRow} de ${pagination.total_rows}`"/>
+                </v-col>
+
+                <v-col cols="1" class="d-flex align-items-center justify-content-around">
+                    <v-icon :disabled="pagination.actual_page === 1" v-text="'mdi-chevron-left'"
+                            @click="changePage(false)"/>
+                    <v-icon :disabled="pagination.actual_page === pagination.total_pages"
+                            v-text="'mdi-chevron-right'"
+                            @click="changePage(true)"/>
+                </v-col>
+
+                <v-col cols="1" class=""></v-col>
+            </v-row>
+
+            <v-row class="mb-15"></v-row>
+        </div>
+
+
+        <v-row class="justify-content-center --mt-3 --pt-3 pb-3" v-show="showDetail">
+            <v-col cols="10" class="workspaces-wrapper" style="background: #f8f8fb; border-radius: 6px; padding: 10px 25px;">
+                <v-row>
+                    <v-col cols="6">
+                        <v-card elevation="0" class="mb-5">
+                            <v-card-title class="justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="mdi mdi-cloud-outline fa-2x mr-3"></span>
+                                    Almacenamiento general
+                                </div>
+                                <div>
+                                    <span v-text="workspaces_total.workspaces_total_storage"></span>
+                                </div>
+                            </v-card-title>
+                        </v-card>
+
+                        <div class="row mx-3" v-for="workspace of workspaces_status_total" :key="workspace.id">
+                            <div class="col-3 align-self-center" v-text="workspace.name"></div>
+                            <div class="col-9 d-flex align-items-center">
+                                <div class="d-flex flex-column w-100">
+                                    <div class="mb-2 d-flex justify-space-between">
+                                        <div>
+                                            Utilizado: <span class="font-weight-bold" v-text="workspace.size_medias_storage"></span>
+                                        </div>
+                                        <div>
+                                            Total: <span class="font-weight-bold" v-text="workspace.size_medias_limit"></span>
+                                        </div>
+                                    </div>
+
+                                    <v-progress-linear
+                                        :color="workspace.size_medias_porcent.exceded ? 'red' : 'primary'"
+                                        height="25"
+                                        :value="workspace.size_medias_porcent.porcent"
+                                        rounded
+                                    >
+                                        <div class="d-flex justify-content-end"
+                                            :style="{ width: (workspace.size_medias_porcent.porcent < 10) ? '8%' :workspace.size_medias_porcent.porcent +'%'}">
+                                            <strong
+                                                class="text-white text-right"
+                                                v-text="workspace.size_medias_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
+                                    </v-progress-linear>
+                                </div>
+
+                             <!--    <v-btn
+                                    class="ml-2"
+                                    text
+                                    color="primary"
+                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'home')">
+                                    <v-icon>
+                                        mdi-open-in-new
+                                    </v-icon>
+                                </v-btn> -->
+                            </div>
+                        </div>
+
+                    </v-col>
+
+                    <v-col cols="6">
+                        <v-card elevation="0" class="mb-5">
+                            <v-card-title class="justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <span class="mdi mdi-account-multiple-outline fa-2x mr-3"></span>
+                                    Total usuarios activos
+                                </div>
+                                <div>
+                                    <span v-text="workspaces_total.workspaces_total_users.toLocaleString()"></span>
+                                </div>
+                            </v-card-title>
+                        </v-card>
+
+                        <div class="row mx-3" v-for="workspace of workspaces_status_total" :key="workspace.id">
+                            <div class="col-12 d-flex align-items-center">
+                                <div class="d-flex flex-column w-100">
+                                    <div class="mb-2 d-flex justify-space-between">
+                                        <div>
+                                            Activos: <span class="font-weight-bold" v-text="workspace.users_count_actives"></span>
+                                        </div>
+                                        <div>
+                                            Total: <span class="font-weight-bold" v-text="workspace.users_count_limit"></span>
+                                        </div>
+                                    </div>
+
+                                    <v-progress-linear
+                                        :color="workspace.users_count_porcent.exceded ? 'red' : 'primary'"
+                                        height="25"
+                                        :value="workspace.users_count_porcent.porcent"
+                                        rounded
+                                    >
+                                        <div class="d-flex justify-content-end"
+                                            :style="{ width: (workspace.users_count_porcent.porcent < 10) ? '8%' :workspace.users_count_porcent.porcent +'%'}">
+                                            <strong
+                                                class="text-white text-right"
+                                                v-text="workspace.users_count_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
+                                    </v-progress-linear>
+                                </div>
+
+                                <!-- <v-btn
+                                    class="ml-2"
+                                    text
+                                    color="primary"
+                                    @click="setActiveWorkspaceRoute(workspace.id, true, 'usuarios')">
+                                    <v-icon>
+                                        mdi-open-in-new
+                                    </v-icon>
+                                </v-btn> -->
+                            </div>
                         </div>
                     </v-col>
                 </v-row>
@@ -188,27 +409,9 @@
         </v-row>
 
 
-        <v-row class="justify-content-end">
-
-            <v-col cols="1" class=""></v-col>
-
-            <v-col cols="1" class="d-flex align-items-end justify-end">
-                <small
-                    v-text="`${pagination.fromRow} - ${pagination.toRow} de ${pagination.total_rows}`"/>
-            </v-col>
-            
-            <v-col cols="1" class="d-flex align-items-center justify-content-around">
-                <v-icon :disabled="pagination.actual_page === 1" v-text="'mdi-chevron-left'"
-                        @click="changePage(false)"/>
-                <v-icon :disabled="pagination.actual_page === pagination.total_pages"
-                        v-text="'mdi-chevron-right'"
-                        @click="changePage(true)"/>
-            </v-col>
-
-            <v-col cols="1" class=""></v-col>
-        </v-row>
-
-        <v-row class="mb-15"></v-row>
+        <!--
+            Modals
+        ======================================== -->
 
         <LogsModal
             :options="modalLogsOptions"
@@ -217,6 +420,13 @@
             model_type="App\Models\Workspace"
             :ref="modalLogsOptions.ref"
             @onCancel="closeSimpleModal(modalLogsOptions)"
+        />
+
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+            @onConfirm="closeFormModal(modalDeleteOptions); loadData();"
         />
 
         <WorkspacesForm
@@ -243,6 +453,7 @@
 import WorkspacesForm from "./WorkspacesForm";
 import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
+import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 
 export default {
     // props: [ 'header'],
@@ -254,8 +465,8 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal, WorkspacesDuplicateForm
-        
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal
+
     },
     data: () => ({
         config: {
@@ -263,15 +474,21 @@ export default {
             title: null,
         },
         headerTemplate : '',
-        // superUserRoleId : 1,
-        // configRoleId: 2,
-        // adminRoleId : 3,
-        // selectedWorkspaceId: null,
+        superUserRoleId : 1,
+        configRoleId: 2,
+        adminRoleId : 3,
+        selectedWorkspaceId: null,
         workspaces: [],
         workspacesConfig: [],
         userSession: {},
-        // configurationIsVisible: false,
-        // canAccessConfiguration: false,
+        configurationIsVisible: false,
+        canAccessConfiguration: false,
+        showDetail: false,
+        workspaces_total:{
+            workspaces_total_storage: '',
+            workspaces_total_users: '',
+        },
+        workspaces_status_total:[],
         workspaceFormModalOptions: {
             ref: 'WorkspacesForm',
             open: false,
@@ -329,22 +546,31 @@ export default {
             base_endpoint: "/search",
             persistent: true
         },
+        modalDeleteOptions: {
+            ref: 'WorkspaceDeleteModal',
+            open: false,
+            base_endpoint: '/workspaces',
+            contentText: '¿Desea eliminar este registro?',
+            endpoint: '',
+            width: '40vw',
+        },
     })
     ,
     mounted() {
 
         this.loadData();
         this.initializeHeaderTemplate();
+        this.loadDataStorage();
     },
-    // watch: {
-    //     selectedWorkspaceId () {
-    //         if (this.selectedWorkspaceId > 0) {
-    //             this.setActiveWorkspace(
-    //                 this.selectedWorkspaceId, false
-    //             );
-    //         }
-    //     }
-    // },
+    watch: {
+        selectedWorkspaceId () {
+            if (this.selectedWorkspaceId > 0) {
+                this.setActiveWorkspace(
+                    this.selectedWorkspaceId, false
+                );
+            }
+        }
+    },
     methods: {
         initializeHeaderTemplate() {
             this.headerTemplate = document
@@ -378,9 +604,40 @@ export default {
         }
         ,
         /**
-         * Open form to duplicate workspace
+         * Open form to store workspace, and update the session workspace
          *
          * @param workspaceId
+         */
+        storeWorkspace() {
+
+            this.workspaceFormModalOptions.action = 'create';
+
+            this.openFormModal(
+                this.workspaceFormModalOptions,
+                null,
+                null,
+                'Crear workspace'
+            );
+        }
+        ,
+        /**
+         * Load workspaces list from server
+         */
+        loadData() {
+
+            let vue = this;
+
+            let url = `/workspaces/search`
+
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.workspaces = data.data.data;
+                    this.loadSession();
+                })
+        }
+        ,/**
+         * Load session data from server
          */
         duplicateWorkspace(workspaceId) {
 
@@ -459,7 +716,7 @@ export default {
 
         /**
          * Update workspace in User's session and
-         * redirect to welcome page
+         * redirect to default page
          *
          * @param workspaceId
          * @param redirect
@@ -476,7 +733,7 @@ export default {
                 .post(url, formData)
                 .then(() => {
 
-                    // Redirect to welcome page
+                    // Redirect to default page
 
                     if (redirect) {
                         window.location.href = redirect;
@@ -490,6 +747,48 @@ export default {
                 .post('/logout')
                 .then(() => {
                     window.location.href = '/login';
+                })
+        }
+        ,
+        setActiveWorkspaceRoute(workspaceId, redirect, route = 'home') {
+
+            let vue = this;
+
+            // Submit request to update workspace in session
+
+            let formData = vue.getMultipartFormData('PUT');
+            let url = `/usuarios/session/workspace/${workspaceId}`;
+            this.$http
+                .post(url, formData)
+                .then(() => {
+
+                    // Redirect to default page
+
+                    if (redirect) {
+                        window.location.href = '/'+route;
+                    }
+                });
+        }
+        ,
+         /**
+         * Load workspaces list from server
+         */
+        loadDataStorage() {
+
+            let vue = this;
+
+            let url = `/general/workspaces-status`
+            vue.showLoader();
+
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    const { workspaces_total, workspaces_status_total } = data.data
+
+                    vue.workspaces_total = workspaces_total;
+                    vue.workspaces_status_total = workspaces_status_total;
+
+                    vue.hideLoader();
                 })
         }
     }

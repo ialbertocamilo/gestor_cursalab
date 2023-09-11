@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat elevation="0">
             <v-card-title class="justify-content-between align-items-center position-relative">
-                <span>Expositores: {{ speaker_id ? 'Editar Expositor' : 'Crear' }}</span>
+                <span>Facilitadores: {{ speaker_id ? 'Editar Facilitador' : 'Crear' }}</span>
             </v-card-title>
         </v-card>
         <br>
@@ -75,7 +75,7 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Experiencia del expositor(a)"
+                                title="Experiencia del facilitador(a)"
                             >
                                 <template slot="content">
                                     <div class="box_beneficio_links">

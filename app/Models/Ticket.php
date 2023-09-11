@@ -103,6 +103,9 @@ class Ticket extends BaseModel
         if ($request->status)
             $query->where('status', $request->status);
 
+        if ($request->reason)
+            $query->where('reason', $request->reason);
+
         if ($request->starts_at)
             $query->whereDate('created_at', '>=', $request->starts_at);
 
@@ -133,13 +136,17 @@ class Ticket extends BaseModel
     {
         $subworkspaces = get_current_workspace_indexes();
         $subworkspacesIds = implode(',', $subworkspaces['ids']->toArray());
+        if (!$subworkspacesIds) return;
 
         $usersToUpdate = DB::select(DB::raw("
             select
                 u.id
-            from users u join tickets t on t.user_id = u.id
+            from users u
+                join tickets t on t.user_id = u.id
             where u.last_login > t.created_at
-            and u.subworkspace_id in ($subworkspacesIds)
+                and t.status != 'solucionado'
+                and t.reason = 'Soporte Login'
+                and u.subworkspace_id in ($subworkspacesIds)
         "));
         $usersToUpdateIds = collect($usersToUpdate)->pluck('id');
 
@@ -149,14 +156,37 @@ class Ticket extends BaseModel
             ->whereIn('user_id', $usersToUpdateIds)
             ->get();
 
+        $tickets_users_inactive = Ticket::query()->whereHas('user', function ($q) use ($subworkspaces){
+            $q->whereIn('subworkspace_id', $subworkspaces['ids'])->where('active',0);
+        })->where('status', 'pendiente')->get();
+
+        $tickets = $tickets->merge($tickets_users_inactive);
         foreach ($tickets as $ticket) {
             $ticket->status = 'solucionado';
             $ticket->save();
 
-            $this->updateInfoSupport('Plataforma', '');
+            $ticket->updateInfoSupport('Plataforma', '');
+
+            self::notifyUserAboutSolvedTicket($ticket);
         }
     }
 
+    /**
+     * Create a notification for user when its ticket is solved
+     * @param Ticket $ticket
+     * @return void
+     */
+    public static function notifyUserAboutSolvedTicket(Ticket $ticket): void
+    {
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            [$ticket->user_id],
+            UserNotification::TICKET_SOLVED,[
+                'ticketNumber' => $ticket->id
+            ]
+        );
+    }
 
     /**
      * Update values in info_support column

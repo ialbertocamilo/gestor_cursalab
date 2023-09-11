@@ -9,8 +9,10 @@
                 v-if="tooltip"
                 class="ml-1"
                 :text="tooltip"
-                right
+                :right="right"
+                :bottom="!right"
                 color="white"
+                small
             />
         </v-card-title>
         <v-card-text class="default-section-content py-3 px-5">
@@ -26,6 +28,10 @@ export default {
             default: 'Título de la sección'
         },
         tooltip: String,
+        right: {
+            type: Boolean,
+            default: true
+        },
         comingSoon: false,
     }
 }
