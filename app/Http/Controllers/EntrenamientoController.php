@@ -482,19 +482,39 @@ class EntrenamientoController extends Controller
         }
 
         // Checklists del alumno
-        $checklists = ChecklistRpta::with('checklistRelation', 'rpta_items')->where('student_id', $usuario->id)->get();
-        $checklistTemp = collect();
-        $checklists->each(static function ($checklist_rpta, $key) use ($checklistTemp) {
-            //            dd($checklist_rpta);
-            $checklistTemp->push([
-                'titulo' => $checklist_rpta->checklistRelation->titulo,
-                'avance' => $checklist_rpta->porcentaje
-            ]);
-        });
-        $usuario->checklists = $checklistTemp;
-        $usuario->cargo = '';
-        $usuario->botica = '';
-        $usuario->grupo_nombre = '';
+        $checklistsByUser  = CheckList::getChecklistsByAlumno($usuario->id);
+        $checklists = [];
+        foreach ($checklistsByUser['checklists']['pendientes'] as $checklist) {
+            $checklists[]=[
+                'titulo' => $checklist['titulo'],
+                'avance' => $checklist['porcentaje']
+            ];
+        }
+        foreach ($checklistsByUser['checklists']['realizados'] as $checklist) {
+            $checklists[]=[
+                'titulo' => $checklist['titulo'],
+                'avance' => $checklist['porcentaje']
+            ];
+        }
+        // foreach ($checklistsByUser as $checklistByUser) {
+        //     $checklists->push([
+        //         'titulo' => $checklist_rpta->checklistRelation->titulo,
+        //         'avance' => $checklist_rpta->porcentaje
+        //     ]);
+        // }
+        // $checklists = ChecklistRpta::with('checklistRelation', 'rpta_items')->where('student_id', $usuario->id)->get();
+        // $checklistTemp = collect();
+        // $checklists->each(static function ($checklist_rpta, $key) use ($checklistTemp) {
+        //     //            dd($checklist_rpta);
+        //     $checklistTemp->push([
+        //         'titulo' => $checklist_rpta->checklistRelation->titulo,
+        //         'avance' => $checklist_rpta->porcentaje
+        //     ]);
+        // });
+        // $usuario->checklists = $checklistTemp;
+        // $usuario->cargo = '';
+        // $usuario->botica = '';
+        // $usuario->grupo_nombre = '';
 
         return response()->json([
             'error' => false,
