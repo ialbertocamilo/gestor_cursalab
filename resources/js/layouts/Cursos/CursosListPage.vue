@@ -306,7 +306,7 @@ export default {
                         method_name: 'encuesta'
                     },
                     {
-                        text: "Crear Proyecto",
+                        text: "Crear Tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'create_project',
@@ -314,7 +314,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Editar Proyecto",
+                        text: "Editar Tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'edit_project',
@@ -322,7 +322,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Usuario proyectos",
+                        text: "Usuario tareas",
                         icon: 'fas fa-book',
                         show_condition:'project_users',
                         type: 'route',
@@ -474,7 +474,7 @@ export default {
                 ref: 'ProjectFormModal',
                 open: false,
                 base_endpoint: '/projects',
-                resource: 'Proyecto',
+                resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create'
             }
@@ -558,7 +558,7 @@ export default {
         },
         openProjectModal(course){
             let vue = this;
-            let title = 'Crear Proyecto';
+            let title = 'Crear Tarea';
             if(course.create_project){
                 vue.modalOptionProject.course=course
                 vue.modalOptionProject.action='create';
@@ -566,7 +566,7 @@ export default {
             }else{
                 vue.modalOptionProject.action='edit';
                 vue.modalOptionProject.create_from_course_list = false;
-                title = `Editar Proyecto - ${course.name}`;
+                title = `Editar Tarea - ${course.name}`;
             }
             console.log('course',course);
             vue.openFormModal(vue.modalOptionProject,course.project,null,title);

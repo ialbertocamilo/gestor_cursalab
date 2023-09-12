@@ -16,11 +16,11 @@ class ProjectController extends Controller
     }
     public function store(ProjectStoreRequest $request){
         Project::storeUpdateRequest($request);
-        return $this->success(['msg'=>'El proyecto se creó correctamente.']);
+        return $this->success(['msg'=>'La tarea se creó correctamente.']);
     }
     public function update(ProjectStoreRequest $request,Project $project){
         Project::storeUpdateRequest($request,$project);
-        return $this->success(['msg'=>'El proyecto se actualizó correctamente.']);
+        return $this->success(['msg'=>'La tarea se actualizó correctamente.']);
     }
 
     public function editProject(Project $project){
@@ -35,7 +35,7 @@ class ProjectController extends Controller
 
     public function deleteProject(Project $project){
         Project::destroyRequest($project);
-        return $this->success(['msg'=>'Se elimino el proyecto correctamente.']);
+        return $this->success(['msg'=>'Se elimino la tarea correctamente.']);
     }
     
     public function listConstraints(){

@@ -46,9 +46,9 @@ class ProjectStoreRequest extends FormRequest
     {
         $constraints = config('project.constraints.admin');
         return [
-            'project.id.exists' => 'Error al actualizar el proyecto',
+            'project.id.exists' => 'Error al actualizar la tarea',
             'project.course_id.required' => 'El dato "Curso" es requerido.',
-            'project.course_id.unique' => 'Este curso ya tiene un proyecto asignado.',
+            'project.course_id.unique' => 'Este curso ya tiene una tarea asignado.',
             'project.name.required' => 'El dato "Curso" es requerido.',
             'project.indications.max' => 'Las indicaciones deben ser máximo de 255 caracteres.',
             'count_file' => 'Solo se pueden subir máximo '.$constraints['max_quantity_upload_files'].' archivos.'

@@ -94,8 +94,8 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="openFormModal(modalOptions,$event,'edit',`Editar Tarea - ${$event.course}`)"
-                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proyecto')"
-                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un proyecto')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de una tarea')"
+                @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar tarea')"
             />
             <ProjectFormModal
                 width="50vw"
@@ -211,13 +211,13 @@ export default {
                     inactive: {
                         title: '¡Estás por desactivar una Tarea!',
                         details: [
-                            'Este proyecto ahora no podrá ser visto por los usuarios.'
+                            'Esta Tarea ahora no podrá ser visto por los usuarios.'
                         ],
                     },
                     active: {
                         title: '¡Estás por activar una Tarea!',
                         details: [
-                            'Este proyecto ahora podrá ser visto por los usuarios.'
+                            'Este Tarea ahora podrá ser visto por los usuarios.'
                         ]
                     }
                 },
@@ -234,7 +234,7 @@ export default {
                     delete: {
                         title: '¡Estás por eliminar una Tarea!',
                         details: [
-                            'Este proyecto no podrá ser visto por los usuarios.',
+                            'Esta tarea no podrá ser visto por los usuarios.',
                             'La información eliminada no podra recuperarse'
                         ],
                     }

@@ -2,7 +2,7 @@
     <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirmModal">
         <template v-slot:content>
             <v-form ref="projectForm">
-                <p>Los proyectos serán asignados a todos los usuarios segmentados en el curso.</p>
+                <p>Las tareas serán asignados a todos los usuarios segmentados en el curso.</p>
                 <v-row justify="space-around">
                     <v-col cols="12">
                         <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"

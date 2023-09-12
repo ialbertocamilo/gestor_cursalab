@@ -53,7 +53,7 @@ class Project extends BaseModel
                 ->whereRelation('workspaces', 'id', $current_workspace->id)
                 ->select(
                     'courses.id',
-                    DB::raw('CASE WHEN p.id IS NULL THEN courses.name ELSE CONCAT(courses.name," (Ya tiene proyecto asignado)") END AS name'),
+                    DB::raw('CASE WHEN p.id IS NULL THEN courses.name ELSE CONCAT(courses.name," (Ya tiene una tarea asignada)") END AS name'),
                     DB::raw('CASE WHEN p.id IS NULL THEN 0 ELSE 1 END AS disabled')
                 )->whereNull('p.deleted_at')
                 ->paginate(10)->items();
