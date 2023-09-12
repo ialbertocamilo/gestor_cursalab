@@ -22,6 +22,7 @@
                         href="#tab-2"
                         :key="2"
                         class="primary--text"
+                        v-if="is_superuser"
                     >
                         <v-icon>mdi-text-box-edit-outline</v-icon>
                         <span class="ml-3">Criterios</span>
@@ -76,16 +77,14 @@
 
                     </v-tab-item>
 
-                    <v-tab-item :key="2" :value="'tab-2'">
-
-                        <v-row>
+                    <v-tab-item :key="2" :value="'tab-2'" v-if="is_superuser">
+                        <!-- <v-row class="">
                             <v-col>
                                 <v-alert
                                     colored-border
                                     elevation="2"
                                     class="mb-0"
                                 >
-                                    <!-- Selecciona los criterios que usa la empresa para segmentar el contenido -->
                                     <p>En esta sección podrás gestionar los criterios que se mostrarán en la segmentación. Ten en cuenta lo siguiente:</p>
                                     <v-row>
                                         <v-col cols="12" class="py-0">
@@ -100,48 +99,70 @@
                                     </v-row>
                                 </v-alert>
                             </v-col>
-                        </v-row>
-                        <v-container
-                                id="scroll-target"
-                                class="overflow-y-auto py-0 px-1"
-                                style="min-height: 360px; max-height: 400px"
-                            >
+                        </v-row> -->
+                        
 
-                            <v-row class="mr-1">
-                                <v-col cols="6">
-                                    <v-subheader class="mb-3 px-0">
-                                        <strong>Por defecto</strong>
-                                    </v-subheader>
-                                    <v-checkbox
-                                        v-for="criterion in defaultCriteria"
-                                        :key="criterion.id"
-                                        v-model="resource.selected_criteria[criterion.id]"
-                                        :label="generateCriterionTitle(criterion)"
-                                        :disabled="false"
-                                    >
-                                        <!-- :disabled="criterion.code === 'module'" -->
-                                    </v-checkbox>
-                                </v-col>
-                                <v-col cols="6">
+                        <DefaultSection title="Criterios disponibles y secciones de uso" v-if="is_superuser">
+                            <template v-slot:content>
 
-                                    <v-subheader class="mb-3 px-0">
-                                        <strong>Personalizados</strong>
-                                    </v-subheader>
+                                <v-container
+                                    id="scroll-target"
+                                    class="overflow-y-auto py-0 px-1"
+                                    style="min-height: 360px; max-height: 450px;"
+                                >
+                                    <v-row class="mr-1 custom-row-checkbox">
+                                        <v-col cols="12" v-if="resource.criteria_workspace">
+                                            <v-row v-for="criterion in resource.criteria_workspace" :key="criterion ? criterion.id : null" class="mb-5" style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">
 
-                                    <v-checkbox
-                                        v-for="criterion in customCriteria"
-                                        :key="criterion.id"
-                                        v-model="resource.selected_criteria[criterion.id]"
-                                        :label="`${criterion.name} ` + (criterion.required ? '(requerido)' : '(opcional)') "
-                                        :disabled="criterion.its_used && resource.selected_criteria[criterion.id]"
-                                    >
-                                        <!-- :append-icon="criterion.its_used && resource.selected_criteria[criterion.id] ? 'fas fa-file-alt':''" -->
+                                                <v-col cols="3" v-if="criterion" class="d-flex align-items-center custom-row-switch">
+                                                    <DefaultToggle
+                                                        class="--mt-5"
+                                                        dense
+                                                        :title="criterion.name"
+                                                        v-model="criterion.available"
+                                                        :disabled="criterion.disabled"
+                                                        :active-label="criterion.name"
+                                                        :inactive-label="criterion.name"
+                                                    />
+                                                    <!-- <DefaultInput
+                                                        clearable
+                                                        v-model="resource.name"
+                                                        label="Título del criterio"
+                                                        :rules="rules.name"
+                                                        dense
+                                                    /> -->
+                                                </v-col>
 
-                                    </v-checkbox>
-                                </v-col>
-                            </v-row>
+                                                <v-col cols="9" v-if="criterion">
+                                                    <v-row justify="start">
+                                                        <v-col :cols="field.type == 'boolean' ? 4 : 12" v-for="field in criterion.fields" :key="field.code" class="py-0 pr-0">
+                                                            <v-checkbox
+                                                                v-if="field.type == 'boolean'"
+                                                                hide-details
+                                                                v-model="field.available"
+                                                                :label="field.name"
+                                                                :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
+                                                            />
 
-                        </v-container>
+                                                            <DefaultInput
+                                                                v-if="field.type == 'text'"
+                                                                clearable
+                                                                v-model="field.text"
+                                                                :label="field.name"
+                                                                :disabled="criterion.disabled ? criterion.disabled : (!criterion.available ? true : false ) "
+                                                                dense
+                                                                class="mb-3 mx-1"
+                                                            />
+                                                        </v-col>
+                                                    </v-row>
+                                                </v-col>
+                                            </v-row>    
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+
+                            </template>
+                        </DefaultSection>
 
                     </v-tab-item>
 
@@ -231,10 +252,11 @@
                                 >
                                     <template v-slot:content>
 
-                                        <v-row justify="start">
+                                        <v-row justify="start" class="custom-row-checkbox">
 
                                             <v-col cols="4" v-for="functionality in functionalities" :key="functionality.id">
                                                 <v-checkbox
+                                                    hide-details
                                                     v-model="resource.selected_functionality[functionality.id]"
                                                     :label="functionality.name"
                                                 >
@@ -360,7 +382,7 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 'selected_criteria',
+    'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 
     'show_logo_in_app','limits'
@@ -385,8 +407,13 @@ export default {
             tabs: null,
             is_superuser: false,
             mensajes: mensajes,
-            errors: []
-            ,
+            errors: [],
+            sections: [
+                {name: 'Perfil', code: 'profile'},
+                {name: 'Filtros', code: 'filters'},
+                {name: 'Ranking', code: 'ranking'},
+                {name: 'Reportes', code: 'reports'},
+            ],
             generateCriterionTitle(criterion) {
 
                 let requiredLabel = criterion.required
@@ -402,8 +429,14 @@ export default {
                 logo: '',
                 logo_negativo: '',
                 qualification_type: '',
-                selected_criteria: {},
-                selected_functionality: {}
+                criteria_workspace: [],
+                selected_functionality: {},
+                // selected_section_criteria: {
+                //     profile: false,
+                //     filters: false,
+                //     ranking: false,
+                //     reports: false,
+                // }
             },
             limit_allowed_users: null,
             resource: {
@@ -412,12 +445,9 @@ export default {
                 qualification_types: [],
             },
             defaultCriteria: [],
-            functionalities: []
-            ,
-            customCriteria: []
-            ,
-            itemsCriterionDates: []
-            ,
+            functionalities: [],
+            customCriteria: [],
+            itemsCriterionDates: [],
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
@@ -480,7 +510,7 @@ export default {
                     method, vue.resource, fields, file_fields
                 );
                 formData.set(
-                    'selected_criteria', JSON.stringify(vue.resource.selected_criteria)
+                    'criteria_workspace', JSON.stringify(vue.resource.criteria_workspace)
                 );
                 formData.set(
                     'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
@@ -552,17 +582,17 @@ export default {
                     // Filter criteria in two collections,
                     // according its "required" properties
 
-                    vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
-                    vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
+                    // vue.defaultCriteria = data.data.criteria.filter(c => c.is_default === 1);
+                    // vue.customCriteria = data.data.criteria.filter(c => c.is_default === 0);
 
                     // Update content of selected criteria
 
-                    vue.resource.selected_criteria = {};
-                    data.data.criteria.forEach(c => {
-                        vue.resource.selected_criteria[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.criteria_workspace
-                        );
-                    });
+                    // vue.resource.criteria_workspace = {};
+                    // data.data.criteria.forEach(c => {
+                    //     vue.resource.criteria_workspace[c.id] = vue.criterionExistsInCriteriaValue(
+                    //         c.id, data.data.criteria_workspace
+                    //     );
+                    // });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
@@ -582,8 +612,7 @@ export default {
         }
         ,
         loadSelects() {
-        }
-        ,
+        },
         criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
 
             let exists = false;
@@ -595,7 +624,6 @@ export default {
                         exists = true;
                 });
             }
-
 
             return exists;
         }

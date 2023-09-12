@@ -35,6 +35,7 @@ class ReportsController extends Controller
 
         $query = GeneratedReport::query()
             ->with('admin.subworkspace')
+            ->whereHas('admin')
             ->where('workspace_id', $workspaceId)
             ->where('report_type','<>','api_information')
             ->where('created_at', '>=', Carbon::today()->subDays(30)->toDateTimeString())

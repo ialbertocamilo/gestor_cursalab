@@ -54,7 +54,7 @@ class TemaController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $course->qualification_type;
-        $media_url = get_media_url();
+        $media_url = get_media_root_url();
 
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url');
 
@@ -83,8 +83,8 @@ class TemaController extends Controller
         $requirement = $topic->requirements()->first();
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
 
-        $media_url = get_media_url();
-        $limits_ia_convert = Workspace::getLimitAIConvert($topic);
+        $media_url = get_media_root_url();
+
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],

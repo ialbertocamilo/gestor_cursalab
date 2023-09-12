@@ -162,7 +162,14 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             $user[$dt['code']] = $dt['value_excel'];
-
+            if(strpos($dt['value_excel'],'=')===0){
+                $has_error = true;
+                $errors_index[] = [
+                    'index' => $dt['index'],
+                    'message' => 'No debe incluir fórmula de Excel.'
+                ];
+                continue;
+            }
             if ($dt['code'] == 'active') {
                 if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
                     $has_error = true;
@@ -178,6 +185,7 @@ class UserMassive extends Massive implements ToCollection
         }
         //verify username and email fields are unique
         $user_username_email = null;
+        $master_username_email = null;
         if (isset($user['document'])) {
             $user_username_email = User::where(function ($q) use ($user) {
                 isset($user['username']) && $q->orWhere('username', $user['username']);
@@ -185,7 +193,6 @@ class UserMassive extends Massive implements ToCollection
             })->where('document', '<>', $user['document'])->select('email', 'username')->first();
 
             if (env('MULTIMARCA') === true) {
-                $master_username_email = null;
                 $master_username_email = UsuarioMaster::where(function ($q) use ($user) {
                     if (isset($user['username'])) {
                         $q->orWhere('username', $user['username']);
@@ -298,7 +305,7 @@ class UserMassive extends Massive implements ToCollection
                 }
                 if (is_array($dc['value_excel'])) {
                     foreach ($dc['value_excel'] as $key => $value_excel) {
-                        $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel);
+                        $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$value_excel,$code_criterion);
                         if($criterion_value['has_error']){
                             $has_error = $criterion_value['has_error'];
                             $errors_index[] = $criterion_value['info_error'];
@@ -308,7 +315,7 @@ class UserMassive extends Massive implements ToCollection
                         $user['criterion_list_final'][] =  $criterion_value['criterion_value']->id;
                     }
                 }else{
-                    $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel']);
+                    $criterion_value = $this->getCriterionValueId($colum_name,$dc,$criterion,$dc['value_excel'],$code_criterion);
                     if($criterion_value['has_error']){
                         $has_error = $criterion_value['has_error'];
                         $errors_index[] = $criterion_value['info_error'];
@@ -322,7 +329,7 @@ class UserMassive extends Massive implements ToCollection
 
         return compact('has_error', 'user', 'errors_index');
     }
-    private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel){
+    private function getCriterionValueId($colum_name,$dc,$criterion,$value_excel,$code_criterion){
         $has_error = false;
         if (strpos($value_excel, "=") === 0) {
             $has_error = true;
@@ -335,7 +342,7 @@ class UserMassive extends Massive implements ToCollection
             ];
         }
         $criterion_value = CriterionValue::where('criterion_id', $criterion->id)->where($colum_name, $value_excel)->first();
-        if(!$dc['can_be_create'] && !$criterion_value){
+        if(!$dc['can_be_create'] && !$criterion_value && $code_criterion != 'date'){
             $has_error = true;
             return [
                 'has_error'=>true,

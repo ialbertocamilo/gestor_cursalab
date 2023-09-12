@@ -64,6 +64,24 @@ if (isset($fullScreen)) {
 
         <div class="nav-container <?= $sidebarClasses ?>">
             <div class="sidemenu-container">
+
+                {{-- Sidemenu skeleton --}}
+
+                <div class="skeleton-wrapper">
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                    <div class="skeleton purple"></div>
+                </div>
+
+
                 {{-- <v-app> --}}
                 <side-menu :roles="{{ json_encode($roles) }}" :show_meeting_section="'{{ $show_meeting_section }}'" :functionality="{{ json_encode($functionality) }}"/>
                 {{-- </v-app> --}}
@@ -122,7 +140,212 @@ if (isset($fullScreen)) {
                 </div>
             @endif
 
-            @yield('content')
+
+                @yield('content')
+
+                {{--
+                    Dashboard skeleton
+                ======================================== --}}
+
+                @if (Route::is('home'))
+                    <div class="dashboard skeleton-wrapper position-relative p-4">
+
+                        <div class="row m-0">
+                            <div class="col-12 card skeleton module-selector"></div>
+                        </div>
+
+                        <div class="row justify-content-between m-0 mt-4 bg-white">
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                            <div class="skeleton card2"></div>
+                        </div>
+
+                        <div class="row m-0 mt-4 justify-content-between">
+                            <div class="col-6 skeleton charts"></div>
+                            <div class="col-6 skeleton charts"></div>
+                        </div>
+                    </div>
+
+                @elseif (!Route::is('workspaces-list'))
+
+                    <div class="table-gui skeleton-wrapper position-relative p-4">
+
+                        <div class="row m-0">
+                            <div class="col-12 card skeleton filters-selector"></div>
+                        </div>
+
+                        <div class="row m-0 mt-4">
+                            <div class="col-12">
+                                <div class="skeleton header-skeleton"></div>
+                                <div class="body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="skeleton bar"></div>
+                                        </div>
+                                        <div class="col-3 d-flex justify-content-between">
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                            <div class="skeleton icon"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                @endif
 
         </div>
         <div id="content_polls" style="display: none;">
@@ -224,8 +447,8 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.2387-' . date('Y-W-d-H')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=3.2387-' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.2389-' . date('Y-W-d-H')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.2389-' . date('Y-W-m')) }}"></script>
 
     <script>
         $(document).ready(function () {

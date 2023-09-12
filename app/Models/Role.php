@@ -62,10 +62,19 @@ class Role extends BaseModel
         return $query->where($column, 'LIKE', "%$value%");
 
     }
-
+    protected function getRolesAdminNames(){
+        return Role::join('assigned_roles','assigned_roles.role_id','=','roles.id')->select('roles.name')->where('roles.active',1)
+                ->groupBy('roles.id')->get()->pluck('name')->toArray();
+    }
     protected function search($request)
     {
         $query = self::whereNotIn('name', ['developer', 'superadmin']);
+        if ($request->q){
+            $query->where(function($q) use ($request){
+                $q->where('name', 'like', "%$request->q%");
+                $q->orWhere('title', 'like', "%$request->q%");
+            });
+        }
 
         if ($request->filters)
         {

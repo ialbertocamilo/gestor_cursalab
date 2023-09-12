@@ -172,7 +172,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
 
             if ($topic->assessable && $topic->evaluation_type->code === 'qualified') {
 
-                if ($grade > $summary->grade) {
+                if ($grade >= $summary->grade) {
 
                     $attempts = $excelData[2] ?: ($summary ? $summary->attempts : 1);
                     $views = $excelData[3] ?: ($summary ? $summary->views : 1);

@@ -21,6 +21,7 @@ const default_media_images = {
     excel: "/images/default-scorm-img_116_360.png",
     scorm: "/images/default-scorm-img_116_360.png",
     link: "/images/default-scorm-img_116_360.png",
+    office: "/images/default-pdf-img_210.png",
 }
 
 export default {
@@ -33,6 +34,7 @@ export default {
                 {label: 'Video', icon: 'mdi mdi-video', type: 'video'},
                 {label: 'Audio', icon: 'mdi mdi-headphones', type: 'audio'},
                 {label: 'PDF', icon: 'mdi mdi-file-pdf-box', type: 'pdf'},
+                {label: 'Office', icon: 'mdi mdi-file', type: 'office'},
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
                 {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},

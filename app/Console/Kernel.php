@@ -56,6 +56,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('mongo:save-data')->dailyAt('03:00');
 
+        // Notifications
+
+        $schedule->command('notifications:clear')->dailyAt('05:00');
+
         // Criteria
 
         $schedule->command('criteria:check-empty')->everyThreeHours();
@@ -68,6 +72,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('beneficios:change-status')->dailyAt('00:00');
         $schedule->command('beneficios:notify-users')->dailyAt('00:30');
         $schedule->command('beneficios:email-segments')->everyFiveMinutes();
+        //Checklist
+        $schedule->command('update:checklist-summary-user')->hourly();
+
     }
 
     /**

@@ -22,6 +22,12 @@
                         <img src="{{ url('/img/storage/users-outline.png') }}" style="margin-right: .3rem;"> Aumentar usuarios: 
                         <b>{{ $data['users'] }} usuarios.</b> 
                     </p>
+                    @if($data['functionalities_name'])
+                        <p style="margin: 0.3rem 0;display: flex; align-items: center;">
+                            Solicita la(s) siguiente(s) funcionalidad(es): 
+                            <b>{{ $data['functionalities_name'] }}.</b> 
+                        </p>
+                    @endif
                 </div>
                 <p> <span style="font-weight:bold">Descripción: </span> {{ $data['description'] }} </p>
             </div>

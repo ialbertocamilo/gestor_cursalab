@@ -125,14 +125,7 @@ class AuthImpersonationController extends Controller
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }
 
-        $criterios = [];
-
-        foreach ($user->criterion_values as $value) {
-            $criterios[] = [
-                'valor' => $value->value_text,
-                'tipo' => $value->criterion->name ?? null,
-            ];
-        }
+        $criterios = $user->getProfileCriteria();
 
         $user_data = [
             "id" => $user->id,
@@ -156,9 +149,10 @@ class AuthImpersonationController extends Controller
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
         $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
 
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu);
+        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
         $config_data->filters = config('data.filters');
+        $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
         $api_url = config('app.url');
 
         return [
@@ -169,7 +163,7 @@ class AuthImpersonationController extends Controller
                 'reportes_url'=>env('REPORTES_URL')
             ],
             'access_token' => $token,
-            'bucket_base_url' => get_media_url(),
+            'bucket_base_url' => get_media_root_url(),
             'config_data' => $config_data,
             'usuario' => $user_data
         ];
@@ -222,6 +216,8 @@ class AuthImpersonationController extends Controller
             return $this->error('Wrong token.', http_code: 503);
 
         } catch (\Exception $e) {
+
+            info($e);
 
             return $this->error('Error found.', http_code: 503);
         }

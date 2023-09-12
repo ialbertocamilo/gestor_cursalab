@@ -108,78 +108,88 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::post('/user_password_reset', [UsuarioController::class, 'updatePasswordUser'])->name('usuarios.user_password_reset');
 
     Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
-    Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('checkrol:admin,reports');
+    Route::prefix('intentos-masivos')->middleware('hasHability:attemps-massive')->group(base_path('routes/cms/intentos-masivos.php'));
+    Route::prefix('notificaciones-push')->middleware('hasHability:push-notification')->group(base_path('routes/cms/notificaciones-push.php'));
+    Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
+    Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    Route::prefix('general')->middleware('checkrol:admin')->group(base_path('routes/cms/general.php'));
-    Route::prefix('common')->middleware('checkrol:admin')->group(base_path('routes/cms/common.php'));
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:documentation-api');
+    
 
+    
+    Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('hasHability:learning-analytics');
 
-    Route::prefix('anuncios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/anuncios.php'));
-    Route::prefix('encuestas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/encuestas.php'));
-    Route::prefix('multimedia')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/multimedia.php'));
-    Route::prefix('glosario')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/glosario.php'));
-    Route::prefix('protocolos-y-documentos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/vademecum.php'));
-    Route::prefix('videoteca')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/videoteca.php'));
-    Route::prefix('tags')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/tags.php'));
-
-
-    Route::prefix('ayudas')->middleware('checkrol:admin')->group(base_path('routes/cms/ayudas.php'));
-    Route::prefix('preguntas-frecuentes')->middleware('checkrol:config')->group(base_path('routes/cms/preguntas_frecuentes.php'));
-    Route::prefix('notificaciones_push')->middleware('checkrol:admin')->group(base_path('routes/cms/notificaciones_push.php'));
-    Route::prefix('soporte')->middleware('checkrol:admin')->group(base_path('routes/cms/soporte.php'));
+    Route::prefix('general')->middleware('hasHability:dashboard')->group(base_path('routes/cms/general.php'));
+    Route::prefix('common')->group(base_path('routes/cms/common.php'));
 
 
-    Route::prefix('users')->middleware('checkrol:config')->group(base_path('routes/cms/users.php'));
-    Route::prefix('permisos')->middleware('checkrol:admin')->group(base_path('routes/cms/permisos.php'));
-    Route::prefix('roles')->middleware('checkrol:config')->group(base_path('routes/cms/roles.php'));
+    Route::prefix('anuncios')->middleware('hasHability:announcement')->group(base_path('routes/cms/anuncios.php'));
+    Route::prefix('encuestas')->middleware('hasHability:pool')->group(base_path('routes/cms/encuestas.php'));
+    Route::prefix('multimedia')->middleware('hasHability:media')->group(base_path('routes/cms/multimedia.php'));
+    Route::prefix('glosario')->middleware('hasHability:glossary')->group(base_path('routes/cms/glosario.php'));
+    Route::prefix('protocolos-y-documentos')->middleware('hasHability:vademecun')->group(base_path('routes/cms/vademecum.php'));
+    Route::prefix('videoteca')->middleware('hasHability:videoteca')->group(base_path('routes/cms/videoteca.php'));
+    // Route::prefix('tags')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/tags.php'));
+
+
+    // Route::prefix('ayudas')->middleware('checkrol:admin')->group(base_path('routes/cms/ayudas.php'));
+    Route::prefix('preguntas-frecuentes')->middleware('hasHability:frequent-questions')->group(base_path('routes/cms/preguntas_frecuentes.php'));
+    Route::prefix('notificaciones_push')->middleware('hasHability:push-notification')->group(base_path('routes/cms/notificaciones_push.php'));
+    Route::prefix('soporte')->middleware('hasHability:support')->group(base_path('routes/cms/soporte.php'));
+
+
+    Route::prefix('users')->middleware('checkrol:super-user')->group(base_path('routes/cms/users.php'));
+    // Route::prefix('permisos')->middleware('checkrol:super-user')->group(base_path('routes/cms/permisos.php'));
+    Route::prefix('roles')->middleware('checkrol:super-user')->group(base_path('routes/cms/roles.php'));
 
 
     Route::prefix('errores')->middleware('checkrol:admin')->group(base_path('routes/cms/errores.php'));
-    Route::prefix('incidencias')->middleware('checkrol:admin')->group(base_path('routes/cms/incidencias.php'));
+    // Route::prefix('incidencias')->middleware('checkrol:admin')->group(base_path('routes/cms/incidencias.php'));
     Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
     // Route::prefix('auditoria')->middleware('checkrol:super-user')->group(base_path('routes/cms/audits.php'));
 
 
-    Route::prefix('usuarios')->middleware('checkrol:admin')->group(base_path('routes/cms/usuarios.php'));
-    Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
-    Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
-    Route::prefix('criterios')->middleware('checkrol:config,admin')->group(base_path('routes/cms/criteria.php'));
-    Route::prefix('supervisores')->middleware('checkrol:admin')->group(base_path('routes/cms/supervisores.php'));
+    Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
+    // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
+    // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
+    Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));
+    Route::prefix('supervisores')->middleware('hasHability:supervisor')->group(base_path('routes/cms/supervisores.php'));
 
 
-    Route::prefix('modulos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/modulos.php'));
-    Route::prefix('segments')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/segments.php'));
-    Route::prefix('entrenadores')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenadores.php'));
-    Route::prefix('escuelas')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/escuelas.php'));
+    Route::prefix('modulos')->middleware('hasHability:modules')->group(base_path('routes/cms/modulos.php'));
+    Route::prefix('segments')->group(base_path('routes/cms/segments.php'));
+    Route::prefix('entrenadores')->middleware('hasHability:trainer')->group(base_path('routes/cms/entrenadores.php'));
+    Route::prefix('escuelas')->middleware('hasHability:school')->group(base_path('routes/cms/escuelas.php'));
 
-    Route::prefix('cursos')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/curso.php'));
+    Route::prefix('cursos')->middleware('hasHability:course')->group(base_path('routes/cms/curso.php'));
 
-    Route::prefix('entrenamiento')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/entrenamiento.php'));
+    Route::prefix('entrenamiento')->group(base_path('routes/cms/entrenamiento.php'));
 
-    Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
-    Route::prefix('media')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/media.php'));
+    // Route::prefix('programas')->middleware('checkrol:admin')->group(base_path('routes/cms/blocks.php'));
+    Route::prefix('media')->group(base_path('routes/cms/media.php'));
 
-    Route::prefix('ambiente')->middleware('checkrol:admin,super-user')->group(base_path('routes/cms/ambiente.php'));
+    Route::prefix('ambiente')->middleware('hasHability:configuration-environment')->group(base_path('routes/cms/ambiente.php'));
 
-    Route::prefix('workspaces')->middleware('checkrol:admin')->group(base_path('routes/cms/workspaces.php'));
-    Route::prefix('/')->middleware(['checkrol:admin,reports,only-reports'])->group(base_path('routes/cms/reportes.php'));
+    Route::prefix('workspaces')->group(base_path('routes/cms/workspaces.php'));
+    Route::prefix('/')->middleware('hasHability:report')->group(base_path('routes/cms/reportes.php'));
 
-    Route::prefix('aulas-virtuales')->middleware('checkrol:admin')->group(base_path('routes/cms/meetings.php'));
+    Route::prefix('aulas-virtuales')->group(base_path('routes/cms/meetings.php'));
 
-    Route::prefix('procesos-masivos')->middleware('checkrol:admin')->group(base_path('routes/cms/masivos.php'));
-    Route::prefix('importar-notas')->middleware('checkrol:admin')->group(base_path('routes/cms/importar-notas.php'));
+    Route::prefix('procesos-masivos')->middleware('hasHability:process-massive')->group(base_path('routes/cms/masivos.php'));
+    Route::prefix('importar-notas')->middleware('hasHability:upload-grades-massive')->group(base_path('routes/cms/importar-notas.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('checkrol:admin,super-user');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:admin,super-user');
 
-    Route::prefix('resumen_encuesta')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_encuesta.php'));
+    Route::prefix('resumen_encuesta')->middleware('hasHability:poll-report')->group(base_path('routes/cms/resumen_encuesta.php'));
     
-    Route::prefix('resumen_evaluaciones')->middleware('checkrol:admin,reports,only-reports')->group(base_path('routes/cms/resumen_evaluaciones.php'));
+    Route::prefix('resumen_evaluaciones')->middleware('hasHability:evaluation-report')->group(base_path('routes/cms/resumen_evaluaciones.php'));
 
-    Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
-    Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));
-    Route::prefix('diplomas')->middleware('checkrol:admin')->group(base_path('routes/cms/diplomas.php'));
+    Route::prefix('beneficios')->middleware('hasHability:benefits')->group(base_path('routes/cms/beneficios.php'));
+    Route::prefix('speakers')->middleware('hasHability:speaker')->group(base_path('routes/cms/speakers.php'));
+    Route::prefix('diplomas')->middleware('hasHability:list-certificate')->group(base_path('routes/cms/diplomas.php'));
     
     // === votaciones === 
-    Route::prefix('votaciones')->middleware('checkrol:admin')->group(base_path('routes/cms/votaciones.php'));
-    // === votaciones === 
+    Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
+
+    Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
 });

@@ -3,14 +3,14 @@
 use App\Http\Controllers\MeetingController;
 use \App\Http\Controllers\ApiRest\RestMeetingController;
 
-Route::prefix('cuentas')->middleware('checkrol:super-user')->group(base_path('routes/cms/accounts.php'));
+Route::prefix('cuentas')->middleware('checkrol:super-user')->group(base_path('routes/cms/accounts.php'))->middleware('hasHability:account-meetings');
 
 Route::get('/list', [RestMeetingController::class, 'listUserMeetings']);
 Route::get('/get-data', [RestMeetingController::class, 'getData']);
 
 Route::controller(MeetingController::class)->group(function() {
 
-    Route::view('/reuniones', 'meetings.list')->name('meetings.list');
+    Route::view('/reuniones', 'meetings.list')->name('meetings.list')->middleware('hasHability:meetings');
     // ->middleware('permission:meetings.list');
 
     Route::get('/search', 'search');

@@ -34,7 +34,7 @@
                     <template v-for="(value, selectKey, index) in selects">
 
                         <v-col cols="12"
-                               v-if="!['sub_workspaces', 'active'].includes(selectKey) && criteria_template[index-2]">
+                               v-if="!['sub_workspaces', 'active', 'module'].includes(selectKey) && criteria_template[index-2]">
 
                             <DefaultInputDate
                                 v-if="criteria_template[index-2].field_type.code === 'date'"

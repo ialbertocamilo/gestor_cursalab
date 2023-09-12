@@ -8,6 +8,7 @@ return [
         'gestor'=> env('GTAG_GESTOR',NULL)
     ],
 
+    'test_environment' => env('TEST_ENVIRONMENT', false),
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -37,6 +38,10 @@ return [
         'showCloseButtonM3' => env('SHOW_CLOSE_BUTTON_M3'),
         'showMessageM4' => env('SHOW_MESSAGE_M4'),
         'showIosLink' => env('SHOW_IOS_LINK'),
+    ],
+
+    'meetings' => [
+        'app_upload_template' => 'http://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/Plantilla-Importar-Invitados.xlsx',
     ],
 
     // Evaluation Quiz Config

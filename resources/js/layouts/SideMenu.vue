@@ -1,717 +1,214 @@
 <template>
-    <v-card flat tile :collapse="!collapseOnScroll">
-        <v-card-title
-            @click="workspacesListIsVisible = !workspacesListIsVisible"
-            class="title-logo-wrapper bg-white d-flex justify-content-center rounded-0"
-        >
-            <img
-                v-if="userSession.session && logoIsLoaded"
-                :src="userSession.session.workspace.logo"
-                :alt="userSession.session.workspace.name"
-                @error="logoIsLoaded = false"
-                width="140"
-            />
-            <!-- Text to be shown when logo fails to load -->
-
-            <div v-if="!logoIsLoaded" style="width: 75%;">
-                {{ userSession.session.workspace.name }}
-            </div>
-
-            <v-icon v-if="workspaces.length > 1" class="caret">
-                {{
-                    workspacesListIsVisible
+    <div class="">
+        <v-card flat tile >
+            <v-card-title @click="workspacesListIsVisible = !workspacesListIsVisible"
+                class="title-logo-wrapper bg-white d-flex justify-content-center rounded-0">
+                <img v-if="userSession.session && logoIsLoaded" :src="userSession.session.workspace.logo"
+                    :alt="userSession.session.workspace.name" @error="logoIsLoaded = false" width="140" />
+                <!-- Text to be shown when logo fails to load -->
+    
+                <div v-if="!logoIsLoaded" style="width: 75%;">
+                    {{ userSession.session.workspace.name }}
+                </div>
+    
+                <v-icon v-if="workspaces.length > 1" class="caret">
+                    {{
+                        workspacesListIsVisible
                         ? "mdi-chevron-up"
                         : "mdi-chevron-down"
-                }}
-            </v-icon>
-
-            <!-- <v-app-bar-nav-icon color="white"></v-app-bar-nav-icon> -->
-        </v-card-title>
-        <div
-            :class="{ visible: workspacesListIsVisible }"
-            v-if="workspaces.length > 1"
-            class="workspaces-list-wrapper"
-        >
-            <v-list shaped class="bg-white workspaces-list">
-                <v-list-item-group
-                    color="primary"
-                    active-class="bg-white"
-                    class="bg-white"
-                >
-                    <v-list-item
-                        v-for="(workspace, i) in workspaces"
-                        @click="setActiveWorkspace(workspace.id)"
-                        :key="i"
-                    >
-                        <v-list-item-content>
-                            <v-list-item-title
-                                v-text="workspace.name"
-                            ></v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                </v-list-item-group>
-            </v-list>
-        </div>
-        <v-list class="mx-auto" dark nav rounded expand tile>
-            <v-list-group
-                :value="false"
-                v-for="(grupo, i) in gruposFiltrado"
-                :key="i"
-                color="white"
-                v-model="grupo.active"
-            >
-                <template v-slot:activator>
-                    <v-list-item-icon>
-                        <v-icon small v-text="grupo.icon"></v-icon>
-                    </v-list-item-icon>
-                    <v-list-item-title
-                        v-text="grupo.title"
-                        class="grupo_title"
-                    ></v-list-item-title>
-                    <div v-if="grupo.isBeta"
-                             class="beta">Beta</div>
-                </template>
-                <div
-                    v-for="(item, i) in grupo.items"
-                    :key="i"
-                    class="list_submenu"
-                    >
-
-                    <v-list-item
-                        dark
-                        dense
-                        :href="`${item.path}`"
-                        @click()
-                        v-model="item.selected"
+                    }}
+                </v-icon>
+    
+                <!-- <v-app-bar-nav-icon color="white"></v-app-bar-nav-icon> -->
+            </v-card-title>
+            <div :class="{ visible: workspacesListIsVisible }" v-if="workspaces.length > 1" class="workspaces-list-wrapper">
+                <v-list shaped class="bg-white workspaces-list">
+                    <v-list-item-group color="primary" active-class="bg-white" class="bg-white">
+                        <v-list-item v-for="(workspace, i) in workspaces" @click="setActiveWorkspace(workspace.id)" :key="i">
+                            <v-list-item-content>
+                                <v-list-item-title>{{ workspace.name }}</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </div>
+            <v-list class="mx-auto" dark nav rounded expand tile>
+                <div v-for="(grupo, i) in grupos" :key="i">
+                    <v-list-item 
+                        v-if="grupo.items.length == 0"
+                        @mouseleave="cancelTimer"
+                        @mouseover="startTimer(grupo,$event)"
+                        dark 
+                        sense 
+                        style="cursor: pointer;"
                     >
                         <v-list-item-icon>
-                            <v-icon
-                                small
-                                v-text="item.icon"
-                                class="item_icon"
-                            ></v-icon>
+                            <v-icon small class="item_icon">{{ grupo.icon }}</v-icon>
                         </v-list-item-icon>
-                        <v-list-item-title
-                            v-text="item.title"
-                            class="item_title"
-                        ></v-list-item-title>
-                        <div v-if="item.isBeta"
-                             class="beta">Beta</div>
+                        <v-badge small class="_badge" overlap>
+                            <template v-slot:badge>
+                                <div v-if="grupo.show_upgrade" class="ml-1 tag_beta_upgrade d-flex align-items-center"><img
+                                        src="/img/premiun.svg"> Upgrade</div>
+                                <div v-if="grupo.is_beta" class="ml-1 tag_beta_upgrade d-flex align-items-center">Beta</div>
+                            </template>
+                            <v-list-item-title class="grupo_title">{{ grupo.title }}</v-list-item-title>
+                        </v-badge>
+    
                     </v-list-item>
-
-
-
+                    <v-list-group v-else dense :value="false" color="white" 
+                        v-model="grupo.active" 
+                        @mouseover="startTimer(grupo,$event)"
+                        @mouseleave="cancelTimer">
+                        <template v-slot:activator >
+                            <v-list-item-icon v-if="!grupo.show_upgrade && !grupo.is_beta">
+                                <v-icon small>{{ grupo.icon }}</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-title class="grupo_title" v-if="grupo.show_upgrade || grupo.is_beta" >
+                                <v-list-item-icon>
+                                    <v-icon small>{{ grupo.icon }}</v-icon>
+                                </v-list-item-icon>
+                                <v-badge small class="_badge" overlap>
+                                    <template v-slot:badge>
+                                        <div v-if="grupo.show_upgrade && !item.is_beta" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                            <img src="/img/premiun.svg"> Upgrade</div>
+                                        <div v-if="grupo.is_beta" class="ml-1 tag_beta_upgrade d-flex align-items-center">Beta
+                                        </div>
+                                    </template>
+                                    {{ grupo.title }}
+                                </v-badge>
+                            </v-list-item-title>
+                            <v-list-item-title class="grupo_title" v-else>
+                                {{ grupo.title }}
+                            </v-list-item-title>
+                        </template>
+                        <div v-for="(item, i) in grupo.items" :key="i" class="list_submenu">
+                            <v-list-item dark dense :href="`${item.path}`" @click="()=>{}" v-model="item.selected">
+                                <v-list-item-icon>
+                                    <v-icon small class="item_icon">{{ item.icon }}</v-icon>
+                                </v-list-item-icon>
+                                <v-badge small class="_badge" overlap> 
+                                    <template v-slot:badge>
+                                        <div  @click="openFormModal(ModalUpgradeOptions)" v-if="item.show_upgrade && !item.is_beta" class="tag_beta_upgrade d-flex align-items-center"><img
+                                                src="/img/premiun.svg"> Upgrade</div>
+                                        <div v-if="item.is_beta" class="tag_beta_upgrade d-flex align-items-center">Beta</div>
+                                    </template>
+                                    <v-list-item-title class="item_title">{{ item.title }}</v-list-item-title>
+                                </v-badge>
+                            </v-list-item>
+                        </div>
+                    </v-list-group>
                 </div>
-            </v-list-group>
-        </v-list>
-    </v-card>
+            </v-list>
+        </v-card>
+        <transition name="fade">
+            <v-card
+                v-if="cardHover.showCard"
+                :width="cardHover.width"
+                flat tile
+                class="card-popup"
+                :style="{ top: cardHover.cardTop,left: cardHover.cardLeft }"
+                @mouseenter="cancelHideTimer"
+                @mouseleave="startHideTimer"
+            >
+                <v-card-title class="default-dialog-title mod_head" style="background: white !important;">
+                    <span class="font-weight-bold" style="font-style: 'Nunito', sans-serif;color:#5457E7" v-text="cardHover.title"></span>
+                    <v-btn icon :ripple="false" color="white"
+                        @click="closeModal">
+                        <v-icon v-text="'mdi-close'"/>
+                    </v-btn>
+                </v-card-title>
+                <v-card-text class="" style="font-style: 'Nunito', sans-serif"  v-html="cardHover.description">
+                </v-card-text>
+                <v-card-actions class="text-center d-flex justify-content-center" v-if="cardHover.show_upgrade">
+                    <v-btn 
+                        color="primary"  
+                        @click="openFormModal(ModalUpgradeOptions)"
+                        style="font-style: 'Nunito', sans-serif;background:#5457E7"
+                    >
+                        <img src="/img/premiun.svg"> Accede a más funciones
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </transition>
+        <ModalUpgrade
+            :options="ModalUpgradeOptions"
+            width="55vw"
+            :model_id="null"
+            :ref="ModalUpgradeOptions.ref"
+            @onCancel="closeSimpleModal(ModalUpgradeOptions)"
+            @onConfirm="closeFormModal(ModalUpgradeOptions),openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
+        
+    </div>
 </template>
 
 <script>
+import ModalUpgrade from './ModalUpgrade';
+import GeneralStorageEmailSendModal from './General/GeneralStorageEmailSendModal.vue';
 
-const SUB_ITEM_GLOSARY =  { title:"Glosario",
-                            icon:"fas fa-book",
-                            path:"/glosario",
-                            subpaths:["glosario"],
-                            selected:false,
-                            permission:"glosario",
-                            role:[ "super-user", "admin", "content-manager", "trainer" ]
-                          };
+const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
+const SUB_ITEM_GLOSARY = {
+    title: "Glosario",
+    icon: "fas fa-book",
+    path: "/glosario",
+    subpaths: ["glosario"],
+    selected: false,
+    permission: "glosario",
+    role: ["super-user", "admin", "content-manager", "trainer"]
+};
 
-const SUB_ITEM_VADEMECUM = {
-                            title:"Protocolos y Documentos",
-                            icon:"fas fa-file-invoice",
-                            path:"/protocolos-y-documentos",
-                            subpaths:["protocolos-y-documentos"],
-                            selected:false,
-                            permission:"vademecum",
-                            role:["super-user","admin","content-manager","trainer-TEST"]
-                        };
+// const SUB_ITEM_VADEMECUM = {
+//     title: "Protocolos y Documentos",
+//     icon: "fas fa-file-invoice",
+//     path: "/protocolos-y-documentos",
+//     subpaths: ["protocolos-y-documentos"],
+//     selected: false,
+//     permission: "vademecum",
+//     role: ["super-user", "admin", "content-manager", "trainer-TEST"]
+// };
 
 export default {
+    components:{ModalUpgrade,GeneralStorageEmailSendModal},
     data: () => ({
         logoIsLoaded: true,
         workspacesListIsVisible: false,
         workspaces: [],
         userSession: {},
         collapseOnScroll: true,
-        grupos: [
-            {
-                title: "RESUMEN",
-                icon: "fas fa-dice-d6",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Dashboard",
-                        icon: "fas fa-tachometer-alt",
-                        path: "/home",
-                        subpaths: ["home"],
-                        selected: false,
-                        permission: "home",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer",
-                            "reports",
-                        ]
-                    },
-                    {
-                        title: "Learning Analytics",
-                        icon: "fas fa-chart-line",
-                        path: "/dashboard_pbi",
-                        subpaths: ["dashboard_pbi"],
-                        selected: false,
-                        permission: "learning_analytics",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer",
-                            "reports"
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "SESIONES LIVE",
-                icon: "fas fa-chalkboard",
-                active: false,
-                functionality: ['sesiones-live'],
-                items: [
-                    {
-                        title: "Gestiona sesiones",
-                        icon: "fas fa-chalkboard-teacher",
-                        path: "/aulas-virtuales/reuniones",
-                        subpaths: ["aulas-virtuales/reuniones"],
-                        selected: false,
-                        permission: "meetings",
-                        role: ["super-user", this.show_meeting_section]
-                    },
-                    {
-                        title: "Cuentas Zoom",
-                        icon: "fas fa-chalkboard-teacher",
-                        path: "/aulas-virtuales/cuentas",
-                        subpaths: ["aulas-virtuales/cuentas"],
-                        selected: false,
-                        permission: "accounts",
-                        role: ["super-user"]
-                        //Fix -2
-                        // permission:"accounts.list"
-                    }
-                ]
-            },
-            {
-                title: "BENEFICIOS",
-                icon: "fas fa-gift",
-                active: false,
-                isBeta: true,
-                functionality: ['benefits'],
-                items: [
-                    {
-                        title: "Configuración",
-                        icon: "fas fa-gift",
-                        path: "/beneficios",
-                        subpaths: ["beneficios"],
-                        selected: false,
-                        permission: "beneficios",
-                        role: [
-                            "super-user",
-                            "admin"
-                        ]
-                    },
-                    {
-                        title: "Facilitadores",
-                        icon: "fas fa-gift",
-                        path: "/speakers",
-                        subpaths: ["speakers"],
-                        selected: false,
-                        permission: "speakers",
-                        role: [
-                            "super-user",
-                            "admin"
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "USUARIOS",
-                icon: "fas fa-users-cog",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Módulos",
-                        icon: "fas fa-th-large",
-                        path: "/modulos",
-                        subpaths: [
-                            "modulos",
-                            // "abconfigs",
-                            // "categorias",
-                            // "cursos"
-                        ],
-                        selected: false,
-                        permission: "modulos",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Usuarios",
-                        icon: "fas fa-users",
-                        path: "/usuarios",
-                        subpaths: ["usuarios"],
-                        selected: false,
-                        permission: "usuarios",
-                        role: ["super-user", "admin"]
-                    },
-                    {
-                        title: "Administradores",
-                        icon: "fas fa-users-cog",
-                        path: "/users",
-                        subpaths: ["users"],
-                        selected: false,
-                        role: ["super-user"]
-                    },
-                    {
-                        title: "Criterios",
-                        icon: "fas fa-clipboard-list",
-                        path: "/criterios",
-                        subpaths: ["criterios", "valores"],
-                        selected: false,
-                        permission: "criterios",
-                        role: ["super-user", "config", "admin"]
-                    },
-                    {
-                        title:"Supervisores",
-                        icon:"fas fa-sitemap",
-                        // path:"/reportes-supervisores/index",
-                        path:"/supervisores",
-                        subpaths:["reportes-supervisores"],
-                        selected:false,
-                        permission:"supervisores",
-                        role:["super-user","admin"]
-                    },
-                ]
-            },
-            {
-                title: "GESTIONA TUS CURSOS",
-                icon: "fas fa-cog",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Módulos",
-                        icon: "fas fa-th-large",
-                        path: "/modulos",
-                        subpaths: [
-                            "modulos",
-                            // "abconfigs",
-                            // "categorias",
-                            // "cursos"
-                        ],
-                        selected: false,
-                        permission: "modulos",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Escuelas",
-                        icon: "fas fa-th-large",
-                        path: "/escuelas",
-                        subpaths: ["escuelas"],
-                        selected: false,
-                        isBeta: false,
-                        permission: "escuelas",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Cursos",
-                        icon: "mdi mdi-notebook",
-                        path: "/cursos",
-                        subpaths: ["cursos"],
-                        selected: false,
-                        isBeta: false,
-                        permission: "cursos",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                        ]
-                    },
-                    // {
-                    //     title:"Cursos",
-                    //     icon:"fas fa-map-signs",
-                    //     path:"/cursos",
-                    //     subpaths:["cursos"],
-                    //     selected:false,
-                    //     permission:"cursos",
-                    //     role:["super-user","admin","content-manager","trainer"]
-                    // },
-                ]
-            },
-            {
-                title: "DIPLOMAS",
-                icon: "fas fa-medal",
-                active: false,
-                isBeta: true,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Listar",
-                        icon: "fas fa-list",
-                        path: "/diplomas",
-                        subpaths: ["diplomas"],
-                        selected: false,
-                        isBeta: true,
-                        permission: "diplomas",
-                        role: [
-                            "super-user",
-                            // "admin",
-                            // "content-manager",
-                            // "trainer"
-                        ]
-                    },
-
-                    {
-                        title: "Crear",
-                        icon: "fas fa-plus",
-                        path: "/diploma/create",
-                        subpaths: ["diploma/create"],
-                        selected: false,
-                        isBeta: true,
-                        permission: "diploma_create",
-                        role: [
-                            "super-user",
-                            // "admin",
-                            // "content-manager",
-                            // "trainer"
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "GESTIONA TU CONTENIDO",
-                icon: "fas fa-pen-square",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Anuncios",
-                        icon: "far fa-newspaper",
-                        path: "/anuncios",
-                        subpaths: ["anuncios"],
-                        selected: false,
-                        permission: "anuncios",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Encuestas",
-                        icon: "fas fa-pencil-alt",
-                        path: "/encuestas",
-                        subpaths: ["encuestas"],
-                        selected: false,
-                        permission: "encuestas",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Multimedia",
-                        icon: "fas fa-photo-video",
-                        path: "/multimedia",
-                        subpaths: ["multimedia"],
-                        selected: false,
-                        permission: "multimedia",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-
-                    {
-                         title:"Videoteca",
-                         icon:"fas fa-caret-square-right",
-                         path:"/videoteca/list",
-                         subpaths:["videoteca"],
-                         selected:false,
-                         permission:"videoteca",
-                         role:["super-user","admin","content-manager","trainer"]
-                     },
-                ]
-            },
-            {
-                title: "CHECKLIST",
-                icon: "fas fa-business-time",
-                active: false,
-                isBeta: true,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Entrenadores y equipo",
-                        icon: "fas fa-user-graduate",
-                        path: "/entrenamiento/entrenadores",
-                        subpaths: ["entrenamiento/entrenador"],
-                        selected: false,
-                        permission: "entrenadores",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    },
-                    {
-                        title: "Gestiona Checklist",
-                        icon: "fas fa-tasks",
-                        path: "/entrenamiento/checklists",
-                        subpaths: ["entrenamiento/checklist"],
-                        selected: false,
-                        permission: "checklist",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "content-manager",
-                            "trainer"
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "VOTACIONES",
-                icon: "fas fa-paper-plane",
-                active: false,
-                functionality: ['reconocimiento'],
-                items: [
-                    {
-                        title: "Listar",
-                        icon: "fas fa-list",
-                        path: "/votaciones",
-                        subpaths: ["votaciones"],
-                        selected: false,
-                        isBeta: true,
-                        permission: "votaciones",
-                        role: [
-                            "super-user",
-                            // "admin",
-                        ]
-                    },
-
-                    {
-                        title: "Crear",
-                        icon: "fas fa-plus",
-                        path: "/votacion/create",
-                        subpaths: ["votacion/create"],
-                        selected: false,
-                        isBeta: true,
-                        permission: "votacion_create",
-                        role: [
-                            "super-user",
-                            // "admin",
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "REPORTES",
-                icon: "fas fa-download",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "General",
-                        icon: "fas fa-download",
-                        path: "/exportar/node",
-                        subpaths: ["exportar/node"],
-                        selected: false,
-                        permission: "reportes",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "trainer",
-                            "reports",
-                            'only-reports'
-                        ]
-                    },
-                    // {
-                    //     title: "Aulas Virtuales",
-                    //     icon: "fas fa-download",
-                    //     path: "/exportar/conferencias",
-                    //     subpaths: ["exportar/conferencias"],
-                    //     selected: false,
-                    //     permission: "conferencias",
-                    //     role: [
-                    //         "super-user",
-                    //         "admin-TEMPORAL_INACTIVO",
-                    //         "trainer-TEMPORAL_INACTIVO",
-                    //         "reports-TEMPORAL_INACTIVO"
-                    //     ]
-                    // },
-                    {
-                        title: "Encuestas",
-                        icon: "fas fa-poll",
-                        path: "/resumen_encuesta",
-                        subpaths: ["resumen_encuesta"],
-                        selected: false,
-                        permission: "resumen_encuesta",
-                        role: [
-                            "super-user",
-                            "admin",
-                            "trainer",
-                            "reports",
-                            'only-reports'
-                        ]
-                    },
-                    {
-                        title: "Evaluaciones",
-                        icon: "fas fa-file-alt",
-                        path: "/resumen_evaluaciones",
-                        subpaths: ["resumen_evaluaciones"],
-                        selected: false,
-                        isBeta: true,
-                        permission: "resumen_evaluaciones",
-                        role: [
-                            "super-user",
-                            // "admin",
-                            // "trainer",
-                            // "reports",
-                            // 'only-reports'
-                        ]
-                    }
-                ]
-            },
-            {
-                title: "HERRAMIENTAS",
-                icon: "fas fa-tools",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Notificaciones push",
-                        icon: "fas fa-envelope-open-text",
-                        path: "/notificaciones_push",
-                        subpaths: ["notificaciones_push"],
-                        selected: false,
-                        permission: "notificaciones",
-                        role: ["super-user", "admin"]
-                    },
-                    {
-                        title: "Intentos masivos",
-                        icon: "fas fa-redo-alt",
-                        path: "/intentos-masivos",
-                        subpaths: ["intentos-masivos"],
-                        selected: false,
-                        permission: "reinicio_usuarios",
-                        role: ["super-user", "admin"]
-                    },
-                    {
-                        title: "Procesos masivos",
-                        icon: "fas fa-share-square",
-                        path: "/procesos-masivos",
-                        subpaths: ["procesos-masivos"],
-                        selected: false,
-                        permission: "proceso_masivo",
-                        role: ["super-user", "admin"]
-                    },
-                    {
-                        title: "Subida de notas",
-                        icon: "fas fa-share-square",
-                        path: "/importar-notas",
-                        subpaths: ["importar-notas"],
-                        selected: false,
-                        permission: "proceso_masivo_notas",
-                        role: ["super-user", "admin"]
-                    },
-                    {
-                        title: "Documentación API",
-                        icon: "fas fa-file",
-                        path: "/documentation-api",
-                        subpaths: ["documentation-api"],
-                        selected: false,
-                        permission: "documentation_api",
-                        role: ["super-user"]
-                    }
-                ]
-            },
-            {
-                title: "ATENCIÓN AL COLABORADOR",
-                icon: "fas fa-headset",
-                active: false,
-                functionality: ['default'],
-                items: [
-                    {
-                        title: "Preguntas frecuentes",
-                        icon: "far fa-question-circle",
-                        path: "/preguntas-frecuentes",
-                        subpaths: ["preguntas-frecuentes"],
-                        selected: false,
-                        role: ["super-user", "config"]
-                    },
-                    {
-                        title: "Formulario de Ayuda",
-                        icon: "far fa-clipboard",
-                        path: "/soporte/formulario-ayuda",
-                        subpaths: ["formulario-ayuda"],
-                        selected: false,
-                        role: ["super-user"]
-                    },
-                    // {
-                    //     title:"Ayuda",
-                    //     icon:"fas fa-hands-helping",
-                    //     path:"/ayudas",
-                    //     subpaths:["ayudas"],
-                    //     selected:false,
-                    //     permission:"ayuda.index"
-                    // },
-                    {
-                        title:"Soporte",
-                        icon:"fas fa-headset",
-                        path:"/soporte",
-                        subpaths:["soporte"],
-                        selected:false,
-                        role: ["super-user", "admin"]
-                    },
-                ]
-            },
-            {
-                title: "CONFIGURACIÓN",
-                icon: "fas fa-wrench",
-                active: false,
-                items: [
-                    {
-                        title: "Ambiente",
-                        icon: "fas fa-cog",
-                        path: "/ambiente",
-                        subpaths: ["ambiente"],
-                        selected: false,
-                        role: ["super-user"]
-                    },
-                ]
-            }
-        ]
+        grupos:[],
+        cardHover:{
+            showCard: false,
+            timer: null,
+            title: 'Beneficios',
+            description: ' Listado de beneficios',
+            show_upgrade:null,
+            width:'22vw'
+        },
+        ModalUpgradeOptions:{
+            ref: 'ModalUpgradeModal',
+            open: false,
+            base_endpoint: '/upgrade',
+            confirmLabel: 'Solicítalo hoy',
+            resource: 'Upgrade',
+            width:'70vw',
+            title_modal: `${img_rocket}Accede a más soluciones${img_rocket}`,
+            action: null
+        },
+        modalGeneralStorageEmailSendOptions: {
+            ref: 'GeneralStorageEmailSendModal',
+            open: false,
+            showCloseIcon: true,
+            hideCancelBtn: true,
+            confirmLabel:'Entendido',
+            persistent: false
+        },
     }),
     props: {
         roles: {
@@ -728,46 +225,46 @@ export default {
         }
 
     },
-    computed: {
-        gruposFiltrado: function() {
-            let vue = this;
-            let new_grupos = [];
-            let new_grupos_sections = [];
-            let location = window.location.pathname.split("/");
-            this.grupos.forEach(grupo => {
-                let new_items = [];
-                grupo.items.forEach(i => {
-                    vue.roles.forEach(item => {
-                        if (i.role.includes(item)) {
-                            new_items.push(i);
-                            if (this.verify_path(location, i.subpaths)) {
-                                grupo.active = true;
-                                i.selected = true;
-                            }
-                        }
-                    });
-                });
-                if (new_items.length > 0) {
-                    grupo.items = new_items;
-                    new_grupos.push(grupo);
-                }
-            });
-            new_grupos.forEach(sec => {
-                if (!sec.hasOwnProperty('functionality')) {
-                    new_grupos_sections.push(sec)
-                }
-                else {
-                    vue.functionality.forEach(f => {
-                        if (sec.functionality.includes(f)) {
-                            new_grupos_sections.push(sec)
-                        }
-                    });
-                }
-            });
-            // console.log(new_grupos);
-            return new_grupos_sections;
-        }
-    },
+    // computed: {
+    //     // gruposFiltrado: function() {
+    //     //     let vue = this;
+    //     //     let new_grupos = [];
+    //     //     let new_grupos_sections = [];
+    //     //     let location = window.location.pathname.split("/");
+    //     //     this.grupos.forEach(grupo => {
+    //     //         let new_items = [];
+    //     //         grupo.items.forEach(i => {
+    //     //             vue.roles.forEach(item => {
+    //     //                 if (i.role.includes(item)) {
+    //     //                     new_items.push(i);
+    //     //                     if (this.verify_path(location, i.subpaths)) {
+    //     //                         grupo.active = true;
+    //     //                         i.selected = true;
+    //     //                     }
+    //     //                 }
+    //     //             });
+    //     //         });
+    //     //         if (new_items.length > 0) {
+    //     //             grupo.items = new_items;
+    //     //             new_grupos.push(grupo);
+    //     //         }
+    //     //     });
+    //     //     new_grupos.forEach(sec => {
+    //     //         if (!sec.hasOwnProperty('functionality')) {
+    //     //             new_grupos_sections.push(sec)
+    //     //         }
+    //     //         else {
+    //     //             vue.functionality.forEach(f => {
+    //     //                 if (sec.functionality.includes(f)) {
+    //     //                     new_grupos_sections.push(sec)
+    //     //                 }
+    //     //             });
+    //     //         }
+    //     //     });
+    //     //     // console.log(new_grupos);
+    //     //     return new_grupos_sections;
+    //     // }
+    // },
     mounted() {
         this.loadData();
         this.loadSession();
@@ -802,9 +299,11 @@ export default {
          * Add new Item by workspace id
          * */
         availableItemGroup(in_title, item) {
-          let vue = this;
-          const index = vue.grupos.findIndex(({title}) => title === in_title);
-          vue.grupos[index].items.push(item);
+            let vue = this;
+            const index = vue.grupos.findIndex(({ title }) => title === in_title);
+            if(index){
+                vue.grupos[index].items.push(item);
+            }
         },
         /**
          * Load session data from server
@@ -817,16 +316,28 @@ export default {
             let url = `/usuarios/session`;
             this.$http.get(url).then(({ data }) => {
                 vue.userSession = data;
-
+                vue.grupos = data.user.menus;
                 //=== only for "Farmacias Peruanas"
-                const { session:{ workspace } } = data;
-                if(workspace.id === 25) {
-                  vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
+                const { session: { workspace } } = data;
+                if (workspace.id === 25) {
+                      vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_GLOSARY);
                 }
+                vue.setActiveSubmenu();
+                // vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
+                // === only for "Farmacias Peruanas"
 
-                vue.availableItemGroup('GESTIONA TU CONTENIDO', SUB_ITEM_VADEMECUM);
-                //=== only for "Farmacias Peruanas"
-
+            });
+        },
+        setActiveSubmenu() {
+            let vue = this;
+            const location = window.location.pathname.split("/");
+            vue.grupos.forEach(grupo => {
+                grupo.items.forEach(i => {
+                    if (this.verify_path(location, i.subpaths)) {
+                        grupo.active = true;
+                        i.selected = true;
+                    }
+                });
             });
         },
         /**
@@ -849,6 +360,57 @@ export default {
 
                 window.location.href = "/home";
             });
+        },
+        startTimer({title,description,show_upgrade}, event) {
+            let vue = this;
+            if(!description){
+                return false;
+            }
+            if (vue.cardHover.timer) {
+                clearTimeout(vue.cardHover.timer);
+                vue.cardHover.timer = null;
+            }
+            const viewportWidth = window.innerWidth;
+            const leftPostion =((parseInt(vue.cardHover.width.replace("vw", "")) * viewportWidth) / 100 ) +225 //225px es la medida del nav-container (custom.css);
+            const topPosition = event.currentTarget.getBoundingClientRect().top;
+            vue.cardHover.cardTop = `${topPosition}px`;
+            vue.cardHover.cardLeft = `${leftPostion}px`;
+            vue.cardHover.timer = setTimeout(() => {
+                vue.cardHover.title = title;
+                vue.cardHover.description = description;
+                vue.cardHover.show_upgrade = show_upgrade;
+                vue.cardHover.showCard = true;
+                vue.startHideTimer();
+                // setTimeout(() => {
+                // this.cardHover.showCard = false;
+                // }, 4000); // Ocultar la tarjeta después de 4 segundos
+            }, 1000);
+        },
+        cancelTimer() {
+            if (this.cardHover.timer) {
+                clearTimeout(this.cardHover.timer);
+                this.cardHover.timer = null;
+            }
+            this.startHideTimer();
+        },
+        startHideTimer() {
+            this.cardHover.timer = setTimeout(() => {
+                this.cardHover.showCard = false;
+            }, 2500); 
+        },
+        cancelHideTimer() {
+            if (this.cardHover.timer) {
+                clearTimeout(this.cardHover.timer);
+                this.cardHover.timer = null;
+            }
+        },
+        closeModal(){
+            let vue =this;
+            this.cardHover.timer = null;
+            vue.cardHover.title = '';
+            vue.cardHover.description = '';
+            vue.cardHover.show_upgrade = false;
+            vue.cardHover.showCard = false;
         }
     }
 };
@@ -896,13 +458,16 @@ export default {
 .v-list {
     background: #5458ea;
 }
+
 .v-list-group--active .grupo_title,
 .v-list-group--active .v-list-item__icon {
     color: #fff;
 }
+
 .list_submenu {
-    margin-left: 31px;
+    margin-left: 20px;
 }
+
 .list_submenu .v-list-item__title.item_title {
     white-space: normal;
     font-family: "Nunito", sans-serif;
@@ -910,33 +475,45 @@ export default {
     font-weight: 400;
     letter-spacing: 0.1px;
     color: #E5E6FC;
+    /* width: min-content; */
 }
+
 .list_submenu .v-list-item {
     margin-top: 3px;
     margin-bottom: 3px;
 }
+
 .v-list-item:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+
 .v-application--is-ltr .v-list-item__icon:first-child {
     margin-right: 8px;
 }
+
 .v-list-item {
     text-decoration: none;
 }
+
 /* Custom class */
 .grupo_title {
     font-size: 0.73em !important;
     font-weight: bold !important;
     white-space: normal;
 }
+._badge {
+    max-width: 200px;
+    white-space: normal;
+}
 .item_icon {
     color: rgba(255, 255, 255, 0.85);
 }
+
 .item_title {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.93em;
 }
+
 .v-list-group .beta,
 .list_submenu .beta {
     padding: 2px 10px 2px 10px;
@@ -946,5 +523,40 @@ export default {
     font-size: 13px;
     font-style: normal;
     font-weight: 400;
+}
+
+/* Ocultar el icono de flecha cuando el grupo está vacío */
+.v-list-group__header--dense .v-list-group__header__append-icon {
+    display: none;
+}
+
+.tag_beta_upgrade {
+    padding: 2px 6px 2px 6px;
+    border-radius: 8px;
+    background: #FFF;
+    color: #5458EA;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    margin-left: 8px !important;
+    margin-top: -8px !important;
+}
+/* POPUP */
+.card-popup {
+    position: absolute;
+    left: 530px;
+    /* top: 15%; */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1;
+    border: 1px solid #5457E7; 
+    box-shadow: 0px 4px 16px 8px rgba(0, 0, 0, 0.25) !important; 
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

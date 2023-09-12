@@ -49,9 +49,10 @@ class RoleController extends Controller
 
     public function edit(Role $role)
     {
-        // $permissions = Ability::where('entity_type', '<>', '*')->get();
-        // return compact('role');
-        return $this->success(compact('role'));
+        $permissions = Ability::getAbilititesForTree();
+        $permissions_ticked = $role->getAbilities()->pluck('id')->toArray();
+
+        return $this->success(compact('role', 'permissions', 'permissions_ticked'));
     }
 
     public function search(Request $request)
@@ -75,11 +76,8 @@ class RoleController extends Controller
         $data = $request->validated();
         $row = Role::create($data);
 
-        // Bouncer::allow($row->name)->to($data['permissions']);
-
-        return redirect()->route('roles.index')
-            ->with('info', 'Rol registrado correctamente.');
-        // return $this->success([], 'Rol registrado correctamente.');
+        Bouncer::allow($row->name)->to($data['permissions']);
+        return $this->success(['msg'=>'Rol registrado correctamente.']);
     }
 
     public function update(Role $role, RoleRequest $request)
@@ -88,11 +86,11 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        // $role->abilities()->sync($data['permissions']);
+        $role->abilities()->sync($data['permissions']);
 
-        return redirect()->route('roles.index')
-            ->with('info', 'Rol actualizado correctamente.');
-        // return $this->success([], 'Rol actualizado correctamente.');
+        // return redirect()->route('roles.index')
+            // ->with('info', 'Rol actualizado correctamente.');
+        return $this->success(['msg'=>'Rol actualizado correctamente.']);
     }
 
     public function show(Role $role)
@@ -108,8 +106,7 @@ class RoleController extends Controller
     public function remove(Role $role)
     {
         $response = $role->delete();
-
-        return $this->success([], 'Rol eliminado correctamente.');
+        return $this->success(['msg'=>'Rol eliminado correctamente.']);
     }
 
     public function active(Role $role)

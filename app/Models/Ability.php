@@ -40,42 +40,58 @@ class Ability extends Model
 
     public function model()
     {
-        return $this->belongsTo(Taxonomy::class, 'entity_type', 'name')
-            ->where('group', 'system')->where('type', 'model');
+        // return $this->belongsTo(Taxonomy::class, 'entity_type', 'path')
+        //     ->where('group', 'gestor')->where('type', 'submenu');
+        return $this->belongsTo(Taxonomy::class, 'entity_id', 'id')
+                ->where('group', 'gestor')->where('type', 'submenu');
     }
 
     protected function getAbilititesForTree()
     {
-        $groups = Ability::with('model')->where('entity_type', '<>', '*')->get()->groupBy('entity_type');
+        $groups = Ability::with(['model:id,parent_id,name,position,icon'])->whereNotNull('entity_id')->get();
+        $menus = Menu::list();
+        $data = [];
+        foreach ($menus as $menu) {
+            $permissions = [];
+            $groupsByMenu = $groups->where('model.parent_id',$menu->id)->sortBy('model.position')
+            ->groupBy('entity_id');
+            foreach ($groupsByMenu as $entity_type => $abilities) {
+    
+                $children = [];
+    
+                foreach ($abilities as $key => $ability) {
+                    $children[] = [
+                        // 'id' => $ability->name,
+                        'id' => $ability->id,
+                        'name' => $ability->title,
+                        'icon' => $ability->icon ?? 'mdi-circle'
+                    ];
+                }
+    
+                $parent = [
+                    'id' => $entity_type,
+                    'name' => ($ability->model->name ?? 'X'),
+                    'avatar' => '',
+                    'icon' => $ability->model->icon ?? 'mdi-folder',
+                    'children' => $children,
+                ];
+    
+                $permissions[] = $parent;
+            }
+            if(count($permissions)>0){
+                $data[] =[
+                    'id' => $menu->id,
+                    'name' => ($menu->name ?? 'X'),
+                    'avatar' => '',
+                    'icon' => $menu->icon ?? 'mdi-folder',
+                    'children' => $permissions,
+                ];
+            }
+        }
 
-        // $permissions = [];
-
-        // foreach ($groups as $entity_type => $abilities) {
-
-        //     $children = [];
-
-        //     foreach ($abilities as $key => $ability) {
-        //         $children[] = [
-        //             // 'id' => $ability->name,
-        //             'id' => $ability->id,
-        //             'label' => $ability->title,
-        //             'icon' => $ability->icon ?? 'folder_open'
-        //         ];
-        //     }
-
-        //     $parent = [
-        //         'id' => $entity_type,
-        //         'label' => 'Módulo ' . ($ability->model->short_name ?? 'X'),
-        //         'avatar' => '',
-        //         'children' => $children,
-        //     ];
-
-        //     $permissions[] = $parent;
-        // }
-
-        // // $data[] = ['id' => 'All', 'label' => 'Seleccionar módulos', 'children' => $permissions];
+        // $data[] = ['id' => 'All', 'label' => 'Seleccionar módulos', 'children' => $permissions];
         // $data = $permissions;
 
-        return $groups;
+        return $data;
     }
 }
