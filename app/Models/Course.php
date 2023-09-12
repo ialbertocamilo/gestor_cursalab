@@ -777,7 +777,11 @@ class Course extends BaseModel
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
-
+        $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
+        $status_projects = collect();
+        if(count($projects)>0){
+            $status_projects   =  ProjectUser::whereIn('user_id',$projects->pluck('id'))->with('status:id,name')->select('id','project_id','status_id')->get();
+        }
         $user->loadMissing('criterion_values.criterion.field_type');
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
@@ -800,7 +804,12 @@ class Course extends BaseModel
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
-
+                $project = $projects->where('course_id',$course->id)->first();
+                if($project){
+                    $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
+                    $project->status = $status_project?->status?->name ?? 'Pendiente';
+                    unset($project->course_id);
+                }
                 // UC rule
                 $course_name = $course->name;
 
@@ -816,6 +825,7 @@ class Course extends BaseModel
                         'encuesta_habilitada' => false,
                         'encuesta_resuelta' => false,
                         'encuesta_id' => null,
+                        'tarea' => $project,
                         'orden' => $course_position,
 
                     ];
@@ -832,8 +842,8 @@ class Course extends BaseModel
                         'encuesta_habilitada' => $course_status['enabled_poll'],
                         'encuesta_resuelta' => $course_status['solved_poll'],
                         'encuesta_id' => $course_status['poll_id'],
+                        'tarea' => $project,
                         'orden' => $course_position,
-
                     ];
                 }
             }

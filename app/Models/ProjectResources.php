@@ -17,7 +17,7 @@ class ProjectResources extends BaseModel
 
     public function media()
     {
-        return $this->belongsTo('App\Media', 'type_id');
+        return $this->belongsTo(Media::class, 'type_id');
     }
 
     protected function storeUpdateRequest($request,$project,$from_resource,$insert_media=true){

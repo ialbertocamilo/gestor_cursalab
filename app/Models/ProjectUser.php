@@ -25,49 +25,49 @@ class ProjectUser extends Model
         return $this->belongsTo(Taxonomy::class, 'status_id');
     }
     protected function userSummary(){
-        $data['count_aprobados'] = 0;
-        $data['count_pendientes'] = 0;
+        $data['count_approved'] = 0;
+        $data['count_pending'] = 0;
         $user = auth()->user();
-        $tareas = $this->tareasByUser($user);
-        if(count($tareas)>0){
-            $status_id_completed = self::getStatusCodes(['disapproved','passed']);
-            $data['count_aprobados'] = self::whereIn('tarea_id',$tareas->pluck('id'))
-                                    ->where('usuario_id',$user->id)
-                                    ->whereIn('status_id',$status_id_completed->pluck('id'))
+        $projects = $this->projectsByUser($user);
+        if(count($projects)>0){
+            $status_ids = self::getStatusCodes(['disapproved','passed']);
+            $data['count_approved'] = self::whereIn('project_id',$projects->pluck('id'))
+                                    ->where('user_id',$user->id)
+                                    ->whereIn('status_id',$status_ids->pluck('id'))
                                     ->count();
-            $data['count_pendientes'] = $tareas->count() - $data['count_aprobados'];
+            $data['count_pending'] = $projects->count() - $data['count_approved'];
         }
-        $data['recommendations'] = config('tarea.recommendations');
+        $data['recommendations'] = config('project.recommendations');
         return $data;
     }
-    protected function userTareas($type){
+    protected function userProjects($type){
         $user = auth()->user();
-        $tareas = $this->tareasByUser($user,true);
-        $tareas_response=[];
-        if(count($tareas)>0){
-            $list_status = ($type=='pendiente') ? ['pending','in_review','observed'] : ['disapproved','passed'];
-            $status =  self::getStatusCodes($list_status);
+        $projects = $this->projectsByUser($user,true);
+        $response=[];
+        if(count($projects)>0){
+            $status_code = ($type=='pendiente') ? ['pending','in_review','observed'] : ['disapproved','passed'];
+            $status =  self::getStatusCodes($status_code);
 
-            $usuario_tarea = self::whereIn('tarea_id',$tareas->pluck('id'))
+            $usuario_tarea = self::whereIn('project_id',$projects->pluck('id'))
                             ->with(['status'=>function($q){
                                 $q->select('id','name','code');
                             }])
-                            ->where('usuario_id',$user->id)
+                            ->where('user_id',$user->id)
                             ->get();
-            foreach ($tareas as $tarea) {
-                $find_usuario_tarea = $usuario_tarea->where('tarea_id',$tarea->id)->first();
-                $tarea->estado_code = 'pending';
-                $tarea->estado_label = 'Pendiente';
-                if(isset($find_usuario_tarea->status)){
-                    $tarea->estado_code = $find_usuario_tarea->status->code;
-                    $tarea->estado_label = $find_usuario_tarea->status->name;
+            foreach ($projects as $project) {
+                $find_project_user = $usuario_tarea->where('project_id',$project->id)->first();
+                $project->code_status = 'pending';
+                $project->status = 'Pendiente';
+                if(isset($find_project_user->status)){
+                    $project->code_status = $find_project_user->status->code;
+                    $project->status = $find_project_user->status->name;
                 }
                 
-                in_array($tarea->estado_code,$list_status) && ($tareas_response[]=$tarea);
+                in_array($project->code_status,$status_code) && ($response[]=$project);
             }
         }
        
-        return $tareas_response;
+        return $response;
     }
 
     protected function search($request , $project){
@@ -147,46 +147,36 @@ class ProjectUser extends Model
     }
 
 
-    protected function searchTareaUser($tarea){
+    protected function searchProjectUser($project){
         $user = auth()->user();
         // $extensions = config('constantes.extensiones');
-        $tarea_search = Project::with(['curso'=>function($q){
-            return $q->select('id','nombre','config_id','categoria_id');
-        }]
-        )->where('id',$tarea->id)->select('id','curso_id','indications','active')->first();
-        $tarea_resources = TareaResources::where('from_resource','media_tarea_curso')->where('tarea_id',$tarea->id)
+        $project_search = $project->load('course:id,name');
+        unset($project_search->updated_at);
+        unset($project_search->created_at);
+        unset($project_search->deleted_at);
+
+        $project_resources = ProjectResources::where('from_resource','media_project_course')->where('project_id',$project->id)
                                 ->select('type_id','type_media')
                                 ->with(['media'=>function($q){
                                     return $q->select('id','title','file');
                                 }])
-                                ->get()->map(function($tarea_resource){
-                                    $tarea_resource->media->tipo = $tarea_resource->type_media;
-                                    $file = $tarea_resource->media->file;
-                                    $tarea_resource->media->path =  str_contains($file,'http') ? $file : env('DO_URL') . "/" .$file ;
-                                    return  $tarea_resource;
-                                });
-        $user_resources = TareaResources::where('from_resource','media_project_user')
-                            ->where('tarea_id',$tarea->id)
+                                ->get();
+        $user_resources = ProjectResources::where('from_resource','media_project_user')
+                            ->where('project_id',$project->id)
                             ->where('type_id',$user->id)    
                             ->select('path_file','filename as title','type_media as tipo','size')
-                            ->get()->map(function($user_resource){
-                                $file = $user_resource->path_file;
-                                $user_resource->type_resource = 'media';
-                                $user_resource->relative_path = $file;
-                                $user_resource->path_file =  str_contains($file,'http') ? $file : env('DO_URL') . "/" .$file;
-                                return $user_resource;
-                            });
+                            ->get();
 
-        $tarea_search->tarea_resources = count($tarea_resources)>0 ? $tarea_resources->pluck('media') : [];
-        $tarea_search->user_resources = count($user_resources)>0 ? $user_resources : [];
-        //CODE
-        $usuario_tarea = self::where('tarea_id',$tarea->id)->where('usuario_id',$user->id)->with('status')->select('id','status_id','msg_to_user')->first();
-        $estado_code = isset($usuario_tarea->status) ? $usuario_tarea->status->code : 'pending';
-        $tarea_search->can_upload_files = in_array($estado_code,['pending','in_review','observed']);
-        $tarea_search->msg_to_user = $usuario_tarea ?  $usuario_tarea->msg_to_user : '' ;
+        $project_search->project_resources = count($project_resources)>0 ? $project_resources->pluck('media') : [];
+        $project_search->user_resources = count($user_resources)>0 ? $user_resources : [];
+        //status code
+        $user_project = self::where('project_id',$project->id)->where('user_id',$user->id)->with('status')->select('id','status_id','msg_to_user')->first();
+        $status_code = isset($user_project->status) ? $user_project->status->code : 'pending';
+        $project_search->can_upload_files = in_array($status_code,['pending','in_review','observed']);
+        $project_search->msg_to_user = $user_project ?  $user_project->msg_to_user : '' ;
         //constraint
-        $tarea_search->constraints = config('tarea.constraints.user');
-        return $tarea_search;
+        $project_search->constraints = config('project.constraints.user');
+        return $project_search;
     }
     protected function downloadZipFiles($request){
         $data['rutas'] = $request->input('rutas');
@@ -211,45 +201,38 @@ class ProjectUser extends Model
         $usuario_tarea->update();
     }
     //Guarda o actualiza la tarea
-    protected function storeUpdateUsuarioTarea($request){
-        $tarea = $request->tarea;
-        $usuario = $request->user;
+    protected function storeUpdateProjectUser($request){
+        $project = $request->project;
+        $user = $request->user;
         $status_code = $this->getStatusByCode('in_review');
         self::updateOrCreate(
-            ['tarea_id'=>$tarea->id,'usuario_id'=>$usuario->id],
-            ['tarea_id'=>$tarea->id,'usuario_id'=>$usuario->id,'status_id'=>$status_code->id
+            ['project_id'=>$project->id,'user_id'=>$user->id],
+            ['project_id'=>$project->id,'user_id'=>$user->id,'status_id'=>$status_code->id
         ]);
 
-        $tarea_resource = TareaResources::storeUpdateRequest($request,$tarea,'media_project_user',false);      
+        $project_resource = ProjectResources::storeUpdateRequest($request,$project,'media_project_user',false);      
     
-        if(count($tarea_resource)==0){
+        if(count($project_resource)==0){
             $status_code = $this->getStatusByCode('pending');
-            self::where('tarea_id',$tarea->id)->where('usuario_id',$usuario->id)->update([
+            self::where('project_id',$project->id)->where('user_id',$user->id)->update([
                 'status_id'=>$status_code->id
             ]);
         }
         return $status_code->name;
     }
   
-    private function tareasByUser($user,$with_course=false){
-        $helper = new HelperController();
-        $usuario_cursos = $helper->help_ids_cursos_x_criterios_v2($user->id);
-        $tareas = Project::whereIn('curso_id',$usuario_cursos)->where('active',1)->select('id','curso_id','indications');
+    private function projectsByUser($user,$with_course=false){
+        // $helper = new HelperController();
+        // $usuario_cursos = $helper->help_ids_cursos_x_criterios_v2($user->id);
+        $courses_id = $user->getCurrentCourses(only_ids:true);
+        $projects = Project::whereIn('course_id',$courses_id)->where('active',1)->select('id','course_id','indications');
         if($with_course){
-            $tareas = $tareas->with(['curso'=>function($q){
-                $q->select('id','nombre','categoria_id as escuela_id','imagen');
+            $projects = $projects->with(['course'=>function($q){
+                $q->select('id','name','imagen');
             }]);
         }
-        $tareas =$tareas->whereHas('curso')->get();
-        if($with_course){
-            $tareas->map(function($tarea){
-                if(!str_contains($tarea->curso->image,'http')){
-                    $tarea->curso->imagen = env('DO_URL'). "/".$tarea->curso->imagen;
-                } 
-                return $tarea;
-            });
-        }
-        return $tareas;
+        $projects =$projects->whereHas('course')->get();
+        return $projects;
     }
 
     private function getStatusByCode($code)
@@ -264,7 +247,7 @@ class ProjectUser extends Model
         return $status;
     }
     protected function getStatusCodes($codes){
-        $status = Taxonomy::select('id','code','name','position','group','description')->where('group', 'tareas')
+        $status = Taxonomy::select('id','code','name','position','group','description')->where('group', 'project')
         ->where('type', 'status')
         ->whereIn('code', $codes)
         ->where('active', 1)
