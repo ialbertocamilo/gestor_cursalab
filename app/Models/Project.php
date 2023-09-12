@@ -111,7 +111,7 @@ class Project extends BaseModel
         return $query->orderBy('created_at','desc')->paginate($request->paginate);
     }
     protected function storeUpdateRequest($request, $project = null){
-        try {
+        // try {
             $request_project = $request->project;
             DB::beginTransaction();
             if (!$project) {
@@ -123,10 +123,10 @@ class Project extends BaseModel
 
             ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);  
             DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $e;
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return $e;
+        // }
         return $project;
     }
 
