@@ -22,6 +22,9 @@ return [
     ],
     'announcements' => [
         'new-announcement' => 'Tienes un nuevo anuncio dentro de la plataforma.'
+    ],
+    'default' => [
+        'from-push' => '{content}'
     ]
 
 ];
