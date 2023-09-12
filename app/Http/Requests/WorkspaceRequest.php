@@ -36,7 +36,8 @@ class WorkspaceRequest extends FormRequest
             'selected_functionality' => 'nullable',
 
             'qualification_type_id' => 'required',
-            'criterio_id_fecha_inicio_reconocimiento' => 'nullable'
+            'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
+            'share_diplomas_social_media' => 'nullable'
         ];
     }
 
@@ -56,6 +57,11 @@ class WorkspaceRequest extends FormRequest
         if ($this->has('show_logo_in_app') ) {
             $data['show_logo_in_app'] = ($this->show_logo_in_app == 'true' ||
                                           $this->show_logo_in_app == 1 ) ? true : false;
+        }
+
+        if ($this->has('share_diplomas_social_media') ) {
+            $data['share_diplomas_social_media'] = ($this->share_diplomas_social_media == 'true' ||
+                                          $this->share_diplomas_social_media == 1 ) ? true : false;
         }
 
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
