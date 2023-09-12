@@ -202,6 +202,7 @@ import CreateAIQuestionsModal from "./CreateAIQuestionsModal"
 export default {
     components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal,CreateAIQuestionsModal},
     props: [
+        'workspace_id',
         'modulo_id',
         'modulo_name',
         'categoria_id',
@@ -325,7 +326,7 @@ export default {
                 confirmLabel: 'Guardar',
                 title_modal: `Creación de evaluación con AI (${this.tema_name})`,
                 topic_id: this.tema_id,
-                workspace_id: this.modulo_id,
+                workspace_id: this.workspace_id,
                 hideCancelBtn: true,
                 hideConfirmBtn: true,
             },
