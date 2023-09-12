@@ -195,7 +195,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));
     Route::prefix('diplomas')->middleware('checkrol:admin')->group(base_path('routes/cms/diplomas.php'));
 
-    Route::prefix('projects')->middleware('checkrol:admin')->group(base_path('routes/cms/projects.php'));
+    Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
 
     Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
 });
