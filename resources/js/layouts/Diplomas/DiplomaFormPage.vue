@@ -1030,7 +1030,7 @@ export default {
 .overlay-div{
     position: relative;
     display: flex;
-    width: 600px;
+    width: 850px;
 /*    height: auto;*/
     background-color: #ffffff;
     border-radius: .5rem;
@@ -1056,7 +1056,7 @@ export default {
     color: #A9A9A9;
     width: auto;
     top: 36%;
-    left: 35%;
+    left: 40%;
     background-color: #ffffff;
     padding: 1rem 1.5rem;
     border-radius: .5rem;
