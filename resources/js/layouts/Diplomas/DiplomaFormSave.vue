@@ -47,7 +47,7 @@ export default {
             resource: {},
             rules: {
                 diploma: this.getRules([
-                    'required', 'min:5', 'max:50'
+                    'required', 'max:60'
                 ]),
             },
         }
