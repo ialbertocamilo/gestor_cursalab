@@ -49,8 +49,8 @@ class CursosController extends Controller
             && !isset($request->q)
             && !isset($request->dates)
         ) || boolval(
-            isset($request->segmented_module) 
-            && isset($request->schools) 
+            isset($request->segmented_module)
+            && isset($request->schools)
             && count($request->schools) == 1
             && !isset($request->active)
             && !isset($request->type)
@@ -214,7 +214,7 @@ class CursosController extends Controller
         SortingModel::deletePositionInPivotTable(CourseSchool::class,Course::class,[
             'course_id' => $course->id
         ]);
-        
+
         $course->delete();
         $course->requirements()->delete();
 
