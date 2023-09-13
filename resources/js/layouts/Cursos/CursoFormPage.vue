@@ -79,7 +79,7 @@
                                         </template>
                                     </DefaultAutocomplete>
                                 </v-col>
-                                
+
                             </v-row>
                         </v-col>
                         <v-col cols="3" class="sep-left">
@@ -261,11 +261,9 @@
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <DefaultModalSection
-                                title="Programación de curso"
-                                :coming-soon="true"
-                            >
+                                title="Programación de curso">
                                 <template slot="content">
-                                    <v-row justify="center" disabled>
+                                    <v-row justify="center">
 
 
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
@@ -276,20 +274,19 @@
                                                 v-model="resource.publish_date_1"
                                                 label="Fecha de inicio"
                                                 dense
-                                                disabled
-
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
+                                                class="time-input"
+                                                type="time"
                                                 label="Hora"
-                                                v-model="resource.scheduled_restarts_dias"
-                                                type="number"
-                                                dense
-                                                disabled
+                                                v-model="resource.publish_time_1"
+                                                :disabled="!resource.publish_date_1"
+                                                :rules="rules.time"
+                                                step="60"
                                             />
                                         </v-col>
-                                        <!-- :disabled="!resource.scheduled_restarts_activado" -->
 
                                         <v-col cols="3" class="d-flex justify-content-center align-items-center">
                                             <DefaultInputDate
@@ -299,20 +296,19 @@
                                                 v-model="resource.publish_date_2"
                                                 label="Fecha de fin"
                                                 dense
-                                                disabled
-
                                             />
                                         </v-col>
                                         <v-col cols="3">
                                             <DefaultInput
+                                                class="time-input"
+                                                type="time"
                                                 label="Hora"
-                                                v-model="resource.scheduled_restarts_dias"
-                                                type="number"
-                                                dense
-                                                disabled
+                                                v-model="resource.publish_time_2"
+                                                :disabled="!resource.publish_date_2"
+                                                :rules="rules.time"
+                                                step="60"
                                             />
                                         </v-col>
-                                        <!-- :disabled="!resource.scheduled_restarts_activado" -->
 
                                         <v-col cols="12" class="py-1">
                                             <p class="mb-0">** Programar la activación y/o inactivación de un curso.</p>
@@ -334,23 +330,8 @@
                                 title="Configuración de diploma"
                             >
                                 <template slot="content">
-                                    <v-row justify="center">
-                                        <v-col cols="6" class="d-flex justify-content-center align-items-center">
-                                            <DefaultToggle
-                                                v-model="resource.show_certification_date"
-                                                active-label="Mostrar fecha en diploma"
-                                                inactive-label="No mostrar fecha en diploma"
-                                            />
-                                        </v-col>
-
-                                        <v-col cols="6">
-                                            * El diploma incluirá la fecha en la que el usuario aprobó el curso.
-                                            <br>
-                                            * Ejemplo: 02 de Enero del 2022
-                                        </v-col>
-
-                                    </v-row>
-
+                                    <DiplomaSelector
+                                        v-model="resource.certificate_template_id"/>
                                 </template>
                             </DefaultModalSection>
                         </v-col>
@@ -409,14 +390,16 @@ const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
-    'duration', 'investment', 'show_certification_date'
+    'duration', 'investment', 'show_certification_date', 'certificate_template_id',
+    'activate_at', 'deactivate_at'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 
 export default {
-    components: {CursoValidacionesModal,DialogConfirm},
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector },
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         const route_school = (this.categoria_id !== '')
@@ -453,13 +436,21 @@ export default {
                 scheduled_restarts_activado: false,
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,
+                certificate_template_id: null,
                 scheduled_restarts_minutos: 1,
                 lista_escuelas: [],
                 show_certification_date: false,
-                qualification_type: {position: 0}
+                qualification_type: {position: 0},
+
+                activate_at: null,
+                deactivate_at: null,
+                publish_date_1: null,
+                publish_time_1: null,
+                publish_date_2: null,
+                publish_time_2: null
             },
             resource: {
-                qualification_type: {position: 0}
+                qualification_type: {position: 0},
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -661,6 +652,22 @@ export default {
             }
         },
         confirmModal(validateForm = true) {
+
+            // Get datetimes values
+            if (this.resource.publish_date_1) {
+                let time1 = this.resource.publish_time_1 || '00:01';
+                this.resource.activate_at = `${this.resource.publish_date_1} ${time1}`
+            } else {
+                this.resource.activate_at = null
+            }
+
+            if (this.resource.publish_date_2) {
+                let time2 = this.resource.publish_time_2 || '00:01';
+                this.resource.deactivate_at = `${this.resource.publish_date_2} ${time2}`
+            } else {
+                this.resource.deactivate_at = null
+            }
+
             let vue = this
             vue.errors = []
             vue.loadingActionBtn = true
@@ -763,6 +770,19 @@ export default {
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
 
                         vue.resource = Object.assign({}, response.curso)
+
+                        // Set schedule datetime
+
+                        if (response.curso.activate_at) {
+                            vue.resource.publish_date_1 = response.curso.activate_at.substring(0, 10);
+                            vue.resource.publish_time_1 = response.curso.activate_at.substring(11, 16);
+                        }
+
+                        if (response.curso.deactivate_at) {
+                            vue.resource.publish_date_2 = response.curso.deactivate_at.substring(0, 10);
+                            vue.resource.publish_time_2 = response.curso.deactivate_at.substring(11, 16);
+                        }
+
                     } else {
                         vue.resource.qualification_type = response.qualification_type
                     }
@@ -794,6 +814,10 @@ export default {
 </script>
 <style lang="scss">
 @import "resources/sass/variables";
+
+.time-input .v-input__slot {
+  min-height: 40px !important;
+}
 
 .date_reinicios_disabled {
     pointer-events: none;

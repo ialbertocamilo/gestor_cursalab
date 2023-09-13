@@ -60,6 +60,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('notifications:clear')->dailyAt('05:00');
 
+        // Courses
+
+        $schedule->command('courses:activate-deactivate')->everyFifteenMinutes();
+
         // Criteria
 
         $schedule->command('criteria:check-empty')->everyThreeHours();
