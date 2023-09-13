@@ -77,6 +77,8 @@ class MasivoController extends Controller
     // }
     public function downloadTemplateUser()
     {
+        ob_end_clean(); 
+        ob_start();
         return Excel::download(new UserMassiveTemplate, 'plantilla_usuarios.xlsx');
     }
 

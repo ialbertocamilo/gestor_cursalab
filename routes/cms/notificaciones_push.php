@@ -10,5 +10,6 @@ Route::controller(PushNotificationsFirebaseController::class)->group(function() 
     Route::get('/search', 'search');
     Route::get('/get-list-selects', 'getListSelects');
     Route::get('/detalle/{notificacion}', 'detalle');
-
+    Route::get('getData', 'getData');
+    Route::post('/enviarNotificacionCustom', 'enviarNotificacionCustom');
 });

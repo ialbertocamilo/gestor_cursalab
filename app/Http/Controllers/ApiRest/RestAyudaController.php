@@ -29,7 +29,7 @@ class RestAyudaController extends Controller
         if (is_null($usuario_id) || is_null($motivo)) {
             $data = array('error' => true, 'error_msg' => 'No se recibieron datos', 'data' => null);
         } else {
-            if(strlen($motivo) == 1){
+            if(strlen($motivo) < 3){
                 $pregunta = Post::select('title')->where('id',$motivo)->first();
                 $motivo = $pregunta->title ?? '';
             }
