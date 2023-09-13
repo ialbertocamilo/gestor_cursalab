@@ -16,8 +16,8 @@ class RestProjectController extends Controller
         $summary = ProjectUser::userSummary();
         return $this->success($summary);
     }
-    public function userProjects($type){
-        $tareas = ProjectUser::userProjects($type);
+    public function userProjects($type,Request $request){
+        $tareas = ProjectUser::userProjects($type,$request);
         return $this->success($tareas);
     }
     public function storeUpdateUserProject(Project $project,ProjectUserRequest $request){
