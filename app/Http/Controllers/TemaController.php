@@ -84,7 +84,7 @@ class TemaController extends Controller
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
 
         $media_url = get_media_root_url();
-
+        $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],

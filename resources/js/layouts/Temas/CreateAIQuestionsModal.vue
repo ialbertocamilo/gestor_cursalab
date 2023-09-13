@@ -86,9 +86,9 @@
                                 <span class="rounded-border-primary">3</span>
                                 <span class="ml-1 color-default-primary">Resultado</span>
                             </div>
-                            <div class="container-questions py-1 my-4">
+                            <div class="container-questions py-1 my-4" v-if="questions.length>0">
                                 <!-- <transition-group name="fade" mode="out-in"> -->
-                                <div class="m-3 px-5 py-2 card-question typing-animation" v-for="(question,index) in questions" :key="index">
+                                <div  class="m-3 px-5 py-2 card-question typing-animation" v-for="(question,index) in questions" :key="index">
                                     <span v-text="question.question" class="mb-1"></span>
                                     <span class="ml-3" v-for="(option,index) in question.options" :key="index" v-text="option.text" :style="option.isCorrect ? 'background:#ddddfa' :''"></span>
                                     <div class="d-flex justify-end">
@@ -104,6 +104,15 @@
                                     </div>
                                 </div>
                                 <!-- </transition-group> -->
+                            </div>
+                            <div v-else 
+                                class="py-1 my-4 d-flex flex-column justify-align-items-center justify-content-center"
+                                style="height: 80vh;border: 1px solid #EAEAEA;"
+                            >
+                                <div class="d-flex justify-center">
+                                    <img src="/img/folder.svg" style="width:3rem">
+                                </div>
+                                <span class="text-center">En esta sección se listarán las preguntas generadas con AI para tu tema.</span>
                             </div>
                         </v-col>
                     </v-row>
@@ -182,10 +191,10 @@ export default {
             configuration:{
                 level:1,
                 type_questions: [
-                    { checked: true, type: 'single-choice', name: 'Selección única', quantity: 5 },
-                    { checked: true, type: 'true_or_false', name: 'Verdadero o Falso', quantity: 5 },
-                    { checked: true, type: 'fill-in-the-blank', name: 'Completar el espacio en blanco', quantity: 5 },
-                    { checked: true, type: 'analogies', name: 'Analogías', quantity: 5 },
+                    { checked: true, type: 'single-choice', name: 'Selección única', quantity: 4 },
+                    { checked: true, type: 'true_or_false', name: 'Verdadero o Falso', quantity: 3 },
+                    { checked: true, type: 'fill-in-the-blank', name: 'Completar el espacio en blanco', quantity: 3 },
+                    // { checked: true, type: 'analogies', name: 'Analogías', quantity: 5 },
                 ],
             },
             questions:[],
@@ -285,7 +294,7 @@ export default {
         },
         changeConfiguration(value){
             let vue = this;
-            let quantities = [5,5,5,5];
+            let quantities = [4,3,3];
             if(value){
                 quantities = vue.generateRandomQuantities();
             }
@@ -303,19 +312,25 @@ export default {
         },
         resetValues(){
             let vue = this;
-            vue.changeQuantities([5,5,5,5]);
+            vue.changeQuantities([4,3,3]);
             vue.configuration.level = 1;
             vue.generate_quantity = 0;
         },
         generateRandomQuantities() {
             let numbers = [];
-            for (let i = 0; i < 3; i++) {
-                let number = Math.floor(Math.random() * 10) + 1; 
+            // Genera dos números aleatorios positivos entre 1 y 9 (inclusive) para asegurar que no superen 10
+            for (let i = 0; i < 2; i++) {
+                let max = 10 - numbers.reduce((sum, num) => sum + num, 0);
+                if (i === 1) {
+                max = Math.min(max, 6); // Limita el segundo número a un máximo de 6 para evitar superar 10
+                }
+                let number = Math.floor(Math.random() * max) + 1;
                 numbers.push(number);
             }
-            let numberLess = 20 - numbers.reduce((sum, num) => sum + num, 0);
-            numberLess = Math.min(Math.max(numberLess, 1), 6);
-            numbers.push(numberLess);
+            // Calcula el tercer número para que la suma total sea 10
+            let remaining = 10 - numbers.reduce((sum, num) => sum + num, 0);
+            numbers.push(remaining);
+            
             return numbers;
         },
         openEditQuestionModal(question,index){

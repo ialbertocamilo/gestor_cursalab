@@ -209,7 +209,13 @@
                                                 <td class="">
                                                     <div class="mt-1">
                                                         <span class="d-flex align-items-center">
+                                                            <img width="26px" 
+                                                                v-if="media.ia_convert==1 && !media.path_convert"
+                                                                class="mr-2 ia_convert_active img-rotate" 
+                                                                src="/img/loader-jarvis.svg"
+                                                            >
                                                             <img width="32px" 
+                                                                v-else
                                                                 class="mr-2" 
                                                                 :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
                                                                 src="/img/ia_convert.svg"
@@ -690,6 +696,9 @@ export default {
                 vue.showAlert("Debe haber almenos un multimedia embebido.", 'warning')
                 return;
             }
+            if(vue.resource.media[vue.mediaDeleteModal.media_index].ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted - 1;
+            }
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
         },
@@ -773,5 +782,17 @@ export default {
 }
 .ia_convert_active{
     filter: hue-rotate(360deg);
+}
+.img-rotate {
+  animation: rotacion 4s linear infinite;
+}
+
+@keyframes rotacion {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

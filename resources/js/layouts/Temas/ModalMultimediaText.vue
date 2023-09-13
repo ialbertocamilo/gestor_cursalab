@@ -88,9 +88,29 @@ export default {
             vue.url = null
             vue.$emit('close')
         },
+        getYoutubeCode(link) {
+            // Patron regular para coincidir con el código de YouTube
+            const patron = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?|watch)\?.*v=|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+            // Intentar hacer coincidir el patrón en el enlace
+            const coincidencia = link.match(patron);
+            // Si se encuentra una coincidencia, devolver el código del video
+            if (coincidencia && coincidencia[1]) {
+                return coincidencia[1];
+            }
+            // Si no se encuentra una coincidencia, devolver null o un mensaje de error
+            return null;
+        },
         confirmModal() {
             let vue = this
             const validateForm = vue.validateForm('TemaMultimediaTextForm')
+            if(vue.type=='youtube' &&  vue.url.includes("https")){
+                const code = vue.getYoutubeCode(vue.url);
+                if(!code){
+                    vue.showAlert('El link de youtube no tiene el formato correcto','warning') 
+                    return '';
+                }
+                vue.url = code;
+            }
             if (validateForm) {
                 const data = {
                     titulo: vue.titulo,

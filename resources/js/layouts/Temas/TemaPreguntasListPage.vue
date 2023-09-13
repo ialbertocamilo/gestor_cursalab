@@ -10,19 +10,24 @@
                     </v-col>
                     <v-col cols="6">
                         <div class="ddd-flex justify-content-end">
-                            <v-btn
-                                class="mx-1"
-                                elevation="0"
-                                color="primary"
-                                @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
-                            >
-                                <img width="22px" 
-                                    class="mr-2" 
-                                    style="filter: brightness(3);"
-                                    src="/img/ia_convert.svg"
-                                >
-                                Crear con AI
-                            </v-btn>
+                            <v-badge small class="_badge" overlap color="#57BFE3"> 
+                                    <template v-slot:badge>
+                                        <span>3/4</span>
+                                    </template>
+                                    <v-btn
+                                        class="mx-1"
+                                        elevation="0"
+                                        color="primary"
+                                        @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
+                                    >
+                                        <img width="22px" 
+                                            class="mr-2" 
+                                            style="filter: brightness(3);"
+                                            src="/img/ia_convert.svg"
+                                        >
+                                        Crear con AI
+                                    </v-btn>
+                            </v-badge>
                             <DefaultActivityButton
                                 :outlined="true"
                                 :label="'Importar evaluación'"

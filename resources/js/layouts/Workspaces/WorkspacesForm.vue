@@ -431,6 +431,7 @@ export default {
                 qualification_type: '',
                 criteria_workspace: [],
                 selected_functionality: {},
+                limits:{}
                 // selected_section_criteria: {
                 //     profile: false,
                 //     filters: false,

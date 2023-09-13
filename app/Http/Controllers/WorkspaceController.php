@@ -189,6 +189,11 @@ class WorkspaceController extends Controller
         $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
+        $workspace->limits = [
+            'limit_allowed_media_convert' => $workspace->limits['limit_allowed_media_convert'] ?? 0,
+            'limit_allowed_ia_evaluations' => $workspace->limits['limit_allowed_ia_evaluations'] ?? 0,
+        ];
+
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
