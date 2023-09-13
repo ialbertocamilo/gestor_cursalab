@@ -406,10 +406,10 @@ const fields = [
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
-import DiplomaSelector from "../../components/Diplomas/DiplomaSelector"
+// import DiplomaSelector from "../../components/Diplomas/DiplomaSelector"
 
 export default {
-  components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector },
+  components: { CursoValidacionesModal, DialogConfirm },
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         const route_school = (this.categoria_id !== '')
