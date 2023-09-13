@@ -234,12 +234,12 @@ class ProjectUser extends Model
         //     }]);
         // }
         //FILTERS
-        if($request->school_id){
+        if($request?->school_id){
             $projects->whereHas('course.schools', function ($t) use ($request) {
                 $t->where('school_id', $request->school_id);
             });
         }
-        if ($request->course){
+        if ($request?->course){
             $projects->whereHas('course',function($q) use ($request){
                 $q->where('name', 'like', "%$request->course%");
             });
