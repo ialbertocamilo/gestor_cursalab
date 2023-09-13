@@ -225,13 +225,27 @@ class ProjectUser extends Model
         // $helper = new HelperController();
         // $usuario_cursos = $helper->help_ids_cursos_x_criterios_v2($user->id);
         $courses_id = $user->getCurrentCourses(only_ids:true);
+        $summary_courses = SummaryCourse::where('user_id',$user->id)->where('course_id',$courses_id)->whereRelation('status', 'code', 'aprobado')->get();
         $projects = Project::whereIn('course_id',$courses_id)->where('active',1)->select('id','course_id','indications');
         if($with_course){
             $projects = $projects->with(['course'=>function($q){
                 $q->select('id','name','imagen');
             }]);
         }
-        $projects =$projects->whereHas('course')->get();
+        $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
+        $projects = $projects->whereHas('course')->get()->map(function($project) use ($user,$statuses,$summary_courses,$with_course){
+            $project->loadMissing('course:id');
+            $course_status = Course::getCourseStatusByUser($user, $project->course, $summary_courses, [], $statuses);
+            $project->available = $course_status['available'];
+            if(!$with_course){
+                unset($project->course);
+            }
+            unset($project->course->requirements);
+            unset($project->course->topics);
+            unset($project->course->polls);
+            unset($project->course->summaries);
+            return $project;
+        });
         return $projects;
     }
 
