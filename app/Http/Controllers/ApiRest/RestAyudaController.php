@@ -218,7 +218,7 @@ class RestAyudaController extends Controller
                 $codigo_http = 200; // OK
             } else {
                 $mensaje = 'El usuario está inactivo.';
-                $codigo_http = 404; // Prohibido
+                $codigo_http = 403; // Prohibido
             }
         } else {
             $mensaje = 'El usuario no existe.';
