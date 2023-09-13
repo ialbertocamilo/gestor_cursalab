@@ -28,8 +28,17 @@ class ProjectUser extends Model
         $data['count_approved'] = 0;
         $data['count_pending'] = 0;
         $user = auth()->user();
-        $projects = $this->projectsByUser($user);
+        $projects = $this->projectsByUser(user:$user,listSchools:true);
+        $schools = collect();
         if(count($projects)>0){
+            $projects->map(function($project) use ($schools){
+                $schools->push([
+                    'id'=>$project->course?->schools?->first()?->id,
+                    'name'=>$project->course?->schools?->first()?->name,
+                ]);
+                unset($project->course);
+                return $project;
+            });
             $status_ids = self::getStatusCodes(['disapproved','passed']);
             $data['count_approved'] = self::whereIn('project_id',$projects->pluck('id'))
                                     ->where('user_id',$user->id)
@@ -37,6 +46,7 @@ class ProjectUser extends Model
                                     ->count();
             $data['count_pending'] = $projects->count() - $data['count_approved'];
         }
+        $data['schools'] = $schools->unique('id');
         $data['recommendations'] = config('project.recommendations');
         return $data;
     }
@@ -221,18 +231,13 @@ class ProjectUser extends Model
         return $status_code->name;
     }
   
-    private function projectsByUser($user,$with_course=false,$request=null){
+    private function projectsByUser($user,$with_course=false,$request=null,$listSchools=false){
         $courses_id = $user->getCurrentCourses(only_ids:true);
         $summary_courses = SummaryCourse::where('user_id',$user->id)->where('course_id',$courses_id)->whereRelation('status', 'code', 'aprobado')->get();
         $projects = Project::with('course:id,name,imagen')
                     ->whereIn('course_id',$courses_id)
                     ->where('active',1)
                     ->select('id','course_id','indications');
-        // if($with_course){
-        //     $projects = $projects->with(['course'=>function($q){
-        //         $q->select('id','name','imagen');
-        //     }]);
-        // }
         //FILTERS
         if($request?->school_id){
             $projects->whereHas('course.schools', function ($t) use ($request) {
@@ -246,7 +251,7 @@ class ProjectUser extends Model
         }
         //Set available project (If the course is blocked the project will not be available)
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
-        $projects = $projects->whereHas('course')->get()->map(function($project) use ($user,$statuses,$summary_courses,$with_course){
+        $projects = $projects->whereHas('course')->get()->map(function($project) use ($user,$statuses,$summary_courses,$with_course,$listSchools){
             // $project->loadMissing('course:id');
             $course_status = Course::getCourseStatusByUser($user, $project->course, $summary_courses, [], $statuses);
             $project->available = $course_status['available'];
@@ -255,7 +260,9 @@ class ProjectUser extends Model
             }
             $project->school_id = $project->course?->schools?->first()->id; 
             unset($project->course->requirements);
-            unset($project->course->schools);
+            if($listSchools){
+                unset($project->course->schools);
+            }
             unset($project->course->topics);
             unset($project->course->polls);
             unset($project->course->summaries);
