@@ -6,5 +6,5 @@ Route::controller(RestProjectController::class)->group(function() {
     Route::get('/{project}/search', 'searchProjectUser');
     Route::get('/user/{type}', 'userProjects');
     Route::get('/summary', 'userSummary');
-    Route::post('/{tarea}/store-update', 'storeUpdateUserProject');
+    Route::post('/{project}/store-update', 'storeUpdateUserProject');
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use Illuminate\Http\Request;
+use App\Http\Requests\ProjectUserRequest;
 
 class RestProjectController extends Controller
 {

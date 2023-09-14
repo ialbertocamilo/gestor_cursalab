@@ -67,13 +67,13 @@
                 <!-- TABLE -->
                 <DefaultTable :ref="dataTable.ref" :data-table="dataTable" :filters="filters"
                     @download_all_files="download_all_files($event)"
-                    @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - DNI: ${$event.dni}`)">
+                    @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - Documento: ${$event.document}`)">
                     <template v-slot:custom_slot="{ item }">
                         <div v-if="item.resources_user.length > 0" class="d-flex justify-center">
                             <span v-for="(resources_user, idx) in item.resources_user" :key="idx">
                                 <v-btn icon @click="openFormModal(modalUsuarioResource, resources_user, null, 'Recurso')"
                                     color="primary">
-                                    <v-icon :v-text="getIcon(resources_user.type_media)"></v-icon>
+                                    <v-icon>{{ getIcon(resources_user.type_media)  }}</v-icon>
                                 </v-btn>
                             </span>
                         </div>
@@ -84,7 +84,7 @@
                 </DefaultTable>
             </v-card>
         </section>
-        <!-- <UsuarioResourceModal 
+        <UsuarioResourceModal 
             :ref="modalUsuarioResource.ref"
             :options="modalUsuarioResource"
             @onConfirm="closeFormModal(modalUsuarioResource, dataTable, filters),refreshDefaultTable(dataTable, filters)"
@@ -95,18 +95,17 @@
             :options="modalUsuarioCheckTarea"
             @onConfirm="closeFormModal(modalUsuarioCheckTarea, dataTable, filters),refreshDefaultTable(dataTable, filters)"
             @onCancel="closeFormModal(modalUsuarioCheckTarea)"
-        /> -->
+        />
     </div>
 </template>
 
 
 <script>
 
-// import UsuarioResourceModal from './UsuarioResourceModal.vue';
-// import UsuarioCheckTareaModal from './UsuarioCheckTareaModal.vue'
-import DefaultTextArea from '../../components/globals/DefaultTextArea.vue';
+import UsuarioResourceModal from './UsuarioResourceModal.vue';
+import UsuarioCheckTareaModal from './UsuarioCheckTareaModal.vue'
 export default {
-    components: { DefaultTextArea },
+    components: { UsuarioResourceModal, UsuarioCheckTareaModal},
     props: ['project_id', 'course_name'],
     data() {
         let vue = this
@@ -231,15 +230,15 @@ export default {
         getIcon(type) {
             const types = [
                 { type: 'pdf', icon: 'mdi-file-pdf' },
-                { type: 'image', icon: 'mdi-image' },
+                { type: 'image', icon: 'mdi-file-image' },
                 { type: 'office', icon: 'mdi-file-document' },
                 { type: 'video', icon: 'mdi-file-video' }
             ]
             const find_type = types.find(e => e.type == type);
             return find_type.icon || 'mdi-file';
         },
-        download_all_files({ resources_user, usuario_tarea_id }) {
-            let url = `/tareas/${usuario_tarea_id}/download-zip-files?`;
+        download_all_files({ resources_user, project_user_id }) {
+            let url = `/projects/${project_user_id}/download-zip-files?`;
             resources_user.forEach((resource, index) => {
                 url += (index > 0) ? '&rutas[]=' + resource.path_file : 'rutas[]=' + resource.path_file;
             });

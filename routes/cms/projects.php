@@ -19,8 +19,8 @@ Route::controller(ProjectController::class)->group(function() {
     Route::view('/{tarea}/usuarios', 'projects.users')->name('project_users.list');
     Route::get('/users/status-list/{type}', [ProjectUserController::class, 'listStatus']);
     Route::get('/{project}/users/search', [ProjectUserController::class, 'search']);
-    // Route::get('/{usuario_tarea_id}/download-zip-files', [UsuarioTareaController::class, 'downloadZipFiles']);
-    // Route::post('/{usuario_tarea}/update-usuario-tarea', [UsuarioTareaController::class, 'update']);
+    Route::get('/{project_user_id}/download-zip-files', [ProjectUserController::class, 'downloadZipFiles']);
+    Route::post('/{project_user}/update-usuario-tarea', [ProjectUserController::class, 'update']);
 });
 
 ?>

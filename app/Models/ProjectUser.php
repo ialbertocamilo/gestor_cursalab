@@ -16,7 +16,7 @@ class ProjectUser extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    public function tarea()
+    public function project()
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
@@ -190,17 +190,17 @@ class ProjectUser extends Model
     }
     protected function downloadZipFiles($request){
         $data['rutas'] = $request->input('rutas');
-        $usuario_tarea_id = $request->usuario_tarea_id;
-        $usuario_tarea =  self::where('id',$usuario_tarea_id )
-                        ->with(['usuario'=>function($q){
-                            $q->select('id','dni');
-                        },'tarea.curso'=>function($q){
-                            $q->select('id','nombre');
+        $project_user_id = $request->project_user_id;
+        $project_user =  self::where('id',$project_user_id )
+                        ->with(['user'=>function($q){
+                            $q->select('id','document');
+                        },'project.course'=>function($q){
+                            $q->select('id','name');
                         }])->first();
-        $curso_nombre = mb_strtolower(str_replace(' ', '-', $usuario_tarea->tarea->curso->nombre));
-        $curso_nombre = str_replace('--', '-', $curso_nombre);
-        $usuario_dni=trim($usuario_tarea->usuario->dni);
-        $data['file_zip_name'] = $usuario_dni.'-'.$curso_nombre.'.zip';
+        $course_name = mb_strtolower(str_replace(' ', '-', $project_user->project->course->name));
+        $course_name = str_replace('--', '-', $course_name);
+        $document_user=trim($project_user->user->document);
+        $data['file_zip_name'] = $document_user.'-'.$course_name.'.zip';
         $name_zip = Media::createZipFromStorage($data);
         return $name_zip;
     }
@@ -219,7 +219,6 @@ class ProjectUser extends Model
             ['project_id'=>$project->id,'user_id'=>$user->id],
             ['project_id'=>$project->id,'user_id'=>$user->id,'status_id'=>$status_code->id
         ]);
-
         $project_resource = ProjectResources::storeUpdateRequest($request,$project,'media_project_user',false);      
     
         if(count($project_resource)==0){
@@ -274,7 +273,7 @@ class ProjectUser extends Model
     private function getStatusByCode($code)
     {
         $status = cache()->rememberForever('taxonomies_project_status_' . $code,  function () use ($code) {
-            return Taxonomy::where('group', 'projects')
+            return Taxonomy::where('group', 'project')
                         ->where('type', 'status')
                         ->where('code', $code)
                         ->where('active', 1)

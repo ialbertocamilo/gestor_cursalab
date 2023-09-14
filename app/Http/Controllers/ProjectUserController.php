@@ -14,8 +14,8 @@ class ProjectUserController extends Controller
         ProjectUserSearchResource::collection($data);
         return $this->success($data);
     }
-    public function downloadZipFiles($usuario_tarea_id,Request $request){
-        $request->usuario_tarea_id = $usuario_tarea_id;
+    public function downloadZipFiles($project_user_id,Request $request){
+        $request->project_user_id = $project_user_id;
         $name_zip = ProjectUser::downloadZipFiles($request);
         return response()->download(public_path($name_zip), $name_zip)->deleteFileAfterSend(true);
     }

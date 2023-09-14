@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Services\FileService;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
-
-use Jenssegers\Mongodb\Eloquent\SoftDeletes;
-use Aws\S3\S3Client;
 use ZipArchive;
+use Aws\S3\S3Client;
+use Illuminate\Support\Str;
+use App\Services\FileService;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\Mime\MimeTypes;
 
+use Illuminate\Support\Facades\Storage;
+use Jenssegers\Mongodb\Eloquent\SoftDeletes;
+use Illuminate\Contracts\Routing\UrlGenerator;
+
+use Illuminate\Contracts\Foundation\Application;
 use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
 
 class Media extends BaseModel
@@ -718,5 +719,23 @@ class Media extends BaseModel
     //         }
     //     }
     // }
-
+    protected function createZipFromStorage($files){
+        $rutas =  $files['rutas'];
+        $file_zip_name = $files['file_zip_name'];
+        $zip = new ZipArchive;
+        $mimeTypes = new MimeTypes();
+        if (true === ($zip->open($file_zip_name, ZipArchive::CREATE | ZipArchive::OVERWRITE))) {
+            foreach ($rutas as $ruta) {
+                if(Storage::disk('s3')->exists($ruta)){
+                    $file_content = Storage::disk('s3')->get($ruta);
+                    $file_extension = $mimeTypes->getExtensions(Storage::disk('s3')->mimeType($ruta));
+                    $file_extension = isset($file_extension[0]) ? $file_extension[0] : 'txt';
+                    $basename = pathinfo($ruta, PATHINFO_FILENAME) . '.' . $file_extension;
+                    $zip->addFromString($basename, $file_content);
+                }
+            }
+        }
+        $zip->close();
+        return $file_zip_name;
+    }
 }
