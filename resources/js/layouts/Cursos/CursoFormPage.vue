@@ -21,6 +21,7 @@
                                 :rules="rules.name"
                                 show-required
                                 counter="120"
+                                emojiable
                             />
                         </v-col>
                         <v-col cols="4">

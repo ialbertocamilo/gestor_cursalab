@@ -20,6 +20,7 @@
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 counter="120"
+                                emojiable
                             />
                         </v-col>
                         <!-- <v-col cols="6">

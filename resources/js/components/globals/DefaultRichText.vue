@@ -19,9 +19,9 @@
                     force_br_newlines: true,
                     force_p_newlines: false,
                     forced_root_block: '',
-                    plugins: ['lists anchor', 'code', 'paste','link','image'],
+                    plugins: ['lists anchor', 'code', 'paste','link','image', 'emoticons'],
                     toolbar:
-                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | code | link | image',
+                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | code | link | image | emoticons',
                     images_file_types: 'jpg,svg,webp,gif'
                 }"
                 @input="updateValue"

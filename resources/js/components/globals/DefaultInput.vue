@@ -25,15 +25,24 @@
         :loading="loading"
         :autocomplete="autocomplete"
         @focus="onFocus"
+        ref="fieldtext"
     >
         <template v-slot:append>
             <v-btn v-if="type == 'password'" width="32" height="32" plain icon
                    @click="onClickSeePassword">
                 <span :class="`far ${iconSeePass ? 'fa-eye' : 'fa-eye-slash' } fa-lg`"></span>
             </v-btn>
+
+            <v-btn  v-if="emojiable" plain icon :ripple="false"
+                v-click-outside="{ handler: onClickOutside }">
+                <v-icon class="emoji-icon-button" @click="showEmojiPicker = !showEmojiPicker" >mdi mdi-emoticon</v-icon>
+                <Picker :data="emojiIndex" set="google" @select="showEmoji" :show-preview="false"  :show-skin-tones="false" style="position: absolute; z-index: 100; top: 20px; right: 10px;" v-show="showEmojiPicker" :useButton="false" :native="false" />
+            </v-btn>
+
             <v-btn v-if="appendIcon" plain icon :ripple="false" @click="onClickAppendIcon">
                 <v-icon>{{ appendIcon }}</v-icon>
             </v-btn>
+
             <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
         </template>
         <template v-slot:label v-if="showRequired">
@@ -43,7 +52,15 @@
 </template>
 
 <script>
+
+import data from "emoji-mart-vue-fast/data/all.json";
+import "emoji-mart-vue-fast/css/emoji-mart.css";
+import { Picker, EmojiIndex } from "emoji-mart-vue-fast";
+
+let emojiIndex = new EmojiIndex(data);
+
 export default {
+    components: {Picker},
     props: {
         value: {
             required: true
@@ -127,13 +144,21 @@ export default {
             type: String,
             default: ''
         },
+        emojiable: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
+            emojiIndex: emojiIndex,
+            emojisOutput: "",
+
             localText: null,
             localType: this.type,
 
-            iconSeePass: true
+            iconSeePass: true,
+            showEmojiPicker: false,
         }
     },
     created() {
@@ -153,6 +178,9 @@ export default {
         }
     },
     methods: {
+        onClickOutside () {
+            this.showEmojiPicker = false
+        },
         onFocus() {
             this.$emit('onFocus')
         },
@@ -200,11 +228,68 @@ export default {
             vue.iconSeePass = !vue.iconSeePass;
             vue.localType = !vue.iconSeePass ? 'text' : 'password';
         },
+        // showEmoji(emoji) {
+        //     // this.emojisOutput = this.emojisOutput + emoji.native;
+        //     this.setEmojiAtPosition(emoji.native)
+
+        // },
+        showEmoji(emoji) {
+
+            let pos = this.$refs.fieldtext.$refs.input.selectionStart
+            const len = this.localText.length
+
+            if (pos === undefined) {
+                pos = 0
+            }
+
+            const before = this.localText.substr(0, pos)
+            const after = this.localText.substr(pos, len)
+
+            let inserted = before + emoji.native
+
+            this.localText = inserted + after
+
+            this.updateValue(this.localText)
+
+            this.$nextTick(() => {
+                this.$refs.fieldtext.$refs.input.selectionEnd = inserted.length
+            });
+        },
+        keepPosition() {
+            const field = this.$refs.fieldtext.$refs.input
+        },
     }
 }
 </script>
 <style lang="scss">
-i.v-icon.icon_tooltip {
-    color: #000 !important;
-}
+    i.v-icon.icon_tooltip {
+        color: #000 !important;
+    }
+    .emoji-mart-category {
+        white-space: initial !important;
+        cursor: auto !important;
+    }
+    .emoji-mart {
+        margin: 0 auto;
+        text-align: left;
+        padding: 0 !important;
+    }
+    .emoji-type-image, .emoji-type-native {
+        cursor: pointer !important;
+    }
+
+
+    // .v-input.custom-default-input.v-input--dense.v-text-field .v-btn__content button.v-icon {
+    .v-input.custom-default-input.v-text-field .v-btn__content button.v-icon {
+        margin-top: -5px !important;
+    }
+
+    // .emoji-icon-button:before {
+    //     background-color: white !important;
+    // }
+
+    // .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
+    //     opacity: .08;
+    //     background: white;
+    // }
 </style>
