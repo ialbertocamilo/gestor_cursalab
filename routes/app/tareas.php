@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProjectUserController;
 use App\Http\Controllers\RestProjectController;
 
 Route::controller(RestProjectController::class)->group(function() {
@@ -7,4 +8,5 @@ Route::controller(RestProjectController::class)->group(function() {
     Route::get('/user/{type}', 'userProjects');
     Route::get('/summary', 'userSummary');
     Route::post('/{project}/store-update', 'storeUpdateUserProject');
+    Route::get('/resource/{project_resource}/download', [ProjectUserController::class, 'downloadFile']);
 });

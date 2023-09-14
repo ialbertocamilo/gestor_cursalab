@@ -15,7 +15,7 @@
                 <v-card-title class="default-dialog-title sticky-card-text">
                     {{ options.title }}
                     <v-spacer/>
-                     <v-btn icon :ripple="false" color="white" :href="`/api/download_file?ruta=${full_path_file}`" target="_blank">
+                     <v-btn icon :ripple="false" color="white" :href="`/projects/resource/${project_resource_id}/download`" target="_blank">
                         <v-icon>mdi-download</v-icon>
                     </v-btn>
                     <v-btn
@@ -65,6 +65,7 @@ export default {
             selects:{},
             type_media:null,
             full_path_file:'',
+            project_resource_id:0,
         }
     },
     methods:{
@@ -82,13 +83,28 @@ export default {
          resetValidation() {
             let vue = this
         },
-        async loadData({type_media,full_path_file}) {
+        async loadData({type_media,full_path_file,id}) {
             let vue = this;
             vue.type_media = type_media;
             vue.full_path_file = full_path_file;
+            vue.project_resource_id = id;
         },
         loadSelects() {
             let vue = this
+        },
+        downloadFile(){
+            let vue = this;
+            const url = ``;
+            const element = document.createElement('a');
+            element.href = url;
+            element.download = true; // Indicar que es una descarga
+            element.style.display = 'none'; // Ocultar el elemento
+            // Agregar el elemento al documento
+            document.body.appendChild(element);
+            // Simular un clic en el enlace de descarga
+            element.click();
+            // Eliminar el elemento después de la descarga
+            document.body.removeChild(element);
         }
     }
 }

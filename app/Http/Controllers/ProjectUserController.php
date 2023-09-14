@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use Illuminate\Http\Request;
+use App\Models\ProjectResources;
 use App\Http\Requests\ProjectUserUpdateRequest;
 use App\Http\Resources\ProjectUserSearchResource;
 
@@ -20,7 +21,9 @@ class ProjectUserController extends Controller
         $name_zip = ProjectUser::downloadZipFiles($request);
         return response()->download(public_path($name_zip), $name_zip)->deleteFileAfterSend(true);
     }
-
+    public function downloadFile(ProjectResources $project_resource){
+        return $project_resource->downloadFile();
+    }
     public function update(ProjectUser $project_user,ProjectUserUpdateRequest $request){
         $request->project_user = $project_user;
         ProjectUser::updateProjectUser($request);

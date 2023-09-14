@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\BaseModel;
 use App\Traits\CustomAudit;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -102,5 +103,30 @@ class ProjectResources extends BaseModel
             'size' =>$size,
             'type_media'=>$tipo
         ];
+    }
+
+    public function downloadFile(){
+        $pathfile = $this->path_file;
+
+        $filename = Str::after($pathfile, '/');
+        $pathInfo = pathinfo($filename);
+        $headers = [];
+        if (isset($pathInfo['extension'])) {
+            if (strtolower($pathInfo['extension']) === 'pdf') {
+                $headers = ['Content-Type' => 'application/pdf'];
+            }
+        }
+        $response = response()->streamDownload(function () use($pathfile){
+            $path = get_media_url($pathfile,'s3');
+            if ($stream = fopen($path, 'r')) {
+                while (!feof($stream)) {
+                    echo fread($stream, 1024);
+                    flush();
+                }
+                fclose($stream);
+            }
+        }, $filename, $headers);
+        if (ob_get_level()) ob_end_clean();
+        return $response;
     }
 }

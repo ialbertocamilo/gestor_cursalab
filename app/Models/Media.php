@@ -731,6 +731,7 @@ class Media extends BaseModel
                     $file_extension = $mimeTypes->getExtensions(Storage::disk('s3')->mimeType($ruta));
                     $file_extension = isset($file_extension[0]) ? $file_extension[0] : 'txt';
                     $basename = pathinfo($ruta, PATHINFO_FILENAME) . '.' . $file_extension;
+                    // dd($file_content,$basename,$ruta);
                     $zip->addFromString($basename, $file_content);
                 }
             }
