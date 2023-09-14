@@ -348,6 +348,8 @@ class DiplomaController extends Controller
         info($grade);
         info('summary_course->grade_average');
         info($summary_course->grade_average);
+        info('course->qualification_type?->position');
+        info($course->qualification_type?->position);
 
         return array(
             'old_template' => $editableTemplate ? false : true,
