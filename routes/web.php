@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\GestorController;
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\DiplomaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WorkspaceController;
@@ -74,9 +75,11 @@ Route::get('dnx/{id}', [GestorController::class, 'descargaArchivo']);
 Route::get('dnv/{id}', [GestorController::class, 'descargaVideo']);
 
 //Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
-Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
+Route::get('tools/ver_diploma/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate']);
+// Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
 //Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
-Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
+Route::get('tools/dnc/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate']);
+// Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
 Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');
 

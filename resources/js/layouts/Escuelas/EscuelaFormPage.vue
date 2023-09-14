@@ -49,7 +49,7 @@
                         </v-col>
                     </v-row>
                     <v-row justify="center">
-                        <v-col cols="6">
+                        <v-col cols="12">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
                                 v-model="resource.imagen"
@@ -57,7 +57,7 @@
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'imagen')"/>
                         </v-col>
-                        <v-col cols="6">
+                        <v-col cols="6" class="d-none">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputDiploma"
                                 v-model="resource.plantilla_diploma"
@@ -122,6 +122,21 @@
                         </v-col>
 
                     </v-row>
+                    <v-row justify="space-around" class="menuable">
+                        <v-col cols="12">
+                            <DefaultModalSection
+                                title="Configuración de diploma"
+                            >
+                                <!-- tooltip="Tooltip" -->
+                                <template slot="content">
+
+                                    <DiplomaSelector
+                                        v-model="resource.certificate_template_id"/>
+
+                                </template>
+                            </DefaultModalSection>
+                        </v-col>
+                    </v-row>
                     <v-row>
                         <v-col cols="2">
 <!--                            <DefaultFormLabel-->
@@ -143,10 +158,13 @@
     </section>
 </template>
 <script>
+import DiplomaSelector from "../../components/Diplomas/DiplomaSelector.vue";
+
 const fields = ['name', 'nombre_ciclo_0', 'active', 'position', 'config_id', 'subworkspaces',
-    'imagen', 'scheduled_restarts', 'modalidad'];
+    'imagen', 'scheduled_restarts', 'modalidad', 'certificate_template_id'];
 const file_fields = ['imagen','plantilla_diploma'];
 export default {
+    components: {DiplomaSelector},
     props: ["modulo_id", 'categoria_id'],
     data() {
         return {
@@ -168,6 +186,7 @@ export default {
                 reinicio_automatico_dias: null,
                 reinicio_automatico_horas: null,
                 reinicio_automatico_minutos: 1,
+                certificate_template_id: null
             },
             resource: {},
             rules: {
