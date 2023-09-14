@@ -11,16 +11,7 @@
     $evaluationTypeCode = $taxonomy->code ?? '';
     $qualification_type = $tema->qualification_type;
     //JARVIS
-    $limit_allowed_ia_evaluations = $workspace->limits['limit_allowed_ia_evaluations'] ?? 0;
-    $medias_to_convert = \App\Models\MediaTema::where('topic_id',request()->segment(6))->select('path_convert')->where('ia_convert',1)->get();
-    $isReadyToCreateAIQuestions = false;
-    if(count($medias_to_convert)>0){
-        $count_not_null_medias_to_convert = $medias_to_convert->pluck('path_convert')->filter(function ($value) {
-                                            return !is_null($value);
-                                        })->count();
-        $isReadyToCreateAIQuestions = count($medias_to_convert) == $count_not_null_medias_to_convert;
-    }
-    // dd($data);
+    $limitsAIConvert =  \App\Models\Workspace::getLimitAIConvert($tema,'evaluations');
     @endphp
     <v-app>
         @include('layouts.user-header')
@@ -40,8 +31,8 @@
             evaluation_data_sum="{{ $data['sum'] ?? 0 }}"
             evaluation_data_sum_required="{{ $data['sum_required'] ?? 0 }}"
             evaluation_data_sum_not_required="{{ $data['sum_not_required'] ?? 0 }}"
-
-            >
+            :limits_ai_convert="{{ json_encode($limitsAIConvert) }}"
+        >
         </tema-preguntas-layout>
     </v-app>
 @endsection

@@ -107,7 +107,7 @@
                             </div>
                             <div v-else 
                                 class="py-1 my-4 d-flex flex-column justify-align-items-center justify-content-center"
-                                style="height: 80vh;border: 1px solid #EAEAEA;"
+                                style="height: 100vh;border: 1px solid #EAEAEA;"
                             >
                                 <div class="d-flex justify-center">
                                     <img src="/img/folder.svg" style="width:3rem">
@@ -232,7 +232,7 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-            vue.$emit('close')
+            vue.$emit('onCancel')
         },
         loadData(){
 

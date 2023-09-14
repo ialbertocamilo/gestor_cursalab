@@ -1,6 +1,5 @@
 <template>
     <section class="section-list ">
-       
         <v-card flat class="elevation-0 mb-4">
 
             <v-card-title>
@@ -10,20 +9,29 @@
                     </v-col>
                     <v-col cols="6">
                         <div class="ddd-flex justify-content-end">
-                            <v-badge small class="_badge" overlap color="#57BFE3"> 
+                            <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
                                     <template v-slot:badge>
-                                        <span>3/4</span>
+                                        <span v-text="`${limits_ai_convert.ia_evaluations_generated}/${limits_ai_convert.limit_allowed_ia_evaluations}`"></span>
                                     </template>
                                     <v-btn
-                                        class="mx-1"
                                         elevation="0"
                                         color="primary"
                                         @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
+                                        :disabled="
+                                            limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations 
+                                            || !limits_ai_convert.is_ready_to_create_AIQuestions"
                                     >
                                         <img width="22px" 
+                                            v-if="limits_ai_convert.is_ready_to_create_AIQuestions"
                                             class="mr-2" 
                                             style="filter: brightness(3);"
                                             src="/img/ia_convert.svg"
+                                        >
+                                        <img else width="22px" 
+                                            v-else
+                                            class="loader-jarvis img-rotate mr-2" 
+                                            style="filter: brightness(3);"
+                                            src="/img/loader-jarvis.svg"
                                         >
                                         Crear con AI
                                     </v-btn>
@@ -168,7 +176,7 @@
                     closeFormModal(modalCreateQuestionsOptions, dataTable, filters);
                     refreshDefaultTable(dataTable, filters),
                     openConfirmCreateQuestion()"
-                @onCancel="closeFormModal(modalCreateQuestionsOptions);refreshDefaultTable(dataTable, filters) "
+                @onCancel="closeFormModal(modalCreateQuestionsOptions) "
             />
             <DefaultAlertDialog 
                 :options="modalInfoCreateQuestion"
@@ -226,6 +234,7 @@ export default {
         'evaluation_data_sum',
         'evaluation_data_sum_required',
         'evaluation_data_sum_not_required',
+        'limits_ai_convert'
     ],
     data() {
         let vue = this
@@ -433,3 +442,17 @@ export default {
 
 }
 </script>
+<style>
+.img-rotate {
+  animation: rotacion 4s linear infinite;
+}
+
+@keyframes rotacion {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

@@ -828,18 +828,36 @@ class Workspace extends BaseModel
         return $workspace;
     }
 
-    protected function getLimitAIConvert($topic){
+    protected function getLimitAIConvert($topic,$type='media_convert'){
         $workspace = get_current_workspace();
         $limits = self::where('id',$workspace->id)->select('limits')->first()?->limits;
-        $media_ia_converted = ($topic) ? MediaTema::where('ia_convert',1)->where('topic_id',$topic->id)->count() : 0;
-        $limit_allowed_media_convert =  $limits['limit_allowed_media_convert'] ?? 0;
-        $limit_allowed_ia_evaluations =  $limits['limit_allowed_ia_evaluations'] ?? 0;
-
-        return [
-            'limit_allowed_media_convert' => (int) $limit_allowed_media_convert,
-            'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
-            'media_ia_converted' => $media_ia_converted ?? 0,
-        ];
+        $data = [];
+        switch ($type) {
+            case 'media_convert':
+                $media_ia_converted = ($topic) ? MediaTema::where('ia_convert',1)->where('topic_id',$topic->id)->count() : 0;
+                $limit_allowed_media_convert =  $limits['limit_allowed_media_convert'] ?? 0;
+                $data = [
+                    'limit_allowed_media_convert' => (int) $limit_allowed_media_convert,
+                    'media_ia_converted' => $media_ia_converted ?? 0,
+                ];
+                break;
+            case 'evaluations':
+                    $limit_allowed_ia_evaluations =  $limits['limit_allowed_ia_evaluations'] ?? 0;
+                    $ia_evaluations_generated =  0;
+                    //Its necesary to convert all medias in text to create evaluations
+                    $medias_to_convert = MediaTema::where('topic_id',$topic->id)->select('path_convert')->where('ia_convert',1)->get();
+                    $count_not_null_medias_to_convert = $medias_to_convert->pluck('path_convert')->filter(function ($value) {
+                        return !is_null($value);
+                    })->count();
+                    $isReadyToCreateAIQuestions = count($medias_to_convert) == $count_not_null_medias_to_convert;
+                    $data = [
+                        'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
+                        'ia_evaluations_generated' => 0,
+                        'is_ready_to_create_AIQuestions'=> $isReadyToCreateAIQuestions,
+                    ];
+                    break;
+        }
+        return $data;        
     }
     protected function getSchoolsForTree($schools)
     {
