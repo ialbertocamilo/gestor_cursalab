@@ -349,6 +349,7 @@ class DiplomaController extends Controller
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
             'grade' => intval($grade),
+            'course-average-grade' => intval($grade),
             'users' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64 ?? NULL,
