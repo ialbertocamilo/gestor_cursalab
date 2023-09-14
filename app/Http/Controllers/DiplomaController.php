@@ -281,6 +281,9 @@ class DiplomaController extends Controller
             ->select('id', 'name', 'plantilla_diploma', 'show_certification_date', 'certificate_template_id')
             ->where('id', $course_id)->first();
 
+        info('ORIG course->qualification_type?->position');
+        info($course->qualification_type?->position);
+
         $course_to_export = $course;
 
         if (!$course && request()->has('original_id')) {
