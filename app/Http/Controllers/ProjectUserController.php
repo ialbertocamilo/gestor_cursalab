@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use Illuminate\Http\Request;
+use App\Http\Requests\ProjectUserUpdateRequest;
 use App\Http\Resources\ProjectUserSearchResource;
 
 class ProjectUserController extends Controller
@@ -20,8 +21,8 @@ class ProjectUserController extends Controller
         return response()->download(public_path($name_zip), $name_zip)->deleteFileAfterSend(true);
     }
 
-    public function update(ProjectUser $usuario_tarea,ProjectUserUpdateRequest $request){
-        $request->usuario_tarea = $usuario_tarea;
+    public function update(ProjectUser $project_user,ProjectUserUpdateRequest $request){
+        $request->project_user = $project_user;
         ProjectUser::updateProjectUser($request);
         return $this->success([]);
     }

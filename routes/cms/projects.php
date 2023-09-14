@@ -20,7 +20,7 @@ Route::controller(ProjectController::class)->group(function() {
     Route::get('/users/status-list/{type}', [ProjectUserController::class, 'listStatus']);
     Route::get('/{project}/users/search', [ProjectUserController::class, 'search']);
     Route::get('/{project_user_id}/download-zip-files', [ProjectUserController::class, 'downloadZipFiles']);
-    Route::post('/{project_user}/update-usuario-tarea', [ProjectUserController::class, 'update']);
+    Route::put('/{project_user}/update-user-project', [ProjectUserController::class, 'update']);
 });
 
 ?>

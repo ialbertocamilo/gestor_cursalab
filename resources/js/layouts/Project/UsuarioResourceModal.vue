@@ -9,8 +9,9 @@
             :showTitle="options.showTitle"
             :noPaddingCardText="options.noPaddingCardText"
             headerClass="m-0"
-        >
-            <template v-slot:content>
+            customTitle
+        >   
+            <template v-slot:card-title>
                 <v-card-title class="default-dialog-title sticky-card-text">
                     {{ options.title }}
                     <v-spacer/>
@@ -24,6 +25,8 @@
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
                 </v-card-title>
+            </template>
+            <template v-slot:content>
                 <div v-if="type_media=='image'" style="width: auto;">
                     <v-img
                         lazy-src="https://picsum.photos/id/11/10/6"
@@ -38,7 +41,7 @@
                     <embed :src="full_path_file" style="height: 500px;width: 100%;">
                 </div>
                 <div v-else-if="type_media=='video'" >
-                    <video :src="full_path_file" autoplay style="height: 500px;width: 100%;"></video>
+                    <video :src="full_path_file" autoplay style="height: 500px;width: 100%;" controls ></video>
                 </div>
                 <div v-else>
                     <span>Este archivo no se puede visualizar, descargalo desde el botón de arriba 👆</span>

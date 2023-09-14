@@ -15,7 +15,7 @@
                         <DefaultSelect
                             dense
                             label="Calificar"
-                            v-model="usuario_tarea.status_id"
+                            v-model="project_user.status_id"
                             itemText="name"
                             itemValue="id"
                             :items="selects.status"
@@ -26,7 +26,7 @@
                     <v-col cols="12">
                         <DefaultTextArea 
                             label="Mensaje al usuario (opcional)"
-                            v-model="usuario_tarea.msg_to_user"
+                            v-model="project_user.msg_to_user"
                             counter
                         />
                     </v-col>
@@ -49,11 +49,11 @@ export default {
             selects: {
                 status: []
             },
-            usuario_tarea: {
+            project_user: {
                 status_id: null,
                 msg_to_user:'',
             },
-            usuario_tarea_id:'',
+            project_user_id:'',
             description:'',
             rules: {
                 estado:this.getRules(["required"]),
@@ -70,9 +70,9 @@ export default {
         async confirmModal() {
             let vue = this;
             const validateForm = vue.validateForm("CheckTareaForm");
-            console.log(vue.usuario_tarea);
+            console.log(vue.project_user);
             if (validateForm) {
-                axios.post(`/tareas/${vue.usuario_tarea_id}/update-usuario-tarea`,vue.usuario_tarea).then((e)=>{
+                axios.put(`/projects/${vue.project_user_id}/update-user-project`,vue.project_user).then((e)=>{
                     vue.queryStatus("tareas", "calificar_tarea");
                     vue.showAlert('Tarea actualizada correctamente.','success');
                     vue.$emit("onConfirm");
@@ -83,26 +83,26 @@ export default {
         },
         resetSelects() {
             let vue = this;
-            vue.usuario_tarea.status_id = null;
-            vue.usuario_tarea.msg_to_user='';
-            vue.usuario_tarea_id = null;
+            vue.project_user.status_id = null;
+            vue.project_user.msg_to_user='';
+            vue.project_user_id = null;
             vue.description='';
         },
         resetValidation() {
             let vue = this;
         },
-        async loadData({usuario_tarea_id,msg_to_user,status_tarea_id}) {
+        async loadData({project_user_id,msg_to_user,status_project_id}) {
             let vue = this;
             vue.resetSelects();
-            (status_tarea_id) && (vue.usuario_tarea.status_id = status_tarea_id);
-            vue.usuario_tarea_id = usuario_tarea_id;
-            vue.usuario_tarea.msg_to_user = msg_to_user; 
+            (status_project_id) && (vue.project_user.status_id = status_project_id);
+            vue.project_user_id = project_user_id;
+            vue.project_user.msg_to_user = msg_to_user; 
         },
         loadSelects() {
             let vue = this;
             axios.get('/projects/users/status-list/select').then(({data})=>{
                 vue.selects.status = data.data;
-                (vue.usuario_tarea.status_id) && vue.setDescription(vue.usuario_tarea.status_id);
+                (vue.project_user.status_id) && vue.setDescription(vue.project_user.status_id);
             }) 
         },
         setDescription(val){

@@ -204,11 +204,11 @@ class ProjectUser extends Model
         $name_zip = Media::createZipFromStorage($data);
         return $name_zip;
     }
-    protected function updateUsuarioTarea($request){
-        $usuario_tarea = $request->usuario_tarea;
-        $usuario_tarea->status_id = $request->status_id; 
-        $usuario_tarea->msg_to_user = $request->msg_to_user;
-        $usuario_tarea->update();
+    protected function updateProjectUser($request){
+        $project_user = $request->project_user;
+        $project_user->status_id = $request->status_id; 
+        $project_user->msg_to_user = $request->msg_to_user;
+        $project_user->update();
     }
     //Guarda o actualiza la tarea
     protected function storeUpdateProjectUser($request){

@@ -229,9 +229,9 @@ export default {
         },
         getIcon(type) {
             const types = [
-                { type: 'pdf', icon: 'mdi-file-pdf' },
+                { type: 'pdf', icon: 'mdi mdi-file-pdf-box' },
                 { type: 'image', icon: 'mdi-file-image' },
-                { type: 'office', icon: 'mdi-file-document' },
+                { type: 'office', icon: 'mdi mdi-file' },
                 { type: 'video', icon: 'mdi-file-video' }
             ]
             const find_type = types.find(e => e.type == type);
