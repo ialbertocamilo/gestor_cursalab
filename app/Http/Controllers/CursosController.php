@@ -49,8 +49,8 @@ class CursosController extends Controller
             && !isset($request->q)
             && !isset($request->dates)
         ) || boolval(
-            isset($request->segmented_module) 
-            && isset($request->schools) 
+            isset($request->segmented_module)
+            && isset($request->schools)
             && count($request->schools) == 1
             && !isset($request->active)
             && !isset($request->type)
@@ -138,6 +138,7 @@ class CursosController extends Controller
         $mod_evaluaciones = $course->mod_evaluaciones;
 
         $course->mod_evaluaciones = $course->getModEvaluacionesConverted();
+        // $course->mod_evaluaciones = []; // merge
 
         // if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
         //     $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $course->qualification_type->position);

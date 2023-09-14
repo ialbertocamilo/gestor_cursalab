@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificate;
 use DB;
 use Carbon\Carbon;
 use App\Models\User;
@@ -50,6 +51,7 @@ class GestorController extends Controller
     {
         try {
             $data = $this->getDiplomaCursoData($user_id, $course_id);
+
             return view('ver_certificado', compact('data'));
         } catch (\Exception $e) {
             info($e);
@@ -86,7 +88,7 @@ class GestorController extends Controller
                     ->where('user_id', $user_id);
             },
         ])
-            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date', 'certificate_template_id')
             ->where('id', $course_id)->first();
 
         $course_to_export = $course;
@@ -105,30 +107,90 @@ class GestorController extends Controller
 
         if (!$summary_course?->certification_issued_at) abort(404);
 
-        $template_certification = '';
+        // $template_certification = '';
 
-        if ($course_to_export->plantilla_diploma) {
-            $template_certification = $course_to_export->plantilla_diploma;
-        }
-        if (!$template_certification) {
+        // Load editable template from course,
+        // school or module
+        // ----------------------------------------
+
+        $certificateTemplateId = $course_to_export->certificate_template_id;
+        if (!$certificateTemplateId) {
             $school = $course_to_export->schools()->first();
-            ($school && $school->plantilla_diploma) && $template_certification = $school->plantilla_diploma;
+            $certificateTemplateId = $school->certificate_template_id;
         }
-        if (!$template_certification && $user->subworkspace->plantilla_diploma) {
-            $template_certification = $user->subworkspace->plantilla_diploma;
+        if (!$certificateTemplateId && $user->subworkspace->plantilla_diploma) {
+            $certificateTemplateId = $user->subworkspace->certificate_template_id;
+        }
+        $editableTemplate = Certificate::find($certificateTemplateId);
+
+        if ($editableTemplate) {
+            $backgroundInfo = json_decode($editableTemplate->info_bg);
+            $dObjects = json_decode($editableTemplate->d_objects);
+
+            $position_grade = collect($dObjects)
+                ->where('id', 'course-average-grade')
+                ->first();
+
+            $position_course = collect($dObjects)
+                ->where('id', 'courses')
+                ->first();
+
+            $position_user = collect($dObjects)
+                ->where('id', 'users')
+                ->first();
+
+            $position_date = collect($dObjects)
+                ->where('id', 'fecha')
+                ->first();
+
+            $backgroundImage = $this->parse_image($editableTemplate->path_image, true);
+
+            $base64 = $backgroundImage['base64'];
+            $backgroundWidth = $backgroundImage['width'];
+            $backgroundHeight = $backgroundImage['height'];
+
+        } else {
+
+            // when course, school and module do not have
+            // an editable template, load old certificate image
+            // ----------------------------------------
+
+            $plantilla_diploma = '';
+
+            if ($course_to_export->plantilla_diploma) {
+                $plantilla_diploma = $course_to_export->plantilla_diploma;
+            }
+            if (!$plantilla_diploma) {
+                $school = $course_to_export->schools()->first();
+                ($school && $school->plantilla_diploma) && $plantilla_diploma = $school->plantilla_diploma;
+            }
+            if (!$plantilla_diploma && $user->subworkspace->plantilla_diploma) {
+                $plantilla_diploma = $user->subworkspace->plantilla_diploma;
+            }
+
+            $base64 = $this->parse_image($plantilla_diploma);
         }
 
-        // $plantilla_curso = $course->plantilla_diploma != null ? $course->plantilla_diploma : $user->subworkspace->plantilla_diploma;
+
         $fecha = $summary_course->certification_issued_at;
-        $base64 = $this->parse_image($template_certification);
+        // $base64 = $this->parse_image($template_certification);
 
         return array(
             'show_certification_date' => $course_to_export->show_certification_date,
-//            'video' => $course->name,
+            //            'video' => $course->name,
             'video' => removeUCModuleNameFromCourseName($course_to_export->name),
+            'grade' => (int)$summary_course->grade_average,
             'usuario' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64,
+            'background_width' => $backgroundWidth ?? null,
+            'background_height' => $backgroundHeight ?? null,
+
+            'position_certificate' => $backgroundInfo ?? null,
+            'position_user' => $position_user ?? null,
+            'position_course' => $position_course ?? null,
+            'position_grade' => $position_grade ?? null,
+            'position_date' => $position_date ?? null
         );
     }
 
@@ -151,7 +213,7 @@ class GestorController extends Controller
         return array('image' => $base64, 'video' => $categoria->nombre, 'usuario' => $usuario->nombre, 'fecha' => $eva->fecha_emision);
     }
 
-    private function parse_image($plantilla)
+    private function parse_image($plantilla, $calculateSize = false)
     {
         $type = pathinfo($plantilla, PATHINFO_EXTENSION);
         $plantilla = str_replace(" ", "%20", $plantilla);
@@ -159,10 +221,24 @@ class GestorController extends Controller
         $headers = get_headers(get_media_url($plantilla));
         if ($headers && strpos($headers[0], "200 OK") !== false) {
             $image = file_get_contents(get_media_url($plantilla));
-            if ($image !== false) {
+            // Return image's base64 and dimensions
+
+            if ($calculateSize) {
+                $imageBinary = imagecreatefromstring($image);
+                $width = imagesx($imageBinary);
+                $height = imagesy($imageBinary);
+
+                return [
+                    'width' => $width,
+                    'height' => $height,
+                    'base64' => 'data:image/' . $type . ';base64,' . base64_encode($image)
+                ];
+
+            } else if ($image !== false) {
                 return 'data:image/' . $type . ';base64,' . base64_encode($image);
             }
         }
+
         return  abort(404);
     }
 

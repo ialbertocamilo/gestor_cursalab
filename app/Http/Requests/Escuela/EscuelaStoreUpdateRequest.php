@@ -38,6 +38,7 @@ class EscuelaStoreUpdateRequest extends FormRequest
             'file_imagen' => 'nullable',
             'plantilla_diploma' => 'nullable',
             'file_plantilla_diploma' => 'nullable',
+            'certificate_template_id' => 'nullable'
         ];
     }
 }

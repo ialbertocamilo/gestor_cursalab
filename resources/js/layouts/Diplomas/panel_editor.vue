@@ -1,56 +1,66 @@
 <template>
     <div class="cont text-center d-flex align-center justify-space-around" style="grid-gap: 0.6rem;">
-        <div class="css-tooltip css-tooltip--bottom" 
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Nombre del curso">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del Curso', false, 'courses', 1)" 
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del Curso', false, 'courses', 1)"
                     text>
-                <v-icon>mdi-book</v-icon>
-            </v-btn>  
+                <v-icon>mdi-notebook</v-icon>
+            </v-btn>
         </div>
-        <div class="css-tooltip css-tooltip--bottom" 
+        
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Nombre del usuario">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del usuario', false, 'users', 1)" 
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del usuario', false, 'users', 1)"
                     text>
                 <v-icon>mdi-account</v-icon>
-            </v-btn>  
+            </v-btn>
         </div>
-        <div class="css-tooltip css-tooltip--bottom" 
+        
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Fecha">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('14/03/2023', false, 'fecha', '%d/%m/%Y')"  
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('14/03/2023', false, 'fecha', '%d/%m/%Y')"
                     text>
                 <v-icon>mdi-calendar</v-icon>
-            </v-btn>  
+            </v-btn>
         </div>
 
-        <div class="css-tooltip css-tooltip--bottom" 
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="Nota del curso">
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('15', false, 'course-average-grade', 1, 76)"
+                   text>
+                <v-icon>mdi-numeric-9-plus-circle-outline</v-icon>
+            </v-btn>
+        </div>
+
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Texto">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_itext()" 
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_itext()"
                     text>
                 <v-icon>mdi-format-text</v-icon>
-            </v-btn>  
+            </v-btn>
         </div>
 
-        <div class="css-tooltip css-tooltip--bottom" 
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Imagen">
-            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="click_input('input_image')" 
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="click_input('input_image')"
                     text>
-                <v-icon>mdi-camera</v-icon>
-            </v-btn>  
+                <v-icon>mdi-image</v-icon>
+            </v-btn>
             <input @change="emitir_add_image()" class="input_img" type="file" id="input_image">
         </div>
 
-        <!-- <div class="css-tooltip css-tooltip--bottom" 
+        <!-- <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Previsualización">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_prev()" text>
-                <v-icon>mdi-eye</v-icon> 
-            </v-btn>  
+                <v-icon>mdi-eye</v-icon>
+            </v-btn>
         </div>
         -->
-        <div class="css-tooltip css-tooltip--bottom" 
+        <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Eliminar la plantilla">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_delete()" text>
                 <v-icon>mdi-delete</v-icon>
-            </v-btn>  
+            </v-btn>
         </div>
     </div>
 </template>
@@ -58,8 +68,8 @@
 export default {
     props:['d_btn'],
     methods: {
-        emitir_add_text(text,hasControls,tipo,id_formato){
-            this.$emit("emit_add_text", text,hasControls,tipo,id_formato);
+        emitir_add_text(text,hasControls,tipo,id_formato,font_size){
+            this.$emit("emit_add_text", text,hasControls,tipo,id_formato,font_size);
         },
         emitir_add_itext(){
             this.$emit("emit_add_itext");
@@ -74,7 +84,7 @@ export default {
             this.$emit("emit_delete",'bg');
         },
         click_input(id){
-            document.getElementById(id).click(); 
+            document.getElementById(id).click();
         },
     },
 }

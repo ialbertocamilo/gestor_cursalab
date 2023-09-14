@@ -12,7 +12,7 @@ class Course extends BaseModel
         'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
-        'show_certification_date'
+        'show_certification_date', 'certificate_template_id'
     ];
 
     protected $casts = [
@@ -1639,4 +1639,31 @@ class Course extends BaseModel
 
     //     return $mod_evaluaciones;
     // }
+
+    protected function validateCompatibleCourse($user, $course_compatible, $original_course_id)
+    {
+        $original_course = Course::with([
+            'compatibilities_a:id',
+            'compatibilities_b:id',
+            'summaries' => function ($q) use ($user) {
+                $q
+                    ->with('status:id,name,code')
+                    ->where('user_id', $user->id);
+            },
+        ])
+            ->select('id', 'name', 'plantilla_diploma', 'show_certification_date')
+            ->where('id', $original_course_id)->first();
+
+        if (!$original_course) abort(404);
+        // TODO: Si llega compatible validar que sea su compatible el curso de la ruta ($course_id)
+        // Compatible de C3
+        $compatible = $original_course->getCourseCompatibilityByUser($user);
+
+        if (!$compatible) abort(404);
+
+        // D3 !== Compatible de C3
+        if ($course_compatible->id !== $compatible->course->id) abort(404);
+
+        return $original_course;
+    }
 }

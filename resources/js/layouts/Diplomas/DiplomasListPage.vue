@@ -131,4 +131,12 @@ export default {
         }
     }
 }
+
+/*
+certifications: [
+    {id: 1, name: 'Diploma Cursalab - Default'},
+    {id: 2, name: 'Diploma Cursalab - [Con fecha]'},
+    {id: 3, name: 'Diploma Cursalab - [Con fecha y nota]'},
+],
+*/
 </script>
