@@ -344,12 +344,17 @@ class DiplomaController extends Controller
 
         $grade = calculateValueForQualification($summary_course->grade_average, $course->qualification_type?->position);
 
+        info('grade');
+        info($grade);
+        info('summary_course->grade_average');
+        info($summary_course->grade_average);
+
         return array(
             'old_template' => $editableTemplate ? false : true,
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
-            'grade' => (string) intval($grade),
-            'course-average-grade' => (string) intval($grade),
+            'grade' => (string) intval($summary_course->grade_average),
+            'course-average-grade' => (string) intval($summary_course->grade_average),
             'users' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64 ?? NULL,
