@@ -269,6 +269,7 @@ class DiplomaController extends Controller
         if (!$user) abort(404);
 
         $course = Course::with([
+            'qualification_type',
             'compatibilities_a:id',
             'compatibilities_b:id',
             'summaries' => function ($q) use ($user_id) {
@@ -341,11 +342,13 @@ class DiplomaController extends Controller
 
         $fecha = $summary_course->certification_issued_at;
 
+        $grade = calculateValueForQualification($summary_course->grade_average, $course->qualification_type?->position);
+
         return array(
             'old_template' => $editableTemplate ? false : true,
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
-            'grade' => (int) $summary_course->grade_average,
+            'grade' => intval($grade),
             'users' => $user->fullname,
             'fecha' => $fecha,
             'image' => $base64 ?? NULL,
