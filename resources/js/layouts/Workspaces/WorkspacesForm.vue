@@ -254,15 +254,17 @@
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Token"
-                                            v-model="limit_allowed_users"
+                                            v-model="configurations.jarvis.token"
                                             type="text"
                                             min="0"
                                             clearable
                                             dense
                                         />
+                                    </v-col>
+                                    <v-col cols="4">
                                         <DefaultInput
                                             label="Modelo"
-                                            v-model="limit_allowed_users"
+                                            v-model="configurations.jarvis.model"
                                             type="text"
                                             min="0"
                                             value="gpt-3.5-turbo"
@@ -270,7 +272,6 @@
                                             dense
                                         />
                                     </v-col>
-
                                 </v-row>
                             </template>
                         </DefaultSection>
