@@ -34,6 +34,7 @@ class ProjectResources extends BaseModel
             }
         }
         info('Verifica multimedias');
+        info($request);
         if($request->hasFile('files')){
             info('Entro files');
             $files = $request->file('files');
