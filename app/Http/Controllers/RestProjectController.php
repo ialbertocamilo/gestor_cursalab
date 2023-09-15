@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use Illuminate\Http\Request;
-use App\Models\ProjectResources;
 use App\Http\Requests\ProjectUserRequest;
+use App\Models\ProjectResources;
 
 class RestProjectController extends Controller
 {
@@ -23,7 +23,11 @@ class RestProjectController extends Controller
         if(!$project_resource){
             return 'Archivo no encontrado';
         }
-        return $project_resource->downloadFile();
+        try {
+            return $project_resource->downloadFile();
+        } catch (\Throwable $th) {
+            return 'Archivo no encontrado';
+        }
     }
     public function userProjects($type,Request $request){
         $tareas = ProjectUser::userProjects($type,$request);

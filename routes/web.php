@@ -79,7 +79,7 @@ Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 
 Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
 Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');
-
+Route::get('tareas/resource/download', [\App\Http\Controllers\RestProjectController::class, 'downloadFile'])->name('tareas.resources.download');
 
 Route::get('tools/ver_diploma/escuela/{usuario_id}/{categoria_id}', [GestorController::class, 'verCertificadoEscuela']);
 Route::get('tools/dnc/escuela/{usuario_id}/{categoria_id}', [GestorController::class, 'descargaCertificadoEscuela']);
