@@ -265,7 +265,7 @@ class ProjectUser extends Model
             }
             $project->school_id = $project->course?->schools?->first()->id; 
             unset($project->course->requirements);
-            if($listSchools){
+            if(!$listSchools){
                 unset($project->course->schools);
             }
             unset($project->course->topics);

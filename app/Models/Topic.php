@@ -458,6 +458,12 @@ class Topic extends BaseModel
                     ->where('school_id',$school_id)
                     ->whereIn('course_id',$courses_id)
                     ->get();
+
+        $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
+        $status_projects = collect();
+        if(count($projects)>0){
+            $status_projects   =  ProjectUser::whereIn('user_id',$projects->pluck('id'))->with('status:id,name')->select('id','project_id','status_id')->get();
+        }
         // UC
         $school_name = $school?->name;
         // if ($workspace_id === 25 && $school_name) {
@@ -619,7 +625,13 @@ class Topic extends BaseModel
                 ]);
             }
     
-
+            $project = $projects->where('course_id',$course->id)->first();
+            if($project){
+                $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
+                $project->status = $status_project?->status?->name ?? 'Pendiente';
+                $project->available = $course_status['available'];
+                unset($project->course_id);
+            }
             $requirement_list = null;
             $requirement_course = $course->requirements->first();
 
@@ -793,6 +805,7 @@ class Topic extends BaseModel
                         'id' => $course->compatible->course->id ?? 'X',
                         'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
                     ],
+                    'tarea' => $project,
                 ]);
 
                 continue;
@@ -821,6 +834,7 @@ class Topic extends BaseModel
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
+                'tarea' => $project,
                 // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }
