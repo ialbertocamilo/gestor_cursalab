@@ -244,7 +244,36 @@
                             </template>
                         </DefaultSection>
 
+                        <DefaultSection
+                            title="Configuración de Jarvis"
+                            v-if="is_superuser"
+                        >
+                            <template v-slot:content>
 
+                                <v-row >
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Token"
+                                            v-model="limit_allowed_users"
+                                            type="text"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                        <DefaultInput
+                                            label="Modelo"
+                                            v-model="limit_allowed_users"
+                                            type="text"
+                                            min="0"
+                                            value="gpt-3.5-turbo"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+
+                                </v-row>
+                            </template>
+                        </DefaultSection>
                         <v-row justify="space-around" v-if="is_superuser">
                             <v-col cols="12">
                                 <DefaultSection
