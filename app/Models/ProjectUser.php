@@ -166,11 +166,14 @@ class ProjectUser extends Model
         unset($project_search->deleted_at);
 
         $project_resources = ProjectResources::where('from_resource','media_project_course')->where('project_id',$project->id)
-                                ->select('type_id','type_media')
+                                ->select('id as resource_id','type_id','type_media')
                                 ->with(['media'=>function($q){
                                     return $q->select('id','title','file');
                                 }])
-                                ->get();
+                                ->get()->map(function($resource){
+                                    $resource->media->resource_id = $resource->resource_id;
+                                    return $resource;
+                                });
         $user_resources = ProjectResources::where('from_resource','media_project_user')
                             ->where('project_id',$project->id)
                             ->where('type_id',$user->id)    
