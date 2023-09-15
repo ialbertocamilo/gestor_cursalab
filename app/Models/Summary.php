@@ -143,7 +143,7 @@ class Summary extends BaseModel
         $users_id_segmented = [];
         // $course->loadMissing('segments');
         if($only_users_has_sc){
-            $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
+            $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course?->id)->pluck('user_id')->toArray();
         }else{
             $users_id_segmented = ($users_id) ? $users_id : $course->usersSegmented($course->segments,'users_id');
         }
@@ -163,7 +163,7 @@ class Summary extends BaseModel
                 [
                     'courseName' => $course->name
                 ],
-                'escuela/'.$school->id.'/cursos/' . $course->id . '/tema'
+                'escuela/'.$school->id.'/cursos/' . $course?->id . '/tema'
             );
         }
 
