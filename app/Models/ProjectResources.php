@@ -33,31 +33,21 @@ class ProjectResources extends BaseModel
                 }
             }
         }
-        info('Verifica multimedias');
-        info($request);
         if($request->hasFile('files')){
-            info('Entro files');
             $files = $request->file('files');
-            info('Cantida de archivos'. count($files));
             foreach ($files as $file) {
                 $path = Media::uploadFile($file,$insert_media);
-                info($path);
                 if($insert_media){
-                    info('Inserto en media');
                     $media = Media::where('file',$path)->select('id','title','ext')->first();
                     $project_resource[] = $this->formatProjectResource($media->id,$project->id,$from_resource,$path,$media->title,$media->ext);
                 }else{
-                    info('No inserto en media');
                     $project_resource[] = $this->formatProjectResource($request->user->id,$project->id,$from_resource,$path,$file->getClientOriginalName(),$file->getClientOriginalExtension());
-                    info($project_resource);
                 }
             }
         }
         if(count($project_resource)>0){
             foreach ($project_resource as $resource) {
                 if(!$this->ProjectResourceExist($resource)){
-                    info('inserto resource');
-                    info($resource);
                     ProjectResources::insert($resource);
                 }
             }

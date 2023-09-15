@@ -33,10 +33,9 @@ class RestProjectController extends Controller
         $tareas = ProjectUser::userProjects($type,$request);
         return $this->success($tareas);
     }
-    public function storeUpdateUserProject(Project $project,Request $request){
+    public function storeUpdateUserProject(Project $project,ProjectUserRequest $request){
         $request->project = $project;
         $request->user = auth()->user();
-        info($request);
         $status_label = ProjectUser::storeUpdateProjectUser($request);
         return $this->success(['msg'=>'La tarea se actualizó correctamente.','project_id'=>$project->id,'status_label'=> mb_strtolower($status_label)]);
     }
