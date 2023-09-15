@@ -178,7 +178,10 @@ class ProjectUser extends Model
                             ->where('project_id',$project->id)
                             ->where('type_id',$user->id)    
                             ->select('path_file','filename as title','type_media as tipo','size')
-                            ->get();
+                            ->get()->map(function($resource){
+                                $resource->type_resource = 'media';
+                                return $resource;
+                            });;
 
         $project_search->project_resources = count($project_resources)>0 ? $project_resources->pluck('media') : [];
         $project_search->user_resources = count($user_resources)>0 ? $user_resources : [];
