@@ -33,7 +33,7 @@ class RestProjectController extends Controller
         $tareas = ProjectUser::userProjects($type,$request);
         return $this->success($tareas);
     }
-    public function storeUpdateUserProject(Project $project,ProjectUserRequest $request){
+    public function storeUpdateUserProject(Project $project,Request $request){
         $request->project = $project;
         $request->user = auth()->user();
         info($request);
