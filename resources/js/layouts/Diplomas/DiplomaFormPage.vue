@@ -889,8 +889,8 @@ export default {
             const vue = this;
 
             const title_plantilla = vue.$refs.DiplomaFormSaveModal.resource.diploma;
-            if(!title_plantilla) return;
-            if(title_plantilla.length <= 10) return;
+            // if(!title_plantilla) return;
+            // if(title_plantilla.length <= 10) return;
 
             let data = {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
