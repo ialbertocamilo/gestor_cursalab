@@ -155,7 +155,7 @@ class Summary extends BaseModel
         // Create notifications for users assigned to course
 
         $school = $course->schools->first();
-        if ($school) {
+        if ($school && get_current_workspace()) {
             UserNotification::createNotifications(
                 get_current_workspace()->id,
                 $users_id_segmented,
