@@ -911,9 +911,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al actualizar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue actualizada correctamente.');
+                        vue.showAlert('El diploma fue actualizado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
@@ -928,9 +928,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al guardar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al guardar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue guardada correctamente.');
+                        vue.showAlert('El diploma fue guardado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
