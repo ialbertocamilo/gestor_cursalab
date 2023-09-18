@@ -179,7 +179,9 @@ class ProjectUser extends Model
                             ->where('type_id',$user->id)    
                             ->select('path_file','filename as title','type_media as tipo','size')
                             ->get()->map(function($resource){
+                                $file = $resource->path_file;
                                 $resource->type_resource = 'media';
+                                $resource->relative_path = $file;
                                 return $resource;
                             });;
 
