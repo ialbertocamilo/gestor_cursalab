@@ -112,6 +112,10 @@ class WorkspaceController extends Controller
             'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
             'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
         ];
+        $data['jarvis_configuration'] = [
+            'openia_token' => $data['openia_token'] ?? '',
+            'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
+        ];
         // Set constraint: limit allowed users
 
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
@@ -193,7 +197,10 @@ class WorkspaceController extends Controller
             'limit_allowed_media_convert' => $workspace->limits['limit_allowed_media_convert'] ?? 0,
             'limit_allowed_ia_evaluations' => $workspace->limits['limit_allowed_ia_evaluations'] ?? 0,
         ];
-
+        $workspace->jarvis_configuration = [
+            'openia_token' => $workspace->jarvis_configuration['openia_token'] ?? '',
+            'openia_model' => $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo',
+        ];
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
@@ -222,6 +229,10 @@ class WorkspaceController extends Controller
         $data['limits'] = [
             'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
             'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
+        ];
+        $data['jarvis_configuration'] = [
+            'openia_token' => $data['openia_token'] ?? '',
+            'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
         ];
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
 

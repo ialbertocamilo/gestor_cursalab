@@ -254,7 +254,7 @@
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Token"
-                                            v-model="configurations.jarvis.token"
+                                            v-model="resource.jarvis_configuration.openia_token"
                                             type="text"
                                             min="0"
                                             clearable
@@ -264,7 +264,7 @@
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Modelo"
-                                            v-model="configurations.jarvis.model"
+                                            v-model="resource.jarvis_configuration.openia_model"
                                             type="text"
                                             min="0"
                                             value="gpt-3.5-turbo"
@@ -548,7 +548,7 @@ export default {
                 );
 
                 vue.setLimitUsersAllowed(formData);
-
+                vue.setJarvisConfiguration(formData);
 
                 // Submit data to be saved
 
@@ -577,8 +577,15 @@ export default {
                 formData.append('limit_allowed_users_type', 'by_workspace');
                 formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
             }
+            
+        },
+        setJarvisConfiguration(formData){
+            let vue = this;
             formData.append('limit_allowed_media_convert', vue.resource.limits.limit_allowed_media_convert);
             formData.append('limit_allowed_ia_evaluations', vue.resource.limits.limit_allowed_ia_evaluations);
+            formData.append('openia_token', vue.resource.jarvis_configuration.openia_token);
+            formData.append('openia_model', vue.resource.jarvis_configuration.openia_model);
+
         },
         /**
          * Load data from server

@@ -88,8 +88,16 @@
                             </div>
                             <div class="container-questions py-1 my-4" v-if="questions.length>0">
                                 <!-- <transition-group name="fade" mode="out-in"> -->
-                                <div  class="m-3 px-5 py-2 card-question typing-animation" v-for="(question,index) in questions" :key="index">
-                                    <span v-text="question.question" class="mb-1"></span>
+                                <div  class="m-3 px-5 py-2 card-question typing-animation" style="width: 100%;" v-for="(question,index) in questions" :key="index">
+                                    <div class="d-flex justify-space-between">
+                                        <span v-text="question.question" class="mb-1"></span>
+                                        <v-tooltip bottom>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <img src="/img/jarvis_question.svg"  v-bind="attrs" v-on="on" style="width:22px">
+                                            </template>
+                                            <span>Esta pregunta fue generada del contenido: "{{ question.media_title }}"</span>
+                                        </v-tooltip>
+                                    </div>
                                     <span class="ml-3" v-for="(option,index) in question.options" :key="index" v-text="option.text" :style="option.isCorrect ? 'background:#ddddfa' :''"></span>
                                     <div class="d-flex justify-end">
                                         <v-btn color="primary" icon @click="openEditQuestionModal(question,index)">
@@ -256,7 +264,9 @@ export default {
                 vue.hideLoader();
                 // 
                 const questionsTemplate = data.message
-                this.addItemWithTimeout(questionsTemplate,0);
+                if (Array.isArray(questionsTemplate)) {
+                    this.addItemWithTimeout(questionsTemplate,0);
+                }
             }).catch(async (error) => {
                 vue.hideLoader();
             })
@@ -275,17 +285,21 @@ export default {
         },
         addItemWithTimeout(new_questions,index) {
             this.questions.push(new_questions[index]);
-            if (this.questions.length != new_questions.length && new_questions[index+1]) {
-                setTimeout(() => {
-                    this.addItemWithTimeout(new_questions,index+1);
-                }, 1000);
-            }else{
-                setTimeout(() => {
-                    const card_questions = document.querySelectorAll(".typing-animation");
-                    card_questions.forEach(function(card) {
-                        card.classList.remove("typing-animation");
-                    });
-                }, 1100);
+            try {
+                if (this.questions.length != new_questions.length && new_questions[index+1]) {
+                    setTimeout(() => {
+                        this.addItemWithTimeout(new_questions,index+1);
+                    }, 1000);
+                }else{
+                    setTimeout(() => {
+                        const card_questions = document.querySelectorAll(".typing-animation");
+                        card_questions.forEach(function(card) {
+                            card.classList.remove("typing-animation");
+                        });
+                    }, 1100);
+                }
+            } catch (error) {
+                console.log(error);                
             }
         },
         confirmModal() {

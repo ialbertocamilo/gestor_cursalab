@@ -4,9 +4,10 @@ namespace App\Models;
 
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mongo\JarvisAttempt;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,6 +36,7 @@ class Workspace extends BaseModel
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
         'limits',
+        'jarvis_configuration',
         'show_logo_in_app',
     ];
 
@@ -93,6 +95,7 @@ class Workspace extends BaseModel
         'contact_support' => 'array',
         'limit_allowed_users' => 'array',
         'limits' => 'json',
+        'jarvis_configuration' => 'json'
     ];
 
 
@@ -852,7 +855,7 @@ class Workspace extends BaseModel
                     $isReadyToCreateAIQuestions = count($medias_to_convert) == $count_not_null_medias_to_convert;
                     $data = [
                         'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
-                        'ia_evaluations_generated' => 0,
+                        'ia_evaluations_generated' => JarvisAttempt::getAttempt($workspace->id),
                         'is_ready_to_create_AIQuestions'=> $isReadyToCreateAIQuestions,
                     ];
                     break;

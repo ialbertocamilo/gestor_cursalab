@@ -198,7 +198,7 @@
                         </div>
                     </div>
                     <p class="mt-4">
-                        <strong>Recuerda cuentas con 10 evaluaciones por realizar con AI.</strong>
+                        <strong>Recuerda cuentas con {{ limits_ai_convert.limit_allowed_ia_evaluations - limits_ai_convert.ia_evaluations_generated }} evaluaciones por realizar con AI.</strong>
                     </p>
                 </template>
             </DefaultAlertDialog>
@@ -436,6 +436,7 @@ export default {
         },
         openConfirmCreateQuestion(){
             let vue = this;
+            vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1; 
             vue.openSimpleModal(vue.modalInfoCreateQuestion);
         }
     }
