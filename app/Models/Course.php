@@ -808,6 +808,7 @@ class Course extends BaseModel
                 if($project){
                     $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
                     $project->status = $status_project?->status?->name ?? 'Pendiente';
+                    $project->code = $status_project?->status?->code ?? 'pending';
                     $project->available = $course_status['available'];
                     unset($project->course_id);
                 }
