@@ -22,6 +22,8 @@ class UserNotification extends Model
     public const NEW_BENEFIFT = 'new-benefit';
     public const NEW_DOCUMENT = 'new-document';
     public const NEW_ANNOUNCEMENT = 'new-announcement';
+    public const NEW_VIDEO = 'new-video';
+    public const FROM_PUSH = 'from-push';
 
     protected $collection = 'user_notifications';
 
@@ -67,10 +69,6 @@ class UserNotification extends Model
     ): void
     {
 
-        if (UserNotification::count() === 0) {
-            self::addUniqueIndexToCollection();
-        }
-
         // Generate message content replacing values in message template
 
         $taxonomy = Taxonomy::query()
@@ -88,19 +86,21 @@ class UserNotification extends Model
 
         // Create notifications for each user
 
+        $notifiedUsersIds = self::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('type_id', $taxonomy->id)
+            ->where('is_visible', 1)
+            ->where('content', $content)
+            ->where('path', $path)
+            ->get()
+            ->pluck('user_id')
+            ->toArray();
+
         $values = [];
         foreach ($userIds as $userId) {
 
-            $notification = self::query()
-                ->where('workspace_id', $workspaceId)
-                ->where('type_id', $taxonomy->id)
-                ->where('is_visible', 1)
-                ->where('path', $path)
-                ->where('user_id', $userId)
-                ->select()->first();
-
-            if (!$notification) {
-                UserNotification::create([
+            if (!in_array($userId, $notifiedUsersIds)) {
+                $values[] = [
                     'workspace_id' => $workspaceId,
                     'user_id' => $userId,
                     'type_id' => $taxonomy->id,
@@ -108,11 +108,13 @@ class UserNotification extends Model
                     'content' => $content,
                     'is_visible' => 1,
                     'is_read' => 0,
-                    'created_at' => now(),
+                    'created_at' => new \MongoDB\BSON\UTCDateTime(now()),
                     'updated_at' => null
-                ]);
+                ];
             }
         }
+
+        UserNotification::insert($values);
     }
 
     /**
@@ -134,21 +136,35 @@ class UserNotification extends Model
             ->where('created_at', '>', now()->subDays(5))
             ->get();
 
-        // Group notifications by date
+        // Remove duplicates and add additional data
 
         Carbon::setLocale('es');
 
-        foreach ($notications as &$notication) {
-            $date = $notication->created_at;
-            $notication->id = $notication->_id;
-            $notication->created_date =
-                $date->day . ' de ' .  $date->monthName . ' ' . $date->year;
-            $notication->type = Taxonomy::find($notication->type_id);
+        $alreadyAdded = [];
+        $_notifications = [];
+        foreach ($notications as $notication) {
 
+            $identifier =  self::generateUniqueIdentifier($notication);
+
+            if (!in_array($identifier, $alreadyAdded)) {
+                $date = $notication->created_at;
+                $notication->id = $notication->_id;
+                $notication->created_date =
+                    $date->day . ' de ' .  $date->monthName . ' ' . $date->year;
+                $notication->type = Taxonomy::find($notication->type_id);
+
+                $_notifications[] = $notication;
+                $alreadyAdded[] = $identifier;
+            }
         }
 
+        // Create groups
+
         $responseNotifications = [];
-        $groupedNotifications = $notications->groupBy('created_date')->toArray();
+        $groupedNotifications = collect($_notifications)
+            ->groupBy('created_date')
+            ->toArray();
+
         foreach ($groupedNotifications as $groupName => $notifications) {
             $responseNotifications[] = [
                 'date' => $groupName,
@@ -160,16 +176,17 @@ class UserNotification extends Model
     }
 
     /**
-     * Add unique index to avoid duplicates
-     * @return void
+     * Generate notification unique identifier
+     * @param $notification
+     * @return string
      */
-    public static function addUniqueIndexToCollection() {
+    public static function generateUniqueIdentifier($notification) {
 
-//        Schema::connection('mongodb')
-//            ->table('user_notifications', function (Blueprint $collection) {
-//                $collection->unique([
-//                    'workspace_id', 'is_visible', 'user_id', 'type_id'
-//                ]);
-//        });
+        return sha1($notification->workspace_id .
+            $notification->type_id .
+            $notification->user_id .
+            $notification->is_visible .
+            $notification->content .
+            $notification->path);
     }
 }
