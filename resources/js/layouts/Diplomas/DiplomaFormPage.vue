@@ -889,8 +889,8 @@ export default {
             const vue = this;
 
             const title_plantilla = vue.$refs.DiplomaFormSaveModal.resource.diploma;
-            if(!title_plantilla) return;
-            if(title_plantilla.length <= 10) return;
+            // if(!title_plantilla) return;
+            // if(title_plantilla.length <= 10) return;
 
             let data = {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
@@ -911,9 +911,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al actualizar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue actualizada correctamente.');
+                        vue.showAlert('El diploma fue actualizado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
@@ -928,9 +928,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al guardar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al guardar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue guardada correctamente.');
+                        vue.showAlert('El diploma fue guardado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });

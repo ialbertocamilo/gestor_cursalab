@@ -128,16 +128,16 @@ class AsignarEntrenadorImport implements ToCollection
                     $data_no_procesada->push($temp);
                     continue;
                 }
-                $hasTrainer = EntrenadorUsuario::where('user_id', $alumnoData->id)->where('active',1)->first();
-                if ($hasTrainer) {
-                    $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
-                    $temp = [
-                        'dni' => $alumno->document,
-                        'nombre' => $alumnoData->name,
-                        'msg' => 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document
-                    ];
-                    $data_no_procesada->push($temp);
-                }
+                // $hasTrainer = EntrenadorUsuario::where('user_id', $alumnoData->id)->where('active',1)->first();
+                // if ($hasTrainer) {
+                //     $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+                //     $temp = [
+                //         'dni' => $alumno->document,
+                //         'nombre' => $alumnoData->name,
+                //         'msg' => 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document
+                //     ];
+                //     $data_no_procesada->push($temp);
+                // }
                 // if ($alumnoData->rol_entrenamiento === null) {
                 //     $alumnoData->rol_entrenamiento = 'alumno';
                 //     $alumnoData->save();

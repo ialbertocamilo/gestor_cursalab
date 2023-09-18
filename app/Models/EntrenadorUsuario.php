@@ -300,11 +300,30 @@ class EntrenadorUsuario extends Model implements Recordable
             $response['msg'] = 'El entrenador que se quiere asignar, es un alumno.';
             return $response;
         }
+        $entrenador = User::where('id', $trainer_id)->where('active', 1)->first();
+        $entrenador_workspace = Workspace::select('parent_id')->where('id', $entrenador->subworkspace_id)->first();
+        if (is_null($entrenador_workspace)) {
+            $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
+            $entrenador_workspace_id = $entrenador_workspace->scope;
+        } else {
+            $entrenador_workspace_id = $entrenador_workspace->parent_id;
+        }
+        Bouncer::scope()->to($entrenador_workspace_id);
+        Bouncer::assign('trainer')->to($entrenador);
         $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
         if (!is_null($hasTrainer)) {
-            $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
-            $response['error'] = true;
-            $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
+            $hasTrainer->trainer_id = $trainer_id;
+            $hasTrainer->save();
+            //update relations
+            ChecklistRpta::alumno($user_id)->update([
+                'coach_id'=>$trainer_id
+            ]);
+            // $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+            // $response['error'] = true;
+            // $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
+            // return $response;
+            $msg = "Se asignó el usuario y el entrenador.";
+            $response['msg'] = $msg;
             return $response;
         }
 
@@ -315,18 +334,6 @@ class EntrenadorUsuario extends Model implements Recordable
             $data['trainer_id'] = $trainer_id;
             $data['user_id'] = $user_id;
             EntrenadorUsuario::create($data);
-
-            $entrenador = User::where('id', $trainer_id)->where('active', 1)->first();
-            $entrenador_workspace = Workspace::select('parent_id')->where('id', $entrenador->subworkspace_id)->first();
-            if (is_null($entrenador_workspace)) {
-                $entrenador_workspace = AssignedRole::getUserAssignedRoles($entrenador->id)->first();
-                $entrenador_workspace_id = $entrenador_workspace->scope;
-            } else {
-                $entrenador_workspace_id = $entrenador_workspace->parent_id;
-            }
-            Bouncer::scope()->to($entrenador_workspace_id);
-            Bouncer::assign('trainer')->to($entrenador);
-
             $response['error'] = false;
             $response['msg'] = 'Se asignó el usuario al entrenador.';
         } else {
@@ -334,6 +341,8 @@ class EntrenadorUsuario extends Model implements Recordable
             $msg = "Se asignó el usuario y el entrenador.";
             $response['msg'] = $msg;
         }
+        
+        
         return $response;
     }
 }

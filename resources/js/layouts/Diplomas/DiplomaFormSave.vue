@@ -47,7 +47,7 @@ export default {
             resource: {},
             rules: {
                 diploma: this.getRules([
-                    'required'
+                    'required', 'min:3', 'max:60'
                 ]),
             },
         }
@@ -64,9 +64,13 @@ export default {
         },
         onConfirm() {
             let vue = this;
-            vue.validateForm('DiplomaForm');
+            let isValid = vue.validateForm('DiplomaForm');
+
+            if (isValid) {
+
+                vue.$emit('onConfirm', true);
+            }
             
-            vue.$emit('onConfirm', true);
         }
     }
 }

@@ -64,7 +64,7 @@ class SectionUpload extends BaseModel
 
         // === filePathLocation ===
         $path = 'uploadlogs/'.$fileName;
-        $result = Storage::disk('s3')->put('/uploadlogs', file_get_contents($file));
+        $result = Storage::disk('s3')->put($path, file_get_contents($file));
         $location = get_media_url($path);
         // === filePathLocation ===
 
