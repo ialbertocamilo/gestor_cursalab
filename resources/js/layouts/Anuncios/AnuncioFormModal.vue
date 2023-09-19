@@ -33,6 +33,7 @@
                             maxlength="120"
                             :max="120"
                             hint="Máximo 120 caracteres"
+                            emojiable
                         />
                     </v-col>
                 </v-row>
@@ -134,6 +135,7 @@ const fields = [
     "publish_date",
     "end_date"
 ];
+
 const file_fields = ["imagen", "archivo"];
 
 export default {

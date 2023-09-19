@@ -19,6 +19,8 @@ class DiplomaSearchResource extends JsonResource
             'image' => get_media_url($this->media->file),
             'title' => $this->title,
             'active' => $this->active,
+            'd_objects' => json_decode($this->d_objects),
+            's_objects' => json_decode($this->s_objects),
             'edit_route' => route('diploma.edit', [$this->id]),
             'is_super_user'=> auth()->user()->isAn('super-user')
         ];

@@ -138,6 +138,7 @@ class CursosController extends Controller
         $mod_evaluaciones = $course->mod_evaluaciones;
 
         $course->mod_evaluaciones = $course->getModEvaluacionesConverted();
+        // $course->mod_evaluaciones = []; // merge
 
         // if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
         //     $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $course->qualification_type->position);

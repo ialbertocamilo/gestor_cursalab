@@ -12,7 +12,7 @@
                     <DefaultErrors :errors="errors"/>
 
                     <v-row>
-                        <v-col cols="4">
+                        <v-col cols="6">
                             <DefaultInput
                                 dense
                                 label="Nombre"
@@ -21,21 +21,10 @@
                                 :rules="rules.name"
                                 show-required
                                 counter="120"
+                                emojiable
                             />
                         </v-col>
-                        <v-col cols="4">
-                            <DefaultAutocomplete
-                                show-required
-                                :rules="rules.types"
-                                dense
-                                label="Tipo de curso"
-                                v-model="resource.type_id"
-                                :items="selects.types"
-                                item-text="name"
-                                item-value="id"
-                            />
-                        </v-col>
-                        <v-col cols="4">
+                        <v-col cols="6">
                             <DefaultAutocomplete
                                 show-required
                                 :rules="rules.lista_escuelas"
@@ -50,14 +39,27 @@
                         </v-col>
                     </v-row>
                     <v-row>
-                        <v-col cols="9">
+                        <v-col cols="6">
                             <v-row>
                                 <v-col cols="12">
-                                    <DefaultInput
+                                    <DefaultTextArea
                                         dense
                                         label="Descripción"
-                                        placeholder="Ingrese una descripción"
+                                        placeholder="Ingrese una descripción del curso"
                                         v-model="resource.description"
+                                        :rows="4"
+                                    />
+                                </v-col>
+                                <v-col cols="12">
+                                    <DefaultAutocomplete
+                                        show-required
+                                        :rules="rules.types"
+                                        dense
+                                        label="Tipo de curso"
+                                        v-model="resource.type_id"
+                                        :items="selects.types"
+                                        item-text="name"
+                                        item-value="id"
                                     />
                                 </v-col>
                                 <v-col cols="12">
@@ -81,19 +83,10 @@
                                 </v-col>
 
                             </v-row>
-                        </v-col>
-                        <v-col cols="3" class="sep-left">
+
                             <v-row>
-                                <!-- <v-col cols="12">
-                                    <DefaultInput
-                                        dense
-                                        type="number"
-                                        label="Orden"
-                                        placeholder="Orden"
-                                        v-model="resource.position"
-                                    />
-                                </v-col> -->
-                                <v-col cols="12">
+
+                                <v-col cols="6">
                                     <DefaultAutocomplete
                                         dense
                                         label="Duración (hrs.)"
@@ -104,7 +97,7 @@
                                         placeholder="Ej. 2:00"
                                     />
                                 </v-col>
-                                <v-col cols="12">
+                                <v-col cols="6">
                                     <DefaultInput
                                         numbersOnly
                                         dense
@@ -115,8 +108,7 @@
                                 </v-col>
                             </v-row>
                         </v-col>
-                    </v-row>
-                    <v-row justify="center">
+
                         <v-col cols="6">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
@@ -125,15 +117,19 @@
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'imagen')"/>
                         </v-col>
-                        <v-col cols="6">
+
+                    </v-row>
+                    <!-- <v-row justify="center"> -->
+
+                       <!--  <v-col cols="6">
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputDiploma"
                                 v-model="resource.plantilla_diploma"
                                 label="Plantilla de Diploma (Medida: 1743x1553 píxeles)  "
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'plantilla_diploma')"/>
-                        </v-col>
-                    </v-row>
+                        </v-col> -->
+                    <!-- </v-row> -->
 
                     <v-row justify="space-around" class="menuable">
                         <v-col cols="12">
@@ -178,7 +174,7 @@
                                                 :rules="rules.nota_aprobatoria"
                                                 type="number"
                                                 :min="0"
-                                                :max="resource.qualification_type.position"
+                                                :max="resource.qualification_type ? resource.qualification_type.position : 0"
                                                 show-required
                                                 dense
                                                 @onFocus="curso_id && conf_focus ? alertNotaMinima() : null"
@@ -331,6 +327,8 @@
                             >
                               <template slot="content">
 
+                                <DiplomaSelector v-model="resource.certificate_template_id" />
+
                                 <div class="p-3 mt-3">
                                   <DefaultToggle
                                       :active-label="'Mostrar diploma al usuario'"
@@ -343,6 +341,7 @@
                                 <!--                                        v-model="resource.certificate_template_id"/>-->
 
                               </template>
+
                             </DefaultModalSection>
                         </v-col>
                     </v-row>
@@ -401,15 +400,15 @@ const fields = [
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
-  'activate_at', 'deactivate_at', 'show_certification_to_user'
+    'activate_at', 'deactivate_at', 'show_certification_to_user'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
-// import DiplomaSelector from "../../components/Diplomas/DiplomaSelector"
+import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 
 export default {
-  components: { CursoValidacionesModal, DialogConfirm },
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector },
     props: ["modulo_id", 'categoria_id', 'curso_id'],
     data() {
         const route_school = (this.categoria_id !== '')
@@ -589,11 +588,14 @@ export default {
             let vue = this
             let value = vue.resource.nota_aprobatoria
 
-            if (value && newValue.position && oldValue.position) {
+            if (newValue) {
+                if (value && newValue.position && oldValue.position) {
 
-                vue.new_value = value * newValue.position / oldValue.position
-                vue.resource.nota_aprobatoria = parseFloat(vue.new_value.toFixed(2))
+                    vue.new_value = value * newValue.position / oldValue.position
+                    vue.resource.nota_aprobatoria = parseFloat(vue.new_value.toFixed(2))
+                }
             }
+
         },
     },
     async mounted() {
