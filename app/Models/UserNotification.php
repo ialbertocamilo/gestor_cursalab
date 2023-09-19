@@ -144,7 +144,7 @@ class UserNotification extends Model
         $_notifications = [];
         foreach ($notications as $notication) {
 
-            $identifier =  self::generateUniqueIdentifier($notication);
+            $identifier =  self::generateUniqueIdentifier($notication, $userId);
 
             if (!in_array($identifier, $alreadyAdded)) {
                 $date = $notication->created_at;
@@ -178,13 +178,14 @@ class UserNotification extends Model
     /**
      * Generate notification unique identifier
      * @param $notification
+     * @param $userId
      * @return string
      */
-    public static function generateUniqueIdentifier($notification) {
-
+    public static function generateUniqueIdentifier($notification, $userId): string
+    {
         return sha1($notification->workspace_id .
             $notification->type_id .
-            $notification->user_id .
+            $userId .
             $notification->is_visible .
             $notification->content .
             $notification->path);
