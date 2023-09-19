@@ -780,7 +780,7 @@ class Course extends BaseModel
         $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
         $status_projects = collect();
         if(count($projects)>0){
-            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name')->select('id','project_id','status_id')->get();
+            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name,code')->select('id','project_id','user_id','status_id')->get();
         }
         $user->loadMissing('criterion_values.criterion.field_type');
 
