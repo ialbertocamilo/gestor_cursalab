@@ -139,6 +139,7 @@ class Summary extends BaseModel
 
         }
     }
+
     protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default'){
         $users_id_segmented = [];
         // $course->loadMissing('segments');
@@ -154,20 +155,23 @@ class Summary extends BaseModel
 
         // Create notifications for users assigned to course
 
-        $school = $course->schools->first();
-        if ($school && get_current_workspace()) {
-            UserNotification::createNotifications(
-                get_current_workspace()->id,
-                $users_id_segmented,
-                UserNotification::NEW_COURSE,
-                [
-                    'courseName' => $course->name
-                ],
-                'escuela/'.$school->id.'/cursos/' . $course?->id . '/tema'
-            );
-        }
+        if ( count($users_id_segmented) ) {
 
+            $school = $course->schools->first();
+            if ($school && get_current_workspace()) {
+                UserNotification::createNotifications(
+                    get_current_workspace()->id,
+                    $users_id_segmented,
+                    UserNotification::NEW_COURSE,
+                    [
+                        'courseName' => $course->name
+                    ],
+                    'escuela/'.$school->id.'/cursos/' . $course?->id . '/tema'
+                );
+            }
+        }
     }
+
     protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update,$event)
     {
         $data = [

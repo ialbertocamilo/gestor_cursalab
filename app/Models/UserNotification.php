@@ -114,7 +114,9 @@ class UserNotification extends Model
             }
         }
 
-        UserNotification::insert($values);
+        if ( count($values) ) {
+            UserNotification::insert($values);
+        }
     }
 
     /**
