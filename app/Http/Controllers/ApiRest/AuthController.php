@@ -673,6 +673,7 @@ class AuthController extends Controller
             $ambiente->fondo_app = $this->getMediaUrl($ambiente->fondo_app);
             $ambiente->logo_app  = $this->getMediaUrl($ambiente->logo_app);
             $ambiente->logo_cursalab = $this->getMediaUrl($ambiente->logo_cursalab);
+            $ambiente->app_main_isotipo = $this->getMediaUrl($ambiente->logo_empresa);
             $ambiente->completed_courses_logo = $this->getMediaUrl($ambiente->completed_courses_logo);
             $ambiente->enrolled_courses_logo  = $this->getMediaUrl($ambiente->enrolled_courses_logo);
             $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
