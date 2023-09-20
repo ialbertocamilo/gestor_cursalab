@@ -62,7 +62,7 @@ class Kernel extends ConsoleKernel
 
         // Courses
 
-        $schedule->command('courses:activate-deactivate')->everyFifteenMinutes();
+        $schedule->command('courses:activate-deactivate')->everyFiveMinutes();
 
         // Criteria
 
