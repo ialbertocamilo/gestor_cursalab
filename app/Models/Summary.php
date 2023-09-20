@@ -140,7 +140,7 @@ class Summary extends BaseModel
         }
     }
 
-    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default'){
+    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default',$send_notification=false   ){
         $users_id_segmented = [];
         // $course->loadMissing('segments');
         if($only_users_has_sc){
@@ -155,7 +155,7 @@ class Summary extends BaseModel
 
         // Create notifications for users assigned to course
 
-        if ( count($users_id_segmented) ) {
+        if ( count($users_id_segmented) && $send_notification) {
 
             $school = $course->schools->first();
             if ($school && get_current_workspace()) {
