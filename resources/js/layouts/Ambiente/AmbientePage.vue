@@ -129,8 +129,8 @@
                                     <DefaultSelectOrUploadMultimedia 
                                         ref="inputLogoEmpresa" 
                                         v-model="resource.logo_empresa"
-                                        label="Imagen (560x224 px)"
-                                        label-button="Insertar logo empresa"
+                                        label="Imagen (400x400 px)"
+                                        label-button="Insertar isotipo empresa"
                                         :file-types="['image']"
                                         @onSelect="setFile($event, resource, 'logo_empresa')"
                                     />
