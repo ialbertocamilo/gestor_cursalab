@@ -61,10 +61,10 @@ class AdminStoreRequest extends FormRequest
             // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
-            'phone_number' => 'nullable',
-            'person_number' => 'nullable',
+            // 'phone_number' => 'nullable',
+            // 'person_number' => 'nullable',
 
-            'workspacessel' => 'required'
+            'workspacessel' => 'nullable'
         ];
 
         return $rules;
@@ -77,15 +77,15 @@ class AdminStoreRequest extends FormRequest
         return $this->all();
     }
 
-    public function messages()
-    {
-        return [
-            'name.required' => 'El dato "nombre" es requerido',
-            'password.required' => 'El dato "contraseña" es requerido',
-            'workspacessel.required' => 'Debe seleccionar al menos un rol',
-            'email_gestor.required' => 'El dato "correo" es requerido',
-            'email_gestor.email_gestor' => 'El dato "correo " debe tener formato abc@ejemplo.com',
-            'email_gestor.unique' => 'Este correo ya ha sido regitrado: intente con otro'
-        ];
-    }
+    // public function messages()
+    // {
+    //     return [
+    //         'name.required' => 'El dato "nombre" es requerido',
+    //         'password.required' => 'El dato "contraseña" es requerido',
+    //         'workspacessel.required' => 'Debe seleccionar al menos un rol',
+    //         'email_gestor.required' => 'El dato "correo" es requerido',
+    //         'email_gestor.email_gestor' => 'El dato "correo " debe tener formato abc@ejemplo.com',
+    //         'email_gestor.unique' => 'Este correo ya ha sido regitrado: intente con otro'
+    //     ];
+    // }
 }

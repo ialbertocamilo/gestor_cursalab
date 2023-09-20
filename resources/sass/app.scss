@@ -422,3 +422,39 @@ Skeletons
     border-radius: 5px;
 }
 
+.roles-tabs {
+    .v-tab {
+        text-align: left !important;
+        justify-content: left !important;
+        text-transform: none !important;
+
+    }
+
+    .v-slide-group__content.v-tabs-bar__content {
+        justify-content: center!important;
+    }
+
+    .v-slide-group__wrapper .container {
+        border-right: 1px solid #e7e7e7b8;
+    }
+    // .v-tab--active {
+    //     font-weight: bold;
+    // }
+
+    .v-icon {
+        margin-top: -5px;
+        margin-right: 15px;
+    }
+    // .container {
+    //     direction: rtl; 
+    // }
+}
+
+.section-roles-tabs {
+
+    border: 1px solid #e7e7e7;
+}
+
+.v-text-field input {
+    font-size: 0.85em;
+}

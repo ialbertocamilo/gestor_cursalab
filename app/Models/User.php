@@ -1651,4 +1651,49 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $criterionWorkspace;
     }
+
+    protected function searchAdmins($request)
+    {
+        // $query = self::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports', 'only-reports');
+        $query = self::whereRelation('roles', function ($query) {
+            $query->where('name', '<>', 'super-user');
+        });
+
+        // $with = ['subworkspace'];
+
+        // if (get_current_workspace()->id == 25) {
+
+        //     $with = ['subworkspace', 'criterion_values' => function ($q) {
+        //         $q->whereIn('criterion_id', [40, 41]);
+        //     }];
+        // }
+
+        // $query->with($with)->withCount('failed_topics');
+
+        if ($request->q)
+            $query->filterText($request->q);
+
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
+        // if ($request->workspace_id)
+        //     $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+
+        // if ($request->subworkspace_id)
+        //     $query->where('subworkspace_id', $request->subworkspace_id);
+
+        // if ($request->sub_workspaces_id)
+        //     $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+
+        $field = $request->sortBy ?? 'created_at';
+        $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort)->orderBy('id', $sort);
+
+        return $query->paginate($request->paginate);
+        // return $query->paginate($request->rowsPerPage);
+    }
 }
