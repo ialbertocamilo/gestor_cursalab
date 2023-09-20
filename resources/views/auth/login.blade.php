@@ -97,6 +97,7 @@
 
                 ¿Necesitas entrar como colaborador?
                 <a href="{{ config('app.web_url') }}"
+                   target="_blank"
                    style="color: #5f59eb; text-decoration: underline">
                     <b>
                         haz click aquí
