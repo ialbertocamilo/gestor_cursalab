@@ -282,14 +282,15 @@ class Vademecum extends Model
             ->toArray();
 
         // Register notifications
-
-        UserNotification::createNotifications(
-            get_current_workspace()->id,
-            $usersIds,
-            UserNotification::NEW_DOCUMENT,
-            [ ],
-            'vademecum'
-        );
+        if(count($usersIds)){
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                $usersIds,
+                UserNotification::NEW_DOCUMENT,
+                [ ],
+                'vademecum'
+            );
+        }
     }
 
     public function prepareTaxonomy($row, $key, $type)

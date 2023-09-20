@@ -139,11 +139,12 @@ class Summary extends BaseModel
 
         }
     }
-    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default'){
+
+    protected function updateUsersByCourse($course,$users_id = null,$summary_course_update=true,$only_users_has_sc=false,$event='default',$send_notification=false   ){
         $users_id_segmented = [];
         // $course->loadMissing('segments');
         if($only_users_has_sc){
-            $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course->id)->pluck('user_id')->toArray();
+            $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course?->id)->pluck('user_id')->toArray();
         }else{
             $users_id_segmented = ($users_id) ? $users_id : $course->usersSegmented($course->segments,'users_id');
         }
@@ -154,20 +155,23 @@ class Summary extends BaseModel
 
         // Create notifications for users assigned to course
 
-        $school = $course->schools->first();
-        if ($school) {
-            UserNotification::createNotifications(
-                get_current_workspace()->id,
-                $users_id_segmented,
-                UserNotification::NEW_COURSE,
-                [
-                    'courseName' => $course->name
-                ],
-                'escuela/'.$school->id.'/cursos/' . $course->id . '/tema'
-            );
-        }
+        if ( count($users_id_segmented) && $send_notification) {
 
+            $school = $course->schools->first();
+            if ($school && get_current_workspace()) {
+                UserNotification::createNotifications(
+                    get_current_workspace()->id,
+                    $users_id_segmented,
+                    UserNotification::NEW_COURSE,
+                    [
+                        'courseName' => $course->name
+                    ],
+                    'escuela/'.$school->id.'/cursos/' . $course?->id . '/tema'
+                );
+            }
+        }
     }
+
     protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update,$event)
     {
         $data = [
