@@ -292,4 +292,8 @@ export default {
     //     opacity: .08;
     //     background: white;
     // }
+
+    .emoji-mart-search {
+        display: none !important;
+    }
 </style>
