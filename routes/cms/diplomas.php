@@ -12,7 +12,7 @@ Route::controller(DiplomaController::class)->group(function() {
 
     Route::post('/get_preview_data', 'get_preview_data');
     Route::post('/save', 'save');
-    Route::post('/get_data_diploma', 'get_data_diploma');
+    // Route::post('/get_data_diploma', 'get_data_diploma');
     Route::put('/{diploma}/status', 'status');
     Route::delete('/{diploma}/destroy', 'destroy');
 

@@ -2,29 +2,28 @@
     <section class="section-list ">
          <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Diplomas: {{ diploma_id ? 'Editar' : 'Crear' }}
+                Diplomas: {{ diploma_id ? 'Editar plantilla' : 'Crear plantilla' }}
+                <v-btn 
+                    icon 
+                    color="primary"
+                    class="ml-2"
+                    @click="openFormModal(modalDiplomaFormInfoOptions, null, 'status', 'Instrucciones')">
+                    <v-icon>mdi-information</v-icon>
+                </v-btn>
             </v-card-title>
         </v-card>
 
-        <v-card flat class="elevation-0 mb-4 pb-5">
-            <div  class="ml-4">
+        <v-card flat class="elevation-0 my-4 py-5">
+           <!--  <div  class="ml-4">
                 <p class="d-flex align-items-center pt-4">
-                    {{ diploma_id ? 'Edición' : 'Creación' }} de plantilla
+                     diploma_id ? 'Edición' : 'Creación'  de plantilla
 
-                    <!-- BOTON INSTRUCCIONES  -->
-                    <v-btn 
-                        icon 
-                        color="primary"
-                        class="ml-2"
-                        @click="openFormModal(modalDiplomaFormInfoOptions, null, 'status', 'Instrucciones')">
-                        <v-icon>mdi-information</v-icon>
-                    </v-btn>
                 </p>
-            </div>
+            </div> -->
             <div class="mx-8 mb-0 d-flex justify-content-center">
                 <v-row class="mt-0 container-box">
 
-                    <div id="overlay-div" class="overlay-div mx-4 mt-3" v-show="overlay"> 
+                    <div id="overlay-div" class="overlay-div ma-auto mt-5" v-show="overlay"> 
                         <v-file-input
                             full-width
                             prepend-icon=""
@@ -32,7 +31,7 @@
                             ref="overlayFile"
                             v-model="bg_image"
                             accept="image/*"
-                            height="67vh"
+                            height="405px"
                             @change="set_plantilla()"
                         />
                         <div class="overlay-icon">
@@ -45,7 +44,7 @@
                         </div>
                     </div>
 
-                    <v-col cols="12" md="12" sm="12">
+                    <v-col cols="12" md="12" sm="12" class="d-flex align-items-center justify-center">
                         <!-- === CANVAS-MENU === -->
                         <div class="c_menu text-center elevation-4 mx-2 my-1 px-2 py-1" id="c_menu" 
                              style="display: none; flex-direction: row; align-items: center; border-radius: .3rem; grid-gap: .5rem;">
@@ -126,52 +125,12 @@
                         <!-- === CANVAS-MENU === -->
 
                         <!-- === CANVAS === -->
-                        <div v-show="!overlay" class="col-12">
+                        <div v-show="!overlay" class="">
                             <canvas ref="canvasElement" id="canvas" class="canvas-style"></canvas>
                         </div>
                         <!-- === CANVAS === -->
                     </v-col>
                 </v-row>
-
-                <!-- DIALOG SAVE -->
-                <v-dialog
-                    v-model="dialog_save"
-                    persistent
-                    max-width="290"
-                >
-                    <v-card>
-                        <v-card-subtitle class="headline">
-                            Escriba el nombre de el diploma
-                        </v-card-subtitle>
-                        <v-card-text>
-                            <v-form>
-                                <v-text-field
-                                    :rules="nameRules"
-                                    label="Nombre"
-                                    v-model="name_plantilla"
-                                    prefix="plantilla-"
-                                ></v-text-field>
-                            </v-form>
-                        </v-card-text>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn
-                                color="green darken-1"
-                                text
-                                @click="dialog_save = false"
-                            >
-                                Cancelar
-                            </v-btn>
-                            <v-btn
-                                color="green darken-1"
-                                text
-                                @click="save_plantilla()"
-                            >
-                                Aceptar
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
 
             </div>
 
@@ -237,7 +196,7 @@
 
         <!-- === ALERT MODAL === -->
         <DiplomaAlertModal
-            width="20vh"
+            width="30vh"
             :ref="modalDiplomaAlertOptions.ref"
             :options="modalDiplomaAlertOptions"
             @onCancel="closeFormModal(modalDiplomaAlertOptions)"
@@ -573,7 +532,7 @@ export default {
             let img = document.getElementById('input_image').files[0];
             let vue = this;
             let file = img;
-            console.log('add_image', file);
+            // console.log('add_image', file);
             let reader = new FileReader();
             reader.onload = function (f) {
                 let data = f.target.result;                    
@@ -930,8 +889,8 @@ export default {
             const vue = this;
 
             const title_plantilla = vue.$refs.DiplomaFormSaveModal.resource.diploma;
-            if(!title_plantilla) return;
-            if(title_plantilla.length <= 10) return;
+            // if(!title_plantilla) return;
+            // if(title_plantilla.length <= 10) return;
 
             let data = {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
@@ -952,9 +911,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al actualizar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue actualizada correctamente.');
+                        vue.showAlert('El diploma fue actualizado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
@@ -969,9 +928,9 @@ export default {
                     vue.hideLoader();
 
                     if(res.data.error) {
-                        vue.showAlert('Hubo un problema al guardar diploma.', 'error');
+                        vue.showAlert('Hubo un problema al guardar el diploma.', 'error');
                     } else {
-                        vue.showAlert('El diploma fue guardada correctamente.');
+                        vue.showAlert('El diploma fue guardado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
                 });
@@ -1071,8 +1030,8 @@ export default {
 .overlay-div{
     position: relative;
     display: flex;
-    width: 100%;
-    height: 56vh;
+    width: 850px;
+/*    height: auto;*/
     background-color: #ffffff;
     border-radius: .5rem;
 }
@@ -1096,8 +1055,8 @@ export default {
     pointer-events: none;
     color: #A9A9A9;
     width: auto;
-    top: 42%;
-    left: 46%;
+    top: 36%;
+    left: 40%;
     background-color: #ffffff;
     padding: 1rem 1.5rem;
     border-radius: .5rem;
@@ -1119,15 +1078,23 @@ export default {
 }
 
 .container-box  {
-    height: 65vh;
+    height: 450px;
     background-color: #D4D4D4;
     border-radius: 0.5rem;
 }
 
 .canvas-style {
+    margin: auto !important;
     border-radius: 0.5rem;
-    width: 100%;
-    height: 100%;
+    height: auto !important;
+}
+
+canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 </style>

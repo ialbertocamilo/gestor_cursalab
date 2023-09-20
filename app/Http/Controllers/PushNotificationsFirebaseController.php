@@ -10,6 +10,7 @@ use App\Models\Eventos;
 use App\Models\Matricula;
 use App\Models\PushNotification;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\Usuario;
 use App\Models\Workspace;
 use Carbon\Carbon;
@@ -117,11 +118,21 @@ class PushNotificationsFirebaseController extends Controller
                 'usuarios' => $agrupado
             ]);
 
+            // Register APP notification
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                $agrupado,
+                UserNotification::FROM_PUSH,
+                [ 'content' => $request->texto ],
+                null
+            );
+
             $ahora->addMinutes($intervalo);
             $i++;
         }
 
-        // Save notification in database
+        // Save PUSH notification in database
 
         $nueva_notificacion = new PushNotification();
         $nueva_notificacion->titulo = $request->titulo;

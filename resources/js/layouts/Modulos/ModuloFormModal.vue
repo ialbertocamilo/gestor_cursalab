@@ -33,7 +33,7 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                    <v-col cols="6">
+                    <v-col cols="12">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.logo"
@@ -41,7 +41,7 @@
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'logo')"/>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="6" class="d-none">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputPlantillaDiploma"
                             v-model="resource.plantilla_diploma"
@@ -179,6 +179,21 @@
                         </DefaultModalSection>
                     </v-col>
                 </v-row>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSection
+                            title="Configuración de diploma"
+                        >
+                            <!-- tooltip="Tooltip" -->
+                            <template slot="content">
+
+                                <DiplomaSelector
+                                    v-model="resource.certificate_template_id"/>
+
+                            </template>
+                        </DefaultModalSection>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around">
                     <!--                    <v-col cols="3">-->
                     <!--                        <DefaultFormLabel-->
@@ -289,12 +304,13 @@
 <script>
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import draggable from 'vuedraggable'
+import DiplomaSelector from "../../components/Diplomas/DiplomaSelector.vue";
 
 const fields = ['name', 'codigo_matricula', 'active', 'reinicios_programado',
-    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo'];
+    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo', 'certificate_template_id'];
 const file_fields = ['logo', 'plantilla_diploma'];
 export default {
-    components: {DefaultRichText, draggable},
+    components: {DiplomaSelector, DefaultRichText, draggable},
     props: {
         options: {
             type: Object,
@@ -328,14 +344,15 @@ export default {
                 // preg_x_ev: null,
                 nota_aprobatoria: null,
                 nro_intentos: null,
+                certificate_template_id: null
             },
             rules: {
                 name: this.getRules(['required']),
                 plantilla_diploma: this.getRules(['required']),
                 codigo_matricula: this.getRules(['required']),
-                // preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
                 nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
-                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+                // preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1'])
             },
             resource: {},
             selects: {
