@@ -222,20 +222,20 @@ class ProjectUser extends Model
     protected function storeUpdateProjectUser($request){
         $project = $request->project;
         $user = $request->user;
-        $status_code = $this->getStatusByCode('in_review');
+        $status = $this->getStatusByCode('in_review');
         self::updateOrCreate(
             ['project_id'=>$project->id,'user_id'=>$user->id],
-            ['project_id'=>$project->id,'user_id'=>$user->id,'status_id'=>$status_code->id
+            ['project_id'=>$project->id,'user_id'=>$user->id,'status_id'=>$status->id
         ]);
         $project_resource = ProjectResources::storeUpdateRequest($request,$project,'media_project_user',false);      
     
         if(count($project_resource)==0){
-            $status_code = $this->getStatusByCode('pending');
+            $status = $this->getStatusByCode('pending');
             self::where('project_id',$project->id)->where('user_id',$user->id)->update([
-                'status_id'=>$status_code->id
+                'status_id'=>$status->id
             ]);
         }
-        return $status_code->name;
+        return $status;
     }
   
     private function projectsByUser($user,$with_course=false,$request=null,$listSchools=false){
