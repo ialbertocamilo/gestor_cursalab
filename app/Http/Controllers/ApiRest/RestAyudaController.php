@@ -217,7 +217,7 @@ class RestAyudaController extends Controller
                 $mensaje = 'El usuario está activo.';
                 $codigo_http = 200; // OK
             } else {
-                $mensaje = 'El usuario está inactivo.';
+                $mensaje = 'Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.';
                 $codigo_http = 403; // Prohibido
             }
         } else {
