@@ -35,7 +35,8 @@
                     ></v-img>
                 </div>
                 <div v-else-if="type_media=='office'">
-                    <DocPreview :docValue="full_path_file" docType="office" :height="80" />
+                    <embed v-if="full_path_file.includes('.txt')"  :src="full_path_file"> 
+                    <DocPreview v-else :docValue="full_path_file" docType="office" :height="80" />
                 </div>
                 <div v-else-if="type_media=='pdf'">
                     <embed :src="full_path_file" style="height: 500px;width: 100%;">
@@ -66,6 +67,7 @@ export default {
             type_media:null,
             full_path_file:'',
             project_resource_id:0,
+            fileContent:''
         }
     },
     methods:{
@@ -88,6 +90,18 @@ export default {
             vue.type_media = type_media;
             vue.full_path_file = full_path_file;
             vue.project_resource_id = id;
+            if(vue.full_path_file.includes('.txt')){
+                vue.loadContentTXTFile(vue.full_path_file);
+            }
+        },
+        async loadContentTXTFile(full_path_file) {
+            try {
+                console.log(full_path_file);
+                const response = await axios.get(full_path_file);
+                this.fileContent = response.data;
+            } catch (error) {
+                console.error('Error al cargar el archivo:', error);
+            }
         },
         loadSelects() {
             let vue = this

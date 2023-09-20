@@ -266,7 +266,7 @@ class Media extends BaseModel
         $valid_ext3 = ['mp3'];
         $valid_ext4 = ['pdf'];
         $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
-        $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx'];
+        $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
 
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
@@ -302,7 +302,6 @@ class Media extends BaseModel
                 $uploaded = true;
             }
         }
-
         // Upload to remote storage
 
         if (!$uploaded) {
