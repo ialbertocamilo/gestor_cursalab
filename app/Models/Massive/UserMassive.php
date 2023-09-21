@@ -234,7 +234,7 @@ class UserMassive extends Massive implements ToCollection
                     $has_error = true;
                     $errors_index[] = [
                         'index' => $email_index,
-                        'message' => ($this->messageInSpanish) ? 'Este email es usado por otro usuario.' : 'The field email must be unique.'
+                        'message' => 'Este email es usado por otro usuario.'
                     ];
                 }
             }
@@ -242,7 +242,7 @@ class UserMassive extends Massive implements ToCollection
               if ($user_username_email ) {
                 if (isset($user['username']) && $user['username'] != '' &&
                     !is_null($user_username_email->username) &&
-                    strtolower($user_username_email->username) == strtolower($user['username']) ) {
+                    mb_strtolower($user_username_email->username) == mb_strtolower($user['username']) ) {
 
                     $has_error = true;
                     $errors_index[] = [
