@@ -6,6 +6,13 @@
         <th width="150px" align="center"><b>ROL</b></th>
         <th width="150px" align="center"><b>DNI</b></th>
         <th width="150px" align="center"><b>NOMBRE</b></th>
+
+        {{-- Criteria names --}}
+
+        @foreach ($criteria as $criterion)
+            <th width="150px" align="center"><b>{{ $criterion->name }}</b></th>
+        @endforeach
+
         {{--            <th width="150px" align="center"><b>APELLIDO PATERNO</b></th>--}}
         {{--            <th width="150px" align="center"><b>APELLIDO MATERNO</b></th>--}}
         {{-- <th width="150px" align="center"><b>TOTAL INGRESOS</b></th> --}}
@@ -40,6 +47,21 @@
             <td align="center">{{ $attendant->usuario->document }}</td>
 
             <td>{{ $attendant->usuario->name.' '.$attendant->usuario->lastname.' '.$attendant->usuario->surname  }}</td>
+
+            {{-- User criteria values --}}
+
+            @foreach ($criteria as $criterion)
+                <td>
+                    {{
+                        getCriterionValue(
+                            $criterion->id,
+                            $attendant->user->criterion_values
+                       )
+                    }}
+                </td>
+            @endforeach
+
+
             {{--                <td>{{ $attendant->usuario->apellido_paterno }}</td>--}}
             {{--                <td>{{ $attendant->usuario->apellido_materno }}</td>--}}
 

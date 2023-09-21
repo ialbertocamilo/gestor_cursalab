@@ -514,3 +514,11 @@ function fechaCastellano($fecha)
     // return "Lima, ".$numeroDia." de ".$nombreMes." de ".$anio;
     return $numeroDia . " de " . $nombreMes . " del " . $anio;
 }
+
+function getCriterionValue($id, $criteria) {
+    $criterion = $criteria->where('criterion_id', $id)->first();
+
+    return $criterion
+        ? $criterion->value_text
+        : '';
+}
