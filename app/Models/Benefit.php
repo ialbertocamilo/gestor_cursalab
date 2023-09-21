@@ -419,7 +419,7 @@ class Benefit extends BaseModel
         $workspace_id = get_current_workspace()?->id;
         $workspace = Workspace::where('id', $workspace_id)->first();
 
-        $response['max_benefits_x_users'] = $workspace?->max_benefits;
+        $response['max_benefits_x_users'] = $workspace?->max_benefits ?? 0;
         return $response;
     }
 
