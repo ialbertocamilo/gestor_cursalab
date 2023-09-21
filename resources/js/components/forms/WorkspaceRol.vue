@@ -18,7 +18,7 @@
             <v-col>
                 <DefaultAutocomplete
                     dense
-                    label="Email"
+                    label="Correos que recibe"
                     v-model="resource.emails_information"
                     :items="selects.emails_information"
                     item-text="name"
