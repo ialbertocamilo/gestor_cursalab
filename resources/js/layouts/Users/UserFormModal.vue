@@ -137,7 +137,7 @@
 
                             </v-container>
 
-                          <v-tab-item v-for="workspace in workspaces" :key="'wrkspc-role-' + workspace.id">
+                          <v-tab-item v-for="(workspace, i) in workspaces" :key="'wrkspc-role-' + workspace.id">
                             <v-card flat>
                               <v-card-text>
 
@@ -209,7 +209,7 @@
                                             label="Correos"
                                             v-model="workspace.emails_information"
                                             :items="emails_information"
-                                            item-text="title"
+                                            item-text="name"
                                             item-value="id"
                                             multiple
                                             :show-select-all="false"

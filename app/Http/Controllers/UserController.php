@@ -104,12 +104,15 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $_workspaces = $user->getWorkspaces();
+
         $workspaces = Workspace::with('subworkspaces')->where('parent_id', null)->get();
         $roles = Role::where('name', '!=', 'super-user')->get();
         
         $emails_information = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
         $emails_information_selected = $user->emails_user()->with('type:id,name')->get();
 
+        // return $this->success(compact('_workspaces'));
         return $this->success(compact('user', 'workspaces', 'roles', 'emails_information','emails_information_selected'));
     }
 

@@ -225,6 +225,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
     }
 
+    public function getWorkspaces()
+    {
+        $roles = AssignedRole::getUserAssignedRoles($this->id);
+
+        return Workspace::whereIn('id', $roles->pluck('scope'))->get();
+
+        // return $this->hasManyThrough(Workspace::class, AssignedRole::class, 'entity_id', 'id', 'scope', 'id');
+    }
+
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'subworkspace_user', 'user_id', 'subworkspace_id');
+    }
+
     public function scopeOnlyClientUsers($q)
     {
         $q
@@ -1695,5 +1709,30 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         return $query->paginate($request->paginate);
         // return $query->paginate($request->rowsPerPage);
+    }
+
+    protected function getDataForAdminForm($user = null)
+    {
+        $user = $user ?? [];
+
+        $workspaces = Workspace::with('subworkspaces')->where('parent_id', null)->get();
+        $emails = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
+        $roles = Role::where('name', '!=', 'super-user')->get();
+
+        $data = [];
+
+        // foreach ($workspaces as $workspace) {
+            
+        //     if ($user) {
+
+        //         $user->roles
+
+        //     } else {
+
+        //     }
+        // }
+
+        return compact('data', 'workspaces', 'emails', 'roles');
+
     }
 }
