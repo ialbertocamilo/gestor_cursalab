@@ -21,7 +21,9 @@ class Project extends BaseModel
     {
         return $this->hasMany(ProjectResources::class, 'project_id');
     }
-
+    public function users(){
+        return $this->hasMany(ProjectUser::class, 'project_id');
+    }
     protected function getListSelectByType($request){
         $data = [];
         switch ($request->type) {
@@ -69,7 +71,11 @@ class Project extends BaseModel
         $query = self::with([
             'course:id,name','course.schools:id,name',
             'course.schools.subworkspaces:id,name,logo'
-        ])->select('id','course_id','indications','active');
+        ])->select('id','course_id','indications','active')->withCount(['users' => function ($query) {
+            $query->whereHas('status', function ($q) {
+                $q->where('code', 'in_review');
+            });
+        }]);
         // ->withCount('usuario_cursos');
 
         // FILTERS
@@ -107,7 +113,6 @@ class Project extends BaseModel
         if ($request->active == 2){
             $query->where('active', '<>', ACTIVE);
         }
-
         return $query->orderBy('created_at','desc')->paginate($request->paginate);
     }
     protected function storeUpdateRequest($request, $project = null){
