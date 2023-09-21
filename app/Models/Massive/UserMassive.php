@@ -171,7 +171,7 @@ class UserMassive extends Massive implements ToCollection
                 continue;
             }
             if ($dt['code'] == 'active') {
-                if(!in_array(strtolower($dt['value_excel']),$this->user_states)){
+                if(!in_array(mb_strtolower($dt['value_excel']),$this->user_states)){
                     $has_error = true;
                     $errors_index[] = [
                         'index' => $dt['index'],
@@ -180,7 +180,7 @@ class UserMassive extends Massive implements ToCollection
                     continue;
                 }
 
-                $user[$dt['code']] = (strtolower($dt['value_excel']) == 'active') ? 1 : 0;
+                $user[$dt['code']] = (mb_strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
         }
         //verify username and email fields are unique
@@ -216,9 +216,9 @@ class UserMassive extends Massive implements ToCollection
             if ($user_username_email || $master_username_email) {
                 if (isset($user['username']) && $user['username'] != '' &&
                     !is_null($user_username_email->username) &&
-                    strtolower($user_username_email->username) == strtolower($user['username']) ||
+                    mb_strtolower($user_username_email->username) == mb_strtolower($user['username']) ||
                     isset($user['username']) && $user['username'] != '' && !is_null($master_username_email->username)
-                    && strtolower($master_username_email->username) == strtolower($user['username'])) {
+                    && mb_strtolower($master_username_email->username) == mb_strtolower($user['username'])) {
 
                     $has_error = true;
                     $errors_index[] = [
@@ -227,9 +227,9 @@ class UserMassive extends Massive implements ToCollection
                     ];
                 }
                 if ($user['email'] != '' && !is_null($user_username_email->email)
-                    && strtolower($user_username_email->email) == strtolower($user['email'])
+                    && mb_strtolower($user_username_email->email) == mb_strtolower($user['email'])
                     || $user['email'] != '' && !is_null($master_username_email)
-                    && strtolower($master_username_email->email) == strtolower($user['email'])) {
+                    && mb_strtolower($master_username_email->email) == mb_strtolower($user['email'])) {
 
                     $has_error = true;
                     $errors_index[] = [
@@ -251,7 +251,7 @@ class UserMassive extends Massive implements ToCollection
                     ];
                 }
                 if ($user['email'] != '' && !is_null($user_username_email->email)
-                    && strtolower($user_username_email->email) == strtolower($user['email'])) {
+                    && mb_strtolower($user_username_email->email) == mb_strtolower($user['email'])) {
 
                     $has_error = true;
                     $errors_index[] = [
