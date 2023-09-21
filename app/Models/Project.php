@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Project extends BaseModel
 {
     use HasFactory;
-    protected $fillable = ['course_id','indications','active'];
+    protected $fillable = ['workspace_id','course_id','indications','active'];
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
@@ -75,7 +75,7 @@ class Project extends BaseModel
             $query->whereHas('status', function ($q) {
                 $q->where('code', 'in_review');
             });
-        }]);
+        }])->where('workspace_id',get_current_workspace()->id);
         // ->withCount('usuario_cursos');
 
         // FILTERS
@@ -122,6 +122,7 @@ class Project extends BaseModel
             if (!$project) {
                 $project = new Project();
                 $project->course_id = $request_project['course_id'];
+                $project->workspace_id  = get_current_workspace()->id;
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
             $project->save();
