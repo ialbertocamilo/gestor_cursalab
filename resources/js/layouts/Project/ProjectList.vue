@@ -188,7 +188,7 @@ export default {
             },
             filters: {
                 q: '',
-                active: 1,
+                active: 3,
                 subworkspace_id:null,
                 school_id:null,
                 course_id:null
