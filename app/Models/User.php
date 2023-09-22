@@ -168,10 +168,24 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->hasMany(CriterionValueUser::class);
     }
+
+    public function assigned_roles()
+    {
+        return $this->hasMany(AssignedRole::class, 'entity_id');
+    }
+    
     public function emails_user()
     {
         return $this->hasMany(EmailUser::class);
     }
+
+    public function email_notifications()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'emails_user', 'user_id', 'type_id')->withPivot('workspace_id', 'last_percent_sent');
+        // return $this->belongsToMany(Workspace::class, 'emails_user', 'user_id', 'workspace_id')->withPivot('type_id', 'last_percent_sent');
+    }
+
+
     public function subworkspace()
     {
         return $this->belongsTo(Workspace::class, 'subworkspace_id');
@@ -1715,24 +1729,62 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $user ?? [];
 
-        $workspaces = Workspace::with('subworkspaces')->where('parent_id', null)->get();
+        $workspaces = Workspace::with('subworkspaces:id,name,parent_id')->select('id', 'name', 'parent_id', 'logo', 'slug')->where('parent_id', null)->get();
         $emails = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
         $roles = Role::where('name', '!=', 'super-user')->get();
 
         $data = [];
 
-        // foreach ($workspaces as $workspace) {
+        foreach ($workspaces as $key => $workspace) {
             
-        //     if ($user) {
+            if ($user) {
 
-        //         $user->roles
+                $emails_selected = $user->email_notifications()->wherePivot('workspace_id', $workspace->id)->pluck('type_id')->toArray();
 
-        //     } else {
+                $data[$key] = $workspace; 
+                $data[$key]['selected_roles'] = $user->assigned_roles()->where('scope', $workspace->id)->pluck('role_id')->toArray(); 
+                $data[$key]['selected_subworkspaces'] = $user->subworkspaces->pluck('id')->toArray(); 
+                $data[$key]['selected_emails'] = $emails_selected; 
 
-        //     }
-        // }
+
+            } else {
+
+                $data[$key] = $workspace; 
+                $data[$key]['selected_roles'] = []; 
+                $data[$key]['selected_subworkspaces'] = []; 
+                $data[$key]['selected_emails'] = []; 
+            }
+        }
 
         return compact('data', 'workspaces', 'emails', 'roles');
+    }
 
+    public function saveAdminData($data)
+    {
+        $user = $this;
+        
+        Bouncer::sync($user)->roles([]);
+
+        // $selected_emails = [];
+        $selected_subworkspaces = [];
+
+        $user->email_notifications()->sync([]);
+
+        foreach ($data['selected_workspaces'] as $key => $workspace) {
+
+            if ($workspace['selected_roles'] && $workspace['selected_subworkspaces']) {
+                
+                Bouncer::scope()->to($workspace['id']);
+                Bouncer::sync($user)->roles($workspace['selected_roles']);
+
+                $selected_subworkspaces = array_merge($selected_subworkspaces, $workspace['selected_subworkspaces']);
+
+                foreach ($workspace['selected_emails'] as $type_id) {
+                    $user->email_notifications()->attach($type_id, ['workspace_id' => $workspace['id']]);
+                }
+            } 
+        }
+        
+        $user->subworkspaces()->sync($selected_subworkspaces);
     }
 }

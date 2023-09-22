@@ -137,7 +137,7 @@
 
                             </v-container>
 
-                          <v-tab-item v-for="(workspace, i) in workspaces" :key="'wrkspc-role-' + workspace.id">
+                          <v-tab-item v-for="(workspace, i) in resource.selected_workspaces" :key="'wrkspc-role-' + workspace.id">
                             <v-card flat>
                               <v-card-text>
 
@@ -157,7 +157,7 @@
                                         </div>
                                     </v-col>
 
-                                    <v-col cols="11" class="--d-flex --justify-content-center --pt-0">
+                                    <v-col cols="11" class="">
 
                                         <p>
                                             Seleccione los módulos a los que tendrá acceso el administrador.    
@@ -167,7 +167,7 @@
                                             :rules="rules.subworkspaces"
                                             dense
                                             label="Módulos"
-                                            v-model="resource.subworkspaces"
+                                            v-model="workspace.selected_subworkspaces"
                                             :items="workspace.subworkspaces"
                                             item-text="name"
                                             item-value="id"
@@ -177,7 +177,7 @@
                                         />
                                     </v-col>
 
-                                    <v-col cols="11" class="--d-flex --justify-content-center --pt-0">
+                                    <v-col cols="11" class="">
 
                                         <p>
                                             Seleccione los roles que tendrá el administrador en este workspace.    
@@ -187,7 +187,7 @@
                                             :rules="rules.roles"
                                             dense
                                             label="Roles"
-                                            v-model="workspace.roles"
+                                            v-model="workspace.selected_roles"
                                             :items="roles"
                                             item-text="title"
                                             item-value="id"
@@ -197,18 +197,18 @@
                                         />
                                     </v-col>
 
-                                    <v-col cols="11" class="--d-flex --justify-content-center --pt-0">
+                                    <v-col cols="11" class="">
 
                                         <p>
                                             Seleccione los tipos de correo que se notificarán al administrador.
                                         </p>
 
                                         <DefaultAutocomplete
-                                            :rules="rules.roles"
+                                            :rules="rules.emails"
                                             dense
                                             label="Correos"
-                                            v-model="workspace.emails_information"
-                                            :items="emails_information"
+                                            v-model="workspace.selected_emails"
+                                            :items="emails"
                                             item-text="name"
                                             item-value="id"
                                             multiple
@@ -240,10 +240,10 @@
 
                 <v-row justify="center">
                     <v-col cols="6" class="d-flex justify-content-center align-items-center pt-0">
-                        <DefaultToggle v-model="resource.enable_2fa"  active-label="Two Factor Autentication habilitado" inactive-label="Two Factor Autentication deshabilitado" />
+                        <DefaultToggle v-model="resource.enable_2fa"  active-label="Two Factor Autentication habilitado" inactive-label="Two Factor Autentication deshabilitado" dense />
                     </v-col>
                     <v-col cols="6" class="d-flex justify-content-center align-items-center pt-0">
-                        <DefaultToggle v-model="resource.active"  active-label="Usuario activo" inactive-label="Usuario inactivo" />
+                        <DefaultToggle v-model="resource.active"  active-label="Usuario activo" inactive-label="Usuario inactivo" dense />
                     </v-col>
                 </v-row>
 
@@ -278,7 +278,7 @@ export default {
             errors: [],
             workspaces: [],
             roles: [],
-            emails_information: [],
+            emails: [],
             // sections: {
             //     showCriteria: false
             // },
@@ -295,7 +295,7 @@ export default {
                 enable_2fa: true,
                 workspaces: [],
                 roles: [],
-                emails_information: [],
+                emails: [],
             },
 
             resource: {},
@@ -434,7 +434,7 @@ export default {
 
                     vue.workspaces = data.data.workspaces;
                     vue.roles = data.data.roles;
-                    vue.emails_information = data.data.emails_information;
+                    vue.emails = data.data.emails;
 
                     if (resource) {
                         vue.resource = data.data.user;

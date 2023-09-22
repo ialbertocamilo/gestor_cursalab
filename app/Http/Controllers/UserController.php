@@ -79,41 +79,25 @@ class UserController extends Controller
      */
     public function store(AdminStoreRequest $request)
     {
-        //cambiar valor de name en el request
-        $data = $request->all();
-//        dd($data);
+        $data = $request->validated();
 
         $employee = Taxonomy::getFirstData('user', 'type', 'employee');
         $data['type_id'] = $employee->id;
 
         $user = User::create($data);
 
-        if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
-            foreach ($data['workspacessel'] as $wk => $val) {
-                if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {
-                    $roles = explode(',', $data['rolestowk'][$wk][0]);
-                    Bouncer::scope()->to($data['workspacessel'][$wk][0]);
-                    Bouncer::sync($user)->roles($roles);
-                }
-            }
-        }
-        EmailUser::storeUpdate($data,$user);
-        return redirect()->route('users.index')
-            ->with('info', 'Administrador guardado con éxito');
+        $user->saveAdminData($data);
+
+        return $this->success(['msg' => 'Administrador creado correctamente.']);
     }
 
     public function edit(User $user)
     {
-        $_workspaces = $user->getWorkspaces();
+        extract(User::getDataForAdminForm($user));
 
-        $workspaces = Workspace::with('subworkspaces')->where('parent_id', null)->get();
-        $roles = Role::where('name', '!=', 'super-user')->get();
-        
-        $emails_information = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
-        $emails_information_selected = $user->emails_user()->with('type:id,name')->get();
+        $user->selected_workspaces = $data;
 
-        // return $this->success(compact('_workspaces'));
-        return $this->success(compact('user', 'workspaces', 'roles', 'emails_information','emails_information_selected'));
+        return $this->success(compact('user', 'workspaces', 'roles', 'emails'));
     }
 
     /**
@@ -126,32 +110,21 @@ class UserController extends Controller
     public function update(AdminStoreRequest $request, User $user)
     {
         // 1. Actualizar el usuario
-        $data = $request->all();
+        $data = $request->validated();
 
-        dd($data);
+        // dd($data);
 
-        if (!is_null($request->password)) {
-            $data['password'] = $request->password;
-        } else {
-            unset($data['password']);
-        }
+        // if (!is_null($request->password)) {
+        //     $data['password'] = $request->password;
+        // } else {
+        //     unset($data['password']);
+        // }
+
         $user->update($data);
 
-        // 2. Actualizar roles
-        Bouncer::sync($user)->roles([]);
-        if (isset($data['workspacessel']) && is_array($data['workspacessel']) && count($data['workspacessel']) > 0) {
-            foreach ($data['workspacessel'] as $wk => $val) {
-                if (isset($data['rolestowk'][$wk]) && is_array($data['rolestowk'][$wk]) && count($data['rolestowk'][$wk]) > 0 && !is_null($data['rolestowk'][$wk][0])) {
-                    $roles = explode(',', $data['rolestowk'][$wk][0]);
-                    Bouncer::scope()->to($data['workspacessel'][$wk][0]);
-                    Bouncer::sync($user)->roles($roles);
-                }
-            }
-        }
-        //Actualizar envío de emails
-        EmailUser::storeUpdate($data,$user);
-        return redirect()->route('users.index')
-            ->with('info', 'Administrador actualizado con éxito');
+        $user->saveAdminData($data);
+
+        return $this->success(['msg' => 'Administrador actualizado correctamente.']);
     }
 
     /**

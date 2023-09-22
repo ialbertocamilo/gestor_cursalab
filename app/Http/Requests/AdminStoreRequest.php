@@ -61,10 +61,12 @@ class AdminStoreRequest extends FormRequest
             // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
+            'active' => 'required',
+            'enable_2fa' => 'required',
             // 'phone_number' => 'nullable',
             // 'person_number' => 'nullable',
 
-            'workspacessel' => 'nullable'
+            'selected_workspaces' => 'required'
         ];
 
         return $rules;
@@ -73,6 +75,7 @@ class AdminStoreRequest extends FormRequest
     public function validationData()
     {
         $this->mergeIfMissing(['active' => INACTIVE]);
+        $this->mergeIfMissing(['enable_2fa' => INACTIVE]);
 
         return $this->all();
     }
