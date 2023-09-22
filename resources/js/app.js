@@ -226,6 +226,7 @@ Vue.component("votacion-form-page", require("./layouts/Votaciones/VotacionesForm
 Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesListDetailPage.vue"));
 /*=== votaciones ===*/
 
+Vue.component("guest-layout", require("./layouts/Guest/GuestListPage.vue"));
 
 const app = new Vue({
     vuetify,

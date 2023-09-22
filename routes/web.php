@@ -195,4 +195,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
 
     Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
+
+    Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
+
 });
