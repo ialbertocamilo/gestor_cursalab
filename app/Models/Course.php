@@ -780,7 +780,7 @@ class Course extends BaseModel
         $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
         $status_projects = collect();
         if(count($projects)>0){
-            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name,code')->select('id','project_id','user_id','status_id')->get();
+            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name,code')->select('id','project_id','user_id','status_id','msg_to_user')->get();
         }
         $user->loadMissing('criterion_values.criterion.field_type');
 
@@ -810,6 +810,10 @@ class Course extends BaseModel
                     $project->status = $status_project?->status?->name ?? 'Pendiente';
                     $project->code = $status_project?->status?->code ?? 'pending';
                     $project->available = $course_status['available'];
+                    $project->show_message = false;
+                    if(in_array($project->code,['observed','disapproved','passed'])){
+                        $project->show_message = boolval($status_project->where('project_id',$project->id)->first()?->msg_to_user);
+                    }
                     unset($project->course_id);
                 }
                 // UC rule
