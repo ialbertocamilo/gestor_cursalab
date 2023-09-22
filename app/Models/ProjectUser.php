@@ -57,6 +57,7 @@ class ProjectUser extends Model
         if(count($projects)>0){
             $status_code = ($type=='pendiente') ? ['pending','in_review','observed'] : ['disapproved','passed'];
             $status =  self::getStatusCodes($status_code);
+            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->select('id','project_id','msg_to_user')->get();
 
             $usuario_tarea = self::whereIn('project_id',$projects->pluck('id'))
                             ->with(['status'=>function($q){
@@ -72,7 +73,10 @@ class ProjectUser extends Model
                     $project->code_status = $find_project_user->status->code;
                     $project->status = $find_project_user->status->name;
                 }
-                
+                $project->show_message = false;
+                if(in_array($project->code_status,['observed','disapproved','passed'])){
+                    $project->show_message = boolval($status_projects->where('project_id',$project->id)->first()?->msg_to_user);
+                }
                 in_array($project->code_status,$status_code) && ($response[]=$project);
             }
         }
