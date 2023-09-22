@@ -32,10 +32,13 @@ class ProjectUser extends Model
         $schools = collect();
         if(count($projects)>0){
             $projects->map(function($project) use ($schools){
-                $schools->push([
-                    'id'=>$project->course?->schools?->first()?->id,
-                    'name'=>$project->course?->schools?->first()?->name,
-                ]);
+                $school_id = $project->course?->schools?->first()?->id;
+                if(!$schools->where('id',$school_id)->first()){
+                    $schools->push([
+                        'id'=>$school_id,
+                        'name'=>$project->course?->schools?->first()?->name,
+                    ]);
+                }
                 unset($project->course);
                 return $project;
             });
@@ -46,7 +49,7 @@ class ProjectUser extends Model
                                     ->count();
             $data['count_pending'] = $projects->count() - $data['count_approved'];
         }
-        $data['schools'] = (array) $schools->unique('id')->all();
+        $data['schools'] = $schools->toArray();
         $data['recommendations'] = config('project.recommendations');
         return $data;
     }
