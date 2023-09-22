@@ -21,22 +21,57 @@
             :item-class="row_classes"
             :server-items-length="pagination.total_rows"
         >
-            <template v-for="h in dataTable.headers" v-slot:[`header.${h.value}`]="{ header }">
-                {{ h.text }}
-                <v-tooltip top attach v-if="h.tooltip">
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-icon
-                            small
-                            color="primary"
-                            dark
-                            v-bind="attrs"
-                            v-on="on"
-                            v-text="'mdi-information'"
-                            class="icon_tooltip"
-                        />
-                    </template>
-                    <span v-text="h.tooltip"/>
-                </v-tooltip>
+            <template v-for="(h,index) in dataTable.headers" v-slot:[`header.${h.value}`]="{  }">
+                <div v-if="h.value == 'custom-select'" class="d-flex justify-content-center aligns-items-center" :key="index">
+                    <v-checkbox
+                        color="primary"
+                        hide-details="false"
+                    ></v-checkbox>
+                    <v-menu
+                        v-model="menu_massive_actions"
+                        attach
+                        offset-x
+                        right
+                        nudge-bottom="10"
+                        min-width="auto"
+                    >
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                text
+                                icon
+                                v-bind="attrs"
+                                v-on="on"
+                            >
+                                <v-icon>mdi mdi-chevron-down</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list dense>
+                        <v-list-item
+                            v-for="(item, i) in massive_actions"
+                            :key="i"
+                            >
+                            <v-list-item-title>{{ item.title }}</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </div>
+                <div v-else>
+                    {{ h.text }}
+                    <v-tooltip top attach v-if="h.tooltip">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                small
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                v-text="'mdi-information'"
+                                class="icon_tooltip"
+                            />
+                        </template>
+                        <span v-text="h.tooltip"/>
+                    </v-tooltip>
+                </div>
             </template>
 
             <!-- VOTACIONES -->
@@ -757,7 +792,14 @@ export default {
             selectedRows: [],
             footerProps: {
                 'items-per-page-options': [10, 15, 20, 25, 30],
-            }
+            },
+            massive_actions: [
+                { title: 'Click Me' },
+                { title: 'Click Me' },
+                { title: 'Click Me' },
+                { title: 'Click Me 2' },
+            ],
+            menu_massive_actions:false
         }
         // ),
     },

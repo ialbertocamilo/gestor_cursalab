@@ -65,9 +65,13 @@
                     </v-row>
                 </v-card-text>
                 <!-- TABLE -->
-                <DefaultTable :ref="dataTable.ref" :data-table="dataTable" :filters="filters"
+                <DefaultTable 
+                    :ref="dataTable.ref" 
+                    :data-table="dataTable" 
+                    :filters="filters"
                     @download_all_files="download_all_files($event)"
-                    @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - Documento: ${$event.document}`)">
+                    @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - Documento: ${$event.document}`)"
+                >
                     <template v-slot:custom_slot="{ item }">
                         <div v-if="item.resources_user.length > 0" class="d-flex justify-center">
                             <span v-for="(resources_user, idx) in item.resources_user" :key="idx">
@@ -123,6 +127,7 @@ export default {
                 endpoint: '/projects/' + vue.project_id + '/users/search',
                 ref: 'UsuarioTareasTable',
                 headers: [
+                    { text: "custom-select", value: "custom-select", align: 'left', model: 'Categoria', sortable: false },
                     { text: "Módulo", value: "subworkspace", align: 'left', model: 'Categoria', sortable: false },
                     { text: "Nombres", value: "name", align: 'left', model: 'Categoria', sortable: false },
                     { text: "Apellidos", value: "lastname", align: 'left', sortable: false },
@@ -173,6 +178,7 @@ export default {
                 showCardActions: true,
             },
             open_advanced_filter: false,
+            selectedItems:[]
         }
     },
     mounted() {
@@ -257,6 +263,17 @@ export default {
                 } else {
                     this.filters.q_group_dnis = main_text;
                 }
+            }
+        },
+        selectionChange(rows) {
+            this.selectedItems = rows
+            console.log(rows);
+            // Update selection flag
+            if (this.selectedItems.length < this.totalCount) {
+                this.allSelected = false
+            }
+            if (this.selectedItems.length === this.totalCount) {
+                this.allSelected = true
             }
         }
     }
