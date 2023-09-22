@@ -81,8 +81,7 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        $employee = Taxonomy::getFirstData('user', 'type', 'employee');
-        $data['type_id'] = $employee->id;
+        $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
         $user = User::create($data);
 
@@ -109,19 +108,9 @@ class UserController extends Controller
      */
     public function update(AdminStoreRequest $request, User $user)
     {
-        // 1. Actualizar el usuario
         $data = $request->validated();
 
-        // dd($data);
-
-        // if (!is_null($request->password)) {
-        //     $data['password'] = $request->password;
-        // } else {
-        //     unset($data['password']);
-        // }
-
         $user->update($data);
-
         $user->saveAdminData($data);
 
         return $this->success(['msg' => 'Administrador actualizado correctamente.']);
@@ -137,6 +126,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return back()->with('info', 'Administrador eliminado Correctamente');
+        return $this->success(['msg' => 'Administrador eliminado correctamente.']);
     }
 }
