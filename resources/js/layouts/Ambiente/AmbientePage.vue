@@ -169,7 +169,7 @@
                                             />
                                         </v-col>
                                         <v-col cols="6">
-                                            <div class="d-flex flex-column">
+                                            <div class="d-flex flex-column text-center">
                                                 <span class="mb-1">Posición del formulario</span>
                                                 <div class="d-flex justify-content-between">
                                                     <!-- {{ resource.form_login_position }} -->
@@ -266,7 +266,7 @@
                                     />
                                 </v-col>
 
-                                <v-col cols="6">
+                                <!-- <v-col cols="6">
                                     <DefaultSelectOrUploadMultimedia 
                                         ref="inputMaleLogo" 
                                         v-model="resource.male_logo"
@@ -285,7 +285,7 @@
                                         :file-types="['image']"
                                         @onSelect="setFile($event, resource,'female_logo')"
                                     />
-                                </v-col>
+                                </v-col> -->
                             </v-row>
 
                             <v-row class="my-4">
@@ -354,7 +354,7 @@
                                     <div class="d-flex align-items-center">
                                         <span class="mr-3 mt-2">Mostrar botón de blog Cursalab</span>
                                         <div>
-                                            <DefaultToggle class="mt-0" v-model="resource.show_blog_btn" no-label/>
+                                            <DefaultToggle class="mt-0" v-model="resource.show_blog_btn" no-label dense/>
                                         </div>
                                     </div>
                                     <hr>
@@ -366,6 +366,13 @@
                                             placeholder="template-default" 
                                             label="Código de plantilla" 
                                         />
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex align-items-center">
+                                        <span class="mr-3 mt-2">Habilitar validación de identidad (usuarios documento-documento)</span>
+                                        <div>
+                                            <DefaultToggle class="mt-0" v-model="resource.identity_validation_enabled" no-label dense/>
+                                        </div>
                                     </div>
                                 </v-col>
                             </v-row>
@@ -435,14 +442,17 @@ const fields = [
     'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',
     'male_logo', 'female_logo',
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
-    'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo'
+    'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo',
+    'identity_validation_enabled',
 ];
 
 const file_fields = [
     //gestor
     'fondo', 'logo', 'icono', 'logo_empresa',
     //app
-    'fondo_app', 'logo_app', 'logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo', 'male_logo', 'female_logo'];
+    'fondo_app', 'logo_app', 'logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo',
+    // 'male_logo', 'female_logo'
+];
 
     export default {
         name: 'AmbientePage',
@@ -487,8 +497,8 @@ const file_fields = [
                 vue.removeFileFromDropzone(vue.resource.completed_courses_logo,'inputCompletedCoursesLogo');
                 vue.removeFileFromDropzone(vue.resource.enrolled_courses_logo,'inputEnrolledCoursesLogo');
                 vue.removeFileFromDropzone(vue.resource.diplomas_logo,'inputDiplomasLogo');
-                vue.removeFileFromDropzone(vue.resource.male_logo,'inputMaleLogo');
-                vue.removeFileFromDropzone(vue.resource.female_logo,'inputFemaleLogo');
+                // vue.removeFileFromDropzone(vue.resource.male_logo,'inputMaleLogo');
+                // vue.removeFileFromDropzone(vue.resource.female_logo,'inputFemaleLogo');
 
                 vue.is_superuser = false;
                 vue.resource.form_login_position = null;

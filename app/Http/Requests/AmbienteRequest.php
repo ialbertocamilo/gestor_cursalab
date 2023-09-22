@@ -49,6 +49,8 @@ class AmbienteRequest extends FormRequest
             'logo_female' => 'nullable',
             
             'template' => 'nullable',
+
+            'identity_validation_enabled' => 'nullable',
         ];
     }
     public function validationData(): array
@@ -58,6 +60,11 @@ class AmbienteRequest extends FormRequest
         if ($this->has('show_blog_btn') ) {
             $data['show_blog_btn'] = ($this->show_blog_btn == 'true' || 
                                        $this->show_blog_btn == 1 ) ? true : false;
+        }
+
+        if ($this->has('identity_validation_enabled') ) {
+            $data['identity_validation_enabled'] = ($this->identity_validation_enabled == 'true' || 
+                                       $this->identity_validation_enabled == 1 ) ? true : false;
         }
 
         return $this->merge($data)->all();

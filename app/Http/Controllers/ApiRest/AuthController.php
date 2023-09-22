@@ -34,6 +34,8 @@ class AuthController extends Controller
         }
 
         try {
+
+            $ambiente = Ambiente::first();
             $data = $request->validated();
 
             // === validacion de recaptcha ===
@@ -78,12 +80,15 @@ class AuthController extends Controller
                     return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
                 // === verificar el dni como password ===
-                if (trim($userinput) === $password) {
-                    $responseResetPass = [];
-                    Auth::user()->resetAttemptsUser(); // resetea intentos
+                if ($ambiente->identity_validation_enabled) {
 
-                    $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
-                    return response()->json($responseResetPass);
+                    if (trim($userinput) === $password) {
+                        $responseResetPass = [];
+                        Auth::user()->resetAttemptsUser(); // resetea intentos
+
+                        $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
+                        return response()->json($responseResetPass);
+                    }
                 }
                 // === verificar el dni como password ===
 
