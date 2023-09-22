@@ -1533,7 +1533,7 @@ class Course extends BaseModel
 
         // $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
         $media_topics = [];
-        if($last_topic_reviewed){
+        if(count($media_temas) && $last_topic_reviewed){
             $media_topics = $media_temas->where('topic_id',$last_topic_reviewed)->sortBy('position');
         }
 
