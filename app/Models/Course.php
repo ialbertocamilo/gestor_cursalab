@@ -1532,14 +1532,19 @@ class Course extends BaseModel
         $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
 
         // $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
-        $media_topics = $media_temas->where('topic_id',$last_topic_reviewed)->sortBy('position');
+        $media_topics = [];
+        if($last_topic_reviewed){
+            $media_topics = $media_temas->where('topic_id',$last_topic_reviewed)->sortBy('position');
+        }
 
         // $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
         // ->where('topic_id', $last_topic_reviewed)
         // ->where('user_id', $user->id)
         // ->first();
-
-        $summary_topic = $summary_topics->where('topic_id', $last_topic_reviewed)->first();
+        $summary_topic = null;
+        if($last_topic_reviewed){
+            $summary_topic = $summary_topics->where('topic_id', $last_topic_reviewed)->first();
+        }
 
         $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
 
