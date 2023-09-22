@@ -46,7 +46,7 @@ class ProjectUser extends Model
                                     ->count();
             $data['count_pending'] = $projects->count() - $data['count_approved'];
         }
-        $data['schools'] = $schools->unique('id')->toArray();
+        $data['schools'] = (array) $schools->unique('id')->all();
         $data['recommendations'] = config('project.recommendations');
         return $data;
     }
