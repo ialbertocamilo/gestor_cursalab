@@ -238,7 +238,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="center">
+                <v-row justify="center" class="mt-2">
                     <v-col cols="6" class="d-flex justify-content-center align-items-center pt-0">
                         <DefaultToggle v-model="resource.enable_2fa"  active-label="Two Factor Autentication habilitado" inactive-label="Two Factor Autentication deshabilitado" dense />
                     </v-col>
