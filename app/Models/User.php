@@ -1743,7 +1743,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 $data[$key] = $workspace; 
                 $data[$key]['selected_roles'] = $user->assigned_roles()->where('scope', $workspace->id)->pluck('role_id')->toArray(); 
-                $data[$key]['selected_subworkspaces'] = $user->subworkspaces->pluck('id')->toArray(); 
+                $data[$key]['selected_subworkspaces'] = $user->subworkspaces->where('parent_id', $workspace->id)->pluck('id')->toArray(); 
                 $data[$key]['selected_emails'] = $emails_selected; 
 
 
@@ -1765,7 +1765,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         
         Bouncer::sync($user)->roles([]);
 
-        // $selected_emails = [];
         $selected_subworkspaces = [];
 
         $user->email_notifications()->sync([]);
