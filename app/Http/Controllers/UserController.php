@@ -61,14 +61,11 @@ class UserController extends Controller
      */
     public function create()
     {
-        $workspaces = Workspace::with('subworkspaces:id,name')->where('parent_id', null)->get();
-        $roles = Role::where('name', '!=', 'super-user')->get();
-        
-        $emails_information = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
-        $emails_information_selected = '';
+        extract(User::getDataForAdminForm());
 
-        // return view('users.create', compact('roles', 'workspaces', 'emails_information', 'emails_information_selected'));
-        return $this->success(compact('workspaces', 'roles', 'emails_information', 'emails_information_selected'));
+        $user['selected_workspaces'] = $data;
+
+        return $this->success(compact('user', 'workspaces', 'roles', 'emails'));
     }
 
     /**

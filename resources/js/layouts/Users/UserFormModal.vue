@@ -38,7 +38,7 @@
                             clearable
                             dense
                             v-model="resource.lastname"
-                            label="Apellido Paterno*"
+                            label="Apellido paterno*"
                             :rules="rules.lastname"
                             placeholder="Ingrese un apellido"
                         />
@@ -48,7 +48,7 @@
                             clearable
                             dense
                             v-model="resource.surname"
-                            label="Apellido Materno"
+                            label="Apellido materno"
                             placeholder="Ingrese un apellido"
                             :rules="rules.surname"
                         />
@@ -436,11 +436,7 @@ export default {
                     vue.roles = data.data.roles;
                     vue.emails = data.data.emails;
 
-                    if (resource) {
-                        vue.resource = data.data.user;
-                    }
-
-                    // return 0;
+                    vue.resource = data.data.user;
                 })
         },
         loadSelects() {
@@ -451,91 +447,27 @@ export default {
 }
 </script>
 <style lang="scss">
-.header_inf {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-.header_inf span {
-    color: #434D56;
-    font-family: "Nunito", sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-}
-// span.lbl_mas_cri {
+// .header_inf {
+//     display: flex;
+//     justify-content: space-between;
+//     width: 100%;
+// }
+// .header_inf span {
+//     color: #434D56;
 //     font-family: "Nunito", sans-serif;
 //     font-size: 13px;
 //     font-weight: 400;
+// }
+
+// .separated hr.v-divider {
+//     // border-color: #94DDDB !important;
+//     margin-top: 1px !important;
+// }
+// .cg {
 //     color: #434D56;
-// }
-// .rem-m .v-input.default-toggle {
-//     margin-top: 0 !important;
-//     width: 100%;
-// }
-// .lbl_error_cri{
-//     color: #FF5252;
 //     font-family: "Nunito", sans-serif;
+//     font-size: 14px;
 //     font-weight: 700;
-//     font-size: 13px;
 // }
-// .v-application .error--text .v-text-field__details {
-//     display: none;
-// }
-.separated hr.v-divider {
-    // border-color: #94DDDB !important;
-    margin-top: 1px !important;
-}
-.cg {
-    color: #434D56;
-    font-family: "Nunito", sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-}
-// .v-dialog .v-text-field .v-input__control,
-// .v-dialog .v-text-field .v-input__slot,
-// .v-dialog .v-text-field fieldset{
-//     border-radius: 10px;
-//     border-color: #D9D9D9;
-// }
-// .v-dialog .v-input .v-label {
-//     font-family: "Nunito", sans-serif;
-//     font-size: 14px;
-// }
-// .v-dialog .theme--light.v-input,
-// .v-dialog .theme--light.v-input input,
-// .v-dialog .theme--light.v-input textarea {
-//     font-family: "Nunito", sans-serif;
-//     font-size: 14px;
-// }
-// // .v-dialog.v-dialog--active.v-dialog--scrollable .v-card__actions {
-// //     border-color: #94DDDB !important;
-// // }
-// .v-dialog button.v-icon.notranslate.v-icon--link.mdi.mdi-close.theme--light {
-//     font-size: 18px;
-// }
-// .v-dialog .v-card__title.default-dialog-title ::-webkit-scrollbar-thumb {
-//     background-color: #7DDBD8E5 !important;
-// }
-// .v-dialog .v-text-field--filled>.v-input__control>.v-input__slot,
-// .v-dialog .v-text-field--full-width>.v-input__control>.v-input__slot,
-// .v-dialog .v-text-field--outlined>.v-input__control>.v-input__slot {
-//     min-height: 50px;
-// }
-// .v-dialog .v-text-field--outlined .v-label {
-//     top: 16px;
-// }
-// .v-dialog .v-list-item .v-list-item__subtitle,
-// .v-dialog .v-list-item .v-list-item__title {
-//     font-family: "Nunito", sans-serif;
-//     font-size: 13px;
-// }
-// .v-dialog .v-text-field--outlined .v-label--active {
-//     color: #434D56 !important;
-// }
-// .v-dialog .v-text-field.error--text fieldset {
-//     border-color: #ff5252;
-// }
-// .v-text-field--enclosed .v-input__append-inner button.v-icon.mdi.mdi-close{
-//     top: -3px;
-// }
+
 </style>

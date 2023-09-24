@@ -1729,7 +1729,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $user ?? [];
 
-        $workspaces = Workspace::with('subworkspaces:id,name,parent_id')->select('id', 'name', 'parent_id', 'logo', 'slug')->where('parent_id', null)->get();
+        $workspaces = Workspace::with('subworkspaces:id,name,parent_id')
+                        ->select('id', 'name', 'parent_id', 'logo', 'slug')
+                        ->where('parent_id', null)->get();
         $emails = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
         $roles = Role::where('name', '!=', 'super-user')->get();
 
