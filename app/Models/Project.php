@@ -117,6 +117,15 @@ class Project extends BaseModel
     }
     protected function storeUpdateRequest($request, $project = null){
         // try {
+            if($request->hasFile('files')){
+                $still_has_storage = Media::validateStorageByWorkspace($request->file('files'));
+                if(!$still_has_storage){
+                    return [
+                        'msg'=>' Has superado la capacidad de almacenamiento dentro de la plataforma.',
+                        'still_has_storage'=>false
+                    ];
+                }
+            }
             $request_project = $request->project;
             DB::beginTransaction();
             if (!$project) {
@@ -126,9 +135,14 @@ class Project extends BaseModel
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
             $project->save();
-
+            //Verificar espacio del storage:
+            
             ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);  
             DB::commit();
+            return [
+                'msg'=>'La tarea se ha creado correctamente',
+                'still_has_storage'=>true
+            ];
         // } catch (\Exception $e) {
         //     DB::rollBack();
         //     return $e;

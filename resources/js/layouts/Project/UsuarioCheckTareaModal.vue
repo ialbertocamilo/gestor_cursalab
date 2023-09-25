@@ -21,6 +21,7 @@
                             :items="selects.status"
                             :rules="rules.estado"
                             @onChange="setDescription"
+                            :loading="isSelectLoading"
                         />
                     </v-col>
                     <v-col cols="12">
@@ -58,7 +59,8 @@ export default {
             rules: {
                 estado:this.getRules(["required"]),
                 msg_to_user: this.getRules(['only_max:255']),
-            }
+            },
+            isSelectLoading:false
         };
     },
     methods: {
@@ -98,11 +100,13 @@ export default {
             vue.project_user_id = project_user_id;
             vue.project_user.msg_to_user = msg_to_user; 
         },
-        loadSelects() {
+        async loadSelects() {
             let vue = this;
-            axios.get('/projects/users/status-list/select').then(({data})=>{
+            vue.isSelectLoading = true;
+            await axios.get('/projects/users/status-list/select').then(({data})=>{
                 vue.selects.status = data.data;
                 (vue.project_user.status_id) && vue.setDescription(vue.project_user.status_id);
+                vue.isSelectLoading = false;
             }) 
         },
         setDescription(val){

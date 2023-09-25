@@ -25,6 +25,7 @@ class ProjectUserSearchResource extends JsonResource
         return [
             'subworkspace'=>$this->subworkspace->name,
             'name'=>$this->name,
+            'user_id'=>$this->id,
             'lastname'=>$this->lastname.' '.$this->sourname,
             'document'=>$this->document,
             'status_project' => isset($this->projects[0]->status) ? $this->projects[0]->status->name : 'Pendiente',

@@ -1,62 +1,97 @@
 <template>
-    <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirmModal">
-        <template v-slot:content>
-            <v-form ref="projectForm">
-                <p>Las tareas serán asignados a todos los usuarios segmentados en el curso.</p>
-                <v-row justify="space-around">
-                    <v-col cols="12">
-                        <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"
-                            no-data-text="No hay datos para mostrar." label="Curso"
-                            item-value='id' item-text='name' :rules="rules.required" :search-input.sync="search"
-                            :loading="isLoading" 
-                            :disabled="isLoading || options.action === 'edit' || options.create_from_course_list"
-                        />
-                    </v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultTextArea label="Indicaciones" placeholder="Indicaciones (Opcional)"
-                            v-model="resource.indications" />
-                    </v-col>
-                </v-row>
-                <div class="d-flex justify-space-between align-center my-4">
-                    <p class="p-0 m-0 text-bold">Lista de Recursos</p>
-                    <div>
-                        <v-btn class="mt-1 ml-1" color="primary" elevation="0" outlined
-                            :disabled="resources.length >= constraints.max_quantity_upload_files"
-                            @click="openSelectPreviewMultimediaModal">
-                            Multimedia
-                        </v-btn>
-                        <v-btn class="mt-1 ml-1" color="primary" elevation="0" outlined
-                            :disabled="resources.length >= constraints.max_quantity_upload_files" @click="openFileInput">
-                            Escritorio
-                        </v-btn>
-                        <input ref="uploader_input_file" class="d-none" type="file" @change="subirArchivo">
-                    </div>
-                </div>
-                <span>Añade una lista de recursos para que los usuarios puedan descargar. Peso máximo
-                    {{ constraints.max_size_upload_files }} MB</span>
-                <v-row class="mt-4">
-                    <ul style="width: 100%;">
-                        <div class="d-flex justify-space-between" v-for="(resource, index) in resources" :key="index">
-                            <li v-text="getTitle(resource)"></li>
-                            <v-icon @click="deleteResource(index)">mdi mdi-close</v-icon>
+    <div>
+        <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirmModal">
+            <template v-slot:content>
+                <v-form ref="projectForm">
+                    <p>Las tareas serán asignados a todos los usuarios segmentados en el curso.</p>
+                    <v-row justify="space-around">
+                        <v-col cols="12">
+                            <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"
+                                no-data-text="No hay datos para mostrar." label="Curso"
+                                item-value='id' item-text='name' :rules="rules.required" :search-input.sync="search"
+                                :loading="isLoading" 
+                                :disabled="isLoading || options.action === 'edit' || options.create_from_course_list"
+                            />
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12">
+                            <DefaultTextArea label="Indicaciones" placeholder="Indicaciones (Opcional)"
+                                v-model="resource.indications" />
+                        </v-col>
+                    </v-row>
+                    <div class="d-flex justify-space-between align-center my-4">
+                        <p class="p-0 m-0 text-bold">Lista de Recursos</p>
+                        <div>
+                            <v-btn class="mt-1 ml-1" color="primary" elevation="0" outlined
+                                :disabled="resources.length >= constraints.max_quantity_upload_files"
+                                @click="openSelectPreviewMultimediaModal">
+                                Multimedia
+                            </v-btn>
+                            <v-btn class="mt-1 ml-1" color="primary" elevation="0" outlined
+                                :disabled="resources.length >= constraints.max_quantity_upload_files" @click="openFileInput">
+                                Escritorio
+                            </v-btn>
+                            <input ref="uploader_input_file" class="d-none" type="file" @change="subirArchivo">
                         </div>
-                    </ul>
-                </v-row>
-            </v-form>
-            <SelectMultimedia :ref="modalPreviewMultimedia.ref" :options="modalPreviewMultimedia" :custom-filter="[]"
-                width="85vw" @onClose="closeSelectPreviewMultimediaModal" @onConfirm="onSelectMediaPreview" />
-        </template>
-    </DefaultDialog>
+                    </div>
+                    <span>Añade una lista de recursos para que los usuarios puedan descargar. Peso máximo
+                        {{ constraints.max_size_upload_files }} MB</span>
+                    <v-row class="mt-4">
+                        <ul style="width: 100%;">
+                            <div class="d-flex justify-space-between" v-for="(resource, index) in resources" :key="index">
+                                <li v-text="getTitle(resource)"></li>
+                                <v-icon @click="deleteResource(index)">mdi mdi-close</v-icon>
+                            </div>
+                        </ul>
+                    </v-row>
+                </v-form>
+                <SelectMultimedia :ref="modalPreviewMultimedia.ref" :options="modalPreviewMultimedia" :custom-filter="[]"
+                    width="85vw" @onClose="closeSelectPreviewMultimediaModal" @onConfirm="onSelectMediaPreview" />
+            </template>
+        </DefaultDialog>
+        <!-- === MODAL ALERT STORAGE === -->
+        <GeneralStorageModal
+            :ref="modalGeneralStorageOptions.ref"
+            :options="modalGeneralStorageOptions"
+            width="45vw"
+            @onCancel="closeFormModal(modalGeneralStorageOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <!-- MODAL ALMACENAMIENTO -->
+
+        <!-- MODAL EMAIL ENVIADO -->
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
+        <!-- MODAL EMAIL ENVIADO -->
+
+        <!-- === MODAL ALERT STORAGE === -->
+        <DefaultStorageAlertModal
+            :ref="modalAlertStorageOptions.ref"
+            :options="modalAlertStorageOptions"
+            width="25vw"
+            @onCancel="closeFormModal(modalAlertStorageOptions)"
+            @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'), 
+                        closeFormModal(modalAlertStorageOptions)"
+        />
+    </div>
 </template>
 
 <script>
 import SelectMultimedia from '../../components/forms/SelectMultimedia.vue'
 
+import DefaultStorageAlertModal from '../Default/DefaultStorageAlertModal.vue';
+import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
+import GeneralStorageModal from '../General/GeneralStorageModal.vue';
 
 export default {
-    components: { SelectMultimedia },
+    components: { SelectMultimedia,DefaultStorageAlertModal,GeneralStorageEmailSendModal,GeneralStorageModal },
     props: {
         options: {
             type: Object,
@@ -105,6 +140,30 @@ export default {
                 max_size_upload_files: 25,
             },
             fileSelected: null,
+            modalAlertStorageOptions: {
+                ref: 'AlertStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Solicitar',
+                persistent: true,
+            },
+            modalGeneralStorageOptions: {
+                ref: 'GeneralStorageModal',
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: '/general',
+                confirmLabel:'Enviar',
+                persistent: true
+            },
+            modalGeneralStorageEmailSendOptions: {
+                ref: 'GeneralStorageEmailSendModal',
+                open: false,
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                confirmLabel:'Entendido',
+                persistent: false
+            },
         };
     },
     watch: {
@@ -154,6 +213,11 @@ export default {
                     .post(url, formData)
                     .then(({ data }) => {
 
+                        if(!data.data.still_has_storage){
+                            vue.showAlert(data.data.msg,'warning')
+                            vue.openFormModal(vue.modalAlertStorageOptions, null, null, 'Alerta de almacenamiento');
+                            return ''; 
+                        }
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')

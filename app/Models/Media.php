@@ -6,13 +6,14 @@ use ZipArchive;
 use Aws\S3\S3Client;
 use Illuminate\Support\Str;
 use App\Services\FileService;
+use App\Services\DashboardService;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Mime\MimeTypes;
 
+use Symfony\Component\Mime\MimeTypes;
 use Illuminate\Support\Facades\Storage;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Routing\UrlGenerator;
 
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Foundation\Application;
 use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
 
@@ -333,6 +334,24 @@ class Media extends BaseModel
         return $path;
     }
 
+    protected function validateStorageByWorkspace($files){
+        $workspace = get_current_workspace();
+        $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
+        $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
+
+        // === workspace storage actual ===
+        $total_current_storage = $workspace_current_storage;
+        foreach ($files as $file) {
+            $total_current_storage += round($file->getSize() / 1024);
+        }
+        $total_current_storage = formatSize($total_current_storage, parsed:false);
+        // === workspace storage actual ===
+
+        $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
+        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' && 
+                                $total_current_storage['size'] <= $total_storage_limit);
+        return  $still_has_storage;
+    }
     protected function extractZipToTempFolder($file, $temp_path)
     {
         $zip = new ZipArchive();

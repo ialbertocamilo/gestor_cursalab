@@ -71,6 +71,7 @@
                     :filters="filters"
                     @download_all_files="download_all_files($event)"
                     @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - Documento: ${$event.document}`)"
+                    @openModalDeleteFiles="openModalDeleteFiles"
                 >
                     <template v-slot:custom_slot="{ item }">
                         <div v-if="item.resources_user.length > 0" class="d-flex justify-center">
@@ -100,6 +101,16 @@
             @onConfirm="closeFormModal(modalUsuarioCheckTarea, dataTable, filters),refreshDefaultTable(dataTable, filters)"
             @onCancel="closeFormModal(modalUsuarioCheckTarea)"
         />
+        <DialogConfirm
+            v-model="deleteFilesConfirmationDialog.open"
+            width="270px"
+            title="Eliminar archivos"
+            txt_btn_confirm="Cancelar"
+            txt_btn_cancel="Confirmar"
+            :subtitle="deleteFilesConfirmationDialog.subtitle"
+            @onConfirm="deleteFilesConfirmationDialog.open = false"
+            @onCancel="deleteFilesConfirmationDialog.open = false,deleteFiles()"
+        />
     </div>
 </template>
 
@@ -108,8 +119,9 @@
 
 import UsuarioResourceModal from './UsuarioResourceModal.vue';
 import UsuarioCheckTareaModal from './UsuarioCheckTareaModal.vue'
+import DialogConfirm from '../../components/basicos/DialogConfirm.vue'
 export default {
-    components: { UsuarioResourceModal, UsuarioCheckTareaModal},
+    components: { UsuarioResourceModal, UsuarioCheckTareaModal, DialogConfirm},
     props: ['project_id', 'course_name'],
     data() {
         let vue = this
@@ -136,6 +148,9 @@ export default {
                     { text: "Tareas Cargados", value: "custom_slot", align: 'center', sortable: false },
                     { text: "Opciones", value: "actions", align: 'center', sortable: false },
                 ],
+                customSelectActions:[
+                    {text:'Archivos eliminados',method_name:'openModalDeleteFiles'}
+                ],
                 actions: [
                     {
                         text: "Descarga",
@@ -152,7 +167,7 @@ export default {
                         show_condition: 'has_resource'
                     },
                 ],
-                more_actions: []
+                more_actions: [],
             },
             filters: {
                 q: '',
@@ -177,8 +192,15 @@ export default {
                 width: '30vw',
                 showCardActions: true,
             },
+            deleteFilesConfirmationDialog: {
+                open: false,
+                title_modal: 'Archivos eliminados',
+                subtitle:'Estás a punto eliminar x archivos de',
+                content_modal :''
+            },
             open_advanced_filter: false,
-            selectedItems:[]
+            selectedItems:[],
+            user_resources_to_delete:[]
         }
     },
     mounted() {
@@ -275,6 +297,22 @@ export default {
             if (this.selectedItems.length === this.totalCount) {
                 this.allSelected = true
             }
+        },
+        openModalDeleteFiles(users){
+            let vue = this;
+            vue.user_resources_to_delete = users;
+            if(users.length>0){
+                let quantity_resources = 0;
+                users.forEach(user => quantity_resources  += user.resources_user.length);
+                vue.deleteFilesConfirmationDialog.subtitle = `Estás a punto eliminar ${quantity_resources} archivo(s) de ${users.length} usuario(s) seleccionado(s). ¿Estás seguro de hacerlo?`;
+                vue.openSimpleModal(vue.deleteFilesConfirmationDialog);
+            }
+        },
+        async deleteFiles(){
+            let vue = this;
+            await vue.$http.get('/projects/users/delete-files',vue.user_resources_to_delete).then(({ data }) => {
+                vue.showAlert('Los archivos han sido eliminados.', 'success', '')
+            })
         }
     }
 

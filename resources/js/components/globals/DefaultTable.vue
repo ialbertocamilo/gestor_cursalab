@@ -22,10 +22,12 @@
             :server-items-length="pagination.total_rows"
         >
             <template v-for="(h,index) in dataTable.headers" v-slot:[`header.${h.value}`]="{  }">
-                <div v-if="h.value == 'custom-select'" class="d-flex justify-content-center aligns-items-center" :key="index">
+                <div v-if="h.value == 'custom-select'" class="d-flex align-items-center" style="width: 20px;" :key="index">
                     <v-checkbox
                         color="primary"
                         hide-details="false"
+                        v-model="all_check_select"
+                        @click="checkOrUncheckAllItems()"
                     ></v-checkbox>
                     <v-menu
                         v-model="menu_massive_actions"
@@ -46,11 +48,16 @@
                             </v-btn>
                         </template>
                         <v-list dense>
-                        <v-list-item
-                            v-for="(item, i) in massive_actions"
-                            :key="i"
+                            <v-list-item
+                                v-for="(item, i) in dataTable.customSelectActions"
+                                :key="i"
                             >
-                            <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                <v-list-item-title 
+                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))" 
+                                    style="cursor: pointer;"
+                                >
+                                    {{ item.text }}
+                                </v-list-item-title>
                             </v-list-item>
                         </v-list>
                     </v-menu>
@@ -329,7 +336,15 @@
                 </div>
             </template>
 
-
+            <template v-slot:item.custom-select="{item,header,index}">
+                {{index}}
+                <v-checkbox
+                    color="primary"
+                    hide-details="false"
+                    v-model="item.selected"
+                >
+                </v-checkbox>
+            </template>
             <!--   CUSTOM COLUMNS -->
 
             <template v-slot:item.status_meeting="{ item, header }">
@@ -793,13 +808,8 @@ export default {
             footerProps: {
                 'items-per-page-options': [10, 15, 20, 25, 30],
             },
-            massive_actions: [
-                { title: 'Click Me' },
-                { title: 'Click Me' },
-                { title: 'Click Me' },
-                { title: 'Click Me 2' },
-            ],
-            menu_massive_actions:false
+            menu_massive_actions:false,
+            all_check_select:false,
         }
         // ),
     },
@@ -889,6 +899,7 @@ export default {
             url += filters
             this.$http.get(url)
                 .then(({data}) => {
+                    data.data.data.forEach(e => e.selected=false);
                     vue.rows = data.data.data
 
                     // if (vue.filters !== "")
@@ -899,7 +910,7 @@ export default {
                     vue.pagination.fromRow = data.data.from || 0;
                     vue.pagination.toRow = data.data.to || 0;
                     vue.pagination.total_rows = data.data.total;
-                    vue.loading = false
+                    vue.loading = false;
                 })
         },
         changePage(sum) {
@@ -1011,6 +1022,10 @@ export default {
         addSpeaker( item ) {
             let vue = this
             vue.$emit('addSpeaker', item)
+        },
+        checkOrUncheckAllItems(){
+            let vue = this;
+            vue.rows.forEach(item => (item.selected = vue.all_check_select));
         }
     }
 }

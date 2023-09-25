@@ -15,12 +15,12 @@ class ProjectController extends Controller
         return $this->success($projects);
     }
     public function store(ProjectStoreRequest $request){
-        Project::storeUpdateRequest($request);
-        return $this->success(['msg'=>'La tarea se creó correctamente.']);
+        $data = Project::storeUpdateRequest($request);
+        return $this->success($data);
     }
     public function update(ProjectStoreRequest $request,Project $project){
-        Project::storeUpdateRequest($request,$project);
-        return $this->success(['msg'=>'La tarea se actualizó correctamente.']);
+        $data = Project::storeUpdateRequest($request,$project);
+        return $this->success($data);
     }
 
     public function editProject(Project $project){
