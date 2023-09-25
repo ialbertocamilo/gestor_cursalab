@@ -336,6 +336,13 @@
                                       v-model="resource.show_certification_to_user"/>
                                 </div>
 
+                                <div class="p-3 mt-3">
+                                  <DefaultToggle
+                                      :active-label="'Confirmación para habilitarles el diploma a los usuarios donde acepten haber culminado satisfactoriamente el curso.'"
+                                      :inactive-label="'Confirmación para habilitarles el diploma a los usuarios donde acepten haber culminado satisfactoriamente el curso.'"
+                                      v-model="resource.user_confirms_certificate"/>
+                                </div>
+
                                 <!--                                    <DiplomaSelector-->
                                 <!--                                        v-if="resource.show_certification_to_user"-->
                                 <!--                                        v-model="resource.certificate_template_id"/>-->
@@ -400,7 +407,7 @@ const fields = [
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
-    'activate_at', 'deactivate_at', 'show_certification_to_user'
+    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -451,6 +458,7 @@ export default {
                 show_certification_date: false,
                 qualification_type: {position: 0},
                 show_certification_to_user: null,
+                user_confirms_certificate: 1,
 
                 activate_at: null,
                 deactivate_at: null,

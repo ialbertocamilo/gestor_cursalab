@@ -14,7 +14,7 @@ class Course extends BaseModel
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
-        'activate_at', 'deactivate_at'
+        'activate_at', 'deactivate_at', 'user_confirms_certificate'
     ];
 
     protected $casts = [

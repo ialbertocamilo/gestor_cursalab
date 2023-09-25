@@ -176,7 +176,7 @@ class RestCourseController extends Controller
                     'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
                     'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                     'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
-
+                    'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
                     'compatible' => null,
                 ];
 
@@ -199,7 +199,7 @@ class RestCourseController extends Controller
                         'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
                         'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
                         'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
-
+                        'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
                         'compatible' => [
                             'course_id' => $compatible_certificate->course->id,
                             'name' => $compatible_certificate->course->name,
