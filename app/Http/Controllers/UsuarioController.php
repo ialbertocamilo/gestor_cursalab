@@ -235,6 +235,7 @@ class UsuarioController extends Controller
                 'field_type:id,code'
             ])
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
+            ->where('code','<>','document')
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required','field_id')
             ->orderBy('position')
             ->get();
