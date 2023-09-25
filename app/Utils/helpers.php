@@ -275,6 +275,29 @@ function get_current_workspace_indexes(string $key = NULL)
     return is_bool($stateKey) ? $dynamicKeys : $stateKey;
 }
 
+function get_current_subworkspaces()
+{
+    $workspace = get_current_workspace();
+    $subworkspaces = [];
+
+    if ($workspace) {
+        $subworkspaces = auth()->user()->subworkspaces()->where('parent_id', $workspace->id)->get();
+    }
+
+    return $subworkspaces;
+}
+
+function current_subworkspaces_id()
+{
+    $subworkspaces = get_current_subworkspaces();
+
+    if ($subworkspaces) {
+        return $subworkspaces->pluck('id')->toarray();
+    }
+
+    return [];
+}
+
 function cache_clear_model($model)
 {
     \Artisan::call('modelCache:clear', array('--model' => $model));

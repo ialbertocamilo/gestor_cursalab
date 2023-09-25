@@ -178,6 +178,11 @@ class Course extends BaseModel
                 $q->where('id', $module_value);
             });
 
+        } else {
+
+            $q->whereHas('schools.subworkspaces', function ($q) {
+                $q->whereIn('id', current_subworkspaces_id());
+            });
         }
 
         if ($request->q)

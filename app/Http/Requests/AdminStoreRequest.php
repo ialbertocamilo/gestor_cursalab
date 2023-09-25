@@ -54,11 +54,12 @@ class AdminStoreRequest extends FormRequest
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
+            // 'document' => 'nullable|max:255',
             // 'password' => "{$pass}|max:255",
             'password' => $passwordRules,
 
             'email_gestor' => "required|email|max:255|unique:users,email_gestor,{$id},id,deleted_at,NULL",
-            // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
+            'document' => "nullable|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
             'active' => 'required',

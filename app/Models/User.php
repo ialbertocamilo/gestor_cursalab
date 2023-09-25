@@ -720,11 +720,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->workspace_id)
             $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
 
-        if ($request->subworkspace_id)
-            $query->where('subworkspace_id', $request->subworkspace_id);
+        if ($request->subworkspace_id) {
 
-        if ($request->sub_workspaces_id)
-            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+            $query->where('subworkspace_id', $request->subworkspace_id);
+        } else {
+
+            if ($request->sub_workspaces_id) {
+                $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+            } else {
+                $query->whereIn('subworkspace_id', current_subworkspaces_id());
+            }
+        }
+
 
         if ($withAdvancedFilters):
             $workspace = get_current_workspace();

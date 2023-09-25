@@ -106,8 +106,9 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
-        $workspace = get_current_workspace()->fresh();
-        $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
+        // $workspace = get_current_workspace()->fresh();
+        // $sub_workspaces_id = $workspace?->subworkspaces?->pluck('id');
+        $sub_workspaces_id = current_subworkspaces_id();
 
         $request->merge(['sub_workspaces_id' => $sub_workspaces_id, 'superuser' => auth()->user()->isA('super-user')]);
 
@@ -123,6 +124,7 @@ class UsuarioController extends Controller
         $workspace = get_current_workspace();
 
         $sub_workspaces = Workspace::where('parent_id', $workspace?->id)
+            ->whereIn('id', current_subworkspaces_id())
             ->select('id', 'name')->get();
 
         $criteria_workspace = Criterion::select('id', 'name', 'field_id', 'code', 'multiple')

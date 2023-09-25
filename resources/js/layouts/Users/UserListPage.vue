@@ -215,18 +215,19 @@ export default {
                     
                 ],
                 more_actions: [
+                    // {
+                    //     text: "Restaurar contraseña",
+                    //     icon: 'fa fa-key',
+                    //     type: 'action',
+                    //     method_name: 'reset_password'
+                    // },
                     {
-                        text: "Restaurar contraseña",
-                        icon: 'fa fa-key',
-                        type: 'action',
-                        method_name: 'reset_password'
-                    },
-                    {
-                        text: "Acceder como usuario",
+                        text: "Acceder como administrador",
                         icon: 'fa fa-user',
-                        type: 'action',
+                        type: 'route',
                         // show_condition: "is_super_user",
-                        method_name: 'impersonate_user'
+                        method_name: 'impersonate_user',
+                        route: 'impersonate_user_route',
                     },
                     {
                         text: "Logs",

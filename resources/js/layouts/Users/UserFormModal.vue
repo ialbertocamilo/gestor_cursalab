@@ -14,7 +14,7 @@
                     <v-col cols="12" class="d-flex justify-content-between pb-0">
                         <div class="header_inf">
                             <strong class="cg">Información personal</strong>
-                            <span>*Datos obligatorios</span>
+                            <!-- <span>*Datos obligatorios</span> -->
                         </div>
                     </v-col>
                     <v-col cols="12" class="py-0 separated">
@@ -71,7 +71,7 @@
                             clearable
                             dense
                             v-model="resource.document"
-                            label="Identificador"
+                            label="Documento de identidad"
                             autocomplete="new-document"
                             :rules="rules.document"
                         />
@@ -126,10 +126,10 @@
                                 class="overflow-y-auto py-0 px-1"
                                 style="min-height: 380px; max-height: 400px"
                             >
-                                <v-tab v-for="workspace in workspaces" :key="'wrkspc-tab-' + workspace.id">
+                                <v-tab v-for="workspace in resource.selected_workspaces" :key="'wrkspc-tab-' + workspace.id">
 
                                     <v-icon left>
-                                        fas fa-th-large
+                                        {{ workspace.selected_subworkspaces.length && workspace.selected_roles.length ? 'mdi mdi-checkbox-outline' : 'mdi mdi-checkbox-blank-outline'}}
                                     </v-icon>
 
                                     {{ workspace.name }}
@@ -153,34 +153,14 @@
                                         />
 
                                         <div v-if="!workspace.logo_is_loaded" >
-                                            <h5>{{ workspace.name }}</h5>
+                                            <h5 class="font-weight-bold">{{ workspace.name }}</h5>
                                         </div>
                                     </v-col>
-
+                                   
                                     <v-col cols="11" class="">
 
                                         <p>
-                                            Seleccione los módulos a los que tendrá acceso el administrador.    
-                                        </p>
-
-                                        <DefaultAutocomplete
-                                            :rules="rules.subworkspaces"
-                                            dense
-                                            label="Módulos"
-                                            v-model="workspace.selected_subworkspaces"
-                                            :items="workspace.subworkspaces"
-                                            item-text="name"
-                                            item-value="id"
-                                            multiple
-                                            :show-select-all="false"
-                                            :count-show-values="3"
-                                        />
-                                    </v-col>
-
-                                    <v-col cols="11" class="">
-
-                                        <p>
-                                            Seleccione los roles que tendrá el administrador en este workspace.    
+                                            Selecciona los roles que tendrá el administrador en este workspace *
                                         </p>
 
                                         <DefaultAutocomplete
@@ -200,7 +180,27 @@
                                     <v-col cols="11" class="">
 
                                         <p>
-                                            Seleccione los tipos de correo que se notificarán al administrador.
+                                            Selecciona los módulos a los que tendrá acceso el administrador *
+                                        </p>
+
+                                        <DefaultAutocomplete
+                                            :rules="rules.subworkspaces"
+                                            dense
+                                            label="Módulos"
+                                            v-model="workspace.selected_subworkspaces"
+                                            :items="workspace.subworkspaces"
+                                            item-text="name"
+                                            item-value="id"
+                                            multiple
+                                            :show-select-all="false"
+                                            :count-show-values="3"
+                                        />
+                                    </v-col>
+
+                                    <v-col cols="11" class="">
+
+                                        <p>
+                                            Selecciona los tipos de correo que recibirá el administrador
                                         </p>
 
                                         <DefaultAutocomplete

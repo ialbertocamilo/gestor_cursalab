@@ -413,12 +413,10 @@ class Workspace extends BaseModel
 
         $query->whereNotNull('parent_id');
 
-        // info('workspace');
-
-        // info(session('workspace'));
-
         if (session('workspace') || $request->workspace_id)
             $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
+
+        $query->whereIn('id', current_subworkspaces_id());
 
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");

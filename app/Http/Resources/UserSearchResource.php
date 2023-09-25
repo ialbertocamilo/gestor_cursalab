@@ -21,9 +21,9 @@ class UserSearchResource extends JsonResource
             'document' => $this->document ?? 'Sin documento',
             'active' => $this->active,
      
-            // 'reporte_route' => route('exportar.node', ['dni' => $this->document]),
             'is_super_user' => auth()->user()->isAn('super-user'),
-            // 'is_super_user'=> true,
+            'is_cursalab_super_user' => is_cursalab_superuser(false),
+            'impersonate_user_route' => route('impersonate', $this->id),
 
         ];
     }
