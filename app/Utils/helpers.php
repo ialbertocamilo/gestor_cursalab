@@ -281,7 +281,15 @@ function get_current_subworkspaces()
     $subworkspaces = [];
 
     if ($workspace) {
-        $subworkspaces = auth()->user()->subworkspaces()->where('parent_id', $workspace->id)->get();
+
+        if (auth()->user()->isAn('super-user')) {
+
+            $subworkspaces = $workspace->subworkspaces()->get();
+
+        } else {
+
+            $subworkspaces = auth()->user()->subworkspaces()->where('parent_id', $workspace->id)->get();
+        }
     }
 
     return $subworkspaces;

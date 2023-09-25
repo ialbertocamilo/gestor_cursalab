@@ -687,14 +687,18 @@ class UsuarioController extends Controller
         // Get workspace saved in session
         $workspace = get_current_workspace();
         // Load modules
-        $modules = Workspace::where('parent_id', $workspace->id)
-            ->select('id', 'name')
-            ->get();
-        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        // $modules = Workspace::where('parent_id', $workspace->id)
+        //     ->select('id', 'name')
+        //     ->get();
+        $modules = get_current_subworkspaces();    
+
+        $modules_id = $modules->pluck('id')->toArray();
+        // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         // Load workspace's schools
         $schools = School::whereHas('subworkspaces', function ($j) use ($modules_id) {
             $j->whereIn('subworkspace_id', $modules_id);
         })->get();
+        
         return response()->json(compact('schools', 'modules'), 200);
     }
 
