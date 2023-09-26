@@ -110,8 +110,6 @@
                 @edit="openFormModal(modalOptions, $event, 'edit', `Editar administrador ${$event.name}`)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>administrador</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Eliminar administrador')"
-                @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.name}`)"
-                @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Acceder como ${$event.name}` )"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del administrador - ${$event.name}`)"
             />
             <UserFormModal
@@ -122,28 +120,14 @@
                 @onCancel="closeFormModal(modalOptions)"
             />
 
-            <UserStatusModal
+          <!--   <UserStatusModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
                 @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
-           
-            <UserResetPasswordModal
-                width="45vw"
-                :ref="modalResetPasswordOptions.ref"
-                :options="modalResetPasswordOptions"
-                @onConfirm="closeFormModal(modalResetPasswordOptions, dataTable, filters)"
-                @onCancel="closeFormModal(modalResetPasswordOptions)"
-            />
+            -->
 
-            <UserImpersonateModal
-                width="45vw"
-                :ref="modalImpersonateUserOptions.ref"
-                :options="modalImpersonateUserOptions"
-                @onConfirm="closeFormModal(modalImpersonateUserOptions)"
-                @onCancel="closeFormModal(modalImpersonateUserOptions)"
-            />
            
             <DefaultStatusModal
                 :options="modalStatusOptions"
@@ -300,18 +284,15 @@ export default {
                 contentText: '¿Desea cambiar de estado a este registro?',
                 content_modal: {
                     inactive: {
-                        title: '¡Estás por desactivar un usuario!',
+                        title: '¡Estás por desactivar un administrador!',
                         details: [
-                            'El usuario no podrá ingresar a la plataforma.',
-                            'Podrá enviar solicitudes desde la sección de ayuda del Log in.',
-                            'Aparecerá en los reportes y consultas con el estado inactivo.'
+                            'El administrador no podrá ingresar a la plataforma.',
                         ],
                     },
                     active: {
-                        title: '¡Estás por activar un usuario!',
+                        title: '¡Estás por activar un administrador!',
                         details: [
-                            'El usuario ahora podrá ingresar a la plataforma.',
-                            'Podrá rendir los cursos, de estar segmentado.'
+                            'El administrador ahora podrá ingresar a la plataforma.',
                         ]
                     }
                 },
