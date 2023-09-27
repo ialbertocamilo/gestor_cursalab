@@ -253,7 +253,9 @@ export default {
         },
         async generateQuestions(){
             let vue = this;
-            const url = `${vue.jarvisBaseUrl}/generate-questions`;
+            // const url = `${vue.jarvisBaseUrl}/generate-questions`;
+            const url = `${vue.options.base_endpoint}/generate-ia-questions`;
+
             vue.showLoader();
             const data = {
                 topic_id: vue.options.topic_id,
@@ -262,8 +264,7 @@ export default {
             }
             await vue.$http.post(url, data).then(async ({data}) => {
                 vue.hideLoader();
-                // 
-                const questionsTemplate = data.message
+                const questionsTemplate = data.data
                 if (Array.isArray(questionsTemplate)) {
                     this.addItemWithTimeout(questionsTemplate,0);
                 }
