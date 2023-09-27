@@ -116,6 +116,10 @@ export default {
         },
         currentClean:{
             required: true
+        },
+        modulesIds: {
+            default: [],
+            type: Array
         }
     },
     data() {
@@ -142,8 +146,8 @@ export default {
             return UserSelecteds.filter( ({ document: doc, fullname: full }) => {
                 const searchDoc =  (doc.toLowerCase()).includes(usersearch);
                 const searchFull =  (full.toLowerCase()).includes(usersearch);
-                
-                return (searchDoc || searchFull); 
+
+                return (searchDoc || searchFull);
             });
         }
     },
@@ -161,7 +165,7 @@ export default {
 
             if (filter_text.length <= 2) return vue.filter_result = [];
 
-            const { docState, docData } = vue.checkIfExistUser(filter_text); 
+            const { docState, docData } = vue.checkIfExistUser(filter_text);
             if (docState) return vue.filter_result = [];
 
             vue.autocomplete_loading = true;
@@ -171,8 +175,14 @@ export default {
             this.debounce = setTimeout(() => {
                 let data = { filter_text: filter_text,
                              omit_documents: docData };
-                const url = `/segments/search-users`;
 
+                // Add modules ids array to request if it has items
+
+                if (vue.modulesIds.length) {
+                    data.modulesIds = vue.modulesIds
+                }
+
+                const url = `/segments/search-users`;
                 vue.$http.post(url, data)
                     .then(({data}) => {
                         const users = (data.data.users) ? data.data.users :  data.data;
@@ -225,6 +235,12 @@ export default {
             let formData = new FormData();
             formData.append("file", vue.file);
 
+            // Add modules ids array to request if it has items
+
+            if (vue.modulesIds.length) {
+                formData.append("modulesIds", vue.modulesIds);
+            }
+
             vue.showLoader();
 
             const url = `/segments/search-users`;
@@ -252,7 +268,7 @@ export default {
                             vue.$emit("addUser", user);
                         }
                     });
-                    
+
                     vue.file = null;
 
                     vue.hideLoader();
