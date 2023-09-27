@@ -295,6 +295,37 @@ function get_current_subworkspaces()
     return $subworkspaces;
 }
 
+function get_subworkspaces($workspace)
+{
+    $subworkspaces = [];
+
+    if ($workspace) {
+
+        if (auth()->user()->isAn('super-user')) {
+
+            $subworkspaces = $workspace->subworkspaces()->get();
+
+        } else {
+
+            $subworkspaces = auth()->user()->subworkspaces()->where('parent_id', $workspace->id)->get();
+        }
+    }
+
+    return $subworkspaces;
+}
+
+function get_subworkspaces_id($workspace)
+{
+    $workspace = is_int($workspace) ? Workspace::find($workspace) : $workspace;
+    $subworkspaces = get_subworkspaces($workspace);
+
+    if ($subworkspaces) {
+        return $subworkspaces->pluck('id')->toarray();
+    }
+
+    return [];
+}
+
 function current_subworkspaces_id()
 {
     $subworkspaces = get_current_subworkspaces();
