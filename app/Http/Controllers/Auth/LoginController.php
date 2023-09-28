@@ -143,11 +143,11 @@ class LoginController extends Controller
 
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
-            // $roles = Role::getRolesAdminNames();
-            // if ( $user->isAn(...$roles))
-            // {
-            if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
+            $roles = Role::getRolesAdminNames();
+            if ( $user->isAn(...$roles))
             {
+            // if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
+            // {
                 if ($request->hasSession()) {
                     $request->session()->put('auth.password_confirmed_at', time());
                 }
