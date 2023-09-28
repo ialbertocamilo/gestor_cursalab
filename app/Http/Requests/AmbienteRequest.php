@@ -51,6 +51,7 @@ class AmbienteRequest extends FormRequest
             'template' => 'nullable',
 
             'identity_validation_enabled' => 'nullable',
+            'password_expiration_enabled' => 'nullable',
         ];
     }
     public function validationData(): array
@@ -65,6 +66,11 @@ class AmbienteRequest extends FormRequest
         if ($this->has('identity_validation_enabled') ) {
             $data['identity_validation_enabled'] = ($this->identity_validation_enabled == 'true' || 
                                        $this->identity_validation_enabled == 1 ) ? true : false;
+        }
+
+        if ($this->has('password_expiration_enabled') ) {
+            $data['password_expiration_enabled'] = ($this->password_expiration_enabled == 'true' || 
+                                       $this->password_expiration_enabled == 1 ) ? true : false;
         }
 
         return $this->merge($data)->all();

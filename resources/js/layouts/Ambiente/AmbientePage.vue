@@ -352,7 +352,7 @@
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center">
-                                        <span class="mr-3 mt-2">Mostrar botón de blog Cursalab</span>
+                                        <span class="mr-3">Mostrar botón de blog Cursalab</span>
                                         <div>
                                             <DefaultToggle class="mt-0" v-model="resource.show_blog_btn" no-label dense/>
                                         </div>
@@ -369,9 +369,16 @@
                                     </div>
                                     <hr>
                                     <div class="d-flex align-items-center">
-                                        <span class="mr-3 mt-2">Habilitar validación de identidad (usuarios documento-documento)</span>
+                                        <span class="mr-3">Habilitar validación de identidad usuarios (documento-documento)</span>
                                         <div>
                                             <DefaultToggle class="mt-0" v-model="resource.identity_validation_enabled" no-label dense/>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex align-items-center">
+                                        <span class="mr-3">Habilitar expiración de contraseña de usuarios ({{ resource.app_password_expiration_days }} días)</span>
+                                        <div>
+                                            <DefaultToggle class="mt-0" v-model="resource.password_expiration_enabled" no-label dense/>
                                         </div>
                                     </div>
                                 </v-col>
@@ -443,7 +450,7 @@ const fields = [
     'male_logo', 'female_logo',
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
     'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo',
-    'identity_validation_enabled',
+    'identity_validation_enabled', 'password_expiration_enabled',
 ];
 
 const file_fields = [

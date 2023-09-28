@@ -121,9 +121,13 @@ class AuthController extends Controller
                 $user->resetAttemptsUser(); // resetea intentos
 
                 // === validar si debe reestablecer contraseña ===
-                $canResetPassWord = $user->checkIfCanResetPassword('APP');
-                if($canResetPassWord) {
-                    return $this->resetPasswordBuildToken($user);
+                if ($ambiente->password_expiration_enabled) {
+
+                    $canResetPassWord = $user->checkIfCanResetPassword('APP');
+                    if($canResetPassWord) {
+                        return $this->resetPasswordBuildToken($user);
+                    }
+                
                 }
                 // === validar si debe reestablecer contraseña ===
 
