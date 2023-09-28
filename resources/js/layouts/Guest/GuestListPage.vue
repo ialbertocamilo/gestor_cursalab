@@ -36,22 +36,16 @@
                             />
                         </v-form>
                     </v-col>
-                    <!-- <v-col cols="4" class="text-end">
-                        <DefaultButton
-                            label="Invitar"
-                            @click="send_invitation()"
-                            :disabled="!isFormValid"
-                        />
-                    </v-col> -->
                 </v-row>
-                <v-row v-if="limitation_admin.limitation">
-                    <v-col cols="12" class="my-4 d-flex align-items-center">
-                        <p class="span-users m-0 p-0" v-text="`Usuarios activos (${limitation_admin.count_users}/${limitation_admin.limitation})`"></p>
-                        <div class="ml-4">
+                <v-row v-if="limit_workspace.limit_allowed_users">
+                    <v-col cols="12" class="mr-8 d-flex align-items-center justify-end">
+                        <p class="m-0 mr-4" v-text="`Usuarios activos (${limit_workspace.active_users_count}/${limit_workspace.limit_allowed_users})`"></p>
+                        <div class="ml-4" v-if="limit_workspace.active_users_count>=limit_workspace.limit_allowed_users">
                             <DefaultModalButton
                                 :label="'Mejorar plan'"
-                                :showIcon="false"
-                                @click="openFormModal(modalIncreaseConstraintOptions,null, null, 'Mejorar plan')"/>
+                                icon_name=""
+                                @click="openFormModal(modalAlertStorageOptions, null, null, 'Alerta de almacenamiento')"
+                            />
                         </div>
                     </v-col>
                 </v-row>
@@ -112,7 +106,7 @@
                 width="50vw"
                 :ref="modalIncreaseConstraintOptions.ref"
                 :options="modalIncreaseConstraintOptions"
-                :limitation_admin="limitation_admin"
+                :limit_workspace="limit_workspace"
                 @onConfirm="closeFormModal(modalIncreaseConstraintOptions, null, null)"
                 @onCancel="closeFormModal(modalIncreaseConstraintOptions)"
             /> -->
@@ -128,6 +122,37 @@
             </template>
         </DefaultAlertDialog>
 
+        <!-- MODAL ALMACENAMIENTO -->
+        <GeneralStorageModal
+            :ref="modalGeneralStorageOptions.ref"
+            :options="modalGeneralStorageOptions"
+            width="45vw"
+            @onCancel="closeFormModal(modalGeneralStorageOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+                        openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <!-- MODAL ALMACENAMIENTO -->
+
+        <!-- MODAL EMAIL ENVIADO -->
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
+        <!-- MODAL EMAIL ENVIADO -->
+
+        <!-- === MODAL ALERT STORAGE === -->
+        <DefaultStorageAlertModal
+            :ref="modalAlertStorageOptions.ref"
+            :options="modalAlertStorageOptions"
+            width="25vw"
+            @onCancel="closeFormModal(modalAlertStorageOptions)"
+            @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'), 
+                        closeFormModal(modalAlertStorageOptions)"
+        />
+        <!-- === MODAL ALERT STORAGE === -->
     </section>
 </template>
 
@@ -138,10 +163,19 @@
     import DefaultCheckbox from "../../components/globals/DefaultCheckBox.vue";
     import DefaultAlertDialog from "../../components/globals/DefaultAlertDialog";
 
+    // components to request increase limits storage
+    import DefaultStorageAlertModal from '../Default/DefaultStorageAlertModal.vue';
+    import GeneralStorageModal from '../General/GeneralStorageModal.vue';
+    import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
+    
     export default {
         components: {
             ListGuestLinksModal,
-            UsuarioStatusModal, DefaultCheckbox, DefaultAlertDialog},
+            UsuarioStatusModal, DefaultCheckbox, DefaultAlertDialog,
+            DefaultStorageAlertModal,
+            GeneralStorageModal,
+            GeneralStorageEmailSendModal
+        },
         data() {
             return {
                 allSelected: false,
@@ -208,11 +242,33 @@
                 },
                 email_user_invitation:'',
                 isFormValid:null,
-                limitation_admin:{
-                    limitation:null,
-                    count_users:0,
-                    name_admin:'',
-                    count_user_additional:null
+                limit_workspace:{
+                    limit_allowed_users:null,
+                    active_users_count:0,
+                },
+                modalAlertStorageOptions: {
+                    ref: 'AlertStorageModal',
+                    open: false,
+                    showCloseIcon: true,
+                    base_endpoint: '/general',
+                    confirmLabel:'Solicitar',
+                    persistent: true,
+                },
+                modalGeneralStorageOptions: {
+                    ref: 'GeneralStorageModal',
+                    open: false,
+                    showCloseIcon: true,
+                    base_endpoint: '/general',
+                    confirmLabel:'Enviar',
+                    persistent: true
+                },
+                modalGeneralStorageEmailSendOptions: {
+                    ref: 'GeneralStorageEmailSendModal',
+                    open: false,
+                    showCloseIcon: true,
+                    hideCancelBtn: true,
+                    confirmLabel:'Entendido',
+                    persistent: false
                 }
             }
         },
@@ -235,15 +291,15 @@
         },
         methods: {
             async load_data(){
-                await axios.get('/invitados/limitation_admin').then(({data})=>{
-                    this.limitation_admin.limitation = data.data.limitation;
-                    this.limitation_admin.count_users = data.data.count_users;
-                    this.limitation_admin.name_admin = data.data.name_admin;
+                let vue = this;
+                await axios.get('/invitados/limits-workspace').then(({data})=>{
+                    vue.limit_workspace.limit_allowed_users = data.data.limit_allowed_users;
+                    vue.limit_workspace.active_users_count = data.data.active_users_count;
                 })
 
                 try {
                     let response = await axios.get('/invitados/search?page=1&paginate=10')
-                    this.totalCount = response.data.data.total
+                    vue.totalCount = response.data.data.total
                 } catch (ex) {
                     console.log(ex)
                 }
@@ -318,78 +374,3 @@
 
     }
 </script>
-<style lang="scss">
-
-    .select-all-wrapper {
-        background: white;
-        height: 45px;
-        margin: 25px 0 15px;
-        border-radius: 4px;
-
-        span, strong {
-            color: #796AEE
-        }
-    }
-
-    .guests-table-wrapper {
-        // checkboxes style
-        .v-data-table__checkbox i {
-            font-size: 18px !important;
-        }
-
-        // hide checkbox in header
-        .v-data-table-header .v-simple-checkbox {
-            opacity: 0;
-        }
-    }
-
-    .span-users{
-        font-style: normal;
-        font-weight: 400;
-        font-size: 18px;
-        line-height: 22px;
-        color: #333D5D;
-    }
-    .v-btn__content {
-        text-transform: initial !important;
-        color: white !important;
-    }
-    .v-data-table{
-        margin: 0 !important;
-    }
-    .v-data-table__wrapper{
-        background: #FFFFFF !important;
-        box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25) !important;
-        border-radius: 6px !important;
-        padding: 19px 23px;
-    }
-    .v-data-table-header{
-        background: #F9FAFB !important;
-    }
-    .v-data-table-header > tr > th{
-        color: #333D5D;
-        font-weight: 400;
-    }
-    .v-input__control{
-        box-shadow: none !important;
-    }
-    tr:hover .v-input__slot{
-        background: #eeeeee !important;
-    }
-    .v-input__control{
-        box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
-    }
-    .v-input__slot{
-        background: white !important;
-    }
-    .v-text-field .v-input__control, .v-text-field .v-input__slot, .v-text-field fieldset{
-        border-radius:6px !important;
-        border: none !important;
-    }
-    .v-text-field__slot > label{
-        color: rgba(51, 61, 93, 0.5) !important;
-    }
-    .section{
-        margin: 0 !important;
-    }
-</style>

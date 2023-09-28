@@ -38,20 +38,7 @@ class Guest extends BaseModel {
         $query->orderBy( $field, $sort );
         return $query->paginate( $request->paginate );
     }
-    public static function listGuestUrl() {
-        $user = Auth::user();
-        $share_url = trim( strtolower( $user->name ) );
-        //Eliminar multiples espacios y cambiar el espacio por guion
-        $url_app_web = config('app.web_url');
-        $share_url = str_replace( ' ', '-', preg_replace( '/\s+/', ' ', $share_url ) );
-        $urls_generated = GuestLink::where('workspace_id',get_current_workspace()->id)->orderBy( 'created_at', 'desc' )->whereNull( 'guest_id' )->get();
-        $data = [
-            'generic_url' => $share_url,
-            'app_url' =>  $url_app_web.'register?c=',
-            'urls_generated'=> $urls_generated
-        ];
-        return $data;
-    }
+   
     public static function send_email_invitation( $email ) {
         $email = trim( $email );
         $user = Auth::user();

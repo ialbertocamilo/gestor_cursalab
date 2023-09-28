@@ -17,7 +17,7 @@ class GuestLink extends BaseModel
         $user = Auth::user();
         $url_exist =  self::where('url',$data['code'])->first();
         if($url_exist){
-            return ['message'=>'Esta url ya se encuentra registrada'];
+            return ['msg'=>'Este enlace ya se encuentra registrado.','type_msg'=>'warning'];
         }
         switch ($data['type_of_time']) {
             case 'months':
@@ -34,7 +34,7 @@ class GuestLink extends BaseModel
                 break;
         }
         self::create_url($data['code'],$expiration_date,$user->id,null,$data['activate_by_default']);
-        return ['message'=>'Se registro correctamente'];
+        return ['msg'=>'Se creó correctamente el enlace.','type_msg'=>'success'];
     }
     public static function create_url($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false){
         $id_register_url = GuestLink::insertGetId([
@@ -86,7 +86,7 @@ class GuestLink extends BaseModel
         return $data;
     }
 
-    public static function delete_guest_url($url_id){
+    public static function deleteGuestLink($url_id){
         GuestLink::where('id',$url_id)->delete();
         if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
             // if (env('MULTIMARCA')) {
@@ -154,7 +154,24 @@ class GuestLink extends BaseModel
         }
         return  ['message'=>'No se pudo registrar al usuario, porfavor pongasé en contacto con el administrador.'];
     }
-
+    protected function listGuestUrl() {
+        $urls_generated = GuestLink::where('workspace_id',get_current_workspace()->id)->orderBy( 'created_at', 'desc' )->whereNull( 'guest_id' )->get();
+        return [
+            'urls_generated'=> $urls_generated
+        ];
+    }
+    protected function initData(){
+        $user = Auth::user();
+        $share_url = trim( strtolower( $user->name ) );
+        //Eliminar multiples espacios y cambiar el espacio por guion
+        $url_app_web = config('app.web_url');
+        $share_url = str_replace( ' ', '-', preg_replace( '/\s+/', ' ', $share_url ) );
+        return [
+            'generic_url' => $share_url,
+            'app_url' =>  $url_app_web.'register?c=',
+        ];;
+    }
+    //SUBFUNCTIONS
     private static function getListCriterion($guest_link){
         return CriterionWorkspace::with([
             'criterion:id,code,name,field_id,can_be_create',

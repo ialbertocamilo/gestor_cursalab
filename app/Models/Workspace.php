@@ -535,6 +535,13 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    protected function infoLimitCurrentWorkspace(){
+        $current_workspace = get_current_workspace();
+        $active_users_count = User::onlyClientUsers()->whereRelation('subworkspace', 'parent_id', $current_workspace->id)
+            ->where('active', 1)->count();
+        $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+        return compact('active_users_count','limit_allowed_users');
+    }
     public function sendEmailByLimit($sub_workspace_id = null){
         $workspace = $this;
 

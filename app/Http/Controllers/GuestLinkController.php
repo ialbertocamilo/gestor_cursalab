@@ -16,13 +16,22 @@ class GuestLinkController extends Controller
         return $this->success($data);
     }
 
+    public function initData(){
+        $data = GuestLink::initData();
+        return $this->success($data);
+    }
+    
+    public function listGuestUrl(){
+        $data = GuestLink::listGuestUrl();
+        return $this->success($data);
+    }
     public function verify_guest_url_multimarca($url){
         $data = GuestLink::verify_guest_url_multimarca($url);
         return $this->success($data);
     }
     
     public function destroy($url_id){
-        GuestLink::delete_guest_url($url_id);
+        GuestLink::deleteGuestLink($url_id);
         return $this->success(['msg'=>'La URL ha sido eliminada correctamente.']);
     }
 

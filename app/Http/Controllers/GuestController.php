@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 
 class GuestController extends Controller
@@ -15,10 +16,6 @@ class GuestController extends Controller
         return $this->success([]);
     }
 
-    public function listGuestUrl(){
-        $data = Guest::listGuestUrl();
-        return $this->success(compact('data'));
-    }
 
     public function send_invitation(Request $request){
         // $data = Guest::send_email_invitation($request->get('email'));
@@ -34,7 +31,8 @@ class GuestController extends Controller
         return $this->success([]);
 
     }
-    public function limitation_admin(){
-        return $this->success([]);
+    public function limitsWorspace(){
+        $data = Workspace::infoLimitCurrentWorkspace();
+        return $this->success($data);
     }
 }
