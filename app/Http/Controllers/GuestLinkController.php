@@ -2,32 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RegisterUrl;
+use App\Models\GuestLink;
 use Illuminate\Http\Request;
 
-class RegisterUrlController extends Controller
+class GuestLinkController extends Controller
 {
     public function addUrl(Request $request){
-        $data = RegisterUrl::addUrl($request->all());
+        $data = GuestLink::addUrl($request->all());
         return $this->success($data);
     }
-    public function verify_guest_url($url){
-        $data = RegisterUrl::verify_guest_url($url);
+    public function verifyGuestCode(Request $request){
+        $data = GuestLink::verifyGuestCode($request);
         return $this->success($data);
     }
 
     public function verify_guest_url_multimarca($url){
-        $data = RegisterUrl::verify_guest_url_multimarca($url);
+        $data = GuestLink::verify_guest_url_multimarca($url);
         return $this->success($data);
     }
     
     public function destroy($url_id){
-        RegisterUrl::delete_guest_url($url_id);
+        GuestLink::delete_guest_url($url_id);
         return $this->success(['msg'=>'La URL ha sido eliminada correctamente.']);
     }
 
     public function register_user(Request $request){
-        $data = RegisterUrl::register_user($request->get('user'));
+        $data = GuestLink::register_user($request->get('user'));
         return $this->success($data);
     }
 }

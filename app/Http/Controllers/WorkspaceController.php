@@ -180,7 +180,6 @@ class WorkspaceController extends Controller
         $workspace->load('qualification_type');
 
         $selection = Criterion::getSelectionCheckbox($workspace);
-
         $workspace['criteria_workspace'] = $selection['criteria_workspace'];
         $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 

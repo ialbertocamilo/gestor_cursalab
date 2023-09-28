@@ -235,7 +235,7 @@
         },
         methods: {
             async load_data(){
-                await axios.get('/guest/limitation_admin').then(({data})=>{
+                await axios.get('/invitados/limitation_admin').then(({data})=>{
                     this.limitation_admin.limitation = data.data.limitation;
                     this.limitation_admin.count_users = data.data.count_users;
                     this.limitation_admin.name_admin = data.data.name_admin;

@@ -39,6 +39,7 @@
         "moment": "^2.26.0",
         "node-sass": "^4.14.0",
         "prismjs": "^1.27.0",
+        "qrcode": "^1.5.3",
         "vue-apexcharts": "^1.6.2",
         "vue-router": "^3.5.3",
         "vue-toastification": "^1.7.14",

@@ -23,6 +23,8 @@ class AmbienteController extends Controller
 
         //app
         $data = Media::requestUploadFile($data, 'fondo_app');
+        $data = Media::requestUploadFile($data, 'fondo_invitados_app');
+
         $data = Media::requestUploadFile($data, 'logo_app');
         $data = Media::requestUploadFile($data, 'logo_cursalab');
         $data = Media::requestUploadFile($data, 'completed_courses_logo');

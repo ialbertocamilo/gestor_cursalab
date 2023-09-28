@@ -36,6 +36,7 @@ class AmbienteRequest extends FormRequest
             'color_terciario_app' => 'nullable',
             
             'fondo_app' => 'nullable',
+            'fondo_invitados_app'=>'nullable',
             'logo_app' => 'nullable',
             'logo_cursalab_position' => 'nullable',
             'show_blog_btn' => 'nullable',

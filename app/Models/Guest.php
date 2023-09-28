@@ -12,20 +12,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
-class Guest extends Model {
+class Guest extends BaseModel {
     protected $table = 'guests';
     protected $fillable = [ 'admin_id', 'email', 'user_id', 'state', 'date_invitation', 'tipo' ];
 
-    public function usuario() {
-        return $this->belongsTo( 'App\Usuario', 'user_id' );
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id' );
     }
     public static function searchForGrid( $request ) {
         $user = Auth::user();
         $query = self::select( 'id', 'email', 'user_id', 'state', 'date_invitation' )
         // ->where( 'admin_id', $user->id )
         ->with( [
-            'usuario'=>function( $q ) {
-                $q->select( 'id', 'nombre', 'estado' );
+            'user'=>function( $q ) {
+                $q->select( 'id', 'name', 'active' );
             }
         ] );
         if ( $request->q )
@@ -42,13 +42,13 @@ class Guest extends Model {
         $user = Auth::user();
         $share_url = trim( strtolower( $user->name ) );
         //Eliminar multiples espacios y cambiar el espacio por guion
-        $url_app_web = config('app.web_url');;
+        $url_app_web = config('app.web_url');
         $share_url = str_replace( ' ', '-', preg_replace( '/\s+/', ' ', $share_url ) );
-        // $urls_generated = RegisterUrl::orderBy( 'created_at', 'desc' )->whereNull( 'guest_id' )->get();
+        $urls_generated = GuestLink::where('workspace_id',get_current_workspace()->id)->orderBy( 'created_at', 'desc' )->whereNull( 'guest_id' )->get();
         $data = [
             'generic_url' => $share_url,
             'app_url' =>  $url_app_web.'register?c=',
-            'urls_generated'=>[]
+            'urls_generated'=> $urls_generated
         ];
         return $data;
     }

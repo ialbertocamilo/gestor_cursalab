@@ -72,7 +72,10 @@ class Workspace extends BaseModel
             'name' => 'Filtro Usuarios',
             'type' => 'boolean',
         ],
-
+        'avaiable_in_personal_data_guest_form'=>[
+            'name' => 'Dato Personal en formulario de Invitados',
+            'type' => 'boolean',
+        ]
     ];
 
     public function sluggable(): array

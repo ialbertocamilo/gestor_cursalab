@@ -10,4 +10,9 @@ class CriterionWorkspace extends Model
     use HasFactory;
 
     protected $table = 'criterion_workspace';
+
+    public function criterion()
+    {
+        return $this->belongsTo(Criterion::class, 'criterion_id');
+    }
 }

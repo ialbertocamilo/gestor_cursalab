@@ -34,4 +34,7 @@ class GuestController extends Controller
         return $this->success([]);
 
     }
+    public function limitation_admin(){
+        return $this->success([]);
+    }
 }

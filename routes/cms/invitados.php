@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\GuestLinkController;
 
 Route::controller(GuestController::class)->group(function() {
 	Route::view('/', 'guest.list')->name('guest.list');
@@ -13,7 +14,7 @@ Route::controller(GuestController::class)->group(function() {
 	Route::post('users_activation', 'activateMultipleUsers');
 
 });
-Route::controller(RegisterUrlController::class)->group(function() {
+Route::controller(GuestLinkController::class)->group(function() {
 	Route::post('add-url', 'addUrl');
 	Route::delete('/delete-url/{url_id}', 'destroy');
 });
