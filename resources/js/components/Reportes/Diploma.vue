@@ -363,7 +363,8 @@ export default {
                 inactive : estado_escuela_filtro.UsuariosInactivos // by 0
             };
 
-            axios.post(`${vue.reportsBaseUrl}/filtros/schools/states`, reqPayload).then((res) => {
+            let url = `${vue.reportsBaseUrl}/filtros/schools/states/${vue.adminId}`
+            axios.post(url, reqPayload).then((res) => {
                 const { data } = res;
                 vue.schools = data;
 
@@ -435,7 +436,7 @@ export default {
     },
     mounted() {
         const vue = this;
-        vue.schoolsInit();// schools by workpaceId
+        vue.schoolsInit();
     }
 };
 </script>

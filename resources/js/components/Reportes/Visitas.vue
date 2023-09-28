@@ -326,7 +326,7 @@ export default {
         async fetchFiltersData() {
             const vue = this;
 
-            let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}?grouped=0`;
+            let urlSchools = `${vue.$props.reportsBaseUrl}/filtros/schools/${vue.$props.workspaceId}/${this.adminId}?grouped=0`;
             let responseSchools = await axios({ url: urlSchools, method: 'get'});
             vue.schools = responseSchools.data;
         },
