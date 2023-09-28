@@ -70,8 +70,8 @@ class GuestLink extends BaseModel
             $ambiente = Ambiente::select('fondo_invitados_app')->first();
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
             $criteria_workspace = self::getListCriterion($guest_link);
-            $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',1)->values()->all();;
-            $data['criteria_data'] = $criteria_workspace->where('personal_data',0)->values()->all();
+            $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
+            $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
             $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
 
             $data['email'] = ($guest_link->guest_id)
@@ -178,7 +178,7 @@ class GuestLink extends BaseModel
                 $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($guest_link) {
                     $q->where('id', $guest_link->workspace_id);
                 })
-                ->where('criterion_id', $criterion_id)->get();
+                ->where('criterion_id', $criterion_id)->orderBy('value_text')->get();
             }
             return [
                 'criterion_id' =>  $criterion_id,
