@@ -57,7 +57,8 @@ class TemaController extends Controller
         $qualification_type = $course->qualification_type;
         $media_url = get_media_root_url();
 
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url');
+        $limits_ia_convert = Workspace::getLimitAIConvert($topic);
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url','limits_ia_convert');
 
         return $compactResponse ? $response : $this->success($response);
     }
