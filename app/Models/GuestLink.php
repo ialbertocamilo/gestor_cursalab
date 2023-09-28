@@ -70,10 +70,9 @@ class GuestLink extends BaseModel
             $ambiente = Ambiente::select('fondo_invitados_app')->first();
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
             $criteria_workspace = self::getListCriterion($guest_link);
-            $data['criteria_workspace'] = $criteria_workspace;
-            // $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
-            // $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
-            // $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
+            $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
+            $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
+            $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
 
             $data['email'] = ($guest_link->guest_id)
                 ? Guest::where('id',$guest_link->guest_id)->first()->email
