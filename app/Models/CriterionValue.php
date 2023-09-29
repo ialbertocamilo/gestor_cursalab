@@ -18,7 +18,7 @@ class CriterionValue extends BaseModel
     //     'value_text', 'value_date', 'value_datetime', 'value_boolean', 'value_decimal', 'value_integer',
     //     'position', ];
 
-    protected $hidden = ['parent_id', 'exclusive_criterion_id', 'description', 'active', 'created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['exclusive_criterion_id', 'description', 'active', 'created_at', 'updated_at', 'deleted_at'];
 
     public function criterion()
     {

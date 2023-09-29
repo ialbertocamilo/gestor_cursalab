@@ -32,7 +32,8 @@ class CriterionStoreRequest extends FormRequest
             'multiple' => 'required',
             'show_in_segmentation' => 'required',
             'workspace_id' => 'nullable',
-            'can_be_create' => 'nullable'
+            'can_be_create' => 'nullable',
+            'parent_id' => 'nullable'
         ];
 
         return $rules;

@@ -174,7 +174,7 @@ class GuestLink extends BaseModel
     //SUBFUNCTIONS
     private static function getListCriterion($guest_link){
         return CriterionWorkspace::with([
-            'criterion:id,code,name,field_id,can_be_create',
+            'criterion:id,code,name,field_id,can_be_create,parent_id',
             'criterion.field_type:id,code',
             // 'criterion.values:id,criterion_id,value_text'
         ])
@@ -185,13 +185,14 @@ class GuestLink extends BaseModel
             $criterion_code = $criterion_workspace->criterion->code;
             $criterion_id = $criterion_workspace->criterion_id;
             $criterion_type = $criterion_workspace->criterion->field_type->code;
+            $parent_id = $criterion_workspace->criterion->parent_id;
             $values = [];
             //never can be create new modules fron guest form
             if($criterion_code != 'module'){
                 $can_be_create = boolval($criterion_workspace->criterion->can_be_create);
             }
 
-            if($criterion_type != 'date'){
+            if($criterion_type != 'date' && !$parent_id){
                 $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($guest_link) {
                     $q->where('id', $guest_link->workspace_id);
                 })
@@ -199,6 +200,7 @@ class GuestLink extends BaseModel
             }
             return [
                 'criterion_id' =>  $criterion_id,
+                'parent_id' => $parent_id,
                 'criterion_code' => $criterion_code,
                 'criterion_type' => $criterion_type,
                 'criterion_title' => $criterion_workspace->criterion_title,

@@ -41,10 +41,17 @@ class CriterionValueController extends Controller
         $data_type = $criterion->field_type->code;
 
         $response = compact('data_type');
-
+        if(!$compactResponse && $criterion->parent_id){
+            $response['criterion_values_parent'] = $this->getCriterionValuesParentByWorkspace($criterion);
+        }
         return $compactResponse ? $data_type : $this->success($response);
     }
-
+    private function getCriterionValuesParentByWorkspace($criterion){
+        return CriterionValue::select('id','value_text')
+            ->where('criterion_id',$criterion->parent_id)
+            ->whereRelation('workspaces', 'id', get_current_workspace()->id)
+            ->get();
+    }
     public function store(CriterionValueStoreRequest $request, Criterion $criterion)
     {
         $data = $request->validated();
@@ -66,7 +73,9 @@ class CriterionValueController extends Controller
         $column_name = $criterion_value->getCriterionValueColumnName();
         $criterion_value->name = $criterion_value->$column_name;
         $data_type = $criterion->field_type->code;
-
+        if($criterion->parent_id){
+            $criterion_values_parent =  $this->getCriterionValuesParentByWorkspace($criterion);
+        }
         return $this->success(get_defined_vars());
     }
 

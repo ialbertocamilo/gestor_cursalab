@@ -30,9 +30,7 @@ class CriterionValueStoreRequest extends FormRequest
         return [
             'name' => "required|min:1|unique:criterion_values,{$column_name},{$id},id,criterion_id,{$this->criterion_id}",
             'criterion_id' => "required",
-
-
-
+            'parent_id' => "nullable",
             'workspace_id' => "nullable",
         ];
     }
