@@ -12,8 +12,8 @@ class GuestLinkController extends Controller
         return $this->success($data);
     }
     public function verifyGuestCode(Request $request){
-        $ip = $request->ip();
-        dd($ip);
+        // $ip = $request->ip();
+        // $host = gethostbyaddr($ip);
         $data = GuestLink::verifyGuestCode($request);
         return $this->success($data);
     }
