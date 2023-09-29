@@ -13,7 +13,7 @@ class GuestLink extends BaseModel
     protected $table = 'guest_links';
     protected $filleable = ['id','url','workspace_id','expiration_date','admin_id','guest_id','activate_by_default','count_registers'];
 
-    public static function addUrl($data){
+    protected function addUrl($data){
         $user = Auth::user();
         $url_exist =  self::where('url',$data['code'])->first();
         if($url_exist){
@@ -33,10 +33,10 @@ class GuestLink extends BaseModel
                 $expiration_date = null;
                 break;
         }
-        self::create_url($data['code'],$expiration_date,$user->id,null,$data['activate_by_default']);
+        self::createLink($data['code'],$expiration_date,$user->id,null,$data['activate_by_default']);
         return ['msg'=>'Se creó correctamente el enlace.','type_msg'=>'success'];
     }
-    public static function create_url($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false){
+    protected function createLink($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false){
         $id_register_url = GuestLink::insertGetId([
             'url'=>$code,
             'workspace_id'=> get_current_workspace()->id,
@@ -50,7 +50,7 @@ class GuestLink extends BaseModel
             SourceMultimarca::insertSource($code,'register',$id_register_url);
         }
     }
-    public static function verifyGuestCode($request){
+    protected function verifyGuestCode($request){
         $code = $request->code;
         if(!$code){
             return ['exist_url'=>false];
@@ -81,19 +81,19 @@ class GuestLink extends BaseModel
         return $data;
     }
 
-    public static function verify_guest_url_multimarca($code){
+    protected function verify_guest_url_multimarca($code){
         $data['source'] =  SourceMultimarca::where('code',$code)->where('type','register')->select('source')->first();
         return $data;
     }
 
-    public static function deleteGuestLink($url_id){
+    protected function deleteGuestLink($url_id){
         GuestLink::where('id',$url_id)->delete();
         if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
             // if (env('MULTIMARCA')) {
             SourceMultimarca::where('type_id',$url_id)->delete();
         }
     }
-    public static function register_user($user){
+    protected function register_user($user){
         //Verificar si existe el usuario
         // $user_db = Usuario::where('dni',$user['dni'])->first();
         $user_db = Usuario::where(function($q) use ($user){

@@ -11,8 +11,17 @@
                     @click="openFormModal(modalOptions,null, null, 'Registrar por enlace')"/>
             </v-card-title>
         </v-card>
+        <DefaultFilter v-model="open_advanced_filter"
+            @filter="advanced_filter(dataTable, filters, 1)"
+        >
+            <template v-slot:content>
+                <v-row justify="center">
+                </v-row>
+            </template>
+        </DefaultFilter>
         <v-card flat class="elevation-0 mb-4">
-                <v-row class="justify-content-start">
+            <v-card-text>
+                <v-row justify="start">
                     <v-col cols="4">
                         <DefaultInput
                             clearable dense
@@ -24,17 +33,25 @@
                         />
                     </v-col>
                     <v-col cols="4">
-                        <v-form v-model="isFormValid" v-on:submit.prevent>
+                        <v-form v-on:submit.prevent>
                             <DefaultInput
                                 clearable dense
                                 v-model="email_user_invitation"
                                 label="Invitar por email"
                                 append-icon="mdi-send"
-                                :rules="rules.input_email"
                                 @onEnter="send_invitation()"
                                 @clickAppendIcon="send_invitation()"
                             />
                         </v-form>
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-end">
+                        <DefaultButton
+                            text
+                            label="Aplicar filtros"
+                            icon="mdi-filter"
+                            @click="open_advanced_filter = !open_advanced_filter"
+                            class="btn_filter"
+                        />
                     </v-col>
                 </v-row>
                 <v-row v-if="limit_workspace.limit_allowed_users">
@@ -49,6 +66,25 @@
                         </div>
                     </v-col>
                 </v-row>
+            </v-card-text>
+            <DefaultTable
+                :ref="dataTable.ref"
+                :data-table="dataTable"
+                :show-select="true"
+                :filters="filters"
+                @onSelectRow="selectionChange($event)"
+                @statusChange="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+            />
+        </v-card>
+        <!-- <v-card flat class="elevation-0 mb-4">
+                <v-row class="justify-content-start">
+                    <v-col cols="4">
+                        
+                    </v-col>
+                    
+                   
+                </v-row>
+                
                 <v-row class="select-all-wrapper">
                     <v-col cols="3">
                         <input type="checkbox"
@@ -78,17 +114,10 @@
                 </v-row>
                 <v-row>
                     <v-col cols="12" class="guests-table-wrapper">
-                        <DefaultTable
-                            :ref="dataTable.ref"
-                            :data-table="dataTable"
-                            :show-select="true"
-                            :filters="filters"
-                            @onSelectRow="selectionChange($event)"
-                            @statusChange="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
-                        />
+                       
                     </v-col>
                 </v-row>
-        </v-card>
+        </v-card> -->
         <ListGuestLinksModal
             width="50vw"
             :ref="modalOptions.ref"
@@ -102,14 +131,6 @@
             @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters),load_data()"
             @onCancel="statusChange"
         />
-            <!-- <IncreaseConstraintModal
-                width="50vw"
-                :ref="modalIncreaseConstraintOptions.ref"
-                :options="modalIncreaseConstraintOptions"
-                :limit_workspace="limit_workspace"
-                @onConfirm="closeFormModal(modalIncreaseConstraintOptions, null, null)"
-                @onCancel="closeFormModal(modalIncreaseConstraintOptions)"
-            /> -->
         <DefaultAlertDialog
             :ref="multipleModalOptions.ref"
             :options="multipleModalOptions"
@@ -237,11 +258,7 @@
                     base_endpoint: ``,
                     contentText: '¿Desea cambiar de estado a los registros seleccionados?'
                 },
-                rules: {
-                    input_email: this.getRules(['required','email']),
-                },
                 email_user_invitation:'',
-                isFormValid:null,
                 limit_workspace:{
                     limit_allowed_users:null,
                     active_users_count:0,
@@ -269,7 +286,8 @@
                     hideCancelBtn: true,
                     confirmLabel:'Entendido',
                     persistent: false
-                }
+                },
+                open_advanced_filter:false
             }
         },
         watch: {
@@ -312,19 +330,29 @@
             },
             async send_invitation(){
                 let vue = this;
-                if(!vue.isFormValid){
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                if(!vue.email_user_invitation || !regex.test(vue.email_user_invitation)){
+                    this.showAlert('El formato de correo electrónico es inválido', 'warning')
                     return 0;
                 }
                 vue.showLoader();
-                await axios.post('/invitados/send_invitation',{
+                await axios.post('/invitados/send-invitation',{
                     email:vue.email_user_invitation,
                 }).then(({data})=>{
                     vue.queryStatus("invitados", "enviar_correo");
                     this.showAlert(data.data.msg, 'success')
                     vue.refreshDefaultTable(vue.dataTable, vue.filters)
                     vue.email_user_invitation='';
+                    vue.hideLoader();
+
+                }).catch((e)=>{
+                    if(e.response.data.message){
+                        this.showAlert(e.response.data.message, 'warning')
+                    }else{
+                        this.showAlert('No se pudo enviar la invitación.', 'warning')
+                    }
+                    vue.hideLoader();
                 })
-                vue.hideLoader();
             },
             statusChange(value){
                 const vue = this;

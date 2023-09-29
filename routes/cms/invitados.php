@@ -7,7 +7,7 @@ Route::controller(GuestController::class)->group(function() {
 	Route::view('/', 'guest.list')->name('guest.list');
 
 	Route::get('search', 'search');
-	Route::post('send_invitation', 'send_invitation');
+	Route::post('send-invitation', 'sendInvitation');
 	Route::get('limits-workspace', 'limitsWorspace');
 	Route::post('send_requirement', 'send_requirement');
 	Route::post('users_activation', 'activateMultipleUsers');
