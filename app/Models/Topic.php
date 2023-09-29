@@ -101,7 +101,7 @@ class Topic extends BaseModel
 
     protected static function search($request, $paginate = 15)
     {
-        $q = self::with('evaluation_type:id,code,name', 'questions.type')
+        $q = self::with('evaluation_type:id,code,name', 'questions.type', 'requirements.model_topic')
             //            ->withCount('questions')
             ->where('course_id', $request->course_id);
         // $q = self::withCount('preguntas')

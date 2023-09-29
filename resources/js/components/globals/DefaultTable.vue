@@ -569,6 +569,11 @@
 
             </template>
 
+            <template v-slot:item.nombre_and_requisito="{item, header}">
+                <p class="my-0">{{ item.nombre_and_requisito.nombre }}</p>
+                <p class="my-0" v-if="item.nombre_and_requisito.requisito"><small><strong>Requisito:</strong> {{ item.nombre_and_requisito.requisito }}</small></p>
+            </template>
+
             <template v-slot:item.custom_error="{item, header}">
                 <p class="my-0"><strong>{{ item.custom_error.title }}</strong></p>
                 <p class="my-0"><small>{{ item.custom_error.subtitle }}</small></p>
