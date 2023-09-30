@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GuestController;
 use App\Http\Controllers\FirebaseController;
 use App\Http\Controllers\GuestLinkController;
 use App\Http\Controllers\ApiRest\AuthController;
@@ -121,8 +122,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
 
     Route::post('/meetings/zoom/webhook-end-meeting', [RestMeetingController::class, 'zoomWebhookEndMeeting']);
     Route::post('/meetings/{meeting}/finish', [RestMeetingController::class,'finishMeeting']);
-
+    /* apis para el formulario de invitados */
     Route::get('/verify-guest-code', [GuestLinkController::class,'verifyGuestCode']);
+    Route::post('/send-code-guest', [GuestController::class,'sendGuestCodeVerificationByEmail']);
+    Route::post('/verify-code-guest', [GuestController::class,'verifyGuestCodeVerificationByEmail']);
+    /* */
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);

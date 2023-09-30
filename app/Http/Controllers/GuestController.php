@@ -23,6 +23,15 @@ class GuestController extends Controller
         return $this->success($data);
     }
 
+    public function sendGuestCodeVerificationByEmail(Request $request){
+        $data = Guest::sendGuestCodeVerificationByEmail($request);
+        return $this->success($data);
+    }
+    
+    public function verifyGuestCodeVerificationByEmail(Request $request){
+        $data = Guest::verifyGuestCodeVerificationByEmail($request);
+        return $this->success($data);
+    }
     public function activateMultipleUsers(Request $request) {
 
         // $result = Usuario::whereIn('id',  $request->usersIds)->update(['estado' => 1]);

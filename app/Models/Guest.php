@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\RegisterUrl;
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Str;
+use App\Models\Mongo\EmailsSent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Guest extends BaseModel {
     protected $table = 'guests';
@@ -34,7 +35,30 @@ class Guest extends BaseModel {
         $query->orderBy( $field, $sort );
         return $query->paginate( $request->paginate );
     }
-   
+    protected function sendGuestCodeVerificationByEmail($request){
+        $currentRange = env('AUTH2FA_CODE_DIGITS');
+        $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
+
+        $start = '1'.str_repeat('0', $currentRange - 1);
+        $end = str_repeat('9', $currentRange);
+        $currentCode = rand($start, $end);
+        //enviar codigo al email
+        $mail_data = [ 'subject' => 'Código de verificación',
+                       'code' => $currentCode,
+                       'minutes' => $currentMinutes,
+                       'name' => $request->name.' '.$request->lastname,
+                       'expires_code'=> Carbon::now()->addMinutes($currentMinutes)->format('Y-m-d H:i:s'),
+                    ];
+        EmailsSent::storeEmailSent($mail_data,'guest_code_verification');
+        Mail::to( $request->email )->send( new EmailTemplate( 'emails.guest_code_verification', $mail_data ) );
+        return ['message'=>'Email enviado correctamente.'];
+    }
+    
+    protected function verifyGuestCodeVerificationByEmail($request){
+        $message = EmailsSent::verifyCode($request);
+        return $message;
+    }
+
     public static function sendInvitationByEmail( $email ) {
         $admin = auth()->user();
         $email = trim( $email );
