@@ -12,7 +12,10 @@ class GuestLink extends BaseModel
 {
     protected $table = 'guest_links';
     protected $filleable = ['id','url','workspace_id','expiration_date','admin_id','guest_id','activate_by_default','count_registers'];
-
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
     protected function addUrl($data){
         $user = Auth::user();
         $url_exist =  self::where('url',$data['code'])->first();
@@ -56,6 +59,7 @@ class GuestLink extends BaseModel
             return ['exist_url'=>false];
         }
         $guest_link =  self::query()
+            ->with(['workspace:id,logo'])
             ->where('url',$code)
             ->select('guest_id','id','expiration_date','workspace_id')
             ->first();
@@ -69,6 +73,7 @@ class GuestLink extends BaseModel
         if ($guest_link) {
             $ambiente = Ambiente::select('fondo_invitados_app')->first();
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
+            $data['logo'] =  get_media_url($guest_link?->workspace?->logo,'s3');
             $criteria_workspace = self::getListCriterion($guest_link);
             $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
             $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
