@@ -757,4 +757,31 @@ class Media extends BaseModel
         $zip->close();
         return $file_zip_name;
     }
+
+    protected function downloadFilesInZip($data,$zipFileName = 'download-files'){
+        // Crear un archivo ZIP temporal
+        $zip = new ZipArchive();
+        if ($zip->open($zipFileName, ZipArchive::CREATE) !== true) {
+            return false;
+        }
+        $mimeTypes = new MimeTypes();
+        foreach ($data as $item) {
+            // Añadir la carpeta al archivo ZIP
+            $folderName = $item['folder_name'];
+            $zip->addEmptyDir($folderName);
+
+            // Añadir archivos a la carpeta del ZIP
+            foreach ($item['routes'] as $route) {
+                if(Storage::disk('s3')->exists($route)){
+                    $file_content = Storage::disk('s3')->get($route);
+                    $file_extension = $mimeTypes->getExtensions(Storage::disk('s3')->mimeType($route));
+                    $file_extension = isset($file_extension[0]) ? $file_extension[0] : 'txt';
+                    $basename = pathinfo($route, PATHINFO_FILENAME) . '.' . $file_extension;
+                    $zip->addFromString($folderName . '/' . $basename, $file_content);
+                }
+            }
+        }
+        $zip->close();
+        return $zipFileName;
+    }
 }

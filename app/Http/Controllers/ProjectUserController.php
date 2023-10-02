@@ -21,6 +21,12 @@ class ProjectUserController extends Controller
         $name_zip = ProjectUser::downloadZipFiles($request);
         return response()->download(public_path($name_zip), $name_zip)->deleteFileAfterSend(true);
     }
+    public function downloadMassiveZipFiles(Request $request){
+        $project_users_id = $request->puid;
+        $project_id = $request->project_id;
+        $name_zip = ProjectUser::downloadMassiveZipFiles($project_users_id,$project_id);
+        return response()->download(public_path($name_zip), $name_zip)->deleteFileAfterSend(true);
+    }
     public function downloadFile(ProjectResources $project_resource){
         return $project_resource->downloadFile();
     }

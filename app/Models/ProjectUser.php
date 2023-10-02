@@ -219,6 +219,27 @@ class ProjectUser extends Model
         $name_zip = Media::createZipFromStorage($data);
         return $name_zip;
     }
+
+    protected function downloadMassiveZipFiles($project_users_id,$project_id){
+        $project = Project::where('id',$project_id)->with(['course:id,name'])->select('id','course_id')->first();
+        $course_name = mb_strtolower(str_replace(' ', '-', $project->course->name));
+        $course_name = str_replace('--', '-', $course_name);
+        $project_users = self::whereIn('id',$project_users_id)->with([
+            'user:id,document',
+            'user.project_resources'=>function($q)use($project_id){
+                $q->where('project_id',$project_id)->select('id','project_id','path_file','filename','type_media','from_resource','type_id');
+            }
+        ])->get()->map(function($pu){
+            $document_user=trim($pu->user->document);
+            return [
+                'folder_name'=> $document_user,
+                'routes' => $pu->user->project_resources->pluck('path_file')->toArray()
+            ];
+        })->toArray();
+        $name_zip = Media::downloadFilesInZip($project_users,$course_name);
+        return $name_zip;
+    }
+    
     protected function updateProjectUser($request){
         $project_user = $request->project_user;
         $project_user->status_id = $request->status_id; 

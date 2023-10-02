@@ -72,6 +72,7 @@
                     @download_all_files="download_all_files($event)"
                     @check_tarea="openFormModal(modalUsuarioCheckTarea, $event, null, `Revisar Tarea - Documento: ${$event.document}`)"
                     @openModalDeleteFiles="openModalDeleteFiles"
+                    @downloadFilesUsers="downloadFilesUsers"
                 >
                     <template v-slot:custom_slot="{ item }">
                         <div v-if="item.resources_user.length > 0" class="d-flex justify-center">
@@ -149,7 +150,8 @@ export default {
                     { text: "Opciones", value: "actions", align: 'center', sortable: false },
                 ],
                 customSelectActions:[
-                    {text:'Archivos eliminados',method_name:'openModalDeleteFiles'}
+                    {text:'Eliminar archivos',method_name:'openModalDeleteFiles'},
+                    {text:'Descargar archivos',method_name:'downloadFilesUsers'},
                 ],
                 actions: [
                     {
@@ -273,11 +275,23 @@ export default {
             // window.location.href = url;
             window.open(url, '_blank');
         },
+        downloadFilesUsers(users){
+            let vue = this;
+            const tempString = users
+            .filter(u => u.project_user_id)
+            .map(u => `&puid[]=${u.project_user_id}`)
+            .join('');         
+            console.log(tempString);
+            let url = `/projects/download-massive-zip-files?project_id=${vue.project_id}${tempString}`
+            console.log(url);
+            axios.get(url).then(({ data }) => {
+                vue.hideLoader();
+            })
+            window.open(url, '_blank');
+        },
         remove_on_paste(event, localText) {
             event.preventDefault();
             let main_text = event.clipboardData.getData("text");
-            console.log('main_text' + main_text);
-            console.log('localText' + localText);
             if (main_text) {
                 main_text = main_text.replace(/\r?\n/g, ' ');
                 if (this.filters.q_group_dnis) {
