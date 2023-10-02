@@ -124,6 +124,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::post('/meetings/{meeting}/finish', [RestMeetingController::class,'finishMeeting']);
     /* apis para el formulario de invitados */
     Route::get('/verify-guest-code', [GuestLinkController::class,'verifyGuestCode']);
+    Route::get('/child-criterion-values', [GuestLinkController::class,'childCriterionValues']);
     Route::post('/send-code-guest', [GuestController::class,'sendGuestCodeVerificationByEmail']);
     Route::post('/verify-code-guest', [GuestController::class,'verifyGuestCodeVerificationByEmail']);
     /* */

@@ -80,7 +80,15 @@ class GuestLink extends BaseModel
         }
         return $data;
     }
+    protected function childCriterionValues($request){
+        
+        $criterion_values =  CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($request) {
+            $q->where('id', $request->workspace_id);
+        })
+        ->where('criterion_id', $request->criterion_id)->orderBy('value_text')->get();
 
+        return ['values' => $criterion_values];
+    }
     protected function verify_guest_url_multimarca($code){
         $data['source'] =  SourceMultimarca::where('code',$code)->where('type','register')->select('source')->first();
         return $data;

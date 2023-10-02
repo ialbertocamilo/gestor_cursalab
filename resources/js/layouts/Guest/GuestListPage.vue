@@ -209,20 +209,33 @@
                     headers: [
                         {text: "Nombre", value: "user_name", align: 'center', sortable: false},
                         {text: "Email", value: "email", sortable: false},
-                        {text: "Invitación", value: "state_name", align: 'center', sortable: false},
-                        {text: "Activo", value: "state", align: 'center', sortable: false},
+                        {text: "Estado invitación", value: "state_name", align: 'center', sortable: false},
+                        {text: "Estado", value: "state", align: 'center', sortable: false},
                         {text: "Fecha y hora", value: "date_invitation", align: 'center'},
+                        {text: "Fecha y hora", value: "date_invitation", align: 'center'},
+                        {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     ],
                     actions: [
-
+                        {
+                            text: "Editar",
+                            icon: "mdi mdi-pencil",
+                            type: "action",
+                            method_name: "edit"
+                        },
+                        {
+                            text: "Actualizar estado",
+                            icon: 'fa fa-circle',
+                            type: 'action',
+                            method_name: 'status'
+                        },
+                        {
+                            text: "Eliminar",
+                            icon: 'far fa-trash-alt',
+                            type: 'action',
+                            method_name: 'delete'
+                        },
                     ],
                     more_actions: [
-                        {
-                            text: "Actividad",
-                            icon: 'fas fa-file',
-                            type: 'action',
-                            method_name: 'activity'
-                        },
                     ]
                 },
                 filters: {

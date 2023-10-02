@@ -17,7 +17,10 @@ class GuestLinkController extends Controller
         $data = GuestLink::verifyGuestCode($request);
         return $this->success($data);
     }
-
+    public function childCriterionValues(Request $request){
+        $data = GuestLink::childCriterionValues($request);
+        return $this->success($data);
+    }
     public function initData(){
         $data = GuestLink::initData();
         return $this->success($data);
