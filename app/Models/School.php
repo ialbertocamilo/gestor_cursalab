@@ -40,7 +40,8 @@ class School extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
+        // $modules_id = $request->modules ?? $workspace->subworkspaces->pluck('id')->toArray();
+        $modules_id = $request->modules ?? current_subworkspaces_id();
 
         $escuelas = School::
         // addSelect('DISTINCT(ss.school_id)')

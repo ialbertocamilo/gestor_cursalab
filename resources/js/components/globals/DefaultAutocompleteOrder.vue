@@ -1,7 +1,6 @@
 <template>
     <div class="d-flex">
         <v-autocomplete
-            attach
             outlined
             :dense="dense"
             hide-details="auto"
