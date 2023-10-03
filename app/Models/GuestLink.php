@@ -53,7 +53,7 @@ class GuestLink extends BaseModel
             SourceMultimarca::insertSource($code,'register',$id_register_url);
         }
     }
-    protected function verifyGuestCode($request){
+    protected function verifyGuestUrl($request){
         $code = $request->code;
         if(!$code){
             return ['exist_url'=>false];

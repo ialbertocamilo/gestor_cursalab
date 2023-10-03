@@ -11,10 +11,10 @@ class GuestLinkController extends Controller
         $data = GuestLink::addUrl($request->all());
         return $this->success($data);
     }
-    public function verifyGuestCode(Request $request){
+    public function verifyGuestUrl(Request $request){
         // $ip = $request->ip();
         // $host = gethostbyaddr($ip);
-        $data = GuestLink::verifyGuestCode($request);
+        $data = GuestLink::verifyGuestUrl($request);
         return $this->success($data);
     }
     public function childCriterionValues(Request $request){
