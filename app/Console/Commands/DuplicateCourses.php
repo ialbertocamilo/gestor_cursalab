@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class DuplicateCourses extends Command
 {
+    const DATE_TIME = '2023-09-22 16:00';
+
     /**
      * The name and signature of the console command.
      *
@@ -77,7 +79,7 @@ class DuplicateCourses extends Command
 
                     foreach ($originTopics as $originTopic) {
                         $destinationTopic = $originTopic->replicate();
-                        $destinationTopic->created_at = '2023-05-30 16:00';
+                        $destinationTopic->created_at = self::DATE_TIME;
                         $destinationTopic->updated_at = null;
                         $destinationTopic->course_id = $destinationCourse->course_id;
                         $destinationTopic->save();
@@ -89,7 +91,7 @@ class DuplicateCourses extends Command
 
                         foreach ($originQuestions as $originQuestion) {
                             $destinationQuestion = $originQuestion->replicate();
-                            $destinationQuestion->created_at = '2023-05-30 16:00';
+                            $destinationQuestion->created_at = self::DATE_TIME;
                             $destinationQuestion->updated_at = null;
                             $destinationQuestion->topic_id = $destinationTopic->id;
                             $destinationQuestion->save();
@@ -97,7 +99,7 @@ class DuplicateCourses extends Command
 
                         foreach ($originMediaTopics as $originMediaTopic) {
                             $destinationMediaTopic = $originMediaTopic->replicate();
-                            $destinationMediaTopic->created_at = '2023-05-30 16:00';
+                            $destinationMediaTopic->created_at = self::DATE_TIME;
                             $destinationMediaTopic->updated_at = null;
                             $destinationMediaTopic->topic_id = $destinationTopic->id;
                             $destinationMediaTopic->save();
@@ -135,15 +137,13 @@ class DuplicateCourses extends Command
         where
             s.id in (
                 SELECT school_id from school_subworkspace ss where subworkspace_id  in (SELECT id from workspaces where parent_id = :workspaceId)
-                                                                    )
+            )
             and c.name in (
-
-                 'PIC: Conética',
-                 'PIC: Sesgos Inconscientes',
-                 'PIC: Evacuación y prevención de incendios',
-                 'PIC: Primeros auxilios',
-                 'PIC: Programa IRIS',
-                 'PIC: Seguridad de la Información 2022'
+                 'PIC: ABC de Tiendas',
+                 'PIC: Agora Club',
+                 'PIC: Club Pro',
+                 'PIC: Programa de Inducción Cultural - Tienda 2.0',
+                 'PIC: Sostenibilidad Tienda'
             )
         "), ['workspaceId' => $workspaceId]);
     }
