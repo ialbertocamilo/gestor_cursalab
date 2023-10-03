@@ -38,7 +38,14 @@ class Guest extends BaseModel {
     protected function sendGuestCodeVerificationByEmail($request){
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
-
+        $email_is_registered = User::select('id')->where('email',$request->email)->first();
+        if($email_is_registered){
+            return ['message'=>'El email ya se encuentra registrado en la plataforma.','email_sent'=>false];
+        }
+        $document_is_registered = User::select('id')->where('email',$request->document)->first();
+        if($document_is_registered){
+            return ['message'=>'El documento ya se encuentra registrado en la plataforma.','email_sent'=>false];
+        }
         $start = '1'.str_repeat('0', $currentRange - 1);
         $end = str_repeat('9', $currentRange);
         $currentCode = rand($start, $end);
@@ -46,12 +53,12 @@ class Guest extends BaseModel {
         $mail_data = [ 'subject' => 'Código de verificación',
                        'code' => $currentCode,
                        'minutes' => $currentMinutes,
-                       'name' => $request->name.' '.$request->lastname,
+                       'name' => trim($request->name).' '. trim($request->lastname),
                        'expires_code'=> Carbon::now()->addMinutes($currentMinutes)->format('Y-m-d H:i:s'),
                     ];
         EmailsSent::storeEmailSent($mail_data,'guest_code_verification');
-        Mail::to( $request->email )->send( new EmailTemplate( 'emails.guest_code_verification', $mail_data ) );
-        return ['message'=>'Email enviado correctamente.'];
+        Mail::to( trim($request->email) )->send( new EmailTemplate( 'emails.guest_code_verification', $mail_data ) );
+        return ['message'=>'Email enviado correctamente.','email_sent'=>true];
     }
     
     protected function verifyGuestCodeVerificationByEmail($request){

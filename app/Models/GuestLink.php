@@ -186,7 +186,7 @@ class GuestLink extends BaseModel
     }
     //SUBFUNCTIONS
     private static function getListCriterion($guest_link){
-        return CriterionWorkspace::with([
+        $criterion_workspace = CriterionWorkspace::with([
             'criterion:id,code,name,field_id,can_be_create,parent_id',
             'criterion.field_type:id,code',
             // 'criterion.values:id,criterion_id,value_text'
@@ -204,7 +204,6 @@ class GuestLink extends BaseModel
             if($criterion_code != 'module'){
                 $can_be_create = boolval($criterion_workspace->criterion->can_be_create);
             }
-
             if($criterion_type != 'date' && !$parent_id){
                 $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($guest_link) {
                     $q->where('id', $guest_link->workspace_id);
@@ -221,6 +220,11 @@ class GuestLink extends BaseModel
                 'can_be_create' => $can_be_create,
                 'values' => $values
             ];
+        });
+        return $criterion_workspace->map(function($cw) use ($criterion_workspace) {
+            $child = collect($criterion_workspace)->where('parent_id',$cw['criterion_id'])->first();
+            $cw['child_id'] = $child?->id;
+            return $cw;
         });
     }
 }
