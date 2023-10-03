@@ -34,6 +34,7 @@ class Workspace extends BaseModel
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
         'show_logo_in_app',
+        'share_diplomas_social_media',
         'certificate_template_id',
     ];
 
@@ -551,8 +552,8 @@ class Workspace extends BaseModel
         $percent = floor($current_active_users_count/$workspace_limit * pow(10, 2)) / pow(10, 2);
         if( $percent > 0.97){
             $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
-            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)     
-                                    ->where('last_percent_sent','<>',$percent)       
+            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)
+                                    ->where('last_percent_sent','<>',$percent)
                                     ->wherehas('user',function($q){
                                             $q->where('active',ACTIVE)->whereNotNull('email_gestor');
                                     })->get();
@@ -707,14 +708,14 @@ class Workspace extends BaseModel
                             ->first();
 
                 $school_position = ['position' => $_school->pivot?->position];
-                
+
                 if ( ! $school ) {
 
                     $school_data = $_school->toArray();
                     $school_data['external_id'] = $_school->id;
 
                     $school = $subworkspace->schools()->create($school_data, $school_position);
-                
+
                 } else {
 
                     $subworkspace->schools()->syncWithoutDetaching([$school->id => $school_position]);
@@ -866,7 +867,7 @@ class Workspace extends BaseModel
                 'icon' => 'mdi-school',
                 'children' => $school_children,
             ];
-            
+
             $data[] = $parent;
         }
 

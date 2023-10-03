@@ -215,7 +215,7 @@ class CursosController extends Controller
         SortingModel::deletePositionInPivotTable(CourseSchool::class,Course::class,[
             'course_id' => $course->id
         ]);
-        
+
         $course->delete();
         $course->requirements()->delete();
 

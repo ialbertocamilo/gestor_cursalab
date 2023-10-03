@@ -9,8 +9,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="all,follow">
 
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv='pragma' content='no-cache'>
+
+
     <title>Certificado</title>
     <link type="text/css" media="all" rel="stylesheet" href="{{ asset('css/certi.css') }}">
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cursalab, LMS Corporativa multiplataforma" />
+    <meta property="og:description" content="Capacitación, evaluación, monitoreo y analítica en un solo lugar" />
+    <meta property="og:image" content="https://sfo2.digitaloceanspaces.com/clb1/images/ambiente/Compartir%20Diploma-02.jpg" />
+    <meta property="og:image:width" content="828" />
+    <meta property="og:image:height" content="450" />
+    <meta property="og:url" content="https://cursalab.io" />
+    <meta property="og:site_name" content="Cursalab" />
 </head>
 <body>
 
