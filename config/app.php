@@ -68,6 +68,17 @@ return [
         ]
     ],
 
+    // Password configuration
+
+    'passwords' => [
+        'app' => [
+            'expiration_days' => env('RESET_PASSWORD_DAYS_APP', 365)
+        ],
+        'gestor' => [
+            'expiration_days' => env('RESET_PASSWORD_DAYS_GESTOR', 365)
+        ]
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

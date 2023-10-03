@@ -92,6 +92,8 @@
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
+                @create_project="openProjectModal($event)"
+                @edit_project="openProjectModal($event)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -163,7 +165,13 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
-
+            <ProjectFormModal
+                width="50vw"
+                :ref="modalOptionProject.ref"
+                :options="modalOptionProject"
+                @onConfirm="closeFormModal(modalOptionProject, dataTable, filters)"
+                @onCancel="closeFormModal(modalOptionProject)"
+            />
         </v-card>
     </section>
 </template>
@@ -175,9 +183,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
+import ProjectFormModal from "../Project/ProjectFormModal.vue";
 
 export default {
     components: {
+        ProjectFormModal,
         CursosEncuestaModal,
         MoverCursoModal,
         DialogConfirm,
@@ -252,6 +262,30 @@ export default {
                         method_name: 'encuesta'
                     },
                     {
+                        text: "Crear Tarea",
+                        icon: 'fas fa-book',
+                        type: 'action',
+                        show_condition:'create_project',
+                        method_name: 'create_project',
+                        // permission_name:'can_show_tarea'
+                    },
+                    {
+                        text: "Editar Tarea",
+                        icon: 'fas fa-book',
+                        type: 'action',
+                        show_condition:'edit_project',
+                        method_name: 'edit_project',
+                        // permission_name:'can_show_tarea'
+                    },
+                    {
+                        text: "Usuario tareas",
+                        icon: 'fas fa-book',
+                        show_condition:'project_users',
+                        type: 'route',
+                        route: 'project_users_route',
+                        // permission_name:'can_show_tarea'
+                    },
+                    {
                         text: "Actualizar Estado",
                         icon: 'fa fa-circle',
                         type: 'action',
@@ -321,7 +355,14 @@ export default {
                 ref: 'CourseListValidationModal',
                 open: false,
             },
-
+            modalOptionProject: {
+                ref: 'ProjectFormModal',
+                open: false,
+                base_endpoint: '/projects',
+                resource: 'Tarea',
+                confirmLabel: 'Guardar',
+                action:'create'
+            },
             courseUpdateStatusModal: {
                 ref: 'CourseUpdateStatusModal',
                 title: 'Actualizar Curso',
@@ -411,6 +452,21 @@ export default {
 
                     // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
+        },
+        openProjectModal(course){
+            let vue = this;
+            let title = 'Crear Tarea';
+            if(course.create_project){
+                vue.modalOptionProject.course=course
+                vue.modalOptionProject.action='create';
+                vue.modalOptionProject.create_from_course_list = true;
+            }else{
+                vue.modalOptionProject.action='edit';
+                vue.modalOptionProject.create_from_course_list = false;
+                title = `Editar Tarea - ${course.name}`;
+            }
+            console.log('course',course);
+            vue.openFormModal(vue.modalOptionProject,course.project,null,title);
         },
         changeHeaders(){
             let vue = this;

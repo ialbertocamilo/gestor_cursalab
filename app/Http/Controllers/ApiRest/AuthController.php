@@ -34,6 +34,8 @@ class AuthController extends Controller
         }
 
         try {
+
+            $ambiente = Ambiente::first();
             $data = $request->validated();
 
             // === validacion de recaptcha ===
@@ -78,12 +80,15 @@ class AuthController extends Controller
                     return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);
 
                 // === verificar el dni como password ===
-                if (trim($userinput) === $password) {
-                    $responseResetPass = [];
-                    Auth::user()->resetAttemptsUser(); // resetea intentos
+                if ($ambiente->identity_validation_enabled) {
 
-                    $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
-                    return response()->json($responseResetPass);
+                    if (trim($userinput) === $password) {
+                        $responseResetPass = [];
+                        Auth::user()->resetAttemptsUser(); // resetea intentos
+
+                        $responseResetPass['recovery'] = $this->checkSameDataCredentials(trim($userinput), $password);
+                        return response()->json($responseResetPass);
+                    }
                 }
                 // === verificar el dni como password ===
 
@@ -116,9 +121,13 @@ class AuthController extends Controller
                 $user->resetAttemptsUser(); // resetea intentos
 
                 // === validar si debe reestablecer contraseña ===
-                $canResetPassWord = $user->checkIfCanResetPassword('APP');
-                if($canResetPassWord) {
-                    return $this->resetPasswordBuildToken($user);
+                if ($ambiente->password_expiration_enabled) {
+
+                    $canResetPassWord = $user->checkIfCanResetPassword('APP');
+                    if($canResetPassWord) {
+                        return $this->resetPasswordBuildToken($user);
+                    }
+                
                 }
                 // === validar si debe reestablecer contraseña ===
 
@@ -211,7 +220,11 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id)
+            ? Workspace::select('share_diplomas_social_media', 'show_logo_in_app', 'logo', 'slug', 'name', 'id')
+                ->where('id', $workspace->parent_id)
+                ->first()
+            : null;
 
         if ($workspace_data) {
             $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;

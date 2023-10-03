@@ -47,7 +47,12 @@ class CursosStoreUpdateRequest extends FormRequest
             'file_imagen' => 'nullable',
             'file_plantilla_diploma' => 'nullable',
             'validateForm' => 'required',
-            'certificate_template_id' => 'nullable'
+
+            'certificate_template_id' => 'nullable',
+            'activate_at' => 'nullable',
+            'deactivate_at' => 'nullable',
+            'show_certification_to_user' => 'nullable',
+            'user_confirms_certificate' => 'nullable'
         ];
     }
 
@@ -55,6 +60,14 @@ class CursosStoreUpdateRequest extends FormRequest
     {
         $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
         $show_certification_date = ($this->show_certification_date === 'true' or $this->show_certification_date === true or $this->show_certification_date === 1 or $this->show_certification_date === '1');
+
+        $show_certification_to_user = ($this->show_certification_to_user === 'true' or $this->show_certification_to_user === true or $this->show_certification_to_user === 1 or $this->show_certification_to_user === '1');
+
+        $user_confirms_certificate = (
+            $this->user_confirms_certificate === 'true' or
+            $this->user_confirms_certificate === true or
+            $this->user_confirms_certificate === 1 or
+            $this->user_confirms_certificate === '1');
 
         $mod_evaluaciones = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
         $qualification_type_id = $this->has('qualification_type') ? $this->qualification_type : null;
@@ -66,6 +79,8 @@ class CursosStoreUpdateRequest extends FormRequest
 
         $data['active'] = $active;
         $data['show_certification_date'] = $show_certification_date;
+        $data['show_certification_to_user'] = $show_certification_to_user;
+        $data['user_confirms_certificate'] = $user_confirms_certificate;
         $data['validateForm'] = !!$this->validateForm;
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
         $data['mod_evaluaciones'] = $mod_evaluaciones;

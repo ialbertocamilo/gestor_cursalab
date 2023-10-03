@@ -12,7 +12,9 @@ class Course extends BaseModel
         'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
-        'show_certification_date', 'certificate_template_id'
+        'show_certification_date', 'show_certification_to_user',
+        'certificate_template_id',
+        'activate_at', 'deactivate_at', 'user_confirms_certificate'
     ];
 
     protected $casts = [
@@ -54,6 +56,11 @@ class Course extends BaseModel
     public function update_usuarios()
     {
         return $this->hasMany(Update_usuarios::class, 'curso_id');
+    }
+    
+    public function project()
+    {
+        return $this->hasOne(Project::class, 'course_id');
     }
 
     public function segments()
@@ -137,7 +144,7 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
-            ->with('schools.subworkspaces')
+            ->with(['schools.subworkspaces','project:id,course_id'])
             // ->with('segments.values', function ($q) {
             //     $q
             //         ->withWhereHas('criterion_value', function ($q) {
@@ -777,7 +784,11 @@ class Course extends BaseModel
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
-
+        $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
+        $status_projects = collect();
+        if(count($projects)>0){
+            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name,code')->select('id','project_id','user_id','status_id','msg_to_user')->get();
+        }
         $user->loadMissing('criterion_values.criterion.field_type');
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
@@ -800,7 +811,18 @@ class Course extends BaseModel
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $course_status = self::getCourseStatusByUser($user, $course, $summary_courses_compatibles, $medias, $statuses);
-
+                $project = $projects->where('course_id',$course->id)->first();
+                if($project){
+                    $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
+                    $project->status = $status_project?->status?->name ?? 'Pendiente';
+                    $project->code = $status_project?->status?->code ?? 'pending';
+                    $project->available = $course_status['available'];
+                    $project->show_message = false;
+                    if(in_array($project->code,['observed','disapproved','passed'])){
+                        $project->show_message = boolval($status_project->where('project_id',$project->id)->first()?->msg_to_user);
+                    }
+                    unset($project->course_id);
+                }
                 // UC rule
                 $course_name = $course->name;
 
@@ -816,6 +838,7 @@ class Course extends BaseModel
                         'encuesta_habilitada' => false,
                         'encuesta_resuelta' => false,
                         'encuesta_id' => null,
+                        'tarea' => $project,
                         'orden' => $course_position,
 
                     ];
@@ -832,8 +855,8 @@ class Course extends BaseModel
                         'encuesta_habilitada' => $course_status['enabled_poll'],
                         'encuesta_resuelta' => $course_status['solved_poll'],
                         'encuesta_id' => $course_status['poll_id'],
+                        'tarea' => $project,
                         'orden' => $course_position,
-
                     ];
                 }
             }
@@ -1516,14 +1539,19 @@ class Course extends BaseModel
         $last_topic_reviewed = $last_topic ?? $topics->first()->id ?? null;
 
         // $media_topics = MediaTema::where('topic_id',$last_topic_reviewed)->orderBy('position')->get();
-        $media_topics = $media_temas->where('topic_id',$last_topic_reviewed)->sortBy('position');
+        $media_topics = [];
+        if(count($media_temas)){
+            $media_topics = $media_temas->where('topic_id',$last_topic_reviewed)->sortBy('position');
+        }
 
         // $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
         // ->where('topic_id', $last_topic_reviewed)
         // ->where('user_id', $user->id)
         // ->first();
-
-        $summary_topic = $summary_topics->where('topic_id', $last_topic_reviewed)->first();
+        $summary_topic = null;
+        if($last_topic_reviewed){
+            $summary_topic = $summary_topics->where('topic_id', $last_topic_reviewed)->first();
+        }
 
         $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
 

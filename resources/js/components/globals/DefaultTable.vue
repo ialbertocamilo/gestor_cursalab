@@ -21,22 +21,64 @@
             :item-class="row_classes"
             :server-items-length="pagination.total_rows"
         >
-            <template v-for="h in dataTable.headers" v-slot:[`header.${h.value}`]="{ header }">
-                {{ h.text }}
-                <v-tooltip top attach v-if="h.tooltip">
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-icon
-                            small
-                            color="primary"
-                            dark
-                            v-bind="attrs"
-                            v-on="on"
-                            v-text="'mdi-information'"
-                            class="icon_tooltip"
-                        />
-                    </template>
-                    <span v-text="h.tooltip"/>
-                </v-tooltip>
+            <template v-for="(h,index) in dataTable.headers" v-slot:[`header.${h.value}`]="{  }">
+                <div v-if="h.value == 'custom-select'" class="d-flex align-items-center" style="width: 20px;" :key="index">
+                    <v-checkbox
+                        color="primary"
+                        hide-details="false"
+                        v-model="all_check_select"
+                        @click="checkOrUncheckAllItems()"
+                    ></v-checkbox>
+                    <v-menu
+                        v-model="menu_massive_actions"
+                        attach
+                        offset-x
+                        right
+                        nudge-bottom="10"
+                        min-width="auto"
+                    >
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                text
+                                icon
+                                v-bind="attrs"
+                                v-on="on"
+                            >
+                                <v-icon>mdi mdi-chevron-down</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list dense>
+                            <v-list-item
+                                v-for="(item, i) in dataTable.customSelectActions"
+                                :key="i"
+                            >
+                                <v-list-item-title 
+                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))" 
+                                    style="cursor: pointer;"
+                                >
+                                    {{ item.text }}
+                                </v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </div>
+                <div v-else>
+                    {{ h.text }}
+                    <v-tooltip top attach v-if="h.tooltip">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                small
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                v-text="'mdi-information'"
+                                class="icon_tooltip"
+                            />
+                        </template>
+                        <span v-text="h.tooltip"/>
+                    </v-tooltip>
+                </div>
             </template>
 
             <!-- VOTACIONES -->
@@ -294,7 +336,15 @@
                 </div>
             </template>
 
-
+            <template v-slot:item.custom-select="{item,header,index}">
+                {{index}}
+                <v-checkbox
+                    color="primary"
+                    hide-details="false"
+                    v-model="item.selected"
+                >
+                </v-checkbox>
+            </template>
             <!--   CUSTOM COLUMNS -->
 
             <template v-slot:item.status_meeting="{ item, header }">
@@ -569,6 +619,11 @@
 
             </template>
 
+            <template v-slot:item.nombre_and_requisito="{item, header}">
+                <p class="my-0">{{ item.nombre_and_requisito.nombre }}</p>
+                <p class="my-0" v-if="item.nombre_and_requisito.requisito"><small><strong>Requisito:</strong> {{ item.nombre_and_requisito.requisito }}</small></p>
+            </template>
+
             <template v-slot:item.custom_error="{item, header}">
                 <p class="my-0"><strong>{{ item.custom_error.title }}</strong></p>
                 <p class="my-0"><small>{{ item.custom_error.subtitle }}</small></p>
@@ -644,6 +699,10 @@
                 </div>
             </template>
 
+            <!-- CUSTOM -->
+            <template v-slot:[`item.custom_slot`]="{item}">
+                <slot name="custom_slot" v-bind="{ item }" />
+            </template>
         </v-data-table>
         <!--   Custom Paginator -->
 
@@ -753,7 +812,9 @@ export default {
             selectedRows: [],
             footerProps: {
                 'items-per-page-options': [10, 15, 20, 25, 30],
-            }
+            },
+            menu_massive_actions:false,
+            all_check_select:false,
         }
         // ),
     },
@@ -843,6 +904,7 @@ export default {
             url += filters
             this.$http.get(url)
                 .then(({data}) => {
+                    data.data.data.forEach(e => e.selected=false);
                     vue.rows = data.data.data
 
                     // if (vue.filters !== "")
@@ -853,7 +915,7 @@ export default {
                     vue.pagination.fromRow = data.data.from || 0;
                     vue.pagination.toRow = data.data.to || 0;
                     vue.pagination.total_rows = data.data.total;
-                    vue.loading = false
+                    vue.loading = false;
                 })
         },
         changePage(sum) {
@@ -965,6 +1027,10 @@ export default {
         addSpeaker( item ) {
             let vue = this
             vue.$emit('addSpeaker', item)
+        },
+        checkOrUncheckAllItems(){
+            let vue = this;
+            vue.rows.forEach(item => (item.selected = vue.all_check_select));
         }
     }
 }

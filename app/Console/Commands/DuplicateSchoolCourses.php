@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class DuplicateSchoolCourses extends Command
 {
 
-    const DATE_TIME = '2023-09-15 15:00';
+    const DATE_TIME = '2023-09-22 16:00';
 
     /**
      * The name and signature of the console command
@@ -118,7 +118,9 @@ class DuplicateSchoolCourses extends Command
 
 
             if ($this->argument('mode') === 'save') {
-                $this->duplicateCourses($originCourses, $destinationSchools);
+                $this->duplicateCourses(
+                    $originCourses, $destinationSchools, $destinationWorkspaceId
+                );
             }
         }
 
@@ -129,7 +131,9 @@ class DuplicateSchoolCourses extends Command
     /**
      *
      */
-    public function duplicateCourses($originCourses, $destinationSchools) {
+    public function duplicateCourses(
+        $originCourses, $destinationSchools, $destinationWorkspaceId
+    ) {
         DB::beginTransaction();
 
         try {
@@ -182,6 +186,10 @@ class DuplicateSchoolCourses extends Command
                         'position' => 1
                     ]);
 
+                DB::table('course_workspace')->insert([
+                    'workspace_id' => $destinationWorkspaceId,
+                    'course_id' => $destinationCourse->id
+                ]);
 
                 // Iterate and duplicate every topic
 

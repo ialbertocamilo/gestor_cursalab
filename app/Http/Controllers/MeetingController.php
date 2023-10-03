@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Benefit;
+use App\Models\CriterionWorkspace;
 use App\Models\Meeting;
 use App\Models\Usuario;
 use App\Models\Taxonomy;
@@ -156,7 +157,7 @@ class MeetingController extends Controller
             $meeting->benefit = $benefits->where('id',$silabo_selected->benefit->id)->first();
         }
         extract($this->getFormSelects(true), EXTR_OVERWRITE);
-        
+
         return $this->success(get_defined_vars());
     }
 
