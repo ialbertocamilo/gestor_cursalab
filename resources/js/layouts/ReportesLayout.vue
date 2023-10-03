@@ -738,29 +738,23 @@ export default {
         },
         async fetchData() {
             let vue = this;
-            // Fetch current session workspace
 
-            let url = `../usuarios/session`
-            let response = await axios({
-                url: url,
-                method: 'get'
-            })
-            vue.userSession = response.data;
-            this.adminId = response.data.user.id
-            this.workspaceId = response.data.session.workspace.id
+            let {
+                userSession,
+                adminId,
+                workspaceId,
+                modules,
+                admins,
+                VademecumList
+            } = await vue.fetchDataReport();
 
-            // Fetch modules and admins
+            this.userSession = userSession;
+            this.adminId = adminId
+            this.workspaceId = workspaceId
 
-            let url2 = `${this.reportsBaseUrl}/filtros/datosiniciales/${this.workspaceId}`
-
-            let response2 = await axios({
-                url: url2,
-                method: 'get'
-            })
-
-            this.modules = response2.data.modules
-            this.admins = response2.data.admins
-            this.VademecumList = response2.data.vademecums
+            this.modules = modules
+            this.admins = admins
+            this.VademecumList = VademecumList
 
             // Fetch report types
 

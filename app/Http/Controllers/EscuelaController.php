@@ -63,6 +63,7 @@ class EscuelaController extends Controller
         $workspace = get_current_workspace();
 
         $modules = Workspace::where('parent_id', $workspace?->id)
+            ->whereIn('id', current_subworkspaces_id())
             ->select('id', 'name')->get();
 
         return $compactResponse ? [] : $this->success(compact('modules'));

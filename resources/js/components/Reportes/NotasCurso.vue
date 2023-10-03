@@ -295,7 +295,7 @@ export default {
     methods: {
         async fetchFiltersData () {
             // Fetch schools
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}?grouped=0`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
