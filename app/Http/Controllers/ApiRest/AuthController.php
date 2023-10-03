@@ -220,7 +220,11 @@ class AuthController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
-        $workspace_data = ($workspace->parent_id) ? Workspace::select('show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
+        $workspace_data = ($workspace->parent_id)
+            ? Workspace::select('share_diplomas_social_media', 'show_logo_in_app', 'logo', 'slug', 'name', 'id')
+                ->where('id', $workspace->parent_id)
+                ->first()
+            : null;
 
         if ($workspace_data) {
             $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;

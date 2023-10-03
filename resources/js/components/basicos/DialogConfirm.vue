@@ -114,6 +114,8 @@
             </v-card-text>
             <v-card-actions>
                 <DefaultModalActionButton
+                    :cancelLabel="txt_btn_cancel"
+                    :confirmLabel="txt_btn_confirm"
                     @cancel="closeModal"
                     @confirm="confirmModal"/>
             </v-card-actions>

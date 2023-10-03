@@ -57,8 +57,14 @@ class CursosController extends Controller
             && !isset($request->dates)
             && !isset($request->q)
         );
+        //Set permission to edit/create project
+        $request->hasHabilityToShowProjectButtons = false;
+        $entity_id = Taxonomy::select('id')->where('group','gestor')->where('type','submenu')->where('code','projects')->first()?->id;
+        if (auth()->user()->getAbilities()->where('entity_id',$entity_id)->first()) {
+            $request->hasHabilityToShowProjectButtons = true;
+        }
+        //Get data
         $cursos = Course::search($request);
-
         CursoSearchResource::collection($cursos);
 
         return $this->success($cursos);
@@ -215,7 +221,7 @@ class CursosController extends Controller
         SortingModel::deletePositionInPivotTable(CourseSchool::class,Course::class,[
             'course_id' => $course->id
         ]);
-        
+
         $course->delete();
         $course->requirements()->delete();
 
