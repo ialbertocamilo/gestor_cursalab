@@ -44,63 +44,28 @@ class ValidateMigratedData extends Command
      */
     public function handle()
     {
+        $this->setInitMessage();
+        // $db = self::connect();
+
+        
+        // (new ValidateMigratedDataUsers())->renderUsersTable();
+
+        // $this->renderCoursesTable();
+        // $this->renderTopicsTable();
+        // $this->renderAnnouncementsTable();
+
+        $this->setFinalMessage();
+    }
+
+    public function setInitMessage()
+    {
         $this->line("Inicio: " . now());
+        $this->line("Database v1 (ORIGIN): " . config('database.connections.mysql_v1.name'));
+        $this->line("Database v2 (NEW): " . config('database.connections.mysql.read.database'));
+    }
 
-        $data = [];
-
-        $db = self::connect();
-
-        $total = DB::table('courses')->count();
-        $total_without_deleted = DB::table('courses')->whereNull('deleted_at')->count();
-        $total_deleted = DB::table('courses')->whereNotNull('deleted_at')->count();
-
-        $v1_total = $db->getTable('cursos')->count();
-        $v1_total_without_deleted = 0;
-        $v1_total_deleted = 0;
-
-
-
-        $this->addRowTable($data, 'Total de registros', $v1_total, $total);
-        $this->addRowTable($data, 'Total sin eliminados', $v1_total_without_deleted, $total_without_deleted);
-        $this->addRowTable($data, 'Total eliminados', $v1_total_deleted, $total_deleted);
-
-        $this->table(
-            ['', 'v1', 'v2', 'status'],
-            $data,
-        );
-
-
-        // $courses = Course::disableCache()
-        //     ->with([
-        //         'topics' => function($q) {
-        //             $q->where('active', ACTIVE);
-        //             $q->select('id', 'name', 'course_id');
-        //         },
-        //         'schools' => function($q) {
-        //             $q->where('active', ACTIVE);
-        //             $q->select('id', 'name', 'scheduled_restarts');
-        //         }
-        //     ])
-        //     ->select('id', 'name', 'scheduled_restarts', 'mod_evaluaciones')
-        //     ->where('active', ACTIVE)->get();
-
-        // $bar = $this->output->createProgressBar($courses->count());
-
-        // $records = 0;
-
-        // foreach ($courses as $course) {
-
-
-
-            // $bar->advance();
-        // }
-
-        // $this->line("");
-
-        // $bar->finish();
-
-        // $this->line("Records updated => " . $records);
-
+    public function setFinalMessage()
+    {
         $this->line("Fin: " . now());
     }
 
@@ -111,5 +76,46 @@ class ValidateMigratedData extends Command
         $dataTable[] = [
             $title, $firstValue, $secondValue, $status,
         ];
+    }
+
+
+
+    public function renderAnnouncementsTable()
+    {
+        $this->line("Anuncios: " . now());
+
+        $db = self::connect();
+        $data = [];
+
+        $v2_total = DB::table('announcements')->count();
+        $v1_total = $db->getTable('anuncios')->count();
+
+        $v2_total_active = DB::table('announcements')->where('active', 1)->count();
+        $v1_total_active = $db->getTable('anuncios')->where('estado', 1)->count();
+
+        $v2_total_inactive = DB::table('announcements')->where('active', '!=', 1)->count();
+        $v1_total_inactive = $db->getTable('anuncios')->where('estado', '!=', 1)->count();
+        
+        $init_data = date('Y') . '-01-01';
+
+        $v2_total_year = DB::table('announcements')->whereDate('publish_date', '>=', $init_data)->count();
+        $v1_total_year = $db->getTable('anuncios')->whereDate('publish_date', '>=', $init_data)->count();
+
+        $v2_total_beforeyear = DB::table('announcements')->whereDate('publish_date', '<', $init_data)->count();
+        $v1_total_beforeyear = $db->getTable('anuncios')->whereDate('publish_date', '<', $init_data)->count();
+
+        
+        $this->addRowTable($data, 'Total de registros', $v1_total, $v2_total);
+        $this->addRowTable($data, 'Total activos', $v1_total_active, $v2_total_active);
+        $this->addRowTable($data, 'Total inactivos', $v1_total_inactive, $v2_total_inactive);
+        $this->addRowTable($data, 'Total publicados este año', $v1_total_year, $v2_total_year);
+        $this->addRowTable($data, 'Total publicados antes de este año', $v1_total_beforeyear, $v2_total_beforeyear);
+
+        $this->table(
+            ['Anuncios', 'v1', 'v2', 'status'],
+            $data,
+        );
+
+        $this->line("-------------------------------");
     }
 }
