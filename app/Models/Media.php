@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
-use App\Services\FileService;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Support\Facades\Storage;
+use ZipArchive;
+use Aws\S3\S3Client;
 use Illuminate\Support\Str;
+use App\Services\FileService;
+use App\Services\DashboardService;
 use Illuminate\Support\Facades\File;
 
+use Symfony\Component\Mime\MimeTypes;
+use Illuminate\Support\Facades\Storage;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
-use Aws\S3\S3Client;
-use ZipArchive;
 
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\Foundation\Application;
 use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
 
 class Media extends BaseModel
@@ -265,7 +267,7 @@ class Media extends BaseModel
         $valid_ext3 = ['mp3'];
         $valid_ext4 = ['pdf'];
         $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
-        $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx'];
+        $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
 
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
@@ -301,7 +303,6 @@ class Media extends BaseModel
                 $uploaded = true;
             }
         }
-
         // Upload to remote storage
 
         if (!$uploaded) {
@@ -333,6 +334,24 @@ class Media extends BaseModel
         return $path;
     }
 
+    protected function validateStorageByWorkspace($files){
+        $workspace = get_current_workspace();
+        $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
+        $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
+
+        // === workspace storage actual ===
+        $total_current_storage = $workspace_current_storage;
+        foreach ($files as $file) {
+            $total_current_storage += round($file->getSize() / 1024);
+        }
+        $total_current_storage = formatSize($total_current_storage, parsed:false);
+        // === workspace storage actual ===
+
+        $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
+        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' && 
+                                $total_current_storage['size'] <= $total_storage_limit);
+        return  $still_has_storage;
+    }
     protected function extractZipToTempFolder($file, $temp_path)
     {
         $zip = new ZipArchive();
@@ -718,5 +737,51 @@ class Media extends BaseModel
     //         }
     //     }
     // }
+    protected function createZipFromStorage($files){
+        $rutas =  $files['rutas'];
+        $file_zip_name = $files['file_zip_name'];
+        $zip = new ZipArchive;
+        $mimeTypes = new MimeTypes();
+        if (true === ($zip->open($file_zip_name, ZipArchive::CREATE | ZipArchive::OVERWRITE))) {
+            foreach ($rutas as $ruta) {
+                if(Storage::disk('s3')->exists($ruta)){
+                    $file_content = Storage::disk('s3')->get($ruta);
+                    $file_extension = $mimeTypes->getExtensions(Storage::disk('s3')->mimeType($ruta));
+                    $file_extension = isset($file_extension[0]) ? $file_extension[0] : 'txt';
+                    $basename = pathinfo($ruta, PATHINFO_FILENAME) . '.' . $file_extension;
+                    // dd($file_content,$basename,$ruta);
+                    $zip->addFromString($basename, $file_content);
+                }
+            }
+        }
+        $zip->close();
+        return $file_zip_name;
+    }
 
+    protected function downloadFilesInZip($data,$zipFileName = 'download-files'){
+        // Crear un archivo ZIP temporal
+        $zip = new ZipArchive();
+        if ($zip->open($zipFileName, ZipArchive::CREATE) !== true) {
+            return false;
+        }
+        $mimeTypes = new MimeTypes();
+        foreach ($data as $item) {
+            // Añadir la carpeta al archivo ZIP
+            $folderName = $item['folder_name'];
+            $zip->addEmptyDir($folderName);
+
+            // Añadir archivos a la carpeta del ZIP
+            foreach ($item['routes'] as $route) {
+                if(Storage::disk('s3')->exists($route)){
+                    $file_content = Storage::disk('s3')->get($route);
+                    $file_extension = $mimeTypes->getExtensions(Storage::disk('s3')->mimeType($route));
+                    $file_extension = isset($file_extension[0]) ? $file_extension[0] : 'txt';
+                    $basename = pathinfo($route, PATHINFO_FILENAME) . '.' . $file_extension;
+                    $zip->addFromString($folderName . '/' . $basename, $file_content);
+                }
+            }
+        }
+        $zip->close();
+        return $zipFileName;
+    }
 }
