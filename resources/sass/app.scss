@@ -458,3 +458,9 @@ Skeletons
 .v-text-field input {
     font-size: 0.85em;
 }
+
+.v-card__title.sticky-card-text{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
