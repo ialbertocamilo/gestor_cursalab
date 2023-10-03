@@ -202,13 +202,14 @@ class Announcement extends BaseModel
             ->toArray();
 
         // Register notifications
-
-        UserNotification::createNotifications(
-            get_current_workspace()->id,
-            $usersIds,
-            UserNotification::NEW_ANNOUNCEMENT,
-            [ ],
-            'anuncios'
-        );
+        if(count($usersIds)){
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                $usersIds,
+                UserNotification::NEW_ANNOUNCEMENT,
+                [ ],
+                'anuncios'
+            );
+        }
     }
 }

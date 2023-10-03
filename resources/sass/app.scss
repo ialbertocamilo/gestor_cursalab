@@ -421,4 +421,8 @@ Skeletons
     width: 42px;
     border-radius: 5px;
 }
-
+.v-card__title.sticky-card-text{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}

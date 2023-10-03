@@ -204,7 +204,7 @@ Segment extends BaseModel
             //colocar usuarios en cola para actualizaciónes masivas
             if($request->model_type == 'App\\Models\\Course'){
                 $course = Course::find($request->model_id);
-                Summary::updateUsersByCourse($course,null,false,false,'segmented');
+                Summary::updateUsersByCourse($course,null,false,false,'segmented',send_notification:true);
             }
 
             DB::commit();

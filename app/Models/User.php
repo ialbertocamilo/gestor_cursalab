@@ -225,6 +225,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
     }
 
+    public function projects(){
+        return $this->hasMany(ProjectUser::class, 'user_id', 'id');
+    }
+
+    public function project_resources(){
+        return $this->hasMany(ProjectResources::class, 'type_id', 'id')->where('from_resource','media_project_user');
+    }
+
     public function scopeOnlyClientUsers($q)
     {
         $q

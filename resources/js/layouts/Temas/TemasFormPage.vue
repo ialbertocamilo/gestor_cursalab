@@ -20,6 +20,7 @@
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 counter="120"
+                                emojiable
                             />
                             <DefaultAutocomplete
                                 dense

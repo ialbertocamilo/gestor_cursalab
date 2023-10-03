@@ -211,17 +211,20 @@ class Videoteca extends BaseModel
 
             DB::beginTransaction();
 
-            if ($videoteca) :
+            $createNotifications = false;
+            if ($videoteca) {
                 // $videoteca->fill($data);
                 // if ($videoteca->isDirty()):
                 //     $videoteca->save($data);
                 // endif;
 
                 $videoteca->update($data);
-            else:
+            } else {
                 $data['workspace_id'] = get_current_workspace()->id;
                 $videoteca = self::create($data);
-            endif;
+
+                $createNotifications = true;
+            }
 
             // if (!empty($data['modules'])) :
                 $videoteca->modules()->sync($data['modules'] ?? []);
@@ -234,6 +237,10 @@ class Videoteca extends BaseModel
 
             // $videoteca->save();
 
+            if ($createNotifications and $videoteca) {
+                self::registerNotificationsForVideo($videoteca->id);
+            }
+
             DB::commit();
 
             return $videoteca;
@@ -243,6 +250,48 @@ class Videoteca extends BaseModel
             info($e);
             DB::rollBack();
         }
+    }
+
+    /**
+     * Register notifications for all active users in video's modules
+     * @param $videoId
+     * @return void
+     */
+    public static function registerNotificationsForVideo($videoId): void
+    {
+
+        // Load videos' subworkspaces ids
+
+        $subworkspacesIds = DB::select(DB::raw('
+                select w.id
+                from videoteca_module vm
+                    join workspaces w on w.id = vm.module_id
+                where vm.videoteca_id = :videoId
+            '),['videoId' => $videoId]
+        );
+
+        $subworkspacesIds = collect($subworkspacesIds)
+            ->pluck('id')
+            ->toArray();
+
+        // Load users ids from subworkspaces
+
+        $usersIds = User::query()
+            ->whereIn('subworkspace_id', $subworkspacesIds)
+            ->where('active', 1)
+            ->select('id')
+            ->pluck('id')
+            ->toArray();
+
+        // Register notifications
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            $usersIds,
+            UserNotification::NEW_VIDEO,
+            [ ],
+            'videoteca/multimedia/' . $videoId
+        );
     }
 
     protected function prepareData($items, $with = [], $user = null)

@@ -9,7 +9,7 @@ class School extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_id',
-         'scheduled_restarts', 'active'
+         'scheduled_restarts', 'active', 'certificate_template_id'
     ];
 
     public function setActiveAttribute($value)

@@ -42,7 +42,7 @@ class WorkspaceRequest extends FormRequest
 
             'qualification_type_id' => 'required',
             'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
-            'criteria' => 'required'
+            'share_diplomas_social_media' => 'nullable'
         ];
     }
 
@@ -64,33 +64,13 @@ class WorkspaceRequest extends FormRequest
                                           $this->show_logo_in_app == 1 ) ? true : false;
         }
 
-        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
-
-
-        $criteria_workspace = $this->criteria_workspace ? json_decode($this->criteria_workspace, true) : [];
-
-        $data['criteria'] = [];
-
-        foreach ($criteria_workspace as $row) {
-
-            if ($row['available']) {
-
-                $fields = [];
-
-                foreach ($row['fields'] as $field) {
-
-                    if ($field['type'] == 'boolean') {
-                        $fields[$field['code']] = $field['available'] ? 1 : NULL;
-                    }
-
-                    if ($field['type'] == 'text') {
-                        $fields[$field['code']] = $field['text'] ?? NULL;
-                    }
-                }
-
-                $data['criteria'][$row['criterion_id']] = $fields;
-            }
+        if ($this->has('share_diplomas_social_media') ) {
+            $data['share_diplomas_social_media'] = ($this->share_diplomas_social_media == 'true' ||
+                $this->share_diplomas_social_media == 1 ) ? true : false;
         }
+
+
+        $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
 
         return $this->merge($data)->all();
     }

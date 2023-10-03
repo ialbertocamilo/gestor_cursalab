@@ -344,13 +344,27 @@
                                             @onSelect="setFile($event, resource, 'logo_marca_agua')"
                                         />
                                     </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultToggle
-                                            class="mt-5"
-                                            v-model="resource.marca_agua_estado"
-                                            active-label="Mostrar marca de agua en diploma"
-                                            inactive-label="No mostrar marca de agua en diploma"
+                                    <v-col cols="6">
+                                        <div>
+                                            <DefaultToggle
+                                                class="mt-5"
+                                                v-model="resource.marca_agua_estado"
+                                                active-label="Mostrar marca de agua en diploma"
+                                                inactive-label="No mostrar marca de agua en diploma"
                                             />
+                                        </div>
+
+                                        <div>
+                                            <DefaultToggle
+                                                class="mt-5"
+                                                v-model="resource.share_diplomas_social_media"
+                                                active-label="Permitir compartir diploma en redes sociales"
+                                                inactive-label="No permitir compatir diploma en redes sociales"
+                                            />
+                                        </div>
+
+
+
                                     </v-col>
                                 </v-row>
                             </template>
@@ -414,7 +428,7 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
     'show_logo_in_app','limits'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];

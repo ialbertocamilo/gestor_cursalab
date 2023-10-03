@@ -101,7 +101,7 @@ class Topic extends BaseModel
 
     protected static function search($request, $paginate = 15)
     {
-        $q = self::with('evaluation_type:id,code,name', 'questions.type')
+        $q = self::with('evaluation_type:id,code,name', 'questions.type', 'requirements.model_topic')
             //            ->withCount('questions')
             ->where('course_id', $request->course_id);
         // $q = self::withCount('preguntas')
@@ -460,6 +460,12 @@ class Topic extends BaseModel
                     ->where('school_id',$school_id)
                     ->whereIn('course_id',$courses_id)
                     ->get();
+
+        $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
+        $status_projects = collect();
+        if(count($projects)>0){
+            $status_projects   =  ProjectUser::whereIn('project_id',$projects->pluck('id'))->where('user_id',$user->id)->with('status:id,name,code')->select('id','project_id','user_id','status_id','msg_to_user')->get();
+        }
         // UC
         $school_name = $school?->name;
         // if ($workspace_id === 25 && $school_name) {
@@ -621,7 +627,18 @@ class Topic extends BaseModel
                 ]);
             }
     
-
+            $project = $projects->where('course_id',$course->id)->first();
+            if($project){
+                $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
+                $project->status = $status_project?->status?->name ?? 'Pendiente';
+                $project->code = $status_project?->status?->code ?? 'pending';
+                $project->available = $course_status['available'];
+                $project->show_message = false;
+                if(in_array($project->code,['observed','disapproved','passed'])){
+                    $project->show_message = boolval($status_project->where('project_id',$project->id)->first()?->msg_to_user);
+                }
+                unset($project->course_id);
+            }
             $requirement_list = null;
             $requirement_course = $course->requirements->first();
 
@@ -795,6 +812,7 @@ class Topic extends BaseModel
                         'id' => $course->compatible->course->id ?? 'X',
                         'name' => $course->compatible->course->name ?? 'TEST DEFAULT COMPATIBLE',
                     ],
+                    'tarea' => $project,
                 ]);
 
                 continue;
@@ -823,6 +841,7 @@ class Topic extends BaseModel
                 'porcentaje' => $course_status['progress_percentage'],
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
+                'tarea' => $project,
                 // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }

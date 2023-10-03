@@ -19,7 +19,7 @@ class Ambiente extends Model
         'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',
         'logo_cursalab_position','show_blog_btn','logo_cursalab',
         'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo','male_logo', 'female_logo',
-        'template',
+        'template', 'identity_validation_enabled', 'password_expiration_enabled',
     ];
 
     protected $hidden = [

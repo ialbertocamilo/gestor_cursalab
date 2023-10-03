@@ -226,10 +226,10 @@ class CheckList extends BaseModel
                     }
                 }
                 $lista_cursos = $checklist->courses->map(function($course) use ($user,$summaries_course_checklist,$statuses_course){
-                    $status = 'Pendiente';
+                    $status = 'Por validar';
                     $summary_course = $summaries_course_checklist->where('course_id',$course->id)->first();
                     if($summary_course){
-                        $status = $statuses_course->where('id',$summary_course->status_id)->first()?->name ?? 'Pendiente';
+                        $status = $statuses_course->where('id',$summary_course->status_id)->first()?->name ?? 'Por validar';
                     }
                     return [
                         'id' =>$course->id,
@@ -622,7 +622,7 @@ class CheckList extends BaseModel
             if (!is_null($actividadProgreso)) {
                 $actividad->estado = $actividadProgreso->qualification;
             } else {
-                $actividad->estado = 'Pendiente';
+                $actividad->estado = 'Por validar';
             }
             $type_name = !is_null($actividad->type_id) ? $checklists_taxonomies->where('id', $actividad->type_id)->first() : null;
             $type_name = !is_null($type_name) ? $type_name->code : '';
@@ -643,7 +643,7 @@ class CheckList extends BaseModel
                     $checklistRptaItem = new ChecklistRptaItem();
                     $checklistRptaItem->checklist_answer_id =  $checklistRpta->id;
                     $checklistRptaItem->checklist_item_id =  $actividad->id;
-                    $checklistRptaItem->qualification =   'Pendiente';
+                    $checklistRptaItem->qualification =   'Por validar';
                     $checklistRptaItem->save();
                     $checklistRpta->rpta_items->push($checklistRptaItem);
                 }

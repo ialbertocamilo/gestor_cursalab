@@ -38,6 +38,7 @@ class SubWorkspaceRequest extends FormRequest
             'file_logo' => 'nullable',
             'plantilla_diploma' => 'nullable',
             'file_plantilla_diploma' => 'nullable',
+            'certificate_template_id' => 'nullable'
         ];
    
         return $reglas;

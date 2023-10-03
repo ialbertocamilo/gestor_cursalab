@@ -48,6 +48,7 @@ class RestQuizController extends Controller
         $data_ev = [
             'active_results' => (bool) $topic->active_results,
             'attempts' => $row->attempts + 1,
+            'total_attempts' => $row->total_attempts + 1,
             'last_time_evaluated_at' => now(),
             'current_quiz_started_at' => NULL,
             'current_quiz_finishes_at' => NULL,
@@ -59,7 +60,7 @@ class RestQuizController extends Controller
         if($topic->active_results) {
             $data_ev['preguntas'] = Topic::evaluateAnswers2($request->respuestas, $topic);
         }
-        // === tema: mostrar resultados === 
+        // === tema: mostrar resultados ===
 
         $next_topic = NULL;
 
@@ -126,7 +127,7 @@ class RestQuizController extends Controller
     public function cargar_preguntas($topic_id)
     {
         $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
-        
+
         if ($topic->course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
 

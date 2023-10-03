@@ -92,7 +92,7 @@ class BenefitController extends Controller
             $benefit = Benefit::find($benefit_id);
             UserNotification::createNotifications(
                 $benefit->workspace_id,
-                [$usersIds],
+                $usersIds,
                 UserNotification::NEW_BENEFIFT,
                 [
                     'benefitName' => $benefit->name

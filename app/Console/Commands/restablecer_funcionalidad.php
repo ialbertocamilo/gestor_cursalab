@@ -110,9 +110,37 @@ class restablecer_funcionalidad extends Command
         // $this->setCourseOrden();
         // $this->restoSummaryCourseSinceSummaryTopic();
         // $this->restoreJsonNotification();
-        $this->restoreSummariesWithTypeTopicGradesMassive();
+        // $this->restoreSummariesWithTypeTopicGradesMassive();
+        $this->getInfoSupervisors();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
+    }
+    public function getInfoSupervisors(){
+        $users = User::query()
+        ->whereHas('segments')
+        ->withCount([
+            'segments' => function ($q) {
+                $q->
+                whereRelation('code', 'code', 'user-supervise');
+            },
+        ])
+        ->whereRelation('segments.code', 'code', 'user-supervise')->get();
+        $reports = [];
+        $_bar = $this->output->createProgressBar($users->count());
+        $_bar->start();
+        foreach ($users as $key => $user) {
+            $course = new Course();
+            $users_segmented = $course->usersSegmented($user->segments);
+            $reports[] = [
+                'workspace' =>  $user->subworkspace->parent->name,
+                'documento supervisor' => $user->document,
+                'nombre supervisor' => $user->name,
+                'apellido supervisor' => $user->lastname,
+                'cantidad de usuarios supervisados' => count($users_segmented),
+            ];
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/report_supervisor.json', json_encode($reports,JSON_UNESCAPED_UNICODE));
     }
     public function restoreSummariesWithTypeTopicGradesMassive(){
         $summary_topics = SummaryTopic::where('source_id', 4623)
