@@ -4,6 +4,7 @@ namespace App\Console\Commands\ValidationData;
 
 use App\Models\SummaryTopic;
 use App\Models\Course;
+use App\Models\Taxonomy;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use DB;
@@ -45,14 +46,9 @@ class ValidateMigratedData extends Command
     public function handle()
     {
         $this->setInitMessage();
-        // $db = self::connect();
 
-        
-        // (new ValidateMigratedDataUsers())->renderUsersTable();
-
-        // $this->renderCoursesTable();
-        // $this->renderTopicsTable();
-        // $this->renderAnnouncementsTable();
+        $this->renderAnnouncementsTable();
+        $this->renderMeetingsTable();
 
         $this->setFinalMessage();
     }
@@ -113,6 +109,54 @@ class ValidateMigratedData extends Command
 
         $this->table(
             ['Anuncios', 'v1', 'v2', 'status'],
+            $data,
+        );
+
+        $this->line("-------------------------------");
+    }
+
+    public function renderMeetingsTable()
+    {
+        $this->line("Meetings: " . now());
+
+        $db = self::connect();
+        $data = [];
+
+        $v2_total = DB::table('meetings')->count();
+        $v1_total = $db->getTable('meetings')->count();
+
+        $v2_total_active = DB::table('meetings')->whereNull('deleted_at')->count();
+        $v1_total_active = $db->getTable('meetings')->whereNull('deleted_at')->count();
+
+        $v2_total_inactive = DB::table('meetings')->whereNotNull('deleted_at')->count();
+        $v1_total_inactive = $db->getTable('meetings')->whereNotNull('deleted_at')->count();
+        
+        $init_data = date('Y') . '-01-01';
+
+        $v2_total_year = DB::table('meetings')->whereDate('starts_at', '>=', $init_data)->count();
+        $v1_total_year = $db->getTable('meetings')->whereDate('starts_at', '>=', $init_data)->count();
+
+        $v2_total_beforeyear = DB::table('meetings')->whereDate('starts_at', '<', $init_data)->count();
+        $v1_total_beforeyear = $db->getTable('meetings')->whereDate('starts_at', '<', $init_data)->count();
+
+        
+        $this->addRowTable($data, 'Total de registros', $v1_total, $v2_total);
+        $this->addRowTable($data, 'Total sin eliminados', $v1_total_active, $v2_total_active);
+        $this->addRowTable($data, 'Total eliminados', $v1_total_inactive, $v2_total_inactive);
+        $this->addRowTable($data, 'Total publicados este año', $v1_total_year, $v2_total_year);
+        $this->addRowTable($data, 'Total publicados antes de este año', $v1_total_beforeyear, $v2_total_beforeyear);
+
+        $statuses = Taxonomy::getData('meeting', 'status')->get();
+
+        foreach ($statuses as $status) {
+            $v2_total_status = DB::table('meetings')->where('status_id', $status->id)->count();
+            $v1_total_status = $db->getTable('meetings')->where('status_id', $status->external_id)->count();
+
+            $this->addRowTable($data, 'Total ' . $status->name, $v1_total_status, $v2_total_status);
+        }
+
+        $this->table(
+            ['Meetings', 'v1', 'v2', 'status'],
             $data,
         );
 
