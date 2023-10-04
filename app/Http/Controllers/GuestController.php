@@ -22,7 +22,9 @@ class GuestController extends Controller
         $data = Guest::sendInvitationByEmail($request->get('email'));
         return $this->success($data);
     }
-
+    public function storeGuest(GuestStoreRequest $request){
+        return $this->success([]);
+    }
     public function sendGuestCodeVerificationByEmail(Request $request){
         $data = Guest::sendGuestCodeVerificationByEmail($request);
         return $this->success($data);

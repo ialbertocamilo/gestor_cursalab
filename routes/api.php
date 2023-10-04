@@ -127,6 +127,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
     Route::get('/child-criterion-values', [GuestLinkController::class,'childCriterionValues']);
     Route::post('/send-code-guest', [GuestController::class,'sendGuestCodeVerificationByEmail']);
     Route::post('/verify-code-guest', [GuestController::class,'verifyGuestCodeVerificationByEmail']);
+    Route::post('/store-guest', [GuestController::class,'storeGuest']);
     /* */
 });
 
