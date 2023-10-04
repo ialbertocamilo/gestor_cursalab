@@ -57,8 +57,14 @@ class CursosController extends Controller
             && !isset($request->dates)
             && !isset($request->q)
         );
+        //Set permission to edit/create project
+        $request->hasHabilityToShowProjectButtons = false;
+        $entity_id = Taxonomy::select('id')->where('group','gestor')->where('type','submenu')->where('code','projects')->first()?->id;
+        if (auth()->user()->getAbilities()->where('entity_id',$entity_id)->first()) {
+            $request->hasHabilityToShowProjectButtons = true;
+        }
+        //Get data
         $cursos = Course::search($request);
-
         CursoSearchResource::collection($cursos);
 
         return $this->success($cursos);
@@ -69,6 +75,7 @@ class CursosController extends Controller
         $workspace = get_current_workspace();
 
         $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        // $modules_id = current_subworkspaces_id();
 
         $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
 
@@ -215,7 +222,7 @@ class CursosController extends Controller
         SortingModel::deletePositionInPivotTable(CourseSchool::class,Course::class,[
             'course_id' => $course->id
         ]);
-        
+
         $course->delete();
         $course->requirements()->delete();
 
@@ -400,6 +407,7 @@ class CursosController extends Controller
         $modules = Workspace::where('parent_id', $workspace->id)
             // ->select('criterion_value_id as id', 'name')
             ->select('id', 'name', 'codigo_matricula')
+            ->whereIn('id', current_subworkspaces_id())
             ->get()
             ->map(function ($module, $key) {
                 $module->name = $module->name . " [{$module->codigo_matricula}]";

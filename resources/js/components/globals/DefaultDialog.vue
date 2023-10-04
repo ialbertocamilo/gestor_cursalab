@@ -8,24 +8,29 @@
         @click:outside="closeModalOutside"
     >
         <v-card>
-            <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
-                <span v-html="options.title_modal ? options.title_modal : options.title"></span>
-                <v-btn icon :ripple="false" color="white"
-                       @click="closeModal">
-                    <v-icon v-text="'mdi-close'"/>
-                </v-btn>
-            </v-card-title>
-            <v-card-title :class="headerClass" v-show="showTitle" v-else>
-                <div v-html="options.title"></div>
-                <slot name="title-icon"/>
-                <v-spacer/>
-                <v-btn
-                    v-show="options.showCloseIcon"
-                    icon :ripple="false" :color="colorCloseIcon"
-                       @click="closeModalFromIcon">
-                    <v-icon v-text="'mdi-close'"/>
-                </v-btn>
-            </v-card-title>
+            <div v-if="customTitle">
+                <slot name="card-title"/>
+            </div>
+            <div v-else>
+                <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
+                    <span v-html="options.title_modal ? options.title_modal : options.title"></span>
+                    <v-btn icon :ripple="false" color="white"
+                           @click="closeModal">
+                        <v-icon v-text="'mdi-close'"/>
+                    </v-btn>
+                </v-card-title>
+                <v-card-title :class="headerClass" v-show="showTitle" v-else>
+                    <div v-html="options.title"></div>
+                    <slot name="title-icon"/>
+                    <v-spacer/>
+                    <v-btn
+                        v-show="options.showCloseIcon"
+                        icon :ripple="false" :color="colorCloseIcon"
+                           @click="closeModalFromIcon">
+                        <v-icon v-text="'mdi-close'"/>
+                    </v-btn>
+                </v-card-title>
+            </div>
             <v-card-text :class="{'py-3': !noPaddingCardText}">
                 <div class="bx_content" v-if="options.type_modal == 'requirement'">
                     <div class="bx_header">
@@ -106,9 +111,17 @@ export default {
             type: String,
             default:'default-dialog-title'
         },
+        styleTitle:{
+            type: String,
+            default:''
+        },
         colorCloseIcon:{
             type: String,
             default: 'white'
+        },
+        customTitle:{
+            type: Boolean,
+            default: false
         }
     },
     methods: {

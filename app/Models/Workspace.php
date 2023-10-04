@@ -34,6 +34,7 @@ class Workspace extends BaseModel
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
         'show_logo_in_app',
+        'share_diplomas_social_media',
         'certificate_template_id',
     ];
 
@@ -249,12 +250,43 @@ class Workspace extends BaseModel
      */
     public static function countModules(int $workspaceId): int
     {
+        $ids = get_subworkspaces_id($workspaceId);
 
         $count = Workspace::query()
             ->where('parent_id', $workspaceId)
+            ->whereIn('id', $ids)
             ->count();
 
         return $count ?? 0;
+    }
+
+    /**
+     * Count workspaces' courses
+     *
+     * @param int $workspaceId
+     * @return int
+     */
+    public static function countCourses(int $workspaceId): int
+    {
+        // $workspace = get_current_workspace();
+
+        $q = Course::query();
+            // ->whereHas('workspaces', function ($t) use ($workspaceId) {
+            //     $t->where('workspace_id', $workspaceId);
+            // });
+
+
+            $q->whereHas('schools.subworkspaces', function ($q) use ($workspaceId) {
+                $q->whereIn('id', get_subworkspaces_id($workspaceId));
+            });
+
+        // if ($request->active == 1)
+        //     $q->where('active', ACTIVE);
+
+        // if ($request->active == 2)
+        //     $q->where('active', '<>', ACTIVE);
+
+        return $q->count();
     }
 
     /**
@@ -265,8 +297,8 @@ class Workspace extends BaseModel
      */
     public static function countUsers(int $workspaceId): int
     {
-
-        $ids = self::loadSubWorkspacesIds($workspaceId);
+        $ids = get_subworkspaces_id($workspaceId);
+        // $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
             ->whereIn('subworkspace_id', $ids)
@@ -413,12 +445,10 @@ class Workspace extends BaseModel
 
         $query->whereNotNull('parent_id');
 
-        // info('workspace');
-
-        // info(session('workspace'));
-
         if (session('workspace') || $request->workspace_id)
             $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
+
+        $query->whereIn('id', current_subworkspaces_id());
 
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");
@@ -551,8 +581,8 @@ class Workspace extends BaseModel
         $percent = floor($current_active_users_count/$workspace_limit * pow(10, 2)) / pow(10, 2);
         if( $percent > 0.97){
             $type_id = Taxonomy::where('group','email')->where('type','user')->where('code','limite_workspace')->first()?->id;
-            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)     
-                                    ->where('last_percent_sent','<>',$percent)       
+            $emails_user = EmailUser::with('user:id,email_gestor')->where('workspace_id',$workspace->id)->where('type_id',$type_id)
+                                    ->where('last_percent_sent','<>',$percent)
                                     ->wherehas('user',function($q){
                                             $q->where('active',ACTIVE)->whereNotNull('email_gestor');
                                     })->get();
@@ -707,14 +737,14 @@ class Workspace extends BaseModel
                             ->first();
 
                 $school_position = ['position' => $_school->pivot?->position];
-                
+
                 if ( ! $school ) {
 
                     $school_data = $_school->toArray();
                     $school_data['external_id'] = $_school->id;
 
                     $school = $subworkspace->schools()->create($school_data, $school_position);
-                
+
                 } else {
 
                     $subworkspace->schools()->syncWithoutDetaching([$school->id => $school_position]);
@@ -866,7 +896,7 @@ class Workspace extends BaseModel
                 'icon' => 'mdi-school',
                 'children' => $school_children,
             ];
-            
+
             $data[] = $parent;
         }
 

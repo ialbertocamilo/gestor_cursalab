@@ -3,6 +3,7 @@
 namespace App\Exports\Meeting;
 
 use App\Models\Attendant;
+use App\Models\CriterionWorkspace;
 use App\Models\Meeting;
 
 use App\Models\Workspace;
@@ -38,7 +39,11 @@ class MeetingAttendantsExport implements FromView, WithTitle, ShouldAutoSize, Wi
     {
         $data = $this->data;
 
-        $attendants = Attendant::with('usuario', 'user.subworkspace', 'type', 'meeting')
+        $criteria = CriterionWorkspace::loadWorkspaceReportCriteria(get_current_workspace()->id);
+
+        $attendants = Attendant::with(
+            'usuario', 'user.subworkspace', 'user.criterion_values', 'type', 'meeting'
+            )
             ->when($data['meeting'] ?? null, function ($q) use ($data) {
                 $q->where('meeting_id', $data['meeting']->id);
             })
@@ -58,12 +63,10 @@ class MeetingAttendantsExport implements FromView, WithTitle, ShouldAutoSize, Wi
             ->orderBy('meeting_id')
             ->get();
 
-        // dd($attendants);
-
         $isAllowedToViewAll = auth()->user()->isMasterOrAdminCursalab();
 
         info("PUEDE VER TODO: " . $isAllowedToViewAll);
-        return view('meetings.exports.meetings_attendants_export', compact('attendants','isAllowedToViewAll'));
+        return view('meetings.exports.meetings_attendants_export', compact('attendants','isAllowedToViewAll','criteria'));
     }
 
     public function registerEvents(): array

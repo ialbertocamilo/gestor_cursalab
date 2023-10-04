@@ -109,6 +109,18 @@ export default {
                 $('#pageloader').fadeOut()
             }, 250)
         },
+        show_http_errors(errors){
+            if (errors){
+                console.log(errors);
+                const keys_errors = Object.keys(errors);
+                keys_errors.forEach(key => {
+                    const error = errors[key];
+                    error.forEach(msg => {
+                        this.showAlert(msg, 'error')
+                    });
+                });
+            }
+        },
         showAlert(msg, type = 'success', title = '', timer = 10) {
             let vue = this
             let options = {
@@ -435,7 +447,15 @@ export default {
                         (v && v.length <= max) || `El campo debe tener menos de ${max} caracteres`;
                     tempRules.push(tempRule);
                 }
-
+                if (labelRule.indexOf("only_max") > -1) {
+                    let split = labelRule.split(":");
+                    let max = split[1];
+                    const tempRule = (v) =>{
+                        if(v) return (v.length <= max) || `El campo debe tener menos de ${max} caracteres`;
+                        else return true;
+                    }
+                    tempRules.push(tempRule);
+                }
                 if (labelRule.indexOf("min") > -1) {
                     let split = labelRule.split(":");
                     let min = split[1];
@@ -755,6 +775,10 @@ export default {
             }
             return res;
         },
+        roundTwoDecimal(num){
+            let m = Number((Math.abs(num)*100).toPrecision(15));
+            return Math.round(m)/100 * Math.sign(num);
+        },
         getStorageUrl(key, mainKey = 'media_data') {
 
             const currentUrl = window.location.search;
@@ -791,7 +815,7 @@ export default {
 
             // Fetch modules and admins
 
-            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}`
+            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}/${adminId}`
 
             let response2 = await axios({
                 url: url2,

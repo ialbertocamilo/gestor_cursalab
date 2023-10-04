@@ -136,6 +136,7 @@ Vue.component("blocks-form-courses-layout", require("./layouts/Blocks/BlockFormC
 Vue.component("tag-layout", require("./layouts/Tags/TagListPage"));
 Vue.component("error-layout", require("./layouts/Errores/ErrorListPage"));
 Vue.component("usuario-layout", require("./layouts/Usuario/UsuarioListPage"));
+Vue.component("user-layout", require("./layouts/Users/UserListPage"));
 Vue.component("modulo-layout", require("./layouts/Modulos/ModuloListPage"));
 Vue.component("role-layout", require("./layouts/Roles/RoleListPage"));
 Vue.component("escuela-layout", require("./layouts/Escuelas/EscuelaListPage"));
@@ -220,6 +221,9 @@ Vue.component("benefit-form-page", require("./layouts/Benefits/BenefitFormPage")
 
 Vue.component("speaker-layout", require("./layouts/Speakers/SpeakersList.vue"));
 Vue.component("speaker-form-page", require("./layouts/Speakers/SpeakerFormPage"));
+/*---Project list views--*/
+Vue.component("project-layout", require("./layouts/Project/ProjectList.vue"));
+Vue.component("project-users-layout", require("./layouts/Project/ProjectUsersList.vue"));
 /*=== votaciones ===*/
 Vue.component("votacion-layout", require("./layouts/Votaciones/VotacionesListPage.vue"));
 Vue.component("votacion-form-page", require("./layouts/Votaciones/VotacionesFormPage.vue"));
@@ -227,6 +231,8 @@ Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesLi
 /*=== votaciones ===*/
 
 
+
+/*----*/ 
 const app = new Vue({
     vuetify,
     store,
