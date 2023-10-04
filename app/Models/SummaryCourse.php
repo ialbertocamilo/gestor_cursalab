@@ -253,6 +253,13 @@ class SummaryCourse extends Summary
                     $status = 'aprobado';
                     if($update_certification_data){
                         $course_data['certification_issued_at'] = now();
+
+                        // If user confirmation is not necessary,
+                        // accepts certificate automatically
+
+                        if (!$course->user_confirms_certificate) {
+                            $course_data['certification_accepted_at'] = now();
+                        }
                     }
                 }
 
@@ -261,6 +268,13 @@ class SummaryCourse extends Summary
                 $status = 'aprobado';
                 if($update_certification_data){
                     $course_data['certification_issued_at'] = now();
+
+                    // If user confirmation is not necessary,
+                    // accepts certificate automatically
+
+                    if (!$course->user_confirms_certificate) {
+                        $course_data['certification_accepted_at'] = now();
+                    }
                 }
             }
 

@@ -51,6 +51,7 @@ class AmbienteController extends Controller
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
             $ambiente['is_superuser'] = auth()->user()->isAn('super-user');
+            $ambiente['app_password_expiration_days'] = config('app.passwords.app.expiration_days');
            
             return $this->success($ambiente);
         }

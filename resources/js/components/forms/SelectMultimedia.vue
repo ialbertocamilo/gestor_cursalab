@@ -14,6 +14,7 @@
                         label="Tipo"
                         item-text="label"
                         item-value="value"
+                        @onChange="getData"
                         dense
                     />
                 </v-col>
@@ -53,7 +54,8 @@
                                         />
                                         <!--                                    <img :src="infoMedia(item).preview" class="img-fluid" >-->
                                     </div>
-                                    <span>{{ item.title }}</span>
+                                    <!-- <span>{{ item.title }}</span> -->
+                                    <span v-text="(item.size) ? `${item.title} - (${item.size} MB)` : item.title"></span>
                                 </div>
                             </div>
                         </div>
@@ -117,17 +119,18 @@ export default {
             let vue = this;
             vue.getData(page);
         },
-        getData() {
+        async getData() {
             let vue = this;
             vue.loading = true;
             let url = `/multimedia/search?paginate=12&page=${vue.paginate.page}`
             url = vue.prepareUrl(url)
 
-            axios.get(url)
+            await axios.get(url)
                 .then(({data}) => {
                     // console.log(data)
                     vue.multimedias = data.medias.data
                     vue.multimedias = vue.multimedias.map(item => {
+                        item.size = (item.size / (1024 * 1024)).toFixed(2);
                         let newItem = Object.assign({}, item, {
                             selected: false,
                         });

@@ -15,4 +15,18 @@ class CriterionWorkspace extends Model
     {
         return $this->belongsTo(Criterion::class, 'criterion_id');
     }
+    /**
+     * Load workspace's criteria for reports
+     * @param $workspaceId
+     * @return mixed
+     */
+    public static function loadWorkspaceReportCriteria($workspaceId) {
+
+        return self::join('criteria', 'criteria.id', '=', 'criterion_workspace.criterion_id')
+            ->where('available_in_reports', 1)
+            ->where('workspace_id', $workspaceId)
+            ->where('criteria.active', 1)
+            ->select(['criteria.id', 'criteria.name'])
+            ->get();
+    }
 }

@@ -41,6 +41,7 @@
         "prismjs": "^1.27.0",
         "qrcode": "^1.5.3",
         "vue-apexcharts": "^1.6.2",
+        "vue-doc-preview": "^0.3.2",
         "vue-router": "^3.5.3",
         "vue-toastification": "^1.7.14",
         "vue2-datepicker": "^3.9.1",

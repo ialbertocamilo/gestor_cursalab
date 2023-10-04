@@ -9,6 +9,7 @@ use App\Models\Poll;
 use App\Models\PollQuestionAnswer;
 use App\Models\SummaryCourse;
 use App\Models\Taxonomy;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -125,6 +126,11 @@ class RestCourseController extends Controller
         $user = auth()->user();
 
         $user_courses = $user->getCurrentCourses(withRelations: 'soft');
+
+        // Take only courses with enabled certificate
+
+        $user_courses = $user_courses->where('show_certification_to_user', 1);
+
 //        $user_courses = collect($user->getCurrentCourses(response_type: 'courses-unified'));
         $user_courses_id = $user_courses->pluck('id');
         $user_compatibles_courses_id = $user_courses->whereNotNull('compatible')->pluck('compatible.course_id');
@@ -170,7 +176,7 @@ class RestCourseController extends Controller
                     'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
                     'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                     'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
-
+                    'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
                     'compatible' => null,
                 ];
 
@@ -193,7 +199,7 @@ class RestCourseController extends Controller
                         'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
                         'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
                         'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
-
+                        'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
                         'compatible' => [
                             'course_id' => $compatible_certificate->course->id,
                             'name' => $compatible_certificate->course->name,
