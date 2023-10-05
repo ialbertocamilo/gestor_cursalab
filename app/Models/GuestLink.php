@@ -90,7 +90,7 @@ class GuestLink extends BaseModel
         $criterion_values =  CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($request) {
             $q->where('id', $request->workspace_id);
         })
-        ->where('criterion_id', $request->criterion_id)->orderBy('value_text')->get();
+        ->where('criterion_id', $request->criterion_id)->where('parent_id',$request->criterion_value_id)->orderBy('value_text')->get();
 
         return ['values' => $criterion_values];
     }
@@ -193,7 +193,7 @@ class GuestLink extends BaseModel
         ])
         ->select('criterion_id','criterion_title','avaiable_in_personal_data_guest_form')
         ->where('workspace_id',$guest_link->workspace_id)
-        ->where('available_in_user_creation',1)->get()->map(function($criterion_workspace) use ($guest_link){
+        ->where('required_in_user_creation',1)->get()->map(function($criterion_workspace) use ($guest_link){
             $can_be_create = false;
             $criterion_code = $criterion_workspace->criterion->code;
             $criterion_id = $criterion_workspace->criterion_id;
@@ -201,10 +201,10 @@ class GuestLink extends BaseModel
             $parent_id = $criterion_workspace->criterion->parent_id;
             $values = [];
             //never can be create new modules fron guest form
-            if($criterion_code != 'module'){
+            if($criterion_code != 'module' && $criterion_code !='document'){
                 $can_be_create = boolval($criterion_workspace->criterion->can_be_create);
             }
-            if($criterion_type != 'date' && !$parent_id){
+            if($criterion_type != 'date' && !$parent_id && $criterion_code !='document'){
                 $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($guest_link) {
                     $q->where('id', $guest_link->workspace_id);
                 })
@@ -220,10 +220,10 @@ class GuestLink extends BaseModel
                 'can_be_create' => $can_be_create,
                 'values' => $values
             ];
-        });
+        })->filter(fn($cr) => $cr['criterion_code']<>'document');
         return $criterion_workspace->map(function($cw) use ($criterion_workspace) {
             $child = collect($criterion_workspace)->where('parent_id',$cw['criterion_id'])->first();
-            $cw['child_id'] = $child?->id;
+            $cw['child_id'] = $child['criterion_id'] ?? null;
             return $cw;
         });
     }

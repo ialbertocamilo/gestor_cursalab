@@ -35,6 +35,18 @@ class Guest extends BaseModel {
         $query->orderBy( $field, $sort );
         return $query->paginate( $request->paginate );
     }
+    protected function deleteGuest($guest_ids){
+        foreach ($guest_ids as $guest_id) {
+            $guest = Guest::where('id',$guest_id)->first();
+            if($guest->user_id){
+                $user = User::where('id',$guest->user_id)->first();
+                $user->delete();
+            }
+            $guest->delete();
+        }
+        $message = count($guest_ids) > 0 ? 'Invitados eliminados' : 'Invitado eliminado'  ; 
+        return ['message'=> $message];
+    }
     protected function sendGuestCodeVerificationByEmail($request){
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');

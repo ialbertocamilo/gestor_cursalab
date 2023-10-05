@@ -16,6 +16,7 @@ class GuestResource extends JsonResource
     
     public function toArray($request)
     {   
+        
         return [
             'id' =>             $this->id,
             'email' =>          $this->email,
@@ -25,6 +26,8 @@ class GuestResource extends JsonResource
             'state_name' =>     $this->status?->name ?? 'Pendiente' ,
             'state_enabled'=>   'Registrado',
             'date_invitation'=> $this->date_invitation ? Carbon::parse($this->date_invitation)->format('d/m/Y g:i a') : 'No definido',
+            'show_edit' =>      boolval($this->user?->id),
+            'show_status' =>      boolval($this->user?->id),
         ];
     }
 }

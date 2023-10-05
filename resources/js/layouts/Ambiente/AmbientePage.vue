@@ -468,8 +468,7 @@ const file_fields = [
     //gestor
     'fondo', 'logo', 'icono', 'logo_empresa',
     //app
-    'fondo_app','fondo_invitados_app', 'logo_app', 'logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo', 'male_logo', 'female_logo'];
-    'fondo_app', 'logo_app', 'logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo',
+    'fondo_app', 'logo_app','fondo_invitados_app','logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo',
     // 'male_logo', 'female_logo'
 ];
 

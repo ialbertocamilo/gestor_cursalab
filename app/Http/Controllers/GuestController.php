@@ -16,7 +16,11 @@ class GuestController extends Controller
         GuestResource::collection($data);
         return $this->success($data);
     }
-
+    public function deleteGuest(Request $request)
+    {
+        $data = Guest::deleteGuest($request->get('guest_ids'));
+        return $this->success($data);
+    }
 
     public function sendInvitation(GuestInvitationRequest $request){
         $data = Guest::sendInvitationByEmail($request->get('email'));
@@ -37,7 +41,7 @@ class GuestController extends Controller
     public function activateMultipleUsers(Request $request) {
 
         // $result = Usuario::whereIn('id',  $request->usersIds)->update(['estado' => 1]);
-
+        
         return $this->success([]);
 
     }

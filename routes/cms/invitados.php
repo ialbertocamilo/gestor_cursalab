@@ -9,6 +9,9 @@ Route::controller(GuestController::class)->group(function() {
 	Route::get('search', 'search');
 	Route::post('send-invitation', 'sendInvitation');
 	Route::get('limits-workspace', 'limitsWorspace');
+	Route::post('delete', 'deleteGuest');
+
+
 	Route::post('send_requirement', 'send_requirement');
 	Route::post('users_activation', 'activateMultipleUsers');
 

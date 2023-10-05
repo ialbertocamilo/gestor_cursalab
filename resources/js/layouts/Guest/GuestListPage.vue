@@ -70,54 +70,13 @@
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
-                :show-select="true"
                 :filters="filters"
+                @delete="openCustomDialog($event,'delete_one_user')"
+                @openModalDeleteUsers="openCustomDialog($event,'delete_massive_user')"
                 @onSelectRow="selectionChange($event)"
                 @statusChange="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
             />
         </v-card>
-        <!-- <v-card flat class="elevation-0 mb-4">
-                <v-row class="justify-content-start">
-                    <v-col cols="4">
-                        
-                    </v-col>
-                    
-                   
-                </v-row>
-                
-                <v-row class="select-all-wrapper">
-                    <v-col cols="3">
-                        <input type="checkbox"
-                               v-model="allSelected">
-                        <span>Seleccionar todos</span>
-                    </v-col>
-                    <v-col cols="5">
-                        <strong>
-                            Seleccionados: {{ selectedItems.length }}/{{ totalCount }}
-                        </strong>
-                    </v-col>
-                    <v-col cols="4">
-                        <div class="row">
-                            <div class="col-3 d-flex justify-content-end">
-                                <v-switch
-                                    v-model="activateSelected"
-                                    :disabled="selectedItems.length === 0"
-                                    @click.native.stop
-                                ></v-switch>
-                            </div>
-                            <div class="col-9">
-                                <span>Activar seleccionados</span>
-                            </div>
-                        </div>
-                    </v-col>
-
-                </v-row>
-                <v-row>
-                    <v-col cols="12" class="guests-table-wrapper">
-                       
-                    </v-col>
-                </v-row>
-        </v-card> -->
         <ListGuestLinksModal
             width="50vw"
             :ref="modalOptions.ref"
@@ -131,17 +90,6 @@
             @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters),load_data()"
             @onCancel="statusChange"
         />
-        <DefaultAlertDialog
-            :ref="multipleModalOptions.ref"
-            :options="multipleModalOptions"
-            @onCancel="onCancelMultipleActivations"
-            @onConfirm="onConfirmMultipleActivations"
-            width="30vw"
-        >
-            <template v-slot:content>
-                <div v-html="multipleModalOptions.contentText"></div>
-            </template>
-        </DefaultAlertDialog>
 
         <!-- MODAL ALMACENAMIENTO -->
         <GeneralStorageModal
@@ -174,6 +122,13 @@
                         closeFormModal(modalAlertStorageOptions)"
         />
         <!-- === MODAL ALERT STORAGE === -->
+        <DialogConfirm
+            v-model="customConfirmationDialog.open"
+            width="408px"
+            :options="customConfirmationDialog"
+            @onConfirm="customConfirmationDialog.open = false,doCustomAction()"
+            @onCancel="customConfirmationDialog.open = false,resetModal"
+        />
     </section>
 </template>
 
@@ -182,20 +137,20 @@
     import ListGuestLinksModal from "./ListGuestLinksModal";
     import UsuarioStatusModal from "./UsuarioStatusModal";
     import DefaultCheckbox from "../../components/globals/DefaultCheckBox.vue";
-    import DefaultAlertDialog from "../../components/globals/DefaultAlertDialog";
-
     // components to request increase limits storage
     import DefaultStorageAlertModal from '../Default/DefaultStorageAlertModal.vue';
     import GeneralStorageModal from '../General/GeneralStorageModal.vue';
     import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
-    
+
+    import DialogConfirm from '../../components/basicos/DialogConfirm.vue'
     export default {
         components: {
             ListGuestLinksModal,
-            UsuarioStatusModal, DefaultCheckbox, DefaultAlertDialog,
+            UsuarioStatusModal, DefaultCheckbox,
             DefaultStorageAlertModal,
             GeneralStorageModal,
-            GeneralStorageEmailSendModal
+            GeneralStorageEmailSendModal,
+            DialogConfirm
         },
         data() {
             return {
@@ -207,6 +162,7 @@
                     endpoint: '/invitados/search',
                     ref: 'GuestTable',
                     headers: [
+                        { text: "custom-select", value: "custom-select", align: 'left', model: 'Categoria', sortable: false },
                         {text: "Nombre", value: "user_name", align: 'center', sortable: false},
                         {text: "Email", value: "email", sortable: false},
                         {text: "Estado invitación", value: "state_name", align: 'center', sortable: false},
@@ -215,17 +171,23 @@
                         {text: "Fecha y hora", value: "date_invitation", align: 'center'},
                         {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     ],
+                    customSelectActions:[
+                        {text:'Confirmar',method_name:'openModalActiveUsers'},
+                        {text:'Eliminar',method_name:'openModalDeleteUsers'},
+                    ],
                     actions: [
                         {
                             text: "Editar",
                             icon: "mdi mdi-pencil",
                             type: "action",
+                            show_condition:'show_edit',
                             method_name: "edit"
                         },
                         {
                             text: "Actualizar estado",
                             icon: 'fa fa-circle',
                             type: 'action',
+                            show_condition:'show_status',
                             method_name: 'status'
                         },
                         {
@@ -300,6 +262,28 @@
                     confirmLabel:'Entendido',
                     persistent: false
                 },
+                modalUsuarioResource: {
+                    ref: 'UsuarioResourceModal',
+                    open: false,
+                    showCloseIcon: true,
+                    showTitle: false,
+                    width: '30vw',
+                    showCardActions: false,
+                    noPaddingCardText: true
+                },
+                customConfirmationDialog: {
+                    open: false,
+                    action:'',
+                    type_modal:'',
+                    title_modal: '',
+                    content_modal :{
+                        delete:{
+                            title:'',
+                            details:[]
+                        },
+                    },
+                    data:[]
+                },
                 open_advanced_filter:false
             }
         },
@@ -372,43 +356,73 @@
                 let UFC = this.$refs.GuestTable.getData();
                 vue.closeFormModal(vue.modalStatusOptions);
             },
-            selectionChange($rows) {
-                this.selectedItems = $rows
-
-                // Update selection flag
-
-                if (this.selectedItems.length < this.totalCount) {
-                    this.allSelected = false
+            openCustomDialog(event,type){
+                let vue = this;
+                switch (type) {
+                    case 'delete_one_user':
+                        vue.customConfirmationDialog.type = 'delete_user';
+                        vue.customConfirmationDialog.type_modal = 'delete';
+                        vue.customConfirmationDialog.title_modal = 'Eliminar';
+                        vue.customConfirmationDialog.content_modal.delete.title = event.user_id ? '¡Estás por eliminar un Usuario!' :  '¡Estás por eliminar una Invitación!';
+                        vue.customConfirmationDialog.content_modal.delete.details = event.user_id ? [
+                            'Perderá la información de los usuarios.',
+                            'La información eliminada no podra recuperarse'
+                        ] :  [
+                            'El usuario no podrá registrarse por la invitación enviada.',
+                            'La información eliminada no podra recuperarse'
+                        ];
+                        vue.customConfirmationDialog.data = event;
+                    break;
+                    case 'delete_massive_user':
+                        vue.customConfirmationDialog.type = 'delete_user';
+                        vue.customConfirmationDialog.type_modal = 'delete';
+                        vue.customConfirmationDialog.title_modal = 'Eliminar';
+                        vue.customConfirmationDialog.content_modal.delete.title = `¡Estás por eliminar ${event.length} usuarios!`;
+                        vue.customConfirmationDialog.content_modal.delete.details =  [
+                            'Perderá la información de todos los usuarios seleccionados.',
+                            'La información eliminada no podra recuperarse'
+                        ] 
+                        vue.customConfirmationDialog.data = event;
+                    break
                 }
-
-                if (this.selectedItems.length === this.totalCount) {
-                    this.allSelected = true
+                vue.openSimpleModal(vue.customConfirmationDialog);
+            },
+            doCustomAction(){
+                let vue = this;
+                switch (vue.customConfirmationDialog.type) {
+                    case 'delete_user':
+                        vue.callApiToDeleteGuest(vue.customConfirmationDialog.data);
+                        break;
+                    default:
+                        break;
                 }
             },
-            onCancelMultipleActivations() {
-                this.multipleModalOptions.open = false
-                this.activateSelected = false
+            resetModal(){
+                let vue = this;
+                vue.customConfirmationDialog.type = '';
+                vue.customConfirmationDialog.type_modal= '';
+                vue.customConfirmationDialog.title_modal = '';
+                vue.customConfirmationDialog.content_modal.delete.title = '';
+                vue.customConfirmationDialog.content_modal.delete.details = [];
+                vue.customConfirmationDialog.data=[]
             },
-            async onConfirmMultipleActivations() {
-
-                let usersIds = this.selectedItems.map(i => i.user_id)
-
-                try {
-                    let response = await axios({
-                        method: 'post',
-                        url: '../guest/users_activation',
-                        data: {
-                            usersIds
-                        }
+            async callApiToDeleteGuest(data){
+                let vue =this;
+                let guests = Array.isArray(data) ? data : [data] ;
+                let guest_ids = guests.map((g)=> g.id);
+                console.log(guest_ids);
+                if(guest_ids.length >0 ){
+                    vue.showLoader();
+                    axios.post('/invitados/delete',{
+                        guest_ids:guest_ids
+                    }).then(({data})=>{
+                        vue.showAlert(data.data.message, 'success', '')
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                        vue.hideLoader();
+                    }).catch((err)=>{
+                        vue.showAlert('No se puedo eliminar a el/los invitado(s)', 'error', '')
+                        vue.hideLoader();
                     })
-
-                    if (response.data.success) {
-                        this.$refs[this.dataTable.ref].getData();
-                    }
-                    this.multipleModalOptions.open = false
-
-                } catch (ex) {
-                    console.log(ex);
                 }
             }
         }
