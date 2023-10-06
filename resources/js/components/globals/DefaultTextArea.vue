@@ -1,5 +1,6 @@
 <template>
     <v-textarea
+        :ref="refTextArea"
         outlined
         :label="label"
         :placeholder="placeholder"
@@ -47,6 +48,10 @@ export default {
         },
         rows: {
             default: 3
+        },
+        refTextArea:{
+            type:String,
+            default:'text_area'
         }
 
     },

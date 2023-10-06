@@ -42,7 +42,9 @@
                         <v-col cols="6">
                             <v-row>
                                 <v-col cols="12">
+                                    <v-btn @click="generateIaDescription()">Generar con IA</v-btn>
                                     <DefaultTextArea
+                                        :ref="'textAreaDescription'"
                                         dense
                                         label="Descripción"
                                         placeholder="Ingrese una descripción del curso"
@@ -831,6 +833,32 @@ export default {
             }
 
             return valid;
+        },
+        generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            axios.post(url,{
+                course_name : vue.resource.name
+            }).then(({data})=>{
+                let characters = data.data.description.split('');
+                vue.resource.description = '';
+                const textarea = vue.$refs.textAreaDescription;
+                // Verifica si el ref se encuentra definido y enfoca el textarea
+                if (textarea) {
+                    textarea.$el.focus();
+                }
+                // Función para actualizar vue.resource.description letra por letra
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.description += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 100); // Espera 100 milisegundos antes de agregar el próximo carácter
+                    }
+                }
+                // Iniciar la actualización letra por letra desde el primer carácter
+                updateDescription(0);
+            })
         }
     }
 }
