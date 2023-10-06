@@ -168,7 +168,6 @@
                         {text: "Estado invitación", value: "state_name", align: 'center', sortable: false},
                         {text: "Estado", value: "state", align: 'center', sortable: false},
                         {text: "Fecha y hora", value: "date_invitation", align: 'center'},
-                        {text: "Fecha y hora", value: "date_invitation", align: 'center'},
                         {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     ],
                     customSelectActions:[

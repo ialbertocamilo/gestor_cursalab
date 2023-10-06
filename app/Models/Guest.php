@@ -26,7 +26,7 @@ class Guest extends BaseModel {
     public static function searchForGrid( $request ) {
         $query = self::select( 'id', 'email', 'user_id', 'status_id', 'date_invitation' )
         ->where('workspace_id',get_current_workspace()->id)
-        ->with(['user:id,name,active','status:id,name']);
+        ->with(['user:id,name,lastname,surname,active','status:id,name']);
         if ( $request->q ){
             $query->where( 'email', 'like', "%$request->q%" );
         }

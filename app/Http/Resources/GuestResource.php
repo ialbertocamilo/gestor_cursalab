@@ -22,7 +22,7 @@ class GuestResource extends JsonResource
             'email' =>          $this->email,
             'user_id' =>        $this->user?->id,
             'state' =>          $this->user?->active ?? 'No disponible',
-            'user_name' =>      $this->user?->nombre ?? 'No disponible',
+            'user_name' =>      $this->user ? $this->user?->name.' '.$this->user?->lastname.' '.$this->user?->surname : 'No disponible',
             'state_name' =>     $this->status?->name ?? 'Pendiente' ,
             'state_enabled'=>   'Registrado',
             'date_invitation'=> $this->date_invitation ? Carbon::parse($this->date_invitation)->format('d/m/Y g:i a') : 'No definido',

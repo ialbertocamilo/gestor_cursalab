@@ -28,13 +28,13 @@ class GuestStoreRequest extends FormRequest
     public function rules()
     {
         $passwordRules = [
-            "required", 'confirmed', 'max:100',
-            RulePassword::min(8)->letters()->numbers()->symbols(),
-            new CustomContextSpecificWords($this->email ?? NULL, 'email'),
-            new CustomContextSpecificWords($this->document ?? NULL, 'document'),
-            new CustomContextSpecificWords($this->name ?? NULL, 'name'),
-            new CustomContextSpecificWords($this->lastname ?? NULL, 'lastname'),
-            new CustomContextSpecificWords($this->surname ?? NULL, 'surname'),
+            "required", 'confirmed', 'max:100','min:8',
+            // RulePassword::min(8)->letters()->numbers()->symbols(),
+            // new CustomContextSpecificWords($this->email ?? NULL, 'email'),
+            // new CustomContextSpecificWords($this->document ?? NULL, 'document'),
+            // new CustomContextSpecificWords($this->name ?? NULL, 'name'),
+            // new CustomContextSpecificWords($this->lastname ?? NULL, 'lastname'),
+            // new CustomContextSpecificWords($this->surname ?? NULL, 'surname'),
         ];
         return [
             'name'=>'required',
