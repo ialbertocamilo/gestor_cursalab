@@ -72,7 +72,25 @@ class Guest extends BaseModel {
         Mail::to( trim($request->email) )->send( new EmailTemplate( 'emails.guest_code_verification', $mail_data ) );
         return ['message'=>'Email enviado correctamente.','email_sent'=>true];
     }
-    
+    protected function storeGuest($data,$request){
+        $guest_link = GuestLink::where('id',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
+        if(!$guest_link){
+            return ['message'=>'Link inválido'];
+        }
+        $data['active'] = boolval($guest_link->activate_by_default);
+        $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','registered')->first()?->id;
+        $user = User::storeRequest($data);
+        if($request->guest_id){
+            Guest::where('id',$request->guest_id)->update([
+                'status_id'=>$status_id_pending,
+                'user_id'=>$user->id
+            ]);
+        }else{
+            $type_id_by_email = Taxonomy::where('group','guests')->where('type','type')->where('code','by-link')->first()?->id;
+            Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,get_current_workspace()->id,$user->id);
+        }
+        $guest_link->increment('count_registers', 1);
+    }
     protected function verifyGuestCodeVerificationByEmail($request){
         $message = EmailsSent::verifyCode($request);
         return $message;
@@ -91,37 +109,21 @@ class Guest extends BaseModel {
         $data[ 'user' ] = $admin;
         $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','pending')->first()?->id;
         $type_id_by_email = Taxonomy::where('group','guests')->where('type','type')->where('code','by-email')->first()?->id;
-        $guest = Guest::insertGuest($email,$status_id_pending,$type_id_by_email,$admin);
+        $guest = Guest::insertGuest($email,$status_id_pending,$type_id_by_email,$admin,get_current_workspace()->id);
         GuestLink::createLink( $code, Carbon::now()->addWeeks( 1 ), $admin->id, $guest->id,0);
         Mail::to( $email )->send( new EmailTemplate( 'emails.guest_invitation', $data ) );
         return [ 'msg'=>'Se ha enviado la invitación.' ];
     }
-    public static function insertGuest($email,$status_id,$type_id,$admin){
+    public static function insertGuest($email,$status_id,$type_id,$admin,$workspace_id,$user_id=null){
         $guest = new Guest();
         $guest->email = $email;
         $guest->status_id = $status_id;
         $guest->type_id = $type_id;
-        $guest->admin_id = $admin->id;
+        $guest->admin_id = $admin?->id;
         $guest->date_invitation = now();
-        $guest->workspace_id = get_current_workspace()->id;
+        $guest->workspace_id = $workspace_id;
+        $guest->user_id = $user_id;
         $guest->save();
         return $guest;
-    }
-    protected function dataShareUrl(){
-        $user = Auth::user();
-        $share_url = trim(strtolower($user->name));
-        //Eliminar multiples espacios y cambiar el espacio por guion
-        $url_app_web = DB::table('config_general')->first()->url_app_web;
-        $share_url = str_replace(' ','-',preg_replace('/\s+/', ' ', $share_url));
-        if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
-            
-        }
-        $urls_generated = RegisterUrl::orderBy('created_at','desc')->whereNull('guest_id')->get();
-        $data = [
-            'generic_url' => $share_url,
-            'app_url' =>  $url_app_web.'/register?c=',
-            'urls_generated'=>$urls_generated
-        ];
-        return $data;
     }
 }

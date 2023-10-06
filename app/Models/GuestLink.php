@@ -61,7 +61,7 @@ class GuestLink extends BaseModel
         $guest_link =  self::query()
             ->with(['workspace:id,logo'])
             ->where('url',$code)
-            ->select('guest_id','id','expiration_date','workspace_id')
+            ->select('guest_id','id as code_id','expiration_date','workspace_id')
             ->first();
 
         if ($guest_link && $guest_link->expiration_date) {
@@ -106,6 +106,7 @@ class GuestLink extends BaseModel
             SourceMultimarca::where('type_id',$url_id)->delete();
         }
     }
+    
     protected function register_user($user){
         //Verificar si existe el usuario
         // $user_db = Usuario::where('dni',$user['dni'])->first();

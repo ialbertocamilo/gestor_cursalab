@@ -6,6 +6,7 @@ use App\Models\Guest;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use App\Http\Resources\GuestResource;
+use App\Http\Requests\GuestStoreRequest;
 use App\Http\Requests\GuestInvitationRequest;
 
 class GuestController extends Controller
@@ -26,18 +27,7 @@ class GuestController extends Controller
         $data = Guest::sendInvitationByEmail($request->get('email'));
         return $this->success($data);
     }
-    public function storeGuest(GuestStoreRequest $request){
-        return $this->success([]);
-    }
-    public function sendGuestCodeVerificationByEmail(Request $request){
-        $data = Guest::sendGuestCodeVerificationByEmail($request);
-        return $this->success($data);
-    }
-    
-    public function verifyGuestCodeVerificationByEmail(Request $request){
-        $data = Guest::verifyGuestCodeVerificationByEmail($request);
-        return $this->success($data);
-    }
+
     public function activateMultipleUsers(Request $request) {
 
         // $result = Usuario::whereIn('id',  $request->usersIds)->update(['estado' => 1]);

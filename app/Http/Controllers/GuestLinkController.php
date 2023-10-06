@@ -11,16 +11,7 @@ class GuestLinkController extends Controller
         $data = GuestLink::addUrl($request->all());
         return $this->success($data);
     }
-    public function verifyGuestUrl(Request $request){
-        // $ip = $request->ip();
-        // $host = gethostbyaddr($ip);
-        $data = GuestLink::verifyGuestUrl($request);
-        return $this->success($data);
-    }
-    public function childCriterionValues(Request $request){
-        $data = GuestLink::childCriterionValues($request);
-        return $this->success($data);
-    }
+
     public function initData(){
         $data = GuestLink::initData();
         return $this->success($data);
