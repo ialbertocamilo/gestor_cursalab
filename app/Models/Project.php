@@ -12,6 +12,7 @@ class Project extends BaseModel
 {
     use HasFactory;
     protected $fillable = ['workspace_id','course_id','indications','active'];
+    use SoftDeletes;
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
@@ -47,19 +48,30 @@ class Project extends BaseModel
                 break;
             case 'search-course':
                 $current_workspace = get_current_workspace();
-                $data = Course::leftJoin('projects AS p','p.course_id','=','courses.id')
-                ->when(true, function($q) use ($request){
-                    $request->q && $request->q != 'undefined'  ? $q->filtroName($request->q) : $q->doesntHave('project');
+                // $data = Course::leftJoin('projects AS p','p.course_id','=','courses.id')
+                $data = Course::
+                when(!$request->q, function($q) use ($request){
+                    // $request->q && $request->q != 'undefined'  ? $q->filtroName($request->q) : $q->doesntHave('project');
+                    $q->filtroName($request->q) ;
                 })
                 ->where('courses.active', 1)
                 ->whereRelation('workspaces', 'id', $current_workspace->id)
                 ->select(
                     'courses.id',
-                    DB::raw('CASE WHEN p.id IS NULL THEN courses.name ELSE CONCAT(courses.name," (Ya tiene una tarea asignada)") END AS name'),
-                    DB::raw('CASE WHEN p.id IS NULL THEN 0 ELSE 1 END AS disabled')
-                )->whereNull('p.deleted_at')
-                ->paginate(10)->items();
-                
+                    'courses.name'
+                    // 'p.id',
+                    // 'p.deleted_at',
+                    // DB::raw('CASE WHEN p.id IS NULL and p.deleted_at is null THEN courses.name ELSE CONCAT(courses.name," (Ya tiene una tarea asignada)") END AS name'),
+                    // DB::raw('CASE WHEN p.id IS NULL and p.deleted_at is null THEN 0 courses 1 END AS disabled')
+                )
+                ->paginate(10)->map(function($course){
+                    $course['disabled']  = 0; 
+                    if(Project::where('course_id',$course->id)->select('id')->first()){
+                        $course['name'] = $course['name'].' (Ya tiene una tarea asignada)';
+                        $course['disabled']  = 1; 
+                    }
+                    return $course;
+                });
                 break;
             case 'constraints':
                 $data = config('project.constraints.admin');
