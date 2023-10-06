@@ -4,7 +4,8 @@ use App\Http\Controllers\UserController;
 
 Route::controller(UserController::class)->group(function () {
 
-    Route::get('/', 'index')->name('users.index');
+    // Route::get('/', 'index')->name('users.index');
+    Route::view('/', 'users.list')->name('users.list');
     Route::get('/search', 'search')->name('users.search');
     Route::get('/get-form-data', 'getFormData');
 

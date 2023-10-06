@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-autocomplete
-            attach
+            :attach="attach"
             outlined
             :dense="dense"
             hide-details="auto"
@@ -152,6 +152,10 @@ export default {
         tooltip: {
             type: String,
             default: ''
+        },
+        attach: {
+            type: Boolean,
+            default: true
         },
     },
     data() {

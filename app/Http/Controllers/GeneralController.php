@@ -23,7 +23,8 @@ class GeneralController extends Controller
     public function getModulos()
     {
         $current_workspace = get_current_workspace();
-        $modulos = $current_workspace->subworkspaces->toArray();
+        $modulos = get_current_subworkspaces();
+        // $modulos = $current_workspace->subworkspaces->toArray();
         // $modulos = Criterion::getValuesForSelect('module');
 
         return $this->success(compact('modulos'));
@@ -41,7 +42,8 @@ class GeneralController extends Controller
             cache()->flush();
 
         $current_workspace = get_current_workspace();
-        $modulos = $current_workspace->subworkspaces->toArray();
+        // $modulos = $current_workspace->subworkspaces->toArray();
+        $modulos = get_current_subworkspaces();
 
         $subworkspace_id = request('modulo_id', NULL);
         // $workspaceId = Workspace::getWorkspaceIdFromModule($subworkspace_id);

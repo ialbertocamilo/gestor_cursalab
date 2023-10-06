@@ -828,7 +828,7 @@ export default {
 
             // Fetch modules and admins
 
-            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}`
+            let url2 = `${reportsBaseUrl}/filtros/datosiniciales/${workspaceId}/${adminId}`
 
             let response2 = await axios({
                 url: url2,

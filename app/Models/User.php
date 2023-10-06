@@ -168,10 +168,24 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         return $this->hasMany(CriterionValueUser::class);
     }
+
+    public function assigned_roles()
+    {
+        return $this->hasMany(AssignedRole::class, 'entity_id');
+    }
+
     public function emails_user()
     {
         return $this->hasMany(EmailUser::class);
     }
+
+    public function email_notifications()
+    {
+        return $this->belongsToMany(Taxonomy::class, 'emails_user', 'user_id', 'type_id')->withPivot('workspace_id', 'last_percent_sent');
+        // return $this->belongsToMany(Workspace::class, 'emails_user', 'user_id', 'workspace_id')->withPivot('type_id', 'last_percent_sent');
+    }
+
+
     public function subworkspace()
     {
         return $this->belongsTo(Workspace::class, 'subworkspace_id');
@@ -223,6 +237,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function benefits()
     {
         return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
+    }
+
+    public function getWorkspaces()
+    {
+        $roles = AssignedRole::getUserAssignedRoles($this->id);
+
+        return Workspace::whereIn('id', $roles->pluck('scope'))->get();
+
+        // return $this->hasManyThrough(Workspace::class, AssignedRole::class, 'entity_id', 'id', 'scope', 'id');
+    }
+
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'subworkspace_user', 'user_id', 'subworkspace_id');
     }
 
     public function projects(){
@@ -435,11 +463,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
         $user->save();
         if($user->active){
-            try {   
+            try {
                 $current_workspace = get_current_workspace();
                 $current_workspace->sendEmailByLimit();
             } catch (\Throwable $th) {
-                
+
             }
         }
         $criterion = Criterion::with('field_type:id,code')->where('code', 'termination_date')->select('id', 'field_id')->first();
@@ -598,12 +626,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
             }
-            try {   
+            try {
                 //code...
                 $current_workspace = get_current_workspace();
                 $current_workspace->sendEmailByLimit();
             } catch (\Throwable $th) {
-                
+
             }
                 //throw $th;
             DB::commit();
@@ -700,11 +728,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($request->workspace_id)
             $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
 
-        if ($request->subworkspace_id)
-            $query->where('subworkspace_id', $request->subworkspace_id);
+        if ($request->subworkspace_id) {
 
-        if ($request->sub_workspaces_id)
-            $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+            $query->where('subworkspace_id', $request->subworkspace_id);
+        } else {
+
+            if ($request->sub_workspaces_id) {
+                $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+            } else {
+                $query->whereIn('subworkspace_id', current_subworkspaces_id());
+            }
+        }
+
 
         if ($withAdvancedFilters):
             $workspace = get_current_workspace();
@@ -1625,18 +1660,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         if ($this->document) {
             $criterios[] = [
-                'valor' => $this->document, 
+                'valor' => $this->document,
                 'tipo' => 'Doc. Identidad',
             ];
         }
 
         if ($this->email) {
             $criterios[] = [
-                'valor' => $this->email, 
+                'valor' => $this->email,
                 'tipo' => 'Correo',
             ];
         }
-        
+
         foreach ($criterion_values as $value) {
 
             $criterion = $criterionWorkspace->where('id', $value->criterion->id)->first();
@@ -1658,5 +1693,114 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         Criterion::overrideCriterionWorkspaceTitle($criterionWorkspace);
 
         return $criterionWorkspace;
+    }
+
+    protected function searchAdmins($request)
+    {
+        // $query = self::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports', 'only-reports');
+        $query = self::whereRelation('roles', function ($query) {
+            $query->where('name', '<>', 'super-user');
+        });
+
+        // $with = ['subworkspace'];
+
+        // if (get_current_workspace()->id == 25) {
+
+        //     $with = ['subworkspace', 'criterion_values' => function ($q) {
+        //         $q->whereIn('criterion_id', [40, 41]);
+        //     }];
+        // }
+
+        // $query->with($with)->withCount('failed_topics');
+
+        if ($request->q)
+            $query->filterText($request->q);
+
+        if ($request->active == 1)
+            $query->where('active', ACTIVE);
+
+        if ($request->active == 2)
+            $query->where('active', '<>', ACTIVE);
+
+        // if ($request->workspace_id)
+        //     $query->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+
+        // if ($request->subworkspace_id)
+        //     $query->where('subworkspace_id', $request->subworkspace_id);
+
+        // if ($request->sub_workspaces_id)
+        //     $query->whereIn('subworkspace_id', $request->sub_workspaces_id);
+
+        $field = $request->sortBy ?? 'created_at';
+        $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
+
+        $query->orderBy($field, $sort)->orderBy('id', $sort);
+
+        return $query->paginate($request->paginate);
+        // return $query->paginate($request->rowsPerPage);
+    }
+
+    protected function getDataForAdminForm($user = null)
+    {
+        $user = $user ?? [];
+
+        $workspaces = Workspace::with('subworkspaces:id,name,parent_id')
+                        ->select('id', 'name', 'parent_id', 'logo', 'slug')
+                        ->where('parent_id', null)->get();
+        $emails = Taxonomy::select('id','name')->where('group','email')->where('type','user')->get();
+        $roles = Role::where('name', '!=', 'super-user')->get();
+
+        $data = [];
+
+        foreach ($workspaces as $key => $workspace) {
+
+            if ($user) {
+
+                $emails_selected = $user->email_notifications()->wherePivot('workspace_id', $workspace->id)->pluck('type_id')->toArray();
+
+                $data[$key] = $workspace;
+                $data[$key]['selected_roles'] = $user->assigned_roles()->where('scope', $workspace->id)->pluck('role_id')->toArray();
+                $data[$key]['selected_subworkspaces'] = $user->subworkspaces->where('parent_id', $workspace->id)->pluck('id')->toArray();
+                $data[$key]['selected_emails'] = $emails_selected;
+
+
+            } else {
+
+                $data[$key] = $workspace;
+                $data[$key]['selected_roles'] = [];
+                $data[$key]['selected_subworkspaces'] = [];
+                $data[$key]['selected_emails'] = [];
+            }
+        }
+
+        return compact('data', 'workspaces', 'emails', 'roles');
+    }
+
+    public function saveAdminData($data)
+    {
+        $user = $this;
+
+        Bouncer::sync($user)->roles([]);
+
+        $selected_subworkspaces = [];
+
+        $user->email_notifications()->sync([]);
+
+        foreach ($data['selected_workspaces'] as $key => $workspace) {
+
+            if ($workspace['selected_roles'] && $workspace['selected_subworkspaces']) {
+
+                Bouncer::scope()->to($workspace['id']);
+                Bouncer::sync($user)->roles($workspace['selected_roles']);
+
+                $selected_subworkspaces = array_merge($selected_subworkspaces, $workspace['selected_subworkspaces']);
+
+                foreach ($workspace['selected_emails'] as $type_id) {
+                    $user->email_notifications()->attach($type_id, ['workspace_id' => $workspace['id']]);
+                }
+            }
+        }
+
+        $user->subworkspaces()->sync($selected_subworkspaces);
     }
 }
