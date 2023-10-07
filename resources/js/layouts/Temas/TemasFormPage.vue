@@ -33,23 +33,33 @@
                             />
                             <fieldset class="editor mt-2">
                                 <legend>Descripción</legend>
-
                                 <editor
                                     api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                     v-model="resource.content"
                                     :init="{
-                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                    height: 185,
-                                    menubar: false,
-                                    language: 'es',
-                                    force_br_newlines : true,
-                                    force_p_newlines : false,
-                                    forced_root_block : '',
-                                    plugins: ['lists image preview anchor', 'code', 'paste','link'],
-                                    toolbar:
-                                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                    images_upload_handler: images_upload_handler,
-                                }"/>
+                                        deprecation_warnings: false,
+                                        content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                        height: 185,
+                                        menubar: false,
+                                        language: 'es',
+                                        force_br_newlines : true,
+                                        force_p_newlines : false,
+                                        forced_root_block : '',
+                                        plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                        toolbar:
+                                            'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify  |bullist numlist | image | preview |code | link | customButton ',
+                                        images_upload_handler: images_upload_handler,
+                                        setup: function (editor) {
+                                            editor.ui.registry.addButton('customButton', {
+                                                text: getText(), // Ruta de la imagen para el botón personalizado
+                                                tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                                                onAction: function (_) {
+                                                    generateIaDescription();
+                                                },
+                                            });
+                                        }
+                                    }"
+                                />
                             </fieldset>
                         </v-col>
                         <v-col cols="4">
@@ -411,7 +421,8 @@ export default {
                     }
                 },
             },
-            limits_ia_convert:{}
+            limits_ia_convert:{},
+            loading_description:false
         }
     },
     async mounted() {
@@ -726,7 +737,39 @@ export default {
 
             if (media.type_id == 'scorm' || media.type_id == 'genially' || media.type_id == 'link')
                 return media.value;
+        },
+        async generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.name){
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'topic'
+            }).then(({data})=>{
+                let characters = data.data.description.split('');
+                vue.resource.content = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.content += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 100);
+                    }else{
+                        vue.loading_description = false; 
+                    }
+                }
+                updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
+            })
+        },
+        getText(){
+            return '<image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >';
         }
+
     }
 }
 </script>

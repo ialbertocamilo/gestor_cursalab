@@ -42,14 +42,18 @@
                         <v-col cols="6">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-btn @click="generateIaDescription()">Generar con IA</v-btn>
+                                    <!-- <v-btn @click="generateIaDescription()">Generar con IA</v-btn> -->
                                     <DefaultTextArea
                                         :ref="'textAreaDescription'"
                                         dense
-                                        label="Descripción"
-                                        placeholder="Ingrese una descripción del curso"
+                                        label="Descripción y/o objetivos"
+                                        placeholder="Ingrese una descripción y/o objetivo del curso"
                                         v-model="resource.description"
                                         :rows="4"
+                                        @eventGenerateIA="generateIaDescription"
+                                        :loading="loading_description"
+                                        :disabled="loading_description"
+                                        :showButtonIaGenerate="true"
                                     />
                                 </v-col>
                                 <v-col cols="12">
@@ -575,6 +579,7 @@ export default {
                 open: false
             },
             new_value: 0,
+            loading_description:false,
         }
     },
     computed: {
@@ -834,30 +839,32 @@ export default {
 
             return valid;
         },
-        generateIaDescription(){
+        async generateIaDescription(){
             const vue = this;
             let url = `/jarvis/generate-description-jarvis` ;
-            axios.post(url,{
-                course_name : vue.resource.name
+            if(vue.loading_description || !vue.resource.name){
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'course'
             }).then(({data})=>{
                 let characters = data.data.description.split('');
-                vue.resource.description = '';
-                const textarea = vue.$refs.textAreaDescription;
-                // Verifica si el ref se encuentra definido y enfoca el textarea
-                if (textarea) {
-                    textarea.$el.focus();
-                }
-                // Función para actualizar vue.resource.description letra por letra
+                vue.resource.description = ''; // Limpiar el contenido anterior
                 function updateDescription(index) {
                     if (index < characters.length) {
                         vue.resource.description += characters[index];
                         setTimeout(() => {
                             updateDescription(index + 1);
-                        }, 100); // Espera 100 milisegundos antes de agregar el próximo carácter
+                        }, 100);
+                    }else{
+                        vue.loading_description = false; 
                     }
                 }
-                // Iniciar la actualización letra por letra desde el primer carácter
                 updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
             })
         }
     }
