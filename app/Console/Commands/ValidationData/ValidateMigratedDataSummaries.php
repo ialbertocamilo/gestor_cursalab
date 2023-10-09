@@ -3,7 +3,9 @@
 namespace App\Console\Commands\ValidationData;
 
 // use Illuminate\Console\Command;
-// use App\Models\SummaryTopic;
+use App\Models\SummaryUser;
+use App\Models\SummaryCourse;
+use App\Models\SummaryTopic;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -46,11 +48,11 @@ class ValidateMigratedDataSummaries extends ValidateMigratedData
         $db = self::connect();
         $data = [];
 
-        $v2_total = User::onlyClientUsers()->count();
-        $v1_total = $db->getTable('usuarios')->count();
+        $v2_total = SummaryUser::count();
+        $v1_total = $db->getTable('resumen_general')->count();
 
         $v2_total_active = User::onlyClientUsers()->where('active', 1)->count();
-        $v1_total_active = $db->getTable('usuarios')->where('estado', 1)->count();
+        $v1_total_active = $db->getTable('resumen_general')->where('estado', 1)->count();
 
         $v2_total_inactive = User::onlyClientUsers()->where('active', '!=', 1)->count();
         $v1_total_inactive = $db->getTable('usuarios')->where('estado', '!=', 1)->count();
