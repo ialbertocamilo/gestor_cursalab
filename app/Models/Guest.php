@@ -77,6 +77,11 @@ class Guest extends BaseModel {
         if(!$guest_link){
             return ['message'=>'Link inválido'];
         }
+        $data['criterion_list_final'] = [];
+        // Recorrer el array y acceder a las claves y valores de forma dinámica
+        foreach ($data['criterion_list'] as $clave => $valor) {
+           array_push($data['criterion_list_final'],$valor);
+        }
         $data['active'] = boolval($guest_link->activate_by_default);
         $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','registered')->first()?->id;
         $user = User::storeRequest($data);
@@ -90,6 +95,7 @@ class Guest extends BaseModel {
             Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,get_current_workspace()->id,$user->id);
         }
         $guest_link->increment('count_registers', 1);
+        return ['message'=> $data['active'] ? 'Usuario registrado' : 'Usuario invitado'];
     }
     protected function verifyGuestCodeVerificationByEmail($request){
         $message = EmailsSent::verifyCode($request);

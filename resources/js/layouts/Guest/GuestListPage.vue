@@ -74,7 +74,8 @@
                 @delete="openCustomDialog($event,'delete_one_user')"
                 @openModalDeleteUsers="openCustomDialog($event,'delete_massive_user')"
                 @onSelectRow="selectionChange($event)"
-                @statusChange="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
+                @edit="openFormModal(modalFormUserOptions, $event, 'edit')"
             />
         </v-card>
         <ListGuestLinksModal
@@ -84,12 +85,12 @@
             @onConfirm="closeFormModal(modalOptions, dataTable, filters)"
             @onCancel="closeFormModal(modalOptions)"
         />
-        <UsuarioStatusModal
+        <!-- <UsuarioStatusModal
             :options="modalStatusOptions"
             :ref="modalStatusOptions.ref"
             @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters),load_data()"
             @onCancel="statusChange"
-        />
+        /> -->
 
         <!-- MODAL ALMACENAMIENTO -->
         <GeneralStorageModal
@@ -129,6 +130,20 @@
             @onConfirm="customConfirmationDialog.open = false,doCustomAction()"
             @onCancel="customConfirmationDialog.open = false,resetModal"
         />
+        <!-- Modal to edit user -->
+        <UsuarioFormModal
+            width="60vw"
+            :ref="modalFormUserOptions.ref"
+            :options="modalFormUserOptions"
+            @onConfirm="refreshDefaultTable(dataTable, filters)"
+            @onCancel="closeFormModal(modalFormUserOptions)"
+        />
+        <DefaultStatusModal
+            :options="modalStatusOptions"
+            :ref="modalStatusOptions.ref"
+            @onConfirm="closeFormModal(modalStatusOptions, dataTable, filters)"
+            @onCancel="closeFormModal(modalStatusOptions)"
+        />
     </section>
 </template>
 
@@ -143,14 +158,20 @@
     import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal.vue';
 
     import DialogConfirm from '../../components/basicos/DialogConfirm.vue'
+    import UsuarioFormModal from "../Usuario/UsuarioFormModal.vue";
+    import DefaultStatusModal from "../Default/DefaultStatusModal";
+
     export default {
         components: {
             ListGuestLinksModal,
-            UsuarioStatusModal, DefaultCheckbox,
+            UsuarioStatusModal, 
+            DefaultCheckbox,
             DefaultStorageAlertModal,
             GeneralStorageModal,
             GeneralStorageEmailSendModal,
-            DialogConfirm
+            DialogConfirm,
+            UsuarioFormModal,
+            DefaultStatusModal
         },
         data() {
             return {
@@ -166,7 +187,7 @@
                         {text: "Nombre", value: "user_name", align: 'center', sortable: false},
                         {text: "Email", value: "email", sortable: false},
                         {text: "Estado invitación", value: "state_name", align: 'center', sortable: false},
-                        {text: "Estado", value: "state", align: 'center', sortable: false},
+                        {text: "Estado", value: "status", align: 'center', sortable: false},
                         {text: "Fecha y hora", value: "date_invitation", align: 'center'},
                         {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     ],
@@ -221,7 +242,7 @@
                 modalStatusOptions: {
                     ref: 'UsuarioStatusModal',
                     open: false,
-                    base_endpoint: '/usuarios/status',
+                    base_endpoint: '/invitados/user',
                     contentText: '¿Desea cambiar de estado a este registro?',
                     endpoint: '',
                 },
@@ -283,7 +304,14 @@
                     },
                     data:[]
                 },
-                open_advanced_filter:false
+                open_advanced_filter:false,
+                modalFormUserOptions: {
+                    ref: 'UsuarioFormModal',
+                    open: false,
+                    base_endpoint: '/invitados/user',
+                    resource: 'Usuario',
+                    confirmLabel: 'Confirmar',
+                }
             }
         },
         watch: {

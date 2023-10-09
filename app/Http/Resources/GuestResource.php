@@ -16,12 +16,23 @@ class GuestResource extends JsonResource
     
     public function toArray($request)
     {   
-        
+        $status = 'No disponible';
+        $active = true;
+        if($this->user){
+            $status = ($this->user->active) ? 'Activo' : 'Inactivo';
+            $active = boolval($this->user->active);
+        }
+        $color = ($active) ? '#5458ea' : '#e0e0e0' ;
         return [
             'id' =>             $this->id,
             'email' =>          $this->email,
             'user_id' =>        $this->user?->id,
-            'state' =>          $this->user?->active ?? 'No disponible',
+            // 'status' =>         $status,
+            'status' => [
+                'text' => $status,
+                'color' => $color,
+            ],
+            'active' =>         $active,
             'user_name' =>      $this->user ? $this->user?->name.' '.$this->user?->lastname.' '.$this->user?->surname : 'No disponible',
             'state_name' =>     $this->status?->name ?? 'Pendiente' ,
             'state_enabled'=>   'Registrado',
