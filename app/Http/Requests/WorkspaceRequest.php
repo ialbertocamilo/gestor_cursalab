@@ -37,13 +37,13 @@ class WorkspaceRequest extends FormRequest
 
             'qualification_type_id' => 'required',
             'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
-            'share_diplomas_social_media' => 'nullable'
+            'share_diplomas_social_media' => 'nullable',
+            'criteria' => 'required',
         ];
     }
 
     public function validationData(): array
     {
-
         $data = [];
 
         if ( ! $this->has('active') )
@@ -66,6 +66,31 @@ class WorkspaceRequest extends FormRequest
 
 
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
+
+        $criteria_workspace = $this->criteria_workspace ? json_decode($this->criteria_workspace, true) : [];
+
+        $data['criteria'] = [];
+
+        foreach ($criteria_workspace as $row) {
+
+            if ($row['available']) {
+
+                $fields = [];
+
+                foreach ($row['fields'] as $field) {
+
+                    if ($field['type'] == 'boolean') {
+                        $fields[$field['code']] = $field['available'] ? 1 : NULL;
+                    }
+
+                    if ($field['type'] == 'text') {
+                        $fields[$field['code']] = $field['text'] ?? NULL;
+                    }
+                }
+
+                $data['criteria'][$row['criterion_id']] = $fields;
+            }
+        }
 
         return $this->merge($data)->all();
     }

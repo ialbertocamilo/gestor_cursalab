@@ -272,6 +272,7 @@ class ProjectUser extends Model
         $projects = Project::with('course:id,name,imagen')
                     ->whereIn('course_id',$courses_id)
                     ->where('active',1)
+                    ->whereNull('deleted_at')
                     ->select('id','course_id','indications');
         //FILTERS
         if($request?->school_id){

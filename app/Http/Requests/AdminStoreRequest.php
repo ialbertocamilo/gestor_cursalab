@@ -54,17 +54,20 @@ class AdminStoreRequest extends FormRequest
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
             'surname' => 'required|min:2|max:255',
+            // 'document' => 'nullable|max:255',
             // 'password' => "{$pass}|max:255",
             'password' => $passwordRules,
 
             'email_gestor' => "required|email|max:255|unique:users,email_gestor,{$id},id,deleted_at,NULL",
-            // 'document' => "required|min:8|unique:users,document,{$id},id,deleted_at,NULL",
+            'document' => "nullable|min:8|unique:users,document,{$id},id,deleted_at,NULL",
 
             'username' => 'nullable',
-            'phone_number' => 'nullable',
-            'person_number' => 'nullable',
+            'active' => 'required',
+            'enable_2fa' => 'required',
+            // 'phone_number' => 'nullable',
+            // 'person_number' => 'nullable',
 
-            'workspacessel' => 'required'
+            'selected_workspaces' => 'required'
         ];
 
         return $rules;
@@ -73,19 +76,20 @@ class AdminStoreRequest extends FormRequest
     public function validationData()
     {
         $this->mergeIfMissing(['active' => INACTIVE]);
+        $this->mergeIfMissing(['enable_2fa' => INACTIVE]);
 
         return $this->all();
     }
 
-    public function messages()
-    {
-        return [
-            'name.required' => 'El dato "nombre" es requerido',
-            'password.required' => 'El dato "contraseña" es requerido',
-            'workspacessel.required' => 'Debe seleccionar al menos un rol',
-            'email_gestor.required' => 'El dato "correo" es requerido',
-            'email_gestor.email_gestor' => 'El dato "correo " debe tener formato abc@ejemplo.com',
-            'email_gestor.unique' => 'Este correo ya ha sido regitrado: intente con otro'
-        ];
-    }
+    // public function messages()
+    // {
+    //     return [
+    //         'name.required' => 'El dato "nombre" es requerido',
+    //         'password.required' => 'El dato "contraseña" es requerido',
+    //         'workspacessel.required' => 'Debe seleccionar al menos un rol',
+    //         'email_gestor.required' => 'El dato "correo" es requerido',
+    //         'email_gestor.email_gestor' => 'El dato "correo " debe tener formato abc@ejemplo.com',
+    //         'email_gestor.unique' => 'Este correo ya ha sido regitrado: intente con otro'
+    //     ];
+    // }
 }

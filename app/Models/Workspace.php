@@ -253,12 +253,43 @@ class Workspace extends BaseModel
      */
     public static function countModules(int $workspaceId): int
     {
+        $ids = get_subworkspaces_id($workspaceId);
 
         $count = Workspace::query()
             ->where('parent_id', $workspaceId)
+            ->whereIn('id', $ids)
             ->count();
 
         return $count ?? 0;
+    }
+
+    /**
+     * Count workspaces' courses
+     *
+     * @param int $workspaceId
+     * @return int
+     */
+    public static function countCourses(int $workspaceId): int
+    {
+        // $workspace = get_current_workspace();
+
+        $q = Course::query();
+            // ->whereHas('workspaces', function ($t) use ($workspaceId) {
+            //     $t->where('workspace_id', $workspaceId);
+            // });
+
+
+            $q->whereHas('schools.subworkspaces', function ($q) use ($workspaceId) {
+                $q->whereIn('id', get_subworkspaces_id($workspaceId));
+            });
+
+        // if ($request->active == 1)
+        //     $q->where('active', ACTIVE);
+
+        // if ($request->active == 2)
+        //     $q->where('active', '<>', ACTIVE);
+
+        return $q->count();
     }
 
     /**
@@ -269,8 +300,8 @@ class Workspace extends BaseModel
      */
     public static function countUsers(int $workspaceId): int
     {
-
-        $ids = self::loadSubWorkspacesIds($workspaceId);
+        $ids = get_subworkspaces_id($workspaceId);
+        // $ids = self::loadSubWorkspacesIds($workspaceId);
 
         $count = User::query()
             ->whereIn('subworkspace_id', $ids)
@@ -417,12 +448,10 @@ class Workspace extends BaseModel
 
         $query->whereNotNull('parent_id');
 
-        // info('workspace');
-
-        // info(session('workspace'));
-
         if (session('workspace') || $request->workspace_id)
             $query->where('parent_id', $request->workspace_id ?? session('workspace')->id);
+
+        $query->whereIn('id', current_subworkspaces_id());
 
         if ($request->q)
             $query->where('name', 'like', "%$request->q%");

@@ -295,7 +295,7 @@ export default {
     methods: {
         async fetchFiltersData () {
             // Fetch schools
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}?grouped=0`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
@@ -413,7 +413,7 @@ export default {
             if (this.escuela.length === 0) return false;
 
             this.cursos_libres = false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}/all`
             let res = await axios({
                 url,
                 method: 'get'
