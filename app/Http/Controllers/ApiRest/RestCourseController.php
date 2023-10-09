@@ -23,10 +23,10 @@ class RestCourseController extends Controller
 
         // Update flag to force update users courses
 
-//        if(now()->diffInMinutes($user->required_update_at) > 60) {
-//            $user->required_update_at = now();
-//            $user->save();
-//        }
+        if(now()->diffInMinutes($user->required_update_at) > 60) {
+            $user->required_update_at = now();
+            $user->save();
+        }
 
 //        $courses = $user->getCurrentCourses();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
@@ -199,7 +199,7 @@ class RestCourseController extends Controller
                         'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
                         'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
                         'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
-                        'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
+                        'user_confirms_certificate' => $certificate?->course?->user_confirms_certificate,
                         'compatible' => [
                             'course_id' => $compatible_certificate->course->id,
                             'name' => $compatible_certificate->course->name,
