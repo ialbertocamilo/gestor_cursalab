@@ -84,13 +84,19 @@ class Guest extends BaseModel {
         }
         $data['active'] = boolval($guest_link->activate_by_default);
         $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','registered')->first()?->id;
-        $user = User::storeRequest($data);
         if($request->guest_id){
-            Guest::where('id',$request->guest_id)->update([
-                'status_id'=>$status_id_pending,
-                'user_id'=>$user->id
-            ]);
+            $_guest = Guest::where('id',$request->guest_id)->first;
+            if($_guest){
+                $user = User::storeRequest($data);
+                $_guest->update([
+                    'status_id'=>$status_id_pending,
+                    'user_id'=>$user->id
+                ]);
+            }else{
+                return ['message'=>'Link inválido'];
+            }
         }else{
+            $user = User::storeRequest($data);
             $type_id_by_email = Taxonomy::where('group','guests')->where('type','type')->where('code','by-link')->first()?->id;
             Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,get_current_workspace()->id,$user->id);
         }

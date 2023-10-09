@@ -29,7 +29,7 @@ class GuestRestController extends Controller
     public function storeGuest(GuestStoreRequest $request){
         $data = $request->validated();
         $message = Guest::storeGuest($data,$request);
-        return $this->success([]);
+        return $this->success($message);
     }
     public function sendGuestCodeVerificationByEmail(Request $request){
         $data = Guest::sendGuestCodeVerificationByEmail($request);
