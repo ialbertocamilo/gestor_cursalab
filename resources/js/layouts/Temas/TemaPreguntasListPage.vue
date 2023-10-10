@@ -177,6 +177,7 @@
                     refreshDefaultTable(dataTable, filters),
                     openConfirmCreateQuestion()"
                 @onCancel="closeFormModal(modalCreateQuestionsOptions) "
+                :number_socket="number_socket"
             />
             <DefaultAlertDialog 
                 :options="modalInfoCreateQuestion"
@@ -207,6 +208,7 @@
 </template>
 
 <script>
+const number_socket = Math.floor(Math.random(6)*1000000);
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
@@ -362,7 +364,8 @@ export default {
                 hideCancelBtn:true,
                 confirmLabel:'Entendido'
             },
-            delete_model: null
+            delete_model: null,
+            number_socket:number_socket
         }
     },
     mounted() {
@@ -380,7 +383,6 @@ export default {
               content: msg,
             })
         }
-
         // vue.getSelects();
     },
     methods: {

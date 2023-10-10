@@ -189,6 +189,9 @@ export default {
         options: {
             type: Object,
             required: true
+        },
+        number_socket:{
+            required:false
         }
     },
     data() {
@@ -236,6 +239,16 @@ export default {
     },
     mounted(){
         this.jarvisBaseUrl = this.getJarvisUrl();
+        console.log(this.number_socket);
+        window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGenerated', result => {
+            try {
+                console.log(result);
+                this.questions.push(result.data.mensaje);
+                console.log(this.number_socket);
+            } catch (error) {
+                console.error('Error al procesar los datos:', error);
+            }
+        });
     },
     methods: {
         closeModal() {
@@ -260,7 +273,8 @@ export default {
             const data = {
                 topic_id: vue.options.topic_id,
                 workspace_id: vue.options.workspace_id,
-                configuration: vue.configuration
+                configuration: vue.configuration,
+                number_socket:vue.number_socket
             }
             await vue.$http.post(url, data).then(async ({data}) => {
                 vue.hideLoader();
