@@ -9,7 +9,7 @@
             />
             <img
                 v-else
-                src="/img/noimage.png" height="100" class="--primary"
+                :src="oldPreview || '/img/noimage.png'" height="100" class="--primary"
             />
         </v-col>
 
@@ -100,7 +100,8 @@ export default {
         // DiplomaFormSave,  
     },
     props: {
-        value: null
+        value: null,
+        oldPreview: null,
     }
     ,
     data() {
