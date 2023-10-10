@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Jarvis;
 use GuzzleHttp\Client;
 use App\Models\MediaTema;
 use App\Services\FileService;
@@ -37,35 +38,10 @@ class ConvertMultimediaToText extends Command
     }
 
     private function convertMultimediaToText(){
-        $medias_to_convert = MediaTema::with(['topic:id,course_id','topic.course:id','topic.course.workspaces:id'])
+        $medias_to_convert = MediaTema::with(['topic:id,course_id','topic.course:id','topic.course.workspaces:id,jarvis_configuration'])
         ->whereNull('path_convert')->where('ia_convert',1)->orderBy('updated_at','DESC')->take(5)->get();
         foreach ($medias_to_convert as $media) {
-            $text_result = null;
-            $params = [
-                // 'url' => $link,
-                'workspace_id'=> $media->topic->course->workspaces->first()?->id,
-                'topic_id' => $media->topic->id,
-                'media_topic_id' => $media->id
-            ];
-            if($media->type_id == 'youtube'){
-                $link = 'https://www.youtube.com/watch?v=' . $media->value;
-                $params['url'] =$link;
-                $response = Http::withOptions(['verify' => false])->timeout(1500)->post(env('JARVIS_BASE_URL').'/process_youtube', $params);
-                $this->info($response);
-            }
-            if(in_array($media->type_id,['pdf','video','audio'])){
-                $params['relative_path'] =$media->value;
-                $response = Http::withOptions(['verify' => false])->timeout(1500)->post(env('JARVIS_BASE_URL').'/convert_file', $params);
-                $this->info($response);
-            }
-            // if ($text_result) {
-            //     $fileName = $media->id.'_'.$media->topic_id.'_'.$media->type_id.'_'.rand(1,5000);
-            //     $path = 'jarvis/' . $fileName.'.txt';
-            //     $media->path_convert = $path;
-            //     $text_result = json_decode( $text_result ,JSON_UNESCAPED_UNICODE);
-            //     $result = Storage::disk('s3')->put($path, json_encode($text_result,JSON_UNESCAPED_UNICODE));
-            //     $media->save();
-            // }
+            Jarvis::convertMultimediaToText($media);
         }
     }
 }

@@ -233,14 +233,7 @@ class TemaController extends Controller
 
         return $this->success(['pregunta' => $pregunta]);
     }
-    public function generateIaQuestions(Request $request){
-        $response = Http::withOptions(['verify' => false])->timeout(900)->post(env('JARVIS_BASE_URL').'/generate-questions', $request->all());
-        if ($response->successful()) {
-            $data = $response->json();
-            return $this->success($data['message']);
-        }
-        return $this->error(['message' => 'error'],500);
-    }
+    
     public function storeAIQuestion(School $school, Course $course, Topic $topic,Request $request){
         $question_type_code = $topic->evaluation_type->code === 'qualified'
         ? 'select-options'

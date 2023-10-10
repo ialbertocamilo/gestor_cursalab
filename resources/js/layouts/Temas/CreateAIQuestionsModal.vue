@@ -267,8 +267,8 @@ export default {
         async generateQuestions(){
             let vue = this;
             // const url = `${vue.jarvisBaseUrl}/generate-questions`;
-            const url = `${vue.options.base_endpoint}/generate-ia-questions`;
-
+            // const url = `${vue.options.base_endpoint}/generate-ia-questions`;
+            const url = '/jarvis/generate-questions';
             vue.showLoader();
             const data = {
                 topic_id: vue.options.topic_id,

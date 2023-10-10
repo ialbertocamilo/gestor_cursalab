@@ -319,12 +319,12 @@ class GeneralController extends Controller
     }
 
     public function executeCommandJarvis(){
-        try {
+        // try {
             //code...
             Artisan::call('convert:multimedia-text');
             return 'Se ejecutó correctamente';
-        } catch (\Throwable $th) {
-            return 'Hubo un error :C';
-        }
+        // } catch (\Throwable $th) {
+        //     return 'Hubo un error :C';
+        // }
     }
 }
