@@ -13,7 +13,7 @@ class JarvisController extends Controller
     }
     public function generateQuestionsJarvis(Request $request){
         $questions = Jarvis::generateQuestionsJarvis($request);
-        return $this->success(compact('questions'));
+        return $this->success($questions);
     }
 
 }
