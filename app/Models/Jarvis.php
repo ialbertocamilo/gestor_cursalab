@@ -78,7 +78,7 @@ class Jarvis extends Model
         $response = Http::withOptions(['verify' => false])->timeout(900)->post($this->jarvis_base_url.'/generate-questions', $params);
         if ($response->successful()) {
             $data = $response->json();
-            return $data;
+            return $data['message'];
             // return $this->success($data['message']);
         }
         // return $this->error(['message' => 'error'],500);
