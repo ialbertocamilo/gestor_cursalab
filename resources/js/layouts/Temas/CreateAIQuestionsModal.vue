@@ -240,15 +240,15 @@ export default {
     mounted(){
         this.jarvisBaseUrl = this.getJarvisUrl();
         console.log(this.number_socket);
-        window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGenerated', result => {
-            try {
-                console.log(result);
-                this.questions.push(result.data.mensaje);
-                console.log(this.number_socket);
-            } catch (error) {
-                console.error('Error al procesar los datos:', error);
-            }
-        });
+        // window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+        //     try {
+        //         console.log(result);
+        //         this.questions.push(result.data.mensaje);
+        //         console.log(this.number_socket);
+        //     } catch (error) {
+        //         console.error('Error al procesar los datos:', error);
+        //     }
+        // });
     },
     methods: {
         closeModal() {

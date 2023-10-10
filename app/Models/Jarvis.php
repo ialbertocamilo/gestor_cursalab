@@ -83,11 +83,11 @@ class Jarvis extends Model
         }
         // return $this->error(['message' => 'error'],500);
     }
-    private function getJarvisConfiguration($workspace=null){
-        $workspace = $workspace ?? get_current_workspace();
-        $jarvis_configuration = $workspace->jarvis_configuration;
-        $token = $workspace->jarvis_configuration['openia_token'] ?? '';
-        $model = $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo';
+    private function getJarvisConfiguration($_workspace=null){
+        $workspace = $_workspace ?? get_current_workspace();
+        $jarvis_configuration = is_array($workspace->jarvis_configuration) ? $workspace->jarvis_configuration : json_decode($workspace->jarvis_configuration,true);
+        $token = $jarvis_configuration['openia_token'] ?? '';
+        $model = $jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo';
         return compact('token','model');
     }
     private function saveInS3($path_name,$text)

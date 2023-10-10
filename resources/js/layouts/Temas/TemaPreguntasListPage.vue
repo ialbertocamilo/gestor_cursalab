@@ -383,6 +383,15 @@ export default {
               content: msg,
             })
         }
+        window.Echo.channel(`questions-ia-generated`).listen('QuestionIaGeneratedEvent', result => {
+            try {
+                console.log(result);
+                // this.questions.push(result.data.mensaje);
+                // console.log(this.number_socket);
+            } catch (error) {
+                console.error('Error al procesar los datos:', error);
+            }
+        });
         // vue.getSelects();
     },
     methods: {

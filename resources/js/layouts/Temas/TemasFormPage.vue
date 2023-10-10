@@ -51,7 +51,7 @@
                                         images_upload_handler: images_upload_handler,
                                         setup: function (editor) {
                                             editor.ui.registry.addButton('customButton', {
-                                                text: getText(), // Ruta de la imagen para el botón personalizado
+                                                text: getIconText(), // Ruta de la imagen para el botón personalizado
                                                 tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
                                                 onAction: function (_) {
                                                     generateIaDescription();
@@ -60,6 +60,11 @@
                                         }
                                     }"
                                 />
+                                <v-progress-linear
+                                    indeterminate
+                                    color="primary"
+                                    v-if="loading_description"
+                                ></v-progress-linear>
                             </fieldset>
                         </v-col>
                         <v-col cols="4">
@@ -229,7 +234,9 @@
                                                                 v-else
                                                                 class="mr-2" 
                                                                 :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
+                                                                @click="openModalToConvert(media)"
                                                                 src="/img/ia_convert.svg"
+                                                                style="cursor: pointer;"
                                                             >
                                                             <p class="m-0" :style="media.ia_convert ? 'color:#5458EA' : 'color:gray'">Ai Convert</p>
                                                         </span>
@@ -326,11 +333,21 @@
             @onConfirm="confirmDeleteMedia"
             @onCancel="mediaDeleteModal.open = false"
         />
+        <ConvertMediaToIaModal 
+            :limits="limits_ia_convert"
+            width="40vw"
+            :ref="convertMediaToIaOptions.ref"
+            :options="convertMediaToIaOptions"
+            @close="convertMediaToIaOptions.open = false "
+            @onConfirm="addIaConvert"
+        />
     </section>
 </template>
 <script>
 
 import MultimediaBox from "./MultimediaBox";
+import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
+
 // import DefaultRichText from "../../components/globals/DefaultRichText";
 import TemaMultimediaTypes from "./TemaMultimediaTypes";
 import draggable from 'vuedraggable'
@@ -344,7 +361,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm,ConvertMediaToIaModal},
     props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
@@ -422,7 +439,13 @@ export default {
                 },
             },
             limits_ia_convert:{},
-            loading_description:false
+            loading_description:false,
+            convertMediaToIaOptions: {
+                ref: 'ConvertMediaToIaOptions',
+                title: null,
+                open: false,
+                confirmLabel: 'Guardar'
+            },
         }
     },
     async mounted() {
@@ -714,10 +737,10 @@ export default {
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
         },
-        copyToClipboard(text) {
+        async copyToClipboard(text) {
             let vue = this;
 
-            navigator.clipboard.writeText(text);
+            await navigator.clipboard.writeText(text);
 
             vue.showAlert('Código multimedia copiado', 'success', '', 3);
         },
@@ -766,10 +789,28 @@ export default {
                 vue.loading_description = false; 
             })
         },
-        getText(){
+        getIconText(){
             return '<image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >';
+        },
+        openModalToConvert(media){
+            let vue  = this;
+            if(media.ia_convert){
+                return '';
+            }
+            if(!['youtube','video','audio','pdf'].includes(media.type_id)){
+                showAlert('Este tipo de multimedia no esta habilitada para IA', 'warning', '') 
+                return '';
+            }
+            vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')
+            // convertMediaToIaOptions
+        },
+        addIaConvert(media){
+            let vue  = this;
+            const idx = vue.resource.media.findIndex(m => m.id = media.id)
+            vue.resource.media[idx].ia_convert = 1;
+            vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
+            vue.convertMediaToIaOptions.open = false;
         }
-
     }
 }
 </script>
