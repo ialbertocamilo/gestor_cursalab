@@ -101,7 +101,10 @@ class Guest extends BaseModel {
             Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,get_current_workspace()->id,$user->id);
         }
         $guest_link->increment('count_registers', 1);
-        return ['message'=> $data['active'] ? 'Usuario registrado' : 'Usuario invitado'];
+        $title = 'Tu solicitud ha sido aceptada';
+        $message = $data['active'] ? 'Ya puedes ingresar a nuestra plataforma' : 'Recibirás un correo de confirmación cuando se active tu cuenta de capacitación';
+
+        return compact('title','message');
     }
     protected function verifyGuestCodeVerificationByEmail($request){
         $message = EmailsSent::verifyCode($request);
