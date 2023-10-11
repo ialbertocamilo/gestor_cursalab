@@ -334,17 +334,17 @@
                             >
                               <template slot="content">
 
-                                <DiplomaSelector v-model="resource.certificate_template_id" />
+                                <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
 
-                                <div class="p-3 mt-3">
-                                  <DefaultToggle
+                                <div class="p-2 mt-3">
+                                  <DefaultToggle dense
                                       :active-label="'Mostrar diploma al usuario'"
                                       :inactive-label="'Mostrar diploma al usuario'"
                                       v-model="resource.show_certification_to_user"/>
                                 </div>
 
-                                <div class="p-3 mt-3">
-                                  <DefaultToggle
+                                <div class="p-2 --mt-3">
+                                  <DefaultToggle dense
                                       :active-label="'Confirmación para habilitarles el diploma a los usuarios donde acepten haber culminado satisfactoriamente el curso.'"
                                       :inactive-label="'Confirmación para habilitarles el diploma a los usuarios donde acepten haber culminado satisfactoriamente el curso.'"
                                       v-model="resource.user_confirms_certificate"/>
