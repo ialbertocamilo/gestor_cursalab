@@ -25,6 +25,7 @@
                         class="ml-2" 
                         src="/img/ia_convert.svg"
                     >
+                    <span class="span-limits">{{limits.ia_descriptions_generated}}/{{limits.limit_descriptions_jarvis }}</span>
                 </div>
             </template>
         </v-textarea>
@@ -74,6 +75,13 @@ export default {
             type: Boolean,
             default: false
         },
+        limits:{
+            type: Object,
+            default: {
+                ia_descriptions_generated:0,
+                limit_descriptions_jarvis:0
+            }
+        }
     },
     data() {
         return {
@@ -110,5 +118,13 @@ export default {
   color: #888; 
   font-size: 12px; 
   cursor: pointer;
+}
+.span-limits{
+    color: white;
+    background: rgb(87, 191, 227);
+    padding: 5px;
+    border-radius: 16px;
+    margin-right: 8px;
+    margin-left: 2px;
 }
 </style>

@@ -110,7 +110,8 @@ class WorkspaceController extends Controller
 
         $data['limits'] = [
             'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
-            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null,
+            'limit_descriptions_jarvis' => $data['limit_descriptions_jarvis'] ?? 0,
         ];
         $data['jarvis_configuration'] = [
             'openia_token' => $data['openia_token'] ?? '',
@@ -196,6 +197,7 @@ class WorkspaceController extends Controller
         $workspace->limits = [
             'limit_allowed_media_convert' => $workspace->limits['limit_allowed_media_convert'] ?? 0,
             'limit_allowed_ia_evaluations' => $workspace->limits['limit_allowed_ia_evaluations'] ?? 0,
+            'limit_descriptions_jarvis' => $workspace->limits['limit_descriptions_jarvis'] ?? 0,
         ];
         $workspace->jarvis_configuration = [
             'openia_token' => $workspace->jarvis_configuration['openia_token'] ?? '',
@@ -228,7 +230,8 @@ class WorkspaceController extends Controller
         // Set constraint: limit allowed users
         $data['limits'] = [
             'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
-            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null,
+            'limit_descriptions_jarvis' => $data['limit_descriptions_jarvis'] ?? 0,
         ];
         $data['jarvis_configuration'] = [
             'openia_token' => $data['openia_token'] ?? '',

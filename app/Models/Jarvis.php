@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Mongo\JarvisAttempt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +31,7 @@ class Jarvis extends Model
         );
         if ($response->successful()) {
             $data = $response->json();
+            JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'descriptions');
             return $data['description'];
         }
         return $response;
@@ -78,6 +80,7 @@ class Jarvis extends Model
         $response = Http::withOptions(['verify' => false])->timeout(900)->post($this->jarvis_base_url.'/generate-questions', $params);
         if ($response->successful()) {
             $data = $response->json();
+            JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'evaluations');
             return $data['message'];
             // return $this->success($data['message']);
         }

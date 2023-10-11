@@ -890,6 +890,12 @@ class Workspace extends BaseModel
                         'is_ready_to_create_AIQuestions'=> $isReadyToCreateAIQuestions,
                     ];
                     break;
+            case 'descriptions':
+                $limit_descriptions_jarvis =  $limits['limit_descriptions_jarvis'] ?? 0;
+                $data = [
+                    'limit_descriptions_jarvis' => (int) $limit_descriptions_jarvis,
+                    'ia_descriptions_generated' => JarvisAttempt::getAttempt($workspace->id,'descriptions'),
+                ];
         }
         return $data;        
     }

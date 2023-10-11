@@ -51,6 +51,7 @@
                                         v-model="resource.description"
                                         :rows="4"
                                         @eventGenerateIA="generateIaDescription"
+                                        :limits="limits_descriptions_generate_ia"
                                         :loading="loading_description"
                                         :disabled="loading_description"
                                         :showButtonIaGenerate="true"
@@ -580,6 +581,10 @@ export default {
             },
             new_value: 0,
             loading_description:false,
+            limits_descriptions_generate_ia:{
+                ia_descriptions_generated:0,
+                limit_descriptions_jarvis:0
+            }
         }
     },
     computed: {
@@ -626,6 +631,7 @@ export default {
                 this.resource.lista_escuelas.push(+this.$props.categoria_id);
             }
         }
+        this.loadLimitsGenerateIaDescriptions();
     },
     methods: {
         calculateBySystem(val) {
@@ -843,6 +849,12 @@ export default {
             const vue = this;
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se esta generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
                 return ''
             }
             vue.loading_description = true; 
@@ -850,6 +862,7 @@ export default {
                 name : vue.resource.name,
                 type:'course'
             }).then(({data})=>{
+                vue.limits_descriptions_generate_ia.ia_descriptions_generated +=1;
                 let characters = data.data.description.split('');
                 vue.resource.description = ''; // Limpiar el contenido anterior
                 function updateDescription(index) {
@@ -857,7 +870,7 @@ export default {
                         vue.resource.description += characters[index];
                         setTimeout(() => {
                             updateDescription(index + 1);
-                        }, 100);
+                        }, 10);
                     }else{
                         vue.loading_description = false; 
                     }
@@ -865,6 +878,11 @@ export default {
                 updateDescription(0);
             }).catch(()=>{
                 vue.loading_description = false; 
+            })
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                this.limits_descriptions_generate_ia = data.data;
             })
         }
     }

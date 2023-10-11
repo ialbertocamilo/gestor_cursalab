@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Jarvis;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
 
 class JarvisController extends Controller
@@ -15,5 +16,8 @@ class JarvisController extends Controller
         $questions = Jarvis::generateQuestionsJarvis($request);
         return $this->success($questions);
     }
-
+    public function getLimitsByWorkspace(Request $request){
+        $limits = Workspace::getLimitAIConvert(null,$request->type);
+        return $this->success($limits);
+    }
 }

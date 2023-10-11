@@ -439,6 +439,7 @@ export default {
                 },
             },
             limits_ia_convert:{},
+            limits_descriptions_generate_ia:{},
             loading_description:false,
             convertMediaToIaOptions: {
                 ref: 'ConvertMediaToIaOptions',
@@ -453,6 +454,7 @@ export default {
         vue.showLoader()
         await this.loadData()
         vue.hideLoader()
+        vue.loadLimitsGenerateIaDescriptions();
     },
     computed: {
         showActiveResults() {
@@ -765,6 +767,12 @@ export default {
             const vue = this;
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se esta generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
                 return ''
             }
             vue.loading_description = true; 
@@ -772,6 +780,9 @@ export default {
                 name : vue.resource.name,
                 type:'topic'
             }).then(({data})=>{
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                ia_descriptions_generated.textContent = vue.limits_descriptions_generate_ia.ia_descriptions_generated+1;
+
                 let characters = data.data.description.split('');
                 vue.resource.content = ''; // Limpiar el contenido anterior
                 function updateDescription(index) {
@@ -779,7 +790,7 @@ export default {
                         vue.resource.content += characters[index];
                         setTimeout(() => {
                             updateDescription(index + 1);
-                        }, 100);
+                        }, 10);
                     }else{
                         vue.loading_description = false; 
                     }
@@ -790,7 +801,13 @@ export default {
             })
         },
         getIconText(){
-            return '<image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >';
+            return `
+            <div>
+                <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
+                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/<span id="limit_descriptions_jarvis">0</span></span>
+            </div>
+            `
+            // return '<v-badge><image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ ></v-badge>';
         },
         openModalToConvert(media){
             let vue  = this;
@@ -798,7 +815,7 @@ export default {
                 return '';
             }
             if(!['youtube','video','audio','pdf'].includes(media.type_id)){
-                showAlert('Este tipo de multimedia no esta habilitada para IA', 'warning', '') 
+                vue.showAlert('Este tipo de multimedia no esta habilitada para IA', 'warning', '') 
                 return '';
             }
             vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')
@@ -810,6 +827,15 @@ export default {
             vue.resource.media[idx].ia_convert = 1;
             vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
             vue.convertMediaToIaOptions.open = false;
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                this.limits_descriptions_generate_ia = data.data;
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
+                ia_descriptions_generated.textContent = data.data.ia_descriptions_generated;
+                limit_descriptions_jarvis.textContent =  data.data.limit_descriptions_jarvis;
+            })
         }
     }
 }
@@ -879,5 +905,15 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+.badge_custom{
+    position: absolute !important;
+    color: white !important;
+    background: rgb(87, 191, 227) !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+    margin-right: 8px !important;
+    margin-left: 2px !important;
+    font-size:9px !important;
 }
 </style>

@@ -240,6 +240,16 @@
                                             dense
                                         />
                                     </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Límite de descripciones con IA"
+                                            v-model="resource.limits.limit_descriptions_jarvis"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
                                 </v-row>
                             </template>
                         </DefaultSection>
@@ -597,6 +607,7 @@ export default {
             let vue = this;
             formData.append('limit_allowed_media_convert', vue.resource.limits.limit_allowed_media_convert);
             formData.append('limit_allowed_ia_evaluations', vue.resource.limits.limit_allowed_ia_evaluations);
+            formData.append('limit_descriptions_jarvis', vue.resource.limits.limit_descriptions_jarvis);
             formData.append('openia_token', vue.resource.jarvis_configuration.openia_token);
             formData.append('openia_model', vue.resource.jarvis_configuration.openia_model);
 
