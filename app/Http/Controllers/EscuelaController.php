@@ -49,6 +49,8 @@ class EscuelaController extends Controller
 
         $workspace = get_current_workspace();
 
+        $school->plantilla_diploma = $school->plantilla_diploma ? get_media_url($school->plantilla_diploma) : null;
+
         $modules = Workspace::where('parent_id', $workspace?->id)
             ->select('id', 'name')->get();
 

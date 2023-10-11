@@ -389,6 +389,8 @@ class WorkspaceController extends Controller
         $subworkspace->contact_email = $contact_support['contact_email'] ?? NULL;
         $subworkspace->contact_schedule = $contact_support['contact_schedule'] ?? NULL;
 
+        $subworkspace->plantilla_diploma = $subworkspace->plantilla_diploma ? get_media_url($subworkspace->plantilla_diploma) : null;
+
         return $this->success([
             'modulo' => $subworkspace,
             'main_menu' => $formSelects['main_menu'],
