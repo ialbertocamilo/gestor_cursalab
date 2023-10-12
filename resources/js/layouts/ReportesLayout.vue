@@ -710,13 +710,15 @@ export default {
         let params = new URLSearchParams(uri);
         let tab = params.get("tab");
         let section = params.get("section");
+        let dni = params.get("dni");
 
         if (tab) {
-
             this.activeTab = tab
             this.selectedTab = parseInt(section)
+        } else if (dni) {
+            this.activeTab = 'new-report';
+            this.selectedTab = '#notas-de-usuario'
         }
-
     }
     ,
     methods: {
