@@ -24,7 +24,7 @@ class EmailsSent extends Model
         if($email_sent['data_sent']['code'] != $request->code){
             return [
                 'verified'=>false,
-                'message' => 'El código no coincide.'
+                'message' => 'El código que has indicado es incorrecto  si deseas puedes volver a ingresarlo  o reenviar el código.'
             ];
         }
         if(!($email_sent['data_sent']['expires_code'] > now())){
