@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Guest;
 use App\Models\Workspace;
+use App\Mail\EmailTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\GuestResource;
 use App\Http\Requests\GuestStoreRequest;
 use App\Http\Controllers\UsuarioController;
@@ -110,6 +112,17 @@ class GuestController extends Controller
         if ($status && !$current_workspace->verifyLimitAllowedUsers()){
             $error_msg = config('errors.limit-errors.limit-user-allowed');
             return $this->error($error_msg, 422);
+        }
+        if($status){
+            $data = [
+                'lastname'=>$user->lastname,
+                'name'=>$user->name,
+                'document'=>$user->document,
+                'subworkspace_name'=>$user->subworkspace->name,
+                'subject'=>'Correo de bienvenida',
+                'web_url' => config('app.web_url')
+            ];
+            Mail::to( trim($user->email) )->send( new EmailTemplate( 'emails.welcome_user', $data ) );
         }
         $user->update(['active' => $status]);
         $current_workspace->sendEmailByLimit();

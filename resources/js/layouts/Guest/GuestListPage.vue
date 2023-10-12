@@ -421,7 +421,7 @@
                         vue.customConfirmationDialog.title_modal = 'Activar';
                         vue.customConfirmationDialog.content_modal.delete.title = `¡Estás por activar ${event.filter(u => !u.active && u.user_id).length} usuario(s)!`;
                         vue.customConfirmationDialog.content_modal.delete.details =  [
-                            'Podrán ingresar a la plataforma.',
+                            'Se le enviará un correo indicando que ya puede ingresar a la  plataforma.',
                         ] 
                         vue.customConfirmationDialog.data = event.filter(u => !u.active && u.user_id);
                     break
