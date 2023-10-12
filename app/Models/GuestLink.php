@@ -59,14 +59,14 @@ class GuestLink extends BaseModel
         if(!$code){
             return ['exist_url'=>false,'fondo_invitados_app'=>$ambiente?->fondo_invitados_app,'logo'=>$ambiente?->logo_empresa];
         }
-        $guest_link =  self::query()
+        $_guest_link =  self::query()
             ->with(['workspace:id,logo'])
             ->where('url',$code)
             ->select('guest_id','id as code_id','expiration_date','workspace_id')
             ->first();
 
-        if ($guest_link && $guest_link->expiration_date) {
-            $guest_link = $guest_link->expiration_date > date("Y-m-d G:i")
+        if ($_guest_link && $_guest_link->expiration_date) {
+            $guest_link = $_guest_link->expiration_date > date("Y-m-d G:i")
                 ? $guest_link
                 : null ;
         }
@@ -82,8 +82,11 @@ class GuestLink extends BaseModel
             $data['email'] = ($guest_link->guest_id)
                 ? Guest::where('id',$guest_link->guest_id)->first()->email
                 : null ;
+            return $data;
+        }else{
+            $message = $_guest_link ? 'Link expirado' : 'El link es incorrecto';
+            return ['exist_url'=>false,'fondo_invitados_app'=>$ambiente?->fondo_invitados_app,'message','logo'=>$ambiente?->logo_empresa];
         }
-        return $data;
     }
     protected function childCriterionValues($request){
         
