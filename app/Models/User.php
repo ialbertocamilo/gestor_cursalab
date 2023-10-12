@@ -878,23 +878,23 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     )
     {
         $user = $this;
-        info('A');
+        // info('A');
         if ($user->hasDataUpToDate()) {
 
             $all_courses = $user->getCoursesDirectly();
         } else {
 
-            info('A 1');
+            // info('A 1');
 
             $user->load(['criterion_values:id,value_text,criterion_id','criterion_values.criterion:id,code']);
-            info('A 2');
+            // info('A 2');
 
             $all_courses = [];
 
             if ($with_direct_segmentation) {
                 $this->setCoursesWithDirectSegmentation($user, $all_courses, $withFreeCourses, $response_type);
             }
-            info('A 3');
+            // info('A 3');
 
             $user->course_data()->updateOrCreate(['user_id' => $user->id], [
                 'courses' => $all_courses['current_courses_ids'] ?? [],
@@ -905,7 +905,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ]);
         }
 
-        info('B');
+        // info('B');
         $current_courses = $all_courses['current_courses'] ?? [];
         $compatibles_courses = $all_courses['compatibles'] ?? [];
         $course_id_tags = isset($all_courses['course_id_tags']) ? collect($all_courses['course_id_tags']) : collect();
@@ -914,7 +914,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return $all_courses;
 
         $query = $this->getUserCourseSegmentationQuery($withRelations);
-        info('C');
+        // info('C');
 
         if(count($bySchoolsId)>0){
             $byCoursesId = CourseSchool::whereIn('school_id',$bySchoolsId)->select('course_id')->pluck('course_id');
@@ -925,7 +925,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
-        info('D');
+        // info('D');
 
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
@@ -937,7 +937,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $course->compatible = $compatible_course;
             }
         }
-        info('E');
+        // info('E');
 
         return $courses;
     }
@@ -952,13 +952,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function setCoursesWithDirectSegmentation($user, &$all_courses, $withFreeCourses, $response_type)
     {
-        info('S - 1');
+        // info('S - 1');
         $user->loadMissing('subworkspace.parent');
 
         $workspace = $user->subworkspace->parent;
 
         $query = $this->getUserCourseSegmentationQuery('soft');
-        info('S - 2');
+        // info('S - 2');
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
@@ -970,7 +970,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('active', ACTIVE)
             ->get();
 
-        info('S - 3');
+        // info('S - 3');
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
 //        $user->active_cycle = $user->getActiveCycle();
 
@@ -979,7 +979,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //            'cycle_0_value' => CriterionValue::whereRelation('criterion', 'code', 'cycle')
 //                ->where('value_text', 'Ciclo 0')->first()
 //        ];
-        info('S - 4');
+        // info('S - 4');
 
         $summary_courses_compatibles = SummaryCourse::with('course:id,name')
             ->whereRelation('course', 'active', ACTIVE)
@@ -988,14 +988,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->orderBy('grade_average', 'DESC')
             ->whereRelation('status', 'code', 'aprobado')
             ->get();
-        info('S - 5');
+        // info('S - 5');
         $cycles = null;
         if($user->subworkspace->parent_id === 25){
             $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
             ->where('value_text', '<>', 'Ciclo 0')
             ->orderBy('position')->get();
         }
-        info('S - 6');
+        // info('S - 6');
 
         $document_criterion_id = Criterion::where('code', 'document')->first()->id;
         $user_criteria_document_id = $user_criteria[$document_criterion_id][0]->id ?? NULL; 
@@ -1010,6 +1010,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             // $valid_rule = $this->validateUCCyclesRule($segment, $user, $UC_rules_data);
             // if (!$valid_rule) continue;
 
+                // $course_segment_criteria = $segment_values->where('segment_id', $segment->id)->groupBy('criterion_id');
                 $course_segment_criteria = $segment->values->groupBy('criterion_id');
 
                 if ($segment->type?->code == 'segmentation-by-document') {
@@ -1020,14 +1021,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                     $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
                 }
-
-                // $course_segment_criteria = SegmentValue::where('segment_id', $segment->id)->groupBy('criterion_id')->get();
-                // $course_segment_criteria = $segment_values->where('segment_id', $segment->id)->groupBy('criterion_id');
-
-                // info($course_segment_criteria);
-
-                // $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
-                // $valid_segment = Segment::validateSegmentByUserCriteriaV2($user_criteria, $course_segment_criteria, $segment->id, $document_criterion_id, $document_segments);
 
                 if ($valid_segment) :
                     $tags = [];
@@ -1089,7 +1082,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
         }
 
-        info('S - 7');
+        // info('S - 7');
 
         unset($user->active_cycle);
     }

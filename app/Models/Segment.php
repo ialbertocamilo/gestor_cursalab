@@ -403,39 +403,6 @@ Segment extends BaseModel
         return $segment_valid;
     }
 
-    protected function validateSegmentByUserCriteriaV2($user_criteria, $segment_criteria, $segment_id, $document_id, $document_segments): bool
-    {
-        $segment_valid = false;
-
-        foreach ($segment_criteria as $criterion_id => $segment_values) {
-
-            // info('segment_criteria => ' . $criterion_id . " - {$document_id}");
-
-            $user_criterion_id = $user_criteria[$criterion_id] ?? false;
-
-            if (!$user_criterion_id) :
-                $segment_valid = false;
-                break;
-            endif;
-
-
-            if ($criterion_id == $document_id) {
-                // info('criterio == document  => ' . $user_criterion_id[0]->id);
-
-                
-                // $segment_valid = SegmentValue::where('segment_id', $segment_id)->where('criterion_value_id', $user_criterion_id[0]->id)->count();
-
-            } else {
-
-                $segment_valid = $this->validateValueSegmentCriteriaByUser($segment_values, $user_criterion_id);
-            }
-
-            if (!$segment_valid) break;
-        }
-
-        return $segment_valid;
-    }
-
     private function validateValueSegmentCriteriaByUser($segment_values, $user_criterion_value_by_criterion)
     {
         $criterion_code = $user_criterion_value_by_criterion->first()?->criterion?->field_type?->code;
