@@ -34,9 +34,13 @@ class GuestController extends Controller
     public function activateMultipleUsers(Request $request) {
 
         // $result = Usuario::whereIn('id',  $request->usersIds)->update(['estado' => 1]);
-        
-        return $this->success([]);
-
+        foreach ($request->users_id as $user_id) {
+            $user = User::find($user_id);
+            if($user){
+                $this->changeStatusUser($user);
+            }
+        }
+        return $this->success(['message' => 'Estado actualizado correctamente.']);
     }
     public function limitsWorspace(){
         $data = Workspace::infoLimitCurrentWorkspace();
@@ -78,9 +82,10 @@ class GuestController extends Controller
             $data = $request->validated();
             /****************** Insertar/Actualizar en BD master ****************/
             if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                $usuario_controller = new UsuarioController();
                 $dni_previo = $user['document'];
                 $email_previo = $user['email'];
-                $this->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
+                $user_controller->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
                 // info($user);
             }
             /********************************************************************/
@@ -96,18 +101,17 @@ class GuestController extends Controller
     public function statusGuestUser(Guest $guest){
         $guest->load('user');
         $user = $guest->user;
-        $status = ($user->active == 1) ? 0 : 1;
-
+        $this->changeStatusUser($user);
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
+    }
+    private function changeStatusUser($user){
+        $status = !$user->active;
         $current_workspace = get_current_workspace();
-
         if ($status && !$current_workspace->verifyLimitAllowedUsers()){
             $error_msg = config('errors.limit-errors.limit-user-allowed');
-
             return $this->error($error_msg, 422);
         }
-
         $user->update(['active' => $status]);
         $current_workspace->sendEmailByLimit();
-        return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 }

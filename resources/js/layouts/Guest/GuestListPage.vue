@@ -73,6 +73,8 @@
                 :filters="filters"
                 @delete="openCustomDialog($event,'delete_one_user')"
                 @openModalDeleteUsers="openCustomDialog($event,'delete_massive_user')"
+                @openModalActiveUsers="openCustomDialog($event,'active_massive_user')"
+                @openModalInactiveUsers="openCustomDialog($event,'inactive_massive_user')"
                 @onSelectRow="selectionChange($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Actualizar estado')"
                 @edit="openFormModal(modalFormUserOptions, $event, 'edit')"
@@ -192,7 +194,8 @@
                         {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     ],
                     customSelectActions:[
-                        {text:'Confirmar',method_name:'openModalActiveUsers'},
+                        {text:'Activar',method_name:'openModalActiveUsers'},
+                        {text:'Inactivar',method_name:'openModalInactiveUsers'},
                         {text:'Eliminar',method_name:'openModalDeleteUsers'},
                     ],
                     actions: [
@@ -385,6 +388,7 @@
             },
             openCustomDialog(event,type){
                 let vue = this;
+                console.log(event,type);
                 switch (type) {
                     case 'delete_one_user':
                         vue.customConfirmationDialog.type = 'delete_user';
@@ -411,6 +415,26 @@
                         ] 
                         vue.customConfirmationDialog.data = event;
                     break
+                    case 'active_massive_user':
+                        vue.customConfirmationDialog.type = 'active_massive_user';
+                        vue.customConfirmationDialog.type_modal = 'delete';
+                        vue.customConfirmationDialog.title_modal = 'Activar';
+                        vue.customConfirmationDialog.content_modal.delete.title = `¡Estás por activar ${event.filter(u => !u.active && u.user_id).length} usuario(s)!`;
+                        vue.customConfirmationDialog.content_modal.delete.details =  [
+                            'Podrán ingresar a la plataforma.',
+                        ] 
+                        vue.customConfirmationDialog.data = event.filter(u => !u.active && u.user_id);
+                    break
+                    case 'inactive_massive_user':
+                        vue.customConfirmationDialog.type = 'inactive_massive_user';
+                        vue.customConfirmationDialog.type_modal = 'delete';
+                        vue.customConfirmationDialog.title_modal = 'Inactivar';
+                        vue.customConfirmationDialog.content_modal.delete.title = `¡Estás por inactivar ${event.filter(u => u.active && u.user_id).length} usuario(s)!`;
+                        vue.customConfirmationDialog.content_modal.delete.details =  [
+                            'No podrán ingresar a la plataforma.',
+                        ] 
+                        vue.customConfirmationDialog.data = event.filter(u => u.active && u.user_id);
+                    break
                 }
                 vue.openSimpleModal(vue.customConfirmationDialog);
             },
@@ -420,6 +444,12 @@
                     case 'delete_user':
                         vue.callApiToDeleteGuest(vue.customConfirmationDialog.data);
                         break;
+                    case 'active_massive_user':
+                        vue.callApiToActiveMassive(vue.customConfirmationDialog.data);
+                        break
+                    case 'inactive_massive_user':
+                        vue.callApiToActiveMassive(vue.customConfirmationDialog.data);
+                    break
                     default:
                         break;
                 }
@@ -437,7 +467,6 @@
                 let vue =this;
                 let guests = Array.isArray(data) ? data : [data] ;
                 let guest_ids = guests.map((g)=> g.id);
-                console.log(guest_ids);
                 if(guest_ids.length >0 ){
                     vue.showLoader();
                     axios.post('/invitados/delete',{
@@ -448,6 +477,22 @@
                         vue.hideLoader();
                     }).catch((err)=>{
                         vue.showAlert('No se puedo eliminar a el/los invitado(s)', 'error', '')
+                        vue.hideLoader();
+                    })
+                }
+            },
+            async callApiToActiveMassive(data){
+                let vue =this;
+                if(data.length>0){
+                    vue.showLoader();
+                    await axios.post('/invitados/users_activation',{
+                            users_id:data.map(g => g.user_id)
+                    }).then(({data})=>{
+                        vue.showAlert(data.data.message, 'success', '')
+                        vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                        vue.hideLoader();
+                    }).catch((err)=>{
+                        vue.showAlert('No se puedo activar a los invitado(s)', 'error', '')
                         vue.hideLoader();
                     })
                 }
