@@ -54,7 +54,7 @@ class GuestLink extends BaseModel
         }
     }
     protected function verifyGuestUrl($request){
-        $ambiente = Ambiente::select('fondo_invitados_app')->first();
+        $ambiente = Ambiente::select('fondo_invitados_app','logo')->first();
         $code = $request->code;
         if(!$code){
             return ['exist_url'=>false,'fondo_invitados_app'=>get_media_url($ambiente?->fondo_invitados_app),'logo'=>get_media_url($ambiente?->logo)];
