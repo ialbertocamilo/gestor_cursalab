@@ -103,8 +103,8 @@ class Guest extends BaseModel {
         $guest_link->increment('count_registers', 1);
         $title = 'Tu solicitud ha sido aceptada';
         $message = $data['active'] ? 'Ya puedes ingresar a nuestra plataforma' : 'Recibirás un correo de confirmación cuando se active tu cuenta de capacitación';
-
-        return compact('title','message');
+        $redirect_login = $data['active'];
+        return compact('title','message','redirect_login');
     }
     protected function verifyGuestCodeVerificationByEmail($request){
         $message = EmailsSent::verifyCode($request);

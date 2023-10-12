@@ -54,9 +54,10 @@ class GuestLink extends BaseModel
         }
     }
     protected function verifyGuestUrl($request){
+        $ambiente = Ambiente::select('fondo_invitados_app')->first();
         $code = $request->code;
         if(!$code){
-            return ['exist_url'=>false];
+            return ['exist_url'=>false,'fondo_invitados_app'=>$ambiente?->fondo_invitados_app,'logo'=>$ambiente?->logo_empresa];
         }
         $guest_link =  self::query()
             ->with(['workspace:id,logo'])
@@ -71,7 +72,6 @@ class GuestLink extends BaseModel
         }
         $data = $guest_link;
         if ($guest_link) {
-            $ambiente = Ambiente::select('fondo_invitados_app')->first();
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
             $data['logo'] =  get_media_url($guest_link?->workspace?->logo,'s3');
             $criteria_workspace = self::getListCriterion($guest_link);
