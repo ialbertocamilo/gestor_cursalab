@@ -10,8 +10,6 @@
     $taxonomy = \App\Models\Taxonomy::find($tema->type_evaluation_id);
     $evaluationTypeCode = $taxonomy->code ?? '';
     $qualification_type = $tema->qualification_type;
-    //JARVIS
-    $limitsAIConvert =  \App\Models\Workspace::getLimitAIConvert($tema,'evaluations');
     @endphp
     <v-app>
         @include('layouts.user-header')
@@ -31,7 +29,6 @@
             evaluation_data_sum="{{ $data['sum'] ?? 0 }}"
             evaluation_data_sum_required="{{ $data['sum_required'] ?? 0 }}"
             evaluation_data_sum_not_required="{{ $data['sum_not_required'] ?? 0 }}"
-            :limits_ai_convert="{{ json_encode($limitsAIConvert) }}"
         >
         </tema-preguntas-layout>
     </v-app>

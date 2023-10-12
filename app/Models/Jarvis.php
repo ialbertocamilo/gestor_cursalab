@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Mongo\JarvisAttempt;
+use App\Models\Mongo\JarvisResponse;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,8 @@ class Jarvis extends Model
         if ($response->successful()) {
             $data = $response->json();
             JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'descriptions');
-            return $data['description'];
+            JarvisResponse::insertResponse([$data['description'][1]],'description');
+            return $data['description'][0];
         }
         return $response;
     }
@@ -81,10 +83,9 @@ class Jarvis extends Model
         if ($response->successful()) {
             $data = $response->json();
             JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'evaluations');
-            return $data['message'];
-            // return $this->success($data['message']);
+            JarvisResponse::insertResponse($data['message'][1],'evaluation');
+            return $data['message'][0];
         }
-        // return $this->error(['message' => 'error'],500);
     }
     private function getJarvisConfiguration($_workspace=null){
         $workspace = $_workspace ?? get_current_workspace();

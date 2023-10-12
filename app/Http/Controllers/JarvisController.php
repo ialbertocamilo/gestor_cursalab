@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Topic;
 use App\Models\Jarvis;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -17,7 +18,9 @@ class JarvisController extends Controller
         return $this->success($questions);
     }
     public function getLimitsByWorkspace(Request $request){
-        $limits = Workspace::getLimitAIConvert(null,$request->type);
+        $topic = ($request->topic_id) ? Topic::find($request->topic_id) : null;
+        
+        $limits = Workspace::getLimitAIConvert($topic,$request->type);
         return $this->success($limits);
     }
 }

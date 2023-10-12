@@ -175,7 +175,7 @@
                 @onConfirm="
                     closeFormModal(modalCreateQuestionsOptions, dataTable, filters);
                     refreshDefaultTable(dataTable, filters),
-                    openConfirmCreateQuestion()"
+                    openConfirmCreateQuestion(),updateData($event)"
                 @onCancel="closeFormModal(modalCreateQuestionsOptions) "
                 :number_socket="number_socket"
             />
@@ -236,7 +236,6 @@ export default {
         'evaluation_data_sum',
         'evaluation_data_sum_required',
         'evaluation_data_sum_not_required',
-        'limits_ai_convert'
     ],
     data() {
         let vue = this
@@ -365,7 +364,11 @@ export default {
                 confirmLabel:'Entendido'
             },
             delete_model: null,
-            number_socket:number_socket
+            number_socket:number_socket,
+            limits_ai_convert:{
+                ia_evaluations_generated:0,
+                limit_allowed_ia_evaluations:0
+            }
         }
     },
     mounted() {
@@ -392,6 +395,7 @@ export default {
                 console.error('Error al procesar los datos:', error);
             }
         });
+        vue.loadLimitsGenerateIaDescriptions();
         // vue.getSelects();
     },
     methods: {
@@ -401,7 +405,7 @@ export default {
             }, 1000)
         },
         updateData(data){
-
+            console.log(data);
             let vue = this
 
             vue.validation.status = data.status
@@ -449,6 +453,13 @@ export default {
             let vue = this;
             vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1; 
             vue.openSimpleModal(vue.modalInfoCreateQuestion);
+        },
+        async   loadLimitsGenerateIaDescriptions(){
+            this.showLoader();
+            await axios.get(`/jarvis/limits?type=evaluations&topic_id=${this.tema_id}`).then(({data})=>{
+                this.hideLoader();
+                this.limits_ai_convert = data.data;
+            })
         }
     }
 

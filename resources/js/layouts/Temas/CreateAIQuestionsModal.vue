@@ -88,15 +88,18 @@
                             </div>
                             <div class="container-questions py-1 my-4" v-if="questions.length>0">
                                 <!-- <transition-group name="fade" mode="out-in"> -->
-                                <div  class="m-3 px-5 py-2 card-question typing-animation" style="width: 100%;" v-for="(question,index) in questions" :key="index">
+                                    <!-- style="width: 100%;" -->
+                                <div  class="m-3 px-5 py-2 card-question typing-animation"  v-for="(question,index) in questions" :key="index">
                                     <div class="d-flex justify-space-between">
                                         <span v-text="question.question" class="mb-1"></span>
-                                        <v-tooltip bottom>
-                                            <template v-slot:activator="{ on, attrs }">
-                                                <img src="/img/jarvis_question.svg"  v-bind="attrs" v-on="on" style="width:22px">
-                                            </template>
-                                            <span>Esta pregunta fue generada del contenido: "{{ question.media_title }}"</span>
-                                        </v-tooltip>
+                                        <div class="mx-2">
+                                            <v-tooltip bottom>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                    <img src="/img/jarvis_question.svg"  v-bind="attrs" v-on="on" style="width:22px">
+                                                </template>
+                                                <span>Esta pregunta fue generada del contenido: "{{ question.media_title }}"</span>
+                                            </v-tooltip>
+                                        </div>
                                     </div>
                                     <span class="ml-3" v-for="(option,index) in question.options" :key="index" v-text="option.text" :style="option.isCorrect ? 'background:#ddddfa' :''"></span>
                                     <div class="d-flex justify-end">
@@ -240,15 +243,15 @@ export default {
     mounted(){
         this.jarvisBaseUrl = this.getJarvisUrl();
         console.log(this.number_socket);
-        // window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGeneratedEvent', result => {
-        //     try {
-        //         console.log(result);
-        //         this.questions.push(result.data.mensaje);
-        //         console.log(this.number_socket);
-        //     } catch (error) {
-        //         console.error('Error al procesar los datos:', error);
-        //     }
-        // });
+        window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+            try {
+                console.log(result);
+                this.questions.push(result.data.mensaje);
+                console.log(this.number_socket);
+            } catch (error) {
+                console.error('Error al procesar los datos:', error);
+            }
+        });
     },
     methods: {
         closeModal() {
@@ -293,7 +296,8 @@ export default {
             const url = `${vue.options.base_endpoint}/store-ai-question`;
             await vue.$http.post(url, vue.questions).then(async ({data}) => {
                 vue.hideLoader();
-                vue.$emit('onConfirm');
+                vue.questions = [];
+                vue.$emit('onConfirm',data);
             }).catch(async (error) => {
                 vue.hideLoader();
             })

@@ -16,7 +16,7 @@
             <span>
                 Quieres seguir disfrutando de los beneficios que te brinda la AI
             </span>
-            <v-btn color="primary" outlined text style="border-color: #5458ea;" @click="openFormModal(ModalUpgradeOptions)">
+            <v-btn class="ml-2" color="primary" outlined text style="border-color: #5458ea;" @click="openFormModal(ModalUpgradeOptions)">
                 <img width="22px" src="/img/premiun.svg">
                 <span class="text-bolder" >Solicítalo hoy</span>
             </v-btn>

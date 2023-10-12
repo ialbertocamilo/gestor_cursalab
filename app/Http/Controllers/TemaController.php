@@ -251,7 +251,6 @@ class TemaController extends Controller
                 'pregunta' => $question['question'],
                 'topic_id' => $topic->id,
                 'type_id' => $type_id,
-                // 'rptas_json' => $data['nuevasRptas'],
                 'rptas_json' => json_encode($options),
                 'rpta_ok' => $question['correctAnswer'] + 1,
                 'active' => 1,
@@ -261,7 +260,9 @@ class TemaController extends Controller
         }
         Question::insert($insert_questions);
         // dd($insert_questions);
-        return $this->success(['message'=>'Preguntas creadas correctamente.']);
+        $data = Question::verifyEvaluation($topic);
+        $data = array_merge($data,['message'=>'Preguntas creadas correctamente.']);
+        return $this->success($data);
         // $result = Question::checkScoreLeft($topic, $data['id'], $data);
     }
     public function storePregunta(
