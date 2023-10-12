@@ -131,7 +131,7 @@
                                 <template slot="content">
 
                                     <DiplomaSelector
-                                        v-model="resource.certificate_template_id"/>
+                                        v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
 
                                 </template>
                             </DefaultModalSection>

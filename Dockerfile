@@ -1,25 +1,174 @@
-FROM php:8.0 as php
+# -------------------------------------------------------------------------------------------------------
+# COMPOSER
+# -------------------------------------------------------------------------------------------------------
 
-RUN apt-get update -y
-RUN apt-get install -y unzip libpq-dev libcurl4-gnutls-dev
-RUN docker-php-ext-install pdo pdo_mysql bcmath
+FROM composer:2.1 as composer_base
 
-RUN pecl install mongodb && docker-php-ext-enable mongodb
+ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
+ARG PHP_PECL_EXTS="redis mongodb"
+ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+ARG PHP_LARAVEL="bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer dom pcntl"
 
-RUN apt-get install -y libpng-dev
-RUN docker-php-ext-install gd
+RUN mkdir -p /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes/bin
 
-WORKDIR /var/www
-COPY . .
+WORKDIR /opt/apps/laravel-in-kubernetes
 
-COPY --from=composer:2.3.5 /usr/bin/composer /usr/bin/composer
+RUN addgroup -S composer \
+    && adduser -S composer -G composer \
+    && chown -R composer /opt/apps/laravel-in-kubernetes \
+    && apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
+    && pecl install ${PHP_PECL_EXTS} \
+    && docker-php-ext-enable ${PHP_PECL_EXTS}
 
-ENV PORT=8000
-# Copiar el script de entrada
-COPY entrypoint.sh /entrypoint.sh
+USER composer
+
+COPY --chown=composer composer.json ./
+
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+COPY --chown=composer . .
+
+RUN composer install --no-dev --prefer-dist
+
+# -------------------------------------------------------------------------------------------------------
+# FRONTEND
+# -------------------------------------------------------------------------------------------------------
+
+# For the frontend, we want to get all the Laravel files,
+# and run a production compile
+FROM node:12.22.12-alpine as frontend
+
+# We need to copy in the Laravel files to make everything is available to our frontend compilation
+COPY --from=composer_base /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+COPY .env_vuejs ./.env
+
+# We want to install all the NPM packages,
+# and compile the MIX bundle for production
+RUN npm install && \
+    npm install cross-env --save-dev && \
+    npm install imagemin@^5.0.0 || ^6.0.0 || ^7.0.0 --save-dev && \
+    npm run prod
+
+
+# ----------------------------------------------------------------------------------------------------
+# CLI
+# ----------------------------------------------------------------------------------------------------
+
+# For running things like migrations, and queue jobs,
+# we need a CLI container.
+# It contains all the Composer packages,
+# and just the basic CLI "stuff" in order for us to run commands,
+# be that queues, migrations, tinker etc.
+FROM php:8.1-alpine as cli
+
+# We need to declare that we want to use the args in this build step
+ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
+ARG PHP_PECL_EXTS="redis mongodb"
+ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+# We need to install some requirements into our image,
+# used to compile our PHP extensions, as well as install all the extensions themselves.
+# You can see a list of required extensions for Laravel here: https://laravel.com/docs/8.x/deployment#server-requirements
+
+RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
+    && pecl install ${PHP_PECL_EXTS} \
+    && docker-php-ext-enable ${PHP_PECL_EXTS}
+
+# Next we have to copy in our code base from our initial build which we installed in the previous stage
+COPY --from=composer_base /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes
+COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
+
+
+# ----------------------------------------------------------------------------------------------------
+# FPM-SERVER
+# ----------------------------------------------------------------------------------------------------
+
+# We need a stage which contains FPM to actually run and process requests to our PHP application.
+FROM php:8.1-fpm-alpine as fpm_server
+
+# We need to declare that we want to use the args in this build step
+ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
+ARG PHP_PECL_EXTS="redis mongodb"
+ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
+    && pecl install ${PHP_PECL_EXTS} \
+    && docker-php-ext-enable ${PHP_PECL_EXTS}
+    
+# As FPM uses the www-data user when running our application,
+# we need to make sure that we also use that user when starting up,
+# so our user "owns" the application when running..
+USER  www-data
+
+# COnfiguration of fpm.ini
+COPY --chown=www-data docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
+
+# We have to copy in our code base from our initial build which we installed in the previous stage
+COPY --from=composer_base --chown=www-data /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes
+COPY --from=frontend --chown=www-data /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
+
+# We want to cache the event, routes, and views so we don't try to write them when we are in Kubernetes.
+# Docker builds should be as immutable as possible, and this removes a lot of the writing of the live application.
+# RUN php artisan event:cache && \
+#     php artisan route:cache && \
+#     php artisan view:cache
+
+
+RUN php artisan event:cache && \
+    php artisan view:cache
+
+COPY --chown=www-data ./docker/laravel/entrypoint.sh ./entrypoint.sh
 
 # Dar permisos de ejecución al script de entrada
-RUN chmod +x /entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 # Configurar el comando de entrada
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
+
+# ----------------------------------------------------------------------------------------------------
+# NGINX
+# ----------------------------------------------------------------------------------------------------
+
+# We need an nginx container which can pass requests to our FPM container,
+# as well as serve any static content.
+FROM nginx:1.20-alpine as web_server
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+# We need to add our NGINX template to the container for startup,
+# and configuration.
+
+COPY docker/nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Copy in ONLY the public directory of our project.
+# This is where all the static assets will live, which nginx will serve for us.
+COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
+
+# ----------------------------------------------------------------------------------------------------
+# CRON
+# ----------------------------------------------------------------------------------------------------
+
+# We need a CRON container to the Laravel Scheduler.
+# We'll start with the CLI container as our base,
+# as we only need to override the CMD which the container starts with to point at cron.
+FROM cli as cron
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+# We want to create a laravel.cron file with Laravel cron settings, which we can import into crontab,
+# and run crond as the primary command in the forground....
+RUN touch laravel.cron && \
+    echo "* * * * * cd /opt/apps/laravel-in-kubernetes && php artisan schedule:run" >> laravel.cron && \
+    crontab laravel.cron
+
+CMD ["crond", "-l", "2", "-f"]
