@@ -141,6 +141,7 @@ class CursosController extends Controller
         }
 
         $course->lista_escuelas = $schools;
+        $course->plantilla_diploma = $course->plantilla_diploma ? get_media_url($course->plantilla_diploma) : null;
 
         $mod_evaluaciones = $course->mod_evaluaciones;
 
