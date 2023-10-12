@@ -64,7 +64,7 @@ class GuestLink extends BaseModel
             ->where('url',$code)
             ->select('guest_id','id as code_id','expiration_date','workspace_id')
             ->first();
-        if(!$guest_link || $guest_link->expiration_date > date("Y-m-d G:i")){
+        if(!$guest_link || $guest_link->expiration_date < date("Y-m-d G:i")){
             $message = $guest_link ? 'Link expirado' : 'El link es incorrecto';
             return ['exist_url'=>false,'fondo_invitados_app'=>$ambiente?->fondo_invitados_app,'message','logo'=>$ambiente?->logo_empresa];
         }
