@@ -165,7 +165,7 @@
                         <SegmentByDocument
                             ref="SegmentByDocument"
                             :segment="segment_by_document"
-
+                            :modules-ids="modulesIds"
                             :current-clean="segment_by_document_clean"
                             @addUser="addUser"
                             @deleteUser="deleteUser"
@@ -271,6 +271,7 @@ export default {
             criteria: [],
             courseModules: [],
             modulesSchools: [],
+            modulesIds: [],
 
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
@@ -683,9 +684,8 @@ export default {
             let url = `${this.options.base_endpoint}/modules/course/${courseId}`;
             try {
                 const response = await this.$http.get(url);
-                let modulesIds = []
                 if (response.data.data) {
-                    modulesIds = response.data.data.modulesIds
+                    this.modulesIds = response.data.data.modulesIds
                     this.modulesSchools = response.data.data.modulesSchools
                 }
             } catch (ex) {
