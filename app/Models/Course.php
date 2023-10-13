@@ -1651,9 +1651,12 @@ class Course extends BaseModel
         $mod_evaluaciones = $course->mod_evaluaciones;
 
         if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
-            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
 
-            $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            if ($main->qualification_type) {
+
+                $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
+                $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            }
             // $course->mod_evaluaciones = $mod_evaluaciones;
         }
 
