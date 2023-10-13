@@ -16,9 +16,13 @@ class Jarvis extends Model
     private $client_folder ;
     private $jarvis_base_url;
     private $jarvis_folder ;
+    private $bucket;
+
     public function __construct()
     {
         $this->client_folder = env('AWS_CURSALAB_CLIENT_NAME_FOLDER');
+        $this->bucket = env('AWS_BUCKET');
+
         $this->jarvis_base_url = env('JARVIS_BASE_URL');
         $this->jarvis_folder = 'jarvis';
     }
@@ -42,6 +46,7 @@ class Jarvis extends Model
         $text_result = null;
         $workspace = $multimedia->topic->course->workspaces->first();
         $params = self::getJarvisConfiguration($workspace);
+        $params['bucket'] = $this->bucket;
         if($multimedia->type_id == 'youtube'){
             $link = 'https://www.youtube.com/watch?v=' . $multimedia->value;
             $params['url'] =$link;
@@ -51,7 +56,7 @@ class Jarvis extends Model
             $params['relative_path'] = $this->client_folder.'/'.$multimedia->value;
             $response = Http::withOptions(['verify' => false])->timeout(1500)->post($this->jarvis_base_url.'/convert_file', $params);
         }
-
+        info($params);
         if ($response->successful()) {
             $data = $response->json();
             $text = $data['message'];
