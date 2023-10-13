@@ -114,6 +114,16 @@
                                         <v-btn color="primary" @click="openDeleteModal(index)" icon><v-icon small> far fa-trash-alt</v-icon> </v-btn>
                                     </div>
                                 </div>
+                                <div class="m-3 py-2" v-if="question_is_loading">
+                                    <div style="color: #5458ea;">
+                                        Se están generando tus preguntas..
+                                    </div>
+                                    <v-progress-linear
+                                        indeterminate
+                                        color="#5458ea"
+                                        
+                                    ></v-progress-linear>
+                                </div>
                                 <!-- </transition-group> -->
                             </div>
                             <div v-else 
@@ -151,7 +161,7 @@
     
                     </v-col>
                     <v-col cols="7" class="d-flex justify-end">
-                        <DefaultButton class="mr-12" v-if="questions.length > 0"  @click="saveQuestions()" label="Guardar evaluación" />
+                        <DefaultButton class="mr-12" v-if="questions.length > 0 && !question_is_loading"  @click="saveQuestions()" label="Guardar evaluación" />
                     </v-col>
                 </v-row>
             </template>
@@ -184,16 +194,19 @@
     </div>
 </template>
 <script>
-import EditAIQuestionsModal from './EditAIQuestionsModal';
+// const number_socket = Math.floor(Math.random(6)*1000000);
 
+
+// console.log(number_socket);
+import EditAIQuestionsModal from './EditAIQuestionsModal';
 export default {
     components:{EditAIQuestionsModal},
     props: {
         options: {
             type: Object,
             required: true
-        },
-        number_socket:{
+        }
+        ,number_socket:{
             required:false
         }
     },
@@ -212,7 +225,7 @@ export default {
                 ],
             },
             questions:[],
-
+            // number_socket:number_socket,
             modalQuestionOptions: {
                 ref: 'EditModalQuestion',
                 title_modal:'Edición de preguntas',
@@ -237,21 +250,34 @@ export default {
                     }
                 },
                 index_question:null,
-            }
+            },
+            question_is_loading:false
         }
     },
     mounted(){
         this.jarvisBaseUrl = this.getJarvisUrl();
         console.log(this.number_socket);
-        window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGeneratedEvent', result => {
-            try {
-                console.log(result);
-                this.questions.push(result.data.mensaje);
-                console.log(this.number_socket);
-            } catch (error) {
-                console.error('Error al procesar los datos:', error);
-            }
-        });
+        // window.Echo.channel(`questions-ia-generated.${number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+        //     try {
+        //         console.log(result);
+        //         this.questions.push(result.data.mensaje);
+        //         console.log(this.number_socket);
+        //     } catch (error) {
+        //         console.error('Error al procesar los datos:', error);
+        //     }
+        // });
+        // window.Echo.connector.pusher.connection.bind('message', (payload) => {
+        //     console.log('message', payload);
+        // });
+        // window.Echo.channel(`questions-ia-generated.${this.number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+        //     try {
+        //         console.log(result);
+        //         this.questions.push(result.data.mensaje);
+        //         console.log(this.number_socket);
+        //     } catch (error) {
+        //         console.error('Error al procesar los datos:', error);
+        //     }
+        // });
     },
     methods: {
         closeModal() {
@@ -279,9 +305,11 @@ export default {
                 configuration: vue.configuration,
                 number_socket:vue.number_socket
             }
+            vue.question_is_loading=true;
             await vue.$http.post(url, data).then(async ({data}) => {
                 vue.hideLoader();
-                const questionsTemplate = data.data
+                const questionsTemplate = data.data;
+                vue.question_is_loading=false;
                 if (Array.isArray(questionsTemplate)) {
                     this.addItemWithTimeout(questionsTemplate,0);
                 }
@@ -303,9 +331,12 @@ export default {
             })
         },
         addItemWithTimeout(new_questions,index) {
-            this.questions.push(new_questions[index]);
+            if(!this.questions.find(q => q.question_id == new_questions[index].question_id)){
+                this.questions.push(new_questions[index]);
+            }
             try {
                 if (this.questions.length != new_questions.length && new_questions[index+1]) {
+
                     setTimeout(() => {
                         this.addItemWithTimeout(new_questions,index+1);
                     }, 1000);
@@ -387,6 +418,12 @@ export default {
             vue.questions[question.index].options=question.options;
             vue.questions[question.index].correctAnswer=question.correctAnswer;
             vue.closeFormModal(vue.modalQuestionOptions)
+        },
+        setQuestionFromFatherComponent(questions){
+            this.hideLoader();
+            this.addItemWithTimeout(questions,0)
+            // this.questions = [...this.questions,questions]
+            // console.log(this.questions);
         }
     }
 }

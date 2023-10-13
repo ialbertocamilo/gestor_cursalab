@@ -32,7 +32,7 @@
                                 item-text="name"
                             />
                             <fieldset class="editor mt-2">
-                                <legend>Descripción</legend>
+                                <legend>Descripción y/u objetivos</legend>
                                 <editor
                                     api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                     v-model="resource.content"
@@ -767,7 +767,7 @@ export default {
             const vue = this;
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
-                const message = vue.loading_description ? 'Se esta generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
                 vue.showAlert(message, 'warning', '') 
                 return ''
             }

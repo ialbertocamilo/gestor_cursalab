@@ -46,7 +46,7 @@
                                     <DefaultTextArea
                                         :ref="'textAreaDescription'"
                                         dense
-                                        label="Descripción y/o objetivos"
+                                        label="Descripción y/u objetivos"
                                         placeholder="Ingrese una descripción y/o objetivo del curso"
                                         v-model="resource.description"
                                         :rows="4"
@@ -849,7 +849,7 @@ export default {
             const vue = this;
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
-                const message = vue.loading_description ? 'Se esta generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
                 vue.showAlert(message, 'warning', '') 
                 return ''
             }

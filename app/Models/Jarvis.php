@@ -84,6 +84,7 @@ class Jarvis extends Model
             $data = $response->json();
             JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'evaluations');
             JarvisResponse::insertResponse($data['message'][1],'evaluation');
+            info($data['message'][0]);
             return $data['message'][0];
         }
     }

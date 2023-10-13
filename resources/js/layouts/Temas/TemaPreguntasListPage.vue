@@ -386,13 +386,20 @@ export default {
               content: msg,
             })
         }
-        window.Echo.channel(`questions-ia-generated`).listen('QuestionIaGeneratedEvent', result => {
-            try {
-                console.log(result);
-                // this.questions.push(result.data.mensaje);
-                // console.log(this.number_socket);
-            } catch (error) {
-                console.error('Error al procesar los datos:', error);
+        window.Echo.channel(`questions-ia-generated.${number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+            // try {
+            //     console.log(result);
+            //     this.questions.push(result.data.mensaje);
+            //     console.log(this.number_socket);
+            // } catch (error) {
+            //     console.error('Error al procesar los datos:', error);
+            // }
+        });
+        window.Echo.connector.pusher.connection.bind('message', (payload) => {
+            if(payload.channel == `questions-ia-generated.${number_socket}`){
+                if(payload.data.question){
+                    vue.$refs[vue.modalCreateQuestionsOptions.ref].setQuestionFromFatherComponent(payload.data.question);
+                }
             }
         });
         vue.loadLimitsGenerateIaDescriptions();
