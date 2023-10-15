@@ -172,7 +172,7 @@ class Summary extends BaseModel
         }
     }
 
-    protected function setSummaryUpdates($user_ids, $course_ids = null,$summary_course_update,$event)
+    protected function setSummaryUpdates($user_ids, $course_ids = null, $summary_course_update = null, $event = null)
     {
         $data = [
             'summary_user_update' => true,

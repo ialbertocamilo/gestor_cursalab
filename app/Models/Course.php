@@ -885,6 +885,7 @@ class Course extends BaseModel
 //        if ($course->compatible)
 //            dd($course->compatible);
         $workspace_id = $user->subworkspace->parent_id;
+        $COURSE_STATUS_APROBADO = Taxonomy::getFirstData('course', 'user-status', 'aprobado')->id;
 
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -968,7 +969,7 @@ class Course extends BaseModel
                         //     }else{
                         //         try {
                         //             // if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                        //             if(!in_array($summary_requirement_course_req?->status_id, [COURSE_STATUS_APROBADO])){
+                        //             if(!in_array($summary_requirement_course_req?->status_id, [$COURSE_STATUS_APROBADO])){
                         //                 $available_course_req = false;
                         //             }
                         //         } catch (\Throwable $th) {
@@ -995,7 +996,7 @@ class Course extends BaseModel
             }else{
                 try {
                     // if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                    if(!in_array($summary_requirement_course?->status_id, [COURSE_STATUS_APROBADO])){
+                    if(!in_array($summary_requirement_course?->status_id, [$COURSE_STATUS_APROBADO])){
                         $available_course = false;
                         $status = 'bloqueado';
                         if($requirement_course?->requirement_id){
@@ -1032,7 +1033,7 @@ class Course extends BaseModel
                             //     }else{
                             //         try {
                             //             // if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                            //             if(!in_array($summary_requirement_course_req?->status_id, [COURSE_STATUS_APROBADO])){
+                            //             if(!in_array($summary_requirement_course_req?->status_id, [$COURSE_STATUS_APROBADO])){
                             //                 $available_course_req = false;
                             //             }
                             //         } catch (\Throwable $th) {
@@ -1651,9 +1652,12 @@ class Course extends BaseModel
         $mod_evaluaciones = $course->mod_evaluaciones;
 
         if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
-            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
 
-            $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            if ($main->qualification_type) {
+
+                $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
+                $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            }
             // $course->mod_evaluaciones = $mod_evaluaciones;
         }
 
