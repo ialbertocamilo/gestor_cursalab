@@ -44,7 +44,7 @@ COPY --from=composer_base /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-k
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
-COPY .env_vuejs ./.env
+COPY docker/vuejs/.env_vuejs ./.env
 
 # We want to install all the NPM packages,
 # and compile the MIX bundle for production
