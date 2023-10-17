@@ -116,7 +116,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:documentation-api');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
     
 
     
