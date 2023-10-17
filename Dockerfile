@@ -54,7 +54,6 @@ COPY --from=composer_base /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-k
 COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
 
 
-
 # ----------------------------------------------------------------------------------------------------
 # FPM-SERVER
 # ----------------------------------------------------------------------------------------------------
