@@ -14,10 +14,10 @@ REGISTRY ?= 505992365906.dkr.ecr.us-east-1.amazonaws.com
 docker: docker-pull docker-build docker-push
 
 docker-build:
-	docker build -f Dockerfile.dev . --target cli -t ${REGISTRY}/cli:${VERSION}
-	docker build -f Dockerfile.dev . --target cron -t ${REGISTRY}/cron:${VERSION}
-	docker build -f Dockerfile.dev . --target fpm_server -t ${REGISTRY}/fpm_server:${VERSION}
-	docker build -f Dockerfile.dev . --target web_server -t ${REGISTRY}/web_server_gestor:${VERSION}
+	docker build -f Dockerfile . --target cli -t ${REGISTRY}/cli:${VERSION}
+	docker build -f Dockerfile . --target cron -t ${REGISTRY}/cron:${VERSION}
+	docker build -f Dockerfile . --target fpm_server -t ${REGISTRY}/fpm_server:${VERSION}
+	docker build -f Dockerfile . --target web_server -t ${REGISTRY}/web_server_gestor:${VERSION}
 
 docker-push:
 	docker push ${REGISTRY}/cli:${VERSION}

@@ -2,34 +2,14 @@
 # COMPOSER
 # -------------------------------------------------------------------------------------------------------
 
-FROM composer:2.1 as composer_base
-
-ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
-ARG PHP_PECL_EXTS="redis mongodb"
-ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
-ARG PHP_LARAVEL="bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer dom pcntl"
-
-RUN mkdir -p /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes/bin
-
-WORKDIR /opt/apps/laravel-in-kubernetes
-
-RUN addgroup -S composer \
-    && adduser -S composer -G composer \
-    && chown -R composer /opt/apps/laravel-in-kubernetes \
-    && apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
-    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
-    && pecl install ${PHP_PECL_EXTS} \
-    && docker-php-ext-enable ${PHP_PECL_EXTS}
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.2 as composer_base
 
 USER composer
-
-COPY --chown=composer composer.json ./
-
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY --chown=composer . .
 
 RUN composer install --no-dev --prefer-dist
+
 
 # -------------------------------------------------------------------------------------------------------
 # FRONTEND
@@ -54,6 +34,7 @@ RUN npm install && \
     npm run prod
 
 
+
 # ----------------------------------------------------------------------------------------------------
 # CLI
 # ----------------------------------------------------------------------------------------------------
@@ -63,27 +44,15 @@ RUN npm install && \
 # It contains all the Composer packages,
 # and just the basic CLI "stuff" in order for us to run commands,
 # be that queues, migrations, tinker etc.
-FROM php:8.1-alpine as cli
-
-# We need to declare that we want to use the args in this build step
-ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
-ARG PHP_PECL_EXTS="redis mongodb"
-ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+# We need a stage which contains FPM to actually run and process requests to our PHP application.
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.2 as cli
 
 WORKDIR /opt/apps/laravel-in-kubernetes
-
-# We need to install some requirements into our image,
-# used to compile our PHP extensions, as well as install all the extensions themselves.
-# You can see a list of required extensions for Laravel here: https://laravel.com/docs/8.x/deployment#server-requirements
-
-RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
-    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
-    && pecl install ${PHP_PECL_EXTS} \
-    && docker-php-ext-enable ${PHP_PECL_EXTS}
 
 # Next we have to copy in our code base from our initial build which we installed in the previous stage
 COPY --from=composer_base /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes
 COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
+
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -91,20 +60,10 @@ COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in
 # ----------------------------------------------------------------------------------------------------
 
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM php:8.1-fpm-alpine as fpm_server
-
-# We need to declare that we want to use the args in this build step
-ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
-ARG PHP_PECL_EXTS="redis mongodb"
-ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.2 as fpm_server
 
 WORKDIR /opt/apps/laravel-in-kubernetes
-
-RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
-    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
-    && pecl install ${PHP_PECL_EXTS} \
-    && docker-php-ext-enable ${PHP_PECL_EXTS}
-    
+  
 # As FPM uses the www-data user when running our application,
 # we need to make sure that we also use that user when starting up,
 # so our user "owns" the application when running..
@@ -153,6 +112,7 @@ COPY docker/nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
 # Copy in ONLY the public directory of our project.
 # This is where all the static assets will live, which nginx will serve for us.
 COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in-kubernetes/public
+
 
 # ----------------------------------------------------------------------------------------------------
 # CRON
