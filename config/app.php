@@ -79,6 +79,10 @@ return [
         ]
     ],
 
+    'migrated' => [
+        'v1' => env('MIGRATED_V1', false),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
