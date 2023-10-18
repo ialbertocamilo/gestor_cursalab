@@ -552,6 +552,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
+                if (env('MULTIMARCA')) {
+                    $user->sendWelcomeEmail();
+                }
             endif;
 
             $user->subworkspace_id = Workspace::query()
@@ -648,11 +651,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
     protected function sendWelcomeEmail(){
         $user = $this;
-        info($user);
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
                     ];
-        info($mail_data);
         Mail::to($user->email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
     }
     public function syncDocumentCriterionValue($old_document, $new_document)

@@ -259,13 +259,7 @@ class UsuarioController extends Controller
 
             }
             /********************************************************************/
-            $user = User::storeRequest($data);
-            info(env('MULTIMARCA'));
-            info($user);
-            if (env('MULTIMARCA') && $user->active) {
-                info('entro');
-                $user->sendWelcomeEmail();
-            }
+            User::storeRequest($data);
             return $this->success(['msg' => 'Usuario creado correctamente.']);
         } catch (\Exception $e){
              return $this->master_errors($e);
