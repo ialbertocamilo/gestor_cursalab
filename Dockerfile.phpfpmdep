@@ -1,0 +1,17 @@
+# ----------------------------------------------------------------------------------------------------
+# PHP FPM DEPENDENCIES
+# ----------------------------------------------------------------------------------------------------
+
+FROM php:8.1-fpm-alpine
+
+# We need to declare that we want to use the args in this build step
+ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
+ARG PHP_PECL_EXTS="redis mongodb"
+ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
+    && pecl install ${PHP_PECL_EXTS} \
+    && docker-php-ext-enable ${PHP_PECL_EXTS}
