@@ -11,7 +11,7 @@ REGISTRY ?= 505992365906.dkr.ecr.us-east-1.amazonaws.com
 
 
 # Commands
-docker: docker-build docker-push
+docker: docker-pull docker-build docker-push
 
 docker-build:
 	docker build -f Dockerfile . --target cli -t ${REGISTRY}/cli:${VERSION}
@@ -24,3 +24,9 @@ docker-push:
 	docker push ${REGISTRY}/cron:${VERSION}
 	docker push ${REGISTRY}/fpm_server:${VERSION}
 	docker push ${REGISTRY}/web_server_gestor:${VERSION}
+
+
+docker-pull: 
+	docker pull ${REGISTRY}/composer:2.0.2
+	docker pull ${REGISTRY}/php:2.0.2
+	docker pull ${REGISTRY}/phpfpm:2.0.2
