@@ -314,12 +314,14 @@ Segment extends BaseModel
         $temp = [];
         foreach ($criterion['values_selected'] ?? [] as $value) {
 
-            $temp[] = [
-                'id' => $value['segment_value_id'] ?? null,
-                'criterion_value_id' => $value['id'],
-                'criterion_id' => $criterion['id'],
-                'type_id' => NULL,
-            ];
+            if (isset($value['id']) && $criterion['id']) {
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_value_id' => $value['id'],
+                    'criterion_id' => $criterion['id'],
+                    'type_id' => NULL,
+                ];
+            }
         }
 
         return $temp;
