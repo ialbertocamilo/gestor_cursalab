@@ -635,6 +635,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
                 //throw $th;
             DB::commit();
+            return $user;
         } catch (\Exception $e) {
 
             info($e);
@@ -645,7 +646,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
-
+    protected function sendWelcomeEmail(){
+        $user = $this;
+        info($user);
+        $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
+                       'user' => $user->name.' '.$user->lastname,
+                    ];
+        info($mail_data);
+        Mail::to($user->email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
+    }
     public function syncDocumentCriterionValue($old_document, $new_document)
     {
         $document_criterion = Criterion::where('code', 'document')->first();
