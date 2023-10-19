@@ -766,10 +766,16 @@ class Course extends BaseModel
 
         return $data;
     }
-    protected function getDataToCoursesViewAppByUserV2($user, $user_courses): array
+    protected function getDataToCoursesViewAppByUserV2($user, $user_courses,$filter_school_id=false): array
     {
         $workspace_id = $user->subworkspace->parent_id;
         $schools = $user_courses->groupBy('schools.*.id');
+        if($filter_school_id){
+            //A course can belong to one or more schools, so it should be filtered only by the selected school.
+            $schools = $schools->filter(function ($group, $schoolId) use ($filter_school_id) {
+                return $schoolId == $filter_school_id;
+            });
+        }
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $user_courses->pluck('id'))
             ->where('user_id', $user->id)
