@@ -38,7 +38,8 @@ class MigrarUsuarios extends Command
 
         // Obtener los usuarios de la base de datos de origen
         // $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554;');
-        $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554 	and document not in ("12345678");');
+        // $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554 	and document not in ("12345678");'); // solos para usuarios Demo 1.0 a Demo 2.0
+        $usuarios = $origen->select("SELECT document, email, username FROM users WHERE subworkspace_id IS NOT NULL AND type_id IN (select id from taxonomies t where t.group='user' and t.type='type' and t.code='client');");
         // Migrar cada usuario a la base de datos de destino
         foreach ($usuarios as $usuario) {
             // Verificar si el usuario ya existe en la base de datos de destino
@@ -53,10 +54,11 @@ class MigrarUsuarios extends Command
                     $destino->table('master_usuarios')->insert([
                     'dni' => $usuario->document,
                     'username' => $usuario->username,
-                    'email' => 'sin_correo'.$correo_nulo++,
+                    // 'email' => 'sin_correo'.$correo_nulo++,
+                    'email' => '',
                     'customer_id' => ENV('CUSTOMER_ID'),
                 ]);
-                info('Usuario migrado: ' . $usuario->document);
+                info('Usuario migrado (sin-correo): ' . $usuario->document);
                 } else {
 
                     $destino->table('master_usuarios')->insert([
@@ -65,7 +67,7 @@ class MigrarUsuarios extends Command
                         'email' => $usuario->email,
                         'customer_id' => ENV('CUSTOMER_ID'),
                     ]);
-                    info('Usuario migrado: ' . $usuario->document);
+                    info('Usuario migrado (con-correo): ' . $usuario->document);
                 }
             }
         }
