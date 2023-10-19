@@ -314,7 +314,7 @@ Segment extends BaseModel
         $temp = [];
         foreach ($criterion['values_selected'] ?? [] as $value) {
 
-            if (isset($value['id']) && $criterion['id']) {
+            if (isset($value['id']) && isset($criterion['id'])) {
                 $temp[] = [
                     'id' => $value['segment_value_id'] ?? null,
                     'criterion_value_id' => $value['id'],

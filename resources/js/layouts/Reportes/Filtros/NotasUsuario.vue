@@ -48,7 +48,7 @@
                 	<v-btn
 						color="primary"
 						@click="buscarNotasUsuario"
-						v-bind:disabled="(this.search && this.search.length) >= 8 ? false : true"
+						v-bind:disabled="(this.search && this.search.length) >= 4 ? false : true"
 					>
 						<b-icon icon="search" class="mr-2"></b-icon>
 						Consultar
