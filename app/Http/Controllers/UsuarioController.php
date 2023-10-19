@@ -667,7 +667,7 @@ class UsuarioController extends Controller
         }
 
         $user->update(['active' => $status]);
-        if (env('MULTIMARCA') && $status) {
+        if ($status) {
             $user->sendWelcomeEmail();
         }
         $current_workspace->sendEmailByLimit();

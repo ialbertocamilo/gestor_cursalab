@@ -461,9 +461,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user->active = $active;
         if ($active) {
             $data['summary_user_update'] = true;
-            if (env('MULTIMARCA')) {
-                $user->sendWelcomeEmail($from_massive);
-            }
+            $user->sendWelcomeEmail($from_massive);
         }
         $user->save();
         if($user->active){
@@ -555,9 +553,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
-                if (env('MULTIMARCA')) {
-                    $user->sendWelcomeEmail();
-                }
+                $user->sendWelcomeEmail($from_massive);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
             
@@ -657,6 +653,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $email =  trim($user->email);
         if(!$email){
+        // if(!$email && !env('MULTIMARCA')){
             return '';
         }
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
