@@ -88,7 +88,7 @@
                 <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align:center">
                     <span style="font-weight: bolder">¿Tienes problemas para ingresar?</span> Contáctate con nuestro equipo de Customer Success.
                 </div>
-                <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
+                <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px;text-align:center">
                 Este es un mensaje automático, por favor no responder.
                 </p>
             </div>
