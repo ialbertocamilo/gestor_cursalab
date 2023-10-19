@@ -99,6 +99,7 @@ class SegmentController extends Controller
         $data = $request->all();
 
         $documents = null;
+        $sub_workspaces_id = current_subworkspaces_id();
 
         if ($request->has('file')) {
 
@@ -109,6 +110,7 @@ class SegmentController extends Controller
         }
 
         $query = User::query()
+            ->whereIn('subworkspace_id', $sub_workspaces_id)
             ->withWhereHas('criterion_values', function ($q) use ($data) {
                 $q->select('id', 'value_text')
                     // ->where('value_text', 'like', "%{$data['filter_text']}%")
