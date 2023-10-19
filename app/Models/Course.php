@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Course extends BaseModel
 {
@@ -692,7 +693,8 @@ class Course extends BaseModel
 
                         'porcentaje' => '100.00',
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                     ];
                 }
                 else
@@ -718,7 +720,13 @@ class Course extends BaseModel
                         'porcentaje' => $course_status['progress_percentage'],
                         'tags' => $tags,
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'scheduled_activation' => [
+                            'message' => $course->deactivate_at ? 
+                                            'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
+                                            : null,
+                        ],
                     ];
                 }
             }
