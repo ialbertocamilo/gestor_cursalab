@@ -4,48 +4,49 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\UCMigrationData\Migration_1;
-use App\Notifications\UserResetPasswordNotification;
-use Clockwork\DataSource\DBALDataSource;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Bouncer;
+use Carbon\Carbon;
+use App\Traits\CustomCRUD;
+use App\Mail\EmailTemplate;
+use App\Traits\CustomAudit;
+use App\Traits\CustomMedia;
+use Illuminate\Support\Str;
+use App\Models\Mongo\EmailLog;
+use Spatie\Image\Manipulations;
+use Khsing\World\Models\Country;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
-use Silber\Bouncer\Database\HasRolesAndAbilities;
-use NotificationChannels\WebPush\HasPushSubscriptions;
-use Altek\Accountant\Contracts\Identifiable;
-use Altek\Accountant\Contracts\Recordable;
-use Carbon\Carbon;
+use Silber\Bouncer\Database\Models;
 use Illuminate\Support\Facades\Hash;
 
-use Silber\Bouncer\Database\Models;
+use Illuminate\Support\Facades\Mail;
 
-use Khsing\World\Models\Country;
+use Clockwork\DataSource\DBALDataSource;
 
-use App\Traits\CustomAudit;
-use App\Traits\CustomCRUD;
-use App\Traits\CustomMedia;
+use Illuminate\Notifications\Notifiable;
+use Altek\Accountant\Contracts\Recordable;
+use Lab404\Impersonate\Models\Impersonate;
 
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\UCMigrationData\Migration_1;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\HasMedia;
+use Altek\Accountant\Contracts\Identifiable;
+
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Jenssegers\Mongodb\Eloquent\HybridRelations;
+
+use Silber\Bouncer\Database\HasRolesAndAbilities;
 
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
-use Illuminate\Support\Str;
-
-use Spatie\Image\Manipulations;
-
-use Illuminate\Support\Facades\Mail;
-use App\Mail\EmailTemplate;
-use Jenssegers\Mongodb\Eloquent\HybridRelations;
-use Lab404\Impersonate\Models\Impersonate;
 use Lab404\Impersonate\Services\ImpersonateManager;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Notifications\UserResetPasswordNotification;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use NotificationChannels\WebPush\HasPushSubscriptions;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-use Bouncer;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
@@ -454,12 +455,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    public function updateStatusUser($active = null, $termination_date = null)
+    public function updateStatusUser($active = null, $termination_date = null,$from_massive=false)
     {
         $user = $this;
         $user->active = $active;
         if ($active) {
             $data['summary_user_update'] = true;
+            if (env('MULTIMARCA')) {
+                $user->sendWelcomeEmail($from_massive);
+            }
         }
         $user->save();
         if($user->active){
@@ -551,12 +555,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
-                $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
                 if (env('MULTIMARCA')) {
                     $user->sendWelcomeEmail();
                 }
+                $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
-
+            
             $user->subworkspace_id = Workspace::query()
                 ->where('criterion_value_id', $data['criterion_list']['module'])
                 ->first()?->id;
@@ -649,12 +653,29 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
-    protected function sendWelcomeEmail(){
+    public function sendWelcomeEmail($from_massive=false){
         $user = $this;
+        $email =  trim($user->email);
+        if(!$email){
+            return '';
+        }
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
+                       'user_id' => $user->id,
                     ];
-        Mail::to($user->email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
+        $email_was_sent = EmailLog::where('user_email',$email)->where('type_email','welcome_email')->first();
+        if($email_was_sent){
+            return;
+        }
+        $status = 'no_sent';
+        if(!$from_massive && !$email_was_sent){
+            //send email by command 
+            $status = 'sent';
+            Mail::to($email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
+            info('entra');
+        }
+        info('llego');
+        EmailLog::insertEmail($mail_data,'welcome_email','emails.welcome_email',$email,$status);
     }
     public function syncDocumentCriterionValue($old_document, $new_document)
     {
