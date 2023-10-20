@@ -653,8 +653,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function sendWelcomeEmail($from_massive=false){
         $user = $this;
         $email =  trim($user->email);
-        if(!$email){
-        // if(!$email && !env('MULTIMARCA')){
+        // if(!$email){
+        if(!$email && !env('MULTIMARCA')){
             return '';
         }
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
