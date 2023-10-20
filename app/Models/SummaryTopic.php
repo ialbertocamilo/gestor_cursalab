@@ -186,7 +186,7 @@ class SummaryTopic extends Summary
         return ($correct_answers == 0) ? 0 : ((20 / ($correct_answers + $failed_answers)) * $correct_answers);
     }
 
-    protected function hasPassed($new_grade, $passing_grade = NULL, $course = NULL)
+    protected function hasPassed($new_grade, $passing_grade = NULL, $course = null)
     {
         if (!$passing_grade)
             // $passing_grade = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'nota_aprobatoria');

@@ -490,9 +490,13 @@ class Workspace extends BaseModel
                 $workspace = get_current_workspace();
                 $workspace->criteriaValue()->attach($criterion_value);
 
-            };
+                // Add subworkspace to current admin
+                if ( ! auth()->user()->isA('super-user') ) {
+                    auth()->user()->subworkspaces()->attach($subworkspace);
+                }
+            }
 
-            if (!empty($data['app_menu'])):
+            if (!empty($data['app_menu'])) :
                 $subworkspace->app_menu()->sync($data['app_menu']);
             endif;
 

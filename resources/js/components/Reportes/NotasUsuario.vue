@@ -26,7 +26,7 @@
                 class="col-7"
                 v-model="search"
                 placeholder="Documento"
-                oninput="javascript: if (this.value.length > 15) this.value = this.value.slice(0, 15);"
+                oninput="javascript: if (this.value.length > 30) this.value = this.value.slice(0, 30);"
                 @keyup.enter="buscarNotasUsuario"
             ></b-form-input>
             <b-input-group-append>

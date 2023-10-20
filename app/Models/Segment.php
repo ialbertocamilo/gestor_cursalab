@@ -54,6 +54,10 @@ Segment extends BaseModel
     }
     protected function getCriteriaByWorkspace($workspace)
     {
+        $criteria = $workspace->criterionWorkspace;
+
+        $criteria_config = $criteria->where('pivot.available_in_segmentation', 1)->pluck('id');
+
         return Criterion::select('id', 'name', 'position', 'code', 'field_id')
             ->with([
                 'field_type:id,name,code',
@@ -64,11 +68,11 @@ Segment extends BaseModel
                     //                    $q->whereIn('id', $values->pluck('id')->toArray());
                     $q
                         ->select('id', 'criterion_id', 'value_boolean', 'value_date', 'value_text')
-                        ->whereRelation('workspaces', 'id', $workspace->id);
-//                        ->whereRelation('workspaces', 'id', $workspace->id)
-//                        ->whereRelation('criterion.field_type', 'code', '<>', 'date');
+                        ->whereRelation('workspaces', 'id', $workspace->id)
+                        ->whereRelation('criterion.field_type', 'code', '<>', 'date');
                 }
             ])
+            ->whereIn('id', $criteria_config)
             ->whereHas('workspaces', function ($q) use ($workspace) {
                 $q->where('workspace_id', $workspace->id);
             })
@@ -125,6 +129,16 @@ Segment extends BaseModel
 
         foreach ($criteria_selected as $key => $criterion) {
 
+            if (!$criterion) continue;
+
+            $criterion_used = $criteria->where('id', $criterion['id'])->first();
+
+            // Remove criterion if no longer in config for segmentation
+            if (!$criterion_used) {
+                unset($criteria_selected[$key]);
+                continue;
+            }
+
             $grouped = $segment->values->where('criterion_id', $criterion['id'])->toArray();
 
             $segment_values_selected = [];
@@ -153,7 +167,8 @@ Segment extends BaseModel
                 $segment_values_selected[] = $new;
             }
 
-            $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
+            // $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
+            $criteria_selected[$key]['values'] = $criterion_used->values ?? [];
             $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
         }
 
@@ -299,12 +314,14 @@ Segment extends BaseModel
         $temp = [];
         foreach ($criterion['values_selected'] ?? [] as $value) {
 
-            $temp[] = [
-                'id' => $value['segment_value_id'] ?? null,
-                'criterion_value_id' => $value['id'],
-                'criterion_id' => $criterion['id'],
-                'type_id' => NULL,
-            ];
+            if (isset($value['id']) && isset($criterion['id'])) {
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_value_id' => $value['id'],
+                    'criterion_id' => $criterion['id'],
+                    'type_id' => NULL,
+                ];
+            }
         }
 
         return $temp;

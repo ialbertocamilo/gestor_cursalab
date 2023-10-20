@@ -530,8 +530,10 @@ class Media extends BaseModel
                       ->where('workspace_id', $workspace->id);
 
         if ($request->q) {
-            $title = Str::slug(trim($request->q));
-            $query->where('title', 'like', "%{$title}%");
+            $q = trim($request->q);
+            $slug = Str::slug($q);
+            $query->where('title', 'like', "%{$slug}%");
+            $query->orWhere('title', 'like', "%{$q}%");
         }
 
         if ($request->tipo) {

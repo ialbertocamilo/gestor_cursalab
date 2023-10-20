@@ -23,10 +23,10 @@ class RestCourseController extends Controller
 
         // Update flag to force update users courses
 
-//        if(now()->diffInMinutes($user->required_update_at) > 60) {
-//            $user->required_update_at = now();
-//            $user->save();
-//        }
+        if(now()->diffInMinutes($user->required_update_at) > 60) {
+            $user->required_update_at = now();
+            $user->save();
+        }
 
 //        $courses = $user->getCurrentCourses();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user');
@@ -128,7 +128,6 @@ class RestCourseController extends Controller
         $user_courses = $user->getCurrentCourses(withRelations: 'soft');
 
         // Take only courses with enabled certificate
-
         $user_courses = $user_courses->where('show_certification_to_user', 1);
 
 //        $user_courses = collect($user->getCurrentCourses(response_type: 'courses-unified'));
@@ -161,8 +160,7 @@ class RestCourseController extends Controller
 
         foreach ($user_courses as $user_course) {
 
-            if ($qs AND !stringContains($user_course->name, $qs))
-                continue;
+            if ($qs AND !stringContains($user_course->name, $qs)) continue;
 
             $certificate = $certificates->where('course_id', $user_course->id)->first();
 
@@ -199,7 +197,7 @@ class RestCourseController extends Controller
                         'issued_at' => $compatible_certificate->certification_issued_at->format('d/m/Y'),
                         'ruta_ver' => "tools/ver_diploma/{$user->id}/{$compatible_certificate->course_id}{$add}",
                         'ruta_descarga' => "tools/dnc/{$user->id}/{$compatible_certificate->course_id}{$add}",
-                        'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
+                        'user_confirms_certificate' => $certificate?->course?->user_confirms_certificate,
                         'compatible' => [
                             'course_id' => $compatible_certificate->course->id,
                             'name' => $compatible_certificate->course->name,
@@ -231,5 +229,47 @@ class RestCourseController extends Controller
         return $data;
     }
 
+    public function getCertificatesV2(Request $request)
+    {
+        $data = [];
+        $user = auth()->user();
+        $qs = $request->q ?? NULL;
 
+        $query = SummaryCourse::with('course:id,name')
+            ->whereHas('course', function($q) use ($qs) {
+                $q->where('show_certification_to_user', 1);
+                
+                if ($qs) {
+                    $q->where('name', 'like', "%{$qs}%");
+                }
+            })
+            ->where('user_id', $user->id)
+            ->whereNotNull('certification_issued_at');
+
+        if ($request->type == 'accepted')
+            $query->whereNotNull('certification_accepted_at');
+
+        if ($request->type == 'pending')
+            $query->whereNull('certification_accepted_at');
+
+        $certificates = $query->get();
+
+        foreach ($certificates as $certificate) {
+
+            // if ($qs AND !stringContains($certificate->course->name, $qs)) continue;
+
+            $data[] = [
+                'course_id' => $certificate->course_id,
+                'name' => $certificate->course->name,
+                'accepted' => $certificate->certification_accepted_at ? true : false,
+                'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
+                'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
+                'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
+                'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
+                'compatible' => null,
+            ];
+        }
+
+        return $this->success(compact('data'));
+    }
 }

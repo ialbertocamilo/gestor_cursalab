@@ -91,8 +91,6 @@ class SegmentController extends Controller
     {
         // return ($request->all());
 
-
-
         return Segment::storeRequestData($request);
     }
 
@@ -110,9 +108,7 @@ class SegmentController extends Controller
             $documents = $import->getProccesedData();
         }
 
-        $workspace = get_current_workspace();
-
-        $users = User::query()
+        $query = User::query()
             ->withWhereHas('criterion_values', function ($q) use ($data) {
                 $q->select('id', 'value_text')
                     // ->where('value_text', 'like', "%{$data['filter_text']}%")
@@ -127,8 +123,24 @@ class SegmentController extends Controller
             ->when($documents ?? null, function ($q) use ($documents) {
                 $q->whereIn('document', $documents);
             })
-            ->select('id', 'name', 'surname', 'lastname', 'document')
-            ->whereRelation('subworkspace', 'parent_id', $workspace?->id);
+            ->select('id', 'name', 'surname', 'lastname', 'document');
+
+        // When modulesIds are provided, search users only for those modules,
+        // or the entire workspace otherwise
+
+        if ($request->has('modulesIds')) {
+
+            $modulesIds = is_array($data['modulesIds'])
+                ? $data['modulesIds']
+                : explode(',', $data['modulesIds'] ?? []);
+
+            $users = $query->whereHas('subworkspace', function($q) use ($data, $modulesIds) {
+                $q->whereIn('criterion_value_id', $modulesIds);
+            });
+        } else {
+            $workspace = get_current_workspace();
+            $users = $query->whereRelation('subworkspace', 'parent_id', $workspace?->id);
+        }
 
         $users = ($request->has('file')) ? $users->get() : $users->limit(50)->get();
         $users_not_found = [];
