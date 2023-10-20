@@ -553,10 +553,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
                 $user = self::create($data);
-                $user->sendWelcomeEmail($from_massive);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
-            
+            if($user->active){
+                $user->sendWelcomeEmail($from_massive);
+            }
             $user->subworkspace_id = Workspace::query()
                 ->where('criterion_value_id', $data['criterion_list']['module'])
                 ->first()?->id;
