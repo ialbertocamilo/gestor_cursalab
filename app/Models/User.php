@@ -654,7 +654,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $email =  trim($user->email);
         // if(!$email){
-        if(!$email && !env('MULTIMARCA')){
+        if(!$email && !env('DEMO',false)){
             return '';
         }
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',

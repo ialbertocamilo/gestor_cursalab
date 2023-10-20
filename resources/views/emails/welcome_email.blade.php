@@ -21,9 +21,8 @@
                     <span style="font-weight: bolder">¡Bienvenido a bordo!</span>
                 </div>
                 <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center;margin-top:12px">
-                    Recuerda que tu ingreso a la plataforma se realizará con tu <span style="font-weight: bolder">doc. de identidad</span>.
-                    </div>
-                    
+                    Recuerda que tu ingreso a la plataforma se realizará con tu <span style="font-weight: bolder">correo corporativo</span> como usuariogit y contraseña.
+                </div>
             </div>
             <div style="text-align: center;margin-top:30px">
                 <div style="margin-left: 95%;
