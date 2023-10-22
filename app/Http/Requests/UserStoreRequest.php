@@ -81,8 +81,8 @@ class UserStoreRequest extends FormRequest
                 $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
             }
         }
-        if(!$id && $this->active){
-            $rules['active'] = [new VerifyLimitAllowedUsers($this->method())];
+        if(!$id || $id =='NULL'){
+            $rules['active'] = $this->active ? [new VerifyLimitAllowedUsers($this->method())] : 'required';
         }
         if($this->email){
             $rules['email'] ="required|email|max:255|unique:users,email,{$id},id,deleted_at,NULL" ;

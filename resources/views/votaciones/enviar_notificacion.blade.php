@@ -2,7 +2,7 @@
 @section('body')
 <tr style="background-color:#F9FAFB;margin-top:10px" align="center">
     <td>
-        <h1 style=" color:#5458EA;margin-top:2rem;font-weight:bold;font-size: 1.3rem;">¡Haz sido postulado!</h1>
+        <h1 style=" color:#5458EA;margin-top:2rem;font-weight:bold;font-size: 1.3rem;">¡Has sido postulado!</h1>
     </td>
 </tr>
 <tr style="background-color:#F9FAFB;" align="center">

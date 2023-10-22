@@ -21,6 +21,9 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'customer' => [
+        'slug' => env('CUSTOMER_SLUG', 'cursalab-default'),
+    ],
 
     // App versions
 

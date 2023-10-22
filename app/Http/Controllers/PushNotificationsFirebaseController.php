@@ -55,10 +55,20 @@ class PushNotificationsFirebaseController extends Controller
         // $modules = Criterion::getValuesForSelect('module');
         $modules = Workspace::loadSubWorkspaces(['criterion_value_id as id','name as nombre']);
 
+        $criteria_code = 'position_name';
+        $criterion = Criterion::where('code', $criteria_code)->first();
+
+        if (!$criterion) {
+            $criterion = Criterion::whereRelation('field_type', 'code', 'default')->first();
+            $criteria_code = $criterion->code;
+        }
+
+        $criteria_values = Criterion::getValuesForSelect($criteria_code);
+
         foreach ($modules as $module) {
             $module->modulo_selected = false;
             $module->carreras_selected = false;
-            $module->carreras = Criterion::getValuesForSelect('position_name');
+            $module->carreras = $criteria_values;
         }
 
         return $this->success(get_defined_vars());
@@ -254,6 +264,9 @@ class PushNotificationsFirebaseController extends Controller
 
         $estado = ['PENDIENTE', 'ENVIADO'];
         $segmentacion = json_decode($notificacion->destinatarios);
+        if (isset($segmentacion[0]) || isset($segmentacion[0]['id'])) {
+            $segmentacion = NULL;
+        }
         $resumen_estado['alcanzados'] = $notificacion->success;
         $resumen_estado['no_alcanzados'] = $notificacion->failure;
         $detalles_json = collect(json_decode($notificacion->detalles_json));

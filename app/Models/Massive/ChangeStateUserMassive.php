@@ -122,7 +122,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
             if(!in_array($user->subworkspace_id,$this->subworkspaces)){
                 $this->setError($user_identifier, $termination_date, 'Este usuario no pertenece a tu workspace');
             }else{
-                $user->updateStatusUser($this->state_user_massive, $termination_date);
+                $user->updateStatusUser($this->state_user_massive, $termination_date,true);
                 $this->q_change_status++;
             }
         } else {

@@ -17,7 +17,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar por tÍtulo..."
+                            label="Buscar por título..."
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"

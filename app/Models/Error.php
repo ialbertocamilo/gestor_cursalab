@@ -69,10 +69,14 @@ class Error extends Model
     {
         if (!$user) return 'Anónimo';
 
-        $notifier = $user->name;
+        $customer = config('app.customer.slug');
 
-        if ($platform_code == 'app')
-            $notifier = $user->name . ' (' . $user->document . ')';
+        $notifier = "[{$customer}] [UserID#{$user->id}] " . $user->name;
+
+        if ($platform_code == 'app') {
+            $module_code = $user->subworkspace->code ?? 'DEFAULT';
+            $notifier = $notifier . ' (' . $user->document . ') => [MOD-' . $module_code . ']';
+        }
 
         return $notifier;
     }
@@ -264,7 +268,7 @@ class Error extends Model
         $notifier = Error::getNotifierData($user, $platform_code);
 
         // Get user to send the notification
-        $user = $user ?? User::find(1);
+        $user = $user ?? User::whereNull('subworkspace_id')->first();
 
         $user->notify(new ErrorExceptionNotification($error, $notifier));
 
@@ -274,7 +278,8 @@ class Error extends Model
     public function sendErrorNotification($error, $section, $subsection)
     {
         // Get user to send the notification
-        $user = User::find(1);
+        // $user = User::find(1);
+        $user = User::whereNull('subworkspace_id')->first();
 
         $user->notify(new ErrorNotification($error, $section, $subsection));
 
