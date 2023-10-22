@@ -78,7 +78,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('beneficios:email-segments')->everyFiveMinutes();
         //Checklist
         $schedule->command('update:checklist-summary-user')->hourly();
-
+        $schedule->command('send:emails')->everyFiveMinutes();
     }
 
     /**

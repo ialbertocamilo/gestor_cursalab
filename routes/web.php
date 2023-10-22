@@ -36,6 +36,8 @@ Route::redirect('/', 'login', 301);
 //     return view('emails.email_information_apis',['data'=>$mail_data]);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
+Route::view('welcome_email','emails.welcome_email');
+
 Route::get('email_reset',function(){
     $mail_data=[
         'user'=>'Aldo López',

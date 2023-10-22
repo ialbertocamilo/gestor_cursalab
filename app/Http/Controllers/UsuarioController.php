@@ -260,7 +260,6 @@ class UsuarioController extends Controller
             }
             /********************************************************************/
             User::storeRequest($data);
-
             return $this->success(['msg' => 'Usuario creado correctamente.']);
         } catch (\Exception $e){
              return $this->master_errors($e);
@@ -668,6 +667,9 @@ class UsuarioController extends Controller
         }
 
         $user->update(['active' => $status]);
+        if ($status) {
+            $user->sendWelcomeEmail();
+        }
         $current_workspace->sendEmailByLimit();
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }

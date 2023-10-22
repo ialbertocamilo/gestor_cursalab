@@ -35,7 +35,7 @@ class MigrarUsuarios extends Command
         $destino = DB::connection('mysql_master');
 
         // Obtener los usuarios de la base de datos de origen
-        $usuarios = $origen->select("SELECT document, email, username FROM users WHERE subworkspace_id IS NOT NULL AND type_id IN (select id from taxonomies t where t.group='user' and t.type='type' and t.code='client');");
+        $usuarios = $origen->select("SELECT document, email, username FROM users WHERE subworkspace_id IS NOT NULL AND type_id IN (select id from taxonomies t where t.group='user' and t.type='type' and t.code='employee');");
 
         foreach ($usuarios as $usuario) {
 
