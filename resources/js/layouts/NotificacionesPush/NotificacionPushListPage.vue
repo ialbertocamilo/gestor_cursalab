@@ -110,6 +110,7 @@
                 :ref="modalOptions.ref"
                 :options="modalOptions"
                 :modules="selects.modules"
+                :criterion="criterion"
                 @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
                 @onCancel="closeFormModal(modalOptions)"
             />
@@ -164,6 +165,9 @@ export default {
                 modules: [],
                 careers: []
             },
+            criterion: {
+                name: '',
+            },
             modalOptions: {
                 ref: 'NotificacionPushFormModal',
                 open: false,
@@ -197,6 +201,7 @@ export default {
                 .then(({data}) => {
                     vue.selects.estados = data.data.estados
                     vue.selects.modules = data.data.modules
+                    vue.criterion = data.data.criterion
                 })
         },
     }

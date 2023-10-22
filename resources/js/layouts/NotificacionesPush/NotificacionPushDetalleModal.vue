@@ -5,10 +5,10 @@
         @onCancel="closeModal"
     >
         <template v-slot:content>
-            <v-row>
+            <v-row v-if="resource.segmentacion">
                 <v-col cols="12">
                     <DefaultFormLabel
-                        label="Segmentación"
+                        label="Detalle de segmentación"
                     />
                     <v-simple-table style="width: 100%" dense>
                         <template v-slot:default>
@@ -42,7 +42,7 @@
                                         small
                                         class="m-1"
                                         color="#C0C1ED"
-                                        v-text="`Todos los puestos seleccionados`"
+                                        v-text="`Todos seleccionados`"
                                     />
                                 </td>
                             </tr>
@@ -55,7 +55,7 @@
             <v-row>
                 <v-col cols="12">
                     <DefaultFormLabel
-                        label="Segmentación"
+                        label="Detalle de estados"
                     />
                     <v-row>
                         <v-col v-if="resource.resumen_estado" cols="5">
@@ -85,7 +85,7 @@
             <v-row>
                 <v-col cols="12">
                     <DefaultFormLabel
-                        label="Segmentación"
+                        label="Detalle de envío"
                     />
                     <v-simple-table style="width: 100%" dense>
                         <template v-slot:default>
