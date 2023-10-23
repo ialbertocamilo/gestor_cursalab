@@ -93,7 +93,9 @@ class RestTopicController extends Controller
             ->where('user_id', $user->id)
             ->first();
         if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
-        $statuses = Taxonomy::select('id','name','code','group')->where('type', 'user-status')->get();
+        $statuses = Taxonomy::select('id','name','code','group')
+                    ->where('group', 'topic')
+                    ->where('type', 'user-status')->get();
 
         $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
 
