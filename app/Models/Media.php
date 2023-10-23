@@ -612,17 +612,17 @@ class Media extends BaseModel
         if (in_array(strtolower($ext), $valid_ext1)) {
             $preview = FileService::generateUrl($this->file);
         } else if (in_array(strtolower($ext), $valid_ext2)) {
-            $preview = FileService::generateUrl(self::DEFAULT_VIDEO_IMG);
+            $preview = asset(self::DEFAULT_VIDEO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext3)) {
-            $preview = FileService::generateUrl(self::DEFAULT_AUDIO_IMG);
+            $preview = asset(self::DEFAULT_AUDIO_IMG);
         } else if (in_array(strtolower($ext), $valid_ext4)) {
-            $preview = FileService::generateUrl(self::DEFAULT_PDF_IMG);
+            $preview = asset(self::DEFAULT_PDF_IMG);
         } else if (in_array(strtolower($ext), $valid_ext6)) {
-            $preview = FileService::generateUrl(self::DEFAULT_PDF_IMG);
+            $preview = asset(self::DEFAULT_PDF_IMG);
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-            $preview = FileService::generateUrl(self::DEFAULT_SCORM_IMG);
+            $preview = asset(self::DEFAULT_SCORM_IMG);
         } else {
-            $preview = FileService::generateUrl(self::DEFAULT_SCORM_IMG);
+            $preview = asset(self::DEFAULT_SCORM_IMG);
         }
 
         return $preview;

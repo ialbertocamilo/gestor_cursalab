@@ -67,11 +67,11 @@ class Error extends Model
 
     public function getNotifierData($user, $platform_code)
     {
-        if (!$user) return 'Anónimo';
+        $customer = strtoupper(config('app.customer.slug'));
 
-        $customer = config('app.customer.slug');
+        if (!$user) return "[{$customer}] Anónimo";
 
-        $notifier = "[{$customer}] [UserID#{$user->id}] " . $user->name;
+        $notifier = "[{$customer}] [ID#{$user->id}] " . $user->name;
 
         if ($platform_code == 'app') {
             $module_code = $user->subworkspace->code ?? 'DEFAULT';
