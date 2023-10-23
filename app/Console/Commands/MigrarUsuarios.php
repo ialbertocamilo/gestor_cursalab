@@ -49,7 +49,7 @@ class MigrarUsuarios extends Command
 
             if ($existingUser) {
                 // Si el usuario ya existe, salta al siguiente usuario
-                info('DNI ya existe: ' . $usuario->document);
+                info('DNI ya existe: ' . $usuario->document.' - '.$usuario->email);
                 continue;
             }
 
@@ -60,7 +60,7 @@ class MigrarUsuarios extends Command
                     'username' => $usuario->username,
                     'customer_id' => ENV('CUSTOMER_ID'),
                 ]);
-                info('Usuario migrado (sin-email): ' . $usuario->document);
+                info('Usuario migrado (sin-email): ' . $usuario->document.' - '.$usuario->email);
             } else { 
 
                 // Si el email tiene valor, hay que verificar si existe en el MASTER
@@ -73,7 +73,7 @@ class MigrarUsuarios extends Command
 
                 if ($existingUser) {
                     // Si el EMAIL ya existe, salta al siguiente usuario
-                    info('Email ya existe: ' .$usuario->email);
+                    info('Email ya existe: ' .$usuario->document.' - '.$usuario->email);
                     continue;
                 }
 
@@ -83,7 +83,7 @@ class MigrarUsuarios extends Command
                     'email' => $usuario->email,
                     'customer_id' => ENV('CUSTOMER_ID'),
                 ]);
-                info('Usuario migrado (con-email): ' . $usuario->document);
+                info('Usuario migrado (con-email): ' . $usuario->document.' - '.$usuario->email);
             }
         }
 
