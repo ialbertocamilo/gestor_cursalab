@@ -636,11 +636,13 @@ class Workspace extends BaseModel
     public static function loadSubWorkspaces($attributes)
     {
         // $workspaceId = get_current_workspace_indexes('id');
-        $workspace = get_current_workspace();
+        // $workspace = get_current_workspace();
+        $modules_ids = current_subworkspaces_id();
 
         return Workspace::select($attributes)
             ->where('active', ACTIVE)
-            ->where('parent_id', $workspace->id)
+            ->whereIn('id', $modules_ids)
+            // ->where('parent_id', $workspace->id)
             ->get();
     }
 

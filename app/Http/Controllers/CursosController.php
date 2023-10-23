@@ -74,10 +74,14 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
-        // $modules_id = current_subworkspaces_id();
+        // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        $modules_id = current_subworkspaces_id();
 
-        $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
+        $query = Course::whereRelation('workspaces', 'id', $workspace->id)
+                    ->whereHas('schools', function($q) use ($modules_id) {
+                        $q->whereRelationIn('subworkspaces', 'id', $modules_id);
+                    })
+                    ->where('active', ACTIVE);
 
         if ($course)
             $query->where('id', '!=', $course->id);

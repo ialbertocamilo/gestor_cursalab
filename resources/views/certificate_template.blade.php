@@ -1,7 +1,9 @@
 <?php
     setlocale(LC_TIME, 'es_PE.UTF-8');
+    $css_file = $config->is_v1_migrated ? 'certi-v1.css' : 'certi.css';
+    // $css_file = config('app.migrated.v1') ? 'certi-v1.css' : 'certi.css';
 ?>
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -13,9 +15,9 @@
     <meta http-equiv="Expires" content="-1">
     <meta http-equiv='pragma' content='no-cache'>
 
-
     <title>Certificado</title>
-    <link type="text/css" media="all" rel="stylesheet" href="{{ asset('css/certi.css') }}">
+
+    <link type="text/css" media="all" rel="stylesheet" href="{{ asset('css/' . $css_file) }}">
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Cursalab, LMS Corporativa multiplataforma" />

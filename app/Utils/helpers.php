@@ -326,12 +326,12 @@ function get_subworkspaces_id($workspace)
     return [];
 }
 
-function current_subworkspaces_id()
+function current_subworkspaces_id($field = 'id')
 {
     $subworkspaces = get_current_subworkspaces();
 
     if ($subworkspaces) {
-        return $subworkspaces->pluck('id')->toarray();
+        return $subworkspaces->pluck($field)->toarray();
     }
 
     return [];

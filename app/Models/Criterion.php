@@ -49,7 +49,7 @@ class Criterion extends BaseModel
     }
 
     # modules by code
-    protected function getValuesForSelect($criterion_code)
+    protected function getValuesForSelect($criterion_code, $current = false)
     {
         $current_workspace = get_current_workspace();
 
@@ -60,6 +60,9 @@ class Criterion extends BaseModel
             ->whereRelation('criterion', 'code', $criterion_code)
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
             ->where('active', ACTIVE)
+            ->when($current, function($q) {
+                $q->whereIn('id', current_subworkspaces_id('criterion_value_id'));
+            })
             ->select('id', "$column_name as nombre")
             ->get();
     }
