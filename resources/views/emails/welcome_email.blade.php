@@ -31,7 +31,7 @@
                 border-radius: 9px; 
                 background: #CC96FC;"></div> 
                 <a target="_blank"
-                    href="https://play.google.com/store/apps/details?id=pe.cursalab.app"
+                    href="https://play.google.com/store/apps/details?id=io.cursalab.app"
                     style="text-decoration: none;margin-right:10px">
                     <img 
                         src="{{ url('/img/playstore.png') }}"   
