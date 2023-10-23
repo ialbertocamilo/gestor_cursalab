@@ -1,6 +1,9 @@
 # VERSION defines the version for the docker containers.
 # To build a specific set of containers with a version,
 # you can use the VERSION as an arg of the docker build command (e.g make docker VERSION=0.0.2)
+
+VERSION_DEP ?= 2.0.4
+
 VERSION ?= v0.0.1
 
 # REGISTRY defines the registry where we store our images.
@@ -8,6 +11,7 @@ VERSION ?= v0.0.1
 # you can use the REGISTRY as an arg of the docker build command (e.g make docker REGISTRY=my_registry.com/username)
 # You may also change the default value if you are using a different registry as a default
 REGISTRY ?= 505992365906.dkr.ecr.us-east-1.amazonaws.com
+
 
 
 # Commands
@@ -27,6 +31,20 @@ docker-push:
 
 
 docker-pull: 
-	docker pull ${REGISTRY}/composer:2.0.2
-	docker pull ${REGISTRY}/php:2.0.2
-	docker pull ${REGISTRY}/phpfpm:2.0.2
+	docker pull ${REGISTRY}/composer:${VERSION_DEP}
+	docker pull ${REGISTRY}/php:${VERSION_DEP}
+	docker pull ${REGISTRY}/phpfpm:${VERSION_DEP}
+
+
+
+docker-dependencies: docker-dependencies-build docker-dependencies-push
+
+docker-dependencies-build:
+	docker build -f Dockerfile.composerdep .  -t ${REGISTRY}/composer:${VERSION_DEP}
+	docker build -f Dockerfile.phpdep .  -t ${REGISTRY}/php:${VERSION_DEP}
+	docker build -f Dockerfile.phpfpmdep .  -t ${REGISTRY}/phpfpm:${VERSION_DEP}
+
+docker-dependencies-push:
+	docker push ${REGISTRY}/composer:${VERSION_DEP}
+	docker push ${REGISTRY}/php:${VERSION_DEP}
+	docker push ${REGISTRY}/phpfpm:${VERSION_DEP}

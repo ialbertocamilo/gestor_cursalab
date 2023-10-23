@@ -13,6 +13,8 @@ RUN mkdir -p /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes/bin
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
+COPY docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
+
 RUN addgroup -S composer \
     && adduser -S composer -G composer \
     && chown -R composer /opt/apps/laravel-in-kubernetes \
