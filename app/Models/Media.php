@@ -638,8 +638,6 @@ class Media extends BaseModel
 
     public function streamDownloadFile()
     {
-
-
         $filename = Str::after($this->file, '/');
         // $stream = Storage::readStream($this->file);
 
