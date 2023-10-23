@@ -11,7 +11,10 @@ ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma onigur
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
+COPY docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
+
 RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
     && pecl install ${PHP_PECL_EXTS} \
     && docker-php-ext-enable ${PHP_PECL_EXTS}
