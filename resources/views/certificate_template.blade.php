@@ -51,4 +51,34 @@
 
     </div>
 </body>
+
+@if($download)
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
+    <script>
+        function screenshot() {
+            const file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+        
+            setTimeout(function () {
+                window.scrollTo(0,0)
+                var html2Obj = html2canvas(certi, { width: certi.offsetWidth, height: certi.offsetHeight }).then(function(canvas) {
+                    const a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.href = canvas.toDataURL();
+                    a.download = "Certificado_"+file_name+".png";
+                    a.click();
+                });
+            }, 1000);
+        }
+
+        window.onload = function () {
+
+            setTimeout(function () {
+                screenshot();
+            }, 1000);
+        };
+    </script>
+
+@endif
+
 </html>

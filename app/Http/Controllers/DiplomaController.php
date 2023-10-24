@@ -246,12 +246,13 @@ class DiplomaController extends Controller
             
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
             $config = Ambiente::first();
+            $download = request()->routeIs('diplomas.download');
 
             if ($data['old_template'] === false) {
                 $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
             }
 
-            return view('certificate_template', compact('data', 'config'));
+            return view('certificate_template', compact('data', 'config', 'download'));
 
         } catch (\Throwable $th) {
 
