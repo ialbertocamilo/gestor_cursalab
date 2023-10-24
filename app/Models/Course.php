@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Course extends BaseModel
 {
@@ -692,7 +693,8 @@ class Course extends BaseModel
 
                         'porcentaje' => '100.00',
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                     ];
                 }
                 else
@@ -718,7 +720,13 @@ class Course extends BaseModel
                         'porcentaje' => $course_status['progress_percentage'],
                         'tags' => $tags,
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'scheduled_activation' => [
+                            'message' => $course->deactivate_at ? 
+                                            'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
+                                            : null,
+                        ],
                     ];
                 }
             }
@@ -758,10 +766,16 @@ class Course extends BaseModel
 
         return $data;
     }
-    protected function getDataToCoursesViewAppByUserV2($user, $user_courses): array
+    protected function getDataToCoursesViewAppByUserV2($user, $user_courses,$filter_school_id=false): array
     {
         $workspace_id = $user->subworkspace->parent_id;
         $schools = $user_courses->groupBy('schools.*.id');
+        if($filter_school_id){
+            //A course can belong to one or more schools, so it should be filtered only by the selected school.
+            $schools = $schools->filter(function ($group, $schoolId) use ($filter_school_id) {
+                return $schoolId == $filter_school_id;
+            });
+        }
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $user_courses->pluck('id'))
             ->where('user_id', $user->id)
@@ -885,6 +899,7 @@ class Course extends BaseModel
 //        if ($course->compatible)
 //            dd($course->compatible);
         $workspace_id = $user->subworkspace->parent_id;
+        $COURSE_STATUS_APROBADO = Taxonomy::getFirstData('course', 'user-status', 'aprobado')->id;
 
         $course_progress_percentage = 0.00;
         $status = 'por-iniciar';
@@ -968,7 +983,7 @@ class Course extends BaseModel
                         //     }else{
                         //         try {
                         //             // if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                        //             if(!in_array($summary_requirement_course_req?->status_id, [COURSE_STATUS_APROBADO])){
+                        //             if(!in_array($summary_requirement_course_req?->status_id, [$COURSE_STATUS_APROBADO])){
                         //                 $available_course_req = false;
                         //             }
                         //         } catch (\Throwable $th) {
@@ -995,7 +1010,7 @@ class Course extends BaseModel
             }else{
                 try {
                     // if(!in_array($summary_requirement_course?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                    if(!in_array($summary_requirement_course?->status_id, [COURSE_STATUS_APROBADO])){
+                    if(!in_array($summary_requirement_course?->status_id, [$COURSE_STATUS_APROBADO])){
                         $available_course = false;
                         $status = 'bloqueado';
                         if($requirement_course?->requirement_id){
@@ -1032,7 +1047,7 @@ class Course extends BaseModel
                             //     }else{
                             //         try {
                             //             // if(!in_array($summary_requirement_course_req?->status?->code,['aprobado', 'realizado', 'revisado'])){
-                            //             if(!in_array($summary_requirement_course_req?->status_id, [COURSE_STATUS_APROBADO])){
+                            //             if(!in_array($summary_requirement_course_req?->status_id, [$COURSE_STATUS_APROBADO])){
                             //                 $available_course_req = false;
                             //             }
                             //         } catch (\Throwable $th) {
@@ -1651,9 +1666,12 @@ class Course extends BaseModel
         $mod_evaluaciones = $course->mod_evaluaciones;
 
         if ($mod_evaluaciones && isset($mod_evaluaciones['nota_aprobatoria'])) {
-            $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
 
-            $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            if ($main->qualification_type) {
+
+                $nota_aprobatoria = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], $main->qualification_type->position);
+                $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
+            }
             // $course->mod_evaluaciones = $mod_evaluaciones;
         }
 

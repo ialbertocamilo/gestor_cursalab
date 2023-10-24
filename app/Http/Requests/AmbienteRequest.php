@@ -53,6 +53,8 @@ class AmbienteRequest extends FormRequest
 
             'identity_validation_enabled' => 'nullable',
             'password_expiration_enabled' => 'nullable',
+
+            'is_v1_migrated' => 'nullable',
         ];
     }
     public function validationData(): array
@@ -72,6 +74,11 @@ class AmbienteRequest extends FormRequest
         if ($this->has('password_expiration_enabled') ) {
             $data['password_expiration_enabled'] = ($this->password_expiration_enabled == 'true' || 
                                        $this->password_expiration_enabled == 1 ) ? true : false;
+        }
+
+        if ($this->has('is_v1_migrated') ) {
+            $data['is_v1_migrated'] = ($this->is_v1_migrated == 'true' || 
+                                       $this->is_v1_migrated == 1 ) ? true : false;
         }
 
         return $this->merge($data)->all();

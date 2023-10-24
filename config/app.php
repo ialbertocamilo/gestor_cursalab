@@ -21,6 +21,9 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'customer' => [
+        'slug' => env('CUSTOMER_SLUG', 'cursalab-default'),
+    ],
 
     // App versions
 
@@ -77,6 +80,10 @@ return [
         'gestor' => [
             'expiration_days' => env('RESET_PASSWORD_DAYS_GESTOR', 365)
         ]
+    ],
+
+    'migrated' => [
+        'v1' => env('MIGRATED_V1', false),
     ],
 
     /*

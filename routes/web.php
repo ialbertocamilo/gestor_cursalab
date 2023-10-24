@@ -36,6 +36,8 @@ Route::redirect('/', 'login', 301);
 //     return view('emails.email_information_apis',['data'=>$mail_data]);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
+Route::view('welcome_email','emails.welcome_email');
+
 Route::get('email_reset',function(){
     $mail_data=[
         'user'=>'Aldo López',
@@ -116,7 +118,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:documentation-api');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
     
 
     
@@ -196,7 +198,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
     Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));
-    Route::prefix('diplomas')->middleware('checkrol:admin')->group(base_path('routes/cms/diplomas.php'));
 
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
 

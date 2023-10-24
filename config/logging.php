@@ -53,7 +53,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['single','daily','stderr'],
             'ignore_exceptions' => false,
         ],
 
@@ -128,6 +128,15 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/soporte_log.log'),
             'level' => 'debug',
+        ],
+
+        'stdout' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+            'with' => [
+                'stream' => 'php://stdout',
+            ],
         ],
     ],
 

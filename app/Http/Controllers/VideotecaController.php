@@ -151,7 +151,7 @@ class VideotecaController extends Controller
      */
     public function getListSelects()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Criterion::getValuesForSelect('module', true);
         $categorias = Taxonomy::getDataForSelect('videoteca', 'categoria');
 
         $tags = Taxonomy::group('videoteca')

@@ -66,7 +66,8 @@ return [
         // 'ayuda'=> 'Ayuda'
 
         [ 'id' => 'escuelas', 'nombre' => 'Escuelas'],
-        [ 'id' => 'malla', 'nombre' => 'Malla Curricular'],
+        [ 'id' => 'cursos', 'nombre' => 'Cursos'],
+        // [ 'id' => 'malla', 'nombre' => 'Malla Curricular'],
         [ 'id' => 'progreso', 'nombre' => 'Progreso'],
         [ 'id' => 'cursos_extra', 'nombre' => 'Cursos Extracurriculares'],
         [ 'id' => 'diplomas', 'nombre' => 'Diplomas'],

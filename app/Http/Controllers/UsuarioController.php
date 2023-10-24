@@ -224,15 +224,23 @@ class UsuarioController extends Controller
     public function getFormSelects($compactResponse = false)
     {
         $current_workspace = get_current_workspace();
+
+        $all_modules = $current_workspace->subworkspaces()->get()->pluck('criterion_value_id')->toArray();
+        $modules_ids = current_subworkspaces_id('criterion_value_id');
+        $modules_ids_to_exclude = array_diff($all_modules, $modules_ids);
+
         $criteria = Criterion::query()
             ->with([
-                'values' => function ($q) use ($current_workspace) {
+                'values' => function ($q) use ($current_workspace, $modules_ids_to_exclude) {
                     // $q->with('parents:id,criterion_id,value_text')
                         $q->whereHas('workspaces', function ($q2) use ($current_workspace) {
                             $q2->where('id', $current_workspace->id);
+                            // $q2->whereIn('criterion_id', $modules_ids);
                         });
+                        $q->whereNotIn('id', $modules_ids_to_exclude);
                         $q->select('id', 'criterion_id', 'exclusive_criterion_id', 'parent_id',
                             'value_text');
+                        $q->whereRelation('criterion.field_type', 'code', '<>', 'date');
                 },
                 'field_type:id,code'
             ])
@@ -260,7 +268,6 @@ class UsuarioController extends Controller
             }
             /********************************************************************/
             User::storeRequest($data);
-
             return $this->success(['msg' => 'Usuario creado correctamente.']);
         } catch (\Exception $e){
              return $this->master_errors($e);
@@ -668,6 +675,9 @@ class UsuarioController extends Controller
         }
 
         $user->update(['active' => $status]);
+        if ($status) {
+            $user->sendWelcomeEmail();
+        }
         $current_workspace->sendEmailByLimit();
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
@@ -691,9 +701,9 @@ class UsuarioController extends Controller
         // $modules = Workspace::where('parent_id', $workspace->id)
         //     ->select('id', 'name')
         //     ->get();
-        $modules = get_current_subworkspaces();    
-
-        $modules_id = $modules->pluck('id')->toArray();
+        $modules = get_current_subworkspaces(); 
+        // $modules_id = $modules->pluck('id')->toArray();
+        $modules_id = current_subworkspaces_id();   
         // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         // Load workspace's schools
         $schools = School::whereHas('subworkspaces', function ($j) use ($modules_id) {
