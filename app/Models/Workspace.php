@@ -615,7 +615,7 @@ class Workspace extends BaseModel
                 ]);
             }
         }
-        return true;
+        return $current_active_users_count > $workspace_limit;
     }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {

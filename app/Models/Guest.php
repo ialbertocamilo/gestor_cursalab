@@ -82,7 +82,11 @@ class Guest extends BaseModel {
         foreach ($data['criterion_list'] as $clave => $valor) {
            array_push($data['criterion_list_final'],$valor);
         }
-        $data['active'] = boolval($guest_link->activate_by_default);
+        $data['active'] = false;
+        $current_workspace = get_current_workspace();
+        if($guest_link->activate_by_default){
+            $data['active'] = $current_workspace->verifyLimitAllowedUsers();
+        }
         $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','registered')->first()?->id;
         if($request->guest_id){
             $_guest = Guest::where('id',$request->guest_id)->first;
@@ -98,12 +102,15 @@ class Guest extends BaseModel {
         }else{
             $user = User::storeRequest($data);
             $type_id_by_email = Taxonomy::where('group','guests')->where('type','type')->where('code','by-link')->first()?->id;
-            Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,get_current_workspace()->id,$user->id);
+            Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,$current_workspace->id,$user->id);
         }
         $guest_link->increment('count_registers', 1);
         $title = 'Tu solicitud ha sido aceptada';
         $message = $data['active'] ? 'Ya puedes ingresar a nuestra plataforma' : 'Recibirás un correo de confirmación cuando se active tu cuenta de capacitación';
         $redirect_login = $data['active'];
+        if($data['active']){
+            $current_workspace->sendEmailByLimit();
+        }
         return compact('title','message','redirect_login');
     }
     protected function verifyGuestCodeVerificationByEmail($request){

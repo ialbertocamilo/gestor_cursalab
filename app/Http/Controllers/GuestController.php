@@ -114,6 +114,7 @@ class GuestController extends Controller
             return $this->error($error_msg, 422);
         }
         if($status){
+            $user->loadMissing('subworkspace');
             $data = [
                 'lastname'=>$user->lastname,
                 'name'=>$user->name,
