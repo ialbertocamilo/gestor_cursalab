@@ -37,7 +37,7 @@ class GuestController extends Controller
 
         // $result = Usuario::whereIn('id',  $request->usersIds)->update(['estado' => 1]);
         foreach ($request->users_id as $user_id) {
-            $user = User::find($user_id);
+            $user = User::with('subworkspace:id,name')->where('id',$user_id)->first();
             if($user){
                 $this->changeStatusUser($user);
             }
