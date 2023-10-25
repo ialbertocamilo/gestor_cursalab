@@ -15,7 +15,7 @@ class WorkspaceDuplicateRequest extends FormRequest
     {
 
         return [
-            'name' => 'required|min:5|max:255',
+            'name' => 'required|min:1|max:255',
             'url_powerbi' => 'nullable',
             // 'active' => 'nullable',
             'logo' => 'nullable',
