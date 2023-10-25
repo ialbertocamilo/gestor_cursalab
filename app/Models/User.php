@@ -654,7 +654,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $email =  trim($user->email);
         // if(!$email){
-        if(!$email && !env('DEMO',false)){
+        $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
+        if(!$taxonomy){
+            return;
+        }
+        if(!$email){
             return '';
         }
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
