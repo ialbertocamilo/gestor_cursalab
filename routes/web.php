@@ -118,7 +118,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
     
 
     
@@ -183,7 +182,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('procesos-masivos')->middleware('hasHability:process-massive')->group(base_path('routes/cms/masivos.php'));
     Route::prefix('importar-notas')->middleware('hasHability:upload-grades-massive')->group(base_path('routes/cms/importar-notas.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:admin,super-user');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 
     Route::prefix('resumen_encuesta')->middleware('hasHability:poll-report')->group(base_path('routes/cms/resumen_encuesta.php'));
     
