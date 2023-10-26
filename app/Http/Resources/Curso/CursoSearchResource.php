@@ -4,6 +4,7 @@ namespace App\Http\Resources\Curso;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\FileService;
+use Carbon\Carbon;
 
 class CursoSearchResource extends JsonResource
 {
@@ -63,18 +64,13 @@ class CursoSearchResource extends JsonResource
             'type' => $this->type->name ?? 'No definido',
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : '-',
 
-            'custom_curso_nombre' => '',
+            'custom_curso_nombre' => $this->getCourseTypes(),
             'curso_nombre_escuela' => [
                 'curso' => $this->name,
                 'escuela' => implode(', ', $schools),
             ],
 
             'curso_estado' => $this->getCourseStatus(),
-
-            // 'curso_estado' => [
-            //     'estado' => $this->active ? 'Curso visible para usuarios' : 'Curso no visible para usuarios',
-            //     'subtitle' => '3 temas activos | segmentado | escuelas activas',
-            // ],
 
             'actualizaciones' => '',
 
@@ -136,18 +132,65 @@ class CursoSearchResource extends JsonResource
             'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary', 
         ];
 
-        $estado = $this->active ? 'Curso visible para usuarios' : 'Curso no visible para usuarios';
+        $visible = ($this->active_topics_count && $this->segments_count && $active_schools_count && $this->active);
+
+        $estado = $visible ? 'Curso visible para usuarios' : 'Curso no visible para usuarios';
 
         if (!$this->active) {
             $estado .= ' [Inactivo]';
         }
 
-        if ($this->activate_at || $this->deactivate_at) {
-            $estado .= ' [Programado]';
-        }
-
+        // $icon_data = [];
         $data = [
             'estado' => $estado,
+            'subtitles' => $subtitles,
+            'icon' => $icon_data ?? NULL,
+        ];
+
+        if ($this->activate_at || $this->deactivate_at) {
+
+            $icon_title = '';
+
+            $activate_at = $this->activate_at ? Carbon::parse($this->activate_at)->format('d/m/Y H:i a') : 'Indefinido';
+            $deactivate_at = $this->deactivate_at ? Carbon::parse($this->deactivate_at)->format('d/m/Y H:i a') : 'Indefinido';
+
+            if ($activate_at) $icon_title .= $activate_at;
+            if ($deactivate_at) $icon_title .= ' - ' . $deactivate_at;
+
+            $data['icon'] = [
+                'name' => 'mdi-calendar',
+                'title' => $icon_title,
+            ];
+
+            // $estado .= ' [Programado]';
+        }
+
+        return $data;
+    }
+
+    public function getCourseTypes()
+    {
+        $subtitles = [];
+
+        $subtitles[] = [
+            'name' => 'Tipo: ' . ($this->type->name ?? 'No definido'), 
+            // 'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        ];
+
+        $subtitles[] = [
+            'name' => ($this->qualification_type->name ?? 'Sistema no definido'),
+            // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        ];
+
+        // $active_schools_count = $this->schools->where('active', ACTIVE)->count();
+
+        // $subtitles[] = [
+        //     'name' => 'Escuelas activas: ' . $active_schools_count, 
+        //     'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        // ];
+
+        $data = [
+            'nombre' => $this->name,
             'subtitles' => $subtitles,
         ];
 

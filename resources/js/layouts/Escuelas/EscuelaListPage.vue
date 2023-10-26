@@ -182,10 +182,10 @@ export default {
                 ref: 'escuelasTable',
                 headers: [
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombre", value: "name"},
+                    {text: "Portada", value: "new_image", align: 'center', sortable: false},
+                    {text: "Nombre", value: "escuela_nombre", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
-                    {text: "Módulos", value: "images", align: 'center', sortable: false},
+                    // {text: "Módulos", value: "images", align: 'center', sortable: false},
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],

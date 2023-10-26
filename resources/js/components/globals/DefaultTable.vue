@@ -223,6 +223,53 @@
                 <div class="d-flex justify-center flex-row my-2"
                      v-if="item.image">
                     <v-img
+                        max-height="70"
+                        max-width="70"
+                        :src="item.image"
+                    >
+                        <template v-slot:placeholder>
+                            <v-row
+                                class="fill-height ma-0"
+                                align="center"
+                                justify="center"
+                            >
+                                <v-progress-circular
+                                    indeterminate
+                                    color="grey lighten-5"
+                                ></v-progress-circular>
+                            </v-row>
+                        </template>
+                    </v-img>
+                </div>
+            </template>
+
+            <template v-slot:item.new_image="{ item, header }">
+                <div class="d-flex justify-center flex-row my-2"
+                     v-if="item.image">
+                    <v-img
+                        height="65"
+                        max-width="100"
+                        :src="item.image"
+                    >
+                        <template v-slot:placeholder>
+                            <v-row
+                                class="fill-height ma-0"
+                                align="center"
+                                justify="center"
+                            >
+                                <v-progress-circular
+                                    indeterminate
+                                    color="grey lighten-5"
+                                ></v-progress-circular>
+                            </v-row>
+                        </template>
+                    </v-img>
+                </div>
+            </template>
+            <template v-slot:item.new_image_2="{ item, header }">
+                <div class="d-flex justify-center flex-row my-2"
+                     v-if="item.image">
+                    <v-img
                         height="50"
                         max-width="100"
                         :src="item.image"
@@ -641,19 +688,100 @@
             </template>
 
             <template v-slot:item.curso_estado="{item, header}">
-                <p class="my-0">{{ item.curso_estado.estado }}</p>
+                <p class="my-0">
+                    {{ item.curso_estado.estado }}
+                    <template v-if="item.curso_estado.icon">
+                        <v-icon v-text="`${item.curso_estado.icon.name}`" :title="item.curso_estado.icon.title" small color="primary"/>
+                    </template>
+                </p>
                 <p class="my-0 course-status-subtitles" v-if="item.curso_estado.subtitles">
                     <span v-for="(subtitle, index) in item.curso_estado.subtitles" :key="index">
                         <small :class="subtitle.class" >{{ subtitle.name }}</small>
                     </span>
                 </p>
+                <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
+                    <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>
+                </div>
             </template>
 
             <template v-slot:item.curso_nombre_escuela="{item, header}">
-                <p class="my-0">{{ item.curso_nombre_escuela.curso }}</p>
-                <p class="my-0" v-if="item.curso_nombre_escuela.escuela"><small><strong>Escuela:</strong> {{ item.curso_nombre_escuela.escuela }}</small></p>
-                <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
-                    <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>
+                <div class="py-2">
+                    <p class="my-0">
+                        {{ item.curso_nombre_escuela.curso }} 
+                    </p>
+                    <p class="my-0" v-if="item.curso_nombre_escuela.escuela"><small><strong>Escuela:</strong> {{ item.curso_nombre_escuela.escuela }}</small></p>
+                    <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
+
+                     <!--    <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
+                            :style="`
+                                background-image: url(${row.image});
+                                background-size: contain;
+                                height: 15px;
+                                width: 100%;
+                                max-width: 50px;
+                            `"
+                        >
+                        </span>
+ -->
+                        <v-img
+                            v-for="(row, index) in item.images"
+                            height="15"
+                            max-width="50px"
+                            :key="index"
+                            :src="row.image"
+                            :title="row.name || 'Logo'"
+                            style="opacity: 0.75;"
+                        >
+                            <template v-slot:placeholder>
+                                <v-row
+                                    class="fill-height ma-0"
+                                    align="center"
+                                    justify="center"
+                                >
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="grey lighten-5"
+                                    ></v-progress-circular>
+                                </v-row>
+                            </template>
+                        </v-img>
+                    </div>
+                    
+                </div>
+            </template>
+
+            <template v-slot:item.escuela_nombre="{item, header}">
+                <div class="py-2">
+                    <p class="my-0">
+                        {{ item.escuela_nombre.name }} 
+                    </p>
+                    <!-- <p class="my-0" v-if="item.escuela_nombre.escuela"><small><strong>Escuela:</strong> {{ item.escuela_nombre.escuela }}</small></p> -->
+                    <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
+
+                        <v-img
+                            v-for="(row, index) in item.images"
+                            height="15"
+                            max-width="50px"
+                            :key="index"
+                            :src="row.image"
+                            :title="row.name || 'Logo'"
+                            style="opacity: 0.75;"
+                        >
+                            <template v-slot:placeholder>
+                                <v-row
+                                    class="fill-height ma-0"
+                                    align="center"
+                                    justify="center"
+                                >
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="grey lighten-5"
+                                    ></v-progress-circular>
+                                </v-row>
+                            </template>
+                        </v-img>
+                    </div>
+                    
                 </div>
             </template>
 
@@ -690,7 +818,17 @@
 
             <!--   CURSOS  -->
             <template v-slot:item.custom_curso_nombre="{item, header}">
-                <p class="my-0" v-text="item.nombre"/>
+                <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
+
+                <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
+                    <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
+                        <small :class="subtitle.class" >{{ subtitle.name }}</small>
+                    </span>
+                </p>
+
+                <!-- <p class="my-0">
+                    <small ><strong>Creado: </strong>{{ item.created_at }}</small>
+                </p> -->
 
                 <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
                     <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>

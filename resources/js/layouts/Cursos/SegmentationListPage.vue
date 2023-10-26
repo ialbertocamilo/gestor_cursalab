@@ -223,7 +223,7 @@ export default {
                 endpoint: `cursos/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Portada", value: "new_image", align: 'center', sortable: false},
                     // {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
                     {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
