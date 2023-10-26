@@ -64,6 +64,17 @@ class CursoSearchResource extends JsonResource
             'created_at' => $this->created_at ? $this->created_at->format('d/m/Y g:i a') : '-',
 
             'custom_curso_nombre' => '',
+            'curso_nombre_escuela' => [
+                'curso' => $this->name,
+                'escuela' => implode(', ', $schools),
+            ],
+
+            'curso_estado' => $this->getCourseStatus(),
+
+            // 'curso_estado' => [
+            //     'estado' => $this->active ? 'Curso visible para usuarios' : 'Curso no visible para usuarios',
+            //     'subtitle' => '3 temas activos | segmentado | escuelas activas',
+            // ],
 
             'actualizaciones' => '',
 
@@ -103,4 +114,44 @@ class CursoSearchResource extends JsonResource
 
         return $data;
     }
+
+    public function getCourseStatus()
+    {
+        $subtitles = [];
+
+        $subtitles[] = [
+            'name' => 'Temas activos: ' . $this->active_topics_count, 
+            'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        ];
+
+        $subtitles[] = [
+            'name' => $this->segments_count ? 'Segmentado' : 'No segmentado', 
+            'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        ];
+
+        $active_schools_count = $this->schools->where('active', ACTIVE)->count();
+
+        $subtitles[] = [
+            'name' => 'Escuelas activas: ' . $active_schools_count, 
+            'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        ];
+
+        $estado = $this->active ? 'Curso visible para usuarios' : 'Curso no visible para usuarios';
+
+        if (!$this->active) {
+            $estado .= ' [Inactivo]';
+        }
+
+        if ($this->activate_at || $this->deactivate_at) {
+            $estado .= ' [Programado]';
+        }
+
+        $data = [
+            'estado' => $estado,
+            'subtitles' => $subtitles,
+        ];
+
+        return $data;
+    }
+
 }

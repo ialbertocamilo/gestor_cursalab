@@ -143,8 +143,9 @@ export default {
                     // {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre_and_requisito", sortable: false},
                     // {text: "Nombre", value: "nombre", sortable: false},
-                    {text: "Evaluable", value: "assessable", sortable: false},
-                    {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
+                    // {text: "Evaluable", value: "assessable", align: 'center', sortable: false},
+                    // {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
+                    {text: "Tipo de evaluación", value: "tema_evaluacion", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -163,16 +164,18 @@ export default {
                         route: 'edit_route'
                     },
                     {
-                        text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
-                    },
-                    {
                         text: "Actualizar Estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                ],
+                more_actions: [
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -182,14 +185,6 @@ export default {
                         method_name: "logs"
                     }
                 ]
-                // more_actions: [
-                //     {
-                //         text: "Actividad",
-                //         icon: 'fas fa-file',
-                //         type: 'action',
-                //         method_name: 'activity'
-                //     },
-                // ]
             },
             selects: {
                 modules: []

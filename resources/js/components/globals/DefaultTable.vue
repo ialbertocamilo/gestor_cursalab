@@ -62,7 +62,7 @@
                         </v-list>
                     </v-menu>
                 </div>
-                <div v-else>
+                <div v-else class="d-inline">
                     {{ h.text }}
                     <v-tooltip top attach v-if="h.tooltip">
                         <template v-slot:activator="{ on, attrs }">
@@ -158,7 +158,23 @@
             <template v-slot:item.images="{ item, header }">
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
-                    <v-img
+
+                     <!-- <v-avatar v-for="(row, index) in item.images" :key="index" :image="row.image" :src="row.image" ></v-avatar> -->
+
+                    <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
+                        :style="`
+                            background-image: url(${row.image});
+                            background-position: center;
+                            background-size: cover;
+                            border-radius: 50%;
+                            height: 32px;
+                            width: 32px;
+                        `"
+                        >
+                        <!-- <img :src="row.image" alt="Avatar"> -->
+                    </span>
+
+                    <!-- <v-img
                         v-for="(row, index) in item.images"
                         max-height="50"
                         max-width="50"
@@ -177,7 +193,7 @@
                                 ></v-progress-circular>
                             </v-row>
                         </template>
-                    </v-img>
+                    </v-img> -->
                 </div>
             </template>
             <template v-slot:item.tags="{ item, header }">
@@ -207,8 +223,8 @@
                 <div class="d-flex justify-center flex-row my-2"
                      v-if="item.image">
                     <v-img
-                        max-height="70"
-                        max-width="70"
+                        height="50"
+                        max-width="100"
                         :src="item.image"
                     >
                         <template v-slot:placeholder>
@@ -230,8 +246,8 @@
                 <div class="d-flex justify-center flex-row my-2"
                      v-if="item.image">
                     <v-img
-                        max-height="120"
-                        max-width="120"
+                        max-height="90"
+                        max-width="90"
                         :src="item.image"
                     >
                         <template v-slot:placeholder>
@@ -622,6 +638,28 @@
             <template v-slot:item.nombre_and_requisito="{item, header}">
                 <p class="my-0">{{ item.nombre_and_requisito.nombre }}</p>
                 <p class="my-0" v-if="item.nombre_and_requisito.requisito"><small><strong>Requisito:</strong> {{ item.nombre_and_requisito.requisito }}</small></p>
+            </template>
+
+            <template v-slot:item.curso_estado="{item, header}">
+                <p class="my-0">{{ item.curso_estado.estado }}</p>
+                <p class="my-0 course-status-subtitles" v-if="item.curso_estado.subtitles">
+                    <span v-for="(subtitle, index) in item.curso_estado.subtitles" :key="index">
+                        <small :class="subtitle.class" >{{ subtitle.name }}</small>
+                    </span>
+                </p>
+            </template>
+
+            <template v-slot:item.curso_nombre_escuela="{item, header}">
+                <p class="my-0">{{ item.curso_nombre_escuela.curso }}</p>
+                <p class="my-0" v-if="item.curso_nombre_escuela.escuela"><small><strong>Escuela:</strong> {{ item.curso_nombre_escuela.escuela }}</small></p>
+                <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
+                    <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>
+                </div>
+            </template>
+
+            <template v-slot:item.tema_evaluacion="{item, header}">
+                <p class="my-0">{{ item.tema_evaluacion.title }}</p>
+                <p class="my-0" v-if="item.tema_evaluacion.subtitle"><small>{{ item.tema_evaluacion.subtitle }}</small></p>
             </template>
 
             <template v-slot:item.custom_error="{item, header}">

@@ -13,6 +13,19 @@
             <v-card-title>
                 <!-- <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/> -->
                 Cursos
+
+                <DefaultInfoTooltip class="mr-5" right>
+                    <template v-slot:content>
+                        <p><strong>Recuerda que un curso será visible para tus usuarios solo si cumple los siguientes requisitos:</strong></p>
+                        <ul>
+                            <li>El curso debe contar con al menos un tema activo y pertenecer al menos a una escuela activa.</li>
+                            <!-- <li>El curso debe pertenecer al menos a una escuela activa.</li> -->
+                            <li>El curso debe estar segmentado, ya sea por criterios o por documento.</li>
+                            <li>El curso debe encontrarse activo (de manera directa o por medio de su programación).</li>
+                        </ul>
+                    </template>
+                </DefaultInfoTooltip>
+
                 <v-spacer/>
 
                 <DefaultModalButton
@@ -210,11 +223,13 @@ export default {
                 endpoint: `cursos/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Portada", value: "medium_image", align: 'center', sortable: false},
-                    {text: "Nombre", value: "custom_curso_nombre", sortable: false},
-                    {text: "Escuela", value: "schools", sortable: false},
+                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    // {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
+                    {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
+                    // {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
-                    {text: "Módulos", value: "images", sortable: false},
+                    // {text: "Módulos", value: "images", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
