@@ -355,8 +355,10 @@ const app = new Vue({
 
             try {
                 FileSaver.saveAs(url, name)
+
             } catch (error) {
                 console.log(error)
+
             }
 
         }
