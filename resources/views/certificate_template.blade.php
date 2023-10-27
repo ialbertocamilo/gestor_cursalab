@@ -59,6 +59,7 @@
     <script>
         function screenshot() {
             const file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+            file_name = file_name.replace(/\s/g, '-').toLowerCase();
         
             setTimeout(function () {
                 window.scrollTo(0,0)
@@ -66,7 +67,7 @@
                     const a = document.createElement("a");
                     document.body.appendChild(a);
                     a.href = canvas.toDataURL();
-                    a.download = "Certificado_"+file_name+".png";
+                    a.download = "certificado-"+file_name+".png";
                     a.click();
                 });
             }, 1000);
