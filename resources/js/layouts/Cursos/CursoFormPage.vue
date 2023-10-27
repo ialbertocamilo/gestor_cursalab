@@ -307,7 +307,8 @@
                                         <!-- :disabled="!resource.scheduled_restarts_activado" -->
 
                                         <v-col cols="12" class="py-1">
-                                            <p class="mb-0">** Programar la activación y/o inactivación de un curso.</p>
+                                            <p class="mb-0">** El curso pasará a estar activo de acuerdo a la fecha configurada.</p>
+                                            <p class="mb-0">** Recuerda que el curso debe estar segmentado, pertenecer a una escuela activa y contener al menos un tema activo para que este sea visible por tus usuarios cuando este se active.</p>
                                         </v-col>
                                     </v-row>
                                     <!-- <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
@@ -526,9 +527,9 @@ export default {
                 type_modal: 'confirm',
                 content_modal: {
                     confirm: {
-                        title: '¡Estas a punto cambiar la configuración de un curso!',
+                        title: '¡Estás a punto cambiar la configuración de un curso!',
                         details: [
-                            'Los usuarios con historico se mantendrán con la información y no se recalculará su status.'
+                            'Los usuarios con histórico se mantendrán con la información y no se recalculará su estado.'
                         ],
                     }
                 },
