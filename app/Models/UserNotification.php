@@ -127,6 +127,7 @@ class UserNotification extends Model
         $workspace_id = $user->subworkspace?->parent_id;
         $userId = $user->id;
 
+        
         $notications = UserNotification::query()
             ->where('user_id', $userId)
             ->where('workspace_id', $workspace_id)
