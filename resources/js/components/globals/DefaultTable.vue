@@ -730,7 +730,7 @@
                             :key="index"
                             :src="row.image"
                             :title="row.name || 'Logo'"
-                            style="opacity: 0.75;"
+                            style="opacity: 0.65;"
                         >
                             <template v-slot:placeholder>
                                 <v-row
@@ -765,7 +765,7 @@
                             :key="index"
                             :src="row.image"
                             :title="row.name || 'Logo'"
-                            style="opacity: 0.75;"
+                            style="opacity: 0.65;"
                         >
                             <template v-slot:placeholder>
                                 <v-row
@@ -818,20 +818,49 @@
 
             <!--   CURSOS  -->
             <template v-slot:item.custom_curso_nombre="{item, header}">
-                <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
+                <div class="py-2">
 
-                <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
-                    <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
-                        <small :class="subtitle.class" >{{ subtitle.name }}</small>
-                    </span>
-                </p>
+                    <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
 
-                <!-- <p class="my-0">
-                    <small ><strong>Creado: </strong>{{ item.created_at }}</small>
-                </p> -->
+                    <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
+                        <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
+                            <small :class="subtitle.class" :title="subtitle.title">{{ subtitle.name }}</small>
+                        </span>
+                    </p>
 
-                <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
-                    <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>
+                    <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
+
+                            <v-img
+                                v-for="(row, index) in item.images"
+                                height="15"
+                                max-width="50px"
+                                :key="index"
+                                :src="row.image"
+                                :title="row.name || 'Logo'"
+                                style="opacity: 0.65;"
+                            >
+                                <template v-slot:placeholder>
+                                    <v-row
+                                        class="fill-height ma-0"
+                                        align="center"
+                                        justify="center"
+                                    >
+                                        <v-progress-circular
+                                            indeterminate
+                                            color="grey lighten-5"
+                                        ></v-progress-circular>
+                                    </v-row>
+                                </template>
+                            </v-img>
+                        </div>
+
+                    <!-- <p class="my-0">
+                        <small ><strong>Creado: </strong>{{ item.created_at }}</small>
+                    </p> -->
+
+                    <div v-if="item.actualizaciones.length > 0" class="customm-cursos-box-actualizaciones">
+                        <small v-for="(act, index) in item.actualizaciones" :key="index" v-html="act"/>
+                    </div>
                 </div>
 
             </template>
