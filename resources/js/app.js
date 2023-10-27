@@ -352,6 +352,7 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
+
             try {
                 FileSaver.saveAs(url, name)
             } catch (error) {
