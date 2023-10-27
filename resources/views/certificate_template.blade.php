@@ -58,7 +58,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
     <script>
         function screenshot() {
-            const file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+            let file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
             file_name = file_name.replace(/\s/g, '-').toLowerCase();
         
             setTimeout(function () {
