@@ -247,10 +247,11 @@ export default {
                 headers: [
                     // {text: "Orden", value: "orden", align: 'center'},
                     // {text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Portada", value: "new_image_2", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
-                    {text: "Tipo", value: "type", sortable: false},
-                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
+                    // {text: "Tipo", value: "type", sortable: false},
+                    // {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -274,13 +275,6 @@ export default {
                         type: 'route',
                         route: 'edit_route'
                     },
-                    {
-                        text: "Logs",
-                        icon: "mdi mdi-database",
-                        type: "action",
-                        show_condition: "is_super_user",
-                        method_name: "logs"
-                    }
 
                     // {
                     //     text: "Eliminar",
@@ -334,6 +328,13 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
                     },
                     {
                         text: "Eliminar",
