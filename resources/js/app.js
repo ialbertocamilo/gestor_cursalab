@@ -352,7 +352,6 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-            //    url = `${this.getReportsBaseUrl()}/${url}`
             try {
                 FileSaver.saveAs(url, name)
             } catch (error) {
