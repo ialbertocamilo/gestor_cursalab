@@ -53,7 +53,8 @@
 </body>
 
 @if($download)
-    
+
+    <script src="{{ asset('js/canvas/html2canvas.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
     <script>
         function screenshot() {
