@@ -182,6 +182,16 @@ class CursoSearchResource extends JsonResource
             // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
         ];
 
+        if ($this->created_at) {
+
+            $subtitles[] = [
+                'name' => $this->created_at->format('d/m/Y'),
+                'title' => 'Creado: ' . $this->created_at->format('d/m/Y H:i:s'),
+                // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            ];
+        }
+
+
         // $active_schools_count = $this->schools->where('active', ACTIVE)->count();
 
         // $subtitles[] = [
