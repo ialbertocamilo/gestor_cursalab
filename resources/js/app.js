@@ -232,7 +232,7 @@ Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesLi
 
 
 
-/*----*/ 
+/*----*/
 const app = new Vue({
     vuetify,
     store,
@@ -352,7 +352,7 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-               url = `${this.getReportsBaseUrl()}/${url}`
+            //    url = `${this.getReportsBaseUrl()}/${url}`
             try {
                 FileSaver.saveAs(url, name)
             } catch (error) {
