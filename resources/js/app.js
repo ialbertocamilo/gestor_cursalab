@@ -358,12 +358,7 @@ const app = new Vue({
             } catch (error) {
                 console.log(error)
             }
-            // reportes utilizando el S3
-            // const downloadLink = document.createElement('a');
-            // downloadLink.href = url;
-            // downloadLink.download = name;
-            // downloadLink.target = '_blank';
-            // downloadLink.click();
+
         }
     }
 });
