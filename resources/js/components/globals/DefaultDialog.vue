@@ -23,8 +23,8 @@
                     <div v-html="options.title"></div>
                     <slot name="title-icon"/>
                     <v-spacer/>
+                        <!-- v-show="options.showCloseIcon" -->
                     <v-btn
-                        v-show="options.showCloseIcon"
                         icon :ripple="false" :color="colorCloseIcon"
                            @click="closeModalFromIcon">
                         <v-icon v-text="'mdi-close'"/>

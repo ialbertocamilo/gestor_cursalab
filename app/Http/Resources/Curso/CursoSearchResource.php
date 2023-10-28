@@ -73,6 +73,8 @@ class CursoSearchResource extends JsonResource
             'curso_estado' => $this->getCourseStatus(),
 
             'actualizaciones' => '',
+            'is_cursalab_super_user'=> is_cursalab_superuser(true),
+            'is_super_user'=>auth()->user()->isAn('super-user'),
 
             'edit_route' => $route_edit,
             'temas_route' => $route_topics,

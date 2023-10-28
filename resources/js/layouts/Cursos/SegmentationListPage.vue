@@ -98,11 +98,12 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del Curso - ${$event.name}`)"
-                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
+                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
+                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
                 @redirect_to_course_form_page="redirect_to_course_form_page($event)"
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
+                @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
                 @create_project="openProjectModal($event)"
@@ -185,12 +186,20 @@
                 @onConfirm="closeFormModal(modalOptionProject, dataTable, filters)"
                 @onCancel="closeFormModal(modalOptionProject)"
             />
+            <CourseFormModal
+                width="65vw"
+                :ref="modalCourseOptions.ref"
+                :options="modalCourseOptions"
+                @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
+                @onCancel="closeFormModal(modalCourseOptions)"
+            />
         </v-card>
     </section>
 </template>
 
 <script>
 import CursosEncuestaModal from "./CursosEncuestaModal";
+import CourseFormModal from "./CourseFormModal";
 import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -207,7 +216,8 @@ export default {
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentCoursesFormModal,
-        CompatibilityFormModal
+        CompatibilityFormModal,
+        CourseFormModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -253,6 +263,13 @@ export default {
                         type: 'action',
                         method_name: 'redirect_to_course_form_page'
                     },
+                    {
+                        text: "Editar (Modal)",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit',
+                        // show_condition: "is_cursalab_super_user"
+                    },
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -277,7 +294,7 @@ export default {
                         method_name: 'encuesta'
                     },
                     {
-                        text: "Crear Tarea",
+                        text: "Crear tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'create_project',
@@ -285,7 +302,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Editar Tarea",
+                        text: "Editar tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'edit_project',
@@ -301,7 +318,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Actualizar Estado",
+                        text: "Actualizar estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
@@ -406,6 +423,22 @@ export default {
                 ref: 'MoverCursoModal',
                 open: false,
                 base_endpoint: `/cursos`,
+            },
+
+            modalCourseOptions: {
+                ref: 'CourseFormModal',
+                open: false,
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'Curso',
+                title: '',
+                action: null,
+                selects: {
+                    modules: [],
+                    // boticas: [],
+                    // groups: [],
+                    // cargos: [],
+                }
             },
         }
     },
