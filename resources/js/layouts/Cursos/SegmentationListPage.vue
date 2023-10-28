@@ -190,7 +190,7 @@
                 width="65vw"
                 :ref="modalCourseOptions.ref"
                 :options="modalCourseOptions"
-                @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
+                @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalCourseOptions)"
             />
         </v-card>
@@ -433,12 +433,6 @@ export default {
                 resource: 'Curso',
                 title: '',
                 action: null,
-                selects: {
-                    modules: [],
-                    // boticas: [],
-                    // groups: [],
-                    // cargos: [],
-                }
             },
         }
     },

@@ -11,7 +11,7 @@
                 <DefaultErrors :errors="errors"/>
 
                 <v-row>
-                    <v-col cols="6">
+                    <v-col cols="6" class="pb-0">
                         <DefaultInput
                             label="Nombre"
                             placeholder="Ingrese un nombre"
@@ -24,7 +24,7 @@
                             <!-- dense -->
                             <!-- counter="120" -->
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="6" class="pb-0">
                             <!-- dense -->
                         <DefaultAutocomplete
                             show-required
@@ -118,6 +118,7 @@
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
+                            select-height="75vh"
                             />
                     </v-col>
 
@@ -144,7 +145,6 @@
                                     <v-col cols="6">
 
                                         <DefaultSelect
-                                            clearable
                                             dense
                                             :items="selects.qualification_types"
                                             item-text="name"
@@ -295,7 +295,7 @@
                             <v-row justify="center">
 
                                     <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultInputDate
+                                        <DefaultInputDate                                        
                                             clearable
                                             :referenceComponent="'modalDateFilter1'"
                                             :options="modalDateFilter1"
@@ -317,7 +317,7 @@
                                     </v-col>
 
                                     <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                       <DefaultInputDate
+                                       <DefaultInputDate                                       
                                            clearable
                                            :referenceComponent="'modalDateFilter1'"
                                            :options="modalDateFilter2"
@@ -357,7 +357,6 @@
 
             </v-form>
             
-
             <CursoValidacionesModal
                 width="408px"
                 :ref="courseValidationModal.ref"
@@ -737,6 +736,7 @@ export default {
                         vue.showAlert(data.data.msg)
                         // setTimeout(() => vue.closeModal(), 2000)
                         vue.closeModal()
+                        vue.$emit('onConfirm')
                     }
                 })
                 .catch(error => {

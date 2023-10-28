@@ -3,11 +3,11 @@
         class="default-dialog"
         v-model="options.open"
         :width="width"
-        scrollable
         :persistent="options.persistent"
+        scrollable
         @click:outside="closeModalOutside"
     >
-        <v-card>
+        <v-card :height="height">
             <div v-if="customTitle">
                 <slot name="card-title"/>
             </div>
@@ -83,6 +83,9 @@ export default {
         width: {
             default: '70vw'
         },
+        height: {
+            default: '85vh'
+        },
         noPaddingCardText: {
             type: Boolean,
             default: false
@@ -141,6 +144,9 @@ export default {
         confirmModal() {
             let vue = this
             vue.$emit('onConfirm')
+        },
+        onScroll() {
+            console.log('scrolled')
         }
     }
 }

@@ -119,6 +119,7 @@
                 "
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
+                @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -206,6 +207,13 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
+            <CourseFormModal
+                width="65vw"
+                :ref="modalCourseOptions.ref"
+                :options="modalCourseOptions"
+                @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalCourseOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -213,6 +221,7 @@
 <script>
 import CursosEncuestaModal from "./CursosEncuestaModal";
 import MoverCursoModal from "./MoverCursoModal";
+import CourseFormModal from "./CourseFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
@@ -230,7 +239,8 @@ export default {
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
         CompatibilityFormModal,
-        LogsModal
+        LogsModal,
+        CourseFormModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -274,6 +284,14 @@ export default {
                         icon: 'mdi mdi-pencil',
                         type: 'route',
                         route: 'edit_route'
+                    },
+
+                    {
+                        text: "Editar (Modal)",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit',
+                        // show_condition: "is_cursalab_super_user"
                     },
 
                     // {
@@ -478,7 +496,16 @@ export default {
                 resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create'
-            }
+            },
+            modalCourseOptions: {
+                ref: 'CourseFormModal',
+                open: false,
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'Curso',
+                title: '',
+                action: null,
+            },
         }
     },
     mounted() {

@@ -66,6 +66,7 @@ export default {
 </script>
 <style type="text/css">
     .section-expanded .content-background{
-        background-color: #f5f5f575;
+/*        background-color: #f5f5f575;*/
+        background-color: #c8d6e11a;
     }
 </style>

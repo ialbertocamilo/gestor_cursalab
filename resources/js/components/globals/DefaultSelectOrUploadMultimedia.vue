@@ -61,6 +61,7 @@
             :options="modalPreviewMultimedia"
             :custom-filter="fileTypes"
             :width="selectWidth"
+            :height="selectHeight"
             @onClose="closeSelectPreviewMultimediaModal"
             @onConfirm="onSelectMediaPreview"
         />
@@ -89,11 +90,11 @@ export default {
             required: false,
             default:'85vw'
         },
-        // selectHeight:{
-        //     type: String,
-        //     required: false,
-        //     default:'85vh'
-        // },
+        selectHeight:{
+            type: String,
+            required: false,
+            default:'70vh'
+        },
         description: {
             type: String,
             required: false,
