@@ -31,6 +31,12 @@ class GeneratedReport extends Model implements Recordable
 
     protected function search($id)
     {
-        return self::find($id);
-    }
+        $report = self::find($id);
+
+        if ($report) {
+            $report->download_url = reportsSignedUrl($report->download_url);
+            return $report;
+        }
+
+        return null;    }
 }

@@ -54,6 +54,36 @@ function generateSignedUrl(string $key, string $expires = '+360 minutes'): strin
     return (string) $request->getUri();
 }
 
+function reportsSignedUrl(string $key, string $expires = '+30 minutes'): string
+{
+    $config = config('filesystems.disks.s3');
+
+    $s3Client = new S3Client([
+        'version' => 'latest',
+        'region' => $config['region'],
+        'credentials' => [
+            'key' => $config['key'],
+            'secret' => $config['secret'],
+        ],
+        'endpoint'    => 'https://sfo2.digitaloceanspaces.com',
+        'options' => [
+            'CacheControl' => 'max-age=25920000, no-transform, public',
+        ]
+    ]);
+
+    $bucket = $config['bucket'];
+    $key = $config['root'] . '/' . $key;
+
+    $cmd = $s3Client->getCommand('GetObject', [
+        'Bucket' => $bucket,
+        'Key' =>  $key,
+    ]);
+
+    $request = $s3Client->createPresignedRequest($cmd, $expires);
+
+    return (string) $request->getUri();
+}
+
 function cleanExtraSpaces($str)
 {
     return trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $str)));
