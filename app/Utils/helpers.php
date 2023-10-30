@@ -54,7 +54,7 @@ function generateSignedUrl(string $key, string $expires = '+360 minutes'): strin
     return (string) $request->getUri();
 }
 
-function reportsSignedUrl(string $key, string $expires = '+30 minutes'): string
+function reportsSignedUrl(string $key, string $expires = '+60 minutes'): string
 {
     $config = config('filesystems.disks.s3');
 
