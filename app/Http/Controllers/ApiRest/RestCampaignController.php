@@ -13,7 +13,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\AnnouncementVerifyContentUser;
+use App\Models\CampaignVerifyContentUser;
 
 class RestCampaignController extends Controller
 {
@@ -57,7 +57,7 @@ class RestCampaignController extends Controller
     public function campaingsContentsV2(Campaign $campaign){
         $user_id = auth()->user()->id;
         $campaings_contents = $campaign->contents()->select('id','title', 'description', 'file_media', 'linked', 'state')->get();
-        $contents_validated = AnnouncementVerifyContentUser::where('announcement_id',$campaign->id)
+        $contents_validated = CampaignVerifyContentUser::where('announcement_id',$campaign->id)
                                 ->where('user_id',$user_id)->whereIn('content_id',$campaings_contents->pluck('id'))->get();
 
         $campaings_contents_data = $campaings_contents->map(function ($content) use($contents_validated){
@@ -74,12 +74,12 @@ class RestCampaignController extends Controller
         return $this->success(['contents'=>$campaings_contents_data,'allow_continue'=>$allow_continue]);
     }
     public function checkContent(Request $request){
-        $announcement_id = $request->campaign_id;
+        $campaign_id = $request->campaign_id;
         $media_id = $request->media_id;
         $user_id = auth()->user()->id;
-        AnnouncementVerifyContentUser::updateOrCreate(
-            ['announcement_id'=>$announcement_id,'user_id'=>$user_id,'content_id'=>$media_id],
-            ['announcement_id'=>$announcement_id,'user_id'=>$user_id,'content_id'=>$media_id,'completed'=>true]
+        CampaignVerifyContentUser::updateOrCreate(
+            ['campaign_id'=>$campaign_id,'user_id'=>$user_id,'content_id'=>$media_id],
+            ['campaign_id'=>$campaign_id,'user_id'=>$user_id,'content_id'=>$media_id,'completed'=>true]
         );
         return response()->json(['message'=>'contenido validado']);
     }
