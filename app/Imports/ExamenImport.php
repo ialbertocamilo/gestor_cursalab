@@ -63,14 +63,9 @@ class ExamenImport implements ToCollection,WithHeadingRow, OnEachRow, WithValida
     private function headersIsComplete($excel_headers):bool {
         $isComplete=true;
         foreach ($this->headers as $header) {
-            info($header);
             if(!in_array(strtolower($header),$excel_headers) && !in_array(strtoupper($header),$excel_headers)){
-                info('no encontrado');
                 $isComplete = false;
-            }else{
-                info('sí encontrado');
             }
-            info('---------');
         }
         return $isComplete;
     }
