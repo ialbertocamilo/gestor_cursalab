@@ -53,11 +53,13 @@
 </body>
 
 @if($download)
-    
+
+    <script src="{{ asset('js/canvas/html2canvas.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
     <script>
         function screenshot() {
-            const file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+            let file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+            file_name = file_name.replace(/\s/g, '-').toLowerCase();
         
             setTimeout(function () {
                 window.scrollTo(0,0)
@@ -65,7 +67,7 @@
                     const a = document.createElement("a");
                     document.body.appendChild(a);
                     a.href = canvas.toDataURL();
-                    a.download = "Certificado_"+file_name+".png";
+                    a.download = "certificado-"+file_name+".png";
                     a.click();
                 });
             }, 1000);
