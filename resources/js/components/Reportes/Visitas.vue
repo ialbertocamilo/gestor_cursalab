@@ -93,7 +93,7 @@
                             :items="courses"
                             item-value="id"
                             item-text="name"
-                            label="Selecciona una #Escuela"
+                            label="Selecciona un #Curso"
                             :disabled="!school.length"
                             :background-color="!course ? '' : 'light-blue lighten-5'">
                         </v-select>
