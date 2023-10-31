@@ -57,7 +57,7 @@ class RestCampaignController extends Controller
     public function campaingsContentsV2(Campaign $campaign){
         $user_id = auth()->user()->id;
         $campaings_contents = $campaign->contents()->select('id','title', 'description', 'file_media', 'linked', 'state')->get();
-        $contents_validated = CampaignVerifyContentUser::where('announcement_id',$campaign->id)
+        $contents_validated = CampaignVerifyContentUser::where('campaign_id',$campaign->id)
                                 ->where('user_id',$user_id)->whereIn('content_id',$campaings_contents->pluck('id'))->get();
 
         $campaings_contents_data = $campaings_contents->map(function ($content) use($contents_validated){
