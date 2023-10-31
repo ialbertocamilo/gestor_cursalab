@@ -140,10 +140,10 @@ class RestQuizController extends Controller
 
         $row = SummaryTopic::setStartQuizData($topic);
 
-        if ($row->hasNoAttemptsLeft(null,$topic->course))
+        if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if ($row->isOutOfTimeForQuiz())
+        if ($row->isOutOfTimeForQuiz() && $is_qualified)
             return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
 
         $limit = NULL;
