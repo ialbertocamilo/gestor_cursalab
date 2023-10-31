@@ -3,18 +3,20 @@
 namespace App\Imports;
 
 use App\Models\Question;
-use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\OnEachRow;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Row;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure, SkipsEmptyRows
+class ExamenImport implements ToCollection,WithHeadingRow, OnEachRow, WithValidation, WithChunkReading, SkipsOnFailure, SkipsEmptyRows
 {
     use Importable, SkipsFailures, SkipsErrors;
 
@@ -47,7 +49,31 @@ class ExamenImport implements WithHeadingRow, OnEachRow, WithValidation, WithChu
         'a' => 1,  'b' => 2,  'c' => 3,  'd' => 4,  'e' => 5,
         'f' => 6,  'g' => 7,  'h' => 8,  'i' => 9,  'j' => 10
     ];
-
+    private $headers = ['PREGUNTA','OBLIGATORIO','PUNTAJE','RESPUESTA_CORRECTA','A','B','C','D','E','F','G','H','I'];
+    public function collection(Collection $rows)
+    {   
+        if(isset($rows[0])){
+            $excel_headers = $rows[0]->toArray();
+            if(!$this->headersIsComplete(array_keys($excel_headers))){
+                throw new \Exception('invalid_template'); 
+                return;
+            }
+        }
+    }
+    private function headersIsComplete($excel_headers):bool {
+        $isComplete=true;
+        foreach ($this->headers as $header) {
+            info($header);
+            if(!in_array(strtolower($header),$excel_headers) && !in_array(strtoupper($header),$excel_headers)){
+                info('no encontrado');
+                $isComplete = false;
+            }else{
+                info('sí encontrado');
+            }
+            info('---------');
+        }
+        return $isComplete;
+    }
     public function onRow(Row $row)
     {
         $row = $row->toArray();
