@@ -25,7 +25,7 @@
             {{ session('resend') ? session('resend') : 'Hemos enviado' }}
           </span> 
           un código al correo 
-          <span class="text-primary">{{ auth()->user()->email }}</span>, 
+          <span class="text-primary">{{ auth()->user()->email_gestor }}</span>, 
           por favor revise su bandeja de entrada.
         </p>
       </div>

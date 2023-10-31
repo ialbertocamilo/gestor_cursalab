@@ -55,7 +55,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around">
+                <v-row>
                     <v-col cols="4" class="d-flex justify-content-center pb-0">
                         <!-- :rules="rules.email" -->
                         <DefaultInput
@@ -66,7 +66,7 @@
                             autocomplete="new-email"
                         />
                     </v-col>
-                    <v-col cols="4" class="d-flex justify-content-center pb-0">
+                    <!-- <v-col cols="4" class="d-flex justify-content-center pb-0">
                         <DefaultInput
                             clearable
                             dense
@@ -75,7 +75,7 @@
                             autocomplete="new-document"
                             :rules="rules.document"
                         />
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="4" class="d-flex justify-content-center pb-0">
                         <DefaultInput
                             clearable
