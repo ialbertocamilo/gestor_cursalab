@@ -239,12 +239,12 @@ export default {
                 ref: 'cursosTable',
                 headers: [
                     {text: "Portada", value: "new_image", align: 'center', sortable: false},
-                    // {text: "Nombre", value: "custom_curso_nombre", sortable: false},
-                    {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
-                    {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
-                    // {text: "Escuela", value: "schools", sortable: false},
+                    {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    // {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
+                    // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
+                    {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
-                    // {text: "Módulos", value: "images", sortable: false},
+                    {text: "Módulos", value: "images", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [

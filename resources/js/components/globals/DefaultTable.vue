@@ -158,9 +158,7 @@
             <template v-slot:item.images="{ item, header }">
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
-
-                     <!-- <v-avatar v-for="(row, index) in item.images" :key="index" :image="row.image" :src="row.image" ></v-avatar> -->
-
+<!-- 
                     <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
                         :style="`
                             background-image: url(${row.image});
@@ -171,10 +169,9 @@
                             width: 32px;
                         `"
                         >
-                        <!-- <img :src="row.image" alt="Avatar"> -->
-                    </span>
+                    </span> -->
 
-                    <!-- <v-img
+                    <v-img
                         v-for="(row, index) in item.images"
                         max-height="50"
                         max-width="50"
@@ -193,7 +190,7 @@
                                 ></v-progress-circular>
                             </v-row>
                         </template>
-                    </v-img> -->
+                    </v-img>
                 </div>
             </template>
             <template v-slot:item.tags="{ item, header }">
@@ -755,8 +752,8 @@
                     <p class="my-0">
                         {{ item.escuela_nombre.name }} 
                     </p>
-                    <!-- <p class="my-0" v-if="item.escuela_nombre.escuela"><small><strong>Escuela:</strong> {{ item.escuela_nombre.escuela }}</small></p> -->
-                    <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
+                    
+                    <!-- <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
 
                         <v-img
                             v-for="(row, index) in item.images"
@@ -780,7 +777,7 @@
                                 </v-row>
                             </template>
                         </v-img>
-                    </div>
+                    </div> -->
                     
                 </div>
             </template>
@@ -822,7 +819,7 @@
 
                     <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
 
-                    <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
+                 <!--    <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
                         <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
                             <small :class="subtitle.class" :title="subtitle.title">{{ subtitle.name }}</small>
                         </span>
@@ -852,7 +849,7 @@
                                     </v-row>
                                 </template>
                             </v-img>
-                        </div>
+                        </div> -->
 
                     <!-- <p class="my-0">
                         <small ><strong>Creado: </strong>{{ item.created_at }}</small>

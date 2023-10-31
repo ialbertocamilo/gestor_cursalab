@@ -266,9 +266,9 @@ export default {
                     // {text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false},
                     {text: "Portada", value: "new_image_2", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
-                    {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
-                    // {text: "Tipo", value: "type", sortable: false},
-                    // {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
+                    {text: "Tipo", value: "type", sortable: false},
+                    {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
