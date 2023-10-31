@@ -243,6 +243,12 @@ export default {
                 vue.loadingActionBtn = false
                 return
             }
+            if(vue.resource.subworkspaces.length == 0){
+                vue.showAlert('Es necesario seleccionar al menos 1 módulo','warning');
+                vue.loadingActionBtn = false
+                this.hideLoader()
+                return;
+            }
             const edit = vue.categoria_id !== ''
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.categoria_id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
