@@ -47,7 +47,8 @@
         </fieldset>
 
         <transition name="fade" v-if="showButton">
-            <v-btn class="mt-1" color="primary" block elevation="0"
+            <!-- color="primary" -->
+            <v-btn class="mt-1 border"  block elevation="0"
                @click="openSelectPreviewMultimediaModal"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>

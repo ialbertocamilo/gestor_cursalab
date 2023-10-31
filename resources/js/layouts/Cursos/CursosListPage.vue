@@ -15,6 +15,12 @@
                 <v-spacer/>
 
                 <DefaultModalButton
+                    :label="'Curso (M)'"
+                     @click="openFormModal(modalCourseOptions, null, 'create')"
+                     v-if="$root.isSuperUser"
+                />
+
+                <DefaultModalButton
                     :label="'Curso'"
                     @click="openCRUDPage(`/${ruta}cursos/create`)"/>
             </v-card-title>
@@ -211,6 +217,7 @@
                 width="65vw"
                 :ref="modalCourseOptions.ref"
                 :options="modalCourseOptions"
+                :school_id="escuela_id"
                 @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalCourseOptions)"
             />
@@ -280,19 +287,19 @@ export default {
                         method_name: 'segmentation'
                     },
                     {
+                        text: "Editar (M)",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit',
+                        show_condition: "is_cursalab_super_user"
+                    },
+                    {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'route',
                         route: 'edit_route'
                     },
 
-                    {
-                        text: "Editar (Modal)",
-                        icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit',
-                        // show_condition: "is_cursalab_super_user"
-                    },
 
                     // {
                     //     text: "Eliminar",
@@ -502,9 +509,10 @@ export default {
                 open: false,
                 base_endpoint: '/cursos',
                 confirmLabel: 'Guardar',
-                resource: 'Curso',
+                resource: 'curso',
                 title: '',
                 action: null,
+                persistent: true,
             },
         }
     },

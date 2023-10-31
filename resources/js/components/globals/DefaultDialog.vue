@@ -15,7 +15,7 @@
                 <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
                     <span v-html="options.title_modal ? options.title_modal : options.title"></span>
                     <v-btn icon :ripple="false" color="white"
-                           @click="closeModal">
+                           @click="closeModal" v-show="showCloseIcon">
                         <v-icon v-text="'mdi-close'"/>
                     </v-btn>
                 </v-card-title>
@@ -23,8 +23,8 @@
                     <div v-html="options.title"></div>
                     <slot name="title-icon"/>
                     <v-spacer/>
-                        <!-- v-show="options.showCloseIcon" -->
                     <v-btn
+                        v-show="showCloseIcon"
                         icon :ripple="false" :color="colorCloseIcon"
                            @click="closeModalFromIcon">
                         <v-icon v-text="'mdi-close'"/>
@@ -84,7 +84,8 @@ export default {
             default: '70vw'
         },
         height: {
-            default: '85vh'
+            default: ''
+            // default: '85vh'
         },
         noPaddingCardText: {
             type: Boolean,

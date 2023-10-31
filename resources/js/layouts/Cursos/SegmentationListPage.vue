@@ -19,7 +19,6 @@
                         <p><strong>Recuerda que un curso será visible para tus usuarios solo si cumple los siguientes requisitos:</strong></p>
                         <ul>
                             <li>El curso debe contar con al menos un tema activo y pertenecer al menos a una escuela activa.</li>
-                            <!-- <li>El curso debe pertenecer al menos a una escuela activa.</li> -->
                             <li>El curso debe estar segmentado, ya sea por criterios o por documento.</li>
                             <li>El curso debe encontrarse activo (de manera directa o por medio de su programación).</li>
                         </ul>
@@ -29,8 +28,14 @@
                 <v-spacer/>
 
                 <DefaultModalButton
+                    :label="'Curso (M)'"
+                    @click="openFormModal(modalCourseOptions, null, 'create')"
+                    v-if="$root.isSuperUser"
+                />
+                <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/cursos/create`)"/>
+                    @click="openCRUDPage(`/cursos/create`)"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -258,17 +263,17 @@ export default {
                         method_name: 'segmentation'
                     },
                     {
+                        text: "Editar (M)",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit',
+                        show_condition: "is_cursalab_super_user"
+                    },
+                    {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'redirect_to_course_form_page'
-                    },
-                    {
-                        text: "Editar (Modal)",
-                        icon: 'mdi mdi-pencil',
-                        type: 'action',
-                        method_name: 'edit',
-                        // show_condition: "is_cursalab_super_user"
                     },
                     // {
                     //     text: "Eliminar",
@@ -430,9 +435,10 @@ export default {
                 open: false,
                 base_endpoint: '/cursos',
                 confirmLabel: 'Guardar',
-                resource: 'Curso',
+                resource: 'curso',
                 title: '',
                 action: null,
+                persistent: true,
             },
         }
     },

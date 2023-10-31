@@ -2,6 +2,7 @@
     <DefaultDialog
         :options="options"
         :width="width"
+        :show-close-icon="showCloseIcon"
         @onCancel="closeModal"
         @onConfirm="confirmModal"
     >
@@ -76,6 +77,10 @@ export default {
         },
         resource: {
             required: false
+        },
+        showCloseIcon: {
+            type: Boolean,
+            default: true
         },
     },
     data() {

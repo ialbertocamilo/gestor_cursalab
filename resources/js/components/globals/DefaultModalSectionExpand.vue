@@ -26,15 +26,15 @@
         <v-col cols="12" class="d-flex justify-content-between py-1"
             @click="expand.status = !expand.status"
             style="cursor: pointer">
-            <span class="text-bold">{{ title }}</span>
-            <v-icon>{{ expand.status ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <span class="text-bold text-primary">{{ title }}</span>
+            <v-icon class="text-primary">{{ expand.status ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
         </v-col>
         <v-col cols="12" class="py-0 separated">
-            <DefaultDivider class="--divider_light"/>
+            <DefaultDivider class="--divider_light primary"/>
         </v-col>
     </v-row>
 
-    <v-row justify="space-around" align="start" align-content="center" class="px-3 section-expanded" v-show="expand.status">
+    <v-row justify="space-around" align="start" align-content="center" class="px-3 pt-2 section-expanded" v-show="expand.status">
         <v-col cols="12" class="d-flex justify-content-center py-1 content-background">
             <v-expand-transition>
 
@@ -66,7 +66,10 @@ export default {
 </script>
 <style type="text/css">
     .section-expanded .content-background{
-/*        background-color: #f5f5f575;*/
-        background-color: #c8d6e11a;
+        /*background-color: #f5f5f575;*/
+/*        background-color: #c8d6e11a;*/
+        background-color: #f5f5f52e;
+        border-radius: 8px;
+        border: 1px solid #e5e5e5;
     }
 </style>

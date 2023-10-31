@@ -21,11 +21,8 @@
                             emojiable
                             dense
                         />
-                            <!-- dense -->
-                            <!-- counter="120" -->
                     </v-col>
                     <v-col cols="6" class="pb-0">
-                            <!-- dense -->
                         <DefaultAutocomplete
                             show-required
                             :rules="rules.lista_escuelas"
@@ -119,7 +116,7 @@
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
                             select-height="75vh"
-                            />
+                        />
                     </v-col>
 
                 </v-row>
@@ -132,15 +129,6 @@
                         >
                             <template slot="content">
                                 <v-row justify="center">
-
-                                  <!--   <v-col cols="1">
-                                        <DefaultInfoTooltip
-                                            class=""
-                                            top
-                                            text="Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas."
-                                        />
-
-                                    </v-col> -->
 
                                     <v-col cols="6">
 
@@ -156,10 +144,6 @@
                                         />
                                     </v-col>
 
-                                    <!-- <v-col cols="3">
-                                        <small>*Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</small>
-                                    </v-col> -->
-
                                     <v-col cols="3">
                                         <DefaultInput
                                             label="Nota mínima aprobatoria"
@@ -172,7 +156,6 @@
                                             dense
                                             @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
                                         />
-                                        <!-- -- {{ new_value }} -->
                                     </v-col>
 
                                     <v-col cols="3">
@@ -417,7 +400,8 @@ export default {
         width: {
             type: String,
             required: false
-        }
+        },
+        school_id: null,
     },
 
     data() {
@@ -432,8 +416,8 @@ export default {
             conf_focus: true,
             sections: {
                 showSectionQualification: {status: true},
-                showSectionRestarts: {status: false},
                 showSectionCertification: {status: true},
+                showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
             },
             // base_endpoint: base_endpoint_temp,
@@ -613,20 +597,6 @@ export default {
 
         },
     },
-    // async mounted() {
-    //     this.showLoader()
-    //     await this.loadData()
-    //     this.hideLoader()
-
-    //     if (+this.$props.categoria_id) {
-    //         let exists = this.resource
-    //             .lista_escuelas
-    //             .includes(+this.$props.categoria_id);
-    //         if (!exists) {
-    //             this.resource.lista_escuelas.push(+this.$props.categoria_id);
-    //         }
-    //     }
-    // },
     methods: {
 
         resetValidation() {
@@ -636,7 +606,7 @@ export default {
         resetSelects() {
             let vue = this
             // Limpiar inputs file
-            vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
+            vue.removeFileFromDropzone(vue.resource.imagen, 'inputLogo')
             // Selects independientes
             // Selects dependientes
             // vue.resource = Object.assign({}, {})
@@ -655,15 +625,6 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.$emit('onCancel')
-
-            // let params = this.getAllUrlParams(window.location.search);
-            // let temp = `${this.addParamsToURL(vue.base_endpoint, params)}`;
-            // temp = `${vue.base_endpoint}?${temp}`;
-
-            // console.log(temp);
-            // return;
-
-            // window.location.href = temp;
         },
         closeModalStatusEdit(){
             let vue = this
@@ -672,7 +633,7 @@ export default {
         },
         modalStatusEdit(){
             let vue = this
-            const edit = vue.resource.id !== ''
+            const edit = (vue.resource && vue.resource.id)
             if(edit){
                 vue.courseUpdateStatusModal.open = true
                 vue.courseUpdateStatusModal.status_item_modal = !vue.resource.active
@@ -716,7 +677,7 @@ export default {
                 return;
             }
 
-            const edit = vue.resource.id !== ''
+            const edit = (vue.resource && vue.resource.id)
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.resource.id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
 
@@ -789,7 +750,10 @@ export default {
             })
      
             // let url = `${vue.base_endpoint}/${vue.resource.id === '' ? 'form-selects' : `search/${vue.resource.id}`}`
-            let url = `${vue.base_endpoint}/${resource.id === '' ? 'form-selects' : `search/${resource.id}`}`
+            // let url = `${vue.base_endpoint}/${!resource ? 'form-selects' : `search/${resource.id}`}`
+            let url = vue.base_endpoint;
+            url += (resource ? `/search/${resource.id}` : '/form-selects');
+
             await vue.$http.get(url)
                 .then(({data}) => {
                     let response = data.data ? data.data : data;
@@ -798,7 +762,7 @@ export default {
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
-                    if (resource.id !== '') {
+                    if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
 
@@ -818,6 +782,15 @@ export default {
 
                     } else {
                         vue.resource.qualification_type = response.qualification_type
+
+                        if (vue.school_id) {
+
+                            const found = vue.selects.lista_escuelas.find((element) => element.id == vue.school_id);
+
+                            if (found) {
+                                vue.resource.lista_escuelas.push(found);
+                            }
+                        }
                     }
                 })
             return 0;
