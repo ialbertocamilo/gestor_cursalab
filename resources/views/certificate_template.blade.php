@@ -1,7 +1,9 @@
 <?php
     setlocale(LC_TIME, 'es_PE.UTF-8');
+    $css_file = $config->is_v1_migrated ? 'certi-v1.css' : 'certi.css';
+    // $css_file = config('app.migrated.v1') ? 'certi-v1.css' : 'certi.css';
 ?>
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -13,9 +15,9 @@
     <meta http-equiv="Expires" content="-1">
     <meta http-equiv='pragma' content='no-cache'>
 
-
     <title>Certificado</title>
-    <link type="text/css" media="all" rel="stylesheet" href="{{ asset('css/certi.css') }}">
+
+    <link type="text/css" media="all" rel="stylesheet" href="{{ asset('css/' . $css_file) }}">
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Cursalab, LMS Corporativa multiplataforma" />
@@ -49,4 +51,36 @@
 
     </div>
 </body>
+
+@if($download)
+
+    <script src="{{ asset('js/canvas/html2canvas.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
+    <script>
+        function screenshot() {
+            let file_name = "{{ $data['courses'] ?? 'Cursalab' }}";
+            file_name = file_name.replace(/\s/g, '-').toLowerCase();
+        
+            setTimeout(function () {
+                window.scrollTo(0,0)
+                var html2Obj = html2canvas(certi, { width: certi.offsetWidth, height: certi.offsetHeight }).then(function(canvas) {
+                    const a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.href = canvas.toDataURL();
+                    a.download = "certificado-"+file_name+".png";
+                    a.click();
+                });
+            }, 1000);
+        }
+
+        window.onload = function () {
+
+            setTimeout(function () {
+                screenshot();
+            }, 1000);
+        };
+    </script>
+
+@endif
+
 </html>

@@ -20,6 +20,7 @@ class Ambiente extends Model
         'logo_cursalab_position','show_blog_btn','logo_cursalab',
         'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo','male_logo', 'female_logo',
         'template', 'identity_validation_enabled', 'password_expiration_enabled',
+        'is_v1_migrated',
     ];
 
     protected $hidden = [

@@ -53,10 +53,12 @@ class SupervisorController extends Controller
 
     public function modulos()
     {
-        $workspace = get_current_workspace();
+        // $workspace = get_current_workspace();
+        $sub_workspaces_id = current_subworkspaces_id();
 
         $subworkspaces = Workspace::select('id', 'name')
-            ->whereRelation('parent', 'id', $workspace->id)
+            // ->whereRelation('parent', 'id', $workspace->id)
+            ->whereIn('id', $sub_workspaces_id)
             ->get();
 
         return $this->success(['modulos' => $subworkspaces]);

@@ -47,7 +47,7 @@ class RestTopicController extends Controller
     {
         $user = Auth::user();
         $courses = $user->getCurrentCourses(withRelations: 'course-view-app-user',bySchoolsId:[$school_id]);
-        $data = Course::getDataToCoursesViewAppByUserV2($user, $courses);
+        $data = Course::getDataToCoursesViewAppByUserV2($user, $courses,$school_id);
         return $this->successAppV2($data);
     }
 
@@ -93,7 +93,9 @@ class RestTopicController extends Controller
             ->where('user_id', $user->id)
             ->first();
         if (!$summary_topic) return $this->error("No se pudo revisar el contenido.", 422);
-        $statuses = Taxonomy::select('id','name','code','group')->where('type', 'user-status')->get();
+        $statuses = Taxonomy::select('id','name','code','group')
+                    // ->where('group', 'topic')
+                    ->where('type', 'user-status')->get();
 
         $medias = MediaTema::where('topic_id',$topic->id)->orderBy('position','ASC')->get();
 
@@ -175,9 +177,9 @@ class RestTopicController extends Controller
         $avaible_requirements_topic = false; //code aprobado o realizado
         $avaible_requirements_course = false;
         if(!$topic->type_evaluation_id){
-            $avaible_requirements_topic =  $topic_status->code == 'revisado';
+            $avaible_requirements_topic =  $topic_status?->code == 'revisado';
         }
-        $avaible_requirements_course = $course_status->code == 'aprobado';
+        $avaible_requirements_course = $course_status?->code == 'aprobado';
         return $this->success([
             'tema'=>[
                 'id'=> $topic->id,

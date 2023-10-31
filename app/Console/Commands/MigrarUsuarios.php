@@ -28,8 +28,6 @@ class MigrarUsuarios extends Command
      */
     public function handle()
     {
-        $correo_nulo = 1;
-
         // Conexión a la base de datos de origen
         $origen = DB::connection('mysql');
 
@@ -37,38 +35,58 @@ class MigrarUsuarios extends Command
         $destino = DB::connection('mysql_master');
 
         // Obtener los usuarios de la base de datos de origen
-        // $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554;');
-        $usuarios = $origen->select('SELECT document,email,username FROM users where subworkspace_id > 33 and subworkspace_id not in (66, 88, 115, 166, 167, 168) and type_id = 4554 	and document not in ("12345678");');
-        // Migrar cada usuario a la base de datos de destino
+        $usuarios = $origen->select("SELECT document, email, username FROM users WHERE subworkspace_id IS NOT NULL AND type_id IN (select id from taxonomies t where t.group='user' and t.type='type' and t.code='employee');");
+
         foreach ($usuarios as $usuario) {
-            // Verificar si el usuario ya existe en la base de datos de destino
+
+            // Verificar si el usuario ya existe en la base de datos de destino. POR DNI
             $existingUser = $destino
                 ->table('master_usuarios')
-                ->where('dni', $usuario->document)
-                // ->orWhere('email', $usuario->email)
+                ->where(function ($query) use ($usuario) {
+                    $query->where('dni', $usuario->document);
+                })
                 ->first();
-            info('Usuario existente: ' . $usuario->document . $usuario->email);
-            if (!$existingUser) {
-                if ($usuario->email == '') {
-                    $destino->table('master_usuarios')->insert([
+
+            if ($existingUser) {
+                // Si el usuario ya existe, salta al siguiente usuario
+                info('DNI ya existe: ' . $usuario->document.' - '.$usuario->email);
+                continue;
+            }
+
+            // Si el email es vacío, inserta directamente
+            if ($usuario->email == '') {
+                $destino->table('master_usuarios')->insert([
                     'dni' => $usuario->document,
                     'username' => $usuario->username,
-                    'email' => 'sin_correo'.$correo_nulo++,
                     'customer_id' => ENV('CUSTOMER_ID'),
                 ]);
-                info('Usuario migrado: ' . $usuario->document);
-                } else {
+                info('Usuario migrado (sin-email): ' . $usuario->document.' - '.$usuario->email);
+            } else { 
 
-                    $destino->table('master_usuarios')->insert([
-                        'dni' => $usuario->document,
-                        'username' => $usuario->username,
-                        'email' => $usuario->email,
-                        'customer_id' => ENV('CUSTOMER_ID'),
-                    ]);
-                    info('Usuario migrado: ' . $usuario->document);
+                // Si el email tiene valor, hay que verificar si existe en el MASTER
+                $existingUser = $destino
+                    ->table('master_usuarios')
+                    ->where(function ($query) use ($usuario) {
+                        $query->where('email', $usuario->email);
+                    })
+                    ->first();
+
+                if ($existingUser) {
+                    // Si el EMAIL ya existe, salta al siguiente usuario
+                    info('Email ya existe: ' .$usuario->document.' - '.$usuario->email);
+                    continue;
                 }
+
+                $destino->table('master_usuarios')->insert([
+                    'dni' => $usuario->document,
+                    'username' => $usuario->username,
+                    'email' => $usuario->email,
+                    'customer_id' => ENV('CUSTOMER_ID'),
+                ]);
+                info('Usuario migrado (con-email): ' . $usuario->document.' - '.$usuario->email);
             }
         }
+
         $this->info('Usuarios migrados con éxito.');
         return Command::SUCCESS;
     }

@@ -24,6 +24,14 @@ class PosteoSearchResource extends JsonResource
             : null;
         //        info($topic->questions);
         //        info( $topic->questions->where('type.code', 'select-options')->count());
+
+        $assessable_title = $topic->assessable ? 'Evaluable' : 'Tema no evaluable';
+        $evaluation_type = $topic->evaluation_type->name ?? null;
+
+        if ($topic->assessable && $evaluation_type) {
+            $assessable_title .= " [{$evaluation_type}]"; 
+        }
+
         return [
             'id' => $topic->id,
             'nombre' => $topic->name,
@@ -32,6 +40,10 @@ class PosteoSearchResource extends JsonResource
                 'requisito' => $topic->requirements->first()->model_topic->name ?? null,
             ],
             'tipo_evaluacion' => $topic->evaluation_type->name ?? '---', //$topic->getTipoEvaluacion(),
+            'tema_evaluacion' => [
+                'title' => $assessable_title,
+                'subtitle' => $topic->assessable ? ($topic->qualification_type->name ?? null) : null,
+            ],
             'image' => get_media_url($topic->imagen),
             'active' => (bool)$topic->active,
             'position' => $topic->position,

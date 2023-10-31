@@ -53,7 +53,7 @@ class AdminStoreRequest extends FormRequest
         $rules = [
             'name' => 'required|min:3|max:255',
             'lastname' => 'required|min:2|max:255',
-            'surname' => 'required|min:2|max:255',
+            'surname' => 'nullable|min:2|max:255',
             // 'document' => 'nullable|max:255',
             // 'password' => "{$pass}|max:255",
             'password' => $passwordRules,

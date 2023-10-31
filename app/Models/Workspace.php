@@ -490,9 +490,13 @@ class Workspace extends BaseModel
                 $workspace = get_current_workspace();
                 $workspace->criteriaValue()->attach($criterion_value);
 
-            };
+                // Add subworkspace to current admin
+                if ( ! auth()->user()->isA('super-user') ) {
+                    auth()->user()->subworkspaces()->attach($subworkspace);
+                }
+            }
 
-            if (!empty($data['app_menu'])):
+            if (!empty($data['app_menu'])) :
                 $subworkspace->app_menu()->sync($data['app_menu']);
             endif;
 
@@ -632,11 +636,13 @@ class Workspace extends BaseModel
     public static function loadSubWorkspaces($attributes)
     {
         // $workspaceId = get_current_workspace_indexes('id');
-        $workspace = get_current_workspace();
+        // $workspace = get_current_workspace();
+        $modules_ids = current_subworkspaces_id();
 
         return Workspace::select($attributes)
             ->where('active', ACTIVE)
-            ->where('parent_id', $workspace->id)
+            ->whereIn('id', $modules_ids)
+            // ->where('parent_id', $workspace->id)
             ->get();
     }
 

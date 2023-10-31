@@ -464,3 +464,16 @@ Skeletons
     top: 0;
     z-index: 10;
 }
+
+.course-status-subtitles {
+
+    span + span::before {
+        content: "|";
+        margin: 0 5px;
+    }
+}
+
+.default-dialog-title {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}

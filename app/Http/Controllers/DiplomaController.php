@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DiplomaSearchResource;
+use App\Models\Ambiente;
 use App\Models\Media;
 use App\Models\User;
 use App\Models\Course;
@@ -244,12 +245,14 @@ class DiplomaController extends Controller
         try {
             
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
+            $config = Ambiente::first();
+            $download = request()->routeIs('diplomas.download');
 
             if ($data['old_template'] === false) {
                 $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
             }
 
-            return view('certificate_template', compact('data'));
+            return view('certificate_template', compact('data', 'config', 'download'));
 
         } catch (\Throwable $th) {
 

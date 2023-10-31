@@ -72,6 +72,7 @@ export default {
 </script>
 <style lang="scss">
 .v-card__title.default-dialog-title {
+    // border-radius: inherit;
     display: flex;
     justify-content: center;
     position: relative;

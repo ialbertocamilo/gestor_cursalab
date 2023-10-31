@@ -17,9 +17,7 @@
                           height:5px; 
                           border-radius:4px; 
                           background: #FFCD0C;"></div>
-              
               Código de verificación
-              
               <div style="margin-left: 8%;
                           width: 9px; 
                           height: 9px; 

@@ -74,7 +74,7 @@ class WorkspaceController extends Controller
 
         if(ENV('MULTIMARCA') == true){
             $config->logo = 'https://cursalab2-statics.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
-            $config->titulo = 'CursaLab';
+            $config->titulo = 'Cursalab';
 
         }
 
@@ -125,7 +125,7 @@ class WorkspaceController extends Controller
         $workspace = Workspace::create($data);
 
         // Save workspace's criteria
-        
+
         if ( !empty($data['criteria']) ) {
             $workspace->criterionWorkspace()->sync($data['criteria']);
         }
@@ -299,7 +299,7 @@ class WorkspaceController extends Controller
 
         $workspace->functionalities()->sync([]);
         $workspace->criterionWorkspace()->sync([]);
-        
+
         $workspace->criteriaValue()->sync([]);
         // $workspace->criteriaValue()->delete();
 
@@ -320,14 +320,14 @@ class WorkspaceController extends Controller
                         $topic->medias()->delete();
                         $topic->requirements()->delete();
                     }
-                    
+
                     $course->requirements()->delete();
                     $course->topics()->delete();
                 }
-                
+
                 $school->courses()->delete();
             }
-            
+
             $subworkspace->schools()->delete();
 
             foreach ($subworkspace->users as $user) {
@@ -510,7 +510,7 @@ class WorkspaceController extends Controller
         foreach ($destinations as $destination) {
 
             $part = explode('_', $destination);
-            $subworkspace_ids[] = $part[1]; 
+            $subworkspace_ids[] = $part[1];
         }
 
         $data = $this->buildSourceTreeSelection($selections);
@@ -594,9 +594,9 @@ class WorkspaceController extends Controller
                     'id' => $id,
                 ];
 
-                $data[] = $row; 
+                $data[] = $row;
 
-                // $schools[$index][$position] = $row;  
+                // $schools[$index][$position] = $row;
             }
 
             $school_id = $data[0]['id'];
@@ -608,13 +608,13 @@ class WorkspaceController extends Controller
                 $schools[$school_id]['courses'][$course_id]['topics'][] = $topic_id;
 
             } else {
-                
-                if ($course_id && !$topic_id) { 
-                
+
+                if ($course_id && !$topic_id) {
+
                     $schools[$school_id]['courses'][$course_id]['topics'] = [];
-                
+
                 } else {
-                    
+
                     if (!$course_id && !$topic_id) {
 
                         $schools[$school_id]['courses'] = [];

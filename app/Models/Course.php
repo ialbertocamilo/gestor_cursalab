@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Course extends BaseModel
 {
@@ -36,6 +37,11 @@ class Course extends BaseModel
     public function topics()
     {
         return $this->hasMany(Topic::class, 'course_id');
+    }
+
+    public function active_topics()
+    {
+        return $this->hasMany(Topic::class, 'course_id')->where('active', ACTIVE);
     }
 
     public function polls()
@@ -167,7 +173,7 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b']);
+        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b', 'active_topics']);
 
         if ($request->schools) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -692,7 +698,8 @@ class Course extends BaseModel
 
                         'porcentaje' => '100.00',
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                     ];
                 }
                 else
@@ -718,7 +725,13 @@ class Course extends BaseModel
                         'porcentaje' => $course_status['progress_percentage'],
                         'tags' => $tags,
                         'ultimo_tema_visto' => $last_topic_reviewed,
-                        'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'compatible' => $course->compatible?->course ? 'Convalidado' : null,
+                        // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
+                        'scheduled_activation' => [
+                            'message' => $course->deactivate_at ? 
+                                            'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
+                                            : null,
+                        ],
                     ];
                 }
             }
@@ -758,10 +771,16 @@ class Course extends BaseModel
 
         return $data;
     }
-    protected function getDataToCoursesViewAppByUserV2($user, $user_courses): array
+    protected function getDataToCoursesViewAppByUserV2($user, $user_courses,$filter_school_id=false): array
     {
         $workspace_id = $user->subworkspace->parent_id;
         $schools = $user_courses->groupBy('schools.*.id');
+        if($filter_school_id){
+            //A course can belong to one or more schools, so it should be filtered only by the selected school.
+            $schools = $schools->filter(function ($group, $schoolId) use ($filter_school_id) {
+                return $schoolId == $filter_school_id;
+            });
+        }
         $polls_questions_answers = PollQuestionAnswer::select(DB::raw("COUNT(course_id) as count"), 'course_id')
             ->whereIn('course_id', $user_courses->pluck('id'))
             ->where('user_id', $user->id)

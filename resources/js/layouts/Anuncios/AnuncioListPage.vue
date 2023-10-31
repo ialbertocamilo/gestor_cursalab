@@ -213,6 +213,7 @@ export default {
                 base_endpoint: '/anuncios',
                 resource: 'Anuncio',
                 confirmLabel: 'Guardar',
+                showCloseIcon: true,
             },
             modalStatusOptions: {
                 ref: 'AnuncioStatusModal',

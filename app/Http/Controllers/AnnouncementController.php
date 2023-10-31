@@ -40,7 +40,7 @@ class AnnouncementController extends Controller
      */
     public function getListSelects()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Criterion::getValuesForSelect('module', true);
         // $modules = Criterion::getValuesForSelect('module');
 
         return $this->success(get_defined_vars());
@@ -60,7 +60,7 @@ class AnnouncementController extends Controller
 
     public function create()
     {
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Criterion::getValuesForSelect('module', true);
         $destinos = config('data.destinos');
 
         $functionalities = WorkspaceFunctionality::functionalities( get_current_workspace()->id );
@@ -96,17 +96,13 @@ class AnnouncementController extends Controller
         unset($data['module_ids']);
 
         // Create announcement
-
         $announcement = Announcement::create($data);
 
         // Save relationships
-
         $announcement->criterionValues()->sync($modulesIds);
 
         // Register notifications
-
         Announcement::registerNotificationsForAnnouncement($announcement->id);
-
 
         return $this->success(['msg' => 'Anuncio creado correctamente.']);
     }
@@ -121,7 +117,7 @@ class AnnouncementController extends Controller
     {
         $announcement['module_ids'] = $announcement->criterionValues()
             ->pluck('criterion_value_id');
-        $modules = Criterion::getValuesForSelect('module');
+        $modules = Criterion::getValuesForSelect('module', true);
         $destinos = config('data.destinos');
 
         $functionalities = WorkspaceFunctionality::functionalities( get_current_workspace()->id );

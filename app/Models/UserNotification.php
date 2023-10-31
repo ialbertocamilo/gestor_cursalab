@@ -122,11 +122,13 @@ class UserNotification extends Model
     /**
      * Load user notifications grouped by date
      */
-    public static function loadUserNotifications ($userId): array
+    public static function loadUserNotifications ($user): array
     {
-
+        $workspace_id = $user->subworkspace?->parent_id;
+        $userId = $user->id;
         $notications = UserNotification::query()
             ->where('user_id', $userId)
+            ->where('workspace_id', $workspace_id)
             ->where('is_visible', 1)
             ->orderBy('created_at', 'desc')
             ->select([

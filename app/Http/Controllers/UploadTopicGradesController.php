@@ -27,7 +27,8 @@ class UploadTopicGradesController extends Controller
         $modules = Workspace::where('parent_id', $workspace->id)
         ->select('id', 'name')
         ->get();
-        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        $modules_id = current_subworkspaces_id();
         // Load workspace's schools
         $schools = School::with([
             'courses' => function ($q) use ($qualified_type) {

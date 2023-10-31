@@ -139,11 +139,11 @@ class RestQuizController extends Controller
         if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Not verified'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-
-        if ($row->hasNoAttemptsLeft(null,$topic->course))
+        // not considerer open evaluation to attemps and time validations
+        if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if ($row->isOutOfTimeForQuiz())
+        if ($row->isOutOfTimeForQuiz() && $is_qualified)
             return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
 
         $limit = NULL;

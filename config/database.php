@@ -237,6 +237,27 @@ return [
                 'tlsCAFile' => env('DB_MONGO_OPT_TLS_CA', ''),
             ],
         ],
+
+        'mysql_v1' => [
+            'driver' => 'mysql',
+            'url' => env('V1_DATABASE_URL'),
+            'host' => env('V1_DB_HOST', '127.0.0.1'),
+            'port' => env('V1_DB_PORT', '3306'),
+            'name' => env('V1_DB_DATABASE', 'forge'),
+            'username' => env('V1_DB_USERNAME', 'forge'),
+            'password' => env('V1_DB_PASSWORD', ''),
+            'unix_socket' => env('V1_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            // 'strict' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
     ],
 
     /*
