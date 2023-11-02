@@ -34,6 +34,7 @@ class GenerateStatusMediaProgressCommand extends Command
     }
 
     private function generateStatusMediaProgress(){
+
         $status_revisado = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
         $status_realizado= Taxonomy::getFirstData('topic', 'user-status', 'realizado');
         $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
