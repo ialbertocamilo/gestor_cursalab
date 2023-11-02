@@ -612,14 +612,14 @@ export default {
         await this.loadData()
         this.hideLoader()
 
-        if (+this.$props.categoria_id) {
-            let exists = this.resource
-                .lista_escuelas
-                .includes(+this.$props.categoria_id);
-            if (!exists) {
-                this.resource.lista_escuelas.push(+this.$props.categoria_id);
-            }
-        }
+        // if (+this.$props.categoria_id) {
+        //     let exists = this.resource
+        //         .lista_escuelas
+        //         .includes(+this.$props.categoria_id);
+        //     if (!exists) {
+        //         this.resource.lista_escuelas.push(+this.$props.categoria_id);
+        //     }
+        // }
     },
     methods: {
         calculateBySystem(val) {
