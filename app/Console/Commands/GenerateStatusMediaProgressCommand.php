@@ -65,7 +65,6 @@ class GenerateStatusMediaProgressCommand extends Command
 
                 $_bar->advance();
             }
-
             $_bar->finish();
         });
 
