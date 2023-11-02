@@ -31,7 +31,17 @@
                             item-text="name"
                             class="mt-4"
                         />
-                        <fieldset class="editor mt-2">
+
+                        <DefaultRichText
+                            clearable
+                            v-model="resource.content"
+                            label="Descripción"
+                            :rules="rules.content"
+                            class="mt-2"
+                            :height="195"
+                        />
+
+                        <!-- <fieldset class="editor mt-2">
                             <legend>Descripción</legend>
 
                             <editor
@@ -50,7 +60,7 @@
                                     'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
                                 images_upload_handler: images_upload_handler,
                             }"/>
-                        </fieldset>
+                        </fieldset> -->
                     </v-col>
                     <v-col cols="5">
                         <DefaultSelectOrUploadMultimedia
@@ -96,12 +106,12 @@
                                 <v-col cols="4">
                                     <DefaultSelect
                                         dense
-                                        :show-required="resource.assessable === 1"
+                                        :show-required="resource.assessable == 1"
                                         label="Tipo de evaluación"
                                         v-model="resource.type_evaluation_id"
                                         :items="selects.evaluation_types"
-                                        :rules="resource.assessable === 1 ? rules.tipo_ev : []"
-                                        :disabled="resource.assessable === '0' || !resource.assessable"
+                                        :rules="resource.assessable == 1 ? rules.tipo_ev : []"
+                                        :disabled="resource.assessable == 0 || !resource.assessable"
                                         @onChange="showAlertEvaluacion"
                                     />
                                 </v-col>
@@ -253,10 +263,13 @@
                     <v-col cols="2">
                         <DefaultInput
                             dense
+                            type="number"
                             show-required
                             label="Orden"
                             v-model="resource.position"
                             :rules="rules.position"
+                            :max="resource.max_position"
+                            :min="1"
                         />
                     </v-col>
                     <v-col cols="6">
@@ -305,6 +318,7 @@ import draggable from 'vuedraggable'
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
+import DefaultRichText from "../../components/globals/DefaultRichText";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
@@ -312,7 +326,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText},
 
     props: {
         options: {
@@ -342,7 +356,7 @@ export default {
                 name: null,
                 course_id: this.course_id,
                 topic_requirement_id: null,
-                content: null,
+                content: "",
                 imagen: null,
                 file_imagen: null,
                 assessable: null,
@@ -356,6 +370,7 @@ export default {
                 disabled_estado_toggle: false,
                 has_qualified_questions: 0,
                 has_open_questions: 0,
+                max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
             },
@@ -431,7 +446,9 @@ export default {
     methods: {
         resetValidation() {
             let vue = this
-            vue.resetFormValidation('CursoForm')
+            // vue.resetFormValidation('TemaForm')
+            vue.$refs.TemaForm.resetValidation()
+            // vue.resource.media = []
         },
         resetSelects() {
             let vue = this
@@ -444,6 +461,9 @@ export default {
         closeModal() {
             let vue = this
             vue.resetSelects()
+            vue.resetValidation()
+
+            vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
             vue.$emit('onCancel')
         },
         async validate() {
@@ -458,7 +478,7 @@ export default {
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
-            if (vue.topic_id !== '') {
+            if (vue.resource && vue.resource.id) {
 
                 if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.type_evaluation_id) {
                     const evaluation_types = vue.selects.evaluation_types;
@@ -530,6 +550,7 @@ export default {
             }
 
             if (vue.topicsValidationModal.action === 'validations-after-update') {
+                // console.log('vue.topicsValidationModal.action')
                 vue.hideLoader();
                 vue.topicsValidationModal.open = false;
                 vue.closeModal();
@@ -555,7 +576,7 @@ export default {
                     if (has_info_messages){
                         const res = await vue.handleValidationsAfterUpdate(data.data, vue.topicsValidationModal, vue.topicsValidationModalDefault);
                         // vue.$emit('onConfirm')
-                        console.log('handleValidationsAfterUpdate:',res)
+                        // console.log('handleValidationsAfterUpdate:',res)
                         vue.showAlert(data.data.msg)
                     }
                     else {
@@ -567,7 +588,7 @@ export default {
                 })
                 .catch(async (error) => {
                     const res = await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
-                    console.log('handleValidationsBeforeUpdate:',res)
+                    // console.log('handleValidationsBeforeUpdate:',res)
                     vue.loadingActionBtn = false
                 })
         },
@@ -611,7 +632,9 @@ export default {
             let vue = this
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                vue.resource.media = []
             })
+
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
@@ -625,7 +648,10 @@ export default {
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     } else {
                         vue.resource.qualification_type = data.data.qualification_type
+                        vue.resource.position = data.data.default_position
                     }
+                    
+                    vue.resource.max_position = data.data.max_position
                 })
             return 0;
         },
@@ -644,15 +670,16 @@ export default {
         },
         validateTipoEv() {
             let vue = this
-            if (['0', null, 0, false].includes(vue.resource.assessable)) vue.resource.type_evaluation_id = null
+            if (!vue.resource.assessable) vue.resource.type_evaluation_id = null
 
             vue.resource.tipo_ev = null
+            vue.resource.disabled_estado_toggle = false
             vue.resetFormValidation('TemaForm')
         },
         validateCountQuestions() {
             let vue = this;
             if (vue.resource) {
-                if (vue.resource.assessable === 1) {
+                if (vue.resource.assessable == 1) {
                     const evaluation_types = vue.selects.evaluation_types;
                     const indexSelected = evaluation_types.findIndex(el => el.id === vue.resource.type_evaluation_id);
                     if (indexSelected > -1) {

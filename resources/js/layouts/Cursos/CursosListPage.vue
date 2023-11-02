@@ -15,14 +15,14 @@
                 <v-spacer/>
 
                 <DefaultModalButton
-                    :label="'Curso (M)'"
+                    :label="'Crear curso'"
                      @click="openFormModal(modalCourseOptions, null, 'create')"
-                     v-if="$root.isSuperUser"
                 />
+                     <!-- v-if="$root.isSuperUser" -->
 
-                <DefaultModalButton
+               <!--  <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/${ruta}cursos/create`)"/>
+                    @click="openCRUDPage(`/${ruta}cursos/create`)"/> -->
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -287,18 +287,18 @@ export default {
                         method_name: 'segmentation'
                     },
                     {
-                        text: "Editar (M)",
+                        text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
-                        show_condition: "is_cursalab_super_user"
+                        // show_condition: "is_cursalab_super_user"
                     },
-                    {
-                        text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
-                    },
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'route',
+                    //     route: 'edit_route'
+                    // },
 
 
                     // {

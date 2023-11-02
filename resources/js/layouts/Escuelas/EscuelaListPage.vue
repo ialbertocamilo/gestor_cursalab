@@ -6,14 +6,14 @@
                 <v-spacer/>
         
                 <DefaultModalButton
-                    :label="'Escuela (M)'"
+                    :label="'Crear escuela'"
                     @click="openFormModal(modalSchoolOptions, null, 'create')"
-                    v-if="$root.isSuperUser"
                 />
-                <DefaultModalButton
+                    <!-- v-if="$root.isSuperUser" -->
+                <!-- <DefaultModalButton
                     :label="'Escuela'"
                     @click="openCRUDPage(`/escuelas/create`)"
-                />
+                /> -->
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -212,18 +212,18 @@ export default {
                         route: 'cursos_route'
                     },
                     {
-                        text: "Editar (M)",
+                        text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
-                        show_condition: "is_cursalab_super_user"
+                        // show_condition: "is_cursalab_super_user"
                     },
-                    {
-                        text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
-                    },
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'route',
+                    //     route: 'edit_route'
+                    // },
                 ],
                 more_actions: [
                     {

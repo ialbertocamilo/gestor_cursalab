@@ -16,7 +16,7 @@
             <div v-else-if="options.action === 'validations-before-update'">
                 <div
                     v-if="resource && (validateData.selectedType && validateData.selectedType.code === 'qualified') && (resource.assessable === 0 || resource.assessable === null)">
-                    Estas a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
+                    Estás a punto de cambiar el tipo de evaluación de evaluable calificada a no evaluable. Recuerda
                     que es necesario si el avance se mantendrá o se borrará.<br/>
                     <div>
                         <span>¿Desea mantener el avance de los usuarios?</span><br/>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="mt-2">
                     <label class="form-check-label"
-                           v-text="'Si deseas descargar el reporte antes del cambio da click aquí 👇'"/>
+                           v-text="'Si deseas descargar el reporte antes del cambio haz click aquí 👇'"/>
                     <br>
                     <div class="d-flex justify-content-center">
                         <DefaultButton
