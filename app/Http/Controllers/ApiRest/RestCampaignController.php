@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CampaignVerifyContentUser;
 
 class RestCampaignController extends Controller
 {
@@ -54,7 +55,35 @@ class RestCampaignController extends Controller
 
         return $this->success($campaings_contents_data);
     }
+    public function campaingsContentsV2(Campaign $campaign){
+        $user_id = auth()->user()->id;
+        $campaings_contents = $campaign->contents()->select('id','title', 'description', 'file_media', 'linked', 'state')->get();
+        $contents_validated = CampaignVerifyContentUser::where('campaign_id',$campaign->id)
+                                ->where('user_id',$user_id)->whereIn('content_id',$campaings_contents->pluck('id'))->get();
 
+        $campaings_contents_data = $campaings_contents->map(function ($content) use($contents_validated){
+
+            $content->file_media = $content->file_media ? get_media_url($content->file_media) : $content->file_media;
+            $content->type = ($content->linked) ? get_type_link($content->linked) : get_type_media($content->file_media);
+            $content['reviewved'] = boolval($contents_validated->where('content_id',$content['id'])->first());
+            return $content;
+        });
+        $allow_continue = false;
+        if(count($campaings_contents_data)>0){
+            $allow_continue = !boolval($campaings_contents_data->where('reviewved',false)->first());
+        }
+        return $this->success(['contents'=>$campaings_contents_data,'allow_continue'=>$allow_continue]);
+    }
+    public function checkContent(Request $request){
+        $campaign_id = $request->campaign_id;
+        $media_id = $request->media_id;
+        $user_id = auth()->user()->id;
+        CampaignVerifyContentUser::updateOrCreate(
+            ['campaign_id'=>$campaign_id,'user_id'=>$user_id,'content_id'=>$media_id],
+            ['campaign_id'=>$campaign_id,'user_id'=>$user_id,'content_id'=>$media_id,'completed'=>true]
+        );
+        return response()->json(['message'=>'contenido validado']);
+    }
     public function campaignUserRequirements(Campaign $campaign, User $user)
     {
         $requirement_postulates = $campaign->requirement_null_criterio('POSTULATES')->first();
