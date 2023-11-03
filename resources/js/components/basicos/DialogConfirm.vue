@@ -97,7 +97,7 @@
                 <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"
-                    cancelLabel="Retroceder"/>
+                    cancelLabel="Cancelar"/>
             </v-card-actions>
         </v-card>
         <v-card v-else>

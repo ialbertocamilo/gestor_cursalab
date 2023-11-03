@@ -165,6 +165,10 @@ class Topic extends BaseModel
                     // if(!str_contains($string, 'http') && ($media['tipo']=='audio' || $media['tipo']=='video')){
                     //     $valor = env('DO_URL') . '/' .$valor;
                     // }
+                    if ($media['tipo'] == 'youtube') {
+                        $valor = extractYoutubeVideoCode($valor);
+                    }
+
                     $medias[] = [
                         'position' => ($index + 1),
                         'topic_id' => $tema->id,

@@ -47,8 +47,9 @@
         </fieldset>
 
         <transition name="fade" v-if="showButton">
-            <v-btn class="mt-1" color="primary" block elevation="0"
-                   @click="openSelectPreviewMultimediaModal"
+            <!-- color="primary" -->
+            <v-btn class="mt-1 border"  block elevation="0"
+               @click="openSelectPreviewMultimediaModal"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>
                 {{ labelButton }}
@@ -60,7 +61,8 @@
             :ref="modalPreviewMultimedia.ref"
             :options="modalPreviewMultimedia"
             :custom-filter="fileTypes"
-            width="85vw"
+            :width="selectWidth"
+            :height="selectHeight"
             @onClose="closeSelectPreviewMultimediaModal"
             @onConfirm="onSelectMediaPreview"
         />
@@ -83,6 +85,16 @@ export default {
             type: String,
             required: false,
             default:'Seleccionar multimedia'
+        },
+        selectWidth:{
+            type: String,
+            required: false,
+            default:'85vw'
+        },
+        selectHeight:{
+            type: String,
+            required: false,
+            default:'70vh'
         },
         description: {
             type: String,

@@ -54,7 +54,8 @@ class PosteoSearchResource extends JsonResource
 
             'edit_route' => route('temas.editTema', [$request->school_id, $request->course_id, $topic->id]),
             'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $topic->id]),
-            'is_super_user'=>auth()->user()->isAn('super-user')
+            'is_super_user'=>auth()->user()->isAn('super-user'),
+            'is_cursalab_super_user'=> is_cursalab_superuser(),
             // 'is_super_user'=> true
 
         ];

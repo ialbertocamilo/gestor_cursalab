@@ -26,6 +26,7 @@ use App\Models\Question;
 use App\Models\School;
 use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\SortingModel;
 
 class TemaController extends Controller
 {
@@ -44,8 +45,12 @@ class TemaController extends Controller
     {
         $tags = []; //Tag::select('id', 'nombre')->get();
         $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
-        if ($topic)
+        if ($topic) {
             $q_requisitos->whereNotIn('id', [$topic->id]);
+        } 
+
+        $filters = ['course_id' => $course->id];
+        $default_position = $max_position = SortingModel::getNextItemOrderNumber(Topic::class, $filters, 'position');
 
         $requisitos = $q_requisitos->orderBy('position')->get();
 
@@ -55,7 +60,7 @@ class TemaController extends Controller
         $qualification_type = $course->qualification_type;
         $media_url = get_media_root_url();
 
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url');
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url', 'default_position', 'max_position');
 
         return $compactResponse ? $response : $this->success($response);
     }
