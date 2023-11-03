@@ -587,9 +587,8 @@ function getCriterionValue($id, $criteria) {
 
 function extractYoutubeVideoCode(string $url): ?string
 {
+    if (!str_contains($url, 'https://')) return $url;
 
-    if (!str_contains($url, 'http')) return $url;
-    
     $matches = preg_split('/(vi\/|v%3D|v=|\/v\/|youtu\.be\/|\/embed\/)/', $url);
 
     if (!isset($matches[1])) {
@@ -604,4 +603,30 @@ function extractYoutubeVideoCode(string $url): ?string
     }
 
     return $split[0];
+}
+
+function extractVimeoVideoCode(string $url): ?string
+{
+    if (!str_contains($url, 'https://')) return $url;
+    
+    $regex = '~
+        # Match Vimeo link and embed code
+        (?:<iframe [^>]*src=")?              # If iframe match up to first quote of src
+        (?:                                  # Group vimeo url
+                https?:\/\/                  # Either http or https
+                (?:[\w]+\.)*                 # Optional subdomains
+                vimeo\.com                   # Match vimeo.com
+                (?:[\/\w:]*(?:\/videos)?)?   # Optional video sub directory this handles groups links also
+                \/                           # Slash before Id
+                ([0-9]+)                     # $1: VIDEO_ID is numeric
+                [^\s]*                       # Not a space
+        )                                    # End group
+        "?                                   # Match end quote if part of src
+        (?:[^>]*></iframe>)?                 # Match the end of the iframe
+        (?:<p>.*</p>)?                       # Match any title information stuff
+        ~ix';
+    
+    preg_match( $regex, $url, $matches );
+    
+    return $matches[1];
 }
