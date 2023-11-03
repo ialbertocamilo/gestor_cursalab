@@ -486,6 +486,16 @@ function get_type_link(string $linked, string $key = 'type')
     return $switchKey[$key];
 }
 
+function get_type_link2(string $linked, string $key = 'type')
+{
+    $currentType = is_numeric($linked) ? 'vimeo' : 'youtube';
+
+    $switchKey = [ 'type' => $currentType,
+                   'hash' => $linked ];
+
+    return $switchKey[$key];
+}
+
 function getExtensionFileUrl(string $url) {
     ['path' => $filePath] = parse_url($url);
 
