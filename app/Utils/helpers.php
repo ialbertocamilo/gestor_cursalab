@@ -584,3 +584,24 @@ function getCriterionValue($id, $criteria) {
         ? $criterion->value_text
         : '';
 }
+
+function extractYoutubeVideoCode(string $url): ?string
+{
+
+    if (!str_contains($url, 'http')) return $url;
+    
+    $matches = preg_split('/(vi\/|v%3D|v=|\/v\/|youtu\.be\/|\/embed\/)/', $url);
+
+    if (!isset($matches[1])) {
+        return null;
+    }
+
+    $match = $matches[1];
+    $split = preg_split('/[^\w-]/i', $match);
+
+    if (!isset($split[0])) {
+        return null;
+    }
+
+    return $split[0];
+}
