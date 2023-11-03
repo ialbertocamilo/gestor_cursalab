@@ -207,6 +207,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasOne(UserCourseData::class);
     }
 
+    public function config_data()
+    {
+        return $this->hasOne(UserConfigData::class);
+    }
+
     public function summary_courses()
     {
         return $this->hasMany(SummaryCourse::class);
@@ -1861,5 +1866,30 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
 
         $user->subworkspaces()->sync($selected_subworkspaces);
+    }
+
+    public function setConfigData()
+    {
+        $config_data = $this->config_data;
+
+        // if ($config_data) {
+
+        //     if ($config_data->current_courses_updated_at > $this->required_update_at) {
+
+        //         return true;
+        //     }
+        // }
+
+        $row = [];
+
+        $data = [
+            'courses' => $row['current_courses_ids'] ?? [],
+            'schools' => $row['current_schools_ids'] ?? [],
+            'compatibles' => $row['compatibles_ids'] ?? [],
+            'course_id_tags' => $row['course_id_tags'] ?? [],
+            'current_courses_updated_at' => now(),
+        ];
+
+        $user->config_data()->updateOrCreate( ['user_id' => $user->id], $data);
     }
 }
