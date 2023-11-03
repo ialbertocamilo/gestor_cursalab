@@ -212,9 +212,9 @@
                                                 <td class="">
                                                     <div class="multimedia-table-icon mt-2 " style="align-items: start;">
                                                         <a class="media-link" href="javascript:;"  title="Copiar código"
-                                                            @click="copyToClipboard(media.value || media.file?.name)">
+                                                            @click="copyToClipboard(media.value || (media.file ? media.file.name : '') )">
                                                             <i :class="'mdi mdi-content-copy'"  style="font-size: 1rem !important; margin-right: 5px;" />
-                                                            {{ media.value || media.file.name }}
+                                                            {{ media.value || (media.file ? media.file.name : '')  }}
                                                         </a>
                                                     </div>
                                                 </td>
