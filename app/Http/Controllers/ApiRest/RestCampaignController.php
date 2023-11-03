@@ -46,7 +46,8 @@ class RestCampaignController extends Controller
         $campaings_contents_data = $campaings_contents->map(function ($content) {
 
             $content->file_media = $content->file_media ? get_media_url($content->file_media) : $content->file_media;
-            $content->type = ($content->linked) ? get_type_link($content->linked) : get_type_media($content->file_media);
+            // $content->type = ($content->linked) ? get_type_link($content->linked) : get_type_media($content->file_media);
+            $content->type = ($content->linked) ? $content->linked : get_type_media($content->file_media);
             
             return $content;
         });
