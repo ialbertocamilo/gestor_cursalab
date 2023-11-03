@@ -33,7 +33,9 @@ class GenerateStatusMediaProgressCommand extends Command
         $this->generateStatusMediaProgress();
     }
 
-    private function generateStatusMediaProgress(){
+    private function generateStatusMediaProgress()
+    {
+        $this->line("Inicio: " . now());
 
         $status_revisado = Taxonomy::getFirstData('topic', 'user-status', 'revisado');
         $status_realizado= Taxonomy::getFirstData('topic', 'user-status', 'realizado');
@@ -41,15 +43,26 @@ class GenerateStatusMediaProgressCommand extends Command
         $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
         $status_list = [$status_revisado?->id, $status_realizado?->id, $status_passed?->id, $status_failed?->id];
 
-        SummaryTopic::whereIn('status_id',$status_list)->chunkById(10000, function ($summary_topics) {
+        $query = SummaryTopic::with('topic.medias')->whereIn('status_id', $status_list);
 
-            $_bar = $this->output->createProgressBar(count($summary_topics));
-            $_bar->start();
+        $total_records = $query->count();
+        $chunk_total = 500;
+
+        $this->line("Total records " . $total_records);
+
+        $bar = $this->output->createProgressBar($total_records);
+        $bar->start();
+
+        $query->chunkById($chunk_total, function ($summary_topics) use ($bar) {
+
+            $chunkData = [];
+
             foreach ($summary_topics as $sum_top) {
 
-                $medias = MediaTema::where('topic_id', $sum_top->topic_id)->orderBy('position','ASC')->get();
+                // $medias = MediaTema::where('topic_id', $sum_top->topic_id)->orderBy('position','ASC')->get();
+                $medias = $sum_top->topic->medias->sortBy('position');
+                $user_progress_media = [];
 
-                $user_progress_media = array();
                 foreach($medias as $med)
                 {
                     array_push($user_progress_media, (object) array(
@@ -58,15 +71,22 @@ class GenerateStatusMediaProgressCommand extends Command
                         'last_media_duration' => null
                     ));
                 }
-                $sum_top->media_progress = json_encode($user_progress_media);
-                $sum_top->last_media_access = null;
-                $sum_top->last_media_duration = null;
-                $sum_top->save();
 
-                $_bar->advance();
+                $chunkData[] = [
+                    'id' => $sum_top->id,
+                    'media_progress' => json_encode($user_progress_media),
+                    'last_media_access' => null,
+                    'last_media_duration' => null,
+                ];
             }
-            $_bar->finish();
-        });
 
+            batch()->update(new SummaryTopic, $chunkData, 'id');
+        
+            $bar->advance($summary_topics->count());
+        });
+        
+        $bar->finish();
+
+        $this->line("Fin: " . now());
     }
 }

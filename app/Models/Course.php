@@ -1722,4 +1722,14 @@ class Course extends BaseModel
 
         return $original_course;
     }
+
+    protected function setCoursePositionBySchool($course, $school)
+    {
+        SortingModel::setLastPositionInPivotTable(CourseSchool::class, Course::class, [
+            'school_id' => $school->id,
+            'course_id' => $course->id,
+        ],[
+            'school_id' => $school->id,
+        ]);
+    } 
 }
