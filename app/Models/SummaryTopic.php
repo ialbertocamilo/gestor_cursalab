@@ -22,8 +22,6 @@ class SummaryTopic extends Summary
         'answers' => 'array',
     ];
 
-    // public $timestamps = false;
-
     public $defaultRelationships = [
         'topic_id' => 'topic',
         'user_id' => 'user'

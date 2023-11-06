@@ -15,14 +15,14 @@
                 <v-spacer/>
         
                 <DefaultModalButton
-                    :label="'Tema (M)'"
+                    :label="'Crear tema'"
                      @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
-                     v-if="$root.isSuperUser"
                 />
-                <DefaultModalButton
+                     <!-- v-if="$root.isSuperUser" -->
+                <!-- <DefaultModalButton
                     @click="openCRUDPage(`/${ruta}cursos/${course_id}/temas/create`)"
                     :label="'Tema'"
-                />
+                /> -->
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -166,18 +166,18 @@ export default {
                         route: 'evaluacion_route'
                     },
                     {
-                        text: "Editar (M)",
+                        text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
-                        show_condition: "is_cursalab_super_user"
                     },
-                    {
-                        text: "Editar",
-                        icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
-                    },
+                        // show_condition: "is_cursalab_super_user"
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'route',
+                    //     route: 'edit_route'
+                    // },
                     {
                         text: "Actualizar Estado",
                         icon: 'fa fa-circle',
