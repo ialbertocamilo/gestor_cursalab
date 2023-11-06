@@ -73,7 +73,7 @@ class Guest extends BaseModel {
         return ['message'=>'Email enviado correctamente.','email_sent'=>true];
     }
     protected function storeGuest($data,$request){
-        $guest_link = GuestLink::where('url',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
+        $guest_link = GuestLink::where('id',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
         if(!$guest_link){
             return ['message'=>'Link inválido'];
         }
