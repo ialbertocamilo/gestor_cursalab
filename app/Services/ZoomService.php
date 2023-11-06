@@ -73,11 +73,13 @@ class ZoomService extends MeetingService
 
     // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/meetingCreate
     // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/meetingUpdate
+    // https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/meetingUpdate
     protected function createOrUpdateRoom($account, &$data, $meeting = null)
     {
         $config = config('zoom.requests.meeting.create');
         $method = ($meeting and $meeting->identifier) ? 'patch' : 'post';
-        $url = ($meeting and $meeting->identifier) ? "/users/{$account->email}/meetings/$meeting->identifier" : "/users/{$account->email}/meetings";
+        // $url = ($meeting and $meeting->identifier) ? "/users/{$account->email}/meetings/$meeting->identifier" : "/users/{$account->email}/meetings";
+        $url = ($meeting and $meeting->identifier) ? "/meetings/$meeting->identifier" : "/users/{$account->email}/meetings";
         $startTimestamp = strtotime($data['starts_at'] ?? $meeting->starts_at);
 
         $data_zoom = array_replace_recursive($config, [

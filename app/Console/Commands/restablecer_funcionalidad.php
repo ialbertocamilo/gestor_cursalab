@@ -113,7 +113,8 @@ class restablecer_funcionalidad extends Command
         // $this->restoreJsonNotification();
         // $this->restoreSummariesWithTypeTopicGradesMassive();
         // $this->getInfoSupervisors();
-        $this->updateChecklisSummaries();
+        // $this->updateChecklisSummaries();
+        $this->reportHoursCapacitation();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
@@ -130,6 +131,49 @@ class restablecer_funcionalidad extends Command
             }
             $_bar->advance();
         }
+        // $this->info("\n Fin: " . now());
+        // info(" \n Fin: " . now());
+    }
+    public function reportHoursCapacitation(){
+        $workspaces = Workspace::with('schools:id,name','parent:id,name')->whereNotNull('parent_id')->get();
+        $taxonomies_id = Taxonomy::where('group','topic')->where('type','user-status')
+                    ->whereIn('code',['aprobado','desaprobado','realizado','revisado'])
+                    ->select('id')->pluck('id')->toArray();
+        $taxonomies_id = implode(', ', $taxonomies_id);
+        $report = [];
+        $_bar = $this->output->createProgressBar($workspaces->count());
+        $_bar->start();
+        foreach ($workspaces as $workspace){
+            $schools_id = $workspace->schools->pluck('id');
+            $topics_id = Db::table('courses')
+                        ->join('course_school','course_school.course_id','courses.id')
+                        ->join('topics','topics.course_id','courses.id')->whereIn('course_school.school_id',$schools_id)
+                        ->select('topics.id')
+                        ->pluck('id')->toArray();
+            $topics_id = implode(', ', $topics_id);
+            $query = "SELECT
+                    EXTRACT(YEAR FROM st.created_at) as 'anio',
+                    EXTRACT(MONTH FROM st.created_at) as 'mes',
+                    COUNT(st.id) * 20 as 'minutos'
+                FROM summary_topics st 
+                WHERE st.status_id IN (".$taxonomies_id.") 
+                    AND st.topic_id IN (".$topics_id.") 
+                GROUP BY EXTRACT(YEAR FROM st.created_at),
+                    EXTRACT(MONTH FROM st.created_at) 
+                ORDER BY anio, mes";
+            $results = Db::select($query);
+            foreach ($results as $result) {
+                $report[] = [
+                    'workspace' => $workspace->parent->name,
+                    'modulo' => $workspace->name,
+                    'año' => $result->anio,
+                    'mes' => $result->mes,
+                    'minutos' => $result->minutos
+                ];
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/report_hours_capacitation.json', json_encode($report,JSON_UNESCAPED_UNICODE));
     }
     public function getInfoSupervisors(){
         $users = User::query()

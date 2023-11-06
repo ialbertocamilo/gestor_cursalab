@@ -834,7 +834,16 @@ class Workspace extends BaseModel
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
-
+        Db::table('criterion_workspace')->where('workspace_id',$workspace->id)->where('criterion_id',$_crit_module->id)->update([
+            'available_in_profile'=>1,
+            'available_in_ranking'=>1,
+            'available_in_reports'=>1,
+            'available_in_segmentation'=>1,
+            'available_in_user_creation'=>1,
+            'available_in_user_filters'=>1,
+            'required_in_user_creation'=>1,
+            'avaiable_in_personal_data_guest_form'=>1,
+        ]);
         $workspace->criteriaValue()->createMany($this->criteriaValue->where('criterion_id', '<>', $_crit_module->id)->toArray());
 
         $workspace->medias()->createMany($this->medias->toArray());

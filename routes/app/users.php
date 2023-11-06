@@ -6,7 +6,7 @@ Route::controller(RestUserController::class)->group(function() {
 
     Route::post('/password/reset', 'resetPassword');
 
-    Route::get('/notifications/', 'loadNotifications');
+    Route::get('/notifications', 'loadNotifications');
 
     Route::put('/notification/{userNotification}', 'updateNoficationStatus');
 

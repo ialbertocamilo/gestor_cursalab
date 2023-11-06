@@ -1,32 +1,28 @@
 <template>
     <section class="section-list ">
-        <DefaultFilter v-model="open_advanced_filter"
+        <!-- <DefaultFilter v-model="open_advanced_filter"
                        @filter="advanced_filter(dataTable, filters, 1)"
         >
             <template v-slot:content>
                 <v-row justify="center">
-                    <!--                    <v-col cols="12">-->
-                    <!--                        <DefaultAutocomplete-->
-                    <!--                            clearable-->
-                    <!--                            placeholder="Seleccione una Carrera"-->
-                    <!--                            label="Carrera"-->
-                    <!--                            :items="selects.carreras"-->
-                    <!--                            v-model="filters.carrera"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
+                   
                 </v-row>
             </template>
-        </DefaultFilter>
+        </DefaultFilter> -->
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-                <!--                <DefaultActivityButton-->
-                <!--                    :label="'Actividad'"-->
-                <!--                    @click="activity"/>-->
+        
+                <DefaultModalButton
+                    :label="'Tema (M)'"
+                     @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
+                     v-if="$root.isSuperUser"
+                />
                 <DefaultModalButton
                     @click="openCRUDPage(`/${ruta}cursos/${course_id}/temas/create`)"
-                    :label="'Tema'"/>
+                    :label="'Tema'"
+                />
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -59,6 +55,7 @@
                 "
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
+                @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
             />
 
             <DialogConfirm
@@ -105,6 +102,15 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
+            <TopicFormModal
+                width="70vw"
+                :ref="modalTopicOptions.ref"
+                :options="modalTopicOptions"
+                :school_id="school_id"
+                :course_id="course_id"
+                @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalTopicOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -112,12 +118,14 @@
 <script>
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
+import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
         DialogConfirm,
         LogsModal,
+        TopicFormModal,
         'TopicValidationsDelete': TemaValidacionesModal,
         'TopicValidationsUpdateStatus': TemaValidacionesModal
     },
@@ -143,8 +151,9 @@ export default {
                     // {text: "Portada", value: "image", align: 'center', sortable: false},
                     {text: "Nombre", value: "nombre_and_requisito", sortable: false},
                     // {text: "Nombre", value: "nombre", sortable: false},
-                    {text: "Evaluable", value: "assessable", sortable: false},
-                    {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
+                    // {text: "Evaluable", value: "assessable", align: 'center', sortable: false},
+                    // {text: "Tipo de evaluación", value: "tipo_evaluacion", sortable: false},
+                    {text: "Tipo de evaluación", value: "tema_evaluacion", sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
@@ -157,22 +166,31 @@ export default {
                         route: 'evaluacion_route'
                     },
                     {
+                        text: "Editar (M)",
+                        icon: 'mdi mdi-pencil',
+                        type: 'action',
+                        method_name: 'edit',
+                        show_condition: "is_cursalab_super_user"
+                    },
+                    {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'route',
                         route: 'edit_route'
                     },
                     {
-                        text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
-                    },
-                    {
                         text: "Actualizar Estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                ],
+                more_actions: [
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
                     },
                     {
                         text: "Logs",
@@ -182,14 +200,6 @@ export default {
                         method_name: "logs"
                     }
                 ]
-                // more_actions: [
-                //     {
-                //         text: "Actividad",
-                //         icon: 'fas fa-file',
-                //         type: 'action',
-                //         method_name: 'activity'
-                //     },
-                // ]
             },
             selects: {
                 modules: []
@@ -266,6 +276,17 @@ export default {
                 confirmLabel: 'Confirmar',
                 cancelLabel: 'Cancelar',
                 resource: 'TemasValidaciones',
+            },
+
+            modalTopicOptions: {
+                ref: 'TopicFormModal',
+                open: false,
+                base_endpoint: '/temas',
+                confirmLabel: 'Guardar',
+                resource: 'tema',
+                title: '',
+                action: null,
+                persistent: true,
             },
         }
     },

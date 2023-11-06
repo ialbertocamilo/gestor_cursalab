@@ -73,11 +73,28 @@ class Guest extends BaseModel {
         return ['message'=>'Email enviado correctamente.','email_sent'=>true];
     }
     protected function storeGuest($data,$request){
-        $guest_link = GuestLink::where('id',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
+        $guest_link = GuestLink::where('url',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
         if(!$guest_link){
             return ['message'=>'Link inválido'];
         }
         $data['criterion_list_final'] = [];
+        foreach ($data['criterion_list'] as $criterion_code => $value_text) {
+            $criterion_value = CriterionValue::whereRelation('criterion','code',$criterion_code)
+                                ->where('value_text',$value_text)->first();
+            if(!$criterion_value){
+                $criterion = Criterion::where('code',$criterion_code)->with('field_type:id,code')->select('can_be_create','field_id','id')->first();
+                if($criterion?->can_be_create || $criterion?->field_type->code == 'date'){
+                    $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
+                    $criterion_value = new CriterionValue();
+                    $criterion_value[$colum_name] = $value_text;
+                    $criterion_value['value_text'] = $value_text;
+                    $criterion_value['criterion_id'] = $criterion->id;
+                    $criterion_value['active'] = 1;
+                    $criterion_value->save();
+                }
+            }
+            $data['criterion_list'][$criterion_code] = $criterion_value?->id;
+        }
         // Recorrer el array y acceder a las claves y valores de forma dinámica
         foreach ($data['criterion_list'] as $clave => $valor) {
            array_push($data['criterion_list_final'],$valor);

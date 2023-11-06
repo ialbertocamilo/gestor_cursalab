@@ -125,8 +125,8 @@ export default {
                 ref: 'modulosTable',
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombres", value: "name"},
-                    {text: "Activos / Total", value: "active_users", sortable: false},
+                    {text: "Nombre", value: "name"},
+                    {text: "Activos / Total", value: "active_users", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [

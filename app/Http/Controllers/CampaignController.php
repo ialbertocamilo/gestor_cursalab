@@ -193,7 +193,7 @@ class CampaignController extends Controller
 
             // OPTIONAL: QUESTION - PREGUNTA DE ENCUESTA
             $question = $request->currContents['question'] ?? NULL; 
-            info(['$question'=> $question]);
+            // info(['$question'=> $question]);
             Campaign::saveQuestion($question, $lastIndex);
 
             // OPTIONAL: INSIGNIA 01 - RESPUESTA DE ENCUESTA

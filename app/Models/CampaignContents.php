@@ -17,8 +17,17 @@ class CampaignContents extends Model
     protected function saveContents($contents, $campaign) {
 
         $proccess_contents = Arr::map($contents, function($content) use ($campaign) {
+
             if ($content['linked'] == 'null' || $content['linked'] == NULL) {
                 $content['linked'] = NULL;
+            } else {
+                if (str_contains($content['linked'], 'vimeo.com/')) {
+                    $content['linked'] = extractVimeoVideoCode($content['linked']);
+                }
+
+                if (str_contains($content['linked'], 'youtube.com/') || str_contains($content['linked'], 'youtu.be/')) {
+                    $content['linked'] = extractYoutubeVideoCode($content['linked']);
+                } 
             }
 
             $content = Media::requestUploadFileOnly($content, 'media');

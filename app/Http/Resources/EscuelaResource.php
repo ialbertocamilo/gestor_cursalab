@@ -19,6 +19,9 @@ class EscuelaResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'escuela_nombre' => [
+                'name' => $this->name,
+            ],
             'image' => space_url($this->imagen),
             'images' => $this->getModulesImages(),
             'active' => $this->active ? true : false,

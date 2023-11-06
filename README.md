@@ -16,3 +16,8 @@ Se mantiene frontend y backend en el mismo proyecto (gestor)
 ## Chagelog
 
 ### Agosto 2022
+
+
+## New tags
+
+git add . && git commit -m "message commit" && git tag -a v2.1.1 -m "message tag" && git push && git push origin v2.1.1

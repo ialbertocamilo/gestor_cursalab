@@ -39,6 +39,11 @@ class Course extends BaseModel
         return $this->hasMany(Topic::class, 'course_id');
     }
 
+    public function active_topics()
+    {
+        return $this->hasMany(Topic::class, 'course_id')->where('active', ACTIVE);
+    }
+
     public function polls()
     {
         return $this->belongsToMany(Poll::class);
@@ -168,7 +173,7 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b']);
+        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b', 'active_topics']);
 
         if ($request->schools) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -1717,4 +1722,14 @@ class Course extends BaseModel
 
         return $original_course;
     }
+
+    protected function setCoursePositionBySchool($course, $school)
+    {
+        SortingModel::setLastPositionInPivotTable(CourseSchool::class, Course::class, [
+            'school_id' => $school->id,
+            'course_id' => $course->id,
+        ],[
+            'school_id' => $school->id,
+        ]);
+    } 
 }
