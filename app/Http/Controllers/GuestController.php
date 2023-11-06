@@ -103,15 +103,15 @@ class GuestController extends Controller
     public function statusGuestUser(Guest $guest){
         $guest->load('user');
         $user = $guest->user;
-        $this->changeStatusUser($user);
-        return $this->success(['msg' => 'Estado actualizado correctamente.']);
+        $message = $this->changeStatusUser($user);
+        return $this->success(['msg' => $message]);
     }
     private function changeStatusUser($user){
         $status = !$user->active;
         $current_workspace = get_current_workspace();
         if ($status && !$current_workspace->verifyLimitAllowedUsers()){
             $error_msg = config('errors.limit-errors.limit-user-allowed');
-            return $this->error($error_msg, 422);
+            return $error_msg;
         }
         if($status){
             $user->loadMissing('subworkspace');
@@ -127,5 +127,6 @@ class GuestController extends Controller
         }
         $user->update(['active' => $status]);
         $current_workspace->sendEmailByLimit();
+        return 'Estado actualizado correctamente.';
     }
 }
