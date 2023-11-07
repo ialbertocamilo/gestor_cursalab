@@ -169,6 +169,10 @@ class Topic extends BaseModel
                         $valor = extractYoutubeVideoCode($valor);
                     }
 
+                    if ($media['tipo'] == 'vimeo') {
+                        $valor = extractVimeoVideoCode($valor);
+                    }
+
                     $medias[] = [
                         'position' => ($index + 1),
                         'topic_id' => $tema->id,
