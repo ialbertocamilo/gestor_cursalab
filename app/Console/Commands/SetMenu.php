@@ -114,6 +114,9 @@ class SetMenu extends Command
                     'is_beta'=> $menu['is_beta'] ?? false,
                     'show_upgrade'=> $menu['show_upgrade'] ?? false,
                 ];
+                if(!$data['icon_menu']){
+                    $this->info('El menú '.$menu['menu'].' no existe y para crearlo es necesario el parámetro --icon_menu');
+                }
                 $new_menu->save();
                 $this->info('Se creó el menú '.$menu['name']);
             }else{
