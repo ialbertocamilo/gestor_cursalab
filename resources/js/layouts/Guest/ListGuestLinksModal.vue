@@ -175,13 +175,25 @@ export default {
             })
         },
         copy_content(id,text){
-            const elem = document.createElement('textarea');
-            elem.value = text;
-            document.body.appendChild(elem);
-            elem.select();
-            document.execCommand('copy');
-            document.body.removeChild(elem);
-            this.showAlert('Elemento copiado.', 'success')
+            // const elem = document.createElement('textarea');
+            // elem.value = text;
+            // document.body.appendChild(elem);
+            // elem.select();
+            // document.execCommand('copy');
+            // document.body.removeChild(elem);
+            // console.log(elem.value,text);
+            // this.showAlert('Elemento copiado.', 'success')
+
+            // navigator.clipboard.writeText(this.generator.password)
+            navigator.clipboard
+              .writeText(text)
+              .then(() => {
+                this.toggle();
+              })
+              .catch(() => {
+                this.showAlert('Elemento copiado.', 'success')
+                // console.log("copyPassword: something went wrong");
+              });
         },
         async add_url(){
             this.showLoader();
