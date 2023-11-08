@@ -195,9 +195,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     // === votaciones === 
     Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
 
-    Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
-    Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));
-
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
 
     Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
