@@ -75,7 +75,7 @@
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
                             @onChange="moduloChange"
-                            :maxValuesSelected="4"
+                            :maxValuesSelected="maxValuesSelected.modules"
                         />
                     </div>
                     <!-- Escuela -->
@@ -92,7 +92,7 @@
                             :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
                             @onChange="escuelaChange"
-                            :maxValuesSelected="10"
+                            :maxValuesSelected="maxValuesSelected.schools"
                         />
                     </div>
                     <!-- Curso -->
@@ -264,6 +264,9 @@ import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
 import FiltersNotification from "../globals/FiltersNotification.vue";
 
+// console.log(max_values_selected_modules);
+// console.log(max_values_selected_schools);
+// console.log(currentDomain);
 export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
@@ -289,7 +292,11 @@ export default {
             tipocurso: false,
             desaprobados: true,
             encuestaPendiente: true,
-            desarrollo: true
+            desarrollo: true,
+            maxValuesSelected:{
+                modules:4,
+                schools:10,
+            }
         };
     },
     methods: {
@@ -423,6 +430,16 @@ export default {
     },
     mounted() {
         this.fetchFiltersData();
+        const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io'];
+        const currentDomain = new URL(window.location.href).hostname;
+        if(this.adminId == 43617){
+            domainsToExcludeConstraint.forEach(domain => {
+                if(domain.includes(currentDomain)){
+                    this.maxValuesSelected.modules = 0;
+                    this.maxValuesSelected.schools = 0;
+                }
+            });
+        }
     }
 }
 
