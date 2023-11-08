@@ -6,7 +6,7 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-        
+
             <v-form ref="CursoForm">
                 <DefaultErrors :errors="errors"/>
 
@@ -186,9 +186,9 @@
                         >
                             <template slot="content">
                                 <div>
-                                    
+
                                     <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
-                                    
+
                                     <DefaultDivider class="my-1"/>
 
                                     <div class="row">
@@ -197,7 +197,7 @@
                                               :active-label="'Mostrar diploma al usuario'"
                                               :inactive-label="'Mostrar diploma al usuario'"
                                               v-model="resource.show_certification_to_user" />
-                                            
+
                                         </div>
                                         <div class="col-6">
 
@@ -278,7 +278,7 @@
                             <v-row justify="center">
 
                                     <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultInputDate                                        
+                                        <DefaultInputDate
                                             clearable
                                             :referenceComponent="'modalDateFilter1'"
                                             :options="modalDateFilter1"
@@ -300,7 +300,7 @@
                                     </v-col>
 
                                     <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                       <DefaultInputDate                                       
+                                       <DefaultInputDate
                                            clearable
                                            :referenceComponent="'modalDateFilter1'"
                                            :options="modalDateFilter2"
@@ -339,7 +339,7 @@
                 </v-row>
 
             </v-form>
-            
+
             <CursoValidacionesModal
                 width="408px"
                 :ref="courseValidationModal.ref"
@@ -690,7 +690,11 @@ export default {
                 .then(async ({data}) => {
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
-                    if (has_info_messages)
+
+                    // Additional validation is required when course
+                    // in being disabled
+
+                    if (has_info_messages && !this.resource.active)
                         await vue.handleValidationsAfterUpdate(data.data, vue.courseValidationModal, vue.courseValidationModalDefault);
                     else {
                         vue.queryStatus("curso", "crear_curso");
@@ -748,7 +752,7 @@ export default {
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             })
-     
+
             // let url = `${vue.base_endpoint}/${vue.resource.id === '' ? 'form-selects' : `search/${vue.resource.id}`}`
             // let url = `${vue.base_endpoint}/${!resource ? 'form-selects' : `search/${resource.id}`}`
             let url = vue.base_endpoint;
