@@ -239,10 +239,14 @@ class AuthController extends Controller
 
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
+         
+            if ($user->subworkspace->show_logo_in_app) {
+                $workspace_data->logo = $user->subworkspace->logo;
+            }
         }
 
-
         $ciclo_actual = null;
+
         if ($user->subworkspace->parent_id == 25){
             $ciclo_actual = $user->getActiveCycle()?->value_text;
         }

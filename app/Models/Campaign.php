@@ -439,6 +439,10 @@ class Campaign extends Model
                 $calcdate = self::calc_date($condition, $value);
                 $requirement_state = self::check_date($condition, $calcdate, $user_fecha->value_date);
             }
+            // Si al menos 1 requisito no se cumple no debería ver la camapaña 
+            if(!$requirement_state){
+                return $requirement_state;
+            }
         }
 
         return $requirement_state;

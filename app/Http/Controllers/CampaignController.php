@@ -342,7 +342,10 @@ class CampaignController extends Controller
         $request->campaign_id = $campaign->id;
         $request->criterio_id = $requirement_voter->criterio_id;
 
-        $candidates = CampaignSummoneds::candidates_votes($request); 
+        $candidates = CampaignSummoneds::candidates_votes($request);
+
+        ob_end_clean();
+        ob_start();
 
         return Excel::download(new ExportVotacionesCandidatos($candidates, $campaign), 'reporte_candidatos_'.date('Y-m-d H:i:s').'.xlsx');
     }
@@ -356,6 +359,9 @@ class CampaignController extends Controller
                                         'user:id,name,lastname,document,surname'
                                        ]
                               ])->get();
+
+        ob_end_clean();
+        ob_start();
 
         return Excel::download(new ExportVotacionesPostulantes($summoneds, $campaign), 'reporte_postulantes_'.date('Y-m-d H:i:s').'.xlsx');
     }

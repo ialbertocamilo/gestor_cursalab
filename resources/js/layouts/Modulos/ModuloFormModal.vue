@@ -103,52 +103,22 @@
                         </draggable>
                     </v-col>
                 </v-row>
-                <!-- <v-row justify="space-around" class="menuable">
-                    <v-col cols="12">
-                        <DefaultModalSection
-                            title="Evaluaciones"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="4">
-                                        <DefaultInput
-                                            label="Preguntas por evaluación"
-                                            v-model="resource.preg_x_ev"
-                                            :rules="rules.preg_x_ev"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultInput
-                                            label="Nota mínima aprobatoria"
-                                            v-model="resource.nota_aprobatoria"
-                                            :rules="rules.nota_aprobatoria"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultInput
-                                            label="Número de intentos"
-                                            v-model="resource.nro_intentos"
-                                            :rules="rules.nro_intentos"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col>
-                </v-row> -->
+   
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
-                        <DefaultModalSection
-                            title="Soporte"
+
+                        <DefaultModalSectionExpand
+                            title="Configuración de soporte"
+                            :expand="sections.showSectionSoporte"
+                            class="mt-4"
                         >
-                            <!-- tooltip="Tooltip" -->
                             <template slot="content">
+
+                        <!-- <DefaultModalSection -->
+                            <!-- title="Soporte" -->
+                        <!-- > -->
+                            <!-- tooltip="Tooltip" -->
+                            <!-- <template slot="content"> -->
                                 <v-row justify="center">
                                     <v-col cols="4">
                                         <DefaultInput
@@ -176,124 +146,45 @@
                                     </v-col>
                                 </v-row>
                             </template>
-                        </DefaultModalSection>
+                        </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
-                        <DefaultModalSection
+                        <DefaultModalSectionExpand
                             title="Configuración de diploma"
+                            :expand="sections.showSectionCertificate"
+                            class="my-4"
                         >
                             <!-- tooltip="Tooltip" -->
                             <template slot="content">
-
                                 <DiplomaSelector
-                                    v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
-
+                                    v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma" />
                             </template>
-                        </DefaultModalSection>
+                        </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around">
-                    <!--                    <v-col cols="3">-->
-                    <!--                        <DefaultFormLabel-->
-                    <!--                            label="Reinicios automáticos"-->
-                    <!--                            tooltip="Tooltip"-->
-                    <!--                        />-->
-                    <!--                        <DefaultToggle-->
-                    <!--                            v-model="resource.reinicio_automatico"-->
-                    <!--                        />-->
-                    <!--                    </v-col>-->
-                    <!--                    <v-col cols="5">-->
-                    <!--                        <DefaultFormLabel-->
-                    <!--                            label="Programación de reinicios"-->
-                    <!--                        />-->
-                    <!--                        <div class="date_reinicios d-flex flex-row justify-content-around"-->
-                    <!--                             :class="{'date_reinicios_disabled': !resource.reinicio_automatico,-->
-                    <!--                             'date_reinicios_error': showErrorReinicios}"-->
-                    <!--                        >-->
-                    <!--                            <span class="box_date_reinicios d-flex flex-column align-items-center">-->
-                    <!--                                <label for="days_date_reinicios">Días</label>-->
-                    <!--                                <input type="number" class="input_date_reinicios" id="days_date_reinicios"-->
-                    <!--                                       min="0"-->
-                    <!--                                       v-model="resource.reinicio_automatico_dias">-->
-                    <!--                            </span>-->
-                    <!--                            <span class="box_date_reinicios d-flex flex-column align-items-center">-->
-                    <!--                                <label for="horas_date_reinicios">Horas</label>-->
-                    <!--                                <input type="number" class="input_date_reinicios" id="horas_date_reinicios"-->
-                    <!--                                       min="0"-->
-                    <!--                                       v-model="resource.reinicio_automatico_horas">-->
-                    <!--                            </span>-->
-                    <!--                            <span class="box_date_reinicios d-flex flex-column align-items-center">-->
-                    <!--                                <label for="minutos_date_reinicios">Minutos</label>-->
-                    <!--                                <input type="number" class="input_date_reinicios" id="minutos_date_reinicios"-->
-                    <!--                                       min="0"-->
-                    <!--                                       v-model="resource.reinicio_automatico_minutos">-->
-                    <!--                            </span>-->
-                    <!--                        </div>-->
-                    <!--                        <small class="ml-2 date_reinicios_error_message" v-if="showErrorReinicios">-->
-                    <!--                            texto de error-->
-                    <!--                        </small>-->
-
-                    <!--                    </v-col>-->
-                    <!-- <v-col cols="12">
-                        <DefaultModalSection
-                            title="Programación de reinicios"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultToggle
-                                            active-label="Automático"
-                                            inactive-label="Manual"
-                                            v-model="resource.reinicio_automatico"
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Días"
-                                            v-model="resource.reinicio_automatico_dias"
-                                            :disabled="!resource.reinicio_automatico"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Horas"
-                                            v-model="resource.reinicio_automatico_horas"
-                                            :disabled="!resource.reinicio_automatico"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Minutos"
-                                            v-model="resource.reinicio_automatico_minutos"
-                                            :disabled="!resource.reinicio_automatico"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                                <div class="d-flex justify-content-center mt-1"
-                                     v-if="showErrorReinicios">
-                                    <div style="color: #FF5252" class="v-messages__wrapper">
-                                        <div class="v-messages__message">Validar hora de reinicio</div>
-                                    </div>
-                                </div>
-                            </template>
-                        </DefaultModalSection>
-                    </v-col> -->
-                </v-row>
+               
                 <v-row>
+                    <v-col cols="3">
+                        <DefaultToggle 
+                            v-model="resource.active"
+                            active-label="Módulo activo"
+                            inactive-label="Módulo inactivo"
+                            dense />
+                    </v-col>
+                    <v-col cols="3">
+                    </v-col>
 
-                    <v-col cols="2">
-                        <!--                        <DefaultFormLabel-->
-                        <!--                            label="Estado"-->
-                        <!--                        />-->
-                        <DefaultToggle v-model="resource.active"/>
+                    <v-col cols="6">
+                        <DefaultToggle
+                            v-if="$root.isSuperUser"
+                            class="--mt-5"
+                            dense
+                            v-model="resource.show_logo_in_app"
+                            active-label="Mostrar logo de módulo en la aplicación"
+                            inactive-label="No mostrar logo de módulo en la aplicación"
+                        />
                     </v-col>
                 </v-row>
             </v-form>
@@ -307,7 +198,7 @@ import draggable from 'vuedraggable'
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector.vue";
 
 const fields = ['name', 'codigo_matricula', 'active', 'reinicios_programado',
-    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo', 'certificate_template_id'];
+    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo', 'certificate_template_id', 'show_logo_in_app'];
 const file_fields = ['logo', 'plantilla_diploma'];
 export default {
     components: {DiplomaSelector, DefaultRichText, draggable},
@@ -326,6 +217,10 @@ export default {
             drag: {
                 main_menu: false,
                 side_menu: false,
+            },
+            sections: {
+                showSectionCertificate: {status: true},
+                showSectionSoporte: {status: true},
             },
             resourceDefault: {
                 id: null,
