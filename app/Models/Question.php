@@ -70,7 +70,7 @@ class Question extends BaseModel
 
         $sum_not_required = $questionsNotRequired->sum('score');
         $i = 0;
-$this->info('Questions count:   ' . count($questions));
+
         if ( ($sum_required + $sum_not_required) >= $base ) {
 
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
