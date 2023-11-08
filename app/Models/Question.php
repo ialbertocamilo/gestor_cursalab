@@ -21,7 +21,7 @@ class Question extends BaseModel
         'topic_id' => 'topic'
     ];
 
-    public function topic() 
+    public function topic()
     {
         return $this->belongsTo(Topic::class);
     }
@@ -70,9 +70,9 @@ class Question extends BaseModel
 
         $sum_not_required = $questionsNotRequired->sum('score');
         $i = 0;
-
+$this->info('Questions count:' . count($questions));
         if ( ($sum_required + $sum_not_required) >= $base ) {
-            
+
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
 
             if ($missing_score == 0) {
@@ -84,14 +84,14 @@ class Question extends BaseModel
                 $val = true;
 
                 while ($val) :
-                    
+
                     $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
 
                     if ($res['sum'] == $missing_score)
                         $val = false;
-                    
+
                 endwhile;
-                
+
                 $preguntas = $questionsRequired->merge($res['data']);
             }
 
@@ -99,7 +99,7 @@ class Question extends BaseModel
 
             return $preguntas->shuffle();
 
-        } 
+        }
 
         return [];
     }
@@ -112,7 +112,7 @@ class Question extends BaseModel
         $data = [];
 
         foreach ($shuffled as $question) {
-            
+
             $s = $question->score + $sum;
 
             if ($s <= $sum_to && $sum <= $sum_to) {
@@ -208,7 +208,7 @@ class Question extends BaseModel
 
             if ($res == 0) {
 
-                $verified = true; 
+                $verified = true;
                 break;
             }
 
@@ -218,7 +218,7 @@ class Question extends BaseModel
         endwhile;
 
         if ($verified) {
-        
+
             $message = 'La evaluación es correcta.';
 
         } else {
@@ -244,7 +244,7 @@ class Question extends BaseModel
         $sum = 0;
 
         foreach ($shuffled as $question) {
-            
+
             $result = $question->score + $sum;
 
             if ($result <= $score_missing && $sum <= $score_missing) {
@@ -277,7 +277,7 @@ class Question extends BaseModel
 
         return ['message' => $message, 'status' => $status];
     }
-    
+
     protected function import($data)
     {
         // Load question type from database
