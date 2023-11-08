@@ -89,10 +89,10 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
                             @onChange="escuelaChange"
                             :maxValuesSelected="maxValuesSelected.schools"
+                            :showSelectAll="maxValuesSelected.show_select_all"
                         />
                     </div>
                     <!-- Curso -->
@@ -296,6 +296,7 @@ export default {
             maxValuesSelected:{
                 modules:4,
                 schools:10,
+                show_select_all:false
             }
         };
     },
@@ -430,16 +431,15 @@ export default {
     },
     mounted() {
         this.fetchFiltersData();
-        const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io'];
+        const domainsToExcludeConstraint = ['gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io'];
         const currentDomain = new URL(window.location.href).hostname;
-        if(this.adminId == 43617){
-            domainsToExcludeConstraint.forEach(domain => {
-                if(domain.includes(currentDomain)){
-                    this.maxValuesSelected.modules = 0;
-                    this.maxValuesSelected.schools = 0;
-                }
-            });
-        }
+        domainsToExcludeConstraint.forEach(domain => {
+            if(domain.includes(currentDomain)){
+                this.maxValuesSelected.modules = 0;
+                this.maxValuesSelected.schools = 0;
+                this.maxValuesSelected.show_select_all = true;
+            }
+        });
     }
 }
 
