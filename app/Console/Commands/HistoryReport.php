@@ -44,7 +44,8 @@ class HistoryReport extends Command
         foreach ($modulesIds as $moduleId) {
             $response = Http::acceptJson()->post($url, [
                 'workspaceId' => $workspace->id,
-                'modules' => [$moduleId]
+                'modules' => [$moduleId],
+                'adminId' => 2 // <- Definir aqui el id del gestor de SFH
             ]);
 
             $this->info($response->getStatusCode());
