@@ -69,7 +69,6 @@ class Question extends BaseModel
         $questionsNotRequired = $questions->where('required', '<>', 1)->whereNotNull('score');
 
         $sum_not_required = $questionsNotRequired->sum('score');
-        $i = 0;
 
         // Round score total to compare, since base changing can cause a
         // difference in decimals, i.e: 19.9999999995 instead of 20
