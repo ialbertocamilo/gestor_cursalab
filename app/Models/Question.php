@@ -71,7 +71,10 @@ class Question extends BaseModel
         $sum_not_required = $questionsNotRequired->sum('score');
         $i = 0;
 
-        if ( ($sum_required + $sum_not_required) >= $base ) {
+        // Round score total to compare, since base changing can cause a
+        // difference in decimals, i.e: 19.9999999995 instead of 20
+
+        if ( round($sum_required + $sum_not_required, 2) >= $base ) {
 
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
 
