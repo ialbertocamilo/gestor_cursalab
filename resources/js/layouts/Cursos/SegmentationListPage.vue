@@ -58,7 +58,7 @@
                     <v-col cols="3">
                         <DefaultAutocomplete
                             dense
-                            label="Escuelas"
+                            :label="filters.segmented_module ? 'Escuelas' : 'Seleccione un módulo'"
                             :items="selects.schools"
                             v-model="filters.schools"
                             item-text="name"
