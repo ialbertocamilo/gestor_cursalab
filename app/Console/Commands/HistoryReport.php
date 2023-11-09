@@ -31,9 +31,10 @@ class HistoryReport extends Command
     {
 
         $url = rtrim(env('REPORTS_BASE_URL'), '/') . '/exportar/users_history';
-        $this->info($url);
 
         $workspace = Workspace::where('slug', 'super-food-holding-peru')->first();
+        if (!$workspace) return Command::SUCCESS;
+
         $modulesIds = Workspace::query()
             ->where('active', 1)
             ->where('parent_id', $workspace->id)
@@ -45,15 +46,11 @@ class HistoryReport extends Command
             $response = Http::acceptJson()->post($url, [
                 'workspaceId' => $workspace->id,
                 'modules' => [$moduleId],
-                'adminId' => 2 // <- Definir aqui el id del gestor de SFH
+                'adminId' => 21494 // <- Definir aqui el id del gestor de SFH
             ]);
 
             $this->info($response->getStatusCode());
         }
-
-       // dd($response);
-       // dd($response->getStatusCode());
-       // dd($response->getBody()->getContents());
 
         return Command::SUCCESS;
     }
