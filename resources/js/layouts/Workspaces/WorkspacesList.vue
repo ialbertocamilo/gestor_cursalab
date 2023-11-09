@@ -79,8 +79,8 @@
                     clearable dense
                     v-model="filters.q"
                     label="Buscar por nombre..."
-                    @onEnter="loadData"
-                    @clickAppendIcon="loadData"
+                    @onEnter="loadData(1)"
+                    @clickAppendIcon="loadData(1)"
                     append-icon="mdi-magnify"
                 />
             </v-col>
@@ -91,7 +91,7 @@
                     :items="selects.statuses"
                     v-model="filters.active"
                     label="Estado de workspace"
-                    @onChange="loadData"
+                    @onChange="loadData(1)"
                     item-text="name"
                 />
             </v-col>
@@ -623,20 +623,20 @@ export default {
         /**
          * Load workspaces list from server
          */
-        loadData() {
+        // loadData() {
 
-            let vue = this;
+        //     let vue = this;
 
-            let url = `/workspaces/search`
+        //     let url = `/workspaces/search`
 
-            this.$http
-                .get(url)
-                .then(({data}) => {
-                    vue.workspaces = data.data.data;
-                    this.loadSession();
-                })
-        }
-        ,/**
+        //     this.$http
+        //         .get(url)
+        //         .then(({data}) => {
+        //             vue.workspaces = data.data.data;
+        //             this.loadSession();
+        //         })
+        // },
+        /**
          * Load session data from server
          */
         duplicateWorkspace(workspaceId) {

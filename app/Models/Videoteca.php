@@ -78,8 +78,15 @@ class Videoteca extends BaseModel
 
     public function modules()
     {
+        // return $this->belongsToMany(
+        //     CriterionValue::class,
+        //     'videoteca_module',
+        //     'videoteca_id',
+        //     'module_id'
+        // );
+
         return $this->belongsToMany(
-            CriterionValue::class,
+            Workspace::class,
             'videoteca_module',
             'videoteca_id',
             'module_id'

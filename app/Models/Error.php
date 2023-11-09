@@ -74,8 +74,8 @@ class Error extends Model
         $notifier = "[{$customer}] [ID#{$user->id}] " . $user->name;
 
         if ($platform_code == 'app') {
-            $module_code = $user->subworkspace->code ?? 'DEFAULT';
-            $notifier = $notifier . ' (' . $user->document . ') => [MOD-' . $module_code . ']';
+            $module_code = $user->subworkspace->slug ?? 'DEFAULT';
+            $notifier = $notifier . ' (' . $user->document . ') => [' . strtoupper($module_code) . ']';
         }
 
         return $notifier;

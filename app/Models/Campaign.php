@@ -340,7 +340,7 @@ class Campaign extends Model
 
             $data_config = Arr::except($data_config, ['id']);
             
-            info(['$data_config' => $data_config]);
+            // info(['$data_config' => $data_config]);
             $campaign = self::find($campaign_id);
             $campaign->update($data_config);
 
@@ -403,7 +403,7 @@ class Campaign extends Model
 
     protected function check_date($condition, $calcdate, $in_user_date) {
         $conditionState = 0;
-        info(['calcdate'=> $calcdate, 'in_user_date' => $in_user_date]);
+        // info(['calcdate'=> $calcdate, 'in_user_date' => $in_user_date]);
 
         switch($condition) {
             case 0: $conditionState = ($in_user_date >= $calcdate); break;
@@ -438,6 +438,10 @@ class Campaign extends Model
             }else{
                 $calcdate = self::calc_date($condition, $value);
                 $requirement_state = self::check_date($condition, $calcdate, $user_fecha->value_date);
+            }
+            // Si al menos 1 requisito no se cumple no debería ver la camapaña 
+            if(!$requirement_state){
+                return $requirement_state;
             }
         }
 

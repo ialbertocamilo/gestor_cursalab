@@ -4,12 +4,16 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-                <!--                <DefaultActivityButton-->
-                <!--                    :label="'Actividad'"-->
-                <!--                    @click="activity"/>-->
+        
                 <DefaultModalButton
+                    :label="'Crear escuela'"
+                    @click="openFormModal(modalSchoolOptions, null, 'create')"
+                />
+                    <!-- v-if="$root.isSuperUser" -->
+                <!-- <DefaultModalButton
                     :label="'Escuela'"
-                    @click="openCRUDPage(`/escuelas/create`)"/>
+                    @click="openCRUDPage(`/escuelas/create`)"
+                /> -->
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -111,8 +115,18 @@
                         'Eliminar escuela'
                     )
                 "
+
+                @edit="openFormModal(modalSchoolOptions, $event, 'edit', `Editar escuela - ${$event.name}`)"
             />
-                
+            
+            <SchoolFormModal
+                width="65vw"
+                :ref="modalSchoolOptions.ref"
+                :options="modalSchoolOptions"
+                :subworkspace_id="param_module_id"
+                @onConfirm="closeFormModal(modalSchoolOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalSchoolOptions)"
+            />
 
             <EscuelaValidacionesModal
                 width="50vw"
@@ -149,7 +163,7 @@
 </template>
 
 <script>
-import EscuelaFormModal from "./EscuelaFormModal";
+import SchoolFormModal from "./SchoolFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import EscuelaValidacionesModal from "./EscuelaValidacionesModal";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
@@ -161,7 +175,7 @@ import DuplicateForm from "./DuplicateForm";
 export default {
     props: ["workspace_id", "workspace_name"],
     components: {
-        EscuelaFormModal,
+        SchoolFormModal,
         EscuelaValidacionesModal,
         DialogConfirm,
         DefaultStatusModal,
@@ -182,8 +196,8 @@ export default {
                 ref: 'escuelasTable',
                 headers: [
                     // {text: "Orden", value: "position", align: 'center', model: 'School', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombres", value: "name"},
+                    {text: "Portada", value: "new_image", align: 'center', sortable: false},
+                    {text: "Nombre", value: "escuela_nombre", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
                     {text: "Módulos", value: "images", align: 'center', sortable: false},
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
@@ -200,9 +214,16 @@ export default {
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
+                        type: 'action',
+                        method_name: 'edit',
+                        // show_condition: "is_cursalab_super_user"
                     },
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'route',
+                    //     route: 'edit_route'
+                    // },
                 ],
                 more_actions: [
                     {
@@ -289,6 +310,17 @@ export default {
             },
             modalDateFilter1: {
                 open: false,
+            },
+
+            modalSchoolOptions: {
+                ref: 'SchoolFormModal',
+                open: false,
+                base_endpoint: '/escuelas',
+                confirmLabel: 'Guardar',
+                resource: 'escuela',
+                title: '',
+                action: null,
+                persistent: true,
             },
         }
     },

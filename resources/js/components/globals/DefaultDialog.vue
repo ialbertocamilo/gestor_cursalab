@@ -3,11 +3,11 @@
         class="default-dialog"
         v-model="options.open"
         :width="width"
-        scrollable
         :persistent="options.persistent"
+        scrollable
         @click:outside="closeModalOutside"
     >
-        <v-card>
+        <v-card :height="height">
             <div v-if="customTitle">
                 <slot name="card-title"/>
             </div>
@@ -15,7 +15,7 @@
                 <v-card-title class="default-dialog-title mod_head" v-if="options.title_modal">
                     <span v-html="options.title_modal ? options.title_modal : options.title"></span>
                     <v-btn icon :ripple="false" color="white"
-                           @click="closeModal">
+                           @click="closeModal" v-show="showCloseIcon">
                         <v-icon v-text="'mdi-close'"/>
                     </v-btn>
                 </v-card-title>
@@ -24,7 +24,7 @@
                     <slot name="title-icon"/>
                     <v-spacer/>
                     <v-btn
-                        v-show="options.showCloseIcon"
+                        v-show="showCloseIcon"
                         icon :ripple="false" :color="colorCloseIcon"
                            @click="closeModalFromIcon">
                         <v-icon v-text="'mdi-close'"/>
@@ -82,6 +82,10 @@ export default {
         },
         width: {
             default: '70vw'
+        },
+        height: {
+            default: ''
+            // default: '85vh'
         },
         noPaddingCardText: {
             type: Boolean,
@@ -141,6 +145,9 @@ export default {
         confirmModal() {
             let vue = this
             vue.$emit('onConfirm')
+        },
+        onScroll() {
+            console.log('scrolled')
         }
     }
 }

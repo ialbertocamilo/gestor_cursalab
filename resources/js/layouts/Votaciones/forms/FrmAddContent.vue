@@ -141,7 +141,7 @@
 												:class="{'text-primary-sub': showLinkVideo }"
 												>
 												<span class="mdi mdi-youtube fa-2x mb-2"></span>
-												<span>Link de video</span>
+												<span>Link/Código de video</span>
 											</v-card-text>
 										</v-card>
 									</v-col>
@@ -181,7 +181,7 @@
 										clearable
 										dense 
 										v-model="frm.linked" 
-										label="Link (Youtube o Vimeo)" 
+										label="Link/Código (Youtube o Vimeo)" 
 										:rules="rules.linked"
 									/>
 								</div>
@@ -379,7 +379,7 @@
 				if(!file_media && !linked) return; //console.log('ambos nulos')
 				if(!valObjNull(vm.frm, ['file_media', 'linked'])) return; //console.log('jumped valObjNull')
 				if(!valString(title,[5, 70])) return;
-				if(linked && !valDomains(linked, ['youtube','youtu','vimeo'])) return;
+				// if(linked && !valDomains(linked, ['youtube','youtu','vimeo'])) return;
 				if(!valString(description,[5, 200])) return;
 
 				// validamos el dialogMode 

@@ -2,6 +2,7 @@
     <v-select
         attach
         outlined
+        persistent
         :dense="dense"
         hide-details="auto"
         :disabled="disabled"

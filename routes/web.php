@@ -77,10 +77,10 @@ Route::get('dnx/{id}', [GestorController::class, 'descargaArchivo']);
 Route::get('dnv/{id}', [GestorController::class, 'descargaVideo']);
 
 //Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
-Route::get('tools/ver_diploma/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate']);
+Route::get('tools/ver_diploma/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate'])->name('diplomas.view');
 // Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
 //Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
-Route::get('tools/dnc/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate']);
+Route::get('tools/dnc/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate'])->name('diplomas.download');
 // Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
 Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');
@@ -118,7 +118,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
     
 
     
@@ -183,7 +182,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('procesos-masivos')->middleware('hasHability:process-massive')->group(base_path('routes/cms/masivos.php'));
     Route::prefix('importar-notas')->middleware('hasHability:upload-grades-massive')->group(base_path('routes/cms/importar-notas.php'));
 
-    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index')->middleware('hasHability:admin,super-user');
+    Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 
     Route::prefix('resumen_encuesta')->middleware('hasHability:poll-report')->group(base_path('routes/cms/resumen_encuesta.php'));
     
@@ -195,9 +194,6 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     
     // === votaciones === 
     Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
-
-    Route::prefix('beneficios')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/beneficios.php'));
-    Route::prefix('speakers')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/speakers.php'));
 
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
 
