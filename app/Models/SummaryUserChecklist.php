@@ -11,7 +11,10 @@ class SummaryUserChecklist extends Summary
 
     protected $table = 'summary_user_checklist';
     protected $fillable = ['user_id','assigned','completed','advanced_percentage'];
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     protected function updateUserData($user = null)
     {
         $user = $user ?? auth()->user();

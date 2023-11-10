@@ -53,7 +53,9 @@ class GenerateStatusMediaProgressCommand extends Command
         $bar = $this->output->createProgressBar($total_records);
         $bar->start();
 
-        $query->chunkById($chunk_total, function ($summary_topics) use ($bar) {
+        $now_formatted = now()->format('Y-m-d H:i:s');
+
+        $query->chunkById($chunk_total, function ($summary_topics) use ($bar, $now_formatted) {
 
             $chunkData = [];
 
@@ -77,6 +79,8 @@ class GenerateStatusMediaProgressCommand extends Command
                     'media_progress' => json_encode($user_progress_media),
                     'last_media_access' => null,
                     'last_media_duration' => null,
+                    
+                    'updated_at' => $sum_top->updated_at ? $sum_top->updated_at->format('Y-m-d H:i:s') : $now_formatted,
                 ];
             }
 
