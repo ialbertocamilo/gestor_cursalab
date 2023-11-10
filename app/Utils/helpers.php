@@ -54,7 +54,7 @@ function generateSignedUrl(string $key, string $expires = '+360 minutes'): strin
     return (string) $request->getUri();
 }
 
-function reportsSignedUrl(string $key, string $expires = '+60 minutes'): string
+function reportsSignedUrl(string $key = '', string $expires = '+60 minutes'): string
 {
     $config = config('filesystems.disks.s3');
 
@@ -648,7 +648,7 @@ function extractYoutubeVideoCode(string $url): ?string
 function extractVimeoVideoCode(string $url): ?string
 {
     if (!str_contains($url, 'https://')) return $url;
-    
+
     $regex = '~
         # Match Vimeo link and embed code
         (?:<iframe [^>]*src=")?              # If iframe match up to first quote of src
@@ -665,8 +665,8 @@ function extractVimeoVideoCode(string $url): ?string
         (?:[^>]*></iframe>)?                 # Match the end of the iframe
         (?:<p>.*</p>)?                       # Match any title information stuff
         ~ix';
-    
+
     preg_match( $regex, $url, $matches );
-    
+
     return $matches[1];
 }
