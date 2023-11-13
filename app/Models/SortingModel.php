@@ -254,8 +254,9 @@ class SortingModel extends Model
                         })->orderBy('position','desc')
                         ->first()?->position;
         //insert
-        $data['position'] = $last_postion+1 ?? 1;
-        $pivotModel::create($data);
+        $insertModel = $data;
+        $insertModel['position'] = $last_postion+1 ?? 1;
+        $pivotModel::updateOrCreate($data,$insertModel);
         cache_clear_model($model);
     }
     public static function deletePositionInPivotTable($pivotModel,$model,$fields_to_search){
