@@ -357,15 +357,13 @@ export default {
         changeConstraints(){
             const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
             const currentDomain = new URL(window.location.href).hostname;
-            if(this.adminId == 43617){
-                domainsToExcludeConstraint.forEach(domain => {
-                    if(domain.includes(currentDomain)){
-                        this.maxValuesSelected.modules = 0;
-                        this.maxValuesSelected.schools = 0;
-                        this.maxValuesSelected.show_select_all = true;
-                    }
-                });
-            }
+            domainsToExcludeConstraint.forEach(domain => {
+                if(domain.includes(currentDomain)){
+                    this.maxValuesSelected.modules = 0;
+                    this.maxValuesSelected.schools = 0;
+                    this.maxValuesSelected.show_select_all = true;
+                }
+            });
         },
         async fetchFiltersData () {
 
