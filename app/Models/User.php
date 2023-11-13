@@ -652,7 +652,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
-
+        return $user;
         info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
     public function sendWelcomeEmail($from_massive=false){

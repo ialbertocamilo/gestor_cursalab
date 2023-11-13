@@ -1,6 +1,6 @@
 <template>
     <v-select
-        attach
+        :attach="attach"
         outlined
         persistent
         :dense="dense"
@@ -134,6 +134,10 @@ export default {
         countShowValues: {
             type: String | Number,
             default: 1
+        },
+        attach:{
+            type:Boolean,
+            default:true
         }
     },
     computed: {

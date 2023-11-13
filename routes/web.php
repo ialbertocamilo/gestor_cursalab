@@ -198,4 +198,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
 
     Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
+
+    Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
+
 });
