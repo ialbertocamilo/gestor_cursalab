@@ -357,6 +357,7 @@ export default {
         changeConstraints(){
             const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
             const currentDomain = new URL(window.location.href).hostname;
+            
             domainsToExcludeConstraint.forEach(domain => {
                 if(domain.includes(currentDomain)){
                     this.maxValuesSelected.modules = 0;
