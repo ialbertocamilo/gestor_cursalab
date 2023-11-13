@@ -369,7 +369,7 @@ const app = new Vue({
                         const newBlob = new Blob([blob], { type: blob.type });
 
                         // Guardar el Blob con el nuevo nombre usando FileSaver.js
-                        FileSaver.saveAs(newBlob, name);
+                        FileSaver.saveAs(newBlob, name+'.xlsx');
                     })
                     .catch(error => {
                         console.error("Error al descargar el archivo:", error);
