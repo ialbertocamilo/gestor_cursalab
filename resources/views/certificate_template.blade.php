@@ -45,7 +45,7 @@
         @else
 
             {{-- position: absolute; --}}
-            <img style="z-index: 0; top: 0; left: 0; max-height: 70%; max-width: 70%;"
+            <img style="z-index: 0; top: 0; left: 0; max-height: 85%; max-width: 85%;"
                  src="{{ $data['image'] }}"
                  alt="Certificado">
 
