@@ -377,7 +377,6 @@ const app = new Vue({
             } catch (error) {
                 console.error("Error general:", error);
             }
-
         }
     }
 });
