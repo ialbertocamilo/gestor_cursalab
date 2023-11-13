@@ -254,8 +254,23 @@ class SortingModel extends Model
                         })->orderBy('position','desc')
                         ->first()?->position;
         //insert
-        $data['position'] = $last_postion+1 ?? 1;
-        $pivotModel::create($data);
+        $insertModel = $data;
+        $insertModel['position'] = $last_postion+1 ?? 1;
+        // $pivotModel::updateOrCreate($data,$insertModel);
+        $findRelation = $pivotModel::where(function($q) use ($data){
+            foreach ($data as $key => $value) {
+                $q->where($key,$value);
+            }
+        })->first();
+        if($findRelation){
+            $pivotModel::where(function($q) use ($data){
+                foreach ($data as $key => $value) {
+                    $q->where($key,$value);
+                }
+            })->update(['position'=>$insertModel['position']]);
+        }else{
+            $pivotModel::insert($insertModel);
+        }
         cache_clear_model($model);
     }
     public static function deletePositionInPivotTable($pivotModel,$model,$fields_to_search){

@@ -37,6 +37,7 @@ use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\SummaryUserChecklist;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
 use App\Imports\MassiveUploadTopicGrades;
@@ -112,8 +113,25 @@ class restablecer_funcionalidad extends Command
         // $this->restoreJsonNotification();
         // $this->restoreSummariesWithTypeTopicGradesMassive();
         // $this->getInfoSupervisors();
+        // $this->updateChecklisSummaries();
         $this->reportHoursCapacitation();
         $this->info("\n Fin: " . now());
+        // info(" \n Fin: " . now());
+    }
+    public function updateChecklisSummaries(){
+        $users = User::query()
+        ->whereHas('subworkspace',function($q){
+            $q->whereIn('id',[12,13,30]);
+        })->whereHas('summary_checklist')->get();
+        $_bar = $this->output->createProgressBar($users->count());
+        $_bar->start();
+        foreach ($users as $user) {
+            if(SummaryUserChecklist::where('user_id',$user->id)->first()){
+                SummaryUserChecklist::updateUserData($user);
+            }
+            $_bar->advance();
+        }
+        // $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
     }
     public function reportHoursCapacitation(){

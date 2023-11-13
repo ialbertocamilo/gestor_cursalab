@@ -68,7 +68,7 @@
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
                             @onChange="moduloChange"
-                            :maxValuesSelected="4"
+                            :maxValuesSelected="maxValuesSelected.modules"
                         />
                     </div>
                     <!-- Escuela -->
@@ -82,10 +82,10 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
                             @onChange="escuelaChange"
-                            :maxValuesSelected="10"
+                            :maxValuesSelected="maxValuesSelected.schools"
+                            :showSelectAll="maxValuesSelected.show_select_all"
                         />
                     </div>
                     <!-- Curso -->
@@ -100,7 +100,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
+                            :showSelectAll="true"
                             placeholder="Seleccione los cursos"
                         />
                     </div>
@@ -115,7 +115,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
+                            :showSelectAll="true"
                             placeholder="Seleccione los temas"
                         />
                     </div>
@@ -337,18 +337,36 @@ export default {
             tipocurso: false,
             desaprobados: true,
             realizados: true,
-            porIniciar: true
+            porIniciar: true,
+            maxValuesSelected:{
+                modules:4,
+                schools:10,
+                show_select_all:false
+            }
         };
     },
     mounted() {
-        this.fetchFiltersData()
-    }
-    ,
+        this.fetchFiltersData();
+        this.changeConstraints();
+    },
     methods: {
         /**
          * Fetch schools
          * @returns {Promise<void>}
          */
+        changeConstraints(){
+            const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
+            const currentDomain = new URL(window.location.href).hostname;
+            if(this.adminId == 43617){
+                domainsToExcludeConstraint.forEach(domain => {
+                    if(domain.includes(currentDomain)){
+                        this.maxValuesSelected.modules = 0;
+                        this.maxValuesSelected.schools = 0;
+                        this.maxValuesSelected.show_select_all = true;
+                    }
+                });
+            }
+        },
         async fetchFiltersData () {
 
             let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0`

@@ -11,7 +11,10 @@ class CriterionWorkspace extends Model
 
     protected $table = 'criterion_workspace';
 
-
+    public function criterion()
+    {
+        return $this->belongsTo(Criterion::class, 'criterion_id');
+    }
     /**
      * Load workspace's criteria for reports
      * @param $workspaceId

@@ -256,6 +256,17 @@
                                 </v-col>
                                 <v-col cols="6">
                                     <DefaultSelectOrUploadMultimedia 
+                                        ref="inputFondoApp" 
+                                        v-model="resource.fondo_invitados_app"
+                                        label="Tamaño máximo (1920x1280 px)"
+                                        label-button="Insertar fondo de sección de invitados"
+                                        :file-types="['image']"
+                                        :rules="rules.fondo_invitados_app"
+                                        @onSelect="setFile($event, resource,'fondo_invitados_app')"
+                                    />
+                                </v-col>
+                                <v-col cols="6">
+                                    <DefaultSelectOrUploadMultimedia 
                                         ref="inputLogoApp" 
                                         v-model="resource.logo_app"
                                         label="Imagen (560x224 px)"
@@ -446,7 +457,7 @@ const fields = [
     'fondo', 'logo', 'icono', 'logo_empresa', 'template',
     //app
     'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
-    'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',
+    'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app','fondo_invitados_app' ,'logo_app',
     'male_logo', 'female_logo',
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
     'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo',
@@ -457,7 +468,7 @@ const file_fields = [
     //gestor
     'fondo', 'logo', 'icono', 'logo_empresa',
     //app
-    'fondo_app', 'logo_app', 'logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo',
+    'fondo_app', 'logo_app','fondo_invitados_app','logo_cursalab', 'completed_courses_logo', 'enrolled_courses_logo','diplomas_logo',
     // 'male_logo', 'female_logo'
 ];
 
@@ -477,6 +488,7 @@ const file_fields = [
                     titulo_login_app: this.getRules(['required', 'max:255']),
                     subtitulo_login_app: this.getRules(['required', 'max:255']),
                     fondo_app: this.getRules(['required']),
+                    fondo_invitados_app: this.getRules(['required']),
                     logo_app: this.getRules(['required']),
                 }
             }
@@ -499,6 +511,9 @@ const file_fields = [
 
                 //app
                 vue.removeFileFromDropzone(vue.resource.fondo_app, 'inputFondoApp')
+                vue.removeFileFromDropzone(vue.resource.fondo_invitados_app, 'inputFondoInvitadosApp')
+
+                this.getRules(['required'])
                 vue.removeFileFromDropzone(vue.resource.logo_app, 'inputLogoApp')
                 vue.removeFileFromDropzone(vue.resource.logo_cursalab,'inputLogoCursalab');
                 vue.removeFileFromDropzone(vue.resource.completed_courses_logo,'inputCompletedCoursesLogo');

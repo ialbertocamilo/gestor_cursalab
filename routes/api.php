@@ -1,18 +1,19 @@
 <?php
 
-use App\Http\Controllers\ApiRest\AuthController;
-use App\Http\Controllers\ApiRest\AuthImpersonationController;
-use App\Http\Controllers\ApiRest\RestAyudaController;
-use App\Http\Controllers\ApiRest\RestController;
-use App\Http\Controllers\ApiRest\RestMeetingController;
-use App\Http\Controllers\ApiRest\RestDataController;
-use App\Http\Controllers\ApiRest\RestReportesSupervisores;
-use App\Http\Controllers\ApiRest\RestReportsUsersController;
-use App\Http\Controllers\ApiRest\RestVademecumController;
-use App\Http\Controllers\Auth\ForgotPasswordApiController;
-use App\Http\Controllers\Auth\ResetPasswordApiController;
-use App\Http\Controllers\FirebaseController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FirebaseController;
+use App\Http\Controllers\GuestRestController;
+use App\Http\Controllers\ApiRest\AuthController;
+use App\Http\Controllers\ApiRest\RestController;
+use App\Http\Controllers\ApiRest\RestDataController;
+use App\Http\Controllers\ApiRest\RestAyudaController;
+use App\Http\Controllers\ApiRest\RestMeetingController;
+use App\Http\Controllers\ApiRest\RestVademecumController;
+use App\Http\Controllers\Auth\ResetPasswordApiController;
+use App\Http\Controllers\ApiRest\RestReportesSupervisores;
+use App\Http\Controllers\Auth\ForgotPasswordApiController;
+use App\Http\Controllers\ApiRest\RestReportsUsersController;
+use App\Http\Controllers\ApiRest\AuthImpersonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,12 +122,20 @@ Route::group(['middleware' => 'api', 'prefix' => 'rest'], function () {
 
     Route::post('/meetings/zoom/webhook-end-meeting', [RestMeetingController::class, 'zoomWebhookEndMeeting']);
     Route::post('/meetings/{meeting}/finish', [RestMeetingController::class,'finishMeeting']);
+    /* apis para el formulario de invitados */
+    Route::get('/verify-guest-url', [GuestRestController::class,'verifyGuestUrl']);
+    Route::get('/child-criterion-values', [GuestRestController::class,'childCriterionValues']);
+    Route::post('/send-code-guest', [GuestRestController::class,'sendGuestCodeVerificationByEmail']);
+    Route::post('/verify-code-guest', [GuestRestController::class,'verifyGuestCodeVerificationByEmail']);
+    Route::post('/store-guest', [GuestRestController::class,'storeGuest']);
+    /* */
 });
 
 Route::post('password/email', [ForgotPasswordApiController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [ResetPasswordApiController::class, 'reset']);
 Route::post('cambiar-contrasenia', [ResetPasswordApiController::class, 'reset']);
 Route::get('notifications', [FirebaseController::class, 'notificationValues']);
+
 
 // Route::get('notifications', function () {
 //     return response()->json([
