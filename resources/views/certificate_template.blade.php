@@ -44,10 +44,11 @@
 
         @else
 
-            <img style="position: absolute; z-index: 0; top: 0; left: 0"
+            {{-- position: absolute; --}}
+            <img style="z-index: 0; top: 0; left: 0; max-height: 70%; max-width: 70%;"
                  src="{{ $data['image'] }}"
                  alt="Certificado">
-            <span class="nombre default">   </span>
+
         @endif
 
     </div>
