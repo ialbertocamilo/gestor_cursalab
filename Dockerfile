@@ -85,6 +85,12 @@ COPY --from=frontend --chown=www-data /opt/apps/laravel-in-kubernetes/public /op
 RUN php artisan event:cache && \
     php artisan view:cache
 
+COPY --chown=www-data docker/laravel/oauth/oauth-private.key /opt/apps/laravel-in-kubernetes/storage/oauth-private.key
+COPY --chown=www-data docker/laravel/oauth/oauth-public.key /opt/apps/laravel-in-kubernetes/storage/oauth-public.key
+
+RUN chmod -R 660  storage/oauth-private.key && \
+    chmod -R 660  storage/oauth-public.key
+
 COPY --chown=www-data ./docker/laravel/entrypoint.sh ./entrypoint.sh
 
 # Dar permisos de ejecución al script de entrada
