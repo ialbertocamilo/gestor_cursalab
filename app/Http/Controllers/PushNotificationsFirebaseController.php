@@ -84,28 +84,27 @@ class PushNotificationsFirebaseController extends Controller
     {
 //        dd($request->all());
         $_destinatarios = collect();
-
+        $selected_detail = collect(json_decode($request->selected_detail));
         foreach ($request->destinatarios as $module) {
 
             $sub_workspace = Workspace::where('criterion_value_id', $module['criterion_value_id'])->first();
-
+            if(!$selected_detail->where('modulo_id',$module['criterion_value_id'])->first()){
+                continue;
+            }
             if (!$module['carreras_selected']) {
 
                 $query = User::query();
 
             } else {
-                $carreras_values_id = array_column($module['carreras_selected'], 'id');
+                $carreras_values_id = $module['carreras_selected'];
 //                info($carreras_values_id);
                 $query = User::whereHas('criterion_values', function ($q) use ($module, $carreras_values_id) {
                     $q->whereIn('id', $carreras_values_id);
                 });
             }
-
-            $users = $query->where('subworkspace_id', $sub_workspace->id)->pluck('id');
-
+            $users = $query->where('subworkspace_id', $sub_workspace->id)->where('active',1)->select('id')->get()->pluck('id');
             $_destinatarios = $_destinatarios->merge($users->toArray());
         }
-
 //        dd($request->all());
         // Calculates notification time
         $push_chunk = 500;
@@ -264,8 +263,13 @@ class PushNotificationsFirebaseController extends Controller
 
         $estado = ['PENDIENTE', 'ENVIADO'];
         $segmentacion = json_decode($notificacion->destinatarios);
-        if (isset($segmentacion[0]) || isset($segmentacion[0]['id'])) {
-            $segmentacion = NULL;
+        if (!isset($segmentacion[0])) {
+            $segmentacion = [];
+        }
+        foreach ($segmentacion as $sgt) {
+            if (!empty($sgt->carreras) && is_object($sgt->carreras[0]) && empty((array)$sgt->carreras[0])) {
+                $sgt->carreras = [];
+            }
         }
         $resumen_estado['alcanzados'] = $notificacion->success;
         $resumen_estado['no_alcanzados'] = $notificacion->failure;
