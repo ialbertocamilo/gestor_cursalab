@@ -298,7 +298,7 @@ const app = new Vue({
                         }
                     }),
                     listeners: {
-                        download: () => this.downloadReport(e.url, e.name)
+                        download: () => this.downloadReport(e.url, `${e.name}.xlsx`)
                     }
                 });
             } else {
@@ -353,7 +353,6 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-
             try {
                 // Realizar una solicitud para obtener el archivo desde la URL
                 fetch(url)
@@ -369,8 +368,7 @@ const app = new Vue({
                         const newBlob = new Blob([blob], { type: blob.type });
 
                         // Guardar el Blob con el nuevo nombre usando FileSaver.js
-                        FileSaver.saveAs(newBlob, name+
-                            '.xlsx');
+                        FileSaver.saveAs(newBlob, name );
                     })
                     .catch(error => {
                         console.error("Error al descargar el archivo:", error);
@@ -378,6 +376,6 @@ const app = new Vue({
             } catch (error) {
                 console.error("Error general:", error);
             }
-        }
+        },
     }
 });
