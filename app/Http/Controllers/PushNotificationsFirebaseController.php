@@ -96,7 +96,7 @@ class PushNotificationsFirebaseController extends Controller
                 $query = User::query();
 
             } else {
-                $carreras_values_id = $module['carreras_selected'];
+                $carreras_values_id = array_column($module['carreras_selected'],'id');
 //                info($carreras_values_id);
                 $query = User::whereHas('criterion_values', function ($q) use ($module, $carreras_values_id) {
                     $q->whereIn('id', $carreras_values_id);
