@@ -5,8 +5,8 @@
             <th width="300px" align="center"><b>CURSO</b></th>
             <th width="80px" align="center"><b>ESTADO</b></th>
             {{-- <th width="250px" align="center"><b>SEGMENTO</b></th> --}}
-            <th width="200px" align="center"><b>SEGMENTO</b></th>
-            <th width="100px" align="center"><b>BLOQUE</b></th>
+            <th width="200px" align="center"><b>TIPO DE SEGMENTACIÓN</b></th>
+            <th width="100px" align="center"><b>SEGMENTO</b></th>
             <th width="150px" align="center"><b>CRITERIO</b></th>
             <th width="200px" align="center"><b>VALOR</b></th>
         </tr>
@@ -33,7 +33,7 @@
                         <td align="center">{{ $course->active ? 'Activo' : 'Inactivo' }}</td>
                         {{-- <td align="left">{{ $segment->name }}</td> --}}
                         <td align="left">{{ $segment->type->name }}</td>
-                        <td align="center">Bloque {{ $i }}</td>
+                        <td align="center">Segmento {{ $i }}</td>
                         <td align="center">{{ $segment_value->criterion->name }}</td>
                         {{-- <td align="center">{{ $segment_value->criterion->field_type->name }}</td> --}}
 
