@@ -30,7 +30,7 @@ class Guest extends BaseModel {
         if ( $request->q ){
             $query->where( 'email', 'like', "%$request->q%" );
         }
-        $field = $request->sortBy ?? 'created_at';
+        $field = $request->sortBy ?? 'updated_at';
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
         $query->orderBy( $field, $sort );
         return $query->paginate( $request->paginate );
