@@ -65,7 +65,7 @@ class MeetingAttendantsExport implements FromView, WithTitle, ShouldAutoSize, Wi
 
         $isAllowedToViewAll = auth()->user()->isMasterOrAdminCursalab();
 
-        info("PUEDE VER TODO: " . $isAllowedToViewAll);
+        // info("PUEDE VER TODO: " . $isAllowedToViewAll);
         return view('meetings.exports.meetings_attendants_export', compact('attendants','isAllowedToViewAll','criteria'));
     }
 

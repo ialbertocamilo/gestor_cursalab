@@ -1731,4 +1731,19 @@ class Course extends BaseModel
             'school_id' => $school->id,
         ]);
     } 
+
+    protected function getSegmentationDataByWorkspace($workspace)
+    {
+        $courses = Course::with([
+                    'segments' => [
+                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'], 
+                        'type:id,name',
+                    ]
+                ])
+                ->select('id', 'name', 'active')
+                ->whereRelationIn('workspaces', 'id', [$workspace->id])
+                ->get();
+
+        return $courses;
+    }
 }

@@ -111,7 +111,7 @@
                                     <v-row justify="center">
                                         <v-col cols="2" class="d-flex justify-content-center align-items-center">
                                             <DefaultToggle
-                                                v-model="resource.active_results"
+                                                v-model="resource.active_results" dense
                                             />
                                         </v-col>
 

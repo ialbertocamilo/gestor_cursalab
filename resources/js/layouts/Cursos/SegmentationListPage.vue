@@ -27,15 +27,18 @@
 
                 <v-spacer/>
 
+                <a style="font-size: 0.8em; font-weight: bold;" href="/cursos/download-segmentation"
+                    target="_blank" v-if="$root.isSuperUser" class="mr-5"
+                >
+                    <i aria-hidden="true" class="v-icon notranslate mr-1 mdi mdi-download"></i>
+                    Descargar segmentación
+                </a>
+
                 <DefaultModalButton
                     :label="'Crear curso'"
                     @click="openFormModal(modalCourseOptions, null, 'create')"
                 />
-                    <!-- v-if="$root.isSuperUser" -->
-                <!-- <DefaultModalButton
-                    :label="'Curso'"
-                    @click="openCRUDPage(`/cursos/create`)"
-                /> -->
+   
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
