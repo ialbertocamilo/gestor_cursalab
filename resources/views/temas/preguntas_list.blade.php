@@ -11,7 +11,6 @@
     $evaluationTypeCode = $taxonomy->code ?? '';
     $qualification_type = $tema->qualification_type;
 
-    // dd($data);
     @endphp
     <v-app>
         @include('layouts.user-header')

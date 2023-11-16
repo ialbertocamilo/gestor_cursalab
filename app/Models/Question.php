@@ -173,9 +173,9 @@ class Question extends BaseModel
 
         // if ($topic->evaluation_type->code == 'qualified') {
 
-        $sum = $questions->where('active', ACTIVE)->sum('score');
+        $sum =  round($questions->where('active', ACTIVE)->sum('score'), 4);
 
-        $sum_required = $questions->where('active', ACTIVE)->where('required', ACTIVE)->sum('score');
+        $sum_required =  round($questions->where('active', ACTIVE)->where('required', ACTIVE)->sum('score'), 4);
 
         $sum_not_required = $sum - $sum_required;
         $score_missing = $s_ev_base - $sum_required;
