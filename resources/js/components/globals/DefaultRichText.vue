@@ -85,6 +85,12 @@ export default {
         if (this.value) {
             this.localText = this.value // set initial value
         }
+        
+        document.addEventListener('focusin', (e) => {
+          if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+            e.stopImmediatePropagation();
+          }
+        });
     },
     watch: {
         value(val) {
@@ -94,6 +100,7 @@ export default {
 
             this.localText = val // watch change from parent component
         }
+
     },
     methods: {
         emitLengthState(st) {
