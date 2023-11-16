@@ -36,6 +36,7 @@ class Workspace extends BaseModel
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
+        'dc3_configuration'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -209,7 +210,23 @@ class Workspace extends BaseModel
             ->where('type', 'side_menu')
             ->select('id', 'name', 'code');
     }
-
+    public function getDc3ConfigurationAttribute($value)
+    {
+        // Puedes realizar alguna manipulación o formato antes de devolver el valor
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['value_unique_population_registry_code'] = 'Clave Única de Registro de Población';
+            $data['criterion_unique_population_registry_code'] = null;
+            $data['value_specific_occupation'] = 'Ocupación específica (Catálogo Nacional Ocupaciones)';
+            $data['criterion_specific_occupation'] = null;
+            $data['value_position'] = 'Puesto';
+            $data['criterion_position'] = null;
+            $data['name_or_social_reason'] = '';
+            $data['shcp'] = '';
+            return $data;
+        }
+        return json_decode($value);
+    }
     protected static function search($request)
     {
         // Get authenticated user's id

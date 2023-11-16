@@ -37,7 +37,15 @@
                         <v-icon>mdi-text-box-search-outline</v-icon>
                         <span class="ml-3">Configuración</span>
                     </v-tab>
-
+                    <v-tab
+                        href="#tab-4"
+                        :key="4"
+                        class="primary--text"
+                        v-if="is_superuser"
+                    >
+                        <v-icon>mdi-text-box-search-outline</v-icon>
+                        <span class="ml-3">Configuración (DC3-DC4)</span>
+                    </v-tab>
                 </v-tabs>
 
                 <v-tabs-items v-model="tabs">
@@ -351,7 +359,123 @@
                             </template>
                         </DefaultSection>
                     </v-tab-item>
-
+                    <v-tab-item :key="4" :value="'tab-4'">
+                        <DefaultSection title="Datos del trabajador (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row justify="space-around">
+                                    <v-col cols="9">
+                                        <DefaultInput
+                                            label="Clave Única de Registro de Población"
+                                            v-model="resource.dc3_configuration.value_unique_population_registry_code"
+                                            dense
+                                            class="mb-3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            clearable
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_unique_population_registry_code"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="9">
+                                        <DefaultInput
+                                            label="Ocupación específica (Catálogo Nacional Ocupaciones)"
+                                            v-model="resource.dc3_configuration.value_specific_occupation"
+                                            dense
+                                            class="mb-3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            clearable
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_specific_occupation"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="9">
+                                        <DefaultInput
+                                            label="Puesto"
+                                            value="Puesto"
+                                            v-model="resource.dc3_configuration.value_position"
+                                            dense
+                                            class="mb-3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_position"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+                        <DefaultSection title="Datos de la empresa (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultInput
+                                            label="Nombre o razón social"
+                                            dense
+                                            class="mb-3 mx-1"
+                                            v-model="resource.dc3_configuration.name_or_social_reason"
+                                        />
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultInput
+                                            label="Registro Federal de Contribuyentes con homoclave (SHCP)"
+                                            dense
+                                            class="mb-3 mx-1"
+                                            v-model="resource.dc3_configuration.shcp"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+                        <DefaultSection title="Logos y firmas (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputLogoDC3"
+                                            v-model="resource.dc3_logo"
+                                            label="Logo Empresa DC3"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_logo')"/>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputInstructorSignature"
+                                            v-model="resource.dc3_instructor_signature"
+                                            label="Firma (Instructor o tutor)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_instructor_signature')"/>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputBossSignature"
+                                            v-model="resource.dc3_boss_signature"
+                                            label="Firma (Patrón o representante legal)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_boss_signature')"/>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+                    </v-tab-item>
                 </v-tabs-items>
 
             </v-form>
@@ -365,9 +489,10 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
+    'dc3_configuration'    
 ];
-const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
+const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua','dc3_logo','dc3_instructor_signature','dc3_boss_signature'];
 const mensajes = [
     'Los criterios "por defecto" son obligatorios e inalterables, mientras que los "personalizados" son propios del wokspace.',
     'Para desactivar un criterio, debes retirarlo de las segmentaciones donde fue usado.',
@@ -417,6 +542,19 @@ export default {
                 //     ranking: false,
                 //     reports: false,
                 // }
+                dc3_configuration:{
+                    value_unique_population_registry_code:'Clave Única de Registro de Población',
+                    criterion_unique_population_registry_code:null,
+                    value_specific_occupation:'Ocupación específica (Catálogo Nacional Ocupaciones)',
+                    criterion_specific_occupation:null,
+                    value_position:'Puesto',
+                    criterion_position:null,
+                    name_or_social_reason:'',
+                    shcp:'',
+                },
+                dc3_logo:null,
+                dc3_instructor_signature:null,
+                dc3_boss_signature:null
             },
             limit_allowed_users: null,
             resource: {
@@ -495,7 +633,9 @@ export default {
                 formData.set(
                     'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
                 );
-
+                formData.set(
+                    'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
+                );
                 vue.setLimitUsersAllowed(formData);
 
 

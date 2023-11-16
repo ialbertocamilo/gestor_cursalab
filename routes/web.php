@@ -2,10 +2,11 @@
 
 use App\Http\Middleware\CheckRol;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dc3Controller;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\GestorController;
-use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\DiplomaController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WorkspaceController;
@@ -201,4 +202,8 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
 
+    Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDF']);
+    Route::get('/generate-pdf-blade', function(){
+        return view('pdf.dc3');
+    });
 });

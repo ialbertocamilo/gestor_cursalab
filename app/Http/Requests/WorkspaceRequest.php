@@ -39,6 +39,11 @@ class WorkspaceRequest extends FormRequest
             'criterio_id_fecha_inicio_reconocimiento' => 'nullable',
             'share_diplomas_social_media' => 'nullable',
             'criteria' => 'required',
+
+            'dc3_configuration'=>'nullable',
+            'dc3_logo'=>'nullable',
+            'dc3_instructor_signature'=>'nullable',
+            'dc3_boss_signature'=>'nullable',
         ];
     }
 
