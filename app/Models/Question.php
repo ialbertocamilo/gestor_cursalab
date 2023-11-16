@@ -84,15 +84,29 @@ class Question extends BaseModel
             } else {
 
                 $val = true;
+                $i = 0;
+                $broken = false;
 
                 while ($val) :
+
+                    if ($i > 150) {
+                        $broken = true;
+                        $val = false;
+                        break;
+                    }
 
                     $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
 
                     if ($res['sum'] == $missing_score)
                         $val = false;
 
+                    $i++;
+
                 endwhile;
+
+                if ($broken) {
+                    return [];
+                }
 
                 $preguntas = $questionsRequired->merge($res['data']);
             }
