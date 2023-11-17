@@ -114,9 +114,61 @@ class restablecer_funcionalidad extends Command
         // $this->restoreSummariesWithTypeTopicGradesMassive();
         // $this->getInfoSupervisors();
         // $this->updateChecklisSummaries();
-        $this->reportHoursCapacitation();
+        // $this->reportHoursCapacitation();
+        $this->deleteDuplicatesSummaryTopics();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
+    }
+    public function deleteDuplicatesSummaryTopics(){
+        $duplicateTopics = SummaryTopic::select('user_id', 'topic_id')
+                    ->whereNotNull('topic_id')
+                    ->groupBy('user_id', 'topic_id')
+                    ->havingRaw('count(*) > 1')
+                    ->get();
+        $users_id= collect();
+        $bar = $this->output->createProgressBar(count($duplicateTopics));
+        $bar->start();
+        count($duplicateTopics);
+        foreach ($duplicateTopics as $duplicate) {
+            $duplicate_topic_user = SummaryTopic::with('status:id,code')->where('user_id',$duplicate->user_id)->where('topic_id',$duplicate->topic_id)->get();  
+            $has_reviewved = $duplicate_topic_user->where('status.code','revisado')->first();
+            if($has_reviewved){
+                SummaryTopic::with('status:id,code')
+                                    ->where('id','<>',$has_reviewved->id)
+                                    ->where('user_id',$duplicate->user_id)
+                                    ->where('topic_id',$duplicate->topic_id)
+                                    ->delete();
+                $users_id->push($duplicate->user_id);
+            }else{
+                $has_approved = $duplicate_topic_user->where('status.code','aprobado')->first();
+                if($has_approved){
+                    SummaryTopic::with('status:id,code')
+                        ->where('id','<>',$has_approved->id)
+                        ->where('user_id',$duplicate->user_id)
+                        ->where('topic_id',$duplicate->topic_id)
+                        ->delete();
+                    $users_id->push($duplicate->user_id);
+                }
+            }
+            $bar->advance();
+        }
+        $summary_users = SummaryUser::whereIn('id',$users_id->unique())->with('user')->get();
+//        $summary_users = SummaryUser::with('user')
+//            ->where('user_id', 27660)->get();
+        $count_summaries = $summary_users->count();
+
+        $bar = $this->output->createProgressBar($count_summaries);
+        $bar->start();
+        foreach ($summary_users as $summary_user){
+            $user = $summary_user->user;
+            $courses = $user->getCurrentCourses();
+            foreach ($courses as $course){
+                // SummaryCourse::getCurrentRowOrCreate($course, $user);
+                SummaryCourse::updateUserData($course, $user, false, false);
+            }
+            SummaryUser::updateUserData($summary_user->user, false);
+            $bar->advance();
+        }
     }
     public function updateChecklisSummaries(){
         $users = User::query()
