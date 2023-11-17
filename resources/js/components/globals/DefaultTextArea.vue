@@ -25,7 +25,7 @@
                         class="ml-2" 
                         src="/img/ia_convert.svg"
                     >
-                    <span class="span-limits">{{limits.ia_descriptions_generated}}/{{limits.limit_descriptions_jarvis }}</span>
+                    <span class="span-limits">{{limits.ia_descriptions_generated}}/{{limits.limit_descriptions_jarvis>999 ? '∞' : limits.limit_descriptions_jarvis  }}</span>
                 </div>
             </template>
         </v-textarea>

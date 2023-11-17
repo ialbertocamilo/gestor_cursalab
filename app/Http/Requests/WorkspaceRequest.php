@@ -29,6 +29,7 @@ class WorkspaceRequest extends FormRequest
             'limit_allowed_media_convert' => 'nullable',
             'limit_allowed_ia_evaluations' => 'nullable',
             'limit_descriptions_jarvis' => 'nullable',
+            'context_jarvis' => 'nullable',
             'openia_token'=> 'nullable',
             'openia_model'=> 'nullable',
 

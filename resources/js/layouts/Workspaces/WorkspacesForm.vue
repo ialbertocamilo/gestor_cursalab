@@ -261,7 +261,7 @@
                             <template v-slot:content>
 
                                 <v-row >
-                                    <v-col cols="4">
+                                    <v-col cols="8">
                                         <DefaultInput
                                             label="Token"
                                             v-model="resource.jarvis_configuration.openia_token"
@@ -280,6 +280,14 @@
                                             value="gpt-3.5-turbo"
                                             clearable
                                             dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultTextArea
+                                            clearable
+                                            v-model="resource.jarvis_configuration.context_jarvis"
+                                            label="Contexto para generar descripciones"
+                                            rows="5"
                                         />
                                     </v-col>
                                 </v-row>
@@ -592,6 +600,7 @@ export default {
             formData.append('limit_allowed_media_convert', vue.resource.limits.limit_allowed_media_convert);
             formData.append('limit_allowed_ia_evaluations', vue.resource.limits.limit_allowed_ia_evaluations);
             formData.append('limit_descriptions_jarvis', vue.resource.limits.limit_descriptions_jarvis);
+            formData.append('context_jarvis', vue.resource.jarvis_configuration.context_jarvis);
             formData.append('openia_token', vue.resource.jarvis_configuration.openia_token);
             formData.append('openia_model', vue.resource.jarvis_configuration.openia_model);
 

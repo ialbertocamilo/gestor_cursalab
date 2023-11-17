@@ -116,6 +116,7 @@ class WorkspaceController extends Controller
         $data['jarvis_configuration'] = [
             'openia_token' => $data['openia_token'] ?? '',
             'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $data['context_jarvis'] ?? ''
         ];
         // Set constraint: limit allowed users
 
@@ -201,6 +202,7 @@ class WorkspaceController extends Controller
         $workspace->jarvis_configuration = [
             'openia_token' => $workspace->jarvis_configuration['openia_token'] ?? '',
             'openia_model' => $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $workspace->jarvis_configuration['context_jarvis'] ?? ''
         ];
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
@@ -235,7 +237,9 @@ class WorkspaceController extends Controller
         $data['jarvis_configuration'] = [
             'openia_token' => $data['openia_token'] ?? '',
             'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $data['context_jarvis'] ?? ''
         ];
+
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
 
             $constraint_user['type'] = $data['limit_allowed_users_type'];

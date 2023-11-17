@@ -22,7 +22,18 @@
                     plugins: ['lists anchor', 'code', 'paste','link','image', 'emoticons'],
                     toolbar:
                         'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | code | link | image | emoticons',
-                    images_file_types: 'jpg,svg,webp,gif'
+                    images_file_types: 'jpg,svg,webp,gif',
+                    setup: function (editor) {
+                        if(showGenerateIaDescription){
+                            editor.ui.registry.addButton('customButton', {
+                                text: getIconText(), // Ruta de la imagen para el botón personalizado
+                                tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                                onAction: function (_) {
+                                    generateIaDescription();
+                                },
+                            });
+                        }
+                    }
                 }"
                 @input="updateValue"
             />
@@ -73,7 +84,11 @@ export default {
         maxLength: { 
             type: Number, 
             default: 200 
-        }
+        },
+        showGenerateIaDescription:{
+            type:Boolean,
+            default:false
+        },
     },
     data() {
         return {
@@ -136,6 +151,29 @@ export default {
             vue.localText = ''
             vue.updateValue()
         },
+        getIconText(){
+            return `
+            <div>
+                <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
+                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/<span id="limit_descriptions_jarvis">0</span></span>
+            </div>
+            `
+        },
+        generateIaDescription(){
+            vue.$emit('generateIaDescription')
+        }
     }
 }
 </script>
+<style lang="scss" scoped>
+.badge_custom{
+    position: absolute !important;
+    color: white !important;
+    background: rgb(87, 191, 227) !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+    margin-right: 8px !important;
+    margin-left: 2px !important;
+    font-size:9px !important;
+}
+</style>

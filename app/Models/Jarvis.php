@@ -98,7 +98,8 @@ class Jarvis extends Model
         $jarvis_configuration = is_array($workspace->jarvis_configuration) ? $workspace->jarvis_configuration : json_decode($workspace->jarvis_configuration,true);
         $token = $jarvis_configuration['openia_token'] ?? '';
         $model = $jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo';
-        return compact('token','model');
+        $context = $jarvis_configuration['context_jarvis'] ?? '';
+        return compact('token','model','context');
     }
     private function saveInS3($path_name,$text)
     {
