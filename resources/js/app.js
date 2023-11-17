@@ -363,6 +363,7 @@ const app = new Vue({
             }
 
         },
+        
         // downloadReportNotify(url, name) {
         //     try {
         //         // Realizar una solicitud para obtener el archivo desde la URL
