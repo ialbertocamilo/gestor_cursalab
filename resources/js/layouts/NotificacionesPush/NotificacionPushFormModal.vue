@@ -110,64 +110,35 @@
                                         Módulo
                                     </th>
                                     <th class="text-left" style="width: 75% !important">
-                                        Seleccionar puesto (opcional)
+                                        Seleccionar criterio (opcional)
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="(module, index) in modules" :key="index">
-                                    <td>
-                                        <input type="checkbox"
-                                               v-model="module.modulo_selected"/>
+                                    <td class="align-middle">
+                                        <input type="checkbox" v-model="module.modulo_selected" />
+                                    </td>
+                                    <td class="align-middle">
+                                        <span>
+                                            {{ module.nombre }}
+                                        </span>
                                     </td>
                                     <td>
-                                        {{ module.nombre }}
-                                    </td>
-                                    <td>
-                                        <v-autocomplete
-                                            :items="module.carreras"
-                                            multiple
-                                            chips
+                                        <DefaultAutocomplete
                                             dense
+                                            multiple
+                                            :label="criterion.name"
                                             v-model="module.carreras_selected"
-                                            hide-details="auto"
+                                            :returnObject="true"
+                                            :items="module.carreras"
                                             item-text="nombre"
                                             item-value="id"
-                                            return-object
+                                            hide-details="auto"
+                                            :count-show-values="3"
+                                            :show-select-all="false"
                                             :disabled="!module.modulo_selected"
-                                        >
-                                            <template v-slot:prepend-item>
-                                                <v-list-item ripple @click="toggle(index)">
-                                                    <v-list-item-action>
-                                                        <v-icon
-                                                            :color="
-                                                                    module.carreras_selected.length > 0
-                                                                    ? 'indigo darken-4' : ''
-                                                                "
-                                                        >
-                                                            {{ icon(index) }}
-                                                        </v-icon>
-                                                    </v-list-item-action>
-                                                    <v-list-item-content>
-                                                        <v-list-item-title>
-                                                            Seleccionar todas las carreras
-                                                        </v-list-item-title>
-                                                    </v-list-item-content>
-                                                </v-list-item>
-                                                <v-divider class="mt-2"></v-divider>
-                                            </template>
-                                            <template v-slot:selection="{ item, index }">
-                                                <v-chip v-if="index < 3">
-                                                    <span>{{ item.nombre }}</span>
-                                                </v-chip>
-                                                <span v-if="index === 3"
-                                                      class="grey--text caption">
-                                                        (+{{ module.carreras_selected.length - 3 }} carrera{{
-                                                        module.carreras_selected.length - 3 > 1 ? "s" : ""
-                                                    }})
-                                                    </span>
-                                            </template>
-                                        </v-autocomplete>
+                                        />
                                     </td>
                                 </tr>
                                 </tbody>
@@ -212,6 +183,10 @@ export default {
         modules: {
             type: Object | Array,
             default: []
+        },
+        criterion: {
+            type: Object,
+            required: true
         }
     },
 
@@ -354,8 +329,6 @@ export default {
             });
 
             const cadena = JSON.stringify(data);
-            console.log(cadena);
-
             return cadena;
             // vue.nueva_notificacion.destinatarios = cadena;
         },

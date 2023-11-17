@@ -114,7 +114,7 @@
                                         v-else-if="progress_upload === 'error'">
                                         <v-icon style="font-size: 50px !important;" class="mr-3" color="red"
                                                 v-text="'mdi-close-outline'"></v-icon>
-                                        <em style="font-size: 1.2rem">Error al subir el archivo</em>
+                                        <em style="font-size: 1.2rem" v-text="error_message"></em>
                                     </div>
                                 </v-slide-x-reverse-transition>
                                 <v-expand-transition  v-if="progress_upload != 'cargando'">
@@ -211,7 +211,8 @@ export default {
                 "A","B","C","D","E","F","G","H","I","J","K","L","M","N",
                 "O","P","Q","R","S","U","V","W","X","Y","Z"
             ],
-            errors: []
+            errors: [],
+            error_message:'Error al subir el archivo',
         }
     },
     methods: {
@@ -296,7 +297,11 @@ export default {
 
                     // setTimeout(function () {
                         // vue.showAlert(res.data.data.message, res.data.data.status)
-
+                        if(res.data.data.message == 'invalid_template'){
+                            vue.progress_upload = 'error'
+                            vue.error_message = 'El archivo Excel no es válido. Por favor, asegúrese de revisar la plantilla antes de intentar volver a cargarlo.';
+                            return ;
+                        }
                         if (res.data.data.errors && res.data.data.errors.length > 0) {
                             vue.errors = res.data.data.errors
                             vue.progress_upload = 'error'

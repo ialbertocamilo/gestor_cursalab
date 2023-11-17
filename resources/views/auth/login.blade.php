@@ -100,7 +100,7 @@
                    target="_blank"
                    style="color: #5f59eb; text-decoration: underline">
                     <b>
-                        haz click aquí
+                        Haz click aquí
                     </b>
                 </a>
             </p>

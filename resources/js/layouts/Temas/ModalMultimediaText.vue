@@ -40,6 +40,13 @@
                     </v-col>
                     <v-col cols="12">
                         <DefaultInput
+                            v-if="type == 'youtube' || type == 'vimeo'"
+                            label="URL / Código"
+                            placeholder="Ingresar URL / Código"
+                            v-model="url"
+                            :rules="rules.url"/>
+                        <DefaultInput
+                            v-else
                             label="URL"
                             placeholder="Ingresar URL"
                             v-model="url"

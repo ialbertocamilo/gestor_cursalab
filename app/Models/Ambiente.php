@@ -16,10 +16,11 @@ class Ambiente extends Model
         'fondo', 'logo', 'icono', 'logo_empresa',
         //app
         'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
-        'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'logo_app',
+        'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'fondo_invitados_app','logo_app',
         'logo_cursalab_position','show_blog_btn','logo_cursalab',
         'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo','male_logo', 'female_logo',
         'template', 'identity_validation_enabled', 'password_expiration_enabled',
+        'is_v1_migrated',
     ];
 
     protected $hidden = [

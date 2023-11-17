@@ -24,8 +24,8 @@ return [
                 'segments' => function ($q) {
                     $q
                         ->where('active', ACTIVE)
-                        ->select('id', 'model_id')
-                        ->with('values', function ($q) {
+                        ->select('id', 'model_id', 'type_id')
+                        ->with(['type:id,code', 'values' => function ($q) {
                             $q
                                 // ->with('criterion_value', function ($q) {
                                 //     $q
@@ -35,9 +35,9 @@ return [
                                 //             $q->select('id', 'name', 'code');
                                 //         });
                                 // })
-                                ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id');
+                                ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id')->whereRelation('criterion', 'code', '<>', 'document');
 
-                        });
+                        }]);
                 },
                 'summaries' => function ($q) use ($user_id) {
                     $q
@@ -220,7 +220,25 @@ return [
             ],
 
             default => [
-                'segments.values.criterion_value.criterion',
+                // 'segments.values.criterion_value.criterion',
+                'segments' => function ($q) {
+                    $q
+                        ->where('active', ACTIVE)
+                        ->select('id', 'model_id', 'type_id')
+                        ->with(['type:id,code', 'values' => function ($q) {
+                            $q
+                                // ->with('criterion_value', function ($q) {
+                                //     $q
+                                //         ->where('active', ACTIVE)
+                                //         ->select('id', 'value_text', 'value_date', 'value_boolean')
+                                //         ->with('criterion', function ($q) {
+                                //             $q->select('id', 'name', 'code');
+                                //         });
+                                // })
+                                ->select('id', 'segment_id', 'starts_at', 'finishes_at', 'criterion_id', 'criterion_value_id')->whereRelation('criterion', 'code', '<>', 'document');
+
+                        }]);
+                },
                 'requirements',
                 'schools' => function ($query) {
                     $query->where('active', ACTIVE);

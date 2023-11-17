@@ -36,6 +36,9 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\Curso\CursoEncuestaStoreUpdate;
 use App\Http\Requests\Curso\CursosStoreUpdateRequest;
 
+use App\Exports\Course\CourseSegmentationExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class CursosController extends Controller
 {
 
@@ -74,10 +77,14 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
-        // $modules_id = current_subworkspaces_id();
+        // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
+        $modules_id = current_subworkspaces_id();
 
-        $query = Course::whereRelation('workspaces', 'id', $workspace->id)->where('active', ACTIVE);
+        $query = Course::whereRelation('workspaces', 'id', $workspace->id)
+                    ->whereHas('schools', function($q) use ($modules_id) {
+                        $q->whereRelationIn('subworkspaces', 'id', $modules_id);
+                    })
+                    ->where('active', ACTIVE);
 
         if ($course)
             $query->where('id', '!=', $course->id);
@@ -458,6 +465,21 @@ class CursosController extends Controller
             });
 
         return $this->success(compact('schools'));
+    }
+
+    public function downloadCourseSegmentations()
+    {
+        $workspace = get_current_workspace();
+
+        $code = $workspace->slug ?? "WRKSP[{$workspace->id}]";
+
+        $datetime = date('Y-m-d_H:i:s');
+        $filename = "Reporte-de-segmentación-[{$code}].xlsx";
+        
+        ob_end_clean();
+        ob_start();
+
+        return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
 
 }

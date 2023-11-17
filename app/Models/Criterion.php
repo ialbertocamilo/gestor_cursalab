@@ -15,7 +15,7 @@ class Criterion extends BaseModel
         'show_as_parent', 'show_in_reports', 'show_in_ranking',
         'show_in_profile', 'show_in_segmentation', 'is_default',
         'show_in_form', 'required', 'editable_configuration',
-        'editable_segmentation', 'multiple', 'active', 'description','can_be_create'
+        'editable_segmentation', 'multiple', 'active', 'description','can_be_create','avaiable_in_personal_data_guest_form'
     ];
 
     protected $casts = [
@@ -49,7 +49,7 @@ class Criterion extends BaseModel
     }
 
     # modules by code
-    protected function getValuesForSelect($criterion_code)
+    protected function getValuesForSelect($criterion_code, $current = false)
     {
         $current_workspace = get_current_workspace();
 
@@ -60,6 +60,9 @@ class Criterion extends BaseModel
             ->whereRelation('criterion', 'code', $criterion_code)
             ->whereRelation('workspaces', 'id', $current_workspace?->id)
             ->where('active', ACTIVE)
+            ->when($current, function($q) {
+                $q->whereIn('id', current_subworkspaces_id('criterion_value_id'));
+            })
             ->select('id', "$column_name as nombre")
             ->get();
     }

@@ -6,7 +6,7 @@
                 asignado.
             </template>
 
-            <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" />
+            <!-- <list-item titulo="Tipo : Modalidad de escuela" subtitulo="R: Regular | E: Extracurricular | L: Libre" /> -->
             <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
             <list-item titulo="Sistema de calificación" subtitulo="El sistema de calificación asignado al curso" />
             <list-item titulo="Tema" subtitulo="Tema dentro de cada curso" />
@@ -26,7 +26,7 @@
                 class="col-7"
                 v-model="search"
                 placeholder="Documento"
-                oninput="javascript: if (this.value.length > 15) this.value = this.value.slice(0, 15);"
+                oninput="javascript: if (this.value.length > 50) this.value = this.value.slice(0, 50);"
                 @keyup.enter="buscarNotasUsuario"
             ></b-form-input>
             <b-input-group-append>
@@ -35,7 +35,7 @@
                         variant="primary"
                         class="text-light"
                         @click="buscarNotasUsuario"
-                        v-bind:disabled="this.search.length >= 6 ? false : true"
+                        v-bind:disabled="this.search.length >= 4 ? false : true"
                     >
                         <b-icon icon="search" class="mr-2"></b-icon>
                         Consultar
@@ -45,13 +45,13 @@
         </b-input-group>
         <!-- Datos Usuario -->
         <div v-if="Usuario">
-            <div class="text-h7 pl-3 mt-4 text-secondary">Datos personales</div>
+            <!-- <div class="text-h7 pl-3 mt-4 text-secondary">Datos personales</div> -->
             <v-simple-table class="border">
                 <template v-slot:default>
                     <thead>
                         <tr class="text-grey font-weight-bold">
-                            <th>Modulo</th>
-                            <th>Nombres</th>
+                            <th>Módulo</th>
+                            <th>Nombre de usuario</th>
                             <th>Documento</th>
                         </tr>
                     </thead>
@@ -67,9 +67,9 @@
         </div>
         <!-- Tabla ~ Cursos-->
         <div v-if="Cursos">
-            <div class="text-h7 pl-3 mt-7 mb-5 text-secondary">
+            <!-- <div class="text-h7 pl-3 mt-7 mb-5 text-secondary">
                 Avance del usuario
-            </div>
+            </div> -->
             <v-list dense>
                 <v-subheader class="border text-body-2 align-center">
                     <v-row class="text-grey font-weight-bold" no-gutters>
@@ -239,7 +239,7 @@ export default {
     },
     methods: {
         async buscarNotasUsuario() {
-            if (this.search.length < 6) return false;
+            if (this.search.length < 4) return false;
 
             let vue = this
             // Show loading spinner

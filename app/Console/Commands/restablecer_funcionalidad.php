@@ -37,6 +37,7 @@ use App\Models\CriterionValueUser;
 use App\Models\PollQuestionAnswer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\SummaryUserChecklist;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Support\ExternalDatabase;
 use App\Imports\MassiveUploadTopicGrades;
@@ -111,9 +112,120 @@ class restablecer_funcionalidad extends Command
         // $this->restoSummaryCourseSinceSummaryTopic();
         // $this->restoreJsonNotification();
         // $this->restoreSummariesWithTypeTopicGradesMassive();
-        $this->getInfoSupervisors();
+        // $this->getInfoSupervisors();
+        // $this->updateChecklisSummaries();
+        // $this->reportHoursCapacitation();
+        $this->deleteDuplicatesSummaryTopics();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
+    }
+    public function deleteDuplicatesSummaryTopics(){
+        $duplicateTopics = SummaryTopic::select('user_id', 'topic_id')
+                    ->whereNotNull('topic_id')
+                    ->groupBy('user_id', 'topic_id')
+                    ->havingRaw('count(*) > 1')
+                    ->get();
+        $users_id= collect();
+        $bar = $this->output->createProgressBar(count($duplicateTopics));
+        $bar->start();
+        count($duplicateTopics);
+        foreach ($duplicateTopics as $duplicate) {
+            $duplicate_topic_user = SummaryTopic::with('status:id,code')->where('user_id',$duplicate->user_id)->where('topic_id',$duplicate->topic_id)->get();  
+            $has_reviewved = $duplicate_topic_user->where('status.code','revisado')->first();
+            if($has_reviewved){
+                SummaryTopic::with('status:id,code')
+                                    ->where('id','<>',$has_reviewved->id)
+                                    ->where('user_id',$duplicate->user_id)
+                                    ->where('topic_id',$duplicate->topic_id)
+                                    ->delete();
+                $users_id->push($duplicate->user_id);
+            }else{
+                $has_approved = $duplicate_topic_user->where('status.code','aprobado')->first();
+                if($has_approved){
+                    SummaryTopic::with('status:id,code')
+                        ->where('id','<>',$has_approved->id)
+                        ->where('user_id',$duplicate->user_id)
+                        ->where('topic_id',$duplicate->topic_id)
+                        ->delete();
+                    $users_id->push($duplicate->user_id);
+                }
+            }
+            $bar->advance();
+        }
+        $summary_users = SummaryUser::whereIn('id',$users_id->unique())->with('user')->get();
+//        $summary_users = SummaryUser::with('user')
+//            ->where('user_id', 27660)->get();
+        $count_summaries = $summary_users->count();
+
+        $bar = $this->output->createProgressBar($count_summaries);
+        $bar->start();
+        foreach ($summary_users as $summary_user){
+            $user = $summary_user->user;
+            $courses = $user->getCurrentCourses();
+            foreach ($courses as $course){
+                // SummaryCourse::getCurrentRowOrCreate($course, $user);
+                SummaryCourse::updateUserData($course, $user, false, false);
+            }
+            SummaryUser::updateUserData($summary_user->user, false);
+            $bar->advance();
+        }
+    }
+    public function updateChecklisSummaries(){
+        $users = User::query()
+        ->whereHas('subworkspace',function($q){
+            $q->whereIn('id',[12,13,30]);
+        })->whereHas('summary_checklist')->get();
+        $_bar = $this->output->createProgressBar($users->count());
+        $_bar->start();
+        foreach ($users as $user) {
+            if(SummaryUserChecklist::where('user_id',$user->id)->first()){
+                SummaryUserChecklist::updateUserData($user);
+            }
+            $_bar->advance();
+        }
+        // $this->info("\n Fin: " . now());
+        // info(" \n Fin: " . now());
+    }
+    public function reportHoursCapacitation(){
+        $workspaces = Workspace::with('schools:id,name','parent:id,name')->whereNotNull('parent_id')->get();
+        $taxonomies_id = Taxonomy::where('group','topic')->where('type','user-status')
+                    ->whereIn('code',['aprobado','desaprobado','realizado','revisado'])
+                    ->select('id')->pluck('id')->toArray();
+        $taxonomies_id = implode(', ', $taxonomies_id);
+        $report = [];
+        $_bar = $this->output->createProgressBar($workspaces->count());
+        $_bar->start();
+        foreach ($workspaces as $workspace){
+            $schools_id = $workspace->schools->pluck('id');
+            $topics_id = Db::table('courses')
+                        ->join('course_school','course_school.course_id','courses.id')
+                        ->join('topics','topics.course_id','courses.id')->whereIn('course_school.school_id',$schools_id)
+                        ->select('topics.id')
+                        ->pluck('id')->toArray();
+            $topics_id = implode(', ', $topics_id);
+            $query = "SELECT
+                    EXTRACT(YEAR FROM st.created_at) as 'anio',
+                    EXTRACT(MONTH FROM st.created_at) as 'mes',
+                    COUNT(st.id) * 20 as 'minutos'
+                FROM summary_topics st 
+                WHERE st.status_id IN (".$taxonomies_id.") 
+                    AND st.topic_id IN (".$topics_id.") 
+                GROUP BY EXTRACT(YEAR FROM st.created_at),
+                    EXTRACT(MONTH FROM st.created_at) 
+                ORDER BY anio, mes";
+            $results = Db::select($query);
+            foreach ($results as $result) {
+                $report[] = [
+                    'workspace' => $workspace->parent->name,
+                    'modulo' => $workspace->name,
+                    'año' => $result->anio,
+                    'mes' => $result->mes,
+                    'minutos' => $result->minutos
+                ];
+            }
+            $_bar->advance();
+        }
+        Storage::disk('public')->put('json/report_hours_capacitation.json', json_encode($report,JSON_UNESCAPED_UNICODE));
     }
     public function getInfoSupervisors(){
         $users = User::query()

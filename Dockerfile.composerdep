@@ -1,0 +1,31 @@
+# -------------------------------------------------------------------------------------------------------
+# COMPOSER DEV MODULES
+# -------------------------------------------------------------------------------------------------------
+
+FROM composer:2.1
+
+ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcache zip exif gd"
+ARG PHP_PECL_EXTS="redis mongodb"
+ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
+ARG PHP_LARAVEL="bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer dom pcntl"
+
+RUN mkdir -p /opt/apps/laravel-in-kubernetes /opt/apps/laravel-in-kubernetes/bin
+
+WORKDIR /opt/apps/laravel-in-kubernetes
+
+COPY docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
+
+RUN addgroup -S composer \
+    && adduser -S composer -G composer \
+    && chown -R composer /opt/apps/laravel-in-kubernetes \
+    && apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
+    && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
+    && pecl install ${PHP_PECL_EXTS} \
+    && docker-php-ext-enable ${PHP_PECL_EXTS}
+
+USER composer
+
+COPY --chown=composer composer.json ./
+
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist

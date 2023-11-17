@@ -59,7 +59,7 @@ class SummaryTopic extends Summary
     {
         $row = $this->getCurrentRow($topic);
 
-        if (!$row->taking_quiz) {
+        if ($row && !$row->taking_quiz) {
 
             $duration = config('app.quizzes.duration');
 
@@ -168,7 +168,7 @@ class SummaryTopic extends Summary
         return ! $this->passed;
     }
 
-    public function hasNoAttemptsLeft($attempts_limit = null, $course)
+    public function hasNoAttemptsLeft($attempts_limit = null, $course = null)
     {
         if (!$attempts_limit)
         {
@@ -186,7 +186,7 @@ class SummaryTopic extends Summary
         return ($correct_answers == 0) ? 0 : ((20 / ($correct_answers + $failed_answers)) * $correct_answers);
     }
 
-    protected function hasPassed($new_grade, $passing_grade = NULL,$course)
+    protected function hasPassed($new_grade, $passing_grade = NULL, $course = null)
     {
         if (!$passing_grade)
             // $passing_grade = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'nota_aprobatoria');

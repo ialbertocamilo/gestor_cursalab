@@ -498,6 +498,7 @@ class UserMassive extends Massive implements ToCollection
 
     private function excelDateToDate($fecha)
     {
+        $fecha = trim($fecha);
         try {
             if (_validateDate($fecha, 'Y-m-d')) {
                 return $fecha;

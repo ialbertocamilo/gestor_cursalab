@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto:700");
+body {
+    /* overflow: hidden; */
+}
+.container {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    display:flex;justify-content: end;align-items: end
+    /* overflow: hidden; */
+}
+.container img {
+    width: 100%;
+    margin: 0 auto;
+}
+span {
+    font-family: "Roboto", sans-serif;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%); /* Safari */
+    -ms-transform: translateX(-50%); /* IE 9 */
+    -o-transform: translateX(-50%); /* IE 9 */
+    -moz-transform: translateX(-50%); /* IE 9 */
+    color: #484848;
+    text-align: center;
+    font-weight: bold;
+}
+body img {
+    width: 100%;
+}
+span.nombre {
+    top: 33%;
+    font-size: 2.5vw;
+    width: 100%;
+}
+span.nombre-sp {
+    top: 34%;
+    font-size: 2.5vw;
+    width: 100%;
+}
+span.curso {
+    top: 47%;
+    font-size: 2.5vw;
+    width: 100%;
+}
+span.fecha {
+    top: 59.9%;
+    left: 77.4%;
+    font-size: 1.6vw;
+    color: #52265a;
+    /* word-spacing: 53px;  */
+}
+span.horas {
+    top: 69.5%;
+    left: 58%;
+    font-size: 2vw;
+}
+/* BOTONES PARA COMPARTIR */
+.content {
+    padding: 8px 90px;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .content p {
+    line-height: 1.9;
+  }
+
+  .content img {
+    max-height: 500px;
+  }
+
+  /* Share Buttons */
+
+  .share-btn-container {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .share-btn-container a i {
+    font-size: 32px;
+  }
+
+  .share-btn-container a {
+    margin: 12px 0;
+    transition: 500ms;
+  }
+
+  .share-btn-container a:hover {
+    transform: scale(1.2);
+  }
+
+  .share-btn-container .fa-facebook {
+    color: #3b5998;
+  }
+
+  .share-btn-container .fa-twitter {
+    color: #1da1f2;
+  }
+
+  .share-btn-container .fa-linkedin {
+    color: #0077b5;
+  }
+
+
+  .share-btn-container .fa-whatsapp {
+    color: #25d366;
+  }
+  @media (max-width: 550px) {
+    .content {
+      padding: 8px 32px;
+    }
+
+    .share-btn-container {
+      transform: unset;
+      top: unset;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      flex-direction: row;
+      box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
+      padding: 16px 0;
+      justify-content: center;
+    }
+
+    .share-btn-container a {
+      margin: 0 32px;
+    }
+  }
+  /* MARCA DE AGUA */
+.marca_agua{
+    width: 9vw !important;
+    /* background:red; */
+}
+.container-marca_agua{
+    display:flex;
+    width: max-content;
+    position: absolute;
+    align-items:center;
+    margin:0.3%;
+    padding:0.3%;
+    background: rgba(0,0,0,0.5);
+    border-radius:2%;
+    
+}
+.text-marcar_agua{
+    color: white;
+    padding-right:1.1vw;
+    /* font-style:oblique;
+    font-weight:bold; */
+    font: oblique bold 1vw sans-serif;
+}

@@ -333,8 +333,13 @@ class Certificate extends Model
                 $upper_string = false;
             break;
             case 'fecha':
-                $fecha_emision = date('Y-m-d H:i:s');
-                $text = Carbon::parse($fecha_emision)->formatLocalized($e_dinamic['id_formato']);
+                if (isset($real_data['fecha']) && $real_data['fecha']) {
+                    $text = $real_data['fecha']->formatLocalized($e_dinamic['id_formato']);
+                } else {
+                    $fecha_emision = date('Y-m-d H:i:s');
+                    $text = Carbon::parse($fecha_emision)->formatLocalized($e_dinamic['id_formato']);
+                }
+
                 if(str_contains($e_dinamic['id_formato'],'de')){
                     $text = str_replace($this->dias_EN, $this->dias_ES, $text);
                     $text = str_replace($this->meses_EN, $this->meses_ES, $text);

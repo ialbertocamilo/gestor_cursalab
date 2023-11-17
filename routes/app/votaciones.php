@@ -7,6 +7,9 @@ Route::controller(RestCampaignController::class)->group(function() {
     /* === CAMPAÑAS - CONTENIDOS ===*/
     Route::get('/campaigns/{user}', 'campaigns');
     Route::get('/campaign/contents/{campaign}', 'campaingsContents');
+    
+    Route::get('/campaign/v2/contents/{campaign}', 'campaingsContentsV2');
+    Route::get('/campaign/check-content/{campaign_id}/{media_id}', 'checkContent');
     /* === CAMPAÑAS - CONTENIDOS === */
 
     /* usuario estados: insignias - requerimientos */

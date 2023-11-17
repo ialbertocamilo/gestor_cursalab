@@ -21,7 +21,7 @@ class Question extends BaseModel
         'topic_id' => 'topic'
     ];
 
-    public function topic() 
+    public function topic()
     {
         return $this->belongsTo(Topic::class);
     }
@@ -64,15 +64,17 @@ class Question extends BaseModel
         $base = 20;
         $sum_required = $questionsRequired->sum('score');
 
-        $missing_score = $base - $sum_required;
+        $missing_score = round($base - $sum_required, 4);
 
         $questionsNotRequired = $questions->where('required', '<>', 1)->whereNotNull('score');
 
         $sum_not_required = $questionsNotRequired->sum('score');
-        $i = 0;
 
-        if ( ($sum_required + $sum_not_required) >= $base ) {
-            
+        // Round score total to compare, since base changing can cause a
+        // difference in decimals, i.e: 19.9999999995 instead of 20
+
+        if ( round($sum_required + $sum_not_required, 4) >= $base ) {
+
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
 
             if ($missing_score == 0) {
@@ -82,16 +84,31 @@ class Question extends BaseModel
             } else {
 
                 $val = true;
+                $i = 0;
+                $broken = false;
 
                 while ($val) :
-                    
+
+                    if ($i > 200) {
+                        $broken = true;
+                        info("Topic {$topic->id} evaluation broken evaluation (+200)");
+                        $val = false;
+                        break;
+                    }
+
                     $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
 
                     if ($res['sum'] == $missing_score)
                         $val = false;
-                    
+
+                    $i++;
+
                 endwhile;
-                
+
+                if ($broken) {
+                    return [];
+                }
+
                 $preguntas = $questionsRequired->merge($res['data']);
             }
 
@@ -99,7 +116,7 @@ class Question extends BaseModel
 
             return $preguntas->shuffle();
 
-        } 
+        }
 
         return [];
     }
@@ -112,7 +129,7 @@ class Question extends BaseModel
         $data = [];
 
         foreach ($shuffled as $question) {
-            
+
             $s = $question->score + $sum;
 
             if ($s <= $sum_to && $sum <= $sum_to) {
@@ -171,9 +188,9 @@ class Question extends BaseModel
 
         // if ($topic->evaluation_type->code == 'qualified') {
 
-        $sum = $questions->where('active', ACTIVE)->sum('score');
+        $sum =  round($questions->where('active', ACTIVE)->sum('score'), 4);
 
-        $sum_required = $questions->where('active', ACTIVE)->where('required', ACTIVE)->sum('score');
+        $sum_required =  round($questions->where('active', ACTIVE)->where('required', ACTIVE)->sum('score'), 4);
 
         $sum_not_required = $sum - $sum_required;
         $score_missing = $s_ev_base - $sum_required;
@@ -208,7 +225,7 @@ class Question extends BaseModel
 
             if ($res == 0) {
 
-                $verified = true; 
+                $verified = true;
                 break;
             }
 
@@ -218,7 +235,7 @@ class Question extends BaseModel
         endwhile;
 
         if ($verified) {
-        
+
             $message = 'La evaluación es correcta.';
 
         } else {
@@ -244,7 +261,7 @@ class Question extends BaseModel
         $sum = 0;
 
         foreach ($shuffled as $question) {
-            
+
             $result = $question->score + $sum;
 
             if ($result <= $score_missing && $sum <= $score_missing) {
@@ -277,7 +294,7 @@ class Question extends BaseModel
 
         return ['message' => $message, 'status' => $status];
     }
-    
+
     protected function import($data)
     {
         // Load question type from database

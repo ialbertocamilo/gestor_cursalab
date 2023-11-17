@@ -495,7 +495,7 @@ export default {
                 email2 = ''
             }
 
-            return email.trim() === email2.trim()
+            return email.toLowerCase().trim() === email2.toLowerCase().trim()
         }
     }
 }

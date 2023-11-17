@@ -20,7 +20,19 @@
                         />
                     </v-col>
                 </v-row>
-
+                <v-row justify="space-around">
+                    <v-col cols="12" class="d-flex justify-content-center">
+                        <DefaultAutocomplete
+                            style="width: 100%;"
+                            clearable
+                            :items="selects.criteria"
+                            v-model="resource.parent_id"
+                            label="Criterio Padre"
+                            itemText="name"
+                            :disabled="options.action === 'edit' && resource.parent_id"
+                        />
+                    </v-col>
+                </v-row>
                 <v-row align="start">
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultSelect
@@ -104,7 +116,7 @@
 
 import CriterionValidationsModal from "./CriterionValidationsModal";
 
-const fields = ['name', 'multiple', 'show_in_segmentation','can_be_create', 'field_id', 'position'];
+const fields = ['name', 'multiple', 'show_in_segmentation','can_be_create','parent_id', 'field_id', 'position'];
 const file_fields = [];
 
 export default {
@@ -124,6 +136,7 @@ export default {
                 name: '',
                 tipo: null,
                 field_id: null,
+                parent_id:null,
                 multiple: false,
                 show_in_segmentation: false,
                 can_be_create:true,
@@ -134,6 +147,7 @@ export default {
             resource: {},
             selects: {
                 data_types: [],
+                criteria : []
             },
 
             rules: {
@@ -169,7 +183,7 @@ export default {
             let vue = this
             vue.$refs['tipoCriterioForm'].resetValidation()
         },
-        confirmModal() {
+        async confirmModal() {
             let vue = this
 
             vue.errors = []
@@ -183,10 +197,11 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             if (validateForm) {
+                this.showLoader()
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
 
-                vue.$http.post(url, formData)
+                await vue.$http.post(url, formData)
                     .then(async ({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
@@ -236,8 +251,8 @@ export default {
 
             await vue.$http.get(url).then(({data}) => {
 
-                vue.selects.data_types = data.data.data_types
-
+                vue.selects.data_types = data.data.data_types;
+                vue.selects.criteria = data.data.criteria;
                 if (resource) {
                     vue.resource = data.data.criterion
                 } else {

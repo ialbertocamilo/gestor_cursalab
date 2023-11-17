@@ -10,6 +10,7 @@
     $taxonomy = \App\Models\Taxonomy::find($tema->type_evaluation_id);
     $evaluationTypeCode = $taxonomy->code ?? '';
     $qualification_type = $tema->qualification_type;
+
     @endphp
     <v-app>
         @include('layouts.user-header')

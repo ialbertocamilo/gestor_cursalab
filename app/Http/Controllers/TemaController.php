@@ -28,6 +28,7 @@ use App\Http\Resources\Posteo\PosteoPreguntasResource;
 use App\Http\Requests\TemaPregunta\TemaPreguntaStoreRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaDeleteRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaImportRequest;
+use App\Models\SortingModel;
 
 class TemaController extends Controller
 {
@@ -46,8 +47,12 @@ class TemaController extends Controller
     {
         $tags = []; //Tag::select('id', 'nombre')->get();
         $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
-        if ($topic)
+        if ($topic) {
             $q_requisitos->whereNotIn('id', [$topic->id]);
+        } 
+
+        $filters = ['course_id' => $course->id];
+        $default_position = $max_position = SortingModel::getNextItemOrderNumber(Topic::class, $filters, 'position');
 
         $requisitos = $q_requisitos->orderBy('position')->get();
 
@@ -58,7 +63,7 @@ class TemaController extends Controller
         $media_url = get_media_root_url();
 
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url','limits_ia_convert');
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url', 'default_position', 'max_position','limits_ia_convert');
 
         return $compactResponse ? $response : $this->success($response);
     }

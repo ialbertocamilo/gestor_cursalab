@@ -3,14 +3,11 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                <!--                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>-->
                 Módulos
                 <v-spacer/>
-                <!--                <DefaultActivityButton-->
-                <!--                    :label="'Actividad'"-->
-                <!--                    @click="activity"/>-->
+   
                 <DefaultModalButton
-                    :label="'Módulo'"
+                    :label="'Crear módulo'"
                     @click="openFormModal(modalOptions, null, 'create')"/>
             </v-card-title>
         </v-card>
@@ -18,14 +15,6 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row class="justify-content-between">
-                    <!--         <v-col cols="4">
-                                <DefaultSelect clearable dense
-                                               :items="selects.modules"
-                                               v-model="filters.module"
-                                               label="Módulos"
-                                               @onChange="refreshDefaultTable(dataTable, filters)"
-                                />
-                            </v-col> -->
                     <v-col cols="4">
                         <DefaultInput
                             clearable dense
@@ -59,7 +48,7 @@
                         `Logs de Modulo - ${$event.name}`
                     )
                 "
-                @edit="openFormModal(modalOptions, $event, 'edit')"
+                @edit="openFormModal(modalOptions, $event, 'edit', `Editar módulo - ${$event.name}`)"
 
                 @duplicate="
                     openFormModal(
@@ -125,8 +114,8 @@ export default {
                 ref: 'modulosTable',
                 headers: [
                     {text: "Portada", value: "image", align: 'center', sortable: false},
-                    {text: "Nombres", value: "name"},
-                    {text: "Activos / Total", value: "active_users", sortable: false},
+                    {text: "Nombre", value: "name"},
+                    {text: "Activos / Total", value: "active_users", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [

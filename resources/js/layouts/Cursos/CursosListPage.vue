@@ -15,8 +15,15 @@
                 <v-spacer/>
 
                 <DefaultModalButton
+                    :label="'Crear curso'"
+                     @click="openFormModal(modalCourseOptions, null, 'create')"
+                />
+                     <!-- v-if="$root.isSuperUser" -->
+
+
+               <!--  <DefaultModalButton
                     :label="'Curso'"
-                    @click="openCRUDPage(`/${ruta}cursos/create`)"/>
+                    @click="openCRUDPage(`/${ruta}cursos/create`)"/> -->
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -119,6 +126,7 @@
                 "
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
+                @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -206,6 +214,14 @@
                 @onCancel="closeSimpleModal(modalFormCompatibilityOptions)"
                 @onConfirm="closeFormModal(modalFormCompatibilityOptions, dataTable, filters)"
             />
+            <CourseFormModal
+                width="65vw"
+                :ref="modalCourseOptions.ref"
+                :options="modalCourseOptions"
+                :school_id="escuela_id"
+                @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalCourseOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -213,6 +229,7 @@
 <script>
 import CursosEncuestaModal from "./CursosEncuestaModal";
 import MoverCursoModal from "./MoverCursoModal";
+import CourseFormModal from "./CourseFormModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
@@ -230,7 +247,8 @@ export default {
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentFormModal,
         CompatibilityFormModal,
-        LogsModal
+        LogsModal,
+        CourseFormModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -247,8 +265,9 @@ export default {
                 headers: [
                     // {text: "Orden", value: "orden", align: 'center'},
                     // {text: "Orden", value: "position", align: 'center', model: 'CourseSchool', sortable: false},
-                    {text: "Portada", value: "image", align: 'center', sortable: false},
+                    {text: "Portada", value: "new_image_2", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
                     {text: "Tipo", value: "type", sortable: false},
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
@@ -271,16 +290,17 @@ export default {
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
-                        type: 'route',
-                        route: 'edit_route'
+                        type: 'action',
+                        method_name: 'edit',
+                        // show_condition: "is_cursalab_super_user"
                     },
-                    {
-                        text: "Logs",
-                        icon: "mdi mdi-database",
-                        type: "action",
-                        show_condition: "is_super_user",
-                        method_name: "logs"
-                    }
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'route',
+                    //     route: 'edit_route'
+                    // },
+
 
                     // {
                     //     text: "Eliminar",
@@ -334,6 +354,13 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
                     },
                     {
                         text: "Eliminar",
@@ -477,7 +504,17 @@ export default {
                 resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create'
-            }
+            },
+            modalCourseOptions: {
+                ref: 'CourseFormModal',
+                open: false,
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'curso',
+                title: '',
+                action: null,
+                persistent: true,
+            },
         }
     },
     mounted() {

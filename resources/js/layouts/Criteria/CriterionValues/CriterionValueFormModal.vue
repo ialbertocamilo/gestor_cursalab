@@ -26,6 +26,17 @@
                             :rules="rules.name"
                         />
                     </v-col>
+                    <v-col cols="12" class="d-flex justify-content-center">
+                        <DefaultAutocomplete
+                            style="width: 100%;"
+                            clearable
+                            :items="selects.criterion_values_parent"
+                            v-model="resource.parent_id"
+                            label="Valor de criterio padre"
+                            itemText="value_text"
+                            :disabled="options.action === 'edit' && resource.parent_id"
+                        />
+                    </v-col>
                 </v-row>
 
                 <v-row justify="space-around">
@@ -40,7 +51,7 @@
 
 <script>
 
-const fields = ['name'];
+const fields = ['name','parent_id'];
 const file_fields = [];
 
 export default {
@@ -60,11 +71,13 @@ export default {
             resourceDefault: {
                 id: null,
                 name: null,
+                parent_id:null,
             },
             resource: {},
             data_type: 'default',
             selects: {
                 // tipos: [],
+                criterion_values_parent:[],
             },
 
             rules: {
@@ -88,7 +101,7 @@ export default {
             let vue = this
             vue.$refs['criterioForm'].resetValidation()
         },
-        confirmModal() {
+        async confirmModal() {
             let vue = this
 
             vue.errors = []
@@ -106,7 +119,7 @@ export default {
 
                 let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
 
-                vue.$http.post(url, formData)
+                await vue.$http.post(url, formData)
                     .then(({data}) => {
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
@@ -144,7 +157,7 @@ export default {
             await vue.$http.get(url).then(({data}) => {
 
                 vue.data_type = data.data.data_type
-
+                vue.selects.criterion_values_parent = data.data.criterion_values_parent;
                 if (resource) {
                     vue.resource = data.data.criterion_value
                 }

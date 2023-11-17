@@ -21,6 +21,7 @@ class RedirectIfAuthenticated
     public function handle(Request $request, Closure $next, ...$guards)
     {
         $guards = empty($guards) ? [null] : $guards;
+        $customer = strtoupper(config('app.customer.slug'));
 
         if(Session::has('init_2fa')) $guards = []; // guards a vacio
         if(Session::has('init_reset')) $guards = []; // guards a vacio
@@ -29,7 +30,7 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
 
                 if(config('slack.routes.demo')){
-                    $message = 'Demo Cursalab 2.0';
+                    $message = "[{$customer}] Cursalab 2.0";
                     $attachments = [
                         [
                             "color" => "#36a64f",

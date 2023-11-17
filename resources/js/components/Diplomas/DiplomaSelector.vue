@@ -1,21 +1,22 @@
 <template>
     <v-row justify="center">
-        <v-col cols="4" lg="2" class="text-center">
+        <v-col cols="4" lg="2" class="--text-center">
             <img
                 v-if="activeTemplate"
-                :src="activeTemplate.image" height="100" class="--my-7 clickable"
+                :src="activeTemplate.image" height="90" class="--my-7 clickable"
                 @click="modalDiplomaPreviewOptions.open = true"
                 title="Ver preview"
+                style="max-width: 110px;"
             />
             <img
                 v-else
-                :src="oldPreview || '/img/noimage.png'" height="100" class="--primary"
+                :src="oldPreview || '/img/noimage.png'" height="90" class="--primary"  style="max-width: 110px;"
             />
         </v-col>
 
         <v-col cols="8" lg="6" class="">
             <v-row >
-                <v-col cols="12" class="d-flex justify-content-start align-items-start">
+                <v-col cols="12" class="d-flex justify-content-start px-4 align-items-start">
                     <DefaultAutocomplete
                         clearable
                         dense
@@ -29,26 +30,26 @@
                     />
                 </v-col>
 
+                    <!-- v-if="activeTemplate" -->
                 <v-col
-                    v-if="activeTemplate"
                     cols="12"
-                    class="d-flex justify-content-start align-items-start pb-0">
+                    class="d-flex  justify-space-around px-0 py-0">
 
                     <span>
-                        <v-icon :color="'#5751e6'">
+                        <v-icon :color="itHasFeature('courses', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
                         </v-icon>
                         Curso
                     </span>
 
-                    <span class="ml-4">
-                        <v-icon :color="'#5751e6'">
+                    <span class="">
+                        <v-icon :color="itHasFeature('users', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
                         </v-icon>
                         Usuario
                     </span>
 
-                    <span class="ml-4">
+                    <span class="">
                         <v-icon
                             :color="itHasFeature('fecha', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
@@ -56,7 +57,7 @@
                         Fecha
                     </span>
 
-                    <span class="ml-4">
+                    <span class="">
                         <v-icon
                             :color="itHasFeature('course-average-grade', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
@@ -67,13 +68,13 @@
 
             </v-row>
         </v-col>
-        <v-col cols="4"  class="d-lg-flex d-none justify-content-center align-items-center text-right">
 
+        <v-col cols="4"  class="d-lg-flex d-none justify-content-center align-items-center text-right">
             <div class="row">
-                <div class="col col-12 py-2">
+                <div class="col col-12 py-1">
                     <a href="/diplomas" target="_blank">Ir al listado de diplomas</a>
                 </div>
-                <div class="col col-12 py-2">
+                <div class="col col-12 py-1">
                     <a href="/diploma/create" target="_blank">Crear nuevo diploma</a>
                 </div>
             </div>
@@ -151,7 +152,7 @@ export default {
             try {
 
                 const response = await axios({
-                    url: '/diplomas/search',
+                    url: '/diplomas/search?paginate=100',
                     method: 'get'
                 })
 

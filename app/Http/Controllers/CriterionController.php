@@ -39,9 +39,11 @@ class CriterionController extends Controller
     {
         $data_types = Taxonomy::getDataForSelect('criterion', 'type');
         $default_position = SortingModel::getNextItemOrderNumber(Criterion::class, columnName: 'position');
-
         $response = compact('data_types', 'default_position');
-
+        if(!$compactResponse){
+            $criteria = Criterion::select('id','name')->where('active',1)->get();
+            $response['criteria'] = $criteria; 
+        }
         return $compactResponse ? $data_types : $this->success($response);
     }
 
@@ -49,6 +51,7 @@ class CriterionController extends Controller
     {
         $data_types = Taxonomy::getDataForSelect('criterion', 'type');
         $criterion->default_position = SortingModel::getLastItemOrderNumber(Criterion::class, columnName: 'position');
+        $criteria = Criterion::select('id','name')->where('active',1)->get();
 
         return $this->success(get_defined_vars());
     }

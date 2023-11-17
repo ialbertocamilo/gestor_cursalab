@@ -95,7 +95,7 @@ class ViewsM extends Model
                     'workspace_id' => $topic->course->workspaces[0]?->id,
                     'workspace_name' => $topic->course->workspaces[0]?->name,
                     'views_by_topic' => $ledger->count,
-                    'generated_at'=> $date
+                    'generated_at'=> $date,
                 ];
             }
         }

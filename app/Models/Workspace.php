@@ -77,7 +77,10 @@ class Workspace extends BaseModel
             'name' => 'Filtro Usuarios',
             'type' => 'boolean',
         ],
-
+        'avaiable_in_personal_data_guest_form'=>[
+            'name' => 'Dato Personal en formulario de Invitados',
+            'type' => 'boolean',
+        ]
     ];
 
     public function sluggable(): array
@@ -497,9 +500,13 @@ class Workspace extends BaseModel
                 $workspace = get_current_workspace();
                 $workspace->criteriaValue()->attach($criterion_value);
 
-            };
+                // Add subworkspace to current admin
+                if ( ! auth()->user()->isA('super-user') ) {
+                    auth()->user()->subworkspaces()->attach($subworkspace);
+                }
+            }
 
-            if (!empty($data['app_menu'])):
+            if (!empty($data['app_menu'])) :
                 $subworkspace->app_menu()->sync($data['app_menu']);
             endif;
 
@@ -569,6 +576,13 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    protected function infoLimitCurrentWorkspace(){
+        $current_workspace = get_current_workspace();
+        $active_users_count = User::onlyClientUsers()->whereRelation('subworkspace', 'parent_id', $current_workspace->id)
+            ->where('active', 1)->count();
+        $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+        return compact('active_users_count','limit_allowed_users');
+    }
     public function sendEmailByLimit($sub_workspace_id = null){
         $workspace = $this;
 
@@ -608,7 +622,7 @@ class Workspace extends BaseModel
                 ]);
             }
         }
-        return true;
+        return $current_active_users_count > $workspace_limit;
     }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {
@@ -639,11 +653,13 @@ class Workspace extends BaseModel
     public static function loadSubWorkspaces($attributes)
     {
         // $workspaceId = get_current_workspace_indexes('id');
-        $workspace = get_current_workspace();
+        // $workspace = get_current_workspace();
+        $modules_ids = current_subworkspaces_id();
 
         return Workspace::select($attributes)
             ->where('active', ACTIVE)
-            ->where('parent_id', $workspace->id)
+            ->whereIn('id', $modules_ids)
+            // ->where('parent_id', $workspace->id)
             ->get();
     }
 
@@ -825,7 +841,16 @@ class Workspace extends BaseModel
         $workspace->functionalities()->sync($this->functionalities);
 
         $workspace->criterionWorkspace()->sync($this->criterionWorkspace);
-
+        Db::table('criterion_workspace')->where('workspace_id',$workspace->id)->where('criterion_id',$_crit_module->id)->update([
+            'available_in_profile'=>1,
+            'available_in_ranking'=>1,
+            'available_in_reports'=>1,
+            'available_in_segmentation'=>1,
+            'available_in_user_creation'=>1,
+            'available_in_user_filters'=>1,
+            'required_in_user_creation'=>1,
+            'avaiable_in_personal_data_guest_form'=>1,
+        ]);
         $workspace->criteriaValue()->createMany($this->criteriaValue->where('criterion_id', '<>', $_crit_module->id)->toArray());
 
         $workspace->medias()->createMany($this->medias->toArray());

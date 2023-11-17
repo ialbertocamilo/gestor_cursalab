@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Topic extends BaseModel
 {
@@ -167,6 +168,14 @@ class Topic extends BaseModel
                     //     $valor = env('DO_URL') . '/' .$valor;
                     // }
                     $path_convert = $_medias->where('value',$valor)->first()?->path_convert;
+                    if ($media['tipo'] == 'youtube') {
+                        $valor = extractYoutubeVideoCode($valor);
+                    }
+
+                    if ($media['tipo'] == 'vimeo') {
+                        $valor = extractVimeoVideoCode($valor);
+                    }
+
                     $medias[] = [
                         'position' => ($index + 1),
                         'topic_id' => $tema->id,
@@ -844,6 +853,11 @@ class Topic extends BaseModel
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
                 'tarea' => $project,
+                'scheduled_activation' => [
+                    'message' => $course->deactivate_at ? 
+                                    'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
+                                    : null,
+                ],
                 // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }

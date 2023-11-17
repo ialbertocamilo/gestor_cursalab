@@ -13,11 +13,32 @@
             <v-card-title>
                 <!-- <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/> -->
                 Cursos
+
+                <DefaultInfoTooltip class="mr-5" right>
+                    <template v-slot:content>
+                        <p><strong>Recuerda que un curso será visible para tus usuarios solo si cumple los siguientes requisitos:</strong></p>
+                        <ul>
+                            <li>El curso debe contar con al menos un tema activo y pertenecer al menos a una escuela activa.</li>
+                            <li>El curso debe estar segmentado, ya sea por criterios o por documento.</li>
+                            <li>El curso debe encontrarse activo (de manera directa o por medio de su programación).</li>
+                        </ul>
+                    </template>
+                </DefaultInfoTooltip>
+
                 <v-spacer/>
 
+                <a style="font-size: 0.8em; font-weight: bold;" href="/cursos/download-segmentation"
+                    target="_blank" v-if="$root.isSuperUser" class="mr-5"
+                >
+                    <i aria-hidden="true" class="v-icon notranslate mr-1 mdi mdi-download"></i>
+                    Descargar segmentación
+                </a>
+
                 <DefaultModalButton
-                    :label="'Curso'"
-                    @click="openCRUDPage(`/cursos/create`)"/>
+                    :label="'Crear curso'"
+                    @click="openFormModal(modalCourseOptions, null, 'create')"
+                />
+   
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -40,7 +61,7 @@
                     <v-col cols="3">
                         <DefaultAutocomplete
                             dense
-                            label="Escuelas"
+                            :label="filters.segmented_module ? 'Escuelas' : 'Seleccione un módulo'"
                             :items="selects.schools"
                             v-model="filters.schools"
                             item-text="name"
@@ -85,11 +106,12 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del Curso - ${$event.name}`)"
-                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover Curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del Curso - ${$event.name}`)"
+                @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
+                @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
                 @redirect_to_course_form_page="redirect_to_course_form_page($event)"
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
+                @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
                 @create_project="openProjectModal($event)"
@@ -172,12 +194,20 @@
                 @onConfirm="closeFormModal(modalOptionProject, dataTable, filters)"
                 @onCancel="closeFormModal(modalOptionProject)"
             />
+            <CourseFormModal
+                width="65vw"
+                :ref="modalCourseOptions.ref"
+                :options="modalCourseOptions"
+                @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalCourseOptions)"
+            />
         </v-card>
     </section>
 </template>
 
 <script>
 import CursosEncuestaModal from "./CursosEncuestaModal";
+import CourseFormModal from "./CourseFormModal";
 import MoverCursoModal from "./MoverCursoModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -194,7 +224,8 @@ export default {
         'CourseValidationsDelete': CursoValidacionesModal,
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentCoursesFormModal,
-        CompatibilityFormModal
+        CompatibilityFormModal,
+        CourseFormModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -210,8 +241,10 @@ export default {
                 endpoint: `cursos/search`,
                 ref: 'cursosTable',
                 headers: [
-                    {text: "Portada", value: "medium_image", align: 'center', sortable: false},
+                    {text: "Portada", value: "new_image", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
+                    // {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
+                    // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
                     {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
                     {text: "Módulos", value: "images", sortable: false},
@@ -236,8 +269,15 @@ export default {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
-                        method_name: 'redirect_to_course_form_page'
+                        method_name: 'edit',
+                        // show_condition: "is_cursalab_super_user"
                     },
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'action',
+                    //     method_name: 'redirect_to_course_form_page'
+                    // },
                     // {
                     //     text: "Eliminar",
                     //     icon: 'far fa-trash-alt',
@@ -262,7 +302,7 @@ export default {
                         method_name: 'encuesta'
                     },
                     {
-                        text: "Crear Tarea",
+                        text: "Crear tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'create_project',
@@ -270,7 +310,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Editar Tarea",
+                        text: "Editar tarea",
                         icon: 'fas fa-book',
                         type: 'action',
                         show_condition:'edit_project',
@@ -286,7 +326,7 @@ export default {
                         // permission_name:'can_show_tarea'
                     },
                     {
-                        text: "Actualizar Estado",
+                        text: "Actualizar estado",
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
@@ -391,6 +431,17 @@ export default {
                 ref: 'MoverCursoModal',
                 open: false,
                 base_endpoint: `/cursos`,
+            },
+
+            modalCourseOptions: {
+                ref: 'CourseFormModal',
+                open: false,
+                base_endpoint: '/cursos',
+                confirmLabel: 'Guardar',
+                resource: 'curso',
+                title: '',
+                action: null,
+                persistent: true,
             },
         }
     },

@@ -1,6 +1,7 @@
 <template>
     <DefaultDialog :options="options"
                    :width="width"
+                   :height="height"
                    no-padding-card-text
                    @onCancel="onClose"
                    @onConfirm="onConfirm">
@@ -34,12 +35,12 @@
                     <div class="lista_media" style="width: 100%">
                         <div class="row">
                             <div class="col-12 d-flex justify-center" v-if="loading">
-                                <h1>Cargando ....</h1>
+                                <h3>Cargando ...</h3>
                             </div>
                             <div class="col-12 d-flex justify-center" v-if="!loading && multimedias.length === 0">
-                                <h1>No se encontraron resultados</h1>
+                                <h3>No se encontraron resultados</h3>
                             </div>
-                            <div class="col-sm-6 col-md-3 col-lg-2 mt-2"
+                            <div class="col-sm-6 col-md-4 col-lg-3 mt-2"
                                  v-else
                                  v-for="item in multimedias"
                                  :key="item.id"
@@ -47,15 +48,20 @@
                             >
                                 <div class="med_box">
                                     <div class="img_box" :class="{'item-box-selected': item.selected}">
-                                    <span class="tag"
-                                          :style="{background: infoMedia(item).color}">{{ infoMedia(item).tipo }}</span>
+                                              <!-- {{ infoMedia(item).tipo }} -->
+                                        <span class="tag grey" v-if="item.size" >
+                                            <strong >{{ item.size }} MB</strong>
+                                        </span>
+                                        <span class="tag2 primary"  >
+                                            {{ infoMedia(item).tipo || '-' }}
+                                        </span>
                                         <v-img :src="infoMedia(item).preview" contain aspect-ratio="2"
-                                               :lazy-src="`/img/loader.gif`"
-                                        />
-                                        <!--                                    <img :src="infoMedia(item).preview" class="img-fluid" >-->
+                                               :lazy-src="`/img/loader.gif`" />
                                     </div>
-                                    <!-- <span>{{ item.title }}</span> -->
-                                    <span v-text="(item.size) ? `${item.title} - (${item.size} MB)` : item.title"></span>
+                                    <span class="med-box-title" :title="item.title">
+                                        {{ item.title }}
+                                    </span>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -87,7 +93,8 @@ export default {
             type: Array,
             default: []
         },
-        width: String
+        width: String,
+        height: String
     },
     data() {
         return {

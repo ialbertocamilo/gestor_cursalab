@@ -2,6 +2,7 @@
     <DefaultDialog
         :options="options"
         :width="width"
+        :height="height"
         @onCancel="closeModal"
         @onConfirm="confirmModal"
         no-padding-card-text
@@ -37,6 +38,7 @@
                             placeholder="Ingresar título"
                             v-model="titulo"
                             :rules="rules.titulo"
+                            dense
                         />
                     </v-col>
                     <v-col cols="12">
@@ -45,7 +47,10 @@
                             v-model="multimedia"
                             :label="label"
                             :file-types="[filterType]"
-                            @onSelect="setMultimedia"/>
+                            @onSelect="setMultimedia"
+                            select-width="55vw"
+                            select-height="55vh"
+                        />
                     </v-col>
                     <v-col cols="12" v-if="['video','audio','pdf'].includes(filterType)">
                         <AiSection :limits="limits" @onChange="changeIaConvertValue" />
@@ -73,6 +78,7 @@ export default {
             required: false
         },
         width: String,
+        height: String,
         type: String,
         label: String,
 

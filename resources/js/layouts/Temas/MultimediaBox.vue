@@ -4,15 +4,16 @@
         <span class="multimedia-box-span" v-text="data.label"/>
         <ModalMultimediaText
             :limits ="limits"
-            width="40vw"
+            width="60vw"
             :options="modalMultimediaTextOptions"
             :type="data.type"
             @close="modalMultimediaTextOptions.open = false "
             @onConfirm="emitConfirm"
         />
+            <!-- height="70vh" -->
         <ModalMultimediaMix
             :limits="limits"
-            width="40vw"
+            width="60vw"
             :type="data.type"
             :label="data.label"
             :options="modalMultimediaMixOptions"

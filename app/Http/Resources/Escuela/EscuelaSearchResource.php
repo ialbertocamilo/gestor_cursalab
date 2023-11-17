@@ -29,6 +29,9 @@ class EscuelaSearchResource extends JsonResource
             'id' => $this->id,
             'nombre' => $this->name,
             'name' => $this->name,
+            'escuela_nombre' => [
+                'name' => $this->name,
+            ],
             'image' => FileService::generateUrl($this->imagen),
             'images' => $this->getModulesImages(),
             'modules' => implode(', ', $modules),

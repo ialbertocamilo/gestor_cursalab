@@ -75,7 +75,7 @@
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
                             @onChange="moduloChange"
-                            :maxValuesSelected="4"
+                            :maxValuesSelected="maxValuesSelected.modules"
                         />
                     </div>
                     <!-- Escuela -->
@@ -89,10 +89,10 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
                             @onChange="escuelaChange"
-                            :maxValuesSelected="10"
+                            :maxValuesSelected="maxValuesSelected.schools"
+                            :showSelectAll="maxValuesSelected.show_select_all"
                         />
                     </div>
                     <!-- Curso -->
@@ -106,7 +106,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
+                            :showSelectAll="true"
                             placeholder="Seleccione los cursos"
                         />
                     </div>
@@ -128,7 +128,7 @@
                             chips
                             clearable
                             multiple
-                            :show-select-all="false"
+                            :show-select-all="true"
                             hide-details="false"
                             v-model="area"
                             :items="areas"
@@ -264,6 +264,9 @@ import ResumenExpand from "./partials/ResumenExpand.vue"
 import EstadoFiltro from "./partials/EstadoFiltro.vue"
 import FiltersNotification from "../globals/FiltersNotification.vue";
 
+// console.log(max_values_selected_modules);
+// console.log(max_values_selected_schools);
+// console.log(currentDomain);
 export default {
     components: {FiltersNotification, EstadoFiltro, ResumenExpand, ListItem, CheckValidar, FechaFiltro },
     props: {
@@ -289,7 +292,12 @@ export default {
             tipocurso: false,
             desaprobados: true,
             encuestaPendiente: true,
-            desarrollo: true
+            desarrollo: true,
+            maxValuesSelected:{
+                modules:4,
+                schools:10,
+                show_select_all:false
+            }
         };
     },
     methods: {
@@ -423,6 +431,15 @@ export default {
     },
     mounted() {
         this.fetchFiltersData();
+        const domainsToExcludeConstraint = ['gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
+        const currentDomain = new URL(window.location.href).hostname;
+        domainsToExcludeConstraint.forEach(domain => {
+            if(domain.includes(currentDomain)){
+                this.maxValuesSelected.modules = 0;
+                this.maxValuesSelected.schools = 0;
+                this.maxValuesSelected.show_select_all = true;
+            }
+        });
     }
 }
 
