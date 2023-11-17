@@ -44,7 +44,6 @@
                                             <!-- multiple -->
                                             <!-- :count-show-values="3" -->
                                             <!-- :max-values-selected="1" -->
-                                            <!-- :loading="modules_loader" -->
                                     </v-col>
                                     <v-col cols="4">
                                         <DefaultAutocomplete
