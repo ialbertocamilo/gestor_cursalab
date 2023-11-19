@@ -89,7 +89,7 @@ RUN find /etc /usr/local/etc -type f -name newrelic.ini \
 # As FPM uses the www-data user when running our application,
 # we need to make sure that we also use that user when starting up,
 # so our user "owns" the application when running..
-USER  www-data
+# USER  www-data
 
 # COnfiguration of fpm.ini
 COPY --chown=www-data docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
