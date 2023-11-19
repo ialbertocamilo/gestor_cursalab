@@ -75,12 +75,11 @@ RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VE
     && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
     && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall*
 
-# RUN find /etc /opt/etc /usr/local/etc -type f -name newrelic.ini \
 RUN find /etc /usr/local/etc -type f -name newrelic.ini \
     -exec sed -i \
         -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
         -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
-        -e '$anewrelic.daemon.address="newrelic-php-daemon:31339"' {} \;
+        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
 
 
 
