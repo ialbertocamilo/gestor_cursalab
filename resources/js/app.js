@@ -352,40 +352,40 @@ const app = new Vue({
             }
 
         },
-        downloadReport(url, name) {
-            try {
-                FileSaver.saveAs(url, name)
-
-            } catch (error) {
-                console.log(error)
-
-            }
-        },
-
-        // downloadReportNotify(url, name) {
+        // downloadReport(url, name) {
         //     try {
-        //         // Realizar una solicitud para obtener el archivo desde la URL
-        //         fetch(url)
-        //             .then(response => {
-        //                     if (!response.ok) {
-        //                         throw new Error(`HTTP error! Status: ${response.status}`);
-        //                     }
-        //                     return response.blob();
-        //                 }
-        //             )
-        //             .then(blob => {
-        //                 // Crear un nuevo Blob con el nombre deseado
-        //                 const newBlob = new Blob([blob], { type: blob.type });
+        //         FileSaver.saveAs(url, name)
 
-        //                 // Guardar el Blob con el nuevo nombre usando FileSaver.js
-        //                 FileSaver.saveAs(newBlob, name );
-        //             })
-        //             .catch(error => {
-        //                 console.error("Error al descargar el archivo:", error);
-        //             });
         //     } catch (error) {
-        //         console.error("Error general:", error);
+        //         console.log(error)
+
         //     }
         // },
+
+        downloadReport(url, name) {
+            try {
+                // Realizar una solicitud para obtener el archivo desde la URL
+                fetch(url)
+                    .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.blob();
+                        }
+                    )
+                    .then(blob => {
+                        // Crear un nuevo Blob con el nombre deseado
+                        const newBlob = new Blob([blob], { type: blob.type });
+
+                        // Guardar el Blob con el nuevo nombre usando FileSaver.js
+                        FileSaver.saveAs(newBlob, name );
+                    })
+                    .catch(error => {
+                        console.error("Error al descargar el archivo:", error);
+                    });
+            } catch (error) {
+                console.error("Error general:", error);
+            }
+        },
     }
 });
