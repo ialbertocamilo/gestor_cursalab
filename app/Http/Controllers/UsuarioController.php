@@ -1010,7 +1010,6 @@ class UsuarioController extends Controller
             if(!env('DEMO',false)){
                 Mail::to($user->email)->send(new EmailTemplate('emails.confirmacion_restauracion_credenciales', $mail_data));
             }
-
         }
 
         return $this->success(['msg' => 'Contraseña restaurada correctamente.']);

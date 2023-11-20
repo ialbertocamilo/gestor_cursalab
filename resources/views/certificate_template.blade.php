@@ -1,7 +1,9 @@
 <?php
     setlocale(LC_TIME, 'es_PE.UTF-8');
+
+    $sp_slug = 'sanpablo';
     $css_file = $config->is_v1_migrated ? 'certi-v1.css' : 'certi.css';
-    // $css_file = config('app.migrated.v1') ? 'certi-v1.css' : 'certi.css';
+    $user_class = config('app.customer.slug') != $sp_slug ? 'nombre' : 'nombre-sp';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,8 +37,11 @@
         @if($data['old_template'] === true)
 
             <img src="{{ $data['image'] }}" alt="Certificado">
-            <span class="nombre default">{{ $data['users'] }}</span>
-            <span class="curso default">{{ $data['courses'] }}</span>
+            <span class="{{ $user_class }} default">{{ $data['users'] }}</span>
+            
+            @if(config('app.customer.slug') != $sp_slug)
+                <span class="curso default">{{ $data['courses'] }}</span>
+            @endif
         
             @if ($data['show_certification_date'])
                 <span class="fecha">{{ fechaCastellano($data['fecha']) }}</span>
@@ -44,9 +49,11 @@
 
         @else
 
-            <img style="position: absolute; z-index: 0; top: 0; left: 0"
+            {{-- position: absolute; --}}
+            <img style="z-index: 0; top: 0; left: 0; max-height: 100%; max-width: 100%;"
                  src="{{ $data['image'] }}"
                  alt="Certificado">
+
         @endif
 
     </div>

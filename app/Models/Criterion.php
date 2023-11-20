@@ -15,7 +15,7 @@ class Criterion extends BaseModel
         'show_as_parent', 'show_in_reports', 'show_in_ranking',
         'show_in_profile', 'show_in_segmentation', 'is_default',
         'show_in_form', 'required', 'editable_configuration',
-        'editable_segmentation', 'multiple', 'active', 'description','can_be_create'
+        'editable_segmentation', 'multiple', 'active', 'description','can_be_create','avaiable_in_personal_data_guest_form'
     ];
 
     protected $casts = [

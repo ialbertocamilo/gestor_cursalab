@@ -73,7 +73,10 @@ class Workspace extends BaseModel
             'name' => 'Filtro Usuarios',
             'type' => 'boolean',
         ],
-
+        'avaiable_in_personal_data_guest_form'=>[
+            'name' => 'Dato Personal en formulario de Invitados',
+            'type' => 'boolean',
+        ]
     ];
 
     public function sluggable(): array
@@ -566,6 +569,13 @@ class Workspace extends BaseModel
             default => null
         };
     }
+    protected function infoLimitCurrentWorkspace(){
+        $current_workspace = get_current_workspace();
+        $active_users_count = User::onlyClientUsers()->whereRelation('subworkspace', 'parent_id', $current_workspace->id)
+            ->where('active', 1)->count();
+        $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
+        return compact('active_users_count','limit_allowed_users');
+    }
     public function sendEmailByLimit($sub_workspace_id = null){
         $workspace = $this;
 
@@ -605,7 +615,7 @@ class Workspace extends BaseModel
                 ]);
             }
         }
-        return true;
+        return $current_active_users_count > $workspace_limit;
     }
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {

@@ -253,18 +253,18 @@ class Course extends BaseModel
             if ($course) :
 
                 $course->update($data);
-
                 // TODO: Compatibles: Si se cambia el estado del curso
                 if ($course->wasChanged('active')):
 
                     $course->updateOnModifyingCompatibility();
 
                 endif;
-
+                $course->schools()->sync($data['escuelas']);
             else:
 
                 $course = self::create($data);
                 $course->workspaces()->sync([$workspace->id]);
+                $course->schools()->sync($data['escuelas']);
                 foreach ($data['escuelas'] as  $escuela) {
                     SortingModel::setLastPositionInPivotTable(CourseSchool::class,Course::class,[
                         'school_id' => $escuela,
@@ -288,7 +288,6 @@ class Course extends BaseModel
             endif;
 
 
-            $course->schools()->sync($data['escuelas']);
 
             // $course->compatibilities()->sync($data['compatibilities'] ?? []);
 
@@ -1482,7 +1481,7 @@ class Course extends BaseModel
     {
         $user = $user ?? auth()->user();
 
-        $workspace_id = $user->subworkspace->parent_id;
+        $workspace_id = $user->subworkspace?->parent_id;
 
         if ($workspace_id != 25) return false;
 
@@ -1732,4 +1731,19 @@ class Course extends BaseModel
             'school_id' => $school->id,
         ]);
     } 
+
+    protected function getSegmentationDataByWorkspace($workspace)
+    {
+        $courses = Course::with([
+                    'segments' => [
+                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'], 
+                        'type:id,name',
+                    ]
+                ])
+                ->select('id', 'name', 'active')
+                ->whereRelationIn('workspaces', 'id', [$workspace->id])
+                ->get();
+
+        return $courses;
+    }
 }

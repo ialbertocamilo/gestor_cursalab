@@ -64,11 +64,13 @@ class ResetUserAttemptsBySchedule extends Command
 
             $date = Carbon::now()->subMinutes($minutes);
             $date->second = 59;
-
+            // Desaprobado <- usuarios que ya no tienen intentos despúes de haber realizado su evaluación
+            //por-iniciar <- usuarios que ya no tienen intentos despúes de haber abandonado su evaluación (no llego a culminarlo)
+            // realizado <- usuarios que gastaron intentos pero cuando el tema era evaluable abierta y luego cambio a evaluable calificada 
             $query = SummaryTopic::disableCache()
                         ->select('id', 'restarts', 'attempts', 'updated_at')
                         ->whereIn('topic_id', $topic_ids)
-                        ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar'])
+                        ->whereRelationIn('status', 'code', ['desaprobado', 'por-iniciar','realizado'])
                         ->where('attempts', '>=', $config['nro_intentos'])
                         ->where('last_time_evaluated_at', '<=', $date);
 

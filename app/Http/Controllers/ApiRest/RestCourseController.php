@@ -235,7 +235,7 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $qs = $request->q ?? NULL;
 
-        $query = SummaryCourse::with('course:id,name')
+        $query = SummaryCourse::with('course:id,name,user_confirms_certificate')
             ->whereHas('course', function($q) use ($qs) {
                 $q->where('show_certification_to_user', 1);
                 

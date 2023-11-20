@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Topic extends BaseModel
 {
@@ -848,6 +849,11 @@ class Topic extends BaseModel
                 'temas' => $topics_data,
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
                 'tarea' => $project,
+                'scheduled_activation' => [
+                    'message' => $course->deactivate_at ? 
+                                    'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
+                                    : null,
+                ],
                 // 'mod_evaluaciones' => $course->mod_evaluaciones
             ]);
         }

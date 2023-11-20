@@ -130,6 +130,7 @@
                                             multiple
                                             :label="criterion.name"
                                             v-model="module.carreras_selected"
+                                            :returnObject="true"
                                             :items="module.carreras"
                                             item-text="nombre"
                                             item-value="id"
@@ -328,8 +329,6 @@ export default {
             });
 
             const cadena = JSON.stringify(data);
-            console.log(cadena);
-
             return cadena;
             // vue.nueva_notificacion.destinatarios = cadena;
         },

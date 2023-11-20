@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SegmentValue extends BaseModel
 {
@@ -76,5 +77,25 @@ class SegmentValue extends BaseModel
             ->get();
 
         return $segmentValues->pluck('criterion_id')->toArray();
+    }
+
+    public function getCriterionValueText()
+    {
+        $segment_value = $this;
+        $text = $segment_value->criterion_value->value_text ?? 'NOT_DEFINED';
+
+        if($segment_value->starts_at && $segment_value->finishes_at) {
+
+            if ($segment_value->starts_at == $segment_value->finishes_at) {
+
+                $text = Carbon::parse($segment_value->starts_at)->format('d/m/Y');
+
+            } else {
+                $text = Carbon::parse($segment_value->starts_at)->format('d/m/Y') . ' - ' .
+                Carbon::parse($segment_value->finishes_at)->format('d/m/Y');
+            }
+        }
+
+        return $text;
     }
 }

@@ -15,7 +15,7 @@
                             <thead>
                             <tr class="primary">
                                 <th class="text-left text-white" v-text="'Módulo'"/>
-                                <th class="text-left text-white" v-text="'Carreras'"/>
+                                <th class="text-left text-white" v-text="'Criterios'"/>
                             </tr>
                             </thead>
                             <!--                            <tbody v-if="resource.categorias.length === 0">-->

@@ -36,6 +36,9 @@ use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\Curso\CursoEncuestaStoreUpdate;
 use App\Http\Requests\Curso\CursosStoreUpdateRequest;
 
+use App\Exports\Course\CourseSegmentationExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class CursosController extends Controller
 {
 
@@ -462,6 +465,21 @@ class CursosController extends Controller
             });
 
         return $this->success(compact('schools'));
+    }
+
+    public function downloadCourseSegmentations()
+    {
+        $workspace = get_current_workspace();
+
+        $code = $workspace->slug ?? "WRKSP[{$workspace->id}]";
+
+        $datetime = date('Y-m-d_H:i:s');
+        $filename = "Reporte-de-segmentación-[{$code}].xlsx";
+        
+        ob_end_clean();
+        ob_start();
+
+        return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
 
 }

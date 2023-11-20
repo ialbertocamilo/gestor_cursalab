@@ -106,7 +106,7 @@
                             item-text="name"
                             item-value="id"
                             multiple
-                            :showSelectAll="false"
+                            :showSelectAll="true"
                             placeholder="Seleccione los cursos"
                         />
                     </div>
@@ -128,7 +128,7 @@
                             chips
                             clearable
                             multiple
-                            :show-select-all="false"
+                            :show-select-all="true"
                             hide-details="false"
                             v-model="area"
                             :items="areas"
@@ -431,7 +431,7 @@ export default {
     },
     mounted() {
         this.fetchFiltersData();
-        const domainsToExcludeConstraint = ['gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io'];
+        const domainsToExcludeConstraint = ['gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
         const currentDomain = new URL(window.location.href).hostname;
         domainsToExcludeConstraint.forEach(domain => {
             if(domain.includes(currentDomain)){

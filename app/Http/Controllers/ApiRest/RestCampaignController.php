@@ -171,6 +171,7 @@ class RestCampaignController extends Controller
     // ===  APIS POSTULACION ===
     public function postulates(Request $request) 
     {
+        $request->user_id = auth()->user()->id;
         $summoneds = CampaignSummoneds::search_api($request);
         $summoneds_rows = $summoneds->items();
 
@@ -180,7 +181,6 @@ class RestCampaignController extends Controller
             $summoneds_rows[$key]['user_id'] = $item->user->id;
             $summoneds_rows[$key]['campaign_id'] = $item->campaign_id;
             $summoneds_rows[$key]['state_send'] = $item->state_send;
-
             $summoneds_rows[$key]['name'] = $item->user->name;
             $summoneds_rows[$key]['lastname'] = $item->user->lastname;
             $summoneds_rows[$key]['surname'] = $item->user->surname;

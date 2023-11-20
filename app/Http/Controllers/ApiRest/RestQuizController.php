@@ -136,15 +136,19 @@ class RestQuizController extends Controller
         $type_code = $is_qualified ? 'select-options' : 'written-answer';
 
         if (!$topic) return response()->json(['data' => ['msg' => 'Not found'], 'error' => true], 200);
-        if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Not verified'], 'error' => true], 200);
+        if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [A]'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-        // not considerer open evaluation to attemps and time validations
+
+        if (!$row)
+            return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
+        
+        // not consider open evaluation to attempts and time validations
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
         if ($row->isOutOfTimeForQuiz() && $is_qualified)
-            return response()->json(['data' => ['msg' => 'Fuera de tiempo'], 'error' => true], 200);
+            return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
 
         $limit = NULL;
         // $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');
@@ -161,7 +165,7 @@ class RestQuizController extends Controller
         }
 
         if (count($questions) == 0)
-            return response()->json(['error' => true, 'data' => null], 200);
+            return response()->json(['error' => true, 'data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [B]']], 200);
 
         $data = [
             'nombre' => $topic->name,

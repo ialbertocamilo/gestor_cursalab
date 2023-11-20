@@ -79,6 +79,10 @@ class Kernel extends ConsoleKernel
         //Checklist
         $schedule->command('update:checklist-summary-user')->hourly();
         $schedule->command('send:emails')->everyFiveMinutes();
+
+        // Reports
+
+        $schedule->command('reports:history')->weeklyOn(5, '04:30'); // Every friday
     }
 
     /**

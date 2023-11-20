@@ -91,7 +91,7 @@ class ChangeStateUserMassive extends Massive implements ToCollection
             $counter++;
             if (!is_null($row)) {
                 $user_identifier = is_array($row) ? $row[0] : $row;
-                $termination_date = is_array($row) ? $row[1] : null;
+                $termination_date = is_array($row) && isset($row[1]) ? $row[1] : null;
                 if ($termination_date) {
                     $termination_date = $this->excelDateToDate($termination_date);
                     if ($termination_date == 'invalid date') {

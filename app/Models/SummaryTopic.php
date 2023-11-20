@@ -59,7 +59,7 @@ class SummaryTopic extends Summary
     {
         $row = $this->getCurrentRow($topic);
 
-        if (!$row->taking_quiz) {
+        if ($row && !$row->taking_quiz) {
 
             $duration = config('app.quizzes.duration');
 
