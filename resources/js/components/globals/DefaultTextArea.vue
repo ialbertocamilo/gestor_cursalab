@@ -25,7 +25,7 @@
                         class="ml-2" 
                         src="/img/ia_convert.svg"
                     >
-                    <span class="span-limits">{{limits.ia_descriptions_generated}}/{{limits.limit_descriptions_jarvis>999 ? '∞' : limits.limit_descriptions_jarvis  }}</span>
+                    <span class="span-limits" v-if="limits.limit_descriptions_jarvis < 1000">{{limits.ia_descriptions_generated}}/{{ limits.limit_descriptions_jarvis }}</span>
                 </div>
             </template>
         </v-textarea>
@@ -76,11 +76,8 @@ export default {
             default: false
         },
         limits:{
-            type: Object,
-            default: {
-                ia_descriptions_generated:0,
-                limit_descriptions_jarvis:0
-            }
+            required: false,
+            type: Object | Array,
         }
     },
     data() {

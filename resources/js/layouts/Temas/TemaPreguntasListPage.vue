@@ -8,34 +8,36 @@
                         <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                     </v-col>
                     <v-col cols="6">
-                        <div class="ddd-flex justify-content-end">
-                            <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
-                                    <template v-slot:badge>
-                                        <span v-text="`${limits_ai_convert.ia_evaluations_generated}/${limits_ai_convert.limit_allowed_ia_evaluations}`"></span>
-                                    </template>
-                                    <v-btn
-                                        elevation="0"
-                                        color="primary"
-                                        @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
-                                        :disabled="
-                                            limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations 
-                                            || !limits_ai_convert.is_ready_to_create_AIQuestions"
-                                    >
-                                        <img width="22px" 
-                                            v-if="limits_ai_convert.is_ready_to_create_AIQuestions"
-                                            class="mr-2" 
-                                            style="filter: brightness(3);"
-                                            src="/img/ia_convert.svg"
+                        <div class="d-flex justify-content-end">
+                            <span v-if="limits_ai_convert.has_permission_to_use_ia_evaluation">
+                                <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
+                                        <template v-slot:badge>
+                                            <span v-text="`${limits_ai_convert.ia_evaluations_generated}/${limits_ai_convert.limit_allowed_ia_evaluations}`"></span>
+                                        </template>
+                                        <v-btn
+                                            elevation="0"
+                                            color="primary"
+                                            @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
+                                            :disabled="
+                                                limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations 
+                                                || !limits_ai_convert.is_ready_to_create_AIQuestions"
                                         >
-                                        <img else width="22px" 
-                                            v-else
-                                            class="loader-jarvis img-rotate mr-2" 
-                                            style="filter: brightness(3);"
-                                            src="/img/loader-jarvis.svg"
-                                        >
-                                        Crear con AI
-                                    </v-btn>
-                            </v-badge>
+                                            <img width="22px" 
+                                                v-if="limits_ai_convert.is_ready_to_create_AIQuestions"
+                                                class="mr-2" 
+                                                style="filter: brightness(3);"
+                                                src="/img/ia_convert.svg"
+                                            >
+                                            <img else width="22px" 
+                                                v-else
+                                                class="loader-jarvis img-rotate mr-2" 
+                                                style="filter: brightness(3);"
+                                                src="/img/loader-jarvis.svg"
+                                            >
+                                            Crear con AI
+                                        </v-btn>
+                                </v-badge>
+                            </span>
                             <DefaultActivityButton
                                 :outlined="true"
                                 :label="'Importar evaluación'"
@@ -368,7 +370,7 @@ export default {
             limits_ai_convert:{
                 ia_evaluations_generated:0,
                 limit_allowed_ia_evaluations:0
-            }
+            },
         }
     },
     mounted() {
@@ -461,7 +463,7 @@ export default {
             vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1; 
             vue.openSimpleModal(vue.modalInfoCreateQuestion);
         },
-        async   loadLimitsGenerateIaDescriptions(){
+        async loadLimitsGenerateIaDescriptions(){
             this.showLoader();
             await axios.get(`/jarvis/limits?type=evaluations&topic_id=${this.tema_id}`).then(({data})=>{
                 this.hideLoader();

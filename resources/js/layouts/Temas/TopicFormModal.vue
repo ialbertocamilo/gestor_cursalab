@@ -39,9 +39,12 @@
                             :rules="rules.content"
                             class="mt-2"
                             :height="195"
-                            :showGenerateIaDescription='true'
+                            :showGenerateIaDescription="hasPermissionToUseIaDescription"
+                            :key="`${hasPermissionToUseIaDescription}-editor`"
+                            :loading="loading_description"
+                            ref="descriptionRichText"
+                            @generateIaDescription="generateIaDescription"
                         />
-
                     </v-col>
                     <v-col cols="5">
                         <DefaultSelectOrUploadMultimedia
@@ -187,7 +190,7 @@
                                                     </a>
                                                 </div>
                                             </td>
-                                            <td class="">
+                                            <td class="" v-if="hasPermissionToUseIaEvaluation">
                                                 <div class="mt-1">
                                                     <span class="d-flex align-items-center">
                                                         <img width="26px" 
@@ -239,7 +242,7 @@
                                 </table>
                             </v-col>
 
-                            <TemaMultimediaTypes :limits="limits_ia_convert" @addMultimedia="addMultimedia($event)"/>
+                            <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
                         </v-row>
 
                     </template>
@@ -428,11 +431,12 @@ export default {
                 open: false,
                 confirmLabel: 'Guardar'
             },
+            hasPermissionToUseIaDescription:false,
+            hasPermissionToUseIaEvaluation:false,
         }
     },
     async mounted() {
         let vue = this
-        await vue.loadLimitsGenerateIaDescriptions();
     },
     computed: {
         showActiveResults() {
@@ -644,7 +648,12 @@ export default {
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
-
+                    vue.limits_ia_convert = data.data.limits_ia_convert;
+                    vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
+                    vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    if(vue.hasPermissionToUseIaDescription){
+                        this.loadLimitsGenerateIaDescriptions();
+                    }
                     if (resource && resource.id) {
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
@@ -659,8 +668,12 @@ export default {
         },
         addMultimedia(multimedia) {
             let vue = this
+            if(multimedia.ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted +1;
+            }
             vue.resource.media.push({
                 title: multimedia.titulo,
+                ia_convert: multimedia.ia_convert || null,
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
@@ -783,7 +796,7 @@ export default {
                 type:'topic'
             }).then(({data})=>{
                 let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
-                ia_descriptions_generated.textContent = vue.limits_descriptions_generate_ia.ia_descriptions_generated+1;
+                ia_descriptions_generated.textContent = parseInt(ia_descriptions_generated.textContent) + 1;
 
                 let characters = data.data.description.split('');
                 vue.resource.content = ''; // Limpiar el contenido anterior
@@ -816,18 +829,26 @@ export default {
         },
         addIaConvert(media){
             let vue  = this;
-            const idx = vue.resource.media.findIndex(m => m.id = media.id)
-            vue.resource.media[idx].ia_convert = 1;
+            if(media.id){
+                const idx = vue.resource.media.findIndex(m => m.id = media.id)
+                console.log(idx,'if');
+                console.log(vue.resource.media[idx],'if');
+                vue.resource.media[idx].ia_convert = 1;
+                console.log(vue.resource.media[idx],'if');
+            }else{
+                const idx = vue.resource.media.findIndex(m => m.value = media.value)
+                console.log(idx,'else',media.value);
+                console.log(vue.resource.media[idx],'else');
+                vue.resource.media[idx].ia_convert = 1;
+                console.log(vue.resource.media[idx],'else');
+            }
             vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
             vue.convertMediaToIaOptions.open = false;
         },
         async loadLimitsGenerateIaDescriptions(){
+            let vue = this;
             await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
-                this.limits_descriptions_generate_ia = data.data;
-                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
-                let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
-                ia_descriptions_generated.textContent = data.data.ia_descriptions_generated;
-                limit_descriptions_jarvis.textContent =  data.data.limit_descriptions_jarvis;
+                vue.limits_descriptions_generate_ia = data.data;
             })
         }
     }

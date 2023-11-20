@@ -11,21 +11,23 @@
             <v-card-title class="default-dialog-title mod_head">
                     <span v-html="options.title_modal ? options.title_modal : options.title"></span>
                     <v-spacer></v-spacer>
-                    <v-tooltip top>
-                        <template  v-slot:activator="{ on, attrs }">
-                            <v-btn  v-bind="attrs" v-on="on" class="py-1"  outlined text
-                                style="border-radius: 15px;border-color: white;height: auto;">
-                                <span style="color:white">{{limits.media_ia_converted}}/{{limits.limit_allowed_media_convert }}</span>
-                                <img 
-                                    width="22px" 
-                                    style="filter: grayscale(100%) brightness(0) invert(100%);"
-                                    class="ml-2" 
-                                    src="/img/ia_convert.svg"
-                                >
-                            </v-btn>
-                        </template>
-                        <span v-html="`Te quedan ${limits.limit_allowed_media_convert - limits.media_ia_converted} contenidos para <br>  aprovechar nuestra Inteligencia <br> artificial en tus evaluaciones`"></span>
-                    </v-tooltip>
+                    <div v-if="Object.keys(limits).length != 0">
+                        <v-tooltip top>
+                            <template  v-slot:activator="{ on, attrs }">
+                                <v-btn  v-bind="attrs" v-on="on" class="py-1"  outlined text
+                                    style="border-radius: 15px;border-color: white;height: auto;">
+                                    <span style="color:white">{{limits.media_ia_converted}}/{{limits.limit_allowed_media_convert }}</span>
+                                    <img 
+                                        width="22px" 
+                                        style="filter: grayscale(100%) brightness(0) invert(100%);"
+                                        class="ml-2" 
+                                        src="/img/ia_convert.svg"
+                                    >
+                                </v-btn>
+                            </template>
+                            <span v-html="`Te quedan ${limits.limit_allowed_media_convert - limits.media_ia_converted} contenidos para <br>  aprovechar nuestra Inteligencia <br> artificial en tus evaluaciones`"></span>
+                        </v-tooltip>
+                    </div>
                 </v-card-title>
         </template>
         <template v-slot:content>
@@ -52,7 +54,7 @@
                             v-model="url"
                             :rules="rules.url"/>
                     </v-col>
-                    <v-col cols="12" v-if="type == 'youtube'">
+                    <v-col cols="12" v-if="type == 'youtube' && Object.keys(limits).length != 0">
                         <AiSection :limits="limits" @onChange="changeIaConvertValue" />
                         <!-- <DefaultToggle  activeLabel="Habilitar contenido para AI" inactiveLabel="Habilitar contenido para AI" v-model="ia_convert"/> -->
                     </v-col>

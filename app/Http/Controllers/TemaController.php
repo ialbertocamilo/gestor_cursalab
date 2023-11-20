@@ -10,15 +10,17 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\School;
+use App\Models\Ability;
+
 use App\Models\Abconfig;
 
 use App\Models\Pregunta;
-
 use App\Models\Question;
 use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\MediaTema;
 use App\Models\Workspace;
+use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +30,6 @@ use App\Http\Resources\Posteo\PosteoPreguntasResource;
 use App\Http\Requests\TemaPregunta\TemaPreguntaStoreRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaDeleteRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaImportRequest;
-use App\Models\SortingModel;
 
 class TemaController extends Controller
 {
@@ -63,7 +64,11 @@ class TemaController extends Controller
         $media_url = get_media_root_url();
 
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url', 'default_position', 'max_position','limits_ia_convert');
+        $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+        $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
+                             'media_url', 'default_position', 'max_position','limits_ia_convert',
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -92,6 +97,9 @@ class TemaController extends Controller
 
         $media_url = get_media_root_url();
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
+        $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+        $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
@@ -99,7 +107,9 @@ class TemaController extends Controller
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
-            'limits_ia_convert'=>$limits_ia_convert
+            'limits_ia_convert'=>$limits_ia_convert,
+            'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
+            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description
         ]);
     }
 
