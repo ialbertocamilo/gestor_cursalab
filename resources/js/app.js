@@ -298,7 +298,7 @@ const app = new Vue({
                         }
                     }),
                     listeners: {
-                        download: () => this.downloadReportNotify(e.url, `${e.name}.xlsx`)
+                        download: () => this.downloadReport(e.url, `${e.name}.xlsx`)
                     }
                 });
             } else {
