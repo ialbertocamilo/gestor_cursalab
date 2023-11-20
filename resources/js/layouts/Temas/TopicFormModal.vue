@@ -830,17 +830,11 @@ export default {
         addIaConvert(media){
             let vue  = this;
             if(media.id){
-                const idx = vue.resource.media.findIndex(m => m.id = media.id)
-                console.log(idx,'if');
-                console.log(vue.resource.media[idx],'if');
+                const idx = vue.resource.media.findIndex(m => m.id == media.id)
                 vue.resource.media[idx].ia_convert = 1;
-                console.log(vue.resource.media[idx],'if');
             }else{
-                const idx = vue.resource.media.findIndex(m => m.value = media.value)
-                console.log(idx,'else',media.value);
-                console.log(vue.resource.media[idx],'else');
+                const idx = vue.resource.media.findIndex(m => m.value == media.value)
                 vue.resource.media[idx].ia_convert = 1;
-                console.log(vue.resource.media[idx],'else');
             }
             vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
             vue.convertMediaToIaOptions.open = false;
