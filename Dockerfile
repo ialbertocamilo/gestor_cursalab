@@ -69,31 +69,32 @@ ARG NEW_RELIC_AGENT_VERSION=10.10.0.1
 ARG NEW_RELIC_LICENSE_KEY=778525d9f0505874fe7257331a4cc5cbFFFFNRAL
 ARG NEW_RELIC_APPNAME="devinfra2"
 
-# RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
-#     && export NR_INSTALL_USE_CP_NOT_LN=1 \
-#     && export NR_INSTALL_SILENT=1 \
-#     && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
-#     && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall*
-
-# RUN find /etc /usr/local/etc -type f -name newrelic.ini \
-#     -exec sed -i \
-#         -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
-#         -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
-#         -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
-
-
-
 RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
     && export NR_INSTALL_USE_CP_NOT_LN=1 \
     && export NR_INSTALL_SILENT=1 \
     && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
-    && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* && \
-    sed -i \
-      -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
-      -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
-      -e 's/;newrelic.daemon.app_connect_timeout =.*/newrelic.daemon.app_connect_timeout=15s/' \
-      -e 's/;newrelic.daemon.start_timeout =.*/newrelic.daemon.start_timeout=5s/' \
-      /usr/local/etc/php/conf.d/newrelic.ini
+    && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall*
+
+RUN find /etc /usr/local/etc -type f -name newrelic.ini \
+    -exec sed -i \
+        -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
+        -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
+        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"localhost:31339\"/" {} \;
+
+#        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
+
+
+# RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
+#     && export NR_INSTALL_USE_CP_NOT_LN=1 \
+#     && export NR_INSTALL_SILENT=1 \
+#     && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
+#     && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* && \
+#     sed -i \
+#       -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
+#       -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
+#       -e 's/;newrelic.daemon.app_connect_timeout =.*/newrelic.daemon.app_connect_timeout=15s/' \
+#       -e 's/;newrelic.daemon.start_timeout =.*/newrelic.daemon.start_timeout=5s/' \
+#       /usr/local/etc/php/conf.d/newrelic.ini
 
 
 #######
