@@ -2,7 +2,7 @@
 # COMPOSER
 # -------------------------------------------------------------------------------------------------------
 
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.6 as composer_base
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.7 as composer_base
 
 USER composer
 
@@ -45,7 +45,7 @@ RUN npm install && \
 # and just the basic CLI "stuff" in order for us to run commands,
 # be that queues, migrations, tinker etc.
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.6 as cli
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.7 as cli
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
@@ -59,7 +59,7 @@ COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in
 # ----------------------------------------------------------------------------------------------------
 
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.6 as fpm_server
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.7 as fpm_server
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
@@ -67,7 +67,7 @@ WORKDIR /opt/apps/laravel-in-kubernetes
 
 ARG NEW_RELIC_AGENT_VERSION=10.10.0.1
 ARG NEW_RELIC_LICENSE_KEY=778525d9f0505874fe7257331a4cc5cbFFFFNRAL
-ARG NEW_RELIC_APPNAME="devinfra2"
+ARG NEW_RELIC_APPNAME="monitoring"
 
 RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
     && export NR_INSTALL_USE_CP_NOT_LN=1 \
@@ -84,25 +84,13 @@ RUN find /etc /usr/local/etc -type f -name newrelic.ini \
 #        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
 
 
-# RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
-#     && export NR_INSTALL_USE_CP_NOT_LN=1 \
-#     && export NR_INSTALL_SILENT=1 \
-#     && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
-#     && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* && \
-#     sed -i \
-#       -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
-#       -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
-#       -e 's/;newrelic.daemon.app_connect_timeout =.*/newrelic.daemon.app_connect_timeout=15s/' \
-#       -e 's/;newrelic.daemon.start_timeout =.*/newrelic.daemon.start_timeout=5s/' \
-#       /usr/local/etc/php/conf.d/newrelic.ini
-
 
 #######
   
 # As FPM uses the www-data user when running our application,
 # we need to make sure that we also use that user when starting up,
 # so our user "owns" the application when running..
-# USER  www-data
+USER  www-data
 
 # COnfiguration of fpm.ini
 COPY --chown=www-data docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini

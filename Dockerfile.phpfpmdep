@@ -9,6 +9,11 @@ ARG PHP_EXTS="bcmath ctype fileinfo mbstring pdo pdo_mysql dom pcntl curl opcach
 ARG PHP_PECL_EXTS="redis mongodb"
 ARG PHPIZE_DEPS="build-base openssl ca-certificates libxml2-dev oniguruma oniguruma-dev autoconf unzip curl-dev zlib zlib-dev libpng libpng-dev libpq-dev libzip-dev zip libwebp-dev libjpeg-turbo-dev freetype-dev"
 
+ARG NEW_RELIC_AGENT_VERSION=10.10.0.1
+ARG NEW_RELIC_LICENSE_KEY=778525d9f0505874fe7257331a4cc5cbFFFFNRAL
+ARG NEW_RELIC_APPNAME="monitoring"
+
+
 WORKDIR /opt/apps/laravel-in-kubernetes
 
 COPY docker/php-fpm/php.ini-production /usr/local/etc/php/php.ini
@@ -18,3 +23,17 @@ RUN apk add --virtual build-dependencies --no-cache ${PHPIZE_DEPS} \
     && docker-php-ext-install -j$(nproc) ${PHP_EXTS} \
     && pecl install ${PHP_PECL_EXTS} \
     && docker-php-ext-enable ${PHP_PECL_EXTS}
+
+
+RUN curl -L https://download.newrelic.com/php_agent/archive/${NEW_RELIC_AGENT_VERSION}/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz | tar -C /tmp -zx \
+    && export NR_INSTALL_USE_CP_NOT_LN=1 \
+    && export NR_INSTALL_SILENT=1 \
+    && /tmp/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux/newrelic-install install \
+    && rm -rf /tmp/newrelic-php5-* /tmp/nrinstall*
+
+RUN find /etc /usr/local/etc -type f -name newrelic.ini \
+    -exec sed -i \
+        -e "s/REPLACE_WITH_REAL_KEY/${NEW_RELIC_LICENSE_KEY}/" \
+        -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
+        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"localhost:31339\"/" {} \;
+#        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
