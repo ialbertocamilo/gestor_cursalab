@@ -353,7 +353,6 @@ const app = new Vue({
 
         },
         downloadReport(url, name) {
-
             try {
                 FileSaver.saveAs(url, name)
 
@@ -361,9 +360,8 @@ const app = new Vue({
                 console.log(error)
 
             }
-
         },
-        
+
         // downloadReportNotify(url, name) {
         //     try {
         //         // Realizar una solicitud para obtener el archivo desde la URL
