@@ -81,9 +81,6 @@ RUN find /etc /usr/local/etc -type f -name newrelic.ini \
         -e "s/newrelic.appname[[:space:]]=[[:space:]].*/newrelic.appname = \"${NEW_RELIC_APPNAME}\"/" \
         -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"localhost:31339\"/" {} \;
 
-#        -e "s/;newrelic.daemon.address[[:space:]]=[[:space:]].*/newrelic.daemon.address = \"newrelic-php-daemon:31339\"/" {} \;
-
-
 
 #######
   
