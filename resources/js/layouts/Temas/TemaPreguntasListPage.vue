@@ -4,10 +4,10 @@
 
             <v-card-title>
                 <v-row>
-                    <v-col cols="6">
+                    <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '9'">
                         <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '3'">
                         <div class="d-flex justify-content-end">
                             <span v-if="limits_ai_convert.has_permission_to_use_ia_evaluation">
                                 <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
