@@ -40,6 +40,7 @@ class Jarvis extends Model
             JarvisResponse::insertResponse([$data['description'][1]],'description');
             return $data['description'][0];
         }
+        
         return $response;
     }
     protected function convertMultimediaToText($multimedia){
