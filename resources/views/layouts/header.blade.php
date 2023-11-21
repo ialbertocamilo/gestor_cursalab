@@ -17,6 +17,7 @@
     <meta name="robots" content="noindex">
     <meta name="BUCKET_BASE_URL" content="{{ App\Services\FileService::generateUrl('/') }}">
     <meta name="REPORTS_BASE_URL" content="{{ env('REPORTS_BASE_URL') }}">
+    <meta name="JARVIS_BASE_URL" content="{{ env('JARVIS_BASE_URL') }}">
 
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}">

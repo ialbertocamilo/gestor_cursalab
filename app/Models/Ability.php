@@ -94,4 +94,14 @@ class Ability extends Model
 
         return $data;
     }
+
+    protected function hasAbility($code_submenu,$name_ability){
+        $taxonomy = Taxonomy::where('group','gestor')->where('type','submenu')->where('code',$code_submenu)->first();
+        if($taxonomy){
+            $user = auth()->user();
+            $ability = $user->getAbilities()->where('entity_id',$taxonomy->id)->where('name',$name_ability)->first();
+            return boolval($ability);
+        }
+        return false;
+    }
 }

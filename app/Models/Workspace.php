@@ -4,9 +4,10 @@ namespace App\Models;
 
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mongo\JarvisAttempt;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,6 +24,7 @@ class Workspace extends BaseModel
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
+        'limits',
         'users_with_empty_criteria',
         'qualification_type_id',
 
@@ -33,6 +35,8 @@ class Workspace extends BaseModel
         'notificaciones_push_envio_intervalo',
         'criterio_id_fecha_inicio_reconocimiento',
         'limit_allowed_storage',
+        'limits',
+        'jarvis_configuration',
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
@@ -94,8 +98,11 @@ class Workspace extends BaseModel
         'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
-        'limit_allowed_users' => 'array'
+        'limit_allowed_users' => 'array',
+        'limits' => 'json',
+        'jarvis_configuration' => 'json'
     ];
+
 
     public function medias() {
         return $this->hasMany(Media::class, 'workspace_id');
@@ -880,6 +887,45 @@ class Workspace extends BaseModel
         return $workspace;
     }
 
+    protected function getLimitAIConvert($topic,$type='media_convert'){
+        $workspace = get_current_workspace();
+        $limits = self::where('id',$workspace->id)->select('limits')->first()?->limits;
+        $data = [];
+        switch ($type) {
+            case 'media_convert':
+                $media_ia_converted = ($topic) ? MediaTema::where('ia_convert',1)->where('topic_id',$topic->id)->count() : 0;
+                $limit_allowed_media_convert =  $limits['limit_allowed_media_convert'] ?? 0;
+                $data = [
+                    'limit_allowed_media_convert' => (int) $limit_allowed_media_convert,
+                    'media_ia_converted' => $media_ia_converted ?? 0,
+                ];
+                break;
+            case 'evaluations':
+                    $limit_allowed_ia_evaluations =  $limits['limit_allowed_ia_evaluations'] ?? 0;
+                    $ia_evaluations_generated =  0;
+                    //Its necesary to convert all medias in text to create evaluations
+                    $medias_to_convert = MediaTema::where('topic_id',$topic->id)->select('path_convert')->where('ia_convert',1)->get();
+                    $count_not_null_medias_to_convert = $medias_to_convert->pluck('path_convert')->filter(function ($value) {
+                        return !is_null($value);
+                    })->count();
+                    $isReadyToCreateAIQuestions = count($medias_to_convert) == $count_not_null_medias_to_convert;
+                    $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+                    $data = [
+                        'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
+                        'ia_evaluations_generated' => JarvisAttempt::getAttempt($workspace->id),
+                        'is_ready_to_create_AIQuestions'=> $isReadyToCreateAIQuestions,
+                        'has_permission_to_use_ia_evaluation' => $has_permission_to_use_ia_evaluation
+                    ];
+                    break;
+            case 'descriptions':
+                $limit_descriptions_jarvis =  $limits['limit_descriptions_jarvis'] ?? 0;
+                $data = [
+                    'limit_descriptions_jarvis' => (int) $limit_descriptions_jarvis,
+                    'ia_descriptions_generated' => JarvisAttempt::getAttempt($workspace->id,'descriptions'),
+                ];
+        }
+        return $data;        
+    }
     protected function getSchoolsForTree($schools)
     {
         $data = [];

@@ -157,6 +157,7 @@ class Topic extends BaseModel
             } else {
                 $tema->requirements()->delete();
             }
+            $_medias = collect($tema->medias()->get()); 
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -166,6 +167,7 @@ class Topic extends BaseModel
                     // if(!str_contains($string, 'http') && ($media['tipo']=='audio' || $media['tipo']=='video')){
                     //     $valor = env('DO_URL') . '/' .$valor;
                     // }
+                    $path_convert = $_medias->where('value',$valor)->first()?->path_convert;
                     if ($media['tipo'] == 'youtube') {
                         $valor = extractYoutubeVideoCode($valor);
                     }
@@ -181,6 +183,8 @@ class Topic extends BaseModel
                         'title' => $media['titulo'] ?? '',
                         'embed' => $media['embed'],
                         'downloadable' => $media['descarga'],
+                        'ia_convert' => $media['ia_convert'] ?? 0,
+                        'path_convert' => $path_convert,
                         'type_id' => $media['tipo'],
                         'created_at' => $now,
                         'updated_at' => $now,

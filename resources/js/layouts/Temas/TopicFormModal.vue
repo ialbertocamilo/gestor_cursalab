@@ -39,8 +39,12 @@
                             :rules="rules.content"
                             class="mt-2"
                             :height="195"
+                            :showGenerateIaDescription="hasPermissionToUseIaDescription"
+                            :key="`${hasPermissionToUseIaDescription}-editor`"
+                            :loading="loading_description"
+                            ref="descriptionRichText"
+                            @generateIaDescription="generateIaDescription"
                         />
-
                     </v-col>
                     <v-col cols="5">
                         <DefaultSelectOrUploadMultimedia
@@ -186,6 +190,26 @@
                                                     </a>
                                                 </div>
                                             </td>
+                                            <td class="" v-if="hasPermissionToUseIaEvaluation">
+                                                <div class="mt-1">
+                                                    <span class="d-flex align-items-center">
+                                                        <img width="26px" 
+                                                            v-if="media.ia_convert==1 && !media.path_convert"
+                                                            class="mr-2 ia_convert_active img-rotate" 
+                                                            src="/img/loader-jarvis.svg"
+                                                        >
+                                                        <img width="32px" 
+                                                            v-else
+                                                            class="mr-2" 
+                                                            :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
+                                                            @click="openModalToConvert(media)"
+                                                            src="/img/ia_convert.svg"
+                                                            style="cursor: pointer;"
+                                                        >
+                                                        <p class="m-0" :style="media.ia_convert ? 'color:#5458EA' : 'color:gray'">Ai Convert</p>
+                                                    </span>
+                                                </div>
+                                            </td>
                                             <td class="">
                                                 <div class="mt-2">
                                                     <DefaultToggle
@@ -218,7 +242,7 @@
                                 </table>
                             </v-col>
 
-                            <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
+                            <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
                         </v-row>
 
                     </template>
@@ -271,6 +295,14 @@
                 @onConfirm="confirmDeleteMedia"
                 @onCancel="mediaDeleteModal.open = false"
             />
+            <ConvertMediaToIaModal 
+                :limits="limits_ia_convert"
+                width="40vw"
+                :ref="convertMediaToIaOptions.ref"
+                :options="convertMediaToIaOptions"
+                @close="convertMediaToIaOptions.open = false "
+                @onConfirm="addIaConvert"
+            />
         </template>
     </DefaultDialog>
 </template>
@@ -284,6 +316,7 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
+import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
@@ -291,7 +324,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal},
 
     props: {
         options: {
@@ -389,14 +422,22 @@ export default {
                     }
                 },
             },
+            limits_ia_convert:{},
+            limits_descriptions_generate_ia:{},
+            loading_description:false,
+            convertMediaToIaOptions: {
+                ref: 'ConvertMediaToIaOptions',
+                title: null,
+                open: false,
+                confirmLabel: 'Guardar'
+            },
+            hasPermissionToUseIaDescription:false,
+            hasPermissionToUseIaEvaluation:false,
         }
     },
-    // async mounted() {
-    //     let vue = this
-    //     vue.showLoader()
-    //     await this.loadData()
-    //     vue.hideLoader()
-    // },
+    async mounted() {
+        let vue = this
+    },
     computed: {
         showActiveResults() {
             let vue = this;
@@ -607,7 +648,12 @@ export default {
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
-
+                    vue.limits_ia_convert = data.data.limits_ia_convert;
+                    vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
+                    vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    if(vue.hasPermissionToUseIaDescription){
+                        this.loadLimitsGenerateIaDescriptions();
+                    }
                     if (resource && resource.id) {
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
@@ -622,8 +668,12 @@ export default {
         },
         addMultimedia(multimedia) {
             let vue = this
+            if(multimedia.ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted +1;
+            }
             vue.resource.media.push({
                 title: multimedia.titulo,
+                ia_convert: multimedia.ia_convert || null,
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
@@ -728,6 +778,73 @@ export default {
         loadSelects() {
             let vue = this
         },
+        async generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'topic'
+            }).then(({data})=>{
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                ia_descriptions_generated.textContent = parseInt(ia_descriptions_generated.textContent) + 1;
+
+                let characters = data.data.description.split('');
+                vue.resource.content = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.content += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 10);
+                    }else{
+                        vue.loading_description = false; 
+                    }
+                }
+                updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
+            })
+        },
+        openModalToConvert(media){
+            let vue  = this;
+            if(media.ia_convert){
+                return '';
+            }
+            if(!['youtube','video','audio','pdf'].includes(media.type_id)){
+                vue.showAlert('Este tipo de multimedia no esta habilitada para IA', 'warning', '') 
+                return '';
+            }
+            vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')
+            // convertMediaToIaOptions
+        },
+        addIaConvert(media){
+            let vue  = this;
+            if(media.id){
+                const idx = vue.resource.media.findIndex(m => m.id == media.id)
+                vue.resource.media[idx].ia_convert = 1;
+            }else{
+                const idx = vue.resource.media.findIndex(m => m.value == media.value)
+                vue.resource.media[idx].ia_convert = 1;
+            }
+            vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
+            vue.convertMediaToIaOptions.open = false;
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            let vue = this;
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                vue.limits_descriptions_generate_ia = data.data;
+            })
+        }
     }
 }
 </script>
@@ -778,5 +895,23 @@ export default {
         width: 50px;
         height: 30px;
     }
+}
+.ia_convert_inactive{
+    filter: invert(42%) sepia(98%) saturate(0%) hue-rotate(349deg) brightness(111%) contrast(100%);
+}
+.ia_convert_active{
+    filter: hue-rotate(360deg);
+}
+.img-rotate {
+  animation: rotacion 4s linear infinite;
+}
+
+@keyframes rotacion {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

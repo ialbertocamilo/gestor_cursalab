@@ -115,9 +115,48 @@ class restablecer_funcionalidad extends Command
         // $this->getInfoSupervisors();
         // $this->updateChecklisSummaries();
         // $this->reportHoursCapacitation();
-        $this->deleteDuplicatesSummaryTopics();
+        // $this->deleteDuplicatesSummaryTopics();
+        $this->updateSummariesCourse();
         $this->info("\n Fin: " . now());
         // info(" \n Fin: " . now());
+    }
+
+    public function updateSummariesCourse(){
+        $users_id= collect();
+        SummaryCourse::select('id','user_id','course_id')->with('course','user')
+        // ->whereRaw(DB::raw('(IFNULL(passed,0)  + IFNULL(reviewed,0)  + IFNULL(taken,0) ) = assigned
+        // and YEAR(created_at)=2023 and MONTH(created_at)>5 '))
+        ->whereIn('course_id',[468,
+        484,
+        486,
+        488,
+        490])
+        ->chunkById(2500, function ($summaries)use($users_id){
+            $_bar = $this->output->createProgressBar($summaries->count());
+            $_bar->start();
+            foreach ($summaries as $summary) {
+                try {
+                    SummaryCourse::updateUserData($summary->course, $summary->user, false, false);
+                    $_bar->advance();
+                    $users_id->push($summary->user_id);
+                } catch (\Throwable $th) {
+                    info($summary);
+                }
+            }
+            $_bar->finish();
+        });
+        $summary_users = SummaryUser::whereIn('id',$users_id->unique())->with('user')->get();
+        $count_summaries = $summary_users->count();
+        $bar = $this->output->createProgressBar($count_summaries);
+        $bar->start();
+        foreach ($summary_users as $summary_user){
+            try {
+                SummaryUser::updateUserData($summary_user->user, false);
+                $bar->advance();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        }
     }
     public function deleteDuplicatesSummaryTopics(){
         $duplicateTopics = SummaryTopic::select('user_id', 'topic_id')
