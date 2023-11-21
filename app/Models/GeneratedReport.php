@@ -17,7 +17,7 @@ class GeneratedReport extends Model implements Recordable
     protected $fillable = [
         'name', 'download_url', 'admin_id', 'workspace_id', 'filters', 'is_ready'
     ];
-
+    protected $dates = ['created_at', 'updated_at'];
     protected $table = 'generated_reports';
 
     public function admin()
