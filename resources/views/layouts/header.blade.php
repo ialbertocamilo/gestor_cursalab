@@ -1,3 +1,8 @@
+<?php
+  $config = \App\Models\Ambiente::first();
+  $title = $config->titulo ?? 'Gestor';
+  $favicon = $config->icono ? get_media_url($config->icono) : asset('img/favicon.png');
+?>
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
   <head>
@@ -5,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Cursalab</title>
+    <title>Cursalab | {{ $title }}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {{-- <meta name="robots" content="all,follow"> --}}
@@ -34,7 +39,7 @@
     <link rel="stylesheet" href="{{ asset('css/custom.css?v=2.3417-'.date('Y-W-m-d')) }}">
     <link rel="stylesheet" href="{{ asset('css/app.css?v=1.3417-'.date('Y-W-m-d-H')) }}">
     <!-- Favicon-->
-    <link rel="shortcut icon" href="{{ asset('img/favicon.png')}}">
+    <link rel="shortcut icon" href="{{ $favicon }}">
 
     @if(config('app.env') == 'production')
 

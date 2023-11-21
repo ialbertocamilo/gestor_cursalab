@@ -951,7 +951,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if ($response_type === 'courses-unified')
             return $all_courses;
 
-        $query = $this->getUserCourseSegmentationQuery($withRelations);
+        $query = $this->getUserCourseSegmentationQuery($withRelations, $user);
         // info('C');
 
         if(count($bySchoolsId)>0){
@@ -980,10 +980,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $courses;
     }
 
-    private function getUserCourseSegmentationQuery($withRelations)
+    private function getUserCourseSegmentationQuery($withRelations, $user = null)
     {
         // $relations = config("courses.user-courses-query.$withRelations");
-        $user_id = auth()->user() ? auth()->user()->id : $this->id;
+        if ($user) {
+            $user_id = $user->id;
+        } else {
+            $user_id = auth()->user() ? auth()->user()->id : $this->id;
+        }
         $relations = config("courses.user-courses-query")($withRelations, $user_id);
         return Course::with($relations);
     }
@@ -995,7 +999,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $workspace = $user->subworkspace->parent;
 
-        $query = $this->getUserCourseSegmentationQuery('soft');
+        $query = $this->getUserCourseSegmentationQuery('soft', $user);
         // info('S - 2');
 
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
@@ -1647,7 +1651,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $compatibles = $this->course_data['compatibles'];
         $compatible_ids = array_column($compatibles, 'summary_course_id');
 
-        $courses = $this->getUserCourseSegmentationQuery('soft')
+        $courses = $this->getUserCourseSegmentationQuery('soft', $this)
                     ->whereIn('id', $course_ids)
                     ->get();
 

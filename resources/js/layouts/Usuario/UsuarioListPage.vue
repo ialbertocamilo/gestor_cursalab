@@ -139,6 +139,7 @@
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
+                @profile="openFormModal(modalProfileOptions, $event, 'profile', `Perfil de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
                 @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Acceder como ${$event.nombre} - ${$event.document}` )"
@@ -185,6 +186,13 @@
                 @onCancel="closeFormModal(modalCursosOptions)"
             />
 
+            <UsuarioPerfilModal
+                width="55vw"
+                :ref="modalProfileOptions.ref"
+                :options="modalProfileOptions"
+                @onCancel="closeFormModal(modalProfileOptions)"
+            />
+
             <DefaultStatusModal
                 :options="modalStatusOptions"
                 :ref="modalStatusOptions.ref"
@@ -207,6 +215,7 @@
 import UsuarioFormModal from "./UsuarioFormModal";
 import UsuarioStatusModal from "./UsuarioStatusModal";
 import UsuarioCursosModal from "./UsuarioCursosModal";
+import UsuarioPerfilModal from "./UsuarioPerfilModal";
 import UsuarioReiniciosModal from "./UsuarioReiniciosModal";
 import UsuarioResetPasswordModal from "./UsuarioResetPasswordModal";
 import UsuarioImpersonateModal from "./UsuarioImpersonateModal";
@@ -214,7 +223,7 @@ import DefaultStatusModal from "../Default/DefaultStatusModal";
 import LogsModal from "../../components/globals/Logs";
 
 export default {
-    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal, UsuarioImpersonateModal},
+    components: {UsuarioFormModal, UsuarioStatusModal, UsuarioCursosModal, UsuarioReiniciosModal, DefaultStatusModal, UsuarioResetPasswordModal, LogsModal, UsuarioImpersonateModal, UsuarioPerfilModal},
     props: {
         workspace_id: {
             type: Number|String,
@@ -229,7 +238,7 @@ export default {
         let headers = [
             {text: "Nombres y Apellidos", value: "name"},
             {text: "Módulo", value: "module", sortable: false},
-            {text: "Documento", value: "document", align: 'left', sortable: false},
+            {text: "Documento", value: "document", align: 'center', sortable: false},
             {text: "Opciones", value: "actions", align: 'center', sortable: false},
         ];
 
@@ -239,7 +248,7 @@ export default {
                 {text: "Módulo", value: "module", sortable: false},
                 {text: "Carrera", value: "career", sortable: false},
                 {text: "Ciclo", value: "cycle", sortable: false},
-                {text: "Documento", value: "document", align: 'left', sortable: false},
+                {text: "Documento", value: "document", align: 'center', sortable: false},
                 {text: "Opciones", value: "actions", align: 'center', sortable: false},
             ];
         }
@@ -251,6 +260,7 @@ export default {
                 ref: 'UsuarioTable',
                 headers: headers,
                 actions: [
+                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_super_user",},
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
 
                     {
@@ -269,13 +279,6 @@ export default {
                         method_name: "edit"
                     },
 
-                    {
-                        text: "Logs",
-                        icon: "mdi mdi-database",
-                        type: "action",
-                        show_condition: "is_super_user",
-                        method_name: "logs"
-                    }
                 ],
                 more_actions: [
                     {
@@ -304,6 +307,13 @@ export default {
                         // show_condition: "is_super_user",
                         method_name: 'impersonate_user'
                     },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
+                    }
 
                 ]
             },
@@ -348,6 +358,13 @@ export default {
             },
             modalCursosOptions: {
                 ref: 'UsuarioCursosModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                cancelLabel: 'Cerrar',
+                hideConfirmBtn: true,
+            },
+            modalProfileOptions: {
+                ref: 'UsuarioPerfilModal',
                 open: false,
                 base_endpoint: '/usuarios',
                 cancelLabel: 'Cerrar',

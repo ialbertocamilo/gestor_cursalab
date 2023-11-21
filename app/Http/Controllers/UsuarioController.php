@@ -35,6 +35,7 @@ use App\Services\FileService;
 use App\Models\CriterionValue;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
+use App\Models\UserProgress;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,8 @@ use App\Http\Controllers\ApiRest\RestAvanceController;
 
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\Mail;
+
+use Carbon\Carbon;
 
 // use App\Perfil;
 
@@ -1144,5 +1147,33 @@ class UsuarioController extends Controller
         }
 
         return response()->json( $error,422);
+    }
+
+    protected function getProfileData(User $user)
+    {
+        $criteria = $user->getProfileCriteria();
+
+        $profile = [
+            'user' => [
+                'fullname' => $user->fullname,
+                'email' => $user->email ?? 'No definido',
+                'documento' => $user->documento ?? 'No definido',
+                'phone_number' => $user->phone_number ?? 'No definido',
+                'active' => $user->active ? 'Activo' : 'Inactivo',
+                'created_at' => $user->created_at ? $user->created_at->format('d/m/Y G:i a') : 'No definido',
+                'updated_at' => $user->updated_at ? $user->updated_at->format('d/m/Y G:i a') : 'No definido',
+                'last_login' => $user->last_login ? Carbon::parse($user->last_login)->format('d/m/Y G:i a') : 'No definido',
+                'last_pass_updated_at' => $user->last_pass_updated_at ? Carbon::parse($user->last_pass_updated_at)->format('d/m/Y G:i a') : 'No definido',
+            ],
+            'criteria' => $criteria,
+            'background' => asset('img/profile-banner.jpg'),
+        ];
+
+        $progressData = UserProgress::getDataProgress($user);
+
+        return $this->success([
+            'profile' => $profile,
+            'courses' => $progressData,
+        ]);
     }
 }

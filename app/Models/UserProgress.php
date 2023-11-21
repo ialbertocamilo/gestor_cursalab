@@ -1,25 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\ApiRest;
+namespace App\Models;
 
-use App\Models\Topic;
-use App\Models\Course;
-use App\Models\School;
-use App\Models\Certificate;
-use App\Models\Taxonomy;
-use App\Models\CourseSchool;
-use Illuminate\Http\Request;
-use App\Models\SummaryCourse;
-use App\Models\CriterionValue;
-use App\Models\SchoolSubworkspace;
-use App\Models\UserProgress;
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
-class RestUserProgressController extends Controller
+class UserProgress extends Model 
 {
-    public function __userProgressOLD()
+	protected function getDataProgress($user = null)
     {
-        $user = auth()->user();
+        $user = $user ?? auth()->user();
         $user->load('summary', 'summary_courses');
 
         $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
@@ -75,12 +68,13 @@ class RestUserProgressController extends Controller
         $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user);
         $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user);
 
-        return $this->success($response);
+        return $response;
     }
 
-    public function getProgressDetailSchoolsByUser($user_courses, $user)
+    public function getProgressDetailSchoolsByUser($user_courses, $user = null)
     {
-        $workspace_id = auth()->user()->subworkspace->parent_id;
+    	$user = $user ?? auth()->user();
+        $workspace_id = $user->subworkspace->parent_id;
 
         $schools = $user_courses->groupBy('schools.*.id');
 
@@ -105,7 +99,7 @@ class RestUserProgressController extends Controller
             $school_position = $school_workspace?->position;
 
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $courses_data = $this->getSchoolProgress($courses,$positions_courses,$school_id);
+            $courses_data = $this->getSchoolProgress($courses, $positions_courses, $school_id, $user);
 
             $school_status = $this->getSchoolProgressByUserV2($courses_data);
             // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
@@ -185,9 +179,9 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgress($courses,$positions_courses,$school_id)
+    public function getSchoolProgress($courses, $positions_courses, $school_id, $user = null)
     {
-        $user = auth()->user();
+        // $user = $user ?? auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
@@ -292,13 +286,5 @@ class RestUserProgressController extends Controller
         // $columns = array_column($school_courses, 'orden');
         // array_multisort($columns, SORT_ASC, $school_courses);
         return $school_courses->values()->all();
-    }
-
-    public function userProgress()
-    {
-        $user = auth()->user();
-        $response = UserProgress::getDataProgress($user);
-
-        return $this->success($response);
     }
 }
