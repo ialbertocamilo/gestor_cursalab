@@ -8,7 +8,7 @@ use App\Models\Role;
 use App\Models\Taxonomy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 use Altek\Accountant\Facades\Accountant;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +50,7 @@ class ReportsController extends Controller
 
         $reports = $query->get()->toArray();
 
+
         // Load report types taxonomies
 
         $reportsTypes = Taxonomy::getDataByGroupAndType(
@@ -59,11 +60,12 @@ class ReportsController extends Controller
         // Format reports data
 
         foreach ($reports as &$report) {
-
+            $report['download_url'] = reportsSignedUrl($report['download_url']??'');
             $reportType = $reportsTypes->where('code', $report['report_type'])->first();
             $report['report_type'] = $reportType ? $reportType->name : '';
             $report['filters_descriptions'] = json_decode($report['filters_descriptions']) ?: new \stdClass();
-            $report['created_at'] = date('d/m/Y g:i a', strtotime($report['created_at']));
+            // $report['created_at'] = date('d/m/Y g:i a', strtotime($report['created_at']));
+            $report['created_at'] =  Carbon::parse($report['created_at'])->subHours(10)->format('Y-m-d G:i a');
             $report['updated_at'] = $report['updated_at'] ? date('d/m/Y g:i a', strtotime($report['updated_at'])) : '';
         }
 

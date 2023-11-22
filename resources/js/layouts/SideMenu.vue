@@ -151,7 +151,7 @@
 
 <script>
 import ModalUpgrade from './ModalUpgrade';
-import GeneralStorageEmailSendModal from './General/GeneralStorageEmailSendModal.vue';
+import GeneralStorageEmailSendModal from './General/GeneralStorageEmailSendModal';
 
 const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
 const SUB_ITEM_GLOSARY = {

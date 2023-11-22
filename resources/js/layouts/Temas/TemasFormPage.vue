@@ -32,24 +32,39 @@
                                 item-text="name"
                             />
                             <fieldset class="editor mt-2">
-                                <legend>Descripción</legend>
-
+                                <legend>Descripción y/u objetivos</legend>
                                 <editor
                                     api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                     v-model="resource.content"
                                     :init="{
-                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                    height: 185,
-                                    menubar: false,
-                                    language: 'es',
-                                    force_br_newlines : true,
-                                    force_p_newlines : false,
-                                    forced_root_block : '',
-                                    plugins: ['lists image preview anchor', 'code', 'paste','link'],
-                                    toolbar:
-                                        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                    images_upload_handler: images_upload_handler,
-                                }"/>
+                                        deprecation_warnings: false,
+                                        content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                        height: 185,
+                                        menubar: false,
+                                        language: 'es',
+                                        force_br_newlines : true,
+                                        force_p_newlines : false,
+                                        forced_root_block : '',
+                                        plugins: ['lists image preview anchor', 'code', 'paste','link'],
+                                        toolbar:
+                                            'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify  |bullist numlist | image | preview |code | link | customButton ',
+                                        images_upload_handler: images_upload_handler,
+                                        setup: function (editor) {
+                                            editor.ui.registry.addButton('customButton', {
+                                                text: getIconText(), // Ruta de la imagen para el botón personalizado
+                                                tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                                                onAction: function (_) {
+                                                    generateIaDescription();
+                                                },
+                                            });
+                                        }
+                                    }"
+                                />
+                                <v-progress-linear
+                                    indeterminate
+                                    color="primary"
+                                    v-if="loading_description"
+                                ></v-progress-linear>
                             </fieldset>
                         </v-col>
                         <v-col cols="4">
@@ -206,6 +221,27 @@
                                                         </a>
                                                     </div>
                                                 </td>
+                                                
+                                                <td class="">
+                                                    <div class="mt-1">
+                                                        <span class="d-flex align-items-center">
+                                                            <img width="26px" 
+                                                                v-if="media.ia_convert==1 && !media.path_convert"
+                                                                class="mr-2 ia_convert_active img-rotate" 
+                                                                src="/img/loader-jarvis.svg"
+                                                            >
+                                                            <img width="32px" 
+                                                                v-else
+                                                                class="mr-2" 
+                                                                :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
+                                                                @click="openModalToConvert(media)"
+                                                                src="/img/ia_convert.svg"
+                                                                style="cursor: pointer;"
+                                                            >
+                                                            <p class="m-0" :style="media.ia_convert ? 'color:#5458EA' : 'color:gray'">Ai Convert</p>
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td class="">
                                                     <div class="mt-2">
                                                         <DefaultToggle
@@ -241,7 +277,7 @@
 
                             </v-row>
 
-                            <TemaMultimediaTypes @addMultimedia="addMultimedia($event)"/>
+                            <TemaMultimediaTypes :limits="limits_ia_convert" @addMultimedia="addMultimedia($event)"/>
                         </template>
                     </DefaultModalSection>
 
@@ -297,11 +333,21 @@
             @onConfirm="confirmDeleteMedia"
             @onCancel="mediaDeleteModal.open = false"
         />
+        <ConvertMediaToIaModal 
+            :limits="limits_ia_convert"
+            width="40vw"
+            :ref="convertMediaToIaOptions.ref"
+            :options="convertMediaToIaOptions"
+            @close="convertMediaToIaOptions.open = false "
+            @onConfirm="addIaConvert"
+        />
     </section>
 </template>
 <script>
 
 import MultimediaBox from "./MultimediaBox";
+import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
+
 // import DefaultRichText from "../../components/globals/DefaultRichText";
 import TemaMultimediaTypes from "./TemaMultimediaTypes";
 import draggable from 'vuedraggable'
@@ -315,7 +361,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal,DialogConfirm,ConvertMediaToIaModal},
     props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
@@ -392,6 +438,15 @@ export default {
                     }
                 },
             },
+            limits_ia_convert:{},
+            limits_descriptions_generate_ia:{},
+            loading_description:false,
+            convertMediaToIaOptions: {
+                ref: 'ConvertMediaToIaOptions',
+                title: null,
+                open: false,
+                confirmLabel: 'Guardar'
+            },
         }
     },
     async mounted() {
@@ -399,6 +454,7 @@ export default {
         vue.showLoader()
         await this.loadData()
         vue.hideLoader()
+        vue.loadLimitsGenerateIaDescriptions();
     },
     computed: {
         showActiveResults() {
@@ -565,6 +621,7 @@ export default {
                 formData.append(`medias[${index}][tipo]`, el.type_id)
                 formData.append(`medias[${index}][embed]`, Number(el.embed))
                 formData.append(`medias[${index}][descarga]`, Number(el.downloadable))
+                formData.append(`medias[${index}][ia_convert]`, Number(el.ia_convert))
             })
         },
         deleteMedia(media_index) {
@@ -585,7 +642,7 @@ export default {
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
-
+                    vue.limits_ia_convert = data.data.limits_ia_convert;
                     if (vue.topic_id !== '') {
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
@@ -597,8 +654,12 @@ export default {
         },
         addMultimedia(multimedia) {
             let vue = this
+            if(multimedia.ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted +1;
+            }
             vue.resource.media.push({
                 title: multimedia.titulo,
+                ia_convert: multimedia.ia_convert || null,
                 value: multimedia.valor || null,
                 file: multimedia.file || null,
                 type_id: multimedia.type,
@@ -672,13 +733,16 @@ export default {
                 vue.showAlert("Debe haber almenos un multimedia embebido.", 'warning')
                 return;
             }
+            if(vue.resource.media[vue.mediaDeleteModal.media_index].ia_convert){
+                vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted - 1;
+            }
             vue.resource.media.splice(vue.mediaDeleteModal.media_index, 1)
             vue.mediaDeleteModal.open = false
         },
-        copyToClipboard(text) {
+        async copyToClipboard(text) {
             let vue = this;
 
-            navigator.clipboard.writeText(text);
+            await navigator.clipboard.writeText(text);
 
             vue.showAlert('Código multimedia copiado', 'success', '', 3);
         },
@@ -698,6 +762,80 @@ export default {
 
             if (media.type_id == 'scorm' || media.type_id == 'genially' || media.type_id == 'link')
                 return media.value;
+        },
+        async generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'topic'
+            }).then(({data})=>{
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                ia_descriptions_generated.textContent = vue.limits_descriptions_generate_ia.ia_descriptions_generated+1;
+
+                let characters = data.data.description.split('');
+                vue.resource.content = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.content += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 10);
+                    }else{
+                        vue.loading_description = false; 
+                    }
+                }
+                updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
+            })
+        },
+        getIconText(){
+            return `
+            <div>
+                <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
+                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/<span id="limit_descriptions_jarvis">0</span></span>
+            </div>
+            `
+            // return '<v-badge><image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ ></v-badge>';
+        },
+        openModalToConvert(media){
+            let vue  = this;
+            if(media.ia_convert){
+                return '';
+            }
+            if(!['youtube','video','audio','pdf'].includes(media.type_id)){
+                vue.showAlert('Este tipo de multimedia  para IA', 'warning', '') 
+                return '';
+            }
+            vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')
+            // convertMediaToIaOptions
+        },
+        addIaConvert(media){
+            let vue  = this;
+            const idx = vue.resource.media.findIndex(m => m.id = media.id)
+            vue.resource.media[idx].ia_convert = 1;
+            vue.limits_ia_convert.media_ia_converted = vue.limits_ia_convert.media_ia_converted + 1;
+            vue.convertMediaToIaOptions.open = false;
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                this.limits_descriptions_generate_ia = data.data;
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
+                ia_descriptions_generated.textContent = data.data.ia_descriptions_generated;
+                limit_descriptions_jarvis.textContent =  data.data.limit_descriptions_jarvis;
+            })
         }
     }
 }
@@ -749,5 +887,33 @@ export default {
         width: 50px;
         height: 30px;
     }
+}
+.ia_convert_inactive{
+    filter: invert(42%) sepia(98%) saturate(0%) hue-rotate(349deg) brightness(111%) contrast(100%);
+}
+.ia_convert_active{
+    filter: hue-rotate(360deg);
+}
+.img-rotate {
+  animation: rotacion 4s linear infinite;
+}
+
+@keyframes rotacion {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.badge_custom{
+    position: absolute !important;
+    color: white !important;
+    background: rgb(87, 191, 227) !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+    margin-right: 8px !important;
+    margin-left: 2px !important;
+    font-size:9px !important;
 }
 </style>

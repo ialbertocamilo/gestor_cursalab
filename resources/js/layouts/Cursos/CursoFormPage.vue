@@ -42,12 +42,19 @@
                         <v-col cols="6">
                             <v-row>
                                 <v-col cols="12">
+                                    <!-- <v-btn @click="generateIaDescription()">Generar con IA</v-btn> -->
                                     <DefaultTextArea
+                                        :ref="'textAreaDescription'"
                                         dense
-                                        label="Descripción"
-                                        placeholder="Ingrese una descripción del curso"
+                                        label="Descripción y/u objetivos"
+                                        placeholder="Ingrese una descripción y/o objetivo del curso"
                                         v-model="resource.description"
                                         :rows="4"
+                                        @eventGenerateIA="generateIaDescription"
+                                        :limits="limits_descriptions_generate_ia"
+                                        :loading="loading_description"
+                                        :disabled="loading_description"
+                                        :showButtonIaGenerate="true"
                                     />
                                 </v-col>
                                 <v-col cols="12">
@@ -574,6 +581,11 @@ export default {
                 open: false
             },
             new_value: 0,
+            loading_description:false,
+            limits_descriptions_generate_ia:{
+                ia_descriptions_generated:0,
+                limit_descriptions_jarvis:0
+            }
         }
     },
     computed: {
@@ -612,6 +624,15 @@ export default {
         await this.loadData()
         this.hideLoader()
 
+        // if (+this.$props.categoria_id) {
+        //     let exists = this.resource
+        //         .lista_escuelas
+        //         .includes(+this.$props.categoria_id);
+        //     if (!exists) {
+        //         this.resource.lista_escuelas.push(+this.$props.categoria_id);
+        //     }
+        // }
+        this.loadLimitsGenerateIaDescriptions();
         // if (+this.$props.categoria_id) {
         //     let exists = this.resource
         //         .lista_escuelas
@@ -832,6 +853,46 @@ export default {
             }
 
             return valid;
+        },
+        async generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'course'
+            }).then(({data})=>{
+                vue.limits_descriptions_generate_ia.ia_descriptions_generated +=1;
+                let characters = data.data.description.split('');
+                vue.resource.description = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.description += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 10);
+                    }else{
+                        vue.loading_description = false; 
+                    }
+                }
+                updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
+            })
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                this.limits_descriptions_generate_ia = data.data;
+            })
         }
     }
 }

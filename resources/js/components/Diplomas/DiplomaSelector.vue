@@ -152,7 +152,7 @@ export default {
             try {
 
                 const response = await axios({
-                    url: '/diplomas/search',
+                    url: '/diplomas/search?paginate=100',
                     method: 'get'
                 })
 

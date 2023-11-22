@@ -45,7 +45,12 @@
                                     label="Descripción"
                                     placeholder="Ingrese una descripción del curso"
                                     v-model="resource.description"
+                                    @eventGenerateIA="generateIaDescription"
+                                    :limits="limits_descriptions_generate_ia"
+                                    :loading="loading_description"
+                                    :disabled="loading_description"
                                     :rows="4"
+                                    :showButtonIaGenerate="showButtonIaGenerate"
                                 />
                             </v-col>
                             <v-col cols="12">
@@ -564,7 +569,16 @@ export default {
                 open: false
             },
             new_value: 0,
+            loading_description:false,
+            limits_descriptions_generate_ia:{
+                ia_descriptions_generated:0,
+                limit_descriptions_jarvis:0
+            },
+            showButtonIaGenerate:false
         }
+    },
+    async mounted(){
+        this.loadLimitsGenerateIaDescriptions();
     },
     computed: {
         showErrorReinicios() {
@@ -747,6 +761,41 @@ export default {
             let json = JSON.stringify(data)
             formData.append('mod_evaluaciones', json)
         },
+        async generateIaDescription(){
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.name){
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
+                vue.showAlert(message, 'warning', '') 
+                return ''
+            }
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                return ''
+            }
+            vue.loading_description = true; 
+            await axios.post(url,{
+                name : vue.resource.name,
+                type:'course'
+            }).then(({data})=>{
+                vue.limits_descriptions_generate_ia.ia_descriptions_generated +=1;
+                let characters = data.data.description.split('');
+                vue.resource.description = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.description += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 10);
+                    }else{
+                        vue.loading_description = false; 
+                    }
+                }
+                updateDescription(0);
+            }).catch(()=>{
+                vue.loading_description = false; 
+            })
+        },
         async loadData(resource) {
             let vue = this
             vue.$nextTick(() => {
@@ -766,6 +815,7 @@ export default {
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
+                    vue.showButtonIaGenerate = response.show_buttom_ia_description_generate;
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
@@ -822,6 +872,11 @@ export default {
         loadSelects() {
             let vue = this
         },
+        async loadLimitsGenerateIaDescriptions(){
+            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
+                this.limits_descriptions_generate_ia = data.data;
+            })
+        }
     }
 }
 </script>

@@ -19,6 +19,7 @@ Route::controller(GeneralController::class)->group(function() {
 	Route::put('/workspaces-storage', 'workspace_storage')->name('general.workspaces_storage');
 	Route::get('/workspaces-users', 'workspace_users')->name('general.workspaces_users');
 	// Route::put('/workspace-plan', 'workspace_plan')->name('general.workspace_plan');
+	Route::get('/execute-command-jarvis', 'executeCommandJarvis');
 
 });
 

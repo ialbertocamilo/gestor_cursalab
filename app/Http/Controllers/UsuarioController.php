@@ -1057,12 +1057,14 @@ class UsuarioController extends Controller
         // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
         if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email'] ) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-            $usuario_master->updated_at = now();
+            if($usuario_master){
+                $usuario_master->updated_at = now();
                 if (!is_null($usuario_input['username'] || $usuario_master->username != $usuario_input['username'])){
                     $usuario_master->username = $usuario_input['username'];
                 }
-            $usuario_master->save();
-            return;
+                $usuario_master->save();
+                return;
+            }
         }
 
         // Busca datos del payload (inputs) en la BD master

@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\GeneralStorageRequest;
-use App\Http\Resources\ResourceGeneralSubWorkspaceStatus;
-use App\Http\Resources\ResourceGeneralWorkspaceStatus;
-use App\Http\Resources\ResourceListGeneralWorkspacesStatus;
-use App\Mail\EmailTemplate;
-use App\Models\Criterion;
-use App\Models\Prueba;
-use App\Models\Workspace;
-use App\Services\DashboardService;
 use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
+use App\Models\Prueba;
+use App\Models\Criterion;
+use App\Models\Workspace;
+use App\Mail\EmailTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Services\DashboardService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Requests\GeneralStorageRequest;
+use App\Http\Resources\ResourceGeneralWorkspaceStatus;
+use App\Http\Resources\ResourceGeneralSubWorkspaceStatus;
+use App\Http\Resources\ResourceListGeneralWorkspacesStatus;
 
 class GeneralController extends Controller
 {
@@ -315,5 +316,15 @@ class GeneralController extends Controller
         // Mail::to('aldo@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
 
         return $this->success(true);
+    }
+
+    public function executeCommandJarvis(){
+        // try {
+            //code...
+            Artisan::call('convert:multimedia-text');
+            return 'Se ejecutó correctamente';
+        // } catch (\Throwable $th) {
+        //     return 'Hubo un error :C';
+        // }
     }
 }

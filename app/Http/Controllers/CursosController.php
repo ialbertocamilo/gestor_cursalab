@@ -15,6 +15,7 @@ use App\Models\School;
 // use App\Perfil;
 // use App\Curso_perfil;
 // use App\Posteo_perfil;
+use App\Models\Ability;
 use App\Models\Carrera;
 use App\Models\Abconfig;
 use App\Models\Pregunta;
@@ -25,19 +26,19 @@ use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\CourseSchool;
 use App\Models\SortingModel;
+
 use Illuminate\Http\Request;
 
 use App\Models\Curso_encuesta;
-
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\CursoStoreRequest;
 use App\Http\Requests\Curso\MoverCursoRequest;
+use App\Exports\Course\CourseSegmentationExport;
 use App\Http\Resources\Curso\CursoSearchResource;
+
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\Curso\CursoEncuestaStoreUpdate;
 use App\Http\Requests\Curso\CursosStoreUpdateRequest;
-
-use App\Exports\Course\CourseSegmentationExport;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CursosController extends Controller
 {
@@ -115,8 +116,9 @@ class CursosController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $workspace->qualification_type;
+        $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
 
-        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type');
+        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type','show_buttom_ia_description_generate');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -160,13 +162,14 @@ class CursosController extends Controller
         //     $mod_evaluaciones['nota_aprobatoria'] = $nota_aprobatoria;
         //     $course->mod_evaluaciones = $mod_evaluaciones;
         // }
-
+        $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
         return $this->success([
             'curso' => $course,
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
+            'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate
         ]);
     }
 

@@ -199,7 +199,7 @@
                         >
                             <template v-slot:content>
 
-                                <v-row justify="space-around" >
+                                <v-row >
                                     <v-col cols="4">
                                         <DefaultInput
                                             label="Límite de usuarios"
@@ -221,13 +221,78 @@
                                         />
                                     </v-col>
                                     <v-col cols="4">
-
+                                        <DefaultInput
+                                            label="Límite de multimedias convertidos"
+                                            v-model="resource.limits.limit_allowed_media_convert"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Límite de evaluaciones generadas"
+                                            v-model="resource.limits.limit_allowed_ia_evaluations"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Límite de descripciones con IA"
+                                            v-model="resource.limits.limit_descriptions_jarvis"
+                                            type="number"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
                                     </v-col>
                                 </v-row>
                             </template>
                         </DefaultSection>
 
+                        <DefaultSection
+                            title="Configuración de Jarvis"
+                            v-if="is_superuser"
+                        >
+                            <template v-slot:content>
 
+                                <v-row >
+                                    <v-col cols="8">
+                                        <DefaultInput
+                                            label="Token"
+                                            v-model="resource.jarvis_configuration.openia_token"
+                                            type="text"
+                                            min="0"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Modelo"
+                                            v-model="resource.jarvis_configuration.openia_model"
+                                            type="text"
+                                            min="0"
+                                            value="gpt-3.5-turbo"
+                                            clearable
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultTextArea
+                                            clearable
+                                            v-model="resource.jarvis_configuration.context_jarvis"
+                                            label="Contexto para generar descripciones"
+                                            rows="5"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
                         <v-row justify="space-around" v-if="is_superuser">
                             <v-col cols="12">
                                 <DefaultSection
@@ -365,7 +430,8 @@
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
-    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media'
+    'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
+    'show_logo_in_app','limits'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -411,6 +477,7 @@ export default {
                 qualification_type: '',
                 criteria_workspace: [],
                 selected_functionality: {},
+                limits:{}
                 // selected_section_criteria: {
                 //     profile: false,
                 //     filters: false,
@@ -497,20 +564,18 @@ export default {
                 );
 
                 vue.setLimitUsersAllowed(formData);
-
+                vue.setJarvisConfiguration(formData);
 
                 // Submit data to be saved
 
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-
                         vue.resetForm();
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
                         this.hideLoader();
                         vue.$emit('onConfirm');
-
                     }).catch((error) => {
                     this.hideLoader();
                     if (error && error.errors)
@@ -528,6 +593,17 @@ export default {
                 formData.append('limit_allowed_users_type', 'by_workspace');
                 formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
             }
+            
+        },
+        setJarvisConfiguration(formData){
+            let vue = this;
+            formData.append('limit_allowed_media_convert', vue.resource.limits.limit_allowed_media_convert);
+            formData.append('limit_allowed_ia_evaluations', vue.resource.limits.limit_allowed_ia_evaluations);
+            formData.append('limit_descriptions_jarvis', vue.resource.limits.limit_descriptions_jarvis);
+            formData.append('context_jarvis', vue.resource.jarvis_configuration.context_jarvis);
+            formData.append('openia_token', vue.resource.jarvis_configuration.openia_token);
+            formData.append('openia_model', vue.resource.jarvis_configuration.openia_model);
+
         },
         /**
          * Load data from server

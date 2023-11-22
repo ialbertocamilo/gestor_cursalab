@@ -2,7 +2,7 @@
 # COMPOSER
 # -------------------------------------------------------------------------------------------------------
 
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.6 as composer_base
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.7 as composer_base
 
 USER composer
 
@@ -45,7 +45,7 @@ RUN npm install && \
 # and just the basic CLI "stuff" in order for us to run commands,
 # be that queues, migrations, tinker etc.
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.6 as cli
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.7 as cli
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
@@ -59,9 +59,11 @@ COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in
 # ----------------------------------------------------------------------------------------------------
 
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.6 as fpm_server
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.7 as fpm_server
 
 WORKDIR /opt/apps/laravel-in-kubernetes
+
+#######
   
 # As FPM uses the www-data user when running our application,
 # we need to make sure that we also use that user when starting up,
@@ -84,6 +86,12 @@ COPY --from=frontend --chown=www-data /opt/apps/laravel-in-kubernetes/public /op
 
 RUN php artisan event:cache && \
     php artisan view:cache
+
+COPY --chown=www-data docker/laravel/oauth/oauth-private.key /opt/apps/laravel-in-kubernetes/storage/oauth-private.key
+COPY --chown=www-data docker/laravel/oauth/oauth-public.key /opt/apps/laravel-in-kubernetes/storage/oauth-public.key
+
+RUN chmod -R 660  storage/oauth-private.key && \
+    chmod -R 660  storage/oauth-public.key
 
 COPY --chown=www-data ./docker/laravel/entrypoint.sh ./entrypoint.sh
 
