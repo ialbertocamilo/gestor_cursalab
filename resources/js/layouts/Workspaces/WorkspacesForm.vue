@@ -490,21 +490,32 @@
                         </DefaultSection>
                         <DefaultSection title="Datos de la empresa (DC3)" v-if="is_superuser">
                             <template v-slot:content>
-                                <v-row>
-                                    <v-col cols="6">
+                                <v-row v-for="(subwokspace_data,index) in resource.dc3_configuration.subwokspace_data" :key="subwokspace_data.subworkspace_id">
+                                    <v-col cols="4">
+                                        <DefaultAutocomplete
+                                            :items="subworkspaces"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].subworkspace_id"
+                                            item-text="name"
+                                            item-value="id"
+                                            label="Módulo"
+                                            dense
+                                            disabled
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
                                         <DefaultInput
                                             label="Nombre o razón social"
                                             dense
                                             class="mb-3 mx-1"
-                                            v-model="resource.dc3_configuration.name_or_social_reason"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].name_or_social_reason"
                                         />
                                     </v-col>
-                                    <v-col cols="6">
+                                    <v-col cols="4">
                                         <DefaultInput
                                             label="Registro Federal de Contribuyentes con homoclave (SHCP)"
                                             dense
                                             class="mb-3 mx-1"
-                                            v-model="resource.dc3_configuration.shcp"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].shcp"
                                         />
                                     </v-col>
                                 </v-row>
@@ -617,6 +628,7 @@ export default {
                     criterion_position:null,
                     name_or_social_reason:'',
                     shcp:'',
+                    client_name:[]
                 },
                 dc3_logo:null,
                 dc3_instructor_signature:null,
@@ -632,6 +644,7 @@ export default {
             functionalities: [],
             customCriteria: [],
             itemsCriterionDates: [],
+            subworkspaces:[],
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
@@ -792,7 +805,7 @@ export default {
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
                     vue.functionalities = data.data.functionalities;
-
+                    vue.subworkspaces = data.data.subworkspaces;
                     vue.resource.selected_functionality = {};
                     data.data.functionalities_selected.forEach(c => {
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(

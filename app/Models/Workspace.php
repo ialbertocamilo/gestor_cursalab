@@ -230,9 +230,19 @@ class Workspace extends BaseModel
             $data['criterion_position'] = null;
             $data['name_or_social_reason'] = '';
             $data['shcp'] = '';
+            $data['subwokspace_data'] = [];
+            $subworkspaces = get_subworkspaces(get_current_workspace());
+            foreach ($subworkspaces as $subworkspace) {
+                $data['subwokspace_data'][] = [
+                    'subworkspace_id' => $subworkspace->id,
+                    'name_or_social_reason' => '',
+                    'shcp'=>''
+                ];
+            }
             return $data;
         }
-        return json_decode($value);
+        $data =json_decode($value); 
+        return $data;
     }
     protected static function search($request)
     {

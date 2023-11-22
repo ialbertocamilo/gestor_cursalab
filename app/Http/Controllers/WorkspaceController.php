@@ -209,6 +209,7 @@ class WorkspaceController extends Controller
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
         $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
+        $workspace['subworkspaces'] = get_subworkspaces(get_current_workspace());
         //S3
         return $this->success($workspace);
     }
