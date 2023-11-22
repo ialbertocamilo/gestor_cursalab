@@ -909,7 +909,7 @@ class Workspace extends BaseModel
                         return !is_null($value);
                     })->count();
                     $isReadyToCreateAIQuestions = count($medias_to_convert) == $count_not_null_medias_to_convert;
-                    $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+                    $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations') && count($medias_to_convert)>0;
                     $data = [
                         'limit_allowed_ia_evaluations' => (int) $limit_allowed_ia_evaluations,
                         'ia_evaluations_generated' => JarvisAttempt::getAttempt($workspace->id),

@@ -41,6 +41,7 @@
                             :height="195"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
+                            :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
                             :loading="loading_description"
                             ref="descriptionRichText"
                             @generateIaDescription="generateIaDescription"
@@ -423,7 +424,10 @@ export default {
                 },
             },
             limits_ia_convert:{},
-            limits_descriptions_generate_ia:{},
+            limits_descriptions_generate_ia:{
+                ia_descriptions_generated:0,
+                limit_descriptions_jarvis:0
+            },
             loading_description:false,
             convertMediaToIaOptions: {
                 ref: 'ConvertMediaToIaOptions',
@@ -436,7 +440,7 @@ export default {
         }
     },
     async mounted() {
-        let vue = this
+        await this.loadLimitsGenerateIaDescriptions();
     },
     computed: {
         showActiveResults() {
@@ -626,6 +630,7 @@ export default {
                 formData.append(`medias[${index}][tipo]`, el.type_id)
                 formData.append(`medias[${index}][embed]`, Number(el.embed))
                 formData.append(`medias[${index}][descarga]`, Number(el.downloadable))
+                formData.append(`medias[${index}][ia_convert]`, Number(el.ia_convert))
             })
         },
         deleteMedia(media_index) {
@@ -652,7 +657,13 @@ export default {
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
                     if(vue.hasPermissionToUseIaDescription){
-                        this.loadLimitsGenerateIaDescriptions();
+                        setTimeout(() => {
+                            let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                            let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
+                            ia_descriptions_generated.textContent = parseInt(vue.limits_descriptions_generate_ia.ia_descriptions_generated);
+                            limit_descriptions_jarvis.textContent = parseInt(vue.limits_descriptions_generate_ia.limit_descriptions_jarvis);
+                            console.log('ia_descriptions_generated',ia_descriptions_generated,limit_descriptions_jarvis,limits_descriptions_generate_ia);
+                        }, 200);
                     }
                     if (resource && resource.id) {
                         vue.resource = Object.assign({}, data.data.tema)

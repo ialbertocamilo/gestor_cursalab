@@ -102,7 +102,6 @@ export default {
         return {
             localText: null,
             showAlertLength: false,
-            limits_descriptions_generate_ia:{}
         }
     },
     created() {
@@ -114,18 +113,9 @@ export default {
           if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
             e.stopImmediatePropagation();
             console.log('entra');
-            // if(this.showGenerateIaDescription){
-            //     console.log('entra 2');
-            this.loadLimitsGenerateIaDescriptions();
-            // }
           }
         });
     },
-    // mounted(){
-    //     if(this.showGenerateIaDescription){
-    //         this.loadLimitsGenerateIaDescriptions();
-    //     }
-    // },
     watch: {
         value(val) {
             // console.log("cambio desde el parent :: ", val)
@@ -174,26 +164,20 @@ export default {
             return `
             <div>
                 <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
-                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/<span id="limit_descriptions_jarvis">0</span></span>
+                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/
+                <span id="limit_descriptions_jarvis">0</span></span>
             </div>
             `
         },
-        changeLimits(ia_descriptions_generated,limit_descriptions_jarvis){
-            let html_ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
-            let html_limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
-            html_ia_descriptions_generated && (html_ia_descriptions_generated.textContent = ia_descriptions_generated);
-            html_limit_descriptions_jarvis && (html_limit_descriptions_jarvis.textContent =  limit_descriptions_jarvis);
-        },
+        // changeLimits(ia_descriptions_generated,limit_descriptions_jarvis){
+        //     let html_ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+        //     let html_limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
+        //     html_ia_descriptions_generated && (html_ia_descriptions_generated.textContent = ia_descriptions_generated);
+        //     html_limit_descriptions_jarvis && (html_limit_descriptions_jarvis.textContent =  limit_descriptions_jarvis);
+        // },
         generateIaDescription(){
             this.$emit('generateIaDescription')
         },
-        async loadLimitsGenerateIaDescriptions(){
-            let vue = this;
-            await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
-                vue.limits_descriptions_generate_ia = data.data;
-                this.changeLimits(data.data.ia_descriptions_generated,data.data.limit_descriptions_jarvis);
-            })
-        }
     }
 }
 </script>

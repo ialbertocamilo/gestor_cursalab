@@ -83,6 +83,9 @@ class Kernel extends ConsoleKernel
         // Reports
 
         $schedule->command('reports:history')->weeklyOn(5, '04:30'); // Every friday
+
+        //JARVIS
+        $schedule->command('convert:multimedia-text')->everyFiveMinutes();
     }
 
     /**
