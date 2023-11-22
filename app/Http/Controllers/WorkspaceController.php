@@ -104,10 +104,20 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
-
+        
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
+        $data['limits'] = [
+            'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null,
+            'limit_descriptions_jarvis' => $data['limit_descriptions_jarvis'] ?? 0,
+        ];
+        $data['jarvis_configuration'] = [
+            'openia_token' => $data['openia_token'] ?? '',
+            'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $data['context_jarvis'] && $data['context_jarvis'] !='null' ? $data['context_jarvis'] : ''
+        ];
         // Set constraint: limit allowed users
 
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
@@ -184,6 +194,16 @@ class WorkspaceController extends Controller
         $workspace['criteria_workspace_dates'] = $selection['criteria']->where('field_type.code', 'date')->values()->all();
 
         $workspace['limit_allowed_users'] = $workspace->limit_allowed_users['quantity'] ?? null;
+        $workspace->limits = [
+            'limit_allowed_media_convert' => $workspace->limits['limit_allowed_media_convert'] ?? 0,
+            'limit_allowed_ia_evaluations' => $workspace->limits['limit_allowed_ia_evaluations'] ?? 0,
+            'limit_descriptions_jarvis' => $workspace->limits['limit_descriptions_jarvis'] ?? 0,
+        ];
+        $workspace->jarvis_configuration = [
+            'openia_token' => $workspace->jarvis_configuration['openia_token'] ?? '',
+            'openia_model' => $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $workspace->jarvis_configuration['context_jarvis'] ?? ''
+        ];
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
@@ -207,6 +227,16 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'logo_negativo');
         $data = Media::requestUploadFile($data, 'logo_marca_agua');
         // Set constraint: limit allowed users
+        $data['limits'] = [
+            'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
+            'limit_allowed_ia_evaluations' => $data['limit_allowed_ia_evaluations'] ?? null,
+            'limit_descriptions_jarvis' => $data['limit_descriptions_jarvis'] ?? 0,
+        ];
+        $data['jarvis_configuration'] = [
+            'openia_token' => $data['openia_token'] ?? '',
+            'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
+            'context_jarvis' => $data['context_jarvis'] && $data['context_jarvis'] !='null' ? $data['context_jarvis'] : ''
+        ];
 
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
 

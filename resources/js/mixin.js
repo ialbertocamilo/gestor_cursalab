@@ -238,6 +238,19 @@ export default {
                                 .replace(/\/+$/, '')
 
             return reportsBaseUrl
+        },
+        getJarvisUrl() {
+            // Get base URL from head meta
+
+            let metaEl = document.querySelector('meta[name=JARVIS_BASE_URL]')
+            let jarvisBaseUrl = metaEl.getAttribute('content')
+
+            // Remove trailing slash and generate URL
+
+            jarvisBaseUrl = jarvisBaseUrl
+                                .replace(/\/+$/, '')
+
+            return jarvisBaseUrl
         }
         ,
         infoMedia(item) {

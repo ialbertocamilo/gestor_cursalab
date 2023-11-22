@@ -7,7 +7,7 @@ class MediaTema extends BaseModel
     protected $table = 'media_topics';
 
     protected $fillable = [
-        'topic_id', 'title', 'value', 'embed', 'downloadable', 'position', 'type_id'
+        'topic_id', 'title', 'value', 'embed', 'downloadable', 'position', 'type_id','ia_convert'
     ];
 
     protected $casts = [

@@ -64,7 +64,7 @@ class Question extends BaseModel
         $base = 20;
         $sum_required = $questionsRequired->sum('score');
 
-        $missing_score = $base - $sum_required;
+        $missing_score = round($base - $sum_required, 4);
 
         $questionsNotRequired = $questions->where('required', '<>', 1)->whereNotNull('score');
 
@@ -73,7 +73,7 @@ class Question extends BaseModel
         // Round score total to compare, since base changing can cause a
         // difference in decimals, i.e: 19.9999999995 instead of 20
 
-        if ( round($sum_required + $sum_not_required, 2) >= $base ) {
+        if ( round($sum_required + $sum_not_required, 4) >= $base ) {
 
             //ORDENAR SEGUN LA CONDICION DE PUNTAJES
 
@@ -84,15 +84,30 @@ class Question extends BaseModel
             } else {
 
                 $val = true;
+                $i = 0;
+                $broken = false;
 
                 while ($val) :
+
+                    if ($i > 200) {
+                        $broken = true;
+                        info("Topic {$topic->id} evaluation broken evaluation (+200)");
+                        $val = false;
+                        break;
+                    }
 
                     $res = Question::randomItem(NULL, $missing_score, $questionsNotRequired);
 
                     if ($res['sum'] == $missing_score)
                         $val = false;
 
+                    $i++;
+
                 endwhile;
+
+                if ($broken) {
+                    return [];
+                }
 
                 $preguntas = $questionsRequired->merge($res['data']);
             }

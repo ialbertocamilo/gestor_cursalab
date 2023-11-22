@@ -24,13 +24,19 @@ class UploadTopicGradesController extends Controller
 
         $qualified_type = Taxonomy::getFirstData('topic', 'evaluation-type', 'qualified');
         // Load modules
-        $modules = Workspace::where('parent_id', $workspace->id)
-        ->select('id', 'name')
-        ->get();
+        // $modules = Workspace::where('parent_id', $workspace->id)
+        // ->select('id', 'name')
+        // ->get();
+
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->whereIn('id', current_subworkspaces_id())
+            ->select('id', 'name')->get();
+
         // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         $modules_id = current_subworkspaces_id();
         // Load workspace's schools
         $schools = School::with([
+            'subworkspaces:id,name',
             'courses' => function ($q) use ($qualified_type) {
                 $q->with([
                     'topics' => function ($q2) use ($qualified_type) {
@@ -50,7 +56,7 @@ class UploadTopicGradesController extends Controller
 
         $directions = config('massive.upload-topic-grades');
 
-        return $this->success(compact('schools', 'directions'));
+        return $this->success(compact('schools', 'directions', 'modules'));
     }
 
     public function upload(MassiveUploadTopicGradesRequest $request)

@@ -4,6 +4,7 @@
         text
         elevation="0"
         :ripple="false"
+        :outlined="outlined"
         color="primary"
         @click="emitClick"
     >
@@ -18,6 +19,10 @@ export default {
         label: {
             type: String,
             default: 'Botón Modal'
+        },
+        outlined:{
+            type: Boolean,
+            default:false
         }
     },
     methods: {

@@ -3,30 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Post;
 use App\Models\Curso;
 use App\Models\Media;
+use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Posteo;
+use App\Models\School;
+use App\Models\Ability;
+
 use App\Models\Abconfig;
+
 use App\Models\Pregunta;
+use App\Models\Question;
+use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\MediaTema;
-use App\Models\TagRelationship;
-
+use App\Models\Workspace;
+use App\Models\SortingModel;
 use Illuminate\Http\Request;
-
+use App\Models\TagRelationship;
+use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
 use App\Http\Resources\Posteo\PosteoPreguntasResource;
 use App\Http\Requests\TemaPregunta\TemaPreguntaStoreRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaDeleteRequest;
 use App\Http\Requests\TemaPregunta\TemaPreguntaImportRequest;
-use App\Models\Course;
-use App\Models\Post;
-use App\Models\Question;
-use App\Models\School;
-use App\Models\Taxonomy;
-use App\Models\Topic;
-use App\Models\SortingModel;
 
 class TemaController extends Controller
 {
@@ -60,7 +63,12 @@ class TemaController extends Controller
         $qualification_type = $course->qualification_type;
         $media_url = get_media_root_url();
 
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type', 'media_url', 'default_position', 'max_position');
+        $limits_ia_convert = Workspace::getLimitAIConvert($topic);
+        $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+        $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
+                             'media_url', 'default_position', 'max_position','limits_ia_convert',
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -88,7 +96,10 @@ class TemaController extends Controller
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
 
         $media_url = get_media_root_url();
-
+        $limits_ia_convert = Workspace::getLimitAIConvert($topic);
+        $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
+        $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
@@ -96,6 +107,9 @@ class TemaController extends Controller
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
+            'limits_ia_convert'=>$limits_ia_convert,
+            'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
+            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description
         ]);
     }
 
@@ -234,7 +248,38 @@ class TemaController extends Controller
 
         return $this->success(['pregunta' => $pregunta]);
     }
-
+    
+    public function storeAIQuestion(School $school, Course $course, Topic $topic,Request $request){
+        $question_type_code = $topic->evaluation_type->code === 'qualified'
+        ? 'select-options'
+        : 'written-answer';
+        $type_id =  Taxonomy::getFirstData('question', 'type', $question_type_code)?->id;
+        $questions = $request->all();
+        $insert_questions = [];
+        $score = (int)(20/count($questions));
+        foreach ($questions as $question) {
+            $options = [];
+            foreach ($question['options'] as $key => $option) {
+                $options[$key+1] = $option['text'];
+            }
+            $insert_questions[] = [
+                'pregunta' => $question['question'],
+                'topic_id' => $topic->id,
+                'type_id' => $type_id,
+                'rptas_json' => json_encode($options),
+                'rpta_ok' => $question['correctAnswer'] + 1,
+                'active' => 1,
+                'required' => 0,
+                'score' => calculateValueForQualification($score, 20, $topic->qualification_type->position),
+            ];
+        }
+        Question::insert($insert_questions);
+        // dd($insert_questions);
+        $data = Question::verifyEvaluation($topic);
+        $data = array_merge($data,['message'=>'Preguntas creadas correctamente.']);
+        return $this->success($data);
+        // $result = Question::checkScoreLeft($topic, $data['id'], $data);
+    }
     public function storePregunta(
         School $school, Course $course, Topic $topic, TemaPreguntaStoreRequest $request
     )

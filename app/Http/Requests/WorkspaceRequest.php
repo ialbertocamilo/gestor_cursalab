@@ -26,6 +26,13 @@ class WorkspaceRequest extends FormRequest
             'limit_allowed_storage' => 'nullable',
             'limit_allowed_users_type' => 'nullable',
             'limit_allowed_users_limit' => 'nullable',
+            'limit_allowed_media_convert' => 'nullable',
+            'limit_allowed_ia_evaluations' => 'nullable',
+            'limit_descriptions_jarvis' => 'nullable',
+            'context_jarvis' => 'nullable',
+            'openia_token'=> 'nullable',
+            'openia_model'=> 'nullable',
+
             'show_logo_in_app' => 'nullable',
 
             'logo_marca_agua' => 'nullable',

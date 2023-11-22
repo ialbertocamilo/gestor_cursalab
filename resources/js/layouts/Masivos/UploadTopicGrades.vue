@@ -3,7 +3,7 @@
         <header class="page-header">
             <div class="breadcrumb-holder container-fluid">
                 <v-card-title>
-                    Subida de notas
+                    Notas presenciales
                 </v-card-title>
             </div>
         </header>
@@ -31,11 +31,27 @@
                                 <v-row>
                                     <v-col cols="4">
                                         <DefaultAutocomplete
+                                            v-model="select.modulo"
+                                            :items="arrays.modules"
+                                            label="Módulos"
+                                            item-text="name"
+                                            item-value="id"
+                                            dense
+                                            :show-select-all="false"
+                                            @onChange="loadSchools()"
+                                            @onClickClear="arrays.courses = []; arrays.topics = []; select.course = null; select.evaluation_type = null; select.topics = [];"
+                                          />
+                                            <!-- multiple -->
+                                            <!-- :count-show-values="3" -->
+                                            <!-- :max-values-selected="1" -->
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultAutocomplete
                                             clearable
                                             label="Escuelas"
                                             dense
                                             v-model="select.school"
-                                            :items="arrays.schools"
+                                            :items="filteredSchools"
                                             item-text="name"
                                             :show-select-all="false"
                                             @onChange="loadCourses()"
@@ -54,6 +70,8 @@
                                             @onClickClear=" arrays.topics = []; select.evaluation_type = null; select.topics = [];"
                                         />
                                     </v-col>
+                                </v-row>
+                                <v-row>
                                     <v-col cols="4">
                                         <DefaultAutocomplete
                                             clearable
@@ -67,9 +85,7 @@
                                             @onClickClear="arrays.topics = []; select.topics = [];"
                                         />
                                     </v-col>
-                                </v-row>
-                                <v-row>
-                                    <v-col cols="8">
+                                    <v-col cols="4">
                                         <DefaultAutocomplete
                                             clearable multiple
                                             label="Temas"
@@ -129,13 +145,16 @@ export default {
                 schools: [],
                 courses: [],
                 topics: [],
+                modules: [],
             },
             select: {
+                module: null,
                 school: null,
                 course: null,
                 evaluation_type: null,
                 topics: []
             },
+            filteredSchools: [],
         };
     },
     mounted() {
@@ -156,7 +175,48 @@ export default {
                 .then(({data}) => {
                     vue.arrays.directions = data.data.directions;
                     vue.arrays.schools = data.data.schools;
+                    vue.arrays.modules = data.data.modules;
                 });
+        },
+        async loadSchools() {
+            let vue = this;
+
+            // vue.arrays.schools = [];
+            vue.filteredSchools = [];
+            vue.arrays.courses = [];
+            vue.arrays.topics = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.arrays.schools.filter(s => {
+
+                let subworkspaces_id = []
+
+                s.subworkspaces.forEach((sw) => {
+
+                    subworkspaces_id.push(sw.id)
+                });
+
+                if (subworkspaces_id.includes(vue.select.modulo) && !alreadyAdded.includes(s.id)) {
+                
+                    alreadyAdded.push(s.id)
+                    return true
+                } 
+
+                return false
+                // s.subworkspaces.each(sw => {
+
+                //     if (sw.id == vue.select.modulo && !alreadyAdded.includes(s.id)) {
+                    
+                //         alreadyAdded.push(s.id)
+                //         return true
+                //     } 
+
+                //     return false
+                // })
+
+                // console.log('subworkspace')
+                // console.log(subworkspace)
+            })
         },
         loadCourses() {
             let vue = this;

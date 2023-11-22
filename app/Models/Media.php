@@ -31,7 +31,7 @@ class Media extends BaseModel
     protected $table = 'media';
 
     protected $fillable = [
-        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id'
+        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id','ia_convert'
     ];
 
     public function modulesByFile() {

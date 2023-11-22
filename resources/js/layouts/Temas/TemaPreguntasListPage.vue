@@ -1,21 +1,56 @@
 <template>
     <section class="section-list ">
-       
         <v-card flat class="elevation-0 mb-4">
 
             <v-card-title>
-                <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
-                <v-spacer/>
-                <div class="ddd-flex justify-content-end">
-                    <DefaultActivityButton
-                        :label="'Importar evaluación'"
-                        @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
-                    />
-                    <DefaultModalButton
-                        @click="openFormModal(modalOptions, null, 'create')"
-                        :label="'Agregar pregunta'"/>
-                </div>
-
+                <v-row>
+                    <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '9'">
+                        <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                    </v-col>
+                    <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '3'">
+                        <div class="d-flex justify-content-end">
+                            <span v-if="limits_ai_convert.has_permission_to_use_ia_evaluation">
+                                <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
+                                        <template v-slot:badge>
+                                            <span v-text="`${limits_ai_convert.ia_evaluations_generated}/${limits_ai_convert.limit_allowed_ia_evaluations}`"></span>
+                                        </template>
+                                        <v-btn
+                                            elevation="0"
+                                            color="primary"
+                                            @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
+                                            :disabled="
+                                                limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations 
+                                                || !limits_ai_convert.is_ready_to_create_AIQuestions"
+                                        >
+                                            <img width="22px" 
+                                                v-if="limits_ai_convert.is_ready_to_create_AIQuestions"
+                                                class="mr-2" 
+                                                style="filter: brightness(3);"
+                                                src="/img/ia_convert.svg"
+                                            >
+                                            <img else width="22px" 
+                                                v-else
+                                                class="loader-jarvis img-rotate mr-2" 
+                                                style="filter: brightness(3);"
+                                                src="/img/loader-jarvis.svg"
+                                            >
+                                            Crear con AI
+                                        </v-btn>
+                                </v-badge>
+                            </span>
+                            <DefaultActivityButton
+                                :outlined="true"
+                                :label="'Importar evaluación'"
+                                @click="openFormModal(modalTemaPreguntasImport,null,null,modalTemaPreguntasImport.title)"
+                            />
+                            <DefaultModalButton
+                                :text="true"
+                                @click="openFormModal(modalOptions, null, 'create')"
+                                :label="'Agregar pregunta'"/>
+                        </div>
+                    </v-col>
+                </v-row>
+                <!-- <v-spacer/> -->
             </v-card-title>
         </v-card>
 
@@ -135,20 +170,56 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
-
+            <CreateAIQuestionsModal
+                width="80vw"
+                :ref="modalCreateQuestionsOptions.ref"
+                :options="modalCreateQuestionsOptions"
+                @onConfirm="
+                    closeFormModal(modalCreateQuestionsOptions, dataTable, filters);
+                    refreshDefaultTable(dataTable, filters),
+                    openConfirmCreateQuestion(),updateData($event)"
+                @onCancel="closeFormModal(modalCreateQuestionsOptions) "
+                :number_socket="number_socket"
+            />
+            <DefaultAlertDialog 
+                :options="modalInfoCreateQuestion"
+                :hideCancelBtn="modalInfoCreateQuestion.hideCancelBtn"
+                :confirmLabel="modalInfoCreateQuestion.confirmLabel"
+                :showCloseButton = "false"
+                width="40vw"
+                :ref="modalInfoCreateQuestion.ref"
+                @onCancel="closeFormModal(modalInfoCreateQuestion)"
+                @onConfirm="closeFormModal(modalInfoCreateQuestion)"
+            >
+                <template v-slot:content>
+                    <div style="border-radius: 10px;" class="d-flex flex-column align-items-center justify-content-center elevation-2">
+                        <div class="my-8">
+                            <img src="/img/check_confirm.svg">
+                        </div>
+                        <div>
+                            <p style="color:#57BFE3">¡Excelente tu evaluación se creo correctamente!</p>
+                        </div>
+                    </div>
+                    <p class="mt-4">
+                        <strong>Recuerda cuentas con {{ limits_ai_convert.limit_allowed_ia_evaluations - limits_ai_convert.ia_evaluations_generated }} evaluaciones por realizar con AI.</strong>
+                    </p>
+                </template>
+            </DefaultAlertDialog>
         </v-card>
     </section>
 </template>
 
 <script>
+const number_socket = Math.floor(Math.random(6)*1000000);
 import TemaPreguntaFormModal from "./TemaPreguntaFormModal";
 import TemaPreguntasImport from "./TemaPreguntasImport";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import LogsModal from "../../components/globals/Logs";
-
+import CreateAIQuestionsModal from "./CreateAIQuestionsModal"
 export default {
-    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal},
+    components: {TemaPreguntaFormModal, TemaPreguntasImport, DialogConfirm, LogsModal,CreateAIQuestionsModal},
     props: [
+        'workspace_id',
         'modulo_id',
         'modulo_name',
         'categoria_id',
@@ -265,6 +336,17 @@ export default {
                     }
                 },
             },
+            modalCreateQuestionsOptions:{
+                ref: 'CreateQuestions',
+                open: false,
+                base_endpoint: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas`,
+                confirmLabel: 'Guardar',
+                title_modal: `Creación de evaluación con AI (${this.tema_name})`,
+                topic_id: this.tema_id,
+                workspace_id: this.workspace_id,
+                hideCancelBtn: true,
+                hideConfirmBtn: true,
+            },
             modalTemaPreguntasImport: {
                 ref: 'TemaPreguntasImport',
                 open: false,
@@ -276,8 +358,19 @@ export default {
                 hideConfirmBtn: true,
                 topicUrl: `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/search/${vue.tema_id}`,
             },
-
-            delete_model: null
+            modalInfoCreateQuestion:{
+                open: false,
+                ref:'ModalInfoCreateQuestion',
+                title: 'Evaluación creada',
+                hideCancelBtn:true,
+                confirmLabel:'Entendido'
+            },
+            delete_model: null,
+            number_socket:number_socket,
+            limits_ai_convert:{
+                ia_evaluations_generated:0,
+                limit_allowed_ia_evaluations:0
+            },
         }
     },
     mounted() {
@@ -295,7 +388,23 @@ export default {
               content: msg,
             })
         }
-
+        window.Echo.channel(`questions-ia-generated.${number_socket}`).listen('QuestionIaGeneratedEvent', result => {
+            // try {
+            //     console.log(result);
+            //     this.questions.push(result.data.mensaje);
+            //     console.log(this.number_socket);
+            // } catch (error) {
+            //     console.error('Error al procesar los datos:', error);
+            // }
+        });
+        window.Echo.connector.pusher.connection.bind('message', (payload) => {
+            if(payload.channel == `questions-ia-generated.${number_socket}`){
+                if(payload.data.question){
+                    vue.$refs[vue.modalCreateQuestionsOptions.ref].setQuestionFromFatherComponent(payload.data.question);
+                }
+            }
+        });
+        vue.loadLimitsGenerateIaDescriptions();
         // vue.getSelects();
     },
     methods: {
@@ -305,7 +414,7 @@ export default {
             }, 1000)
         },
         updateData(data){
-
+            console.log(data);
             let vue = this
 
             vue.validation.status = data.status
@@ -348,8 +457,34 @@ export default {
 
                     // vue.updateData(data)
                 })
+        },
+        openConfirmCreateQuestion(){
+            let vue = this;
+            vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1; 
+            vue.openSimpleModal(vue.modalInfoCreateQuestion);
+        },
+        async loadLimitsGenerateIaDescriptions(){
+            this.showLoader();
+            await axios.get(`/jarvis/limits?type=evaluations&topic_id=${this.tema_id}`).then(({data})=>{
+                this.hideLoader();
+                this.limits_ai_convert = data.data;
+            })
         }
     }
 
 }
 </script>
+<style>
+.img-rotate {
+  animation: rotacion 4s linear infinite;
+}
+
+@keyframes rotacion {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

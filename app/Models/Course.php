@@ -1481,7 +1481,7 @@ class Course extends BaseModel
     {
         $user = $user ?? auth()->user();
 
-        $workspace_id = $user->subworkspace->parent_id;
+        $workspace_id = $user->subworkspace?->parent_id;
 
         if ($workspace_id != 25) return false;
 

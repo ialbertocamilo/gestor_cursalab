@@ -3,6 +3,7 @@
         <i :class="data.icon || 'mdi mdi-loading'"/>
         <span class="multimedia-box-span" v-text="data.label"/>
         <ModalMultimediaText
+            :limits ="limits"
             width="60vw"
             :options="modalMultimediaTextOptions"
             :type="data.type"
@@ -11,6 +12,7 @@
         />
             <!-- height="70vh" -->
         <ModalMultimediaMix
+            :limits="limits"
             width="60vw"
             :type="data.type"
             :label="data.label"
@@ -31,6 +33,10 @@ export default {
             type: Object,
             required: true
         },
+        limits:{
+            type: Object,
+            required: false
+        }
     },
     data() {
         return {
