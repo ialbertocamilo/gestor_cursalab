@@ -73,10 +73,11 @@ class Guest extends BaseModel {
         return ['message'=>'Email enviado correctamente.','email_sent'=>true];
     }
     protected function storeGuest($data,$request){
-        $guest_link = GuestLink::where('id',$request->code_id)->where('workspace_id',$request->workspace_id)->first();
+        $guest_link = GuestLink::where('id',$request->code_id)->where('workspace_id',$request->workspace_id)->with('subworkspace:id,name,criterion_value_id')->first();
         if(!$guest_link){
             return ['message'=>'Link inválido'];
         }
+        
         $data['criterion_list_final'] = [];
         foreach ($data['criterion_list'] as $criterion_code => $value_text) {
             $criterion_value = CriterionValue::whereRelation('criterion','code',$criterion_code)
@@ -95,14 +96,18 @@ class Guest extends BaseModel {
             }
             $data['criterion_list'][$criterion_code] = $criterion_value?->id;
         }
-        // Recorrer el array y acceder a las claves y valores de forma dinámica
-        foreach ($data['criterion_list'] as $clave => $valor) {
-           array_push($data['criterion_list_final'],$valor);
-        }
+        
         $data['active'] = false;
         $current_workspace = get_current_workspace();
         if($guest_link->activate_by_default){
             $data['active'] = $current_workspace->verifyLimitAllowedUsers();
+        }
+        if($guest_link->subworkspace){
+            $data['criterion_list']['module'] =$guest_link->subworkspace->criterion_value_id;
+        }
+        // Recorrer el array y acceder a las claves y valores de forma dinámica
+        foreach ($data['criterion_list'] as $clave => $valor) {
+            array_push($data['criterion_list_final'],$valor);
         }
         $status_id_pending = Taxonomy::where('group','guests')->where('type','status')->where('code','registered')->first()?->id;
         if($request->guest_id){

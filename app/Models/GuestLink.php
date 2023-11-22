@@ -67,7 +67,7 @@ class GuestLink extends BaseModel
         $guest_link =  self::query()
             ->with(['workspace:id,logo'])
             ->where('url',$code)
-            ->select('guest_id','id as code_id','expiration_date','workspace_id')
+            ->select('guest_id','id as code_id','expiration_date','workspace_id','subworkspace_id')
             ->first();
         if(!$guest_link || $guest_link->expiration_date < date("Y-m-d G:i")){
             $message = $guest_link ? 'Link expirado' : 'El link es incorrecto';
@@ -85,8 +85,9 @@ class GuestLink extends BaseModel
             $criteria_workspace = self::getListCriterion($guest_link);
             $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
             $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
-            $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
-
+            if(!$guest_link->subworkspace_id){
+                $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
+            }
             $data['email'] = ($guest_link->guest_id)
                 ? Guest::where('id',$guest_link->guest_id)->first()->email
                 : null ;
