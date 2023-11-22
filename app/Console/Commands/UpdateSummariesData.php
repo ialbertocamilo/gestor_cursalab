@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-
-use App\Models\SummaryCourse;
-use App\Models\SummaryUser;
-use App\Models\Course;
 use App\Models\User;
+
+use App\Models\Course;
+use App\Models\Taxonomy;
+use App\Models\SummaryUser;
+use App\Models\SummaryCourse;
+use Illuminate\Console\Command;
 
 class UpdateSummariesData extends Command
 {
@@ -42,8 +43,9 @@ class UpdateSummariesData extends Command
      */
     public function handle()
     {
+        //Actualizar summary courses que se quedaron con encuesta pendiente cuando ya no existe la encuesta:
+        $this->updateStatusPendingPoll();
         $subworkspace_id = $this->argument('subworkspace_id');
-
         $users = User::disableCache()->select('id')
             ->where('is_updating', 0)
             ->where(function ($q) {
@@ -117,5 +119,36 @@ class UpdateSummariesData extends Command
         $bar->finish();
 //        $this->newLine(2);
 //        $this->info("FIN : " . now());
+    }
+
+    public function updateStatusPendingPoll(){
+        $users_id= collect();
+        $taxonomy_enc_pend = Taxonomy::select('id')->where('group','course')->where('type','user-status')->where('code','enc_pend')->first();
+        $summaries = SummaryCourse::doesntHave('course.polls')->with('course','user')->where('status_id',$taxonomy_enc_pend->id)->select('id','course_id','user_id')->get();
+        $_bar = $this->output->createProgressBar($summaries->count());
+        $_bar->start();
+        foreach ($summaries as $summary) {
+            try {
+                SummaryCourse::updateUserData($summary->course, $summary->user, false);
+                $users_id->push($summary->user_id);
+            } catch (\Throwable $th) {
+                info($summary);
+            }
+            $_bar->advance();
+        }
+        $_bar->finish();
+        $summary_users = SummaryUser::whereIn('id',$users_id->unique())->with('user')->get();
+        $count_summaries = $summary_users->count();
+        $bar = $this->output->createProgressBar($count_summaries);
+        $bar->start();
+        foreach ($summary_users as $summary_user){
+            try {
+                SummaryUser::updateUserData($summary_user->user, false);
+            } catch (\Throwable $th) {
+                info($summary_user);
+            }
+            $bar->advance();
+        }
+        $_bar->finish();
     }
 }
