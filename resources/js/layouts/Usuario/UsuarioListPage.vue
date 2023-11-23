@@ -260,7 +260,7 @@ export default {
                 ref: 'UsuarioTable',
                 headers: headers,
                 actions: [
-                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_super_user",},
+                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_cursalab_super_user",},
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
 
                     {

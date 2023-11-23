@@ -100,9 +100,9 @@
                                         <h6>{{ course.name }}</h6>
 
                                         <v-simple-table
-                                            fixed-header
-                                            style="max-height: 300px;"
                                           >
+                                            <!-- fixed-header -->
+                                            <!-- style="max-height: 300px;" -->
                                             <template v-slot:default>
                                               <thead>
                                                 <tr>

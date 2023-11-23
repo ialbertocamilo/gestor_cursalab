@@ -116,6 +116,14 @@
                 @status="updateCourseStatus($event)"
                 @create_project="openProjectModal($event)"
                 @edit_project="openProjectModal($event)"
+                @logs="
+                    openFormModal(
+                        modalLogsOptions,
+                        $event,
+                        'logs',
+                        `Logs del Curso - ${$event.name}`
+                    )
+                "
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -201,6 +209,15 @@
                 @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalCourseOptions)"
             />
+
+            <LogsModal
+                :options="modalLogsOptions"
+                width="55vw"
+                :model_id="null"
+                model_type="App\Models\Course"
+                :ref="modalLogsOptions.ref"
+                @onCancel="closeSimpleModal(modalLogsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -214,6 +231,7 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
+import LogsModal from "../../components/globals/Logs";
 
 export default {
     components: {
@@ -225,7 +243,8 @@ export default {
         'CourseValidationsUpdateStatus': CursoValidacionesModal,
         SegmentCoursesFormModal,
         CompatibilityFormModal,
-        CourseFormModal
+        CourseFormModal,
+        LogsModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -330,6 +349,13 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Logs",
+                        icon: "mdi mdi-database",
+                        type: "action",
+                        show_condition: "is_super_user",
+                        method_name: "logs"
                     },
                     // {
                     //     text: "Eliminar",
@@ -442,6 +468,13 @@ export default {
                 title: '',
                 action: null,
                 persistent: true,
+            },
+            modalLogsOptions: {
+                ref: "LogsModal",
+                open: false,
+                showCloseIcon: true,
+                base_endpoint: "/search",
+                persistent: true
             },
         }
     },

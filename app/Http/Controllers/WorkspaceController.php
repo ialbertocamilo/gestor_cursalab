@@ -678,13 +678,17 @@ class WorkspaceController extends Controller
             User::whereHas('subworkspace', function($q) use ($workspace) {
                 $q->where('parent_id', $workspace->id);
             })
+            ->whereRelation('type', 'code', '<>', 'cursalab')
+            ->whereNull('secret_key')
             ->update($data);
 
-            // User::query()
-            //     ->join('assigned_roles as ar', 'ar.entity_id', 'users.id')
-            //     ->where('ar.entity_type', AssignedRole::USER_ENTITY)
-            //     ->where('ar.scope', $workspace->id)
-            //     ->update($data);
+            User::query()
+                ->whereRelation('type', 'code', '<>', 'cursalab')
+                ->join('assigned_roles as ar', 'ar.entity_id', 'users.id')
+                ->where('ar.entity_type', AssignedRole::USER_ENTITY)
+                ->where('ar.scope', $workspace->id)
+                ->whereNull('secret_key')
+                ->update($data);
 
             // channge status - subworkspaces
 
