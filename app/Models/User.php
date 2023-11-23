@@ -658,6 +658,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function sendWelcomeEmail($from_massive=false){
         $user = $this;
         $email =  trim($user->email);
+        return;
         // if(!$email){
         $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
         if(!$taxonomy){
