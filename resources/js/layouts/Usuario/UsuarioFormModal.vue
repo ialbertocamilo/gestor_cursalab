@@ -316,7 +316,7 @@ export default {
                 name: this.getRules(['required', 'max:100', 'text']),
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
-                document: this.getRules(['required', 'min:8']),
+                document: this.getRules(['required', 'min:6']),
                 password: this.getRules(['required', 'min:8']),
                 email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
