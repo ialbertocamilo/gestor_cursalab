@@ -1058,6 +1058,7 @@ class UsuarioController extends Controller
         $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
 
         // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
+        
         if($dni_previo === $usuario_input['document'] && $email_previo === $usuario_input['email'] ) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
             if($usuario_master){
