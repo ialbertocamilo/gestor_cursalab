@@ -21,6 +21,7 @@ use App\Models\School;
 use App\Models\Course;
 use App\Models\Topic;
 use App\Models\WorkspaceFunctionality;
+use App\Models\AssignedRole;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -654,5 +655,42 @@ class WorkspaceController extends Controller
         }
 
         return compact('school_ids', 'course_ids', 'topic_ids', 'schools');
+    }
+
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param Workspace $workspace
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Workspace $workspace, Request $request)
+    {
+        $new_status = !$workspace->active;
+        $data = ['active' => $new_status];
+
+        $workspace->update($data);
+
+        if (!$workspace->parent_id) {
+
+            // channge status - users and admins
+
+            User::whereHas('subworkspace', function($q) use ($workspace) {
+                $q->where('parent_id', $workspace->id);
+            })
+            ->update($data);
+
+            // User::query()
+            //     ->join('assigned_roles as ar', 'ar.entity_id', 'users.id')
+            //     ->where('ar.entity_type', AssignedRole::USER_ENTITY)
+            //     ->where('ar.scope', $workspace->id)
+            //     ->update($data);
+
+            // channge status - subworkspaces
+
+            $workspace->subworkspaces()->update($data);
+        }
+
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 }

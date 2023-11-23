@@ -17,7 +17,7 @@ use App\Http\Controllers\Controller;
 
 class RestUserProgressController extends Controller
 {
-    public function __userProgressOLD()
+    public function __OLD__userProgress()
     {
         $user = auth()->user();
         $user->load('summary', 'summary_courses');
@@ -78,7 +78,7 @@ class RestUserProgressController extends Controller
         return $this->success($response);
     }
 
-    public function getProgressDetailSchoolsByUser($user_courses, $user)
+    public function __OLD__getProgressDetailSchoolsByUser($user_courses, $user)
     {
         $workspace_id = auth()->user()->subworkspace->parent_id;
 
@@ -136,7 +136,7 @@ class RestUserProgressController extends Controller
         return $data;
     }
 
-    public function getSchoolProgressByUserV2($data)
+    public function __OLD__getSchoolProgressByUserV2($data)
     {
         $percentage = 0;
 
@@ -155,7 +155,7 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgressByUser(School $school, $courses, $user)
+    public function __OLD__getSchoolProgressByUser(School $school, $courses, $user)
     {
         $school_percentage = 0;
         $assigned_courses_by_school = $courses->count();
@@ -185,7 +185,7 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function getSchoolProgress($courses,$positions_courses,$school_id)
+    public function __OLD__getSchoolProgress($courses,$positions_courses,$school_id)
     {
         $user = auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
