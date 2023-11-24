@@ -113,12 +113,12 @@ class restablecer_funcionalidad extends Command
         // $this->restoreJsonNotification();
         // $this->restoreSummariesWithTypeTopicGradesMassive();
         // $this->getInfoSupervisors();
-        // $this->updateChecklisSummaries();
+        $this->updateChecklisSummaries();
         // $this->reportHoursCapacitation();
         // $this->deleteDuplicatesSummaryTopics();
         // $this->updateSummariesCourse();
         // $this->info("\n Fin: " . now());
-        $this->updateStatusSummaryTopicsSFH();
+        // $this->updateStatusSummaryTopicsSFH();
         // info(" \n Fin: " . now());
     }
     public function updateStatusSummaryTopicsSFH(){
@@ -281,10 +281,8 @@ class restablecer_funcionalidad extends Command
         }
     }
     public function updateChecklisSummaries(){
-        $users = User::query()
-        ->whereHas('subworkspace',function($q){
-            $q->whereIn('id',[12,13,30]);
-        })->whereHas('summary_checklist')->get();
+        $users = User::whereIn('subworkspace_id',[12,13,30])->whereHas('summary_checklist')->get();
+        
         $_bar = $this->output->createProgressBar($users->count());
         $_bar->start();
         foreach ($users as $user) {
