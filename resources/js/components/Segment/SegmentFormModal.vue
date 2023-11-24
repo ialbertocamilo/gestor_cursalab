@@ -419,6 +419,8 @@ export default {
             let vue = this;
             vue.errors = [];
 
+            vue.showLoader();
+
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -478,6 +480,8 @@ console.log(vue.segments.length);
                     })
 
                 }
+
+                vue.hideLoader()
             });
 
             // When model type is course, load module ids
