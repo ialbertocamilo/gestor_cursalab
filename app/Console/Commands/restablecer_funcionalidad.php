@@ -282,6 +282,7 @@ class restablecer_funcionalidad extends Command
     }
     public function updateChecklisSummaries(){
         $users = User::whereIn('subworkspace_id',[12,13,30])->whereHas('summary_checklist')->get();
+        
         $_bar = $this->output->createProgressBar($users->count());
         $_bar->start();
         foreach ($users as $user) {
