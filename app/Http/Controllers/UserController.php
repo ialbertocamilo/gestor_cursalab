@@ -135,4 +135,13 @@ class UserController extends Controller
         
         return $this->success(['msg' => 'Administrador actualizado correctamente.']);
     }
+
+    public function currentCourses($document){
+        $user = User::where('document',$document)->first();
+        $courses_id = [];
+        if($user){
+            $courses_id = $user->getCurrentCourses(only_ids:true);
+        }
+        return $this->success(['courses_id' => $courses_id]);
+    }
 }
