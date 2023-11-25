@@ -135,7 +135,8 @@
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
                         style="cursor: pointer">
-                        <strong class="cg">Más Criterios</strong>
+                        <strong class="cg">Criterios generales para la creación de un usuario</strong>
+                        <!-- <strong class="cg">Más Criterios</strong> -->
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
                     <v-col cols="12" class="py-0 separated">
@@ -144,9 +145,9 @@
                 </v-row>
 
                 <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
-                    <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
+                    <!-- <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
                         <span class="lbl_mas_cri">Criterios generales para la creación de un usuario.</span>
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                         <v-expand-transition>
                             <UsuarioCriteriaSection

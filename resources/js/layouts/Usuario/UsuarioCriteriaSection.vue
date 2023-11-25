@@ -6,12 +6,20 @@
 
                 <div v-if="TypeOf(user.criterion_list[criterion.code]) !== 'undefined'">
                     <div v-if="criterion.field_type != null && criterion.field_type.code == 'date'">
-                        <DefaultInputDate
+                        <!-- <DefaultInputDate
                             clearable
                             :referenceComponent="'modalDateFilter'+criterion.id"
                             :options="modalDate[index]"
                             v-model="user.criterion_list[criterion.code]"
                             :label="criterion.name"
+                        /> -->
+                        <DefaultInput
+                            clearable
+                            :referenceComponent="'modalDateFilter'+criterion.id"
+                            :options="modalDate[index]"
+                            v-model="user.criterion_list[criterion.code]"
+                            :label="criterion.name"
+                            type="date"
                         />
                     </div>
                     <div v-else>

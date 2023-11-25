@@ -716,6 +716,17 @@ class UsuarioController extends Controller
         return response()->json(compact('schools', 'modules'), 200);
     }
 
+    public function buscarEscuelasxModulo($subworkspace_id)
+    {
+        $escuelas = School::whereHas('subworkspaces', function($q) use ($subworkspace_id) {
+                $q->where('id', $subworkspace_id);
+                $q->where('active', ACTIVE);
+            })
+            ->get();
+
+        return response()->json(compact('escuelas'), 200);
+    }
+
     public function buscarCursosxEscuela($school_id)
     {
         $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
@@ -785,7 +796,9 @@ class UsuarioController extends Controller
                     ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                     // ->where('summary_topics.source_id')
                     ->where('users.subworkspace_id', $subworkspaceId)
-                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id')
+                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                        db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'))
+                        // DB::raw("DATE_FORMAT(summary_topics.last_time_evaluated_at, '%d/%m/%Y') as st_last_time_evaluated_at"))
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -811,7 +824,9 @@ class UsuarioController extends Controller
                 ->where('summary_topics.topic_id', $topicId)
                 // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id');
+                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                    db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'));
+                    // \DB::raw("DATE_FORMAT(summary_topics.last_time_evaluated_at, '%d/%m/%Y') as st_last_time_evaluated_at" ));
 
             // "Desaprobados" only
 

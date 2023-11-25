@@ -135,7 +135,7 @@
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="openFormModal(modalOptions, $event, 'edit')"
+                @edit="openFormModal(modalOptions, $event, 'edit',  `Editar usuario ${$event.nombre} - ${$event.document}`)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
@@ -260,7 +260,6 @@ export default {
                 ref: 'UsuarioTable',
                 headers: headers,
                 actions: [
-                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_cursalab_super_user",},
                     {text: "Cursos", icon: 'mdi mdi-notebook-multiple', type: 'action', method_name: 'cursos'},
 
                     {
@@ -313,7 +312,8 @@ export default {
                         type: "action",
                         show_condition: "is_super_user",
                         method_name: "logs"
-                    }
+                    },
+                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_cursalab_super_user",},
 
                 ]
             },

@@ -622,15 +622,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $user->save();
 
-            foreach ($user->criterion_values as $criterion) {
-                info($criterion);
-            }
+            // foreach ($user->criterion_values as $criterion) {
+            //     info($criterion);
+            // }
 
-            info([ 'is_recordable' => $this->isRecordingEnabled(),
-                   'is_event_record: syncing' => $this->isEventRecordable('syncing'),
-                   'is_event_record: synced'  => $this->isEventRecordable('synced'),
-                   'is_event_record: updatingExistingPivot' => $this->isEventRecordable('updatingExistingPivot'),
-                   'is_event_record: existingPivotUpdated' => $this->isEventRecordable('existingPivotUpdated') ]);
+            // info([ 'is_recordable' => $this->isRecordingEnabled(),
+            //        'is_event_record: syncing' => $this->isEventRecordable('syncing'),
+            //        'is_event_record: synced'  => $this->isEventRecordable('synced'),
+            //        'is_event_record: updatingExistingPivot' => $this->isEventRecordable('updatingExistingPivot'),
+            //        'is_event_record: existingPivotUpdated' => $this->isEventRecordable('existingPivotUpdated') ]);
 
             if ($user && !$from_massive) {
                 SummaryUser::updateUserData($user, false);
@@ -653,7 +653,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             abort(errorExceptionServer());
         }
         return $user;
-        info(['recordable_finish' => $this->isRecordingEnabled() ]);
+        // info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
     public function sendWelcomeEmail($from_massive=false){
         $user = $this;
