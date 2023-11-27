@@ -56,7 +56,7 @@ class enviar_notificaciones extends Command
             foreach ($detalles_json as $key2 => $detalle) {
 //                info($detalle->usuarios);
                 if ($detalle->estado_envio == 0) {
-                    if ($detalle->hora_envio == $ahora->format('Y-m-d H:i')) {
+                    if ($detalle->hora_envio <= $ahora->format('Y-m-d H:i')) {
                         $envio = $this->enviarNotificacion_a_usuarios_x_Chunk($not, $detalle->usuarios);
                         if ($envio) {
 //                            $this->info(" Se envió bloque: " . now());
