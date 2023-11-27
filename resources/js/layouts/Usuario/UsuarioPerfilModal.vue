@@ -312,6 +312,13 @@ export default {
         closeModal() {
             let vue = this;
 
+            vue.courses =  {
+                extracurricular_schools: [],
+                free_schools: [],
+                regular_schools: [],
+                summary_user: [],
+            };
+
             // vue.resource = {
             //     id: '',
             //     fullname: null,
