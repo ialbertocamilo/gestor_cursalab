@@ -130,7 +130,38 @@
                             />
                     </v-col>
                 </v-row>
-
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-between pb-0"
+                        @click="sections.showCriteria = !sections.showCriteria"
+                        style="cursor: pointer">
+                        <strong class="cg">Datos para STPS</strong>
+                    </v-col>
+                    <v-col cols="12" class="py-0 separated">
+                        <DefaultDivider/>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" align="start" align-content="center">
+                    <v-col cols="12" class="d-flex justify-content-center pt-0">
+                        <DefaultInput
+                            clearable
+                            label='National_Identifier_Number_Manager'
+                        />
+                        <DefaultAutocomplete
+                            placeholder=""
+                            label="Ocupación"
+                            :items="mx_national_occupations_catalog"
+                            item-text="name"
+                            clearable
+                        />
+                        <DefaultAutocomplete
+                            placeholder=""
+                            label="Position Name"
+                            :items="position_names"
+                            item-text="name"
+                            clearable
+                        />
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around" align="start" align-content="center">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
@@ -369,6 +400,21 @@ export default {
                     }
                 },
             },
+            mx_national_occupations_catalog:[
+                {id:1,name:'01 - Cultivo crianza y aprovechamiento'},
+                {id:2,name:'01.1 - Agricultura y silvicultura'},
+                {id:1,name:'01.2 - Ganaderia'},
+                {id:1,name:'01.2 - Pesca y acucultura'}
+
+            ],
+            position_names:[
+                {id:1,name:'Business Analyst'},
+                {id:1,name:'Jefe de Sistemas Central'},
+                {id:1,name:'Gerente De Proyectos'},
+                {id:1,name:'Analista Funcional de Sistemas'},
+                {id:1,name:'Analista Senior Legal'},
+
+            ]
        }
     },
     mounted() {

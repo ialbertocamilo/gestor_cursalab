@@ -269,7 +269,7 @@
                     </table>
                 </td>
                 <td style="padding: 5px 5px 10px 5px;" colspan="6">
-                    <div>Instructor o tutor</div>
+                    <div>Patrón o representante legal</div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr style="text-align: center">
                             <td style="font-weight: bolder;">

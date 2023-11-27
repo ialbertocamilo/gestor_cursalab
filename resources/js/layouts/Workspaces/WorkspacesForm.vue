@@ -447,7 +447,7 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="9">
+                                    <!-- <v-col cols="9">
                                         <DefaultInput
                                             label="Ocupación específica (Catálogo Nacional Ocupaciones)"
                                             v-model="resource.dc3_configuration.value_specific_occupation"
@@ -465,7 +465,7 @@
                                             label="Relación criterio"
                                             dense
                                         />
-                                    </v-col>
+                                    </v-col> -->
                                     <v-col cols="9">
                                         <DefaultInput
                                             label="Puesto"
