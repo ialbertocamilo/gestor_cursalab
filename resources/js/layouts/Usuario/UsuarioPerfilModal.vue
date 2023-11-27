@@ -95,7 +95,7 @@
                             <DefaultSection :title-default="false" v-for="(school, s_idx) in courses.regular_schools" :key="'block-school-' + s_idx">
                                 <template v-slot:title>
                                     <div class="pt-4">
-                                        <span class="text-h6">{{ school.name }} <small>({{ school.courses.length }} {{ school.courses.length > 1 ? 'cursos' : 'curso'  }})</small></span>
+                                        <span class="text-h6">{{ school.name }} <small>({{ school.courses.length }} {{ school.courses.length > 1 ? 'cursos' : 'curso'  }} / {{ school.porcentaje }}% avance)</small></span>
                                     </div>
                                 </template>
                                 <template v-slot:content>
@@ -146,6 +146,16 @@
                                                         <v-icon small>mdi-square</v-icon>
                                                       </v-avatar> -->
                                                       <span class="pr-2">Nota promedio:</span> {{ course.nota }}
+                                                    </v-chip>
+
+                                                    <v-chip
+                                                        class="mx-1 px-2 rounded-0 --mt-2"
+                                                        :title="course.nota_sistema"
+                                                        small
+                                                        outlined
+                                                        v-if="course.tag_ciclo"
+                                                    >
+                                                       {{ course.tag_ciclo }}
                                                     </v-chip>
                                                 </div>
 

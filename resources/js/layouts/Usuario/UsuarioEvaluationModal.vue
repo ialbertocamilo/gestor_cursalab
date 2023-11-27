@@ -10,50 +10,84 @@
 
             <v-row justify="space-around" class="mt-5 mx-3">
 
-                <!-- <div v-if="courses.regular_schools">  -->
-                    <DefaultSection :title="current_topic.name" class="w-90">
-                        <template v-slot:content>
+                <DefaultSection :title="current_topic.name" class="w-90">
+                    <template v-slot:content>
 
-                
-                            <div class="mx-3 pb-2">
+                        <div class="--mx-3 --pb-2">
 
-                                <v-simple-table light class="-----theme-light rounded-0"
-                                  >
-                                    <!-- fixed-header -->
-                                    <!-- style="max-height: 300px;" -->
-                                    <template v-slot:default>
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">#</th>
-                                                <th class="text-left">Pregunta</th>
-                                                <th class="text-center">Puntos</th>
-                                                <!-- <th class="text-center">Nota</th> -->
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr
-                                              v-for="(row, r) in current_topic.respuestas"
-                                              :key="'block-topic-' + r"
-                                            >
-                                                <td align="center">{{ r + 1 }}</td>
-                                                <td class="py-2">
-                                                    <span class="mb-1">{{ row.pregunta }}</span> <br>
-                                                    <span :class="row.respuesta.es_correcta ? 'text-primary' : 'text-red'">- {{ row.respuesta.marcada }}</span> <br v-if="!row.respuesta.es_correcta">
-                                                    <span v-if="!row.respuesta.es_correcta" class="--text-blue"><strong>- Correcta: </strong>{{ row.respuesta.correcta }}</span>
-                                                </td>
-                                                <td align="center" :class="row.respuesta.es_correcta ? 'text-bold' : 'text-line-through'">{{ row.respuesta.puntos }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </template>
-                                </v-simple-table>
+                            <div class="--mx-2 mb-2">
+                                <v-chip
+                                    class="mx-1 px-2 rounded-0 --mt-2"
+                                    :title="'Nota del tema'"
+                                    small
+                                    outlined
+                                >
+                                  <span class="pr-2">Nota:</span> {{ current_topic.nota }}
+                                </v-chip>
 
+                                <v-chip
+                                    class="mx-1 px-2 rounded-0 --mt-2"
+                                    title="Sistema de calificación"
+                                    small
+                                    outlined
+                                >
+                                  <span class="pr-2">Calificación:</span> {{ current_topic.nota_sistema }}
+                                </v-chip>
+
+                                <v-chip
+                                    class="mx-1 px-2 rounded-0 --mt-2"
+                                    title="Total de visitas"
+                                    small
+                                    outlined
+                                >
+                                  <span class="pr-2">Visitas:</span> {{ current_topic.visitas }}
+                                </v-chip>
+
+                                <v-chip
+                                    class="mx-1 px-2 rounded-0 --mt-2"
+                                    title="Total de intentos"
+                                    small
+                                    outlined
+                                >
+                                  <span class="pr-2">Intentos:</span> {{ current_topic.intentos }}
+                                </v-chip>
                             </div>
 
+                            <v-simple-table light class="-----theme-light rounded-0"
+                              >
+                                <!-- fixed-header -->
+                                <!-- style="max-height: 300px;" -->
+                                <template v-slot:default>
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th class="text-left">Pregunta</th>
+                                            <th class="text-center">Puntos</th>
+                                            <!-- <th class="text-center">Nota</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                          v-for="(row, r) in current_topic.respuestas"
+                                          :key="'block-topic-' + r"
+                                        >
+                                            <td align="center">{{ r + 1 }}</td>
+                                            <td class="py-2">
+                                                <span class="mb-1">{{ row.pregunta }}</span> <br>
+                                                <span :class="row.respuesta.es_correcta ? 'text-primary' : 'text-red'">- {{ row.respuesta.marcada }}</span> <br v-if="!row.respuesta.es_correcta">
+                                                <span v-if="!row.respuesta.es_correcta" class="--text-blue"><strong>- Correcta: </strong>{{ row.respuesta.correcta }}</span>
+                                            </td>
+                                            <td align="center" :class="row.respuesta.es_correcta ? 'text-bold' : 'text-line-through'">{{ row.respuesta.puntos }}</td>
+                                        </tr>
+                                    </tbody>
+                                </template>
+                            </v-simple-table>
 
-                        </template>
-                    </DefaultSection>
-                <!-- </div> -->
+                        </div>
 
+
+                    </template>
+                </DefaultSection>
 
             </v-row>
         </template>
