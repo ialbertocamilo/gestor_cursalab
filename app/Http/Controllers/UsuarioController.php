@@ -798,7 +798,6 @@ class UsuarioController extends Controller
                     ->where('users.subworkspace_id', $subworkspaceId)
                     ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
                         db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'))
-                        // DB::raw("DATE_FORMAT(summary_topics.last_time_evaluated_at, '%d/%m/%Y') as st_last_time_evaluated_at"))
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -826,7 +825,6 @@ class UsuarioController extends Controller
                 ->where('users.subworkspace_id', $subworkspaceId)
                 ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
                     db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'));
-                    // \DB::raw("DATE_FORMAT(summary_topics.last_time_evaluated_at, '%d/%m/%Y') as st_last_time_evaluated_at" ));
 
             // "Desaprobados" only
 
@@ -1188,6 +1186,7 @@ class UsuarioController extends Controller
         ];
 
         $progressData = UserProgress::getDataProgress($user);
+        $progressData = UserProgress::setTopicQuestionData($progressData);
 
         return $this->success([
             'profile' => $profile,

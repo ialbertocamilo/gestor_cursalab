@@ -217,7 +217,10 @@ class UserProgress extends Model
                         'name' => $topic->name,
                         'disponible' => true,
                         'nota' => null,
+                        'visitas' => null,
+                        'nota_sistema' => $topic->qualification_type?->name ?? 'No definido',
                         'estado' => 'aprobado',
+                        'respuestas' => [],
                         'estado_str' => 'Convalidado',
                     ];
 
@@ -231,6 +234,9 @@ class UserProgress extends Model
                     'name' => $topic->name,
                     'disponible' => $topic_status['available'],
                     'nota' => $topic_status['grade'],
+                    'visitas' => $topic_status['views'],
+                    'respuestas' => $topic_status['answers'] ?? [],
+                    'nota_sistema' => $topic->qualification_type?->name ?? 'No definido',
                     'estado' => $topic_status['status'],
                     'estado_str' => $topic_status_arr[$topic_status['status']],
                 ];
@@ -238,15 +244,17 @@ class UserProgress extends Model
 
             if ($course->compatible):
 
-
                 $compatible_grade = calculateValueForQualification($course->compatible->grade_average, $course->qualification_type?->position);
 
                 $school_courses->push([
                     'id' => $course->id,
+                    'image' => get_media_url($course->imagen),
+                    'show_topics' => false,
                     'name' => $course_name,
                     'position' => $course_position,
                     // 'nota' => $course->compatible->grade_average,
                     'nota' => $compatible_grade,
+                    'nota_sistema' => $course->qualification_type?->name ?? 'No definido',
                     'estado' => 'aprobado',
                     'estado_str' => 'Convalidado',
                     'tags' => $tags,
@@ -260,9 +268,12 @@ class UserProgress extends Model
 
             $school_courses->push([
                 'id' => $course->id,
+                'image' => get_media_url($course->imagen),
+                'show_topics' => false,
                 'name' => $course_name,
                 'position' => $course_position,
                 'nota' => $course_status['average_grade'],
+                'nota_sistema' => $course->qualification_type?->name ?? 'No definido',
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
                 'tags' => $tags,
@@ -286,5 +297,78 @@ class UserProgress extends Model
         // $columns = array_column($school_courses, 'orden');
         // array_multisort($columns, SORT_ASC, $school_courses);
         return $school_courses->values()->all();
+    }
+
+    protected function setTopicQuestionData($data)
+    {
+        $data = $this->getAndSetTopicQuestions($data, 'regular_schools');
+
+        return $data;
+    }
+
+    public function getAndSetTopicQuestions($data, $school_key)
+    {
+        if (isset($data[$school_key])) {
+
+            foreach ($data[$school_key] as $s_key => $school) {
+
+                $topic_ids = [];
+
+                foreach ($school['courses'] as $course) {
+
+                    $ids = array_column($course['temas'], 'id');
+                    $topic_ids = array_merge($topic_ids, $ids);
+                }
+
+                $questions = Question::whereIn('topic_id', $topic_ids)->get();
+
+                foreach ($school['courses'] as $c_key => $course) {
+
+                    foreach ($course['temas'] as $t_key => $topic) {
+
+                        $preguntas = $questions->where('topic_id', $topic['id'])->toArray();
+                        $respuestas = $this->setTopicQuestionAnswers($topic['respuestas'] ?? NULL, $preguntas);
+
+                        // $data[$school_key][$s_key]['courses'][$c_key]['temas'][$t_key]['preguntas'] = $preguntas;
+                        $data[$school_key][$s_key]['courses'][$c_key]['temas'][$t_key]['respuestas'] = $respuestas;
+                    }
+                }
+            }
+
+            return $data;
+        }
+    }
+
+    public function setTopicQuestionAnswers($answers, $questions)
+    {
+        if (!$answers) return [];
+
+        $rows = [];
+
+        foreach ($questions as $key => $question) {
+            
+            $answer = collect($answers)->where('preg_id', $question['id'])->first();
+
+            if ($answer) {
+
+                $right = $question['rptas_json'][$question['rpta_ok']] ?? null;
+                $marked = $question['rptas_json'][$answer['opc']] ?? null;
+                $is_correct =  $answer['opc'] == $question['rpta_ok'];
+
+                $row = [
+                    'pregunta' => $question['pregunta'],
+                    'respuesta' => [
+                        'correcta' => $right,
+                        'marcada' => $marked,
+                        'es_correcta' => $is_correct,
+                        'puntos' => $question['score'],
+                    ],
+                ];  
+
+                $rows[] = $row;              
+            }
+        }
+
+        return $rows;
     }
 }

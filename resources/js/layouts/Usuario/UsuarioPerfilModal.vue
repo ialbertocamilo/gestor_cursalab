@@ -13,7 +13,7 @@
                 <v-tabs fixed-tabs v-model="tabs">
 
                     <v-tab href="#tab-1" :key="1" class="primary--text">
-                        <v-icon>mdi-text-box-outline</v-icon>
+                        <v-icon>mdi-account</v-icon>
                         <span class="ml-3">Perfil de usuario</span>
                     </v-tab>
 
@@ -23,11 +23,11 @@
                         class="primary--text"
                         v-if="$root.isSuperUser"
                     >
-                        <v-icon>mdi-text-box-edit-outline</v-icon>
-                        <span class="ml-3">Cursos</span>
+                        <v-icon>mdi-chart-areaspline-variant</v-icon>
+                        <span class="ml-3">Progreso</span>
                     </v-tab>
 
-                    <v-tab
+                   <!--  <v-tab
                         href="#tab-3"
                         :key="3"
                         class="primary--text"
@@ -35,11 +35,11 @@
                     >
                         <v-icon>mdi-text-box-search-outline</v-icon>
                         <span class="ml-3">Estadística</span>
-                    </v-tab>
+                    </v-tab> -->
 
                 </v-tabs>
 
-                <v-tabs-items v-model="tabs">
+                <v-tabs-items v-model="tabs" class="w-90">
 
                     <v-tab-item :key="1" :value="'tab-1'">
                         <v-row class="--justify-content-center pt-4">
@@ -67,7 +67,7 @@
                                             :key="'crit-' + c_idx"
                                         >
                                           <v-avatar left >
-                                            <v-icon small>mdi-account-circle</v-icon>
+                                            <v-icon small>mdi-square</v-icon>
                                           </v-avatar>
                                           {{ criterion.valor }}
                                         </v-chip>
@@ -89,46 +89,125 @@
 
                     </v-tab-item>
 
-                    <v-tab-item :key="2" :value="'tab-2'" v-if="$root.isSuperUser">
+                    <v-tab-item :key="2" :value="'tab-2'" v-if="$root.isSuperUser" class="---w-90">
 
                         <div v-if="courses.regular_schools"> 
                             <DefaultSection :title="school.name" v-for="(school, s_idx) in courses.regular_schools" :key="'block-school-' + s_idx">
                                 <template v-slot:content>
 
-                                    <div v-for="(course, crs_idx) in school.courses" :key="'block-course-' + crs_idx">
+                                    <div v-for="(course, crs_idx) in school.courses" :key="'block-course-' + crs_idx" class="my-4">
 
-                                        <h6>{{ course.name }}</h6>
-
-                                        <v-simple-table
-                                          >
-                                            <!-- fixed-header -->
-                                            <!-- style="max-height: 300px;" -->
-                                            <template v-slot:default>
-                                              <thead>
-                                                <tr>
-                                                  <th class="text-left" width="400">
-                                                    Tema
-                                                  </th>
-                                                  <th class="text-center">
-                                                    Estado
-                                                  </th>
-                                                  <th class="text-center">
-                                                    Nota
-                                                  </th>
-                                                </tr>
-                                              </thead>
-                                              <tbody>
-                                                <tr
-                                                  v-for="(topic, ti) in course.temas"
-                                                  :key="'block-topic-' + ti"
+                                        <!-- :color="'#1F7087'" -->
+                                        <!-- dark -->
+                                        <v-card
+                                            class="rounded-0"
+                                        >
+                                            <div class="d-flex flex-no-wrap justify-space-between">
+                                              <div>
+                                                <v-card-title
+                                                  class="--text-h6 text-bold"
                                                 >
-                                                  <td>{{ topic.name }}</td>
-                                                  <td align="center">{{ topic.estado_str || 'No definido' }}</td>
-                                                  <td align="center">{{ topic.nota || '-' }}</td>
-                                                </tr>
-                                              </tbody>
-                                            </template>
-                                          </v-simple-table>
+                                                  <!-- v-text="course.name" -->
+                                                    <strong>{{ course.name }}</strong>
+                                                </v-card-title>
+
+                                                <!-- <v-card-subtitle v-text="item.artist"></v-card-subtitle> -->
+                                                
+                                                <div class="mx-2">
+                                                    <v-chip
+                                                        class="mx-1 px-2 rounded-0 --mt-2"
+                                                        color="primary"
+                                                        :title="'Estado del curso'"
+                                                        small
+                                                        outlined
+                                                    >
+                                                        <!-- text-color="white" -->
+                                                      <!-- <v-avatar left >
+                                                        <v-icon small>mdi-square</v-icon>
+                                                      </v-avatar> -->
+                                                      <span class="pr-2">Estado:</span> {{ course.estado_str }}
+                                                    </v-chip>
+
+                                                    <v-chip
+                                                        class="mx-1 px-2 rounded-0 --mt-2"
+                                                        color="primary"
+                                                        :title="course.nota_sistema"
+                                                        small
+                                                        outlined
+                                                        v-if="course.nota"
+                                                    >
+                                                        <!-- text-color="white" -->
+                                                      <!-- <v-avatar left >
+                                                        <v-icon small>mdi-square</v-icon>
+                                                      </v-avatar> -->
+                                                      <span class="pr-2">Nota promedio:</span> {{ course.nota }}
+                                                    </v-chip>
+                                                </div>
+
+
+
+                                                <v-card-actions>
+                                            
+                                                    <!-- outlined
+                                                    rounded -->
+                                                    <!-- small -->
+                                                  <a
+                                                    class="ml-2 mt-2 text-primary"
+                                                    @click="course.show_topics = !course.show_topics"
+                                                  >
+                                                    {{ course.show_topics ? 'Ocultar temas': 'Ver temas' }}
+                                                    <v-icon small color="primary">{{ course.show_topics ? 'mdi-chevron-up': 'mdi-chevron-down' }}</v-icon>
+                                                  </a>
+                                                </v-card-actions>
+                                              </div>
+
+                                              <v-avatar
+                                                class="ma-3"
+                                                size="125"
+                                                tile
+                                              >
+                                                <v-img :src="course.image"></v-img>
+                                              </v-avatar>
+                                            </div>
+
+                                            <div class="mx-3 pb-2" v-show="course.show_topics">
+
+                                                <v-simple-table light class="-----theme-light rounded-0"
+                                                  >
+                                                    <!-- fixed-header -->
+                                                    <!-- style="max-height: 300px;" -->
+                                                    <template v-slot:default>
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-left" width="400">Tema</th>
+                                                                <th class="text-center">Visitas</th>
+                                                                <th class="text-center">Estado</th>
+                                                                <th class="text-center">Nota</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr
+                                                              v-for="(topic, ti) in course.temas"
+                                                              :key="'block-topic-' + ti"
+                                                            >
+                                                                <td>{{ topic.name }}</td>
+                                                                <td align="center">{{ topic.visitas || '-' }}</td>
+                                                                <td align="center">{{ topic.estado_str || 'No definido' }}</td>
+                                                                <!-- <td align="center"><span :title="topic.nota_sistema">{{ topic.nota || '-' }}</span></td> -->
+                                                                <td align="center">
+                                                                    <span title="Ver detalle" v-if="topic.respuestas.length > 0 && topic.nota">
+                                                                        <a href="javascript:;" @click="showEvaluationDetail(topic)">{{ topic.nota || '-' }}</a>
+                                                                    </span>
+                                                                    <span v-else>{{ topic.nota || '-' }}</span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </template>
+                                                </v-simple-table>
+
+                                            </div>
+
+                                        </v-card>
                                         
                                     </div>
 
@@ -138,7 +217,7 @@
 
                     </v-tab-item>
 
-                    <v-tab-item :key="3" :value="'tab-3'" v-if="$root.isSuperUser">
+                    <!-- <v-tab-item :key="3" :value="'tab-3'" v-if="$root.isSuperUser">
 
                         <DefaultSection title="Configuración de sistema de calificación" v-if="$root.isSuperUser">
                             <template v-slot:content>
@@ -154,18 +233,32 @@
                         </DefaultSection>
 
                        
-                    </v-tab-item>
+                    </v-tab-item> -->
 
                 </v-tabs-items>
 
             </v-row>
+
+            <UsuarioEvaluationModal
+                width="65vw"
+                :ref="modalEvaluationOptions.ref"
+                :options="modalEvaluationOptions"
+                :current_topic="current_topic"
+                @onCancel="closeFormModal(modalEvaluationOptions)"
+            />
+
         </template>
+
     </DefaultDialog>
 
 </template>
 
 <script>
+
+import UsuarioEvaluationModal from "./UsuarioEvaluationModal";
+
 export default {
+    components: {UsuarioEvaluationModal},
     props: {
         options: {
             type: Object,
@@ -176,6 +269,7 @@ export default {
     data() {
         return {
             tabs: 1,
+            current_topic: [],
             profile: {
                 user: [],
                 criteria: [],
@@ -185,7 +279,16 @@ export default {
                 free_schools: [],
                 regular_schools: [],
                 summary_user: [],
-            }
+            },
+            modalEvaluationOptions: {
+                ref: 'UsuarioEvaluationModal',
+                open: false,
+                base_endpoint: '/usuarios',
+                cancelLabel: 'Cerrar',
+                hideConfirmBtn: true,
+                title: 'Detalle de evaluación',
+                persistent: true
+            },
         }
     },
     methods: {
@@ -204,20 +307,26 @@ export default {
 
         },
         resetValidation() {
+        },
+        showEvaluationDetail(topic) {
+            let vue = this;
 
+            vue.current_topic = topic;
+            vue.modalEvaluationOptions.open = true;
         },
         async loadData(resource) {
+            
             let vue = this
             let url = `${vue.options.base_endpoint}/${resource.id}/get-profile`
             vue.showLoader();
+
             await vue.$http.get(url)
                 .then(({data}) => {
                     vue.profile = data.data.profile
                     vue.courses = data.data.courses
+                    // vue.questions = data.data.questions
 
                     vue.hideLoader();
-                    // setTimeout(() => {
-                    // }, 3000)
                 })
                 .catch(e => {
                     vue.hideLoader();

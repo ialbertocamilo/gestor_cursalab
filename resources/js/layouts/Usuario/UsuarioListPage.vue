@@ -187,7 +187,7 @@
             />
 
             <UsuarioPerfilModal
-                width="55vw"
+                width="70vw"
                 :ref="modalProfileOptions.ref"
                 :options="modalProfileOptions"
                 @onCancel="closeFormModal(modalProfileOptions)"
@@ -369,6 +369,7 @@ export default {
                 base_endpoint: '/usuarios',
                 cancelLabel: 'Cerrar',
                 hideConfirmBtn: true,
+                persistent: true,
             },
             modalReiniciosOptions: {
                 ref: 'UsuarioReiniciosModal',
