@@ -51,6 +51,15 @@
                                 >
                                   <span class="pr-2">Intentos:</span> {{ current_topic.intentos }}
                                 </v-chip>
+                                    <!-- title="Total de intentos" -->
+                                <v-chip
+                                    class="mx-1 px-2 rounded-0 --mt-2"
+                                    small
+                                    outlined
+                                    v-if="current_topic.ultima_evaluacion"
+                                >
+                                  <span class="pr-2">Última evaluación:</span> {{ current_topic.ultima_evaluacion }}
+                                </v-chip>
                             </div>
 
                             <v-simple-table light class="-----theme-light rounded-0"
