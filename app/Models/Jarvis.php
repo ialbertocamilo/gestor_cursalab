@@ -61,6 +61,7 @@ class Jarvis extends Model
             $response = Http::withOptions(['verify' => false])->timeout(1500)->post($this->jarvis_base_url.'/convert_file', $params);
         }
         info($params);
+        info($response);
         if ($response->successful()) {
             $data = $response->json();
             $text = $data['message'];
