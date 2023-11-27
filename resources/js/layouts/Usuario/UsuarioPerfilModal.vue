@@ -91,8 +91,13 @@
 
                     <v-tab-item :key="2" :value="'tab-2'" v-if="$root.isSuperUser" class="---w-90">
 
-                        <div v-if="courses.regular_schools"> 
-                            <DefaultSection :title="school.name" v-for="(school, s_idx) in courses.regular_schools" :key="'block-school-' + s_idx">
+                        <div v-if="courses.regular_schools" class="mt-3"> 
+                            <DefaultSection :title-default="false" v-for="(school, s_idx) in courses.regular_schools" :key="'block-school-' + s_idx">
+                                <template v-slot:title>
+                                    <div class="pt-4">
+                                        <span class="text-h6">{{ school.name }} <small>({{ school.courses.length }} {{ school.courses.length > 1 ? 'cursos' : 'curso'  }})</small></span>
+                                    </div>
+                                </template>
                                 <template v-slot:content>
 
                                     <div v-for="(course, crs_idx) in school.courses" :key="'block-course-' + crs_idx" class="my-4">
@@ -105,7 +110,7 @@
                                             <div class="d-flex flex-no-wrap justify-space-between">
                                               <div>
                                                 <v-card-title
-                                                  class="--text-h6 text-bold"
+                                                  class="subtitle-1 text-bold text--darken-2 grey--text"
                                                 >
                                                   <!-- v-text="course.name" -->
                                                     <strong>{{ course.name }}</strong>
@@ -116,11 +121,11 @@
                                                 <div class="mx-2">
                                                     <v-chip
                                                         class="mx-1 px-2 rounded-0 --mt-2"
-                                                        color="primary"
                                                         :title="'Estado del curso'"
                                                         small
                                                         outlined
                                                     >
+                                                        <!-- color="primary" -->
                                                         <!-- text-color="white" -->
                                                       <!-- <v-avatar left >
                                                         <v-icon small>mdi-square</v-icon>
@@ -130,12 +135,12 @@
 
                                                     <v-chip
                                                         class="mx-1 px-2 rounded-0 --mt-2"
-                                                        color="primary"
                                                         :title="course.nota_sistema"
                                                         small
                                                         outlined
                                                         v-if="course.nota"
                                                     >
+                                                        <!-- color="primary" -->
                                                         <!-- text-color="white" -->
                                                       <!-- <v-avatar left >
                                                         <v-icon small>mdi-square</v-icon>
@@ -155,7 +160,7 @@
                                                     class="ml-2 mt-2 text-primary"
                                                     @click="course.show_topics = !course.show_topics"
                                                   >
-                                                    {{ course.show_topics ? 'Ocultar temas': 'Ver temas' }}
+                                                    {{ course.show_topics ? 'Ocultar temas': 'Ver temas' }} ({{ course.temas.length }})
                                                     <v-icon small color="primary">{{ course.show_topics ? 'mdi-chevron-up': 'mdi-chevron-down' }}</v-icon>
                                                   </a>
                                                 </v-card-actions>
@@ -163,9 +168,11 @@
 
                                               <v-avatar
                                                 class="ma-3"
-                                                size="125"
                                                 tile
+                                                width="200"
+                                                height="100"
                                               >
+                                                <!-- size="125" -->
                                                 <v-img :src="course.image"></v-img>
                                               </v-avatar>
                                             </div>

@@ -36,10 +36,10 @@
                                               :key="'block-topic-' + r"
                                             >
                                                 <td align="center">{{ r + 1 }}</td>
-                                                <td>
-                                                    <span>{{ row.pregunta }}</span> <br>
+                                                <td class="py-2">
+                                                    <span class="mb-1">{{ row.pregunta }}</span> <br>
                                                     <span :class="row.respuesta.es_correcta ? 'text-primary' : 'text-red'">- {{ row.respuesta.marcada }}</span> <br v-if="!row.respuesta.es_correcta">
-                                                    <span v-if="!row.respuesta.es_correcta" class="--text-blue"><strong>Correcta: </strong>{{ row.respuesta.correcta }}</span>
+                                                    <span v-if="!row.respuesta.es_correcta" class="--text-blue"><strong>- Correcta: </strong>{{ row.respuesta.correcta }}</span>
                                                 </td>
                                                 <td align="center" :class="row.respuesta.es_correcta ? 'text-bold' : 'text-line-through'">{{ row.respuesta.puntos }}</td>
                                             </tr>
