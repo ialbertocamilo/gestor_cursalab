@@ -44,9 +44,12 @@ class Jarvis extends Model
         return $response;
     }
     protected function convertMultimediaToText($multimedia){
+        info('init convertMultimediaToText');
+        info($multimedia);
         $text_result = null;
         $workspace = $multimedia->topic->course->workspaces->first();
         $params = self::getJarvisConfiguration($workspace);
+        info($params);
         $params['bucket'] = $this->bucket;
         if($multimedia->type_id == 'youtube'){
             $link = 'https://www.youtube.com/watch?v=' . $multimedia->value;
@@ -70,6 +73,7 @@ class Jarvis extends Model
             $multimedia->save();
             return 'Created';
         }
+        info('final convertMultimediaToText');
     }
     protected function generateQuestionsJarvis($request){
         $params = $request->all();
