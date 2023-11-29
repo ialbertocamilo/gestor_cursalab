@@ -1157,7 +1157,7 @@ class Course extends BaseModel
     {
         $course_requirement = $course->requirements->first();
 
-        $summary_course = null;
+        // $summary_course = null;
         
         if ($course_requirement) {
 //            $requirement_summary_course = SummaryCourse::with('status:id,code')
@@ -1182,7 +1182,7 @@ class Course extends BaseModel
 
                     if ($compatible_course_req) {
 
-                        $summary_course = $compatible_course_req;
+                        // $summary_course = $compatible_course_req;
 
                     } else {
 
@@ -1197,7 +1197,8 @@ class Course extends BaseModel
         }
 
 //        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
-        $summary_course = $summary_course ?? $course->summaries->first();
+        // $summary_course = $summary_course ?? $course->summaries->first();
+        $summary_course = $course->summaries->first();
 
         $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
         $grade_average = $summary_course ?
