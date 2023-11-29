@@ -124,11 +124,29 @@ return [
                         }
                     ]);
                 },
-                'requirements.summaries_course' => function ($q) use ($user_id) {
-                    $q
-                        ->with('status:id,name,code')
-                        ->where('user_id', $user_id);
-                },
+                // 'requirements.summaries_course' => function ($q) use ($user_id) {
+                //     $q
+                //         ->with('status:id,name,code')
+                //         ->where('user_id', $user_id);
+                // },
+                'requirements' => [
+                    'model_course' => [
+                        'topics',
+                        'schools',
+                        'summaries' => function ($q) use ($user_id) {
+                            $q
+                                ->with('status:id,name,code')
+                                ->where('user_id', $user_id);
+                        },
+                        'compatibilities_a:id',
+                        'compatibilities_b:id',
+                    ],
+                    'summaries_course' => function ($q) use ($user_id) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', $user_id);
+                    },
+                ],
                 'compatibilities_a:id',
                 'compatibilities_b:id',
                 'qualification_type:id,code,position,name',

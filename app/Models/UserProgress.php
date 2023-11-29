@@ -64,14 +64,23 @@ class UserProgress extends Model
         $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular');
         $free_courses = $assigned_courses->where('type.code', 'free');
 
-        $response['regular_schools'] = $this->getProgressDetailSchoolsByUser($regular_courses, $user);
-        $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user);
-        $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user);
+
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            // ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->get();
+
+        $response['regular_schools'] = $this->getProgressDetailSchoolsByUser($regular_courses, $user, $summary_courses_compatibles);
+        $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user, $summary_courses_compatibles);
+        $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user, $summary_courses_compatibles);
 
         return $response;
     }
 
-    public function getProgressDetailSchoolsByUser($user_courses, $user = null)
+    public function getProgressDetailSchoolsByUser($user_courses, $user = null, $summary_courses_compatibles = null)
     {
     	$user = $user ?? auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
@@ -99,7 +108,7 @@ class UserProgress extends Model
             $school_position = $school_workspace?->position;
 
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $courses_data = $this->getSchoolProgress($courses, $positions_courses, $school_id, $user);
+            $courses_data = $this->getSchoolProgress($courses, $positions_courses, $school_id, $user, $summary_courses_compatibles);
 
             $school_status = $this->getSchoolProgressByUserV2($courses_data);
             // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
@@ -179,7 +188,7 @@ class UserProgress extends Model
         ];
     }
 
-    public function getSchoolProgress($courses, $positions_courses, $school_id, $user = null)
+    public function getSchoolProgress($courses, $positions_courses, $school_id, $user = null, $summary_courses_compatibles = null)
     {
         // $user = $user ?? auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
@@ -187,6 +196,7 @@ class UserProgress extends Model
         $topic_status_arr = config('topics.status');
         $school_courses = collect();
         $cycles = null;
+
         if($workspace_id === 25){
             $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
             ->where('value_text', '<>', 'Ciclo 0')
@@ -203,7 +213,7 @@ class UserProgress extends Model
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 
-            $course_status = Course::getCourseProgressByUser($user, $course);
+            $course_status = Course::getCourseProgressByUser($user, $course, $summary_courses_compatibles);
 
             $active_course_topics = $course->topics->where('active', ACTIVE)->sortBy('position');
             $temp_topics = [];
