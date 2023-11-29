@@ -74,7 +74,7 @@ class WorkspaceController extends Controller
         $config->logo = get_media_url($config->logo);
 
         if(ENV('MULTIMARCA') == true){
-            $config->logo = 'https://cursalab2-statics.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
+            $config->logo = 'https://statics-testing.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
             $config->titulo = 'Cursalab';
 
         }
