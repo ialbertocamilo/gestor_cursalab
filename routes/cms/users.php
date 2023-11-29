@@ -19,7 +19,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/{user}/edit', 'edit')->name('users.edit');
     Route::put('/{user}/update', 'update')->name('users.update');
     Route::get('/{user}/show', 'show')->name('users.show');
-    Route::get('/{document}/current-courses', 'currentCourses')->name('users.show');
+    // Route::get('/{document}/current-courses', 'currentCourses');
 
     Route::put('/{user}/status', 'status')->name('users.status');
     Route::delete('/{user}/destroy', 'destroy')->name('users.destroy');
