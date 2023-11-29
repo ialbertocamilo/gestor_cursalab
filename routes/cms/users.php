@@ -21,6 +21,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/{user}/show', 'show')->name('users.show');
     // Route::get('/{document}/current-courses', 'currentCourses');
 
+    
     Route::put('/{user}/status', 'status')->name('users.status');
     Route::delete('/{user}/destroy', 'destroy')->name('users.destroy');
 });
