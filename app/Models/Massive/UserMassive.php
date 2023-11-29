@@ -483,7 +483,7 @@ class UserMassive extends Massive implements ToCollection
 
             return collect([
                 ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
-                ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
+                ['required' => false, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
                 ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
                 ['required' => true, 'header_name' => 'NOMBRES', 'code' => 'name'],
                 ['required' => true, 'header_name' => 'APELLIDO PATERNO', 'code' => 'lastname'],
