@@ -36,7 +36,9 @@ class SegmentController extends Controller
     {
         $workspace = session('workspace');
 
-        $criteria = Segment::getCriteriaByWorkspace($workspace);
+        // $criteria = Segment::getCriteriaByWorkspace($workspace);
+        $criteria = Segment::getCriteriaByWorkspaceV2($workspace);
+        // $criteria = [];
 
         // $segments = Segment::getSegmentsByModel($criteria,$request->model_type, $request->model_id);
         $segments = Segment::getSegmentsByModelV2($request->model_type, $request->model_id);
@@ -73,9 +75,10 @@ class SegmentController extends Controller
     {
         $workspace = session('workspace');
 
-        $criteria = Segment::getCriteriaByWorkspace($workspace);
+        $criteria = Segment::getCriteriaByWorkspaceV2($workspace);
 
-        $segments = Segment::getSegmentsByModel($criteria, $request->model_type, $request->model_id);
+        // $segments = Segment::getSegmentsByModel($criteria, $request->model_type, $request->model_id);
+        $segments = [];
 
         $courseModules = [];
         if ($request->model_type === 'App\Models\Course') {
