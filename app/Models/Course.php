@@ -1157,8 +1157,6 @@ class Course extends BaseModel
     {
         $course_requirement = $course->requirements->first();
 
-        // $summary_course = null;
-        
         if ($course_requirement) {
 //            $requirement_summary_course = SummaryCourse::with('status:id,code')
 //                ->where('course_id', $course_requirement->requirement_id)
@@ -1180,11 +1178,7 @@ class Course extends BaseModel
 
                     $compatible_course_req = $req_course->getCourseCompatibilityByUser($user, $summary_courses_compatibles);
 
-                    if ($compatible_course_req) {
-
-                        // $summary_course = $compatible_course_req;
-
-                    } else {
+                    if (!$compatible_course_req) {
 
                         return ['average_grade' => 0, 'status' => 'bloqueado'];
                     }
@@ -1196,8 +1190,7 @@ class Course extends BaseModel
             }
         }
 
-//        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
-        // $summary_course = $summary_course ?? $course->summaries->first();
+        // $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
         $summary_course = $course->summaries->first();
 
         $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
