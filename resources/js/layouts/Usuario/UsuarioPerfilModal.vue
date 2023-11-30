@@ -312,17 +312,15 @@ export default {
         closeModal() {
             let vue = this;
 
-            vue.courses =  {
-                extracurricular_schools: [],
-                free_schools: [],
-                regular_schools: [],
-                summary_user: [],
-            };
-
-            // vue.resource = {
-            //     id: '',
-            //     fullname: null,
-            //     schools: [],
+            vue.tabs = 1
+            vue.profile = []
+            vue.courses = []
+            vue.current_topic = []
+            // vue.courses =  {
+            //     extracurricular_schools: [],
+            //     free_schools: [],
+            //     regular_schools: [],
+            //     summary_user: [],
             // };
 
             vue.$emit('onCancel')
@@ -339,8 +337,13 @@ export default {
             vue.modalEvaluationOptions.open = true;
         },
         async loadData(resource) {
-            
+
             let vue = this
+            
+            vue.profile = []
+            vue.courses = []
+            vue.current_topic = []
+            
             let url = `${vue.options.base_endpoint}/${resource.id}/get-profile`
             vue.showLoader();
 

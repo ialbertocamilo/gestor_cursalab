@@ -1153,20 +1153,44 @@ class Course extends BaseModel
         ];
     }
 
-    protected function getCourseProgressByUser($user, Course $course)
+    protected function getCourseProgressByUser($user, Course $course, $summary_courses_compatibles = null)
     {
         $course_requirement = $course->requirements->first();
+
         if ($course_requirement) {
 //            $requirement_summary_course = SummaryCourse::with('status:id,code')
 //                ->where('course_id', $course_requirement->requirement_id)
 //                ->where('user_id', $user->id)->first();
             $requirement_summary_course = $course_requirement->summaries_course->first();
 
-            if (!$requirement_summary_course || ($requirement_summary_course && $requirement_summary_course->status->code != 'aprobado'))
-                return ['average_grade' => 0, 'status' => 'bloqueado'];
+            if ($requirement_summary_course) {
+
+                if ( $requirement_summary_course->status->code != 'aprobado') {
+
+                    return ['average_grade' => 0, 'status' => 'bloqueado'];
+                }
+
+            } else {
+
+                if ($summary_courses_compatibles) {
+
+                    $req_course = $course_requirement->model_course;
+
+                    $compatible_course_req = $req_course->getCourseCompatibilityByUser($user, $summary_courses_compatibles);
+
+                    if (!$compatible_course_req) {
+
+                        return ['average_grade' => 0, 'status' => 'bloqueado'];
+                    }
+
+                } else {
+
+                    return ['average_grade' => 0, 'status' => 'bloqueado'];
+                }
+            }
         }
 
-//        $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
+        // $summary_course = SummaryCourse::with('status:id,code')->where('course_id', $course->id)->where('user_id', $user->id)->first();
         $summary_course = $course->summaries->first();
 
         $grade_average = $summary_course ? floatval($summary_course->grade_average) : 0;
