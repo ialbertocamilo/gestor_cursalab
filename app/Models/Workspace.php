@@ -255,7 +255,7 @@ class Workspace extends BaseModel
 
         // Generate query to get workspaces according to role
 
-        $query = self::generateUserWorkspacesQuery($userId);
+        $query = self::generateUserWorkspacesQuery($userId, false);
 
         $query->withCount(['schools', 'courses', 'subworkspaces']);
 
@@ -347,7 +347,7 @@ class Workspace extends BaseModel
     /**
      * Generate a query to get user's workspaces
      */
-    public static function generateUserWorkspacesQuery(int $userId): Builder
+    public static function generateUserWorkspacesQuery(int $userId, $only_active = true): Builder
     {
         // When user has SuperUser role, return al workspaces
 
@@ -358,7 +358,9 @@ class Workspace extends BaseModel
 
             return Workspace::query()
                 ->where('parent_id', null)
-                ->where('workspaces.active', ACTIVE)
+                ->when($only_active, function($q) {
+                    $q->where('workspaces.active', ACTIVE);
+                })
                 ->where('workspaces.deleted_at', null)
                 ->select('workspaces.*');
         }
@@ -388,7 +390,9 @@ class Workspace extends BaseModel
 
         return Workspace::query()
             ->whereIn('id', $workspacesIds)
-            ->where('workspaces.active', ACTIVE)
+            ->when($only_active, function($q) {
+                $q->where('workspaces.active', ACTIVE);
+            })
             ->select('workspaces.*');
     }
 

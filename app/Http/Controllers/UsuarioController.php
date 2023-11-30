@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
 use App\Models\Cargo;
@@ -25,9 +26,11 @@ use App\Models\Categoria;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Workspace;
+use App\Mail\EmailTemplate;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
+use App\Models\UserProgress;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
 use App\Models\UsuarioMaster;
@@ -41,21 +44,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\UserStoreRequest;
+
 use Illuminate\Support\Facades\Session;
 use Altek\Accountant\Facades\Accountant;
+
+use App\Models\NationalOccupationCatalog;
 use App\Http\Requests\ResetPasswordRequest;
+
 
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\ApiRest\HelperController;
 
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
-
-
-use App\Mail\EmailTemplate;
-use Illuminate\Support\Facades\Mail;
 
 // use App\Perfil;
 
@@ -180,7 +184,11 @@ class UsuarioController extends Controller
     {
         $user->load('criterion_values');
 
-        $current_workspace_criterion_list = $this->getFormSelects(true);
+        $formSelects = $this->getFormSelects(true);
+        $current_workspace_criterion_list = $formSelects['criteria'];
+        $criterion_unique_population_registry_code_id = $formSelects['criterion_unique_population_registry_code_id'];
+        $criterion_position_id = $formSelects['criterion_position_id'];
+
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
@@ -213,11 +221,17 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
-
+        $position_dc3 = $current_workspace_criterion_list->where('id',$criterion_position_id)->first();
+        $unique_population_registry_code_dc3 = $current_workspace_criterion_list->where('id',$criterion_unique_population_registry_code_id)->first();
+        $current_workspace_criterion_list = $current_workspace_criterion_list->filter(fn ($c) => !in_array($c->id,[$criterion_unique_population_registry_code_id,$criterion_position_id]))->values();
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
-            'criteria' => $current_workspace_criterion_list
+            'criteria' => $current_workspace_criterion_list,
+            'has_dC3_functionality' =>$formSelects['has_dC3_functionality'],
+            'national_occupations_catalog' =>$formSelects['national_occupations_catalog'],
+            'position_dc3' => $position_dc3,
+            'unique_population_registry_code_dc3' => $unique_population_registry_code_dc3
         ]);
     }
 
@@ -250,9 +264,20 @@ class UsuarioController extends Controller
             ->orderBy('position')
             ->get();
 
-        $response = compact('criteria');
+        //Campos para DC3
+        $has_dC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $national_occupations_catalog = [];
+        $criterion_unique_population_registry_code_id = null;
+        $criterion_position_id = null;
 
-        return $compactResponse ? $criteria : $this->success($response);
+        if($has_dC3_functionality){
+            $criterion_unique_population_registry_code_id = get_current_workspace()->dc3_configuration->criterion_unique_population_registry_code;
+            $criterion_position_id = get_current_workspace()->dc3_configuration->criterion_position;
+            $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
+        }
+        $response = compact('criteria','has_dC3_functionality','national_occupations_catalog','criterion_unique_population_registry_code_id','criterion_position_id');
+        
+        return $compactResponse ? $response : $this->success($response);
     }
 
     public function store(UserStoreRequest $request)
@@ -713,6 +738,17 @@ class UsuarioController extends Controller
         return response()->json(compact('schools', 'modules'), 200);
     }
 
+    public function buscarEscuelasxModulo($subworkspace_id)
+    {
+        $escuelas = School::whereHas('subworkspaces', function($q) use ($subworkspace_id) {
+                $q->where('id', $subworkspace_id);
+                $q->where('active', ACTIVE);
+            })
+            ->get();
+
+        return response()->json(compact('escuelas'), 200);
+    }
+
     public function buscarCursosxEscuela($school_id)
     {
         $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
@@ -782,7 +818,8 @@ class UsuarioController extends Controller
                     ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                     // ->where('summary_topics.source_id')
                     ->where('users.subworkspace_id', $subworkspaceId)
-                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id')
+                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                        db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'))
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -808,7 +845,8 @@ class UsuarioController extends Controller
                 ->where('summary_topics.topic_id', $topicId)
                 // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id');
+                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                    db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'));
 
             // "Desaprobados" only
 
@@ -1055,14 +1093,17 @@ class UsuarioController extends Controller
         $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
 
         // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
-        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email'] ) {
+        
+        if($dni_previo === $usuario_input['document'] && $email_previo === $usuario_input['email'] ) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
-            $usuario_master->updated_at = now();
+            if($usuario_master){
+                $usuario_master->updated_at = now();
                 if (!is_null($usuario_input['username'] || $usuario_master->username != $usuario_input['username'])){
                     $usuario_master->username = $usuario_input['username'];
                 }
-            $usuario_master->save();
-            return;
+                $usuario_master->save();
+                return;
+            }
         }
 
         // Busca datos del payload (inputs) en la BD master
@@ -1144,5 +1185,34 @@ class UsuarioController extends Controller
         }
 
         return response()->json( $error,422);
+    }
+
+    protected function getProfileData(User $user)
+    {
+        $criteria = $user->getProfileCriteria();
+
+        $profile = [
+            'user' => [
+                'fullname' => $user->fullname,
+                'email' => $user->email ?? 'No definido',
+                'documento' => $user->documento ?? 'No definido',
+                'phone_number' => $user->phone_number ?? 'No definido',
+                'active' => $user->active ? 'Activo' : 'Inactivo',
+                'created_at' => $user->created_at ? $user->created_at->format('d/m/Y G:i a') : 'No definido',
+                'updated_at' => $user->updated_at ? $user->updated_at->format('d/m/Y G:i a') : 'No definido',
+                'last_login' => $user->last_login ? Carbon::parse($user->last_login)->format('d/m/Y G:i a') : 'No definido',
+                'last_pass_updated_at' => $user->last_pass_updated_at ? Carbon::parse($user->last_pass_updated_at)->format('d/m/Y G:i a') : 'No definido',
+            ],
+            'criteria' => $criteria,
+            'background' => asset('img/profile-banner.jpg'),
+        ];
+
+        $progressData = UserProgress::getDataProgress($user);
+        $progressData = UserProgress::setTopicQuestionData($progressData);
+
+        return $this->success([
+            'profile' => $profile,
+            'courses' => $progressData,
+        ]);
     }
 }

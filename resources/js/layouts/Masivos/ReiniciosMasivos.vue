@@ -66,6 +66,7 @@
                         item-text="name"
                         item-value="id"
                         :disabled="select.disabledAll"
+                        @change="buscarEscuelas"
                         clearable
                         ref="autocomplete_modulos"
                     >
@@ -211,13 +212,14 @@
                                                                 ></v-checkbox>
                                                             </v-col>
                                                             <v-col cols="2" md="2" lg="2" class="text-center py-0"> Documento </v-col>
-                                                            <v-col cols="5" md="5" lg="5" class="text-left py-0">
+                                                            <v-col cols="4" md="4" lg="4" class="text-left py-0">
                                                                 Usuario
                                                             </v-col>
+                                                            <v-col cols="2" md="2" lg="2" class="text-center py-0"> Última evaluación </v-col>
                                                             <!-- <v-col cols="2" md="2" lg="2" class="text-center py-0" v-if="!select.tema"> Tema </v-col> -->
                                                             <v-col cols="2" md="2" lg="2" class="text-center py-0"> Nota </v-col>
-                                                            <v-col cols="2" md="2" lg="2" class="text-center py-0">
-                                                                # Intentos
+                                                            <v-col cols="1" md="1" lg="1" class="text-center py-0">
+                                                                Intentos
                                                             </v-col>
                                                         </v-row>
                                                     </v-card-title>
@@ -265,7 +267,7 @@
                                                                     >
                                                                         {{ item.user.document }}
                                                                     </v-col>
-                                                                    <v-col cols="5" md="5" lg="5"
+                                                                    <v-col cols="4" md="4" lg="4"
                                                                         class="text-left d-flex"
                                                                         style="align-items: center"
                                                                     >
@@ -285,11 +287,17 @@
                                                                     <v-col cols="2" md="2" lg="2"
                                                                         class="text-center d-flex justify-center"
                                                                         style="align-items: center"
+                                                                    >
+                                                                        {{ item.st_last_time_evaluated_at || 'No definido' }}
+                                                                    </v-col>
+                                                                    <v-col cols="2" md="2" lg="2"
+                                                                        class="text-center d-flex justify-center"
+                                                                        style="align-items: center"
                                                                         :title="item.topic.qualification_type.name"
                                                                     >
                                                                         {{ item.grade }}
                                                                     </v-col>
-                                                                    <v-col cols="2" md="2" lg="2"
+                                                                    <v-col cols="1" md="1" lg="1"
                                                                         class="text-center d-flex justify-center"
                                                                         style="align-items: center"
                                                                     >
@@ -409,9 +417,14 @@
     watch: {
         'select.curso' : function (newVal, oldVal) {
             let vue = this;
-            vue.select.curso_txt = vue.items.cursos.find(
-                (curso) => curso.id == vue.select.curso
-            ).name;
+            if (vue.select.curso) {
+
+                vue.select.curso_txt = vue.items.cursos.find(
+                    (curso) => curso.id == vue.select.curso
+                ).name;
+            } else {
+                vue.select.curso_txt = ''
+            }
         }
     }
     ,
@@ -453,9 +466,9 @@
                 .get("/intentos-masivos/reinicios_data")
                 .then((res) => {
                     vue.baseData.modulos = res.data.modules;
-                    vue.baseData.escuelas = res.data.schools;
+                    // vue.baseData.escuelas = res.data.schools;
                     vue.items.modulos = res.data.modules;
-                    vue.items.escuelas = res.data.schools;
+                    // vue.items.escuelas = res.data.schools;
                 })
                 .catch((err) => {
                     console.log(err);
@@ -480,6 +493,36 @@
         //         this.$refs.autocomplete_escuelas.focus();
         //     });
         // },
+        buscarEscuelas() {
+
+            let vue = this;
+            vue.select.escuela = null;
+            vue.select.curso = null;
+            vue.select.tema = null;
+            if (!vue.select.modulo) {
+                vue.items.escuelas = [];
+                vue.items.cursos = [];
+                vue.items.temas = [];
+                return;
+            }
+
+            let url = `/intentos-masivos/buscarEscuelasxModulo/${vue.select.modulo}`;
+            axios
+                .get(url)
+                .then((res) => {
+                    vue.items.escuelas = res.data.escuelas;
+                    // vue.select.escuela_txt = vue.items.escuelas.find(
+                    //     (escuela) => escuela.id == vue.select.escuela
+                    // ).name;
+
+                    this.$nextTick(() => {
+                        this.$refs.autocomplete_escuelas.focus();
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        },
         buscarCursos() {
 
             let vue = this;
@@ -487,6 +530,7 @@
             vue.select.tema = null;
             if (!vue.select.escuela) {
                 vue.items.cursos = [];
+                vue.items.temas = [];
                 return;
             }
 

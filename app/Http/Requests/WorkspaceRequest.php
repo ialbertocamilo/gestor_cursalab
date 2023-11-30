@@ -48,9 +48,6 @@ class WorkspaceRequest extends FormRequest
             'criteria' => 'required',
 
             'dc3_configuration'=>'nullable',
-            'dc3_logo'=>'nullable',
-            'dc3_instructor_signature'=>'nullable',
-            'dc3_boss_signature'=>'nullable',
         ];
     }
 

@@ -54,6 +54,36 @@ function generateSignedUrl(string $key, string $expires = '+360 minutes'): strin
     return (string) $request->getUri();
 }
 
+function reportsSignedUrl(string $key = '', string $expires = '+60 minutes'): string
+{
+    $config = config('filesystems.disks.s3');
+
+    $s3Client = new S3Client([
+        'version' => 'latest',
+        'region' => $config['region'],
+        'credentials' => [
+            'key' => $config['key'],
+            'secret' => $config['secret'],
+        ],
+        'endpoint'    => 'https://sfo2.digitaloceanspaces.com',
+        'options' => [
+            'CacheControl' => 'max-age=25920000, no-transform, public',
+        ]
+    ]);
+
+    $bucket = $config['bucket'];
+    $key = $config['root'] . '/' . $key;
+
+    $cmd = $s3Client->getCommand('GetObject', [
+        'Bucket' => $bucket,
+        'Key' =>  $key,
+    ]);
+
+    $request = $s3Client->createPresignedRequest($cmd, $expires);
+
+    return (string) $request->getUri();
+}
+
 function cleanExtraSpaces($str)
 {
     return trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $str)));
@@ -618,7 +648,7 @@ function extractYoutubeVideoCode(string $url): ?string
 function extractVimeoVideoCode(string $url): ?string
 {
     if (!str_contains($url, 'https://')) return $url;
-    
+
     $regex = '~
         # Match Vimeo link and embed code
         (?:<iframe [^>]*src=")?              # If iframe match up to first quote of src
@@ -635,8 +665,15 @@ function extractVimeoVideoCode(string $url): ?string
         (?:[^>]*></iframe>)?                 # Match the end of the iframe
         (?:<p>.*</p>)?                       # Match any title information stuff
         ~ix';
-    
+
     preg_match( $regex, $url, $matches );
-    
+
     return $matches[1];
+}
+
+function db_raw_dateformat($field, $alias = null, $format = "'%d/%m/%Y %H:%i'")
+{
+    $alias = $alias ?? $field;
+
+    return \DB::raw("DATE_FORMAT({$field}, $format) as {$alias}");
 }

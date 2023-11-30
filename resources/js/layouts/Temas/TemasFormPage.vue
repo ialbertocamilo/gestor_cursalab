@@ -815,7 +815,7 @@ export default {
                 return '';
             }
             if(!['youtube','video','audio','pdf'].includes(media.type_id)){
-                vue.showAlert('Este tipo de multimedia no esta habilitada para IA', 'warning', '') 
+                vue.showAlert('Este tipo de multimedia  para IA', 'warning', '') 
                 return '';
             }
             vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')

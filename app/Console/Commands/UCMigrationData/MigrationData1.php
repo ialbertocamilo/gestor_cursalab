@@ -48,6 +48,7 @@ class MigrationData1 extends Command
             info("\n CRUD MIGRATED");
         }
 
+
         if ($type === 'unificar_carreras') {
             Migration_1::unificarCarreras();
             $this->info("\n CARRERAS FIXED");

@@ -130,43 +130,53 @@
                             />
                     </v-col>
                 </v-row>
-                <v-row justify="space-around" align="start" align-content="center">
+                <!-- DATOS PARA DC3 y DC4 -->
+                <div v-if="has_dC3_functionality">
+                    <v-row justify="space-around" align="start" align-content="center">
+                        <v-col cols="12" class="d-flex justify-content-between pb-0" style="cursor: pointer">
+                            <strong class="cg">Datos para STPS</strong>
+                        </v-col>
+                        <v-col cols="12" class="py-0 separated">
+                            <DefaultDivider/>
+                        </v-col>
+                    </v-row>
+                    <v-row justify="space-around" align="start" align-content="center">
+                        <v-col cols="4">
+                            <DefaultInput
+                                clearable
+                                v-model="resource.criterion_list[unique_population_registry_code_dc3.code]"
+                                label='National_Identifier_Number_Manager'
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                placeholder=""
+                                label="Ocupación"
+                                :items="national_occupations_catalog"
+                                v-model="resource.national_occupation_id"
+                                item-text="name"
+                                clearable
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                placeholder=""
+                                label="Position Name"
+                                :items="position_dc3.values"
+                                v-model="resource.criterion_list[position_dc3.code]"
+                                item-text="value_text"
+                                clearable
+                            />
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
                         style="cursor: pointer">
-                        <strong class="cg">Datos para STPS</strong>
-                    </v-col>
-                    <v-col cols="12" class="py-0 separated">
-                        <DefaultDivider/>
-                    </v-col>
-                </v-row>
-                <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-center pt-0">
-                        <DefaultInput
-                            clearable
-                            label='National_Identifier_Number_Manager'
-                        />
-                        <DefaultAutocomplete
-                            placeholder=""
-                            label="Ocupación"
-                            :items="mx_national_occupations_catalog"
-                            item-text="name"
-                            clearable
-                        />
-                        <DefaultAutocomplete
-                            placeholder=""
-                            label="Position Name"
-                            :items="position_names"
-                            item-text="name"
-                            clearable
-                        />
-                    </v-col>
-                </v-row>
-                <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="d-flex justify-content-between pb-0"
-                        @click="sections.showCriteria = !sections.showCriteria"
-                        style="cursor: pointer">
-                        <strong class="cg">Más Criterios</strong>
+                        <strong class="cg">Criterios generales para la creación de un usuario</strong>
+                        <!-- <strong class="cg">Más Criterios</strong> -->
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
                     <v-col cols="12" class="py-0 separated">
@@ -174,10 +184,10 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
+                <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
+                    <!-- <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
                         <span class="lbl_mas_cri">Criterios generales para la creación de un usuario.</span>
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                         <v-expand-transition>
                             <UsuarioCriteriaSection
@@ -192,11 +202,12 @@
                 </v-row>
 
                 <v-row>
+                    <v-col cols="3" class="rem-m">
+                        <DefaultToggle v-model="resource.active" dense 
+                                active-label="Usuario activo" inactive-label="Usuario inactivo" @onChange="modalStatusEdit" />
+                    </v-col>
                     <v-col cols="9">
                         <span class="lbl_error_cri" v-show="show_lbl_error_cri">*Debes completar todos los criterios obligatorios.</span>
-                    </v-col>
-                    <v-col cols="3" class="rem-m">
-                        <DefaultToggle v-model="resource.active" pre_label="Usuario" @onChange="modalStatusEdit"/>
                     </v-col>
                 </v-row>
 
@@ -335,6 +346,7 @@ export default {
                 criterion_list: {},
                 criterion_list_final: {},
                 active: true,
+                national_occupation_id:null
             },
             resource_criterion_static: {
                 usuario: {},
@@ -347,7 +359,7 @@ export default {
                 name: this.getRules(['required', 'max:100', 'text']),
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
-                document: this.getRules(['required', 'min:8']),
+                document: this.getRules(['required', 'min:6']),
                 password: this.getRules(['required', 'min:8']),
                 email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
@@ -400,21 +412,11 @@ export default {
                     }
                 },
             },
-            mx_national_occupations_catalog:[
-                {id:1,name:'01 - Cultivo crianza y aprovechamiento'},
-                {id:2,name:'01.1 - Agricultura y silvicultura'},
-                {id:1,name:'01.2 - Ganaderia'},
-                {id:1,name:'01.2 - Pesca y acucultura'}
-
-            ],
-            position_names:[
-                {id:1,name:'Business Analyst'},
-                {id:1,name:'Jefe de Sistemas Central'},
-                {id:1,name:'Gerente De Proyectos'},
-                {id:1,name:'Analista Funcional de Sistemas'},
-                {id:1,name:'Analista Senior Legal'},
-
-            ]
+            /*DC3 - DC4*/
+            national_occupations_catalog:[],
+            position_dc3:{values:[],code:''},
+            unique_population_registry_code_dc3:{},
+            has_dC3_functionality:false
        }
     },
     mounted() {
@@ -549,7 +551,12 @@ export default {
                     const checkCriterios = vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
                     const checkData = vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
 
-                    if(!checkCriterios.same_criterios || !checkData.same_data) {
+                    console.log('checkCriterios')
+                    console.log(checkCriterios)
+                    console.log('checkData')
+                    console.log(checkData)
+
+                    if((!checkCriterios.same_criterios && checkCriterios.changes_criterios.length > 0) || !checkData.same_data) {
                         vue.hideLoader();
                         vue.modalUsuarioFormInfoOptions.resource = { changes_criterios: checkCriterios.changes_criterios ,
                                                                      changes_data: checkData.changes_data };
@@ -640,7 +647,12 @@ export default {
                 .then(({data}) => {
                     vue.criterion_list_req = [];
                     vue.criterion_list_opt = [];
-
+                    vue.has_dC3_functionality = data.data.has_dC3_functionality;
+                    if(vue.has_dC3_functionality){
+                        vue.national_occupations_catalog = data.data.national_occupations_catalog;
+                        vue.position_dc3 = data.data.position_dc3;
+                        vue.unique_population_registry_code_dc3=data.data.unique_population_registry_code_dc3;
+                    }
 
 
                     vue.criterion_list = data.data.criteria

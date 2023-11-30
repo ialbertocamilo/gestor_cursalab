@@ -21,6 +21,7 @@ use App\Models\School;
 use App\Models\Course;
 use App\Models\Topic;
 use App\Models\WorkspaceFunctionality;
+use App\Models\AssignedRole;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -73,7 +74,7 @@ class WorkspaceController extends Controller
         $config->logo = get_media_url($config->logo);
 
         if(ENV('MULTIMARCA') == true){
-            $config->logo = 'https://cursalab2-statics.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
+            $config->logo = 'https://statics-testing.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
             $config->titulo = 'Cursalab';
 
         }
@@ -469,14 +470,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-
-        // $data = Media::requestUploadFile($data, 'dc3_logo');
-        // $data = Media::requestUploadFile($data, 'dc3_instructor_signature');
-        // $data = Media::requestUploadFile($data, 'dc3_boss_signature');
-
-        dd($data);
         $subworkspace = Workspace::storeSubWorkspaceRequest($data);
-
         return $this->success(['msg' => 'Módulo registrado correctamente.']);
     }
 
@@ -485,14 +479,8 @@ class WorkspaceController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-        
-        // $data = Media::requestUploadFile($data, 'dc3_logo');
-        // $data = Media::requestUploadFile($data, 'dc3_instructor_signature');
-        // $data = Media::requestUploadFile($data, 'dc3_boss_signature');
 
-        dd($data);
         $subworkspace = Workspace::storeSubWorkspaceRequest($data, $subworkspace);
-
         return $this->success(['msg' => 'Módulo actualizado correctamente.']);
     }
 
@@ -661,5 +649,46 @@ class WorkspaceController extends Controller
         }
 
         return compact('school_ids', 'course_ids', 'topic_ids', 'schools');
+    }
+
+    /**
+     * Process request to toggle value of active status (1 or 0)
+     *
+     * @param Workspace $workspace
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function status(Workspace $workspace, Request $request)
+    {
+        $new_status = !$workspace->active;
+        $data = ['active' => $new_status];
+
+        $workspace->update($data);
+
+        if (!$workspace->parent_id) {
+
+            // channge status - users and admins
+
+            User::whereHas('subworkspace', function($q) use ($workspace) {
+                $q->where('parent_id', $workspace->id);
+            })
+            ->whereRelation('type', 'code', '<>', 'cursalab')
+            ->whereNull('secret_key')
+            ->update($data);
+
+            User::query()
+                ->whereRelation('type', 'code', '<>', 'cursalab')
+                ->join('assigned_roles as ar', 'ar.entity_id', 'users.id')
+                ->where('ar.entity_type', AssignedRole::USER_ENTITY)
+                ->where('ar.scope', $workspace->id)
+                ->whereNull('secret_key')
+                ->update($data);
+
+            // channge status - subworkspaces
+
+            $workspace->subworkspaces()->update($data);
+        }
+
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
 }
