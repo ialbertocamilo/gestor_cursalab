@@ -8,6 +8,7 @@
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
+                v-show="workspaceId === 25"
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
@@ -17,7 +18,7 @@
             </div>
             <!-- this only for FP -->
 
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <list-item v-show="workspaceId === 25" titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
 
             <!-- this only for FP -->
