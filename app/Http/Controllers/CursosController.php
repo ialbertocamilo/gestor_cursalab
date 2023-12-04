@@ -117,8 +117,8 @@ class CursosController extends Controller
 
         $qualification_type = $workspace->qualification_type;
         $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
-
-        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type','show_buttom_ia_description_generate');
+        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -168,6 +168,7 @@ class CursosController extends Controller
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
+            'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
             'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate
         ]);

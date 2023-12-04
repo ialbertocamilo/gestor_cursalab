@@ -398,7 +398,7 @@
                         <DefaultSection title="Datos del trabajador (DC3)" v-if="is_superuser">
                             <template v-slot:content>
                                 <v-row justify="space-around">
-                                    <v-col cols="9">
+                                    <!-- <v-col cols="9">
                                         <DefaultInput
                                             label="Clave Única de Registro de Población"
                                             v-model="resource.dc3_configuration.value_unique_population_registry_code"
@@ -416,7 +416,7 @@
                                             label="Relación criterio"
                                             dense
                                         />
-                                    </v-col>
+                                    </v-col> -->
                                     <!-- <v-col cols="9">
                                         <DefaultInput
                                             label="Ocupación específica (Catálogo Nacional Ocupaciones)"
@@ -590,10 +590,10 @@ export default {
                 //     reports: false,
                 // }
                 dc3_configuration:{
-                    value_unique_population_registry_code:'Clave Única de Registro de Población',
-                    criterion_unique_population_registry_code:null,
-                    value_specific_occupation:'Ocupación específica (Catálogo Nacional Ocupaciones)',
-                    criterion_specific_occupation:null,
+                    // value_unique_population_registry_code:'Clave Única de Registro de Población',
+                    // criterion_unique_population_registry_code:null,
+                    // value_specific_occupation:'Ocupación específica (Catálogo Nacional Ocupaciones)',
+                    // criterion_specific_occupation:null,
                     value_position:'Puesto',
                     criterion_position:null,
                     name_or_social_reason:'',

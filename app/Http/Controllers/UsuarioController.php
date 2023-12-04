@@ -186,7 +186,6 @@ class UsuarioController extends Controller
 
         $formSelects = $this->getFormSelects(true);
         $current_workspace_criterion_list = $formSelects['criteria'];
-        $criterion_unique_population_registry_code_id = $formSelects['criterion_unique_population_registry_code_id'];
         $criterion_position_id = $formSelects['criterion_position_id'];
 
         $user_criteria = [];
@@ -222,16 +221,14 @@ class UsuarioController extends Controller
 //        }
         $user->criterion_list = $user_criteria;
         $position_dc3 = $current_workspace_criterion_list->where('id',$criterion_position_id)->first();
-        $unique_population_registry_code_dc3 = $current_workspace_criterion_list->where('id',$criterion_unique_population_registry_code_id)->first();
-        $current_workspace_criterion_list = $current_workspace_criterion_list->filter(fn ($c) => !in_array($c->id,[$criterion_unique_population_registry_code_id,$criterion_position_id]))->values();
+        $current_workspace_criterion_list = $current_workspace_criterion_list->filter(fn ($c) => $c->id <> $criterion_position_id)->values();
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
             'criteria' => $current_workspace_criterion_list,
-            'has_dC3_functionality' =>$formSelects['has_dC3_functionality'],
+            'has_DC3_functionality' =>$formSelects['has_DC3_functionality'],
             'national_occupations_catalog' =>$formSelects['national_occupations_catalog'],
             'position_dc3' => $position_dc3,
-            'unique_population_registry_code_dc3' => $unique_population_registry_code_dc3
         ]);
     }
 
@@ -265,17 +262,15 @@ class UsuarioController extends Controller
             ->get();
 
         //Campos para DC3
-        $has_dC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
         $national_occupations_catalog = [];
-        $criterion_unique_population_registry_code_id = null;
         $criterion_position_id = null;
 
-        if($has_dC3_functionality){
-            $criterion_unique_population_registry_code_id = get_current_workspace()->dc3_configuration->criterion_unique_population_registry_code;
+        if($has_DC3_functionality){
             $criterion_position_id = get_current_workspace()->dc3_configuration->criterion_position;
             $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
         }
-        $response = compact('criteria','has_dC3_functionality','national_occupations_catalog','criterion_unique_population_registry_code_id','criterion_position_id');
+        $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
         
         return $compactResponse ? $response : $this->success($response);
     }

@@ -218,7 +218,63 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-
+                <v-row justify="space-around">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="DC3-DC4"
+                            :expand="sections.showSectionDC3DC4"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col cols="12">
+                                        <DefaultToggle
+                                            active-label="Creación de formulario DC3-DC4"
+                                            inactive-label="Creación de formulario DC3-DC4"
+                                            v-model="resource.can_create_certificate_dc3_dc4"
+                                            dense
+                                        />
+                                        <div>
+                                            Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
+                                        </div>
+                                    </v-col>
+                                    <v-col cols="9">
+                                        <!-- <DefaultAutocomplete
+                                            placeholder=""
+                                            label="Instructor"
+                                            :items="persons.instructors"
+                                            item-text="name"
+                                            clearable
+                                        /> -->
+                                    </v-col>
+                                    <v-col cols="3" class="d-flex align-items-center">
+                                        <DefaultModalButton
+                                            label="Agregar"
+                                            outlined
+                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3_instructor'}, 'create','Agregar Instructor')"
+                                        />
+                                    </v-col>
+                                    <v-col cols="9">
+                                        <!-- <DefaultAutocomplete
+                                            placeholder=""
+                                            label="Representante Legal"
+                                            :items="persons.legal_representatives"
+                                            item-text="name"
+                                            clearable
+                                        /> -->
+                                    </v-col>
+                                    
+                                    <v-col cols="3" class="d-flex align-items-center">
+                                        <DefaultModalButton
+                                            label="Agregar"
+                                            outlined
+                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3_legal_representative'}, 'create','Representante Legal')"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -377,6 +433,14 @@
                 @onConfirm="courseUpdateStatusModal.open = false"
                 @onCancel="closeModalStatusEdit"
             />
+            <DC3PersonModal
+                :ref="modalDC3PersonOptions.ref"
+                v-model="modalDC3PersonOptions.open"
+                :options="modalDC3PersonOptions"
+                width="30vw"
+                @onConfirm="confirmValidationModal"
+                @onCancel="modalDC3PersonOptions.open = false"
+            />
         </template>
     </DefaultDialog>
 
@@ -387,15 +451,16 @@ const fields = [
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
-    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate'
+    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
+import DC3PersonModal from './DC3PersonModal';
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector },
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -424,6 +489,7 @@ export default {
                 showSectionCertification: {status: true},
                 showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
+                showSectionDC3DC4:{status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -568,13 +634,28 @@ export default {
             modalDateFilter2: {
                 open: false
             },
+            modalDC3PersonOptions:{
+                open:false,
+                ref: 'PersonFormModal',
+                open: false,
+                base_endpoint: '/person',
+                confirmLabel: 'Guardar',
+                resource: 'person',
+                title: '',
+                action: null,
+                persistent: true,
+            },
             new_value: 0,
             loading_description:false,
             limits_descriptions_generate_ia:{
                 ia_descriptions_generated:0,
                 limit_descriptions_jarvis:0
             },
-            showButtonIaGenerate:false
+            showButtonIaGenerate:false,
+            persons:{
+                legal_representatives:[],
+                instructors:[]
+            }
         }
     },
     async mounted(){

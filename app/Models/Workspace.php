@@ -222,14 +222,12 @@ class Workspace extends BaseModel
         // Puedes realizar alguna manipulación o formato antes de devolver el valor
         if(is_null($value) || $value=='undefined'){
             $data = [];
-            $data['value_unique_population_registry_code'] = 'Clave Única de Registro de Población';
-            $data['criterion_unique_population_registry_code'] = null;
-            $data['value_specific_occupation'] = 'Ocupación específica (Catálogo Nacional Ocupaciones)';
-            $data['criterion_specific_occupation'] = null;
+            // $data['value_unique_population_registry_code'] = 'Clave Única de Registro de Población';
+            // $data['criterion_unique_population_registry_code'] = null;
+            // $data['value_specific_occupation'] = 'Ocupación específica (Catálogo Nacional Ocupaciones)';
+            // $data['criterion_specific_occupation'] = null;
             $data['value_position'] = 'Puesto';
             $data['criterion_position'] = null;
-            $data['name_or_social_reason'] = '';
-            $data['shcp'] = '';
             $data['subwokspace_data'] = [];
             $subworkspaces = get_subworkspaces(get_current_workspace());
             foreach ($subworkspaces as $subworkspace) {

@@ -8,6 +8,7 @@
         :ripple="false"
         color="primary"
         @click="emitClick"
+        :outlined="outlined"
     >
         <!-- <div class="icon_tmp" v-if="template">
             <img src="/img/anfitriones.png">
@@ -43,7 +44,11 @@ export default {
         text: {
             type: Boolean,
             default: false
-        }
+        },
+        outlined: {
+            type: Boolean,
+            default: false
+        },
     },
     methods: {
         emitClick(){

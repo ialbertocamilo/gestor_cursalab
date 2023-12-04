@@ -131,7 +131,7 @@
                     </v-col>
                 </v-row>
                 <!-- DATOS PARA DC3 y DC4 -->
-                <div v-if="has_dC3_functionality">
+                <div v-if="has_DC3_functionality">
                     <v-row justify="space-around" align="start" align-content="center">
                         <v-col cols="12" class="d-flex justify-content-between pb-0" style="cursor: pointer">
                             <strong class="cg">Datos para STPS</strong>
@@ -144,7 +144,7 @@
                         <v-col cols="4">
                             <DefaultInput
                                 clearable
-                                v-model="resource.criterion_list[unique_population_registry_code_dc3.code]"
+                                v-model="resource.curp"
                                 label='National_Identifier_Number_Manager'
                             />
                         </v-col>
@@ -346,7 +346,8 @@ export default {
                 criterion_list: {},
                 criterion_list_final: {},
                 active: true,
-                national_occupation_id:null
+                national_occupation_id:null,
+                curp:''
             },
             resource_criterion_static: {
                 usuario: {},
@@ -415,8 +416,7 @@ export default {
             /*DC3 - DC4*/
             national_occupations_catalog:[],
             position_dc3:{values:[],code:''},
-            unique_population_registry_code_dc3:{},
-            has_dC3_functionality:false
+            has_DC3_functionality:false
        }
     },
     mounted() {
@@ -647,11 +647,10 @@ export default {
                 .then(({data}) => {
                     vue.criterion_list_req = [];
                     vue.criterion_list_opt = [];
-                    vue.has_dC3_functionality = data.data.has_dC3_functionality;
-                    if(vue.has_dC3_functionality){
+                    vue.has_DC3_functionality = data.data.has_DC3_functionality;
+                    if(vue.has_DC3_functionality){
                         vue.national_occupations_catalog = data.data.national_occupations_catalog;
                         vue.position_dc3 = data.data.position_dc3;
-                        vue.unique_population_registry_code_dc3=data.data.unique_population_registry_code_dc3;
                     }
 
 
