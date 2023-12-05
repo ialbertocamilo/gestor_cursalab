@@ -159,6 +159,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
 
     Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
+    Route::prefix('persons')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
     // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));

@@ -238,13 +238,13 @@
                                         </div>
                                     </v-col>
                                     <v-col cols="9">
-                                        <!-- <DefaultAutocomplete
+                                        <DefaultAutocomplete
                                             placeholder=""
                                             label="Instructor"
                                             :items="persons.instructors"
                                             item-text="name"
                                             clearable
-                                        /> -->
+                                        />
                                     </v-col>
                                     <v-col cols="3" class="d-flex align-items-center">
                                         <DefaultModalButton
@@ -254,13 +254,13 @@
                                         />
                                     </v-col>
                                     <v-col cols="9">
-                                        <!-- <DefaultAutocomplete
+                                        <DefaultAutocomplete
                                             placeholder=""
                                             label="Representante Legal"
                                             :items="persons.legal_representatives"
                                             item-text="name"
                                             clearable
-                                        /> -->
+                                        />
                                     </v-col>
                                     
                                     <v-col cols="3" class="d-flex align-items-center">
@@ -451,7 +451,8 @@ const fields = [
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
-    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4'
+    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4',
+    'dc3_configuration'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -527,7 +528,8 @@ export default {
                 publish_date_1: null,
                 publish_time_1: null,
                 publish_date_2: null,
-                publish_time_2: null
+                publish_time_2: null,
+                dc3_configuration:{},
             },
             resource: {
                 qualification_type: {position: 0},

@@ -16,7 +16,7 @@ class Course extends BaseModel
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4'
+        'can_create_certificate_dc3_dc4','dc3_configuration'
     ];
 
     protected $casts = [
@@ -116,7 +116,26 @@ class Course extends BaseModel
 
         return $this->compatibilities_a->merge($this->compatibilities_b);
     }
-
+    public function getDc3ConfigurationAttribute($value)
+    {
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['value_position'] = 'Puesto';
+            $data['criterion_position'] = null;
+            $data['subwokspace_data'] = [];
+            $subworkspaces = get_subworkspaces(get_current_workspace());
+            foreach ($subworkspaces as $subworkspace) {
+                $data['subwokspace_data'][] = [
+                    'subworkspace_id' => $subworkspace->id,
+                    'name_or_social_reason' => '',
+                    'shcp'=>''
+                ];
+            }
+            return $data;
+        }
+        $data =json_decode($value); 
+        return $data;
+    }
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
