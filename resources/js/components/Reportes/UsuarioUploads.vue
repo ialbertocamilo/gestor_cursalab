@@ -10,9 +10,9 @@
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
-            <list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
-            <list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
-            <list-item titulo="Cargo" subtitulo="Cargo que tiene asignado el usuario" />
+            <list-item v-show="workspaceId === 25" titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
+            <list-item v-show="workspaceId === 25" titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
+            <list-item v-show="workspaceId === 25" titulo="Cargo" subtitulo="Cargo que tiene asignado el usuario" />
             <list-item titulo="Link" subtitulo="Link adjuntado por el usuario" />
             <list-item titulo="Archivo" subtitulo="Archivo subido por el usuario" />
             <list-item titulo="Descripción" subtitulo="Descripción adjunta por el usuario" />

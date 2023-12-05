@@ -21,7 +21,7 @@ class RestCampaignController extends Controller
     {
         $subworkspace = $user->subworkspace;
         $criterio = Workspace::select('criterio_id_fecha_inicio_reconocimiento')->where('id', $subworkspace->parent_id)->first();
-        
+
         $user_campaigns_ids = Campaign::getCampaignsByUser($user, $criterio);
         $campaings = Campaign::where('state', 1)->whereIn('id', $user_campaigns_ids)->get();
 
@@ -40,7 +40,7 @@ class RestCampaignController extends Controller
         return $this->success($campaings_data);
     }
 
-    public function campaingsContents(Campaign $campaign) 
+    public function campaingsContents(Campaign $campaign)
     {
         $campaings_contents = $campaign->contents()->select('id','title', 'description', 'file_media', 'linked', 'state')->get();
 
@@ -48,7 +48,7 @@ class RestCampaignController extends Controller
 
             $content->file_media = $content->file_media ? get_media_url($content->file_media) : $content->file_media;
             $content->type = ($content->linked) ? get_type_link2($content->linked) : get_type_media($content->file_media);
-            
+
             return $content;
         });
 
@@ -93,7 +93,7 @@ class RestCampaignController extends Controller
         if($requirement_voters) {
             $user_criterion_value = $user->criterion_values()->select('id', 'value_text as criterio', 'criterion_id')
                                          ->where('criterion_id', $requirement_voters->criterio_id)
-                                         ->first(); 
+                                         ->first();
 
             if($user_criterion_value) {
                 $user_criterion_value->makeHidden('pivot');
@@ -101,15 +101,15 @@ class RestCampaignController extends Controller
             }
         }
 
-        $user_criterion_response = [ 
-            'user_criterio' => $user_criterion_value, 
-            'state' => (bool) $user_criterion_value 
+        $user_criterion_response = [
+            'user_criterio' => $user_criterion_value,
+            'state' => (bool) $user_criterion_value
         ];
 
         return $this->success($user_criterion_response);
     }
 
-    public function campaignUserBadges(Campaign $campaign, User $user) 
+    public function campaignUserBadges(Campaign $campaign, User $user)
     {
         $user = auth()->user();
 
@@ -120,7 +120,7 @@ class RestCampaignController extends Controller
             $user_campaign_response = [
                 'user_id' => (int) $user->id,
                 'campaign_id' => (int) $campaign->id,
-                'first_badge_state' => !(is_null($user_campaign->answer)), 
+                'first_badge_state' => !(is_null($user_campaign->answer)),
                 'second_badge_state' => (bool) $user_campaign->candidate_state
             ];
 
@@ -129,8 +129,8 @@ class RestCampaignController extends Controller
 
         return $this->error();
     }
-    
-    public function contentSaveAnswer(Request $request) 
+
+    public function contentSaveAnswer(Request $request)
     {
         $summoned = CampaignSummoneds::select('id', 'campaign_id', 'user_id', 'in_date','answer')
                                      ->where('campaign_id', $request->campaign_id)
@@ -140,7 +140,7 @@ class RestCampaignController extends Controller
             return $this->success(true);
         } else {
             $summoned_data = $request->all();
-            $summoned_data['in_date'] = date('Y-m-d H:i:s'); 
+            $summoned_data['in_date'] = date('Y-m-d H:i:s');
             $summoned_data['answer'] = $request->answer ?? NULL;
 
             CampaignSummoneds::create($summoned_data);
@@ -149,19 +149,19 @@ class RestCampaignController extends Controller
     }
 
     // ===  APIS VALIDACION ===
-    public function campaignUserCheckAnswer(Request $request) 
+    public function campaignUserCheckAnswer(Request $request)
     {
         $summoned = Campaign::checkAnswer($request);
         return $this->success((bool) $summoned);
     }
 
-    public function campaignUserCheckPostulates(Request $request) 
+    public function campaignUserCheckPostulates(Request $request)
     {
         $summoned_postulate = Campaign::checkPostulates($request);
         return $this->success((bool) $summoned_postulate);
     }
 
-    public function campaignUserCheckVotations(Request $request) 
+    public function campaignUserCheckVotations(Request $request)
     {
         $summoned_votation = Campaign::checkVotations($request);
         return $this->success((bool) $summoned_votation);
@@ -169,7 +169,7 @@ class RestCampaignController extends Controller
     // ===  APIS VALIDACION ===
 
     // ===  APIS POSTULACION ===
-    public function postulates(Request $request) 
+    public function postulates(Request $request)
     {
         $request->user_id = auth()->user()->id;
         $summoneds = CampaignSummoneds::search_api($request);
@@ -274,7 +274,7 @@ class RestCampaignController extends Controller
 
             unset($ranking_rows[$key]['user']);
         }
-        
+
         return $this->success($ranking);
     }
 
@@ -282,9 +282,16 @@ class RestCampaignController extends Controller
 
         $votations_data = [];
 
-        foreach ($request->candidates_ids as $key => $value) {
-            $votations_data[$key]['summoned_id'] = $value;
-            $votations_data[$key]['user_id'] = $request->user_id;
+        foreach ($request->candidates_ids as $index => $candidateId) {
+
+            $vote =  CampaignVotations::where('summoned_id', $candidateId)
+                ->where('user_id', $request->user_id)
+                ->first();
+
+            if (!$vote) {
+                $votations_data[$index]['summoned_id'] = $candidateId;
+                $votations_data[$index]['user_id'] = $request->user_id;
+            }
         }
 
         // info(['votations_data' => $votations_data]);
