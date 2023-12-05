@@ -8,13 +8,14 @@ use App\Models\Ciclo;
 use App\Models\Curso;
 
 use App\Models\Media;
+use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
-use App\Models\School;
 
 // use App\Perfil;
 // use App\Curso_perfil;
 // use App\Posteo_perfil;
+use App\Models\School;
 use App\Models\Ability;
 use App\Models\Carrera;
 use App\Models\Abconfig;
@@ -25,17 +26,17 @@ use App\Models\Curricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\CourseSchool;
+
 use App\Models\SortingModel;
 
 use Illuminate\Http\Request;
-
 use App\Models\Curso_encuesta;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\CursoStoreRequest;
 use App\Http\Requests\Curso\MoverCursoRequest;
 use App\Exports\Course\CourseSegmentationExport;
-use App\Http\Resources\Curso\CursoSearchResource;
 
+use App\Http\Resources\Curso\CursoSearchResource;
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\Curso\CursoEncuestaStoreUpdate;
 use App\Http\Requests\Curso\CursosStoreUpdateRequest;
@@ -484,5 +485,8 @@ class CursosController extends Controller
 
         return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
-
+    public function listMediaTopics(Course $course){
+        $topics = $course->listMediaTopics();
+        return $this->success(compact('topics'));
+    }
 }

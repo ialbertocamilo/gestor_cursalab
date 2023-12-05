@@ -1770,4 +1770,25 @@ class Course extends BaseModel
 
         return $courses;
     }
+
+    public function listMediaTopics(){
+        $course = $this;
+        $topics = Topic::where('course_id',$course->id)->select('id','name')->with('medias:id,value,type_id,topic_id,title as name')->get();
+        foreach ($topics as $topic) {
+            foreach ($topic->medias as $media) {
+                $url = '';
+                $value = $media->value;
+                switch ($media->type_id) {
+                    case 'youtube':
+                        $url = "https://www.youtube.com/embed/".$value."?rel=0&amp;modestbranding=1&amp;showinfo=0";
+                    break;
+                    default:
+                        $url = $media->value;
+                    break;
+                }
+                $media->url = $url;
+            }            
+        }
+        return $topics;
+    }
 }

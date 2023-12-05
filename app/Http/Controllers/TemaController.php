@@ -391,4 +391,9 @@ class TemaController extends Controller
 
         return $this->success($data);
     }
+
+    public function listMedias(Topic $topic){
+        $medias = $topic->medias();
+        return $this->success($medias);
+    }
 }

@@ -13,7 +13,11 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-        
+                <DefaultButton
+                    outlined
+                    label="Ver Preview"
+                    @click="openFormModal(modalPreviewMediaTopicsOptions, course_id, 'list', `Listado de multimedias del curso: ${course_name}`)"
+                />
                 <DefaultModalButton
                     :label="'Crear tema'"
                      @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
@@ -111,6 +115,13 @@
                 @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalTopicOptions)"
             />
+            <PreviewMediaTopicsModal
+                width="40vw"
+                :ref="modalPreviewMediaTopicsOptions.ref"
+                :options="modalPreviewMediaTopicsOptions"
+                @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
+                @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -120,15 +131,17 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
+import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal.vue";
 
 export default {
     components: {
-        DialogConfirm,
-        LogsModal,
-        TopicFormModal,
-        'TopicValidationsDelete': TemaValidacionesModal,
-        'TopicValidationsUpdateStatus': TemaValidacionesModal
-    },
+    DialogConfirm,
+    LogsModal,
+    TopicFormModal,
+    'TopicValidationsDelete': TemaValidacionesModal,
+    'TopicValidationsUpdateStatus': TemaValidacionesModal,
+    PreviewMediaTopicsModal
+},
     props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
         let vue = this
@@ -277,7 +290,17 @@ export default {
                 cancelLabel: 'Cancelar',
                 resource: 'TemasValidaciones',
             },
-
+            modalPreviewMediaTopicsOptions:{
+                ref: 'PreviewMediaTopics',
+                action: null,
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: true,
+                hideCancelBtn: true,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'Topic',
+            },
             modalTopicOptions: {
                 ref: 'TopicFormModal',
                 open: false,
