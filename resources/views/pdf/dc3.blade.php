@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prueba</title>
+    <title>DC3</title>
 </head>
-<body>
+<body style="font-family: Arial, Helvetica, sans-serif">
     <h4 style="text-align: center;font-weight: bolder;margin:0">FORMATO DC-3</h4>
     <h4 style="text-align: center;font-weight: bolder;margin:0">CONSTANCIA DE COMPETENCIAS O DE HABILIDADES LABORALES</h4>
     <table style="border: 2px solid black;width:100%; border-collapse: collapse;">
@@ -39,7 +39,7 @@
                 </table>
             </td>
             <td style="padding: 5px 5px 10px 5px;border-left: 2px solid black">
-                <div>Ocupación especifica (Catálogo Nacional de Ocupaciones)</div>
+                <div>Ocupación especifica (Catálogo Nacional de Ocupaciones) <sup>1/</sup></div>
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
                         <td style="font-weight: bolder">09</td>
@@ -92,7 +92,7 @@
     </table>
     <div style="border: 2px solid black;margin-top:10px">
         <table style="width:100%; border-collapse: collapse;">
-            <tr style="text-align: center;background: black;color:white;padding:8px 0px 8px 0px;">
+            <tr style="text-align: center;background: black;color:white;padding:0px 0px 0px 0px;">
                 <td colspan="12">DATOS DEL PROGRAMA DE CAPACITACIÓN, ADIESTRAMIENTO Y PRODUCTIVIDAD</td> 
             </tr> 
             <tr style="border-top: 2px solid black;">
@@ -230,7 +230,7 @@
             </tr>
             <tr style="border-top: 2px solid black;">
                 <td style="padding: 5px 5px 10px 5px;" colspan="12">
-                    <div>Área temática del curso</div>
+                    <div>Área temática del curso <sup>2/</sup></div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
                             <td style="font-weight: bolder">6000</td>
@@ -240,7 +240,7 @@
             </tr>
             <tr style="border-top: 2px solid black;">
                 <td style="padding: 5px 5px 10px 5px;" colspan="12">
-                    <div>Nombre del agente capacitador o STPS</div>
+                    <div>Nombre del agente capacitador o STPS <sup>3/</sup></div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
                             <td style="font-weight: bolder">Domingo Rios Deyvi</td>
@@ -269,7 +269,7 @@
                     </table>
                 </td>
                 <td style="padding: 5px 5px 10px 5px;" colspan="6">
-                    <div>Patrón o representante legal</div>
+                    <div>Patrón o representante legal <sup>4/</sup></div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr style="text-align: center">
                             <td style="font-weight: bolder;">
@@ -282,6 +282,37 @@
                 </td>
             </tr>
         </table>
+    </div>
+    <div style="margin-top:10px">
+        <div>
+            <div> <span style="font-weight: bold">INSTRUCCIONES</span></div>
+            <div>
+                <ul style="list-style-type: none;">
+                    <li>- Llenar la máquina o con la letra de molde.</li>
+                    <li>- Deberá entregarse al trabajador dentro de los veinte días hábiles siguientes al término de capacitación aprobado.</li>    
+                    <li><sup>1/</sup> Las áreas y subáreas ocupacionales del Catálogo Nacional de Ocupaciones se encuentra disponible al reverso de este formato y en la página <a href="https://www.stps.gob.mx" target="_BLANK">www.stps.gob.mx</a></li>    
+                    <li><sup>2/</sup> Las áreas temáticas de los cursos disponibles en el reverso de este formato y en la página <a href="https://www.stps.gob.mx" target="_BLANK">www.stps.gob.mx</a></li>
+                    <li><sup>3/</sup> Cursos impartidos por el área competente de la Secretaria del Trabajo y Previsión Social</li>
+                    <li><sup>4/</sup> Para empresas con menos de 51 trabajadores. Para empresas con más de 50 trabajadores firmaría el representante del patrón ante la Comisión de capacitación, adiestramiento y productividad</li>
+                    <li><sup>5/</sup> Solo para empresas on mas de 50 trabajadores</li>
+                    <li>* Dato no obligatorio.</li>
+                </ul>
+            </div>
+            <div style="text-align: right">
+                DC-3
+                ANVERSO
+            </div>                
+        </div>
+    </div>
+    <div>
+        <div style="font-weight: bold;text-align: center">CLAVES Y DENOMINACIONES DE ÁREAS Y SUBÁREAS DEL CATÁLOGO NACIONAL DE OCUPACIONES</div>
+        <div>
+            
+        </div>
+        <div style="text-align: right">
+            DC-3
+            ANVERSO
+        </div>                
     </div>
 </body>
 </html>

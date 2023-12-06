@@ -145,7 +145,7 @@
                             <DefaultInput
                                 clearable
                                 v-model="resource.curp"
-                                label='National_Identifier_Number_Manager'
+                                label='CURP'
                             />
                         </v-col>
                         <v-col cols="4">

@@ -53,7 +53,8 @@ class CursosStoreUpdateRequest extends FormRequest
             'deactivate_at' => 'nullable',
             'show_certification_to_user' => 'nullable',
             'user_confirms_certificate' => 'nullable',
-            'can_create_certificate_dc3_dc4' => 'nullable'
+            'can_create_certificate_dc3_dc4' => 'nullable',
+            'dc3_configuration' => 'nullable'
         ];
     }
 

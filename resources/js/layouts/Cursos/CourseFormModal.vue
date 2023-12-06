@@ -218,7 +218,7 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around">
+                <v-row justify="space-around" v-if="has_DC3_functionality">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
                             title="DC3-DC4"
@@ -241,8 +241,9 @@
                                         <DefaultAutocomplete
                                             placeholder=""
                                             label="Instructor"
-                                            :items="persons.instructors"
-                                            item-text="name"
+                                            v-model="resource.dc3_configuration.instructor"
+                                            :items="people.instructors"
+                                            item-text="person_attributes.name"
                                             clearable
                                         />
                                     </v-col>
@@ -250,15 +251,16 @@
                                         <DefaultModalButton
                                             label="Agregar"
                                             outlined
-                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3_instructor'}, 'create','Agregar Instructor')"
+                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
                                         />
                                     </v-col>
                                     <v-col cols="9">
                                         <DefaultAutocomplete
                                             placeholder=""
                                             label="Representante Legal"
-                                            :items="persons.legal_representatives"
-                                            item-text="name"
+                                            v-model="resource.dc3_configuration.legal_representative"
+                                            :items="people.legal_representatives"
+                                            item-text="person_attributes.name"
                                             clearable
                                         />
                                     </v-col>
@@ -267,7 +269,7 @@
                                         <DefaultModalButton
                                             label="Agregar"
                                             outlined
-                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3_legal_representative'}, 'create','Representante Legal')"
+                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
                                         />
                                     </v-col>
                                 </v-row>
@@ -438,7 +440,7 @@
                 v-model="modalDC3PersonOptions.open"
                 :options="modalDC3PersonOptions"
                 width="30vw"
-                @onConfirm="confirmValidationModal"
+                @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false"
             />
         </template>
@@ -533,6 +535,7 @@ export default {
             },
             resource: {
                 qualification_type: {position: 0},
+                dc3_configuration :{}
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -654,7 +657,8 @@ export default {
                 limit_descriptions_jarvis:0
             },
             showButtonIaGenerate:false,
-            persons:{
+            has_DC3_functionality:false,
+            people:{
                 legal_representatives:[],
                 instructors:[]
             }
@@ -779,6 +783,9 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+            formData.set(
+                'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
+            );
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
             vue.getJSONEvaluaciones(formData)
@@ -895,10 +902,15 @@ export default {
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
+
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
                     vue.showButtonIaGenerate = response.show_buttom_ia_description_generate;
+
+                    vue.people.instructors = response.instructors;
+                    vue.people.legal_representatives = response.legal_representatives;
+                    vue.has_DC3_functionality = response.has_DC3_functionality;
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
@@ -959,6 +971,16 @@ export default {
             await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
                 this.limits_descriptions_generate_ia = data.data;
             })
+        },
+        setPersonDC3(person){
+            this.modalDC3PersonOptions.open = false;
+            if(person.type == 'dc3-instructor'){
+                this.people.instructors.push(person);
+                this.resource.dc3_configuration.instructor = person.id;
+                return 0;
+            }
+            this.people.legal_representatives.push(person);
+            this.resource.dc3_configuration.legal_representative = person.id;
         }
     }
 }

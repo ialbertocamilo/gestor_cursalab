@@ -6,7 +6,8 @@
         @onConfirm="confirmModal"
     >
         <template v-slot:content>
-            <v-form ref="instructorForm">
+            <v-form ref="personDC3Form">
+                <DefaultErrors :errors="errors" />
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex justify-content-center">
                         <DefaultInput
@@ -24,9 +25,9 @@
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex-- justify-content-center">
                         <DefaultSelectOrUploadMultimedia
-                            ref="inputImagen"
+                            ref="inputSignature"
                             v-model="resource.signature"
-                            label="signature (500x350px)"
+                            label="Firma (500x350px)"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource, 'signature')"
                         />
@@ -38,17 +39,13 @@
 </template>
 
 <script>
-import DefaultRichText from "../../components/globals/DefaultRichText";
-import moment from "moment";
-
 const fields = [
-    "name",
+    "name",'signature','type'
 ];
 
-const file_fields = ["signature", "archivo"];
+const file_fields = ["signature"];
 
 export default {
-    components: { DefaultRichText },
     props: {
         options: {
             type: Object,
@@ -62,10 +59,14 @@ export default {
             resourceDefault: {
                 name: "",
                 signature: null,
+                file_signature:null,
+                type:''
             },
             resource:{
                 name: "",
                 signature: null,
+                file_signature:null,
+                type:''
             },
             rules: {
                 name: this.getRules(["required", "max:100"]),
@@ -85,11 +86,8 @@ export default {
         ,
         resetValidation() {
             let vue = this
-            // if (vue.options.action !== 'edit'){
-            vue.$refs.inputImagen.removeAllFilesFromDropzone()
-            // vue.resource.contenido = ""
-            // }
-            vue.$refs.instructorForm.resetValidation()
+            vue.$refs.inputSignature.removeAllFilesFromDropzone()
+            vue.$refs.personDC3Form.resetValidation()
         }
         ,
         confirmModal() {
@@ -100,12 +98,9 @@ export default {
 
             this.showLoader()
 
-            const validateForm = vue.validateForm('instructorForm')
-            let base = `${vue.options.base_endpoint}`
-            let url = `${base}/store`;
-
+            const validateForm = vue.validateForm('personDC3Form')
+            let url = `/person/store`;
             let method = 'POST';
-
             if (validateForm && vue.isValid()) {
 
                 let formData = vue.getMultipartFormData(
@@ -114,16 +109,16 @@ export default {
                 vue.$http
                    .post(url, formData)
                    .then(({data}) => {
-                        vue.closeModal()
-                        vue.showAlert(data.data.msg)
-                        vue.$emit('onConfirm')
+                        console.log(data);
+                        vue.showAlert('Se creó correctamente')
+                        this.hideLoader()
+                        vue.$emit('onConfirm',data.data)
                    }).catch((error) => {
                        if (error && error.errors)
                             vue.errors = error.errors
                     })
             }
 
-            this.hideLoader()
         }
         ,
         resetSelects() {
@@ -131,12 +126,13 @@ export default {
         }
         ,
         async loadData({type}) {
-            console.log(type);
             let vue = this
-            vue.label= type == 'dc3_instructor' ? 'Nombre del instructor' : 'Nombre del representante' ;
-            return 0;
-        }
-        ,
+            vue.resource.name = null;
+            vue.resource.signature = null;
+            vue.resource.file_signature = null;
+            vue.label = (type == 'dc3-instructor') ? 'Nombre del instructor' : 'Nombre del representante' ;
+            vue.resource.type = type;
+        },
         isValid() {
 
             let valid = true;
@@ -147,10 +143,9 @@ export default {
 
             // Validation: signature has been set or not,
             // from file or from gallery
-
-            if (!this.resource.signature) {
+            if (!formData.get('file_signature') && !this.resource.signature) {
                 errors.push({
-                    message: 'No ha seleccionado ninguna imágen'
+                    message: 'No ha seleccionado ninguna firma.'
                 })
                 valid = false;
             }

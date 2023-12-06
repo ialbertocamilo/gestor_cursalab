@@ -120,17 +120,8 @@ class Course extends BaseModel
     {
         if(is_null($value) || $value=='undefined'){
             $data = [];
-            $data['value_position'] = 'Puesto';
-            $data['criterion_position'] = null;
-            $data['subwokspace_data'] = [];
-            $subworkspaces = get_subworkspaces(get_current_workspace());
-            foreach ($subworkspaces as $subworkspace) {
-                $data['subwokspace_data'][] = [
-                    'subworkspace_id' => $subworkspace->id,
-                    'name_or_social_reason' => '',
-                    'shcp'=>''
-                ];
-            }
+            $data['instructor'] = null;
+            $data['legal_representative'] = null;
             return $data;
         }
         $data =json_decode($value); 

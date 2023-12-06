@@ -260,6 +260,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Workspace::class, 'subworkspace_user', 'user_id', 'subworkspace_id');
     }
 
+    public function national_occupation()
+    {
+        return $this->belongsTo(NationalOccupationCatalog::class, 'national_occupation_id');
+    }
+
     public function projects(){
         return $this->hasMany(ProjectUser::class, 'user_id', 'id');
     }
