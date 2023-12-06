@@ -124,6 +124,7 @@
                         `Logs del Curso - ${$event.name}`
                     )
                 "
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, $event.id, 'list', `Listado de multimedias del curso: ${$event.name}`)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -218,6 +219,13 @@
                 :ref="modalLogsOptions.ref"
                 @onCancel="closeSimpleModal(modalLogsOptions)"
             />
+            <PreviewMediaTopicsModal
+                width="450px"
+                :ref="modalPreviewMediaTopicsOptions.ref"
+                :options="modalPreviewMediaTopicsOptions"
+                @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
+                @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -232,6 +240,7 @@ import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import LogsModal from "../../components/globals/Logs";
+import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
 
 export default {
     components: {
@@ -244,7 +253,8 @@ export default {
         SegmentCoursesFormModal,
         CompatibilityFormModal,
         CourseFormModal,
-        LogsModal
+        LogsModal,
+        PreviewMediaTopicsModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -349,6 +359,12 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Previsualización",
+                        icon: 'mdi-cellphone',
+                        type: 'action',
+                        method_name: 'preview_medias'
                     },
                     {
                         text: "Logs",
@@ -475,6 +491,17 @@ export default {
                 showCloseIcon: true,
                 base_endpoint: "/search",
                 persistent: true
+            },
+            modalPreviewMediaTopicsOptions:{
+                ref: 'PreviewMediaTopics',
+                action: null,
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: true,
+                hideCancelBtn: true,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'Topic',
             },
         }
     },
