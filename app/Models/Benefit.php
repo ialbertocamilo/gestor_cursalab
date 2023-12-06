@@ -1497,17 +1497,6 @@ class Benefit extends BaseModel
             ],
             "tabs"=> [
                 [
-                    "name" =>  $tab_name,
-                    "code" => "ir-academy",
-                    "filtros_status" => [
-                        ["name" => "Activos", "code"=> "active", "checked" => true],
-                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
-                    ],
-                    "filtros_tipo" => [
-                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
-                    ]
-                ],
-                [
                     "name" => "Todos",
                     "code"=> "free",
                     "filtros_status" => [
@@ -1516,6 +1505,17 @@ class Benefit extends BaseModel
                     ],
                     "filtros_tipo" => [
                         ["name" => "Todos", "code"=> "free", "show"=> false, "checked" => true],
+                        ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
+                    ]
+                ],
+                [
+                    "name" =>  $tab_name,
+                    "code" => "ir-academy",
+                    "filtros_status" => [
+                        ["name" => "Activos", "code"=> "active", "checked" => true],
+                        ["name" => "Bloqueados", "code"=> "locked", "checked" => true]
+                    ],
+                    "filtros_tipo" => [
                         ["name" => $tab_name, "code"=> "ir-academy", "show"=> false, "checked" => true]
                     ]
                 ],

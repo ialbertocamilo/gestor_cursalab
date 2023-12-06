@@ -131,11 +131,12 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" align="start" align-content="center">
+                <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
                         @click="sections.showCriteria = !sections.showCriteria"
                         style="cursor: pointer">
-                        <strong class="cg">Más Criterios</strong>
+                        <strong class="cg">Criterios generales para la creación de un usuario</strong>
+                        <!-- <strong class="cg">Más Criterios</strong> -->
                         <v-icon v-text="sections.showCriteria ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
                     </v-col>
                     <v-col cols="12" class="py-0 separated">
@@ -143,10 +144,10 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around" align="start" align-content="center">
-                    <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
+                <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
+                    <!-- <v-col cols="12" class="pb-0 pt-0" v-show="sections.showCriteria">
                         <span class="lbl_mas_cri">Criterios generales para la creación de un usuario.</span>
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12" class="d-flex justify-content-center pt-0">
                         <v-expand-transition>
                             <UsuarioCriteriaSection
@@ -161,11 +162,12 @@
                 </v-row>
 
                 <v-row>
+                    <v-col cols="3" class="rem-m">
+                        <DefaultToggle v-model="resource.active" dense 
+                                active-label="Usuario activo" inactive-label="Usuario inactivo" @onChange="modalStatusEdit" />
+                    </v-col>
                     <v-col cols="9">
                         <span class="lbl_error_cri" v-show="show_lbl_error_cri">*Debes completar todos los criterios obligatorios.</span>
-                    </v-col>
-                    <v-col cols="3" class="rem-m">
-                        <DefaultToggle v-model="resource.active" pre_label="Usuario" @onChange="modalStatusEdit"/>
                     </v-col>
                 </v-row>
 
@@ -316,7 +318,7 @@ export default {
                 name: this.getRules(['required', 'max:100', 'text']),
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
-                document: this.getRules(['required', 'min:8']),
+                document: this.getRules(['required', 'min:6']),
                 password: this.getRules(['required', 'min:8']),
                 email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
@@ -503,7 +505,12 @@ export default {
                     const checkCriterios = vue.checkChangesAtCriterios(data.criterion_list_final); // criterios
                     const checkData = vue.checkChangesAtUserData(data, [{key:'document', label:'Identificador'}]); // documento - dni
 
-                    if(!checkCriterios.same_criterios || !checkData.same_data) {
+                    console.log('checkCriterios')
+                    console.log(checkCriterios)
+                    console.log('checkData')
+                    console.log(checkData)
+
+                    if((!checkCriterios.same_criterios && checkCriterios.changes_criterios.length > 0) || !checkData.same_data) {
                         vue.hideLoader();
                         vue.modalUsuarioFormInfoOptions.resource = { changes_criterios: checkCriterios.changes_criterios ,
                                                                      changes_data: checkData.changes_data };

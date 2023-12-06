@@ -1037,9 +1037,13 @@ class Topic extends BaseModel
 
         return [
             'available' => $available_topic,
-            // 'grade' => $topic_grade,
+            'views' => $summary_topic->views ?? null,
+            'last_time_evaluated_at' => ($summary_topic && $summary_topic->last_time_evaluated_at) ? $summary_topic->last_time_evaluated_at->format('d/m/Y H:i') : null,
+            'total_attempts' => $summary_topic->total_attempts ?? $summary_topic->attempts ?? null,
+            'answers' => $summary_topic->answers ?? [],
             'grade' => calculateValueForQualification($topic_grade, $topic->qualification_type?->position),
             'status' => $topic_status,
+            // 'grade' => $topic_grade,
         ];
     }
 

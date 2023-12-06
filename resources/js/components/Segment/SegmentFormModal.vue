@@ -419,6 +419,8 @@ export default {
             let vue = this;
             vue.errors = [];
 
+            vue.showLoader();
+
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -435,10 +437,10 @@ export default {
 
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
-console.log(vue.segments.length);
+// console.log(vue.segments.length);
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
                 vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
-console.log(vue.segments.length);
+// console.log(vue.segments.length);
                 if (vue.segments.length === 0) this.addSegmentation();
                 if (vue.segment_by_document === undefined) {
                     vue.segment_by_document = {
@@ -478,6 +480,8 @@ console.log(vue.segments.length);
                     })
 
                 }
+
+                vue.hideLoader()
             });
 
             // When model type is course, load module ids

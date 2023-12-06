@@ -12,7 +12,7 @@
             <v-form ref="workspaceForm">
 
                 <v-tabs fixed-tabs v-model="tabs">
-                    <!-- <v-tabs-slider></v-tabs-slider> -->
+
                     <v-tab href="#tab-1" :key="1" class="primary--text">
                         <v-icon>mdi-text-box-outline</v-icon>
                         <span class="ml-3">Datos generales</span>
@@ -78,29 +78,6 @@
                     </v-tab-item>
 
                     <v-tab-item :key="2" :value="'tab-2'" v-if="is_superuser">
-                        <!-- <v-row class="">
-                            <v-col>
-                                <v-alert
-                                    colored-border
-                                    elevation="2"
-                                    class="mb-0"
-                                >
-                                    <p>En esta sección podrás gestionar los criterios que se mostrarán en la segmentación. Ten en cuenta lo siguiente:</p>
-                                    <v-row>
-                                        <v-col cols="12" class="py-0">
-                                            <small class="mb-2 d-flex align-items-start" v-for="(mensaje,index) in mensajes"
-                                               :key="index">
-                                                <v-icon class="mx-2"
-                                                        style="font-size: 0.60em; color: #22b573; margin-top: 7px;">fas fa-check
-                                                </v-icon>
-                                                <span>{{ mensaje }}</span>
-                                            </small>
-                                        </v-col>
-                                    </v-row>
-                                </v-alert>
-                            </v-col>
-                        </v-row> -->
-                        
 
                         <DefaultSection title="Criterios disponibles y secciones de uso" v-if="is_superuser">
                             <template v-slot:content>
@@ -124,13 +101,6 @@
                                                         :active-label="criterion.name"
                                                         :inactive-label="criterion.name"
                                                     />
-                                                    <!-- <DefaultInput
-                                                        clearable
-                                                        v-model="resource.name"
-                                                        label="Título del criterio"
-                                                        :rules="rules.name"
-                                                        dense
-                                                    /> -->
                                                 </v-col>
 
                                                 <v-col cols="9" v-if="criterion">

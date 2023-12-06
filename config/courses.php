@@ -109,7 +109,7 @@ return [
                         'requirements.summaries_topics' => function ($q) use ($user_id) {
                             $q
                                 ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
@@ -117,18 +117,36 @@ return [
                         'summaries' => function ($q) use ($user_id) {
                             $q
                                 ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                 ->with('status:id,name,code')
                                 ->where('user_id', $user_id);
                         }
                     ]);
                 },
-                'requirements.summaries_course' => function ($q) use ($user_id) {
-                    $q
-                        ->with('status:id,name,code')
-                        ->where('user_id', $user_id);
-                },
+                // 'requirements.summaries_course' => function ($q) use ($user_id) {
+                //     $q
+                //         ->with('status:id,name,code')
+                //         ->where('user_id', $user_id);
+                // },
+                'requirements' => [
+                    'model_course' => [
+                        'topics',
+                        'schools',
+                        'summaries' => function ($q) use ($user_id) {
+                            $q
+                                ->with('status:id,name,code')
+                                ->where('user_id', $user_id);
+                        },
+                        'compatibilities_a:id',
+                        'compatibilities_b:id',
+                    ],
+                    'summaries_course' => function ($q) use ($user_id) {
+                        $q
+                            ->with('status:id,name,code')
+                            ->where('user_id', $user_id);
+                    },
+                ],
                 'compatibilities_a:id',
                 'compatibilities_b:id',
                 'qualification_type:id,code,position,name',
@@ -174,7 +192,7 @@ return [
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
                                    ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
@@ -183,7 +201,7 @@ return [
                             'summaries' => function ($q) use ($user_id) {
                                 $q
                                     ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
@@ -258,7 +276,7 @@ return [
                             'requirements.summaries_topics' => function ($q) use ($user_id) {
                                 $q
                                     ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
@@ -266,7 +284,7 @@ return [
                             'summaries' => function ($q) use ($user_id) {
                                 $q
                                     ->select('user_id', 'topic_id', 'status_id', 'id','grade','attempts',
-                                    'passed', 'last_time_evaluated_at',
+                                    'passed', 'last_time_evaluated_at', 'views', 'answers', 'total_attempts',
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);

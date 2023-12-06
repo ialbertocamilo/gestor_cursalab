@@ -113,14 +113,85 @@ class restablecer_funcionalidad extends Command
         // $this->restoreJsonNotification();
         // $this->restoreSummariesWithTypeTopicGradesMassive();
         // $this->getInfoSupervisors();
-        // $this->updateChecklisSummaries();
+        $this->updateChecklisSummaries();
         // $this->reportHoursCapacitation();
         // $this->deleteDuplicatesSummaryTopics();
-        $this->updateSummariesCourse();
-        $this->info("\n Fin: " . now());
+        // $this->updateSummariesCourse();
+        // $this->info("\n Fin: " . now());
+        // $this->updateStatusSummaryTopicsSFH();
         // info(" \n Fin: " . now());
     }
-
+    public function updateStatusSummaryTopicsSFH(){
+        $documents = [
+            "73444935",
+            "46607950",
+            "43114479",
+            "70095222",
+            "47206111",
+            "47401157",
+            "40838557",
+            "75322752",
+            "43490150",
+            "47826826",
+            "47396517",
+            "75265478",
+            "09545406",
+            "71348076",
+            "72308454",
+            "46458152",
+            "44397639",
+            "44936612",
+            "75338500",
+            "75228065",
+            "71816720",
+            "43246263",
+            "74878050"            
+        ];
+        $topic_id = 5159;
+        $topic = Topic::with('course.topics.evaluation_type')->find($topic_id);
+        $status_passed = Taxonomy::getFirstData('topic', 'user-status', 'aprobado');
+        $status_failed = Taxonomy::getFirstData('topic', 'user-status', 'desaprobado');
+        $users = User::whereIn('document',$documents)->get();
+        $_bar = $this->output->createProgressBar($users->count());
+        $_bar->start();
+        foreach ($users as $user) {
+            // try {
+                $row = SummaryTopic::getCurrentRow($topic,$user);
+                if($row && $row->grade >= 12 && $row->passed == 0){
+                    $passed = SummaryTopic::hasPassed($row->grade,null,$topic->course);
+                    $row->update([
+                        'status_id' => $passed ? $status_passed->id : $status_failed->id,
+                        'passed' => $passed
+                    ]);
+                    $row_course = SummaryCourse::updateUserData($topic->course,$user,false);
+                    // $summary_user = SummaryUser::where('user_id',$user->id)->get();
+                    // SummaryUser::updateUserData($summary_user->user, false);
+                    info('Updated: '.$user->document);
+                }else{
+                    info('-----------------------------------');
+                    info('No updated: '.$user->document);
+                    info($row?->grade);
+                    info($row?->passed);
+                    info('-----------------------------------');
+                }
+            // } catch (\Throwable $th) {
+            //     info($user->document);
+            // }
+            $_bar->advance();
+        }
+        $summary_users = SummaryUser::whereIn('user_id',$users->pluck('id'))->with('user')->get();
+        $count_summaries = $summary_users->count();
+        $bar = $this->output->createProgressBar($count_summaries);
+        $bar->start();
+        foreach ($summary_users as $summary_user){
+            try {
+                SummaryUser::updateUserData($summary_user->user, false);
+                $bar->advance();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        }
+    }
     public function updateSummariesCourse(){
         $users_id= collect();
         SummaryCourse::select('id','user_id','course_id')->with('course','user')
@@ -210,10 +281,8 @@ class restablecer_funcionalidad extends Command
         }
     }
     public function updateChecklisSummaries(){
-        $users = User::query()
-        ->whereHas('subworkspace',function($q){
-            $q->whereIn('id',[12,13,30]);
-        })->whereHas('summary_checklist')->get();
+        $users = User::whereIn('subworkspace_id',[12,13,30])->whereHas('summary_checklist')->get();
+        
         $_bar = $this->output->createProgressBar($users->count());
         $_bar->start();
         foreach ($users as $user) {

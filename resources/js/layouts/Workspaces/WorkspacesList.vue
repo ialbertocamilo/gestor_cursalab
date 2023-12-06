@@ -149,7 +149,7 @@
                                :cols="view ? '3' : '12'" class="workspace"
                                >
 
-                            <div class="row">
+                            <div class="row" :style="{'border': `${workspace.active ? '2px solid white' : '2px solid lightgray'}`}">
                                 <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace"
                                 :style="{'height': `${view ? '105px' : 'auto'}`}"
                                 >
@@ -159,8 +159,8 @@
                                          alt=""
                                          >
                                 </v-col>
-                                <v-col :cols="view ? '12' : '3'" class=" justify-content-center bg-white text-bold d-flex align-items-center">
-                                    <span>{{ workspace.name }}</span>
+                                <v-col :cols="view ? '12' : '3'" class=" justify-content-center --bg-white text-bold d-flex align-items-center">
+                                    <span :style="{'color': `${workspace.active ? 'black' : 'gray'}`}">{{ workspace.name }}</span>
                                 </v-col>
 
                                 <v-col :cols="view ? '12' : '6'" :class="'stats pt-4 pb-2 d-flex  align-items-center workspace-badge ' + (view ? 'justify-content-around' : 'justify-content-end')"
@@ -172,8 +172,8 @@
                                         title="Ir a módulos"
                                         @click="setActiveWorkspace(workspace.id, '/modulos')"
                                     >
-                                        <v-badge class="" :content="'' + workspace.modules_count">
-                                            <v-icon class="icon" color="primary">mdi-sitemap</v-icon>
+                                        <v-badge class="" :content="'' + workspace.modules_count" :color="workspace.active ? 'primary' : 'grey'">
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-sitemap</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Módulos'"/>
                                         </v-badge>
                                     </button>
@@ -183,8 +183,8 @@
                                         title="Ir a usuarios"
                                         @click="setActiveWorkspace(workspace.id, '/usuarios')"
                                     >
-                                        <v-badge :content="'' + workspace.users_count">
-                                            <v-icon class="icon" color="primary">mdi-account-group</v-icon>
+                                        <v-badge :content="'' + workspace.users_count" :color="workspace.active ? 'primary' : 'grey'">
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-account-group</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Usuarios'"/>
                                         </v-badge>
                                     </button>
@@ -194,8 +194,8 @@
                                         title="Ir a cursos"
                                         @click="setActiveWorkspace(workspace.id, '/cursos')"
                                     >
-                                        <v-badge :content="'' + workspace.courses_count">
-                                            <v-icon class="icon" color="primary">mdi-notebook</v-icon>
+                                        <v-badge :content="'' + workspace.courses_count" :color="workspace.active ? 'primary' : 'grey'"> 
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-notebook</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Cursos'"/>
                                         </v-badge>
                                     </button>
@@ -206,7 +206,7 @@
                                         v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
-                                            <v-icon class="icon" color="primary">mdi-pencil</v-icon>
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-pencil</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Editar'"/>
                                         </span>
                                     </button>
@@ -222,8 +222,24 @@
                                         v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
-                                            <v-icon class="icon" color="primary">mdi-content-duplicate</v-icon>
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-content-duplicate</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(
+                                            modalStatusOptions,
+                                            workspace,
+                                            'status',
+                                            `Actualizar estado de workspace - ${workspace.name}`
+                                        )"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-circle</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Actualizar estado'"/>
                                         </span>
                                     </button>
 
@@ -238,7 +254,7 @@
                                         v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
-                                            <v-icon class="icon" color="primary">mdi-delete</v-icon>
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-delete</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Eliminar'"/>
                                         </span>
                                     </button>
@@ -254,7 +270,7 @@
                                         v-show="!view && workspace.is_cursalab_super_user"
                                     >
                                         <span class="v-badge">
-                                            <v-icon class="icon" color="primary">mdi-database</v-icon>
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-database</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Log'"/>
                                         </span>
                                     </button>
@@ -445,6 +461,23 @@
             @onConfirm="loadData()"
         />
 
+<!--         <DialogConfirm
+            :ref="modalStatusOptions.ref"
+            v-model="modalStatusOptions.open"
+            width="450px"
+            title="Cambiar de estado al workspace"
+            subtitle="¿Está seguro de cambiar de estado al workspace?"
+            @onConfirm="closeFormModal(modalStatusOptions); loadData();"
+            @onCancel="closeFormModal(modalStatusOptions);"
+        /> -->
+
+        <DefaultStatusModal
+            :options="modalStatusOptions"
+            :ref="modalStatusOptions.ref"
+            @onConfirm="closeFormModal(modalStatusOptions); loadData();"
+            @onCancel="closeFormModal(modalStatusOptions)"
+        />
+
     </div>
 </template>
 
@@ -454,6 +487,8 @@ import WorkspacesForm from "./WorkspacesForm";
 import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
+// import DialogConfirm from "../../components/basicos/DialogConfirm";
+import DefaultStatusModal from "../Default/DefaultStatusModal";
 
 export default {
     // props: [ 'header'],
@@ -465,7 +500,7 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal, DefaultStatusModal
 
     },
     data: () => ({
@@ -553,6 +588,30 @@ export default {
             contentText: '¿Desea eliminar este registro?',
             endpoint: '',
             width: '40vw',
+        },
+        modalStatusOptions: {
+            ref: 'WorkspaceStatusModal',
+            open: false,
+            base_endpoint: '/workspaces',
+            // contentText: '¿Desea actualizar este registro?',
+            endpoint: '',
+            width: '40vw',
+            content_modal: {
+                active: {
+                    title: '¿Desea activar este workspace?',
+                    details: [
+                        'El workspace quedará habilitado para su uso.',
+                        'Todos los usuarios y administradores podrán volver a iniciar sesión.',
+                    ]
+                },
+                inactive: {
+                    title: '¿Desea inactivar este workspace?',
+                    details: [
+                        'El workspace quedará deshabilitado para su uso.',
+                        'Todos los usuarios y administradores no podrán iniciar sesión.',
+                    ]
+                },
+            }
         },
     })
     ,

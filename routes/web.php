@@ -2,10 +2,11 @@
 
 use App\Http\Middleware\CheckRol;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\GestorController;
-use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\DiplomaController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WorkspaceController;
@@ -143,6 +144,9 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
 
     Route::prefix('users')->middleware('checkrol:super-user')->group(base_path('routes/cms/users.php'));
+    Route::controller(UserController::class)->group(function () {
+        Route::get('users/{document}/current-courses', 'currentCourses');
+    });
     // Route::prefix('permisos')->middleware('checkrol:super-user')->group(base_path('routes/cms/permisos.php'));
     Route::prefix('roles')->middleware('checkrol:super-user')->group(base_path('routes/cms/roles.php'));
 

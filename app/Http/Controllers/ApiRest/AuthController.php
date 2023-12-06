@@ -75,6 +75,16 @@ class AuthController extends Controller
             // === validacion de intentos ===
 
             if (Auth::attempt($credentials1) || Auth::attempt($credentials2) || Auth::attempt($credentials3)) {
+
+                $subworkspace = Auth::user()->subworkspace;
+                $workspace = $subworkspace->parent ?? NULL;
+
+                if (!$subworkspace || ($subworkspace && !$subworkspace->active))
+                    return $this->error('Espacio de trabajo inactivo. Comunícate con tu coordinador para más información. [SW]', http_code: 503);
+
+                if (!$workspace || ($workspace && !$workspace->active))
+                    return $this->error('Espacio de trabajo inactivo. Comunícate con tu coordinador para más información. [W]', http_code: 503);
+
                 // Valida si usuario está inactivo
                 if (!Auth::user()->active)
                     return $this->error('Tu cuenta se encuentra inactiva. Comunícate con tu coordinador para enviar una solicitud de activación.', http_code: 503);

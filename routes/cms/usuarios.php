@@ -19,6 +19,7 @@ Route::controller(UsuarioController::class)->group(function () {
 	Route::post('/store', 'store');
     Route::get('/{user}/edit', 'edit');
     Route::put('/{user}/update', 'update');
+    Route::get('/{user}/get-profile', 'getProfileData');
 //    Route::get('/{user}/show', 'show');
 
     Route::put('/{user}/status', 'updateStatus');

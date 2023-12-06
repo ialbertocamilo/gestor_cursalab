@@ -251,14 +251,18 @@ export default {
             );
             this.Cursos = "";
             this.Usuario = "";
-
-            let urlReport = `${this.$props.reportsBaseUrl}/exportar/notas_usuario`
+            let courses_assigned =[];
+            await axios.get(`/users/${this.search}/current-courses`).then(({data})=>{
+                courses_assigned = data.data.courses_id;
+            })
+            let urlReport = `${this.$props.reportsBaseUrl}/exportar/notas_usuario_v3`
             try {
                 let response = await axios({
                     url: urlReport,
                     method: 'post',
                     data: {
-                        document: this.search
+                        document: this.search,
+                        course_ids:courses_assigned
                     }
                 })
                 vue.queryStatus("reportes", "consultar")

@@ -8,6 +8,7 @@
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
+                v-show="workspaceId === 25"
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
@@ -15,7 +16,8 @@
                 <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
             </div>
 
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <list-item v-show="workspaceId === 25"
+                       titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
             <div v-show="workspaceId === 25">

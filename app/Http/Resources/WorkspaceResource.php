@@ -21,6 +21,7 @@ class WorkspaceResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'active' => $this->active,
             'logo' => FileService::generateUrl($this->logo),
             'logo_negativo' => FileService::generateUrl($this->logo_negativo),
             // 'modules_count' => $this->subworkspaces_count,

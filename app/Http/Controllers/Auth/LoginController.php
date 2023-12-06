@@ -145,7 +145,15 @@ class LoginController extends Controller
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
             $roles = Role::getRolesAdminNames();
-            if ( $user->isAn(...$roles))
+
+            // Al menos un workspace activo
+            $workspaces_active = $user->isAn('super-user');
+
+            if (!$workspaces_active) {
+                $workspaces_active = $user->getWorkspaces()->where('active', ACTIVE)->count() > 0;
+            }
+
+            if ( $user->isAn(...$roles) && $workspaces_active)
             {
             // if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
             // {
