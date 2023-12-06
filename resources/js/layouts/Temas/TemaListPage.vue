@@ -15,7 +15,7 @@
                 <v-spacer/>
                 <DefaultButton
                     outlined
-                    label="Ver Preview"
+                    label="Previsualización"
                     @click="openFormModal(modalPreviewMediaTopicsOptions, course_id, 'list', `Listado de multimedias del curso: ${course_name}`)"
                 />
                 <DefaultModalButton
@@ -116,7 +116,7 @@
                 @onCancel="closeFormModal(modalTopicOptions)"
             />
             <PreviewMediaTopicsModal
-                width="40vw"
+                width="450px"
                 :ref="modalPreviewMediaTopicsOptions.ref"
                 :options="modalPreviewMediaTopicsOptions"
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"

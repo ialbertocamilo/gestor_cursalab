@@ -127,6 +127,7 @@
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
                 @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, $event.id, 'list', `Listado de multimedias del curso: ${course_name}`)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -222,6 +223,13 @@
                 @onConfirm="closeFormModal(modalCourseOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalCourseOptions)"
             />
+            <PreviewMediaTopicsModal
+                width="450px"
+                :ref="modalPreviewMediaTopicsOptions.ref"
+                :options="modalPreviewMediaTopicsOptions"
+                @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
+                @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -236,6 +244,7 @@ import SegmentFormModal from "../Blocks/SegmentFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
+import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
 
 export default {
     components: {
@@ -248,7 +257,8 @@ export default {
         SegmentFormModal,
         CompatibilityFormModal,
         LogsModal,
-        CourseFormModal
+        CourseFormModal,
+        PreviewMediaTopicsModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -354,6 +364,12 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
+                    },
+                    {
+                        text: "Previsualización",
+                        icon: 'mdi-cellphone',
+                        type: 'action',
+                        method_name: 'preview_medias'
                     },
                     {
                         text: "Logs",
@@ -514,6 +530,17 @@ export default {
                 title: '',
                 action: null,
                 persistent: true,
+            },
+            modalPreviewMediaTopicsOptions:{
+                ref: 'PreviewMediaTopics',
+                action: null,
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: true,
+                hideCancelBtn: true,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'Topic',
             },
         }
     },

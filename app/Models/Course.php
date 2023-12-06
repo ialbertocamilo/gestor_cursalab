@@ -1782,6 +1782,21 @@ class Course extends BaseModel
                     case 'youtube':
                         $url = "https://www.youtube.com/embed/".$value."?rel=0&amp;modestbranding=1&amp;showinfo=0";
                     break;
+                    case 'vimeo':
+                        $url = "https://player.vimeo.com/video/".$value;
+                    break;
+                    case 'video':
+                        $url = get_media_url($value,'s3');
+                    break;
+                    case 'audio':
+                        $url = get_media_url($value,'s3');
+                    break;
+                    case 'pdf':
+                        $url = get_media_url($value,'s3');
+                    break;
+                    case 'office':
+                        $url = get_media_url($value,'s3');
+                    break;
                     default:
                         $url = $media->value;
                     break;
