@@ -162,7 +162,7 @@ class UsuarioController extends Controller
             ->whereIn('id', $criteria_workspace->pluck('id'))
             ->orderByDesc('name')
             ->get();
-            
+
         $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
         $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
@@ -701,15 +701,15 @@ class UsuarioController extends Controller
         // $modules = Workspace::where('parent_id', $workspace->id)
         //     ->select('id', 'name')
         //     ->get();
-        $modules = get_current_subworkspaces(); 
+        $modules = get_current_subworkspaces();
         // $modules_id = $modules->pluck('id')->toArray();
-        $modules_id = current_subworkspaces_id();   
+        $modules_id = current_subworkspaces_id();
         // $modules_id = $workspace->subworkspaces->pluck('id')->toArray();
         // Load workspace's schools
         $schools = School::whereHas('subworkspaces', function ($j) use ($modules_id) {
             $j->whereIn('subworkspace_id', $modules_id);
         })->get();
-        
+
         return response()->json(compact('schools', 'modules'), 200);
     }
 
@@ -1146,5 +1146,88 @@ class UsuarioController extends Controller
         }
 
         return response()->json( $error,422);
+    }
+    public function getFormSelectsV2($compactResponse = false){
+        $workspace = get_current_workspace();
+
+        $results = DB::select('
+        SELECT
+            c.id,
+            c.name,
+            c.code,
+            t.name AS taxonomy_name,
+            t.code AS taxonomy_code,
+            cv.value_text,
+            cv.value_date,
+            c.field_id,
+            cv.id as criterion_value_id,
+            c.required,
+            c.multiple
+        FROM
+            criterion_value_workspace cvw
+        LEFT JOIN criterion_values cv ON
+            cvw.criterion_value_id = cv.id
+        JOIN criteria c ON
+            cv.criterion_id = c.id
+        JOIN taxonomies t ON
+            c.field_id = t.id
+        WHERE
+            cvw.workspace_id = ?
+            AND cv.criterion_id IN (
+                SELECT
+                    criterion_id
+                FROM
+                    criterion_workspace cw
+                WHERE
+                    available_in_segmentation = 1
+                    AND workspace_id = ?
+            )
+    ', [$workspace->id, $workspace->id]);
+
+    $criteria = [];
+
+    foreach ($results as $result) {
+        $code = $result->code;
+
+        if (!isset($criteria[$code])) {
+            $criteria[$code] = [
+                'id' => $result->id,
+                'name' => $result->name,
+                'code' => $result->code,
+                'multiple'=> $result->multiple,
+                'required'=> $result->required,
+                'fiel_id' => $result->field_id,
+                'field_type' => [
+                    'id' => $result->field_id,
+                    'code' => $result->taxonomy_code,
+                ],
+                'values' => [
+
+                        [
+                            'id' => $result->criterion_value_id,
+                            'criterion_id' => $result->id,
+                            'value_boolean' => 0,
+                            'value_date' => $result->value_date,
+                            'value_text' => $result->value_text,
+                        ],
+
+                ],
+            ];
+        } else {
+            $criteria[$code]['values'][] = [
+                'id' => $result->criterion_value_id,
+                'criterion_id' => $result->id,
+                'value_text' => $result->value_text,
+            ];
+        }
+    }
+
+    $criteria = array_values($criteria);
+
+    // return $criteria;
+    $response = compact('criteria');
+
+    return $compactResponse ? $criteria : $this->success($response);
+
     }
 }
