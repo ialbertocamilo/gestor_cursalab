@@ -1,7 +1,7 @@
 <template>
     <div>
         <DefaultDialog :customTitle="true" :showCardActions="false" :noPaddingCardText="true" :options="options"
-            :width="width" @onCancel="closeModal" @onConfirm="confirmModal" vCardClass=" p-0 overflow-hidden ">
+            width="350px" @onCancel="closeModal" @onConfirm="confirmModal" vCardClass=" p-0 overflow-hidden ">
             <template v-slot:card-title>
                 <v-card-title class="py-0">
                     <div class="d-flex w-100 justify-space-between">
@@ -23,10 +23,10 @@
                 </v-card-title>
             </template>
             <template v-slot:content>
-                <div class="container-preview">
-                    <div>
+                <div class="container-preview" >
+                    <div v-if="currentMedia" style="height: 250px;">
                         <div v-if="['scorm','genially','office','link'].find(c => c==currentMedia.type_id)">
-                            <div v-if="!isFullscreen" style="width:100%;height: 250px;" class="d-flex justify-content-center align-items-center">
+                            <div v-if="!isFullscreen" style="width:100%;height: 100%;" class="d-flex justify-content-center align-items-center">
                                 <!-- <button @click="toggleFullscreen">Abrir</button> -->
                                 <div>
                                     <div>{{ currentMedia.name }}</div>
@@ -52,24 +52,22 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-else>
-                            <iframe allowfullscreen="" frameborder="0" height="350px" width="100%" :src="currentMedia.url">
-                            </iframe>
-                        </div>
-                        
+                        <iframe v-else ref="iframe_media_emebebed" allowfullscreen="" frameborder="0" height="100%" width="100%" :src="currentMedia.url">
+                        </iframe>
                     </div>
-                    <div style="overflow-y: auto;">
-                        <v-list class="list-container">
-                            <v-list-group v-for="topic in topics" :key="topic.id" class="not-show-arrow">
+                    <div v-else style="height: 250px;"></div>
+                    <div style="overflow-y: auto;scrollbar-width: thin;">
+                        <v-list class="list-container" >
+                            <v-list-group v-for="topic in topics" :key="topic.id" class="not-show-arrow v-list-custom-group">
                                 <template v-slot:activator>
                                     <v-list-item-content class="v-list-custom-color">
-                                        <v-list-item-title>{{ topic.name }}</v-list-item-title>
+                                        <v-list-item-title style="font-size: 0.8rem !important;">{{ topic.name }}</v-list-item-title>
                                     </v-list-item-content>
                                 </template>
         
                                 <v-list-item v-for="media in topic.medias" :key="media.id">
                                     <v-list-item-content @click="changeMedia(media)" class="v-list-item-custom">
-                                        <v-list-item-title>
+                                        <v-list-item-title style="font-size: 0.8rem !important;">
                                             <i
                                                 :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'" />
                                             {{ media.name }}</v-list-item-title>
@@ -106,6 +104,8 @@ export default {
     methods: {
         closeModal() {
             let vue = this
+            vue.pauseMedia();
+            console.log('onCancel');
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -127,7 +127,6 @@ export default {
             await vue.$http.get(url).then(({ data }) => {
                 vue.topics = data.data.topics;
                 vue.currentMedia = vue.topics[0].medias[0];
-                console.log(vue.topics);
                 vue.hideLoader();
             })
         },
@@ -170,10 +169,24 @@ export default {
                 } else if (document.webkitExitFullscreen) {
                 document.webkitExitFullscreen();
                 }
+                this.pauseMedia();
             }
 
             this.isFullscreen = !this.isFullscreen;
         },
+        pauseMedia() {
+            this.$nextTick(() => {
+                this.currentMedia = null;
+            });
+            // const iframe = this.$refs.iframe_media_emebebed;
+            // // Acceder al contenido del iframe
+            // var iframeContent = iframe.contentDocument || iframe.contentWindow.document;
+            // // Verificar si el contenido es una página de YouTube
+            // if (iframeContent && iframeContent.getElementById('movie_player')) {
+            //     // Pausar el video de YouTube
+            //     iframeContent.getElementById('movie_player').pauseVideo();
+            // }
+        }
     }
 }
 </script>
@@ -187,16 +200,20 @@ export default {
     color: white !important;
     padding-left: 12px !important;
 }
-
+.not-show-arrow{
+    padding-top: 0px !important;
+} 
 .not-show-arrow .v-list-item__icon {
     display: none !important;
 }
-
+.not-show-arrow .v-list-group__header{
+    padding: 0 !important;
+}
 .v-list-item-custom {
     border-radius: 8px !important;
     background: #FFF !important;
     box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.15) !important;
-    margin-left: 10px;
+    margin-left: 6px;
     padding-left: 10px;
     cursor: pointer;
 }
@@ -204,10 +221,17 @@ export default {
 .container-preview {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 350px auto;
+    grid-template-rows: 250px auto;
     height: 80vh;
 }
 .overflow-hidden{
     overflow: hidden !important;
+}
+.v-list-custom-group{
+    border-radius: 8px;
+    background: #FFF;
+    box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.15);
+    margin: 0px 8px 8px 8px;
+    padding: 4px 0px;
 }
 </style>

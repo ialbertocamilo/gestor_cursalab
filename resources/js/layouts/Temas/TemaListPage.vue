@@ -20,7 +20,7 @@
                 />
                 <DefaultModalButton
                     :label="'Crear tema'"
-                     @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
+                    @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
                 />
                      <!-- v-if="$root.isSuperUser" -->
                 <!-- <DefaultModalButton
