@@ -94,7 +94,6 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
-
     public function compatibilities_a()
     {
         return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
@@ -122,6 +121,8 @@ class Course extends BaseModel
             $data = [];
             $data['instructor'] = null;
             $data['legal_representative'] = null;
+            $data['catalog_denomination_dc3_id'] = null;
+            $data['range_date'] = null;
             return $data;
         }
         $data =json_decode($value); 

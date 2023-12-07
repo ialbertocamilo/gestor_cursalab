@@ -237,9 +237,32 @@
                                             Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
                                         </div>
                                     </v-col>
+                                    <v-col cols="6">
+                                        <DefaultAutocomplete
+                                            placeholder=""
+                                            dense
+                                            label="Catálogo de área"
+                                            v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
+                                            :items="catalog_denominations"
+                                            item-text="name"
+                                            clearable
+                                        />
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultInputDate
+                                            clearable
+                                            dense
+                                            range
+                                            :referenceComponent="'modalDateFilter3'"
+                                            :options="modalDateFilter3"
+                                            v-model="resource.dc3_configuration.date_range"
+                                            label="Duración del curso"
+                                        />
+                                    </v-col>
                                     <v-col cols="9">
                                         <DefaultAutocomplete
                                             placeholder=""
+                                            dense
                                             label="Instructor"
                                             v-model="resource.dc3_configuration.instructor"
                                             :items="people.instructors"
@@ -257,6 +280,7 @@
                                     <v-col cols="9">
                                         <DefaultAutocomplete
                                             placeholder=""
+                                            dense
                                             label="Representante Legal"
                                             v-model="resource.dc3_configuration.legal_representative"
                                             :items="people.legal_representatives"
@@ -639,6 +663,9 @@ export default {
             modalDateFilter2: {
                 open: false
             },
+            modalDateFilter3: {
+                open: false,
+            },
             modalDC3PersonOptions:{
                 open:false,
                 ref: 'PersonFormModal',
@@ -661,7 +688,8 @@ export default {
             people:{
                 legal_representatives:[],
                 instructors:[]
-            }
+            },
+            catalog_denominations:[]
         }
     },
     async mounted(){
@@ -910,7 +938,9 @@ export default {
 
                     vue.people.instructors = response.instructors;
                     vue.people.legal_representatives = response.legal_representatives;
+                    vue.catalog_denominations = response.catalog_denominations;
                     vue.has_DC3_functionality = response.has_DC3_functionality;
+
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;

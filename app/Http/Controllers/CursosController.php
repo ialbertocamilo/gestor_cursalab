@@ -168,9 +168,11 @@ class CursosController extends Controller
         $has_DC3_functionality = boolval($workspace->functionalities()->get()->where('code','dc3-dc4')->first());
         $instructors = [];
         $legal_representatives = [];
+        $catalog_denominations = [];
         if($has_DC3_functionality){
             $instructors = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-instructor')->get();
             $legal_representatives = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-legal-representative')->get();
+            $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
         }
         return $this->success([
             'curso' => $course,
@@ -183,6 +185,7 @@ class CursosController extends Controller
             'has_DC3_functionality' => $has_DC3_functionality,
             'instructors' => $instructors,
             'legal_representatives' => $legal_representatives,
+            'catalog_denominations' => $catalog_denominations
         ]);
     }
 

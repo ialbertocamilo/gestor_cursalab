@@ -211,6 +211,38 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
     Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDF']);
     Route::get('/generate-pdf-blade', function(){
-        return view('pdf.dc3');
+        $data = [
+            "title"=>'74130119-sostenibilidad',
+            "user" => [
+              "name" => \Str::title("Marisol CABRERA CABRERA"),
+              "curp" => '145L0789asd',
+              "document" => "74130119",
+              "occupation" => '01.2',
+              "position" => "Asistente de Talento y Desarrollo"
+            ],
+            "subworkspace" => [
+              "id" => 4,
+              "name_or_social_reason" => "Intercorp IRC",
+              "shcp" => "IMF1-70223A702",
+              "subworkspace_logo" => "images/wrkspc-1-logo-corporativo-1-02-20220829130652-iSA1RxfF31iv2fD.png"
+            ],
+            "course" =>  [
+              "id" => 112,
+              "name" => "Sostenibilidad",
+              "duration" => "0.35",
+              "instructor" => "Aldo Ramirez",
+              "instructor_signature" => "images/wrkspc-1-1-20231205170625-dapwpNAKnyK4lPL.png",
+              "legal_representative" => "Representante 3",
+              "legal_representative_signature" => "images/wrkspc-1-1-20231205173447-5s3MNfRDbDb8HFB.png",
+              "catalog_denomination_dc3" => "8000",
+              "init_date_course_year" => 2023,
+                "init_date_course_month" => 12,
+                "init_date_course_day" => 5,
+                "final_date_course_year" => 2023,
+                "final_date_course_month" => 12,
+                "final_date_course_day" => 5
+            ]
+        ];
+        return view('pdf.dc3',$data);
     });
 });

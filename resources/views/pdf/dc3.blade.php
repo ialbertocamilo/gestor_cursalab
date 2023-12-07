@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DC3</title>
+    <title>{{$title}}</title>
 </head>
 <body style="font-family: Arial, Helvetica, sans-serif">
     <h4 style="text-align: center;font-weight: bolder;margin:0">FORMATO DC-3</h4>
@@ -15,7 +15,7 @@
                 <div>Nombre (Anotar apellido paterno, apellido materno y nombre(s))</div>
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
-                        <td style="font-weight: bolder">Pedro Guerrero Matute</td>
+                        <td style="font-weight: bolder">{{$user['name']}}</td>
                     </tr>
                 </table>
             </td>
@@ -24,11 +24,11 @@
             <td style="padding: 5px 5px 0px 5px;">
                 <div>Clave Única de Registro de Población</div>
                 @php
-                    $number = str_split('145L0789asd');
+                    $curp = str_split($user['curp']);
                 @endphp
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
-                        @foreach ($number as $n)
+                        @foreach ($curp as $n)
                             @if (!$loop->last)
                                 <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                             @else
@@ -42,7 +42,7 @@
                 <div>Ocupación especifica (Catálogo Nacional de Ocupaciones) <sup>1/</sup></div>
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
-                        <td style="font-weight: bolder">09</td>
+                        <td style="font-weight: bolder">{{$user['occupation']}}</td>
                     </tr>
                 </table>
             </td>
@@ -52,7 +52,7 @@
                 <div>Puesto</div>
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
-                        <td style="font-weight: bolder">Terapeuta</td>
+                        <td style="font-weight: bolder">{{$user['position']}}</td>
                     </tr>
                 </table>
             </td>
@@ -67,7 +67,7 @@
                 <div>Nombre o razón social (En caso de persona fisica, anotar apellido paterno, apellido materno y nombre(s))</div>
                 <table style="width:100%; border-collapse: collapse;">
                     <tr>
-                        <td style="font-weight: bolder">Instituto Mexicano de Formación Interdisciplinario A.C</td>
+                        <td style="font-weight: bolder">{{$subworkspace['name_or_social_reason']}}</td>
                     </tr>
                 </table>
             </td>
@@ -75,11 +75,11 @@
         <td style="padding: 5px 5px 0px 5px; border-top: 2px solid black;" colspan="2">
             <div>Registro Federal de Contribuyentes con homoclave (SHCP)</div>
             @php
-                $number = str_split('145L0789asd');
+                $shcp = str_split($subworkspace['shcp']);
             @endphp
             <table style="width:100%; border-collapse: collapse;">
                 <tr>
-                    @foreach ($number as $n)
+                    @foreach ($shcp as $n)
                         @if (!$loop->last)
                             <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                         @else
@@ -100,7 +100,7 @@
                     <div>Nombre del curso</div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            <td style="font-weight: bolder">Primeros auxilios</td>
+                            <td style="font-weight: bolder">{{$course['name']}}</td>
                         </tr>
                     </table>
                 </td>
@@ -110,7 +110,7 @@
                     <div>Duración en horas</div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            <td style="font-weight: bolder">9</td>
+                            <td style="font-weight: bolder">{{$course['duration']}}</td>
                         </tr>
                     </table>
                 </td>
@@ -125,11 +125,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Año</div>
                     @php
-                        $number = str_split('2017');
+                        $init_date_course_year = str_split($course['init_date_course_year']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($init_date_course_year as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -142,11 +142,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Mes</div>
                     @php
-                        $number = str_split('10');
+                        $init_date_course_month = str_split($course['init_date_course_month']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($init_date_course_month as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -159,11 +159,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Día</div>
                     @php
-                        $number = str_split('10');
+                        $init_date_course_day = str_split($course['init_date_course_day']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($init_date_course_day as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -179,11 +179,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Año</div>
                     @php
-                        $number = str_split('2017');
+                        $final_date_course_year = str_split($course['final_date_course_year']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($final_date_course_year as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -196,11 +196,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Mes</div>
                     @php
-                        $number = str_split('10');
+                        $final_date_course_month = str_split($course['final_date_course_month']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($final_date_course_month as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -213,11 +213,11 @@
                 <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
                     <div style="text-align: center">Día</div>
                     @php
-                        $number = str_split('10');
+                        $final_date_course_day = str_split($course['final_date_course_day']);
                     @endphp
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            @foreach ($number as $n)
+                            @foreach ($final_date_course_day as $n)
                                 @if (!$loop->last)
                                     <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
                                 @else
@@ -233,7 +233,7 @@
                     <div>Área temática del curso <sup>2/</sup></div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            <td style="font-weight: bolder">6000</td>
+                            <td style="font-weight: bolder">{{$course['catalog_denomination_dc3']}}</td>
                         </tr>
                     </table>
                 </td>
@@ -243,7 +243,7 @@
                     <div>Nombre del agente capacitador o STPS <sup>3/</sup></div>
                     <table style="width:100%; border-collapse: collapse;">
                         <tr>
-                            <td style="font-weight: bolder">Domingo Rios Deyvi</td>
+                            <td style="font-weight: bolder">{{$course['instructor']}}</td>
                         </tr>
                     </table>
                 </td>
