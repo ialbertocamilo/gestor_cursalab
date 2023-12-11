@@ -5,7 +5,10 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
 <!--                Criterios-->
                 <v-spacer/>
-                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="$root.isSuperUser"/>
+                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="$root.isSuperUser && criterion_type != 'date' "/>
+
+                <!-- {{ criterion_type }} -->
+                
                 <DefaultModalButton :label="'Valor de criterio'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
@@ -71,7 +74,7 @@ import CriterioFormModal from "./CriterionValueFormModal";
 import CriterionValueUploadModal from "./CriterionValueUploadModal";
 
 export default {
-    props: ['criterion_id', 'criterion_name'],
+    props: ['criterion_id', 'criterion_name', 'criterion_type'],
     components: {CriterioFormModal, CriterionValueUploadModal},
     data() {
         let vue = this
