@@ -1775,34 +1775,10 @@ class Course extends BaseModel
         $course = $this;
         $topics = Topic::where('course_id',$course->id)->select('id','name')->with('medias:id,value,type_id,topic_id,title as name')->get();
         foreach ($topics as $topic) {
-            foreach ($topic->medias as $media) {
-                $url = '';
-                $value = $media->value;
-                switch ($media->type_id) {
-                    case 'youtube':
-                        $url = "https://www.youtube.com/embed/".$value."?rel=0&amp;modestbranding=1&amp;showinfo=0";
-                    break;
-                    case 'vimeo':
-                        $url = "https://player.vimeo.com/video/".$value;
-                    break;
-                    case 'video':
-                        $url = get_media_url($value,'s3');
-                    break;
-                    case 'audio':
-                        $url = get_media_url($value,'s3');
-                    break;
-                    case 'pdf':
-                        $url = get_media_url($value,'s3');
-                    break;
-                    case 'office':
-                        $url = get_media_url($value,'s3');
-                    break;
-                    default:
-                        $url = $media->value;
-                    break;
-                }
-                $media->url = $url;
-            }            
+            $topic->medias->transform(function ($media) use($topic) {
+                $media->url = $topic->generateMediaUrl($media->type_id, $media->value);
+                return $media;
+            });
         }
         return $topics;
     }

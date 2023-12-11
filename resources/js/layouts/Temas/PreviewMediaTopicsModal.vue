@@ -91,10 +91,10 @@
             <template v-slot:card-actions>
                 <div style="width: 100%">
                     <div style="background: #2E36CE;width: 100%; height: 45px; display: flex; justify-content: space-around;align-items: center;">
-                        <div class="icon-circle"></div>
-                        <div class="icon-circle"></div>
-                        <div class="icon-circle"></div>
-                        <div class="icon-circle"></div>
+                        <div class="circle-content mdi mdi-bullhorn mdi-24px"></div>
+                        <div class="circle-content mdi mdi-book-open-page-variant mdi-24px"></div>
+                        <div class="circle-content mdi mdi-video mdi-24px"></div>
+                        <div class="circle-content mdi mdi-chart-line mdi-24px"></div>
                     </div>
                     <div style="width: 100%;display: flex;justify-content: center;align-items: center;padding: 5px;">
                         <div style="width: 150px;height: 4px;background: #434D56;"></div>
@@ -142,9 +142,13 @@ export default {
         resetSelects() {
             let vue = this
         },
-        async loadData(course_id) {
+        async loadData({resource_id,type,route}) {
             let vue = this
-            let url = `/cursos/${course_id}/medias`
+            let url = route;
+            if(!route){
+                url =  (type == 'course') && `/cursos/${resource_id}/medias`;
+            }
+            console.log(url);
             vue.showLoader();
             await vue.$http.get(url).then(({ data }) => {
                 vue.topics = data.data.topics;
@@ -247,10 +251,14 @@ export default {
     margin: 0px 8px 8px 8px;
     padding: 4px 0px;
 }
-.icon-circle{
+.circle-content{
     height: 28px;
     width: 28px;
-    background-color: white;
+    background-color: #2e36ce;
     border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
 }
 </style>

@@ -14,9 +14,10 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
                 <DefaultButton
+                    v-if="showPreviewButton"
                     outlined
                     label="Previsualización"
-                    @click="openFormModal(modalPreviewMediaTopicsOptions, course_id, 'list', `Listado de multimedias del curso: ${course_name}`)"
+                    @click="openFormModal(modalPreviewMediaTopicsOptions, { resource_id:course_id,type:'course'}, 'list', `Listado de multimedias del curso: ${course_name}`)"
                 />
                 <DefaultModalButton
                     :label="'Crear tema'"
@@ -60,6 +61,10 @@
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
+                @data-loaded="enablePreviewbutton()"
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{ 
+                    resource_id:$event.id,type:'topic',route:`/${ruta}cursos/${course_id}/temas/${$event.id}/medias`
+                }, 'list', `Listado`)"
             />
 
             <DialogConfirm
@@ -131,7 +136,7 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
-import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal.vue";
+import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal";
 
 export default {
     components: {
@@ -199,6 +204,12 @@ export default {
                     },
                 ],
                 more_actions: [
+                    {
+                        text: "Previsualización",
+                        icon: 'mdi-cellphone',
+                        type: 'action',
+                        method_name: 'preview_medias',
+                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -311,6 +322,7 @@ export default {
                 action: null,
                 persistent: true,
             },
+            showPreviewButton:false
         }
     },
     mounted() {
@@ -418,6 +430,10 @@ export default {
                     vue.loadingActionBtn = false
                 })
         },
+        enablePreviewbutton(){
+            let vue = this;
+            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+        }
     }
 }
 </script>

@@ -127,7 +127,7 @@
                 @delete="deleteCurso($event)"
                 @status="updateCourseStatus($event)"
                 @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
-                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, $event.id, 'list', `Listado de multimedias del curso: ${course_name}`)"
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, {resource_id:$event.id,type:'course'}, 'list', `Listado de multimedias del curso: ${course_name}`)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -369,7 +369,8 @@ export default {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
                         type: 'action',
-                        method_name: 'preview_medias'
+                        method_name: 'preview_medias',
+                        show_condition: 'temas_count'
                     },
                     {
                         text: "Logs",

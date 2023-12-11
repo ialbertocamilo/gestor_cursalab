@@ -124,7 +124,7 @@
                         `Logs del Curso - ${$event.name}`
                     )
                 "
-                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, $event.id, 'list', `Listado de multimedias del curso: ${$event.name}`)"
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, {resource_id:$event.id,type:'course'}, 'list', `Listado de multimedias del curso: ${$event.name}`)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -364,7 +364,8 @@ export default {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
                         type: 'action',
-                        method_name: 'preview_medias'
+                        method_name: 'preview_medias',
+                        show_condition: 'temas_count'
                     },
                     {
                         text: "Logs",
