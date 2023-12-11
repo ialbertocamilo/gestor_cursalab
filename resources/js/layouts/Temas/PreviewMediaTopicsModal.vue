@@ -5,8 +5,8 @@
             <template v-slot:card-title>
                 <v-card-title class="py-0">
                     <div class="d-flex w-100 justify-space-between">
-                        <div>
-                            <span>{{ currentTime }}</span>
+                        <div >
+                            <span style="font-size::0.8rem !important;">{{ currentTime }}</span>
                         </div>
                         <div>
                             <v-icon small>
@@ -21,13 +21,23 @@
                         </div>
                     </div>
                 </v-card-title>
+                <div style="position: absolute; right: -18px; top: -19px;">
+                    <v-btn 
+                        color="#7D80EF"
+                        fab
+                        small
+                        dark
+                        @click="closeModal"
+                    >
+                        <v-icon> mdi-close </v-icon>
+                    </v-btn>
+                </div>
             </template>
             <template v-slot:content>
                 <div class="container-preview" >
                     <div v-if="currentMedia" style="height: 250px;">
-                        <div v-if="['scorm','genially','office','link'].find(c => c==currentMedia.type_id)">
+                        <div v-if="['scorm','genially','office','link'].find(c => c==currentMedia.type_id)" style="height: 100%;">
                             <div v-if="!isFullscreen" style="width:100%;height: 100%;" class="d-flex justify-content-center align-items-center">
-                                <!-- <button @click="toggleFullscreen">Abrir</button> -->
                                 <div>
                                     <div>{{ currentMedia.name }}</div>
                                     <DefaultButton
@@ -78,6 +88,19 @@
                     </div>
                 </div>
             </template>
+            <template v-slot:card-actions>
+                <div style="width: 100%">
+                    <div style="background: #2E36CE;width: 100%; height: 45px; display: flex; justify-content: space-around;align-items: center;">
+                        <div class="icon-circle"></div>
+                        <div class="icon-circle"></div>
+                        <div class="icon-circle"></div>
+                        <div class="icon-circle"></div>
+                    </div>
+                    <div style="width: 100%;display: flex;justify-content: center;align-items: center;padding: 5px;">
+                        <div style="width: 150px;height: 4px;background: #434D56;"></div>
+                    </div>
+                </div>
+            </template>
         </DefaultDialog>
     </div>
 </template>
@@ -121,7 +144,6 @@ export default {
         },
         async loadData(course_id) {
             let vue = this
-            console.log(course_id);
             let url = `/cursos/${course_id}/medias`
             vue.showLoader();
             await vue.$http.get(url).then(({ data }) => {
@@ -169,7 +191,6 @@ export default {
                 } else if (document.webkitExitFullscreen) {
                 document.webkitExitFullscreen();
                 }
-                this.pauseMedia();
             }
 
             this.isFullscreen = !this.isFullscreen;
@@ -178,14 +199,6 @@ export default {
             this.$nextTick(() => {
                 this.currentMedia = null;
             });
-            // const iframe = this.$refs.iframe_media_emebebed;
-            // // Acceder al contenido del iframe
-            // var iframeContent = iframe.contentDocument || iframe.contentWindow.document;
-            // // Verificar si el contenido es una página de YouTube
-            // if (iframeContent && iframeContent.getElementById('movie_player')) {
-            //     // Pausar el video de YouTube
-            //     iframeContent.getElementById('movie_player').pauseVideo();
-            // }
         }
     }
 }
@@ -213,7 +226,7 @@ export default {
     border-radius: 8px !important;
     background: #FFF !important;
     box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.15) !important;
-    margin-left: 6px;
+    margin: -8px;
     padding-left: 10px;
     cursor: pointer;
 }
@@ -233,5 +246,11 @@ export default {
     box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.15);
     margin: 0px 8px 8px 8px;
     padding: 4px 0px;
+}
+.icon-circle{
+    height: 28px;
+    width: 28px;
+    background-color: white;
+    border-radius: 50%;
 }
 </style>
