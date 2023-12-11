@@ -6,7 +6,7 @@
         :class="{}"
         elevation="0"
         :ripple="false"
-        color="primary"
+        :color="color"
         @click="emitClick"
     >
         <!-- <div class="icon_tmp" v-if="template">
@@ -21,6 +21,10 @@
 <script>
 export default {
     props: {
+        color: {
+            type: String,
+            default: 'primary'
+        },
         label: {
             type: String,
             default: 'Botón Modal'
