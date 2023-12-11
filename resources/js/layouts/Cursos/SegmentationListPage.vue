@@ -364,7 +364,8 @@ export default {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
                         type: 'action',
-                        method_name: 'preview_medias'
+                        method_name: 'preview_medias',
+                        show_condition: 'temas_count'
                     },
                     {
                         text: "Logs",

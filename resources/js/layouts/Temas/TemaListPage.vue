@@ -14,6 +14,7 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
                 <DefaultButton
+                    v-if="showPreviewButton"
                     outlined
                     label="Previsualización"
                     @click="openFormModal(modalPreviewMediaTopicsOptions, course_id, 'list', `Listado de multimedias del curso: ${course_name}`)"
@@ -60,6 +61,8 @@
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
+                @data-loaded="enablePreviewbutton()"
+
             />
 
             <DialogConfirm
@@ -311,6 +314,7 @@ export default {
                 action: null,
                 persistent: true,
             },
+            showPreviewButton:false
         }
     },
     mounted() {
@@ -418,6 +422,10 @@ export default {
                     vue.loadingActionBtn = false
                 })
         },
+        enablePreviewbutton(){
+            let vue = this;
+            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+        }
     }
 }
 </script>
