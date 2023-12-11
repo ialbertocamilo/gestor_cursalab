@@ -47,7 +47,7 @@
              v-text="'Campo requerido'"
              style="color: #FF5252; font-size: 12px"
         />
-        <div v-if="showAlertLength" 
+        <div v-if="showAlertLength"
              class="v-messages__message mt-2"
              v-text="`El campo debe tener menos de ${maxLength} caracteres`"
              style="color: #FF5252; font-size: 12px"
@@ -85,9 +85,13 @@ export default {
             type: Boolean,
             default: false,
         },
-        maxLength: { 
-            type: Number, 
-            default: 200 
+        maxLength: {
+            type: Number,
+            default: 200
+        },
+        ignoreHTMLinLengthCalculation: {
+            type: Boolean,
+            default: false
         },
         showGenerateIaDescription:{
             type:Boolean,
@@ -108,7 +112,7 @@ export default {
         if (this.value) {
             this.localText = this.value // set initial value
         }
-        
+
         document.addEventListener('focusin', (e) => {
           if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
             e.stopImmediatePropagation();
@@ -135,25 +139,33 @@ export default {
         },
         updateValue(value) {
             let vue = this
-            
+
             if (value !== ""){
                 vue.$emit('setVaidateRequired', false)
             }
 
-            // check length 
-            if(value) {
-                if(value.length > vue.maxLength) {
+            // check length
+            if (value) {
+
+                const str = vue.ignoreHTMLinLengthCalculation
+                    ? vue.removeHTML(value)
+                    : value;
+                console.log(str.length)
+                if(str.length > vue.maxLength) {
                     vue.emitLengthState(true)
                 } else {
                     vue.emitLengthState(false)
                     vue.$emit('input', value || null)
                 }
-            }else {
+            } else {
                 vue.emitLengthState(false);
                 vue.$emit('input', value || null)
             }
-
-
+        },
+        removeHTML(str) {
+            let tmp = document.createElement('div');
+            tmp.innerHTML = str;
+            return tmp.textContent || tmp.innerText || '';
         },
         onClear() {
             let vue = this

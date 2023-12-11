@@ -7,7 +7,7 @@
         @onConfirm="validate"
     >
         <template v-slot:content>
-    
+
             <v-form ref="TemaForm">
                 <v-row justify="center">
                     <v-col cols="7">
@@ -38,6 +38,7 @@
                             label="Descripción"
                             :rules="rules.content"
                             class="mt-2"
+                            :ignoreHTMLinLengthCalculation="true"
                             :height="195"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
@@ -70,7 +71,7 @@
 
                         <v-row justify="center">
                             <v-col cols="4" class="d-flex align-items-center">
-                                <DefaultToggle v-model="resource.assessable" 
+                                <DefaultToggle v-model="resource.assessable"
                                     active-label="Sí, el tema es evaluable"
                                     inactive-label="No, el tema no es evaluable"
                                     @onChange="validateTipoEv"
@@ -194,15 +195,15 @@
                                             <td class="" v-if="hasPermissionToUseIaEvaluation">
                                                 <div class="mt-1">
                                                     <span class="d-flex align-items-center">
-                                                        <img width="26px" 
+                                                        <img width="26px"
                                                             v-if="media.ia_convert==1 && !media.path_convert"
-                                                            class="mr-2 ia_convert_active img-rotate" 
+                                                            class="mr-2 ia_convert_active img-rotate"
                                                             src="/img/loader-jarvis.svg"
                                                         >
-                                                        <img width="32px" 
+                                                        <img width="32px"
                                                             v-else
-                                                            class="mr-2" 
-                                                            :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' " 
+                                                            class="mr-2"
+                                                            :class="media.ia_convert ? 'ia_convert_active' : 'ia_convert_inactive' "
                                                             @click="openModalToConvert(media)"
                                                             src="/img/ia_convert.svg"
                                                             style="cursor: pointer;"
@@ -214,7 +215,7 @@
                                             <td class="">
                                                 <div class="mt-2">
                                                     <DefaultToggle
-                                                        dense 
+                                                        dense
                                                         v-model="media.embed"
                                                         active-label="Embebido"
                                                         inactive-label="No embebido"
@@ -276,7 +277,7 @@
                     </v-col>
                 </v-row>
             </v-form>
-            
+
             <TemaValidacionesModal
                 :width="topicsValidationModal.width"
                 :ref="topicsValidationModal.ref"
@@ -296,7 +297,7 @@
                 @onConfirm="confirmDeleteMedia"
                 @onCancel="mediaDeleteModal.open = false"
             />
-            <ConvertMediaToIaModal 
+            <ConvertMediaToIaModal
                 :limits="limits_ia_convert"
                 width="40vw"
                 :ref="convertMediaToIaOptions.ref"
@@ -672,7 +673,7 @@ export default {
                         vue.resource.qualification_type = data.data.qualification_type
                         vue.resource.position = data.data.default_position
                     }
-                    
+
                     vue.resource.max_position = data.data.max_position
                 })
             return 0;
@@ -794,14 +795,14 @@ export default {
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
                 const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al tema para poder generar la descripción';
-                vue.showAlert(message, 'warning', '') 
+                vue.showAlert(message, 'warning', '')
                 return ''
             }
             if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
-                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
                 return ''
             }
-            vue.loading_description = true; 
+            vue.loading_description = true;
             await axios.post(url,{
                 name : vue.resource.name,
                 type:'topic'
@@ -818,12 +819,12 @@ export default {
                             updateDescription(index + 1);
                         }, 10);
                     }else{
-                        vue.loading_description = false; 
+                        vue.loading_description = false;
                     }
                 }
                 updateDescription(0);
             }).catch(()=>{
-                vue.loading_description = false; 
+                vue.loading_description = false;
             })
         },
         openModalToConvert(media){
@@ -832,7 +833,7 @@ export default {
                 return '';
             }
             if(!['youtube','video','audio','pdf'].includes(media.type_id)){
-                vue.showAlert('Este tipo de multimedia no está habilitada para IA', 'warning', '') 
+                vue.showAlert('Este tipo de multimedia no está habilitada para IA', 'warning', '')
                 return '';
             }
             vue.openFormModal(vue.convertMediaToIaOptions, media, null , 'Generar evaluaciones automáticas')
