@@ -142,6 +142,8 @@ export default {
         },
         async loadData(resource) {
             let vue = this;
+
+            vue.showLoader();
             // vue.errors = []
 
             // vue.$nextTick(() => {
@@ -157,7 +159,9 @@ export default {
                 // vue.segments = _data.segments
                 vue.new_criteria = _data.criteria;
 
-                console.log(vue.new_criteria)
+                 vue.hideLoader()
+
+                // console.log(vue.new_criteria)
                 // console.log(vue.courseModules)
             });
 

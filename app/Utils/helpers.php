@@ -670,3 +670,10 @@ function extractVimeoVideoCode(string $url): ?string
 
     return $matches[1];
 }
+
+function db_raw_dateformat($field, $alias = null, $format = "'%d/%m/%Y %H:%i'")
+{
+    $alias = $alias ?? $field;
+
+    return \DB::raw("DATE_FORMAT({$field}, $format) as {$alias}");
+}

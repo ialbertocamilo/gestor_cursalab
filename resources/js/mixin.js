@@ -43,7 +43,7 @@ export default {
             mixin_extensiones: extensiones,
             mixin_default_media_images: default_media_images,
             abc: [
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S","T","U", "V", "W", "X", "Y", "Z","AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AU", "AV", "AW", "AX", "AY", "AZ",
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S","T","U", "V", "W", "X", "Y", "Z","AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS","AT", "AU", "AV", "AW", "AX", "AY", "AZ",
             ],
         }
     },
@@ -293,13 +293,20 @@ export default {
             return data;
         },
         validatedFileExtension(file, fileType) {
-            console.log(file.type)
+
             let extension = mime.extension(file.type);
+
+            // MOV files
+            if (file.type === 'video/quicktime')
+                extension = 'mov'
+
             // Validacion para scorms
             if (file.type === 'application/x-zip-compressed')
                 extension = 'zip'
+
             console.log('Extension :: ', extension)
-            // console.log('fileType :: ', fileType)
+            console.log('FileType :: ', file.type)
+
             if (extension) {
                 if (this.TypeOf(fileType) === 'array') {
                     let valid = false

@@ -1,25 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\ApiRest;
+namespace App\Models;
 
-use App\Models\Topic;
-use App\Models\Course;
-use App\Models\School;
-use App\Models\Certificate;
-use App\Models\Taxonomy;
-use App\Models\CourseSchool;
-use Illuminate\Http\Request;
-use App\Models\SummaryCourse;
-use App\Models\CriterionValue;
-use App\Models\SchoolSubworkspace;
-use App\Models\UserProgress;
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
-class RestUserProgressController extends Controller
+class UserProgress extends Model 
 {
-    public function __OLD__userProgress()
+	protected function getDataProgress($user = null)
     {
-        $user = auth()->user();
+        $user = $user ?? auth()->user();
         $user->load('summary', 'summary_courses');
 
         $assigned_courses = $user->getCurrentCourses(withRelations: 'user-progress');
@@ -71,16 +64,26 @@ class RestUserProgressController extends Controller
         $extracurricular_courses = $assigned_courses->where('type.code', 'extra-curricular');
         $free_courses = $assigned_courses->where('type.code', 'free');
 
-        $response['regular_schools'] = $this->getProgressDetailSchoolsByUser($regular_courses, $user);
-        $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user);
-        $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user);
 
-        return $this->success($response);
+        $summary_courses_compatibles = SummaryCourse::with('course:id,name')
+            ->whereRelation('course', 'active', ACTIVE)
+            ->where('user_id', $user->id)
+            // ->whereIn('course_id', $course->compatibilities->pluck('id')->toArray())
+            ->orderBy('grade_average', 'DESC')
+            ->whereRelation('status', 'code', 'aprobado')
+            ->get();
+
+        $response['regular_schools'] = $this->getProgressDetailSchoolsByUser($regular_courses, $user, $summary_courses_compatibles);
+        $response['extracurricular_schools'] = $this->getProgressDetailSchoolsByUser($extracurricular_courses, $user, $summary_courses_compatibles);
+        $response['free_schools'] = $this->getProgressDetailSchoolsByUser($free_courses, $user, $summary_courses_compatibles);
+
+        return $response;
     }
 
-    public function __OLD__getProgressDetailSchoolsByUser($user_courses, $user)
+    public function getProgressDetailSchoolsByUser($user_courses, $user = null, $summary_courses_compatibles = null)
     {
-        $workspace_id = auth()->user()->subworkspace->parent_id;
+    	$user = $user ?? auth()->user();
+        $workspace_id = $user->subworkspace->parent_id;
 
         $schools = $user_courses->groupBy('schools.*.id');
 
@@ -105,7 +108,7 @@ class RestUserProgressController extends Controller
             $school_position = $school_workspace?->position;
 
             $school = $courses->first()->schools->where('id', $school_id)->first();
-            $courses_data = $this->getSchoolProgress($courses,$positions_courses,$school_id);
+            $courses_data = $this->getSchoolProgress($courses, $positions_courses, $school_id, $user, $summary_courses_compatibles);
 
             $school_status = $this->getSchoolProgressByUserV2($courses_data);
             // $school_status = $this->getSchoolProgressByUser($school, $courses, $user);
@@ -136,7 +139,7 @@ class RestUserProgressController extends Controller
         return $data;
     }
 
-    public function __OLD__getSchoolProgressByUserV2($data)
+    public function getSchoolProgressByUserV2($data)
     {
         $percentage = 0;
 
@@ -155,7 +158,7 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function __OLD__getSchoolProgressByUser(School $school, $courses, $user)
+    public function getSchoolProgressByUser(School $school, $courses, $user)
     {
         $school_percentage = 0;
         $assigned_courses_by_school = $courses->count();
@@ -185,14 +188,15 @@ class RestUserProgressController extends Controller
         ];
     }
 
-    public function __OLD__getSchoolProgress($courses,$positions_courses,$school_id)
+    public function getSchoolProgress($courses, $positions_courses, $school_id, $user = null, $summary_courses_compatibles = null)
     {
-        $user = auth()->user();
+        // $user = $user ?? auth()->user();
         $workspace_id = $user->subworkspace->parent_id;
         $course_status_arr = config('courses.status');
         $topic_status_arr = config('topics.status');
         $school_courses = collect();
         $cycles = null;
+
         if($workspace_id === 25){
             $cycles = CriterionValue::whereRelation('criterion', 'code', 'cycle')
             ->where('value_text', '<>', 'Ciclo 0')
@@ -209,7 +213,7 @@ class RestUserProgressController extends Controller
                 $course_name = removeUCModuleNameFromCourseName($course_name);
             }
 
-            $course_status = Course::getCourseProgressByUser($user, $course);
+            $course_status = Course::getCourseProgressByUser($user, $course, $summary_courses_compatibles);
 
             $active_course_topics = $course->topics->where('active', ACTIVE)->sortBy('position');
             $temp_topics = [];
@@ -223,7 +227,12 @@ class RestUserProgressController extends Controller
                         'name' => $topic->name,
                         'disponible' => true,
                         'nota' => null,
+                        'intentos' => null,
+                        'ultima_evaluacion' => null,
+                        'visitas' => null,
+                        'nota_sistema' => $topic->qualification_type?->name ?? 'No definido',
                         'estado' => 'aprobado',
+                        'respuestas' => [],
                         'estado_str' => 'Convalidado',
                     ];
 
@@ -237,6 +246,11 @@ class RestUserProgressController extends Controller
                     'name' => $topic->name,
                     'disponible' => $topic_status['available'],
                     'nota' => $topic_status['grade'],
+                    'visitas' => $topic_status['views'],
+                    'intentos' => $topic_status['total_attempts'] ?? null,
+                    'ultima_evaluacion' => $topic_status['last_time_evaluated_at'] ?? null,
+                    'respuestas' => $topic_status['answers'] ?? [],
+                    'nota_sistema' => $topic->qualification_type?->name ?? 'No definido',
                     'estado' => $topic_status['status'],
                     'estado_str' => $topic_status_arr[$topic_status['status']],
                 ];
@@ -244,15 +258,17 @@ class RestUserProgressController extends Controller
 
             if ($course->compatible):
 
-
                 $compatible_grade = calculateValueForQualification($course->compatible->grade_average, $course->qualification_type?->position);
 
                 $school_courses->push([
                     'id' => $course->id,
+                    'image' => get_media_url($course->imagen),
+                    'show_topics' => false,
                     'name' => $course_name,
                     'position' => $course_position,
                     // 'nota' => $course->compatible->grade_average,
                     'nota' => $compatible_grade,
+                    'nota_sistema' => $course->qualification_type?->name ?? 'No definido',
                     'estado' => 'aprobado',
                     'estado_str' => 'Convalidado',
                     'tags' => $tags,
@@ -266,9 +282,12 @@ class RestUserProgressController extends Controller
 
             $school_courses->push([
                 'id' => $course->id,
+                'image' => get_media_url($course->imagen),
+                'show_topics' => false,
                 'name' => $course_name,
                 'position' => $course_position,
                 'nota' => $course_status['average_grade'],
+                'nota_sistema' => $course->qualification_type?->name ?? 'No definido',
                 'estado' => $course_status['status'],
                 'estado_str' => $course_status_arr[$course_status['status']],
                 'tags' => $tags,
@@ -294,11 +313,76 @@ class RestUserProgressController extends Controller
         return $school_courses->values()->all();
     }
 
-    public function userProgress()
+    protected function setTopicQuestionData($data)
     {
-        $user = auth()->user();
-        $response = UserProgress::getDataProgress($user);
+        $data = $this->getAndSetTopicQuestions($data, 'regular_schools');
 
-        return $this->success($response);
+        return $data;
+    }
+
+    public function getAndSetTopicQuestions($data, $school_key)
+    {
+        if (isset($data[$school_key])) {
+
+            foreach ($data[$school_key] as $s_key => $school) {
+
+                $topic_ids = [];
+
+                foreach ($school['courses'] as $course) {
+
+                    $ids = array_column($course['temas'], 'id');
+                    $topic_ids = array_merge($topic_ids, $ids);
+                }
+
+                $questions = Question::whereIn('topic_id', $topic_ids)->get();
+
+                foreach ($school['courses'] as $c_key => $course) {
+
+                    foreach ($course['temas'] as $t_key => $topic) {
+
+                        $preguntas = $questions->where('topic_id', $topic['id'])->toArray();
+                        $respuestas = $this->setTopicQuestionAnswers($topic['respuestas'] ?? NULL, $preguntas);
+
+                        // $data[$school_key][$s_key]['courses'][$c_key]['temas'][$t_key]['preguntas'] = $preguntas;
+                        $data[$school_key][$s_key]['courses'][$c_key]['temas'][$t_key]['respuestas'] = $respuestas;
+                    }
+                }
+            }
+
+            return $data;
+        }
+    }
+
+    public function setTopicQuestionAnswers($answers, $questions)
+    {
+        if (!$answers) return [];
+
+        $rows = [];
+
+        foreach ($questions as $key => $question) {
+            
+            $answer = collect($answers)->where('preg_id', $question['id'])->first();
+
+            if ($answer) {
+
+                $right = $question['rptas_json'][$question['rpta_ok']] ?? null;
+                $marked = $question['rptas_json'][$answer['opc']] ?? null;
+                $is_correct =  $answer['opc'] == $question['rpta_ok'];
+
+                $row = [
+                    'pregunta' => $question['pregunta'],
+                    'respuesta' => [
+                        'correcta' => $right,
+                        'marcada' => $marked,
+                        'es_correcta' => $is_correct,
+                        'puntos' => $question['score'],
+                    ],
+                ];  
+
+                $rows[] = $row;              
+            }
+        }
+
+        return $rows;
     }
 }

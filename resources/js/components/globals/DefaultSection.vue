@@ -1,7 +1,7 @@
 <template>
     <v-card flat tile elevation="0" style="border-radius: 4px !important;">
 
-        <v-subheader class="mt-4 px-0">
+        <v-subheader class="mt-4 px-0" v-if="titleDefault">
             <strong>{{ title }}</strong>
         </v-subheader>
 
@@ -12,6 +12,7 @@
             right
             color="white"
         /> -->
+        <slot name="title"/>
 
         <v-divider class="mt-0"/>
 
@@ -26,7 +27,11 @@ export default {
             type: String,
             default: 'Título de la sección'
         },
-        tooltip: String
+        tooltip: String,
+        titleDefault: {
+            type: Boolean,
+            default: true,
+        },
     }
 }
 </script>

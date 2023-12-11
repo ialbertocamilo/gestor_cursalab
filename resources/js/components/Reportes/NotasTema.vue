@@ -8,13 +8,14 @@
             </template>
             <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
             <list-item
+                v-show="workspaceId === 25"
                 titulo="Grupo sistema"
                 subtitulo="Código de grupo (contiene la fecha de subida a la plataforma)"
             />
             <div v-show="workspaceId === 25">
                 <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
             </div>
-            <list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
+            <list-item v-show="workspaceId === 25" titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
             <list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
 
             <div v-show="workspaceId === 25">
@@ -357,7 +358,7 @@ export default {
         changeConstraints(){
             const domainsToExcludeConstraint = ['gestor.test','gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
             const currentDomain = new URL(window.location.href).hostname;
-            
+
             domainsToExcludeConstraint.forEach(domain => {
                 if(domain.includes(currentDomain)){
                     this.maxValuesSelected.modules = 0;

@@ -35,6 +35,7 @@ use App\Services\FileService;
 use App\Models\CriterionValue;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
+use App\Models\UserProgress;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,8 @@ use App\Http\Controllers\ApiRest\RestAvanceController;
 
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\Mail;
+
+use Carbon\Carbon;
 
 // use App\Perfil;
 
@@ -713,6 +716,17 @@ class UsuarioController extends Controller
         return response()->json(compact('schools', 'modules'), 200);
     }
 
+    public function buscarEscuelasxModulo($subworkspace_id)
+    {
+        $escuelas = School::whereHas('subworkspaces', function($q) use ($subworkspace_id) {
+                $q->where('id', $subworkspace_id);
+                $q->where('active', ACTIVE);
+            })
+            ->get();
+
+        return response()->json(compact('escuelas'), 200);
+    }
+
     public function buscarCursosxEscuela($school_id)
     {
         $cursos = Curso::join('course_school', 'course_school.course_id', '=', 'courses.id')
@@ -782,7 +796,8 @@ class UsuarioController extends Controller
                     ->with(['user:id,name,surname,lastname,fullname,document', 'topic.qualification_type'])
                     // ->where('summary_topics.source_id')
                     ->where('users.subworkspace_id', $subworkspaceId)
-                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id')
+                    ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                        db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'))
                     ->whereHas('topic',function($q) use ($courseId){
                         $q->where('course_id',$courseId)->where('active',ACTIVE);
                     });
@@ -808,7 +823,8 @@ class UsuarioController extends Controller
                 ->where('summary_topics.topic_id', $topicId)
                 // ->where('summary_topics.source_id')
                 ->where('users.subworkspace_id', $subworkspaceId)
-                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id');
+                ->select('summary_topics.attempts', 'summary_topics.id', 'summary_topics.topic_id', 'summary_topics.grade', 'summary_topics.user_id', 
+                    db_raw_dateformat('summary_topics.last_time_evaluated_at', 'st_last_time_evaluated_at'));
 
             // "Desaprobados" only
 
@@ -1055,7 +1071,8 @@ class UsuarioController extends Controller
         $usuario_input['email'] = isset($usuario_input['email']) ? $usuario_input['email'] : null;
 
         // Si el formulario contiene el mismo email y dni, solo actualiza el username y no hace validaciones
-        if($dni_previo == $usuario_input['document'] && $email_previo == $usuario_input['email'] ) {
+        
+        if($dni_previo === $usuario_input['document'] && $email_previo === $usuario_input['email'] ) {
             $usuario_master = UsuarioMaster::where('dni', $dni_previo)->first();
             if($usuario_master){
                 $usuario_master->updated_at = now();
@@ -1146,5 +1163,34 @@ class UsuarioController extends Controller
         }
 
         return response()->json( $error,422);
+    }
+
+    protected function getProfileData(User $user)
+    {
+        $criteria = $user->getProfileCriteria();
+
+        $profile = [
+            'user' => [
+                'fullname' => $user->fullname,
+                'email' => $user->email ?? 'No definido',
+                'documento' => $user->documento ?? 'No definido',
+                'phone_number' => $user->phone_number ?? 'No definido',
+                'active' => $user->active ? 'Activo' : 'Inactivo',
+                'created_at' => $user->created_at ? $user->created_at->format('d/m/Y G:i a') : 'No definido',
+                'updated_at' => $user->updated_at ? $user->updated_at->format('d/m/Y G:i a') : 'No definido',
+                'last_login' => $user->last_login ? Carbon::parse($user->last_login)->format('d/m/Y G:i a') : 'No definido',
+                'last_pass_updated_at' => $user->last_pass_updated_at ? Carbon::parse($user->last_pass_updated_at)->format('d/m/Y G:i a') : 'No definido',
+            ],
+            'criteria' => $criteria,
+            'background' => asset('img/profile-banner.jpg'),
+        ];
+
+        $progressData = UserProgress::getDataProgress($user);
+        $progressData = UserProgress::setTopicQuestionData($progressData);
+
+        return $this->success([
+            'profile' => $profile,
+            'courses' => $progressData,
+        ]);
     }
 }
