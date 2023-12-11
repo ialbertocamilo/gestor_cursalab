@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class Dc3Controller extends Controller
 {
@@ -14,13 +15,12 @@ class Dc3Controller extends Controller
         $fileName = $this->setNameDC3PDF($title);
         $filePath = 'dc3/'.$fileName;
         $data['title'] = $title;
-        dd($data);
         $pdf = PDF::loadView('pdf.dc3', $data);
         // Guardar en S3
         
         Storage::disk('s3')->put($filePath, $pdf->output());
         // Devolver la URL del archivo en S3
-        return Storage::disk('s3')->url($filePath);
+        return $filePath;
     }
     
     private function setNameDC3PDF($title,$ext='pdf'){

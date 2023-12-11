@@ -135,7 +135,7 @@ export default {
     },
     data() {
         return {
-            reportType: 'segmentation',
+            reportType: 'dc3-report',
             schools: [],
             courses: [],
             //

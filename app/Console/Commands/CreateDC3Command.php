@@ -55,7 +55,7 @@ class CreateDC3Command extends Command
                 # code...
                 SummaryCourse::select('id','course_id','dc3_path','user_id')
                     ->where('course_id',$course->id)
-                    ->where('status_id',$user_status->pluck('id'))
+                    ->whereIn('status_id',$user_status->pluck('id'))
                     ->whereNull('dc3_path')
                     ->with([
                         'user:id,document,name,lastname,surname,national_occupation_id,subworkspace_id',
@@ -112,7 +112,9 @@ class CreateDC3Command extends Command
                                     'final_date_course_day' => $final_date_course_parse->day,
                                 ]
                             ];
-                            $dc3_controller->generatePDF($data);
+                            $summary->dc3_path = $dc3_controller->generatePDF($data);
+                            $summary->save();
+                            dd($summary);
                         }
                         $_bar->finish();
                 });
