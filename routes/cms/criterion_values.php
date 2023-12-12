@@ -15,6 +15,7 @@ Route::controller(CriterionValueController::class)->group(function() {
 	Route::get('/form-selects', 'getFormSelects');
 
 	Route::post('/store', 'store');
+	Route::post('/upload', 'upload');
 	Route::get('/{criterion_value}/edit', 'edit');
 	Route::put('/{criterion_value}/update', 'update');
 });

@@ -307,7 +307,7 @@ if (isset($fullScreen)) {
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
     <script src="{{ asset('js/app.js?v=3.2391-' . date('Y-W-d-H')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=3.2390-' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.2391-' . date('Y-W-m')) }}"></script>
 
     <script>
         $(document).ready(function () {

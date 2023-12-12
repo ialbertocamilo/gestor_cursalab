@@ -6,7 +6,9 @@ use App\Http\Requests\CriterionValueStoreRequest;
 use App\Http\Resources\CriterionValueResource;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
+use App\Imports\CriterionValueImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CriterionValueController extends Controller
 {
@@ -92,5 +94,31 @@ class CriterionValueController extends Controller
         CriterionValue::storeRequest($data, $criterion_value);
 
         return $this->success(['msg' => 'Valor actualizado correctamente.']);
+    }
+
+    public function upload(Request $request, Criterion $criterion)
+    {
+        $info = [];
+
+        if ($request->hasFile("archivo")) {
+
+            $import = new CriterionValueImport();
+            $import->criterion_id = $criterion->id;
+            Excel::import($import, $request->file('archivo'));
+            $info = $import->get_data();
+
+            return response()->json([
+                'error' => false,
+                'msg' => $info['msg'],
+                'info' => $info
+            ], 200);
+        }
+
+        return response()->json([
+            'error' => true,
+            'msg' => 'No se ha seleccionado ningún archivo',
+            'info' => $info
+        ], 200);
+
     }
 }
