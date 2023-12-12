@@ -9,5 +9,6 @@ Route::controller(RestProjectController::class)->group(function() {
     Route::get('/summary', 'userSummary');
     Route::post('/{project}/store-update', 'storeUpdateUserProject');
     Route::get('/resource/download', 'downloadFile');
+   
     
 });
