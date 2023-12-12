@@ -6,7 +6,7 @@
         :class="{}"
         elevation="0"
         :ripple="false"
-        color="primary"
+        :color="color"
         @click="emitClick"
         :outlined="outlined"
     >
@@ -22,6 +22,10 @@
 <script>
 export default {
     props: {
+        color: {
+            type: String,
+            default: 'primary'
+        },
         label: {
             type: String,
             default: 'Botón Modal'

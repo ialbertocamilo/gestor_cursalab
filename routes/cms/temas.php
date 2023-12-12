@@ -25,6 +25,8 @@ Route::controller(TemaController::class)->group(function() {
 
 	Route::put('/{topic}/status', 'updateStatus');
 
+	Route::get('/{topic}/medias', 'listMedias');
+
 });
 
 // PREGUNTAS

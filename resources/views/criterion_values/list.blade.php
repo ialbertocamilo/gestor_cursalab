@@ -9,6 +9,7 @@
         <criterion-value-layout
             criterion_id="{{ request()->segment(2) }}"
             criterion_name="{{$criterion->name ?? ''}}"
+            criterion_type="{{$criterion->field_type->code ?? ''}}"
         />
     </v-app>
 @endsection

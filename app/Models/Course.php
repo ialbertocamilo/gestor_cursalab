@@ -1782,4 +1782,16 @@ class Course extends BaseModel
 
         return $courses;
     }
+
+    public function listMediaTopics(){
+        $course = $this;
+        $topics = Topic::where('course_id',$course->id)->select('id','name')->with('medias:id,value,type_id,topic_id,title as name')->get();
+        foreach ($topics as $topic) {
+            $topic->medias->transform(function ($media) use($topic) {
+                $media->url = $topic->generateMediaUrl($media->type_id, $media->value);
+                return $media;
+            });
+        }
+        return $topics;
+    }
 }

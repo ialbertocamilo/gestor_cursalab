@@ -81,7 +81,7 @@
             />
         </v-card>
         <ListGuestLinksModal
-            width="50vw"
+            width="70vw"
             :ref="modalOptions.ref"
             :options="modalOptions"
             @onConfirm="closeFormModal(modalOptions, dataTable, filters)"

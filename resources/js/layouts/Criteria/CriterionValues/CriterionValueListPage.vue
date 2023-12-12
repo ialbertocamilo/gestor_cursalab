@@ -5,7 +5,11 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
 <!--                Criterios-->
                 <v-spacer/>
-                <DefaultModalButton :label="'Valor de Criterio'" @click="openFormModal(modalOptions)"/>
+                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="$root.isSuperUser && criterion_type != 'date' "/>
+
+                <!-- {{ criterion_type }} -->
+                
+                <DefaultModalButton :label="'Valor de criterio'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -51,6 +55,15 @@
                 @onCancel="closeFormModal(modalOptions)"
             />
 
+            <CriterionValueUploadModal
+                width="40vw"
+                :ref="modalUploadOptions.ref"
+                :options="modalUploadOptions"
+                :criterion_id="criterion_id"
+                @onConfirm="closeFormModal(modalUploadOptions, dataTable, filters)"
+                @onCancel="closeFormModal(modalUploadOptions)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -58,10 +71,11 @@
 
 <script>
 import CriterioFormModal from "./CriterionValueFormModal";
+import CriterionValueUploadModal from "./CriterionValueUploadModal";
 
 export default {
-    props: ['criterion_id', 'criterion_name'],
-    components: {CriterioFormModal},
+    props: ['criterion_id', 'criterion_name', 'criterion_type'],
+    components: {CriterioFormModal, CriterionValueUploadModal},
     data() {
         let vue = this
 
@@ -102,6 +116,13 @@ export default {
                 base_endpoint: '/criterios/' + vue.criterion_id + '/valores',
                 resource: 'Valor de Criterio',
                 confirmLabel: 'Guardar',
+            },
+            modalUploadOptions: {
+                ref: 'CriterionValueUploadModal',
+                open: false,
+                base_endpoint: '/criterios/' + vue.criterion_id + '/subida-masiva',
+                resource: 'Subida de valores de criterio',
+                confirmLabel: 'Subir',
             },
             modalDeleteOptions: {
                 ref: 'CriterioDeleteModal',

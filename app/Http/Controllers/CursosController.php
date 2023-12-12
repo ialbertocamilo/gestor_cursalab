@@ -8,6 +8,7 @@ use App\Models\Ciclo;
 use App\Models\Curso;
 
 use App\Models\Media;
+use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Person;
 use App\Models\Posteo;
@@ -500,5 +501,8 @@ class CursosController extends Controller
 
         return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
-
+    public function listMediaTopics(Course $course){
+        $topics = $course->listMediaTopics();
+        return $this->success(compact('topics'));
+    }
 }

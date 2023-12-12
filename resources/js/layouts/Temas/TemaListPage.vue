@@ -13,10 +13,15 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-        
+                <DefaultButton
+                    v-if="showPreviewButton"
+                    outlined
+                    label="Previsualización"
+                    @click="openFormModal(modalPreviewMediaTopicsOptions, { resource_id:course_id,type:'course'}, 'list', `Listado de multimedias del curso: ${course_name}`)"
+                />
                 <DefaultModalButton
                     :label="'Crear tema'"
-                     @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
+                    @click="openFormModal(modalTopicOptions, null, 'create', `Crear tema | Curso: ${course_name}`)"
                 />
                      <!-- v-if="$root.isSuperUser" -->
                 <!-- <DefaultModalButton
@@ -56,6 +61,10 @@
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
+                @data-loaded="enablePreviewbutton()"
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{ 
+                    resource_id:$event.id,type:'topic',route:`/${ruta}cursos/${course_id}/temas/${$event.id}/medias`
+                }, 'list', `Listado`)"
             />
 
             <DialogConfirm
@@ -111,6 +120,13 @@
                 @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters)"
                 @onCancel="closeFormModal(modalTopicOptions)"
             />
+            <PreviewMediaTopicsModal
+                width="450px"
+                :ref="modalPreviewMediaTopicsOptions.ref"
+                :options="modalPreviewMediaTopicsOptions"
+                @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
+                @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -120,15 +136,17 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import TemaValidacionesModal from "./TemaValidacionesModal";
 import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
+import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal";
 
 export default {
     components: {
-        DialogConfirm,
-        LogsModal,
-        TopicFormModal,
-        'TopicValidationsDelete': TemaValidacionesModal,
-        'TopicValidationsUpdateStatus': TemaValidacionesModal
-    },
+    DialogConfirm,
+    LogsModal,
+    TopicFormModal,
+    'TopicValidationsDelete': TemaValidacionesModal,
+    'TopicValidationsUpdateStatus': TemaValidacionesModal,
+    PreviewMediaTopicsModal
+},
     props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
         let vue = this
@@ -186,6 +204,12 @@ export default {
                     },
                 ],
                 more_actions: [
+                    {
+                        text: "Previsualización",
+                        icon: 'mdi-cellphone',
+                        type: 'action',
+                        method_name: 'preview_medias',
+                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -277,7 +301,17 @@ export default {
                 cancelLabel: 'Cancelar',
                 resource: 'TemasValidaciones',
             },
-
+            modalPreviewMediaTopicsOptions:{
+                ref: 'PreviewMediaTopics',
+                action: null,
+                open: false,
+                base_endpoint: '',
+                hideConfirmBtn: true,
+                hideCancelBtn: true,
+                confirmLabel: 'Confirmar',
+                cancelLabel: 'Cancelar',
+                resource: 'Topic',
+            },
             modalTopicOptions: {
                 ref: 'TopicFormModal',
                 open: false,
@@ -288,6 +322,7 @@ export default {
                 action: null,
                 persistent: true,
             },
+            showPreviewButton:false
         }
     },
     mounted() {
@@ -395,6 +430,10 @@ export default {
                     vue.loadingActionBtn = false
                 })
         },
+        enablePreviewbutton(){
+            let vue = this;
+            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+        }
     }
 }
 </script>
