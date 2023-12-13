@@ -44,6 +44,11 @@ class Course extends BaseModel
         return $this->hasMany(Topic::class, 'course_id')->where('active', ACTIVE);
     }
 
+    public function inactive_topics()
+    {
+        return $this->hasMany(Topic::class, 'course_id')->where('active', !ACTIVE);
+    }
+
     public function polls()
     {
         return $this->belongsToMany(Poll::class);
@@ -63,7 +68,7 @@ class Course extends BaseModel
     {
         return $this->hasMany(Update_usuarios::class, 'curso_id');
     }
-    
+
     public function project()
     {
         return $this->hasOne(Project::class, 'course_id');
@@ -173,7 +178,7 @@ class Course extends BaseModel
             });
         }
 
-        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b', 'active_topics']);
+        $q->withCount(['topics', 'polls', 'segments', 'type', 'compatibilities_a', 'compatibilities_b', 'active_topics', 'inactive_topics']);
 
         if ($request->schools) {
             $q->whereHas('schools', function ($t) use ($request) {
@@ -727,7 +732,7 @@ class Course extends BaseModel
                         'compatible' => $course->compatible?->course ? 'Convalidado' : null,
                         // 'compatible' => $course->compatible?->course->only('id', 'name') ?: null,
                         'scheduled_activation' => [
-                            'message' => $course->deactivate_at ? 
+                            'message' => $course->deactivate_at ?
                                             'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
                                             : null,
                         ],
@@ -1754,13 +1759,13 @@ class Course extends BaseModel
         ],[
             'school_id' => $school->id,
         ]);
-    } 
+    }
 
     protected function getSegmentationDataByWorkspace($workspace)
     {
         $courses = Course::with([
                     'segments' => [
-                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'], 
+                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'],
                         'type:id,name',
                     ]
                 ])
