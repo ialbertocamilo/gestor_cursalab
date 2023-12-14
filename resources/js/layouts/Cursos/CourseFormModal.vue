@@ -89,7 +89,7 @@
 
                         <v-row>
 
-                            <v-col cols="6">
+                            <v-col cols="6" v-if="!resource.can_create_certificate_dc3_dc4">
                                 <DefaultAutocomplete
                                     dense
                                     label="Duración (hrs.)"
@@ -237,65 +237,82 @@
                                             Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
                                         </div>
                                     </v-col>
-                                    <v-col cols="6">
-                                        <DefaultAutocomplete
-                                            placeholder=""
-                                            dense
-                                            label="Catálogo de área"
-                                            v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
-                                            :items="catalog_denominations"
-                                            item-text="name"
-                                            clearable
-                                        />
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultInputDate
-                                            clearable
-                                            dense
-                                            range
-                                            :referenceComponent="'modalDateFilter3'"
-                                            :options="modalDateFilter3"
-                                            v-model="resource.dc3_configuration.date_range"
-                                            label="Duración del curso"
-                                        />
-                                    </v-col>
-                                    <v-col cols="9">
-                                        <DefaultAutocomplete
-                                            placeholder=""
-                                            dense
-                                            label="Instructor"
-                                            v-model="resource.dc3_configuration.instructor"
-                                            :items="people.instructors"
-                                            item-text="person_attributes.name"
-                                            clearable
-                                        />
-                                    </v-col>
-                                    <v-col cols="3" class="d-flex align-items-center">
-                                        <DefaultModalButton
-                                            label="Agregar"
-                                            outlined
-                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
-                                        />
-                                    </v-col>
-                                    <v-col cols="9">
-                                        <DefaultAutocomplete
-                                            placeholder=""
-                                            dense
-                                            label="Representante Legal"
-                                            v-model="resource.dc3_configuration.legal_representative"
-                                            :items="people.legal_representatives"
-                                            item-text="person_attributes.name"
-                                            clearable
-                                        />
-                                    </v-col>
-                                    
-                                    <v-col cols="3" class="d-flex align-items-center">
-                                        <DefaultModalButton
-                                            label="Agregar"
-                                            outlined
-                                            @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
-                                        />
-                                    </v-col>
+                                    <v-row v-if="resource.can_create_certificate_dc3_dc4" class="px-3">
+                                        <v-col cols="4">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Catálogo de área"
+                                                v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
+                                                :items="catalog_denominations"
+                                                item-text="name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInputDate
+                                                clearable
+                                                dense
+                                                range
+                                                :referenceComponent="'modalDateFilter3'"
+                                                :options="modalDateFilter3"
+                                                v-model="resource.dc3_configuration.date_range"
+                                                label="Periodo de ejecución"
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultAutocomplete
+                                                dense
+                                                label="Duración (hrs.)"
+                                                v-model="resource.duration"
+                                                :items="selects.duration"
+                                                item-text="name"
+                                                item-value="id"
+                                                placeholder="Ej. 2:00"
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="9">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Instructor"
+                                                v-model="resource.dc3_configuration.instructor"
+                                                :items="people.instructors"
+                                                item-text="person_attributes.name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="3" class="d-flex align-items-center">
+                                            <DefaultModalButton
+                                                label="Agregar"
+                                                outlined
+                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
+                                            />
+                                        </v-col>
+                                        <v-col cols="9">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Representante Legal"
+                                                v-model="resource.dc3_configuration.legal_representative"
+                                                :items="people.legal_representatives"
+                                                item-text="person_attributes.name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="3" class="d-flex align-items-center">
+                                            <DefaultModalButton
+                                                label="Agregar"
+                                                outlined
+                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
+                                            />
+                                        </v-col>
+                                    </v-row>
                                 </v-row>
                             </template>
                         </DefaultModalSectionExpand>
@@ -556,6 +573,7 @@ export default {
                 publish_date_2: null,
                 publish_time_2: null,
                 dc3_configuration:{},
+                can_create_certificate_dc3_dc4:false,
             },
             resource: {
                 qualification_type: {position: 0},
@@ -569,6 +587,7 @@ export default {
                 nota_aprobatoria: this.getRules(['required']),
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
                 qualification_type_id: this.getRules(['required']),
+                dc3: this.getRules(['required']),
             },
             selects: {
                 requisito_id: [],

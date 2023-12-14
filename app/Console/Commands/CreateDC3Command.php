@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\SummaryCourse;
 use Illuminate\Console\Command;
 use App\Http\Controllers\Dc3Controller;
+use App\Models\NationalOccupationCatalog;
 
 class CreateDC3Command extends Command
 {
@@ -44,7 +45,10 @@ class CreateDC3Command extends Command
         })->with('subworkspaces:id,parent_id,name,logo')->select('id','dc3_configuration','name')->whereNotNull('dc3_configuration')->get();
         $user_status = Taxonomy::where('group','course')->where('type','user-status')->whereIn('code',['aprobado','enc_pend'])->select('id')->first();
         $dc3_controller = new Dc3Controller();
-
+        $national_occupations_catalog = NationalOccupationCatalog::select('code','name')->get()->toArray();
+        $national_occupations_catalog_chunk = array_chunk($national_occupations_catalog, count($national_occupations_catalog) / 2);
+        $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
+        $catalog_denominations_chunk = array_chunk($catalog_denominations, count($catalog_denominations) / 2);
         foreach ($workspaces as $workspace) {
             $courses = Course::whereHas('workspaces',function($q) use ($workspace){
                 $q->where('id',$workspace->id);
@@ -64,7 +68,7 @@ class CreateDC3Command extends Command
                             $q->where('criterion_id',$criterion_position)->select('id','value_text');
                         }
                     ])
-                    ->chunkById(500, function ($summaries) use ($subwokspace_data,$course,$workspace,$dc3_controller){
+                    ->chunkById(500, function ($summaries) use ($subwokspace_data,$course,$workspace,$dc3_controller,$national_occupations_catalog_chunk,$catalog_denominations_chunk){
                         $_bar = $this->output->createProgressBar($summaries->count());
                         $_bar->start();
                         foreach ($summaries as $summary) {
@@ -82,6 +86,10 @@ class CreateDC3Command extends Command
                             $final_date_course = ($date_range[0] >= $date_range[1]) ? $date_range[0] : $date_range[1];
                             $final_date_course_parse = Carbon::parse($final_date_course);
                             $data = [
+                                'national_occupations_catalog_chunk_1'=>$national_occupations_catalog_chunk[0],
+                                'national_occupations_catalog_chunk_2'=>$national_occupations_catalog_chunk[1],
+                                'catalog_denominations_chunk_1'=>$catalog_denominations_chunk[0],
+                                'catalog_denominations_chunk_2'=>$catalog_denominations_chunk[1],
                                 'user' => [
                                     'name' => Str::title($user->name.' '.$lastname.' '.$surname),
                                     'curp' => $user->curp,
@@ -93,16 +101,16 @@ class CreateDC3Command extends Command
                                     'id' => $subworkspace->subworkspace_id,
                                     'name_or_social_reason' => $subworkspace->name_or_social_reason,
                                     'shcp' => $subworkspace->shcp,
-                                    'subworkspace_logo'=>$subworkspace_logo
+                                    'subworkspace_logo'=>get_media_url($subworkspace_logo,'s3')
                                 ],
                                 'course'=>[
                                     'id'=>$course->id,
                                     'name'=>$course->name,
                                     'duration' => $course->duration,
                                     'instructor' => $instructor->person_attributes['name'],
-                                    'instructor_signature' => $instructor->person_attributes['signature_file'],
+                                    'instructor_signature' => get_media_url($instructor->person_attributes['signature_file'],'s3'),
                                     'legal_representative' => $legal_representative->person_attributes['name'],
-                                    'legal_representative_signature' => $legal_representative->person_attributes['signature_file'],
+                                    'legal_representative_signature' => get_media_url($legal_representative->person_attributes['signature_file'],'s3'),
                                     'catalog_denomination_dc3' => $catalog_denomination_dc3->code,
                                     'init_date_course_year' => $init_date_course_parse->year,
                                     'init_date_course_month' => $init_date_course_parse->month,

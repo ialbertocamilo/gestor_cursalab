@@ -3,7 +3,8 @@
 <head>
     <title>{{$title}}</title>
 </head>
-<body style="font-family: Arial, Helvetica, sans-serif">
+<body style="font-family: Arial, Helvetica, sans-serif;font-size: 14px">
+    <div style="text-align: center"><img src="{{$subworkspace['subworkspace_logo']}}" alt=""></div>
     <h4 style="text-align: center;font-weight: bolder;margin:0">FORMATO DC-3</h4>
     <h4 style="text-align: center;font-weight: bolder;margin:0">CONSTANCIA DE COMPETENCIAS O DE HABILIDADES LABORALES</h4>
     <table style="border: 2px solid black;width:100%; border-collapse: collapse;">
@@ -258,6 +259,8 @@
             <tr style="text-align: center">
                 <td style="padding: 5px 5px 10px 5px;" colspan="6">
                     <div>Instructor o tutor</div>
+                    <div>{{$course['instructor']}}</div>
+                    <img width="170px" src="{{$course['instructor_signature']}}" alt="" srcset="">
                     <table style="width:100%; border-collapse: collapse;">
                         <tr style="text-align: center;">
                             <td style="font-weight: bolder;">
@@ -270,9 +273,12 @@
                 </td>
                 <td style="padding: 5px 5px 10px 5px;" colspan="6">
                     <div>Patrón o representante legal <sup>4/</sup></div>
+                    <div>{{$course['legal_representative']}}</div>
+                    <img width="170px" src="{{$course['legal_representative_signature']}}" alt="" srcset="">
                     <table style="width:100%; border-collapse: collapse;">
                         <tr style="text-align: center">
                             <td style="font-weight: bolder;">
+
                                 <span style="border-top:1px solid black;">
                                     Nombre y Firma
                                 </span>
@@ -298,21 +304,161 @@
                     <li>* Dato no obligatorio.</li>
                 </ul>
             </div>
-            <div style="text-align: right">
+            {{-- <div style="text-align: right">
                 DC-3
                 ANVERSO
-            </div>                
+            </div>                 --}}
         </div>
     </div>
-    <div>
-        <div style="font-weight: bold;text-align: center">CLAVES Y DENOMINACIONES DE ÁREAS Y SUBÁREAS DEL CATÁLOGO NACIONAL DE OCUPACIONES</div>
-        <div>
-            
+    <table style="width: 100%">
+        <tr>
+            <td colspan="12">
+                <div style="font-weight: bold;text-align: center;margin-top:40px">CLAVES Y DENOMINACIONES DE ÁREAS Y SUBÁREAS DEL CATÁLOGO NACIONAL DE OCUPACIONES</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
+            <td colspan="3" align="center">DENOMINACIÓN</td>
+            <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
+            <td colspan="3" align="center">DENOMINACIÓN</td>
+        </tr>
+        @foreach ($national_occupations_catalog as $noc)
+            @if ($loop->iteration % 2 == 1)
+                <tr>
+            @endif
+            <td colspan="3">
+                {{ $noc['code'] }}
+            </td>
+            <td colspan="3">
+                {{ $noc['name'] }}
+            </td>
+            @if ($loop->iteration % 2 == 0 || $loop->last)
+                </tr>
+            @endif
+        @endforeach
+
+        <tr>
+            <td colspan="12">
+                <div style="font-weight: bold;text-align: center;margin-top:40px">CLAVES Y DENOMINACIONES DEL CATÁLOGO DE ÁREAS TEMÁTICAS DE LOS CURSOS</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
+            <td colspan="3" align="center">DENOMINACIÓN</td>
+            <td colspan="3" align="center">CLAVE DEL <br> ÁREA</td>
+            <td colspan="3" align="center">DENOMINACIÓN</td>
+        </tr>
+        @foreach ($catalog_denominations as $cd)
+            @if ($loop->iteration % 2 == 1)
+                <tr>
+            @endif
+            <td colspan="3">
+                {{ $cd['code'] }}
+            </td>
+            <td colspan="3">
+                {{ $cd['name'] }}
+            </td>
+            @if ($loop->iteration % 2 == 0 || $loop->last)
+                </tr>
+            @endif
+        @endforeach
+    </table>
+    {{-- <div style="height: auto; box-sizing: border-box;">
+        <div style="font-weight: bold;text-align: center;margin-top:40px">CLAVES Y DENOMINACIONES DE ÁREAS Y SUBÁREAS DEL CATÁLOGO NACIONAL DE OCUPACIONES</div>
+        <div style="padding-top:30px">
+            <div style="width: 50%; float: left;">
+                <div style="width: 100%;font-weight: bold;text-align: center">
+                    <div style="width: 50%; float: left;">
+                        CLAVE DEL <br> ÁREA/SUBÁREA
+                    </div>
+                    <div style="width: 50%; float: left;height: 36.8px ;">
+                        DENOMINACIÓN
+                    </div>
+                </div>
+                @foreach ($national_occupations_catalog_chunk_1 as $noc)
+                <div style="width: 100%;padding-bottom:10px;">
+                    <div style="width: 50%; float: left;">
+                        {{$noc['code']}}
+                    </div>
+                    <div style="width: 50%; float: left;">
+                        {{$noc['name']}}
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        
+            <div style="width: 50%; float: left;">
+                <div style="width: 100%;font-weight: bold;text-align: center">
+                    <div style="width: 50%; float: left;">
+                        CLAVE DEL <br> ÁREA/SUBÁREA
+                    </div>
+                    <div style="width: 50%; float: left;height: 36.8px ;">
+                        DENOMINACIÓN
+                    </div>
+                </div>
+                @foreach ($national_occupations_catalog_chunk_2 as $noc)
+                <div style="width: 100%;padding-bottom:10px;">
+                    <div style="width: 50%; float: left;">
+                        {{$noc['code']}}
+                    </div>
+                    <div style="width: 50%; float: left;">
+                        {{$noc['name']}}
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
-        <div style="text-align: right">
-            DC-3
-            ANVERSO
-        </div>                
-    </div>
+    </div> --}}
+   
+    {{-- <div>
+        <div style="font-weight: bold;text-align: center;">CLAVES Y DENOMINACIONES DEL CATÁLOGO DE ÁREAS TEMÁTICAS DE LOS CURSOS</div>
+        <div style="padding-top:30px">
+            <div style="width: 50%; float: left;">
+                <div style="width: 100%;font-weight: bold;text-align: center">
+                    <div style="width: 50%; float: left;">
+                        CLAVE DEL <br> ÁREA
+                    </div>
+                    <div style="width: 50%; float: left;height: 36.8px ;">
+                        DENOMINACIÓN
+                    </div>
+                </div>
+                @foreach ($catalog_denominations_chunk_1 as $cd)
+                <div style="width: 100%;padding-bottom:10px;">
+                    <div style="width: 50%; float: left;">
+                        {{$cd['code']}}
+                    </div>
+                    <div style="width: 50%; float: left;">
+                        {{$cd['name']}}
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        
+            <div style="width: 50%; float: left;">
+                <div style="width: 100%;font-weight: bold;text-align: center">
+                    <div style="width: 50%; float: left;">
+                        CLAVE DEL <br> ÁREA/SUBÁREA
+                    </div>
+                    <div style="width: 50%; float: left;height: 36.8px ;">
+                        DENOMINACIÓN
+                    </div>
+                </div>
+                @foreach ($catalog_denominations_chunk_2 as $cd)
+                <div style="width: 100%;padding-bottom:10px;">
+                    <div style="width: 50%; float: left;">
+                        {{$cd['code']}}
+                    </div>
+                    <div style="width: 50%; float: left;">
+                        {{$cd['name']}}
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div> --}}
+    {{-- <div style="text-align: right">
+        DC-3
+        ANVERSO
+    </div>                 --}}
 </body>
 </html>

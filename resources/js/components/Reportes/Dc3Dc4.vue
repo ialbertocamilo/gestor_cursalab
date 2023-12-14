@@ -36,7 +36,7 @@
                     dense
                 />
             </div>
-            <div class="col-sm-6 mb-3 d-flex align-items-center" v-if="filters.type_report == 'dc3_report'">
+            <!-- <div class="col-sm-6 mb-3 d-flex align-items-center" v-if="filters.type_report == 'dc3_report'">
                 <v-checkbox
                     class="my-0 mr-2"
                     label="Por Curso"
@@ -53,7 +53,7 @@
                     value="by_user"
                     hide-details="false"
                 />
-            </div>
+            </div> -->
             <!-- Escuela -->
             <div class="col-sm-6 mb-3" v-if="filters.type_report == 'dc3_report' && type_dc3_report == 'by_course'">
 
@@ -236,6 +236,7 @@ export default {
                         modulos: this.modulo ? [this.modulo] : [],
                         escuelas: this.filters.school,
                         cursos: this.filters.course,
+                        ext:'zip'
                     }
                 })
                 const vue = this
@@ -264,7 +265,8 @@ export default {
             const reqPayload = {
                 schoolIds: vue.filters.school,
                 active:1,
-                inactive:0
+                inactive:0,
+                can_create_certificate_dc3_dc4:true
             };
 
             axios.post(`${vue.reportsBaseUrl}/filtros/school/courses/states`, reqPayload).then((res) => {
