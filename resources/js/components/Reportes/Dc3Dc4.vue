@@ -182,7 +182,7 @@ export default {
 
             // Fetch schools
 
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0?hasDc3=1`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0&hasDc3=1`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
