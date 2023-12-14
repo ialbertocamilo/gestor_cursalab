@@ -161,7 +161,7 @@
                         <v-col cols="4">
                             <DefaultAutocomplete
                                 placeholder=""
-                                label="Position Name"
+                                :label="position_dc3.code"
                                 :items="position_dc3.values"
                                 v-model="resource.criterion_list[position_dc3.code]"
                                 item-text="value_text"

@@ -120,6 +120,7 @@ class CreateDC3Command extends Command
                                 ]
                             ];
                             $summary->dc3_path = $dc3_controller->generatePDF($data);
+
                             $summary->save();
                         }
                         $_bar->finish();
