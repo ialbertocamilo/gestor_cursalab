@@ -319,7 +319,6 @@ class Segment extends BaseModel{
 
             }
 
-
             $data[$result->id]['criteria_selected'] = array_values($data[$result->id]['criteria_selected']);
 
         }
