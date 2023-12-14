@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Taxonomy;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
