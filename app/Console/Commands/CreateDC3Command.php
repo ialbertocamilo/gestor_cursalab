@@ -46,9 +46,7 @@ class CreateDC3Command extends Command
         $user_status = Taxonomy::where('group','course')->where('type','user-status')->whereIn('code',['aprobado','enc_pend'])->select('id')->first();
         $dc3_controller = new Dc3Controller();
         $national_occupations_catalog = NationalOccupationCatalog::select('code','name')->get()->toArray();
-        $national_occupations_catalog_chunk = array_chunk($national_occupations_catalog, count($national_occupations_catalog) / 2);
         $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
-        $catalog_denominations_chunk = array_chunk($catalog_denominations, count($catalog_denominations) / 2);
         foreach ($workspaces as $workspace) {
             $courses = Course::whereHas('workspaces',function($q) use ($workspace){
                 $q->where('id',$workspace->id);
@@ -61,14 +59,17 @@ class CreateDC3Command extends Command
                     ->where('course_id',$course->id)
                     ->whereIn('status_id',$user_status->pluck('id'))
                     ->whereNull('dc3_path')
+                    ->whereHas('user', function($q) {
+                        $q->whereNotNull('national_occupation_id')->whereNotNull('curp');
+                    })
                     ->with([
-                        'user:id,document,name,lastname,surname,national_occupation_id,subworkspace_id',
+                        'user:id,document,name,lastname,surname,national_occupation_id,subworkspace_id,curp',
                         'user.national_occupation:id,code',
                         'user.criterion_values'=>function($q) use ($criterion_position){
                             $q->where('criterion_id',$criterion_position)->select('id','value_text');
                         }
                     ])
-                    ->chunkById(500, function ($summaries) use ($subwokspace_data,$course,$workspace,$dc3_controller,$national_occupations_catalog_chunk,$catalog_denominations_chunk){
+                    ->chunkById(500, function ($summaries) use ($subwokspace_data,$course,$workspace,$dc3_controller,$national_occupations_catalog,$catalog_denominations){
                         $_bar = $this->output->createProgressBar($summaries->count());
                         $_bar->start();
                         foreach ($summaries as $summary) {
@@ -86,10 +87,8 @@ class CreateDC3Command extends Command
                             $final_date_course = ($date_range[0] >= $date_range[1]) ? $date_range[0] : $date_range[1];
                             $final_date_course_parse = Carbon::parse($final_date_course);
                             $data = [
-                                'national_occupations_catalog_chunk_1'=>$national_occupations_catalog_chunk[0],
-                                'national_occupations_catalog_chunk_2'=>$national_occupations_catalog_chunk[1],
-                                'catalog_denominations_chunk_1'=>$catalog_denominations_chunk[0],
-                                'catalog_denominations_chunk_2'=>$catalog_denominations_chunk[1],
+                                'catalog_denominations'=>$catalog_denominations,
+                                'national_occupations_catalog'=>$national_occupations_catalog,
                                 'user' => [
                                     'name' => Str::title($user->name.' '.$lastname.' '.$surname),
                                     'curp' => $user->curp,
@@ -122,7 +121,6 @@ class CreateDC3Command extends Command
                             ];
                             $summary->dc3_path = $dc3_controller->generatePDF($data);
                             $summary->save();
-                            dd($summary);
                         }
                         $_bar->finish();
                 });
