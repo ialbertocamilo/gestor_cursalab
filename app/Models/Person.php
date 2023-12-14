@@ -27,11 +27,19 @@ class Person extends BaseModel
             $person = new Person();
             $person->workspace_id = $workspace->id;
             if($data['type'] == PERSON::INSTRUCTOR || $data['type'] == PERSON::LEGAL_REPRESENTATIVE){
-                $media = Media::requestUploadFile($data, 'signature',true);
+                if(isset($data['file_signature'])){
+                    $media = Media::requestUploadFile($data, 'signature',true);
+                    $signature_file_id = $media['signature']['id'];
+                    $signature_file = $media['signature']['file'];
+                }else{
+                    $media = Media::where('file',$data['signature'])->select('id')->first();
+                    $signature_file_id = $media?->id;
+                    $signature_file = $data['signature'];
+                }
                 $person->person_attributes = [
                     'name' => $data['name'],
-                    'signature_file_id' => $media['signature']['id'],
-                    'signature_file' => $media['signature']['file'],
+                    'signature_file_id' => $signature_file_id,
+                    'signature_file' => $signature_file,
                 ];
             }
             $person->type = $data['type'];
