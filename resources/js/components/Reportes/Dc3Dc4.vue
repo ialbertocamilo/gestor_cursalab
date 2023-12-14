@@ -1,31 +1,13 @@
 <template>
     <v-main>
         <!-- Resumen del reporte -->
-
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
                 Genera el certificado DC3 y DC4 relacionado a tus colaboradores sobre los cursos completados.
             </template>
-            <!-- <list-item titulo="Email, Documento, Apellidos y nombres" subtitulo="Datos personales" />
-            <list-item titulo="Escuela" subtitulo="Escuela de cada curso asignado" />
-            <list-item titulo="Curso" subtitulo="Curso que tiene asignado el usuario" />
-            <list-item
-                titulo="PROMEDIO"
-                subtitulo="El promedio de las notas de los temas evaluables dentro del curso"
-            />
-            <list-item
-                titulo="AVANCE(%)"
-                subtitulo="Porcentaje del curso (cantidad de temas completados sobre la cantidad de temas asignados)"
-            />
-            <list-item
-                titulo="RESULTADO CURSO"
-                subtitulo="Resultado de cada curso, considerando la nota mínima aprobatoria configurada"
-            /> -->
         </ResumenExpand>
-
         <!-- Formulario del reporte -->
         <form @submit.prevent="generateReport" class="row">
-
             <div class="col-sm-6 mb-3">
                 <DefaultAutocomplete
                     v-model="filters.type_report"
@@ -200,7 +182,7 @@ export default {
 
             // Fetch schools
 
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0?hasDc3=1`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
