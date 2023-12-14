@@ -32,6 +32,7 @@ Route::controller(CursosController::class)->group(function () {
     Route::post('/{curso}/mover_curso', 'moverCurso')->name('curso.moverCurso');
 
     Route::put('/{curso}/status', 'updateStatus');
+	Route::get('/{course}/medias', 'listMediaTopics');
 });
 
 // CURSOS

@@ -11,10 +11,14 @@ use Illuminate\Support\Facades\Hash;
 class GuestLink extends BaseModel
 {
     protected $table = 'guest_links';
-    protected $filleable = ['id','url','workspace_id','expiration_date','admin_id','guest_id','activate_by_default','count_registers'];
+    protected $filleable = ['id','url','workspace_id','subworkspace_id','expiration_date','admin_id','guest_id','activate_by_default','count_registers'];
     public function workspace()
     {
         return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
+    public function subworkspace()
+    {
+        return $this->belongsTo(Workspace::class, 'subworkspace_id');
     }
     protected function addUrl($data){
         $user = Auth::user();
@@ -36,14 +40,15 @@ class GuestLink extends BaseModel
                 $expiration_date = null;
                 break;
         }
-        self::createLink($data['code'],$expiration_date,$user->id,null,$data['activate_by_default']);
+        self::createLink($data['code'],$expiration_date,$user->id,null,$data['activate_by_default'],$data['subworkspace_id']);
         return ['msg'=>'Se creó correctamente el enlace.','type_msg'=>'success'];
     }
-    protected function createLink($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false){
+    protected function createLink($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false,$subworkspace_id=null){
         $id_register_url = GuestLink::insertGetId([
             'url'=>$code,
             'workspace_id'=> get_current_workspace()->id,
             'expiration_date'=>$expiration_date,
+            'subworkspace_id'=>$subworkspace_id,
             'admin_id' => $admin_id,
             'guest_id'=>$guest_id,
             'activate_by_default'=>$activate_by_default
@@ -62,7 +67,7 @@ class GuestLink extends BaseModel
         $guest_link =  self::query()
             ->with(['workspace:id,logo'])
             ->where('url',$code)
-            ->select('guest_id','id as code_id','expiration_date','workspace_id')
+            ->select('guest_id','id as code_id','expiration_date','workspace_id','subworkspace_id')
             ->first();
         if(!$guest_link || $guest_link->expiration_date < date("Y-m-d G:i")){
             $message = $guest_link ? 'Link expirado' : 'El link es incorrecto';
@@ -80,8 +85,9 @@ class GuestLink extends BaseModel
             $criteria_workspace = self::getListCriterion($guest_link);
             $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
             $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
-            $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
-
+            if(!$guest_link->subworkspace_id){
+                $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
+            }
             $data['email'] = ($guest_link->guest_id)
                 ? Guest::where('id',$guest_link->guest_id)->first()->email
                 : null ;
@@ -142,9 +148,7 @@ class GuestLink extends BaseModel
         }
         $users_collect->push($temp_user);
         $us = new UsuarioSubirv2();
-        info($users_collect);
         $us->collection($users_collect,true,0);
-        info($us->errores);
         if($us->q_inserts>0){
             $user_db = Usuario::where('dni',$user['dni'])->first();
             $user_db->password = Hash::make(trim($user['password']));
@@ -172,7 +176,8 @@ class GuestLink extends BaseModel
         return  ['message'=>'No se pudo registrar al usuario, porfavor pongasé en contacto con el administrador.'];
     }
     protected function listGuestUrl() {
-        $urls_generated = GuestLink::where('workspace_id',get_current_workspace()->id)->orderBy( 'created_at', 'desc' )->whereNull( 'guest_id' )->get();
+        $urls_generated = GuestLink::with('subworkspace:id,name')->where('workspace_id',get_current_workspace()->id)
+                    ->whereNull( 'guest_id')->orderBy( 'created_at', 'desc' )->get();
         return [
             'urls_generated'=> $urls_generated
         ];
@@ -183,9 +188,11 @@ class GuestLink extends BaseModel
         //Eliminar multiples espacios y cambiar el espacio por guion
         $url_app_web = config('app.web_url');
         $share_url = str_replace( ' ', '-', preg_replace( '/\s+/', ' ', $share_url ) );
+        $modules = Workspace::where('parent_id',get_current_workspace()->id)->select('id','name')->get();
         return [
             'generic_url' => $share_url,
             'app_url' =>  $url_app_web.'register?c=',
+            'modules'=>$modules
         ];;
     }
     //SUBFUNCTIONS

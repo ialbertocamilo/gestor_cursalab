@@ -293,13 +293,20 @@ export default {
             return data;
         },
         validatedFileExtension(file, fileType) {
-            console.log(file.type)
+
             let extension = mime.extension(file.type);
+
+            // MOV files
+            if (file.type === 'video/quicktime')
+                extension = 'mov'
+
             // Validacion para scorms
             if (file.type === 'application/x-zip-compressed')
                 extension = 'zip'
+
             console.log('Extension :: ', extension)
-            // console.log('fileType :: ', fileType)
+            console.log('FileType :: ', file.type)
+
             if (extension) {
                 if (this.TypeOf(fileType) === 'array') {
                     let valid = false

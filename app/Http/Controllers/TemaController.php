@@ -391,4 +391,13 @@ class TemaController extends Controller
 
         return $this->success($data);
     }
+
+    public function listMedias($school, $course, Topic $topic){
+        $topic->load('medias:id,value,type_id,topic_id,title as name');
+        $topic->medias->transform(function ($media) use($topic) {
+            $media->url = $topic->generateMediaUrl($media->type_id, $media->value);
+            return $media;
+        });
+        return $this->success(['topics'=>[$topic]]);
+    }
 }

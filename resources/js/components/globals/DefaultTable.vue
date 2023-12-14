@@ -1118,6 +1118,7 @@ export default {
                     vue.pagination.toRow = data.data.to || 0;
                     vue.pagination.total_rows = data.data.total;
                     vue.loading = false;
+                    vue.$emit('data-loaded');
                 })
         },
         changePage(sum) {

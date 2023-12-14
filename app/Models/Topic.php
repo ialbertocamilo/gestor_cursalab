@@ -1179,4 +1179,19 @@ class Topic extends BaseModel
             'last_media_duration' => $last_media_duration
         ];
     }
+    public function generateMediaUrl($type, $value) {
+        switch ($type) {
+            case 'youtube':
+                return "https://www.youtube.com/embed/{$value}?rel=0&amp;modestbranding=1&amp;showinfo=0";
+            case 'vimeo':
+                return "https://player.vimeo.com/video/{$value}";
+            case 'video':
+            case 'audio':
+            case 'pdf':
+            case 'office':
+                return get_media_url($value, 's3');
+            default:
+                return $value;
+        }
+    }
 }

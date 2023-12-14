@@ -16,7 +16,7 @@
                         <v-col cols="12">
                             <DefaultToggle v-model="url.activate_by_default" type="only-label" label="¿Desea que los usuarios se activen automáticamente al ingresar/ o realizar el registro?" />
                         </v-col>
-                        <v-col cols="12" style="display: grid; grid-template-columns: auto auto 1fr;">
+                        <v-col cols="12" style="display: grid; grid-template-columns: auto auto auto 1fr;">
                             <div class="flex flex-column">
                                 <span>Tiempo</span>
                                 <div>
@@ -36,6 +36,18 @@
                                     dense
                                 />
                             </div>
+                            <div class="flex flex-column mx-2">
+                                <span>Modulos</span>
+                                <DefaultSelect
+                                    :attach="false"
+                                    v-model="url.subworkspace_id"
+                                    :items="modules"
+                                    item-text="name"
+                                    item-value="id"
+                                    :clearable="true"
+                                    dense
+                                />
+                            </div>
                             <div class="flex align-self-end">
                                 <DefaultButton
                                     style=" width: 100%;max-width: 100% !important;"
@@ -51,6 +63,8 @@
                                     <thead class="text-center">
                                         <tr>
                                             <th style="background: #57BFE3;border:none !important;border-radius: 5px 0px 0px 0px;">URL</th>
+                                            <th style="background: #57BFE3;border:none !important;border-radius: 0px 0px 0px 0px;">Módulo</th>
+                                            <th style="background: #57BFE3;border:none !important;border-radius: 0px 0px 0px 0px;">Activación <br> automática</th>
                                             <th style="background: #57BFE3;border:none !important;">Expiración</th>
                                             <th style="background: #57BFE3;border:none !important;border-radius: 0px 5px 0px 0px;">Opciones</th>
                                         </tr>
@@ -60,6 +74,8 @@
                                         :key="index"
                                     >
                                         <td style="border:none !important" :id="`td-url-${index}`">{{ app_url+item.url }}</td>
+                                        <td style="border:none !important" :id="`td-url-${index}`">{{ item.subworkspace ? item.subworkspace.name : 'No configurado' }}</td>
+                                        <td style="border:none !important" :id="`td-url-${index}`">{{ item.activate_by_default ? 'Sí' : 'No' }}</td>
                                         <td style="border:none !important">{{ (item.expiration_date) ? item.expiration_date : 'sin expiración' }}</td >
                                         <td style="border:none !important">
                                             <div class="d-flex justify-center flex-row my-2">
@@ -109,11 +125,13 @@ export default {
         return {
             generic_url:'',
             app_url:'',
+            modules:[],
             url:{
                 type_of_time:'months',
                 number_time:1,
                 code:null,
-                activate_by_default:false
+                activate_by_default:false,
+                subworkspace_id:null
             },
             types_of_time:[
                 {label:'Día(s)',value:'day'},
@@ -170,8 +188,9 @@ export default {
         async loadSelects() {
             let vue = this
             await vue.$http.get('invitados/init-data').then(({data}) => {
-                this.app_url = data.data.app_url;
-                this.url.code = data.data.generic_url;
+                vue.app_url = data.data.app_url;
+                vue.url.code = data.data.generic_url;
+                vue.modules = data.data.modules;
             })
         },
         copy_content(id,text){

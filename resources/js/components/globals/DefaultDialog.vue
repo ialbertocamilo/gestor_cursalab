@@ -31,7 +31,7 @@
                     </v-btn>
                 </v-card-title>
             </div>
-            <v-card-text :class="{'py-3': !noPaddingCardText}">
+            <v-card-text :class="[{'py-3': !noPaddingCardText}, vCardClass]">
                 <div class="bx_content" v-if="options.type_modal == 'requirement'">
                     <div class="bx_header">
                         <div class="img"><img src="/img/modal_alert.png"></div>
@@ -126,6 +126,10 @@ export default {
         customTitle:{
             type: Boolean,
             default: false
+        },
+        vCardClass:{
+            type: String,
+            default: ''
         }
     },
     methods: {
