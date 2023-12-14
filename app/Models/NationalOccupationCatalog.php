@@ -9,7 +9,12 @@ class NationalOccupationCatalog extends Model
 {
     use HasFactory;
     protected $table = 'mx_national_occupations_catalog';
-    protected $fillable = ['workspace_id','course_id','indications','active'];
+    protected $fillable = ['code','name'];
     public $timestamps = false;
 
+    public function scopeSearchByCodeOrName($query, $searchTerm)
+    {
+        return $query->where('code', '=', $searchTerm)
+                     ->orWhere('name', '=', $searchTerm);
+    }
 }

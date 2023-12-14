@@ -5,14 +5,15 @@ namespace App\Models\Massive;
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\UsuarioMaster;
 use App\Models\Massive;
 use App\Models\Criterion;
 use App\Models\Workspace;
+use App\Models\UsuarioMaster;
 use App\Models\CriterionValue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\NationalOccupationCatalog;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
@@ -181,6 +182,21 @@ class UserMassive extends Massive implements ToCollection
                 }
 
                 $user[$dt['code']] = (mb_strtolower($dt['value_excel']) == 'active') ? 1 : 0;
+            }
+
+            //DC3
+            if($dt['code'] == 'national_occupation_id'){
+                $occupation =  NationalOccupationCatalog::searchByCodeOrName(trim($dt['value_excel']))->first();
+                if($occupation){
+                    $user[$dt['code']] = $occupation->id;
+                }else{
+                    $has_error = true;
+                    $errors_index[] = [
+                        'index' => $dt['index'],
+                        'message' => 'El valor no fue encontrado.'
+                    ];
+                    continue;
+                }
             }
         }
         //verify username and email fields are unique
@@ -464,9 +480,9 @@ class UserMassive extends Massive implements ToCollection
     }
     public function getStaticHeaders()
     {
+        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
         if (env('MULTIMARCA') === true) {
-
-            return collect([
+            $staticHeaders = collect([
                 ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
                 // ['required' => true, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
                 // ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
@@ -478,10 +494,13 @@ class UserMassive extends Massive implements ToCollection
                 // ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
                 ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
             ]);
-
+            if($has_DC3_functionality){
+                $staticHeaders->splice(5, 0, ['required' => true, 'header_name' => 'CURP', 'code' => 'curp']);
+                $staticHeaders->splice(6, 0, ['required' => true, 'header_name' => 'OCUPACIÓN', 'code' => 'national_occupation_id']);
+            }
         }else {
 
-            return collect([
+            $staticHeaders = collect([
                 ['required' => true, 'header_name' => 'ESTADO', 'code' => 'active'],
                 ['required' => false, 'header_name' => 'NOMBRE COMPLETO', 'code' => 'fullname'],
                 ['required' => false, 'header_name' => 'USERNAME', 'code' => 'username'],
@@ -493,7 +512,12 @@ class UserMassive extends Massive implements ToCollection
                 ['required' => false, 'header_name' => 'NÚMERO DE PERSONA COLABORADOR', 'code' => 'person_number'],
                 ['required' => false, 'header_name' => 'EMAIL', 'code' => 'email']
             ]);
+            if($has_DC3_functionality){
+                $staticHeaders->splice(7, 0, [['required' => true, 'header_name' => 'CURP', 'code' => 'curp']]);
+                $staticHeaders->splice(8, 0, [['required' => true, 'header_name' => 'OCUPACIÓN', 'code' => 'national_occupation_id']]);
+            }
         }
+        return $staticHeaders;
     }
 
     private function excelDateToDate($fecha)
