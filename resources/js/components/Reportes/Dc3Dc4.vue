@@ -193,6 +193,7 @@ export default {
         ,
         generateReport() {
             const vue = this
+            console.log(vue.reportType);
             vue.$emit('generateReport', {callback: vue.exportSegmentacion, type: vue.reportType})
         },
         async exportSegmentacion(reportName) {

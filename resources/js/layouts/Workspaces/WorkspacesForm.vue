@@ -37,11 +37,12 @@
                         <v-icon>mdi-text-box-search-outline</v-icon>
                         <span class="ml-3">Configuración</span>
                     </v-tab>
+                    <!--  &&  -->
                     <v-tab
                         href="#tab-4"
                         :key="4"
                         class="primary--text"
-                        v-if="is_superuser"
+                        v-if="is_superuser && showDc3Section"
                     >
                         <v-icon>mdi-text-box-search-outline</v-icon>
                         <span class="ml-3">Configuración (DC3-DC4)</span>
@@ -285,6 +286,7 @@
                                                     hide-details
                                                     v-model="resource.selected_functionality[functionality.id]"
                                                     :label="functionality.name"
+                                                    @change="verifyFunactionality"
                                                 >
                                                 </v-checkbox>
                                             </v-col>
@@ -394,7 +396,8 @@
                             </template>
                         </DefaultSection>
                     </v-tab-item>
-                    <v-tab-item :key="4" :value="'tab-4'">
+                    <!-- v-if="resource.selected_functionality.find(sf == taxonomy_id_dc3)" -->
+                    <v-tab-item :key="4" :value="'tab-4'" v-if="showDc3Section">
                         <DefaultSection title="Datos del trabajador (DC3)" v-if="is_superuser">
                             <template v-slot:content>
                                 <v-row justify="space-around">
@@ -443,6 +446,7 @@
                                             v-model="resource.dc3_configuration.value_position"
                                             dense
                                             class="mb-3"
+                                            :rules="rules.dc3"
                                         />
                                     </v-col>
                                     <v-col cols="3">
@@ -453,6 +457,7 @@
                                             item-value="criterion_id"
                                             label="Relación criterio"
                                             dense
+                                            :rules="rules.dc3"
                                         />
                                     </v-col>
                                 </v-row>
@@ -478,6 +483,7 @@
                                             dense
                                             class="mb-3 mx-1"
                                             v-model="resource.dc3_configuration.subwokspace_data[index].name_or_social_reason"
+                                            :rules="rules.dc3"
                                         />
                                     </v-col>
                                     <v-col cols="4">
@@ -486,6 +492,7 @@
                                             dense
                                             class="mb-3 mx-1"
                                             v-model="resource.dc3_configuration.subwokspace_data[index].shcp"
+                                            :rules="rules.dc3"
                                         />
                                     </v-col>
                                 </v-row>
@@ -616,7 +623,10 @@ export default {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
                 qualification_type_id: this.getRules(['required']),
-            }
+                dc3: this.getRules(['required']),
+            },
+            taxonomy_id_dc3:0,
+            showDc3Section:false
         }
     }
     // })
@@ -639,7 +649,7 @@ export default {
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
             vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
-
+            vue.showDc3Section=false;
             vue.resource.limit_allowed_storage = null;
             vue.limit_allowed_users = null;
         }
@@ -739,7 +749,7 @@ export default {
             })
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
-
+            console.log(url,'url');
             await this.$http
                 .get(url)
                 .then(({data}) => {
@@ -772,13 +782,19 @@ export default {
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
                     vue.functionalities = data.data.functionalities;
+                    const taxonomy_id_dc3 = data.data.functionalities.find(f => f.code == 'dc3-dc4');
+                    vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
                     vue.subworkspaces = data.data.subworkspaces;
                     vue.resource.selected_functionality = {};
                     data.data.functionalities_selected.forEach(c => {
+                        if(c.code == 'dc3-dc4'){
+                            vue.showDc3Section = true;
+                        }
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.functionalities
                         );
                     });
+                    
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -801,6 +817,10 @@ export default {
             }
 
             return exists;
+        },
+        verifyFunactionality(){
+            let vue = this;
+            vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
         }
     }
 }
