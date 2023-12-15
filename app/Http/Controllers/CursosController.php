@@ -45,6 +45,8 @@ use App\Http\Requests\Curso\CursosStoreUpdateRequest;
 class CursosController extends Controller
 {
 
+    public static $coursesUsersAssigned = [];
+
     public function search(School $school, Request $request)
     {
         $request->merge(['school_id' => $school->id ?? null]);
@@ -69,31 +71,18 @@ class CursosController extends Controller
         if (auth()->user()->getAbilities()->where('entity_id',$entity_id)->first()) {
             $request->hasHabilityToShowProjectButtons = true;
         }
-        //Get data
-        $paginatedCourses = Course::search($request)->toArray();
+//        //Get data
+        $paginatedCourses = Course::search($request);
 
         // Get users asigned to courses
 
-        $coursesIds = collect($paginatedCourses['data'])
+        $courses = $paginatedCourses->toArray()['data'];
+        $coursesIds = collect($courses)
             ->pluck('id')
             ->toArray();
 
-        $coursesUsersAssigned = CourseInfoUsersM::whereIn('course_id', $coursesIds)
+        self::$coursesUsersAssigned = CourseInfoUsersM::whereIn('course_id', $coursesIds)
         ->get();
-
-        // Set assigned users to every course
-
-        $courses = $paginatedCourses['data'];
-        foreach ($courses as &$course) {
-            $users = $coursesUsersAssigned
-                ->where('course_id', $course['id'])
-                ->first();
-
-            $course['assigned_users'] = $users
-                ? $users['total_user_assignment']
-                : 0;
-        }
-        $paginatedCourses['data'] = $courses;
 
         CursoSearchResource::collection($paginatedCourses);
 

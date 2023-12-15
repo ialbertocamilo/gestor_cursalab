@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Curso;
 
+use App\Http\Controllers\CursosController;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\FileService;
 use Carbon\Carbon;
@@ -41,6 +42,17 @@ class CursoSearchResource extends JsonResource
             $pivot_id_selected = $request->school_id  ?? $request->schools[0];
         }
 
+
+        // Set assigned users to every course
+
+        $users = CursosController::$coursesUsersAssigned
+            ->where('course_id', $this->id)
+            ->first();
+
+        $assignedUsers = $users
+            ? $users['total_user_assignment']
+            : 0;
+
         $_course = [
             'id' => $this->id,
             'name' => $this->name,
@@ -57,11 +69,13 @@ class CursoSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,
+
             'active_topics_count' => $this->active_topics_count,
             'inactive_topics_count' => $this->inactive_topics_count,
             'activate_at' => $this->activate_at,
             'deactivate_at' => $this->deactivate_at,
-            'assigned_users' => $this->assigned_users,
+            'assigned_users' => $assignedUsers,
+
             'encuesta_count' => $this->polls_count,
             'segments_count' => $this->segments_count,
             'active' => $this->active,
