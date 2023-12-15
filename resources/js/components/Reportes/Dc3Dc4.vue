@@ -128,7 +128,7 @@ export default {
             },
             types_report:[
                 {code:'dc3_report',name:'Reporte DC3'},
-                {code:'dc4_report',name:'Reporte DC4'},
+                // {code:'dc4_report',name:'Reporte DC4'},
             ],
             type_dc3_report:'by_course',
             search: null,

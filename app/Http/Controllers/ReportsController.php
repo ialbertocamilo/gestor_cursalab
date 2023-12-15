@@ -78,8 +78,10 @@ class ReportsController extends Controller
      */
     public function loadRepotsTypes(): JsonResponse
     {
-        return $this->success(
-            Taxonomy::getDataByGroupAndType('reports', 'report')
+        $hasPermissionToShowDc3Report =  boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());;
+        return $this->success([
+            'types'=>Taxonomy::getDataByGroupAndType('reports', 'report')
+            ,'hasPermissionToShowDc3Report'=>$hasPermissionToShowDc3Report]
         );
     }
 

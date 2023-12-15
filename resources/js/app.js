@@ -284,7 +284,6 @@ const app = new Vue({
             const vue = this
 
             // Notify user that report is ready to donwload
-            console.log(e);
             if (e.success) {
 
                 this.$toast.warning({

@@ -104,7 +104,7 @@
                        Notas por curso
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='dc3-dc4-report'>
+                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' v-if="permissions.hasPermissionToShowDc3Report">
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        DC3 - DC4
@@ -336,7 +336,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.hasPermissionToShowDc3Report">
                     <v-card flat>
                         <v-card-text>
                             <Dc3Dc4
@@ -640,13 +640,13 @@ import ChecklistGeneral from "../components/Reportes/ChecklistGeneral.vue";
 import Ranking from "../components/Reportes/Ranking.vue";
 import Meetings from "../components/Reportes/Meetings";
 import Segmentacion from '../components/Reportes/Segmentacion.vue';
-import ReportsHistory from "../components/Reportes/ReportsHistory.vue";
+import ReportsHistory from "../components/Reportes/ReportsHistory";
 import EmptyCriteria from "../components/Reportes/EmptyCriteria.vue";
 import UsersHistory from "../components/Reportes/UsersHistory.vue";
 import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
 import Votaciones from "../components/Reportes/Votaciones.vue";
-import Dc3Dc4 from '../components/Reportes/Dc3Dc4.vue'
+import Dc3Dc4 from '../components/Reportes/Dc3Dc4'
 
 export default {
     components: {
@@ -715,7 +715,10 @@ export default {
             isBeingProcessedNotification: false,
             isReadyNotification: false,
             reportDownloadUrl: null,
-            reportFilename: null
+            reportFilename: null,
+            permissions:{
+                hasPermissionToShowDc3Report:false
+            }
         }
     },
     mounted () {
@@ -757,7 +760,22 @@ export default {
         },
         async fetchData() {
             let vue = this;
+            // Fetch report types
 
+            let reportTypesUrl = '../reports/types'
+            try {
+                let response3 = await axios({
+                    url: reportTypesUrl,
+                    method: 'get'
+                })
+
+                vue.reportTypes = response3.data.data.types;
+                vue.permissions.hasPermissionToShowDc3Report = response3.data.data.hasPermissionToShowDc3Report;
+
+            } catch (ex) {
+                console.log(ex)
+            }
+            //Init data
             let {
                 userSession,
                 adminId,
@@ -775,19 +793,7 @@ export default {
             this.admins = admins
             this.VademecumList = VademecumList
 
-            // Fetch report types
-
-            let reportTypesUrl = '../reports/types'
-            try {
-                let response3 = await axios({
-                    url: reportTypesUrl,
-                    method: 'get'
-                })
-
-                vue.reportTypes = response3.data.data
-            } catch (ex) {
-                console.log(ex)
-            }
+            
 
             vue.isSuperUser = vue.isSuper();
         },

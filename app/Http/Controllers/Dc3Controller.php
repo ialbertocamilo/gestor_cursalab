@@ -18,10 +18,7 @@ class Dc3Controller extends Controller
         $filePath = 'dc3/'.$fileName;
         $data['title'] = $title;
         $pdf = PDF::loadView('pdf.dc3', $data);
-        // Guardar en S3
-        
         Storage::disk('s3')->put($filePath, $pdf->output());
-        // Devolver la URL del archivo en S3
         return $filePath;
     }
     public function generatePDFDownload(){
