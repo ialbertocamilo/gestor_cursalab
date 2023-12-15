@@ -175,8 +175,8 @@ class RestQuizController extends Controller
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
                 'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
-                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),//$row->current_quiz_finishes_at->format('Y/m/d H:i'),
-                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))//$row->current_quiz_finishes_at),
+                'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
+                'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
 
