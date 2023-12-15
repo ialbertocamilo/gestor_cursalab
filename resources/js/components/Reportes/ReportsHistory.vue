@@ -202,7 +202,6 @@ export default {
          async download(url, name, id,ext) {
             let saveAuditUrl = `/reports/save/${id}`;
             const extension = ext || 'xlsx';
-            console.log('extension',extension,ext);
             this.$root.downloadReport(url, name + '.'+extension);
             try {
                 let response = await axios({

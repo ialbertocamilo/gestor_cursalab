@@ -284,7 +284,7 @@ const app = new Vue({
             const vue = this
 
             // Notify user that report is ready to donwload
-
+            console.log(e);
             if (e.success) {
 
                 this.$toast.warning({
@@ -298,7 +298,7 @@ const app = new Vue({
                         }
                     }),
                     listeners: {
-                        download: () => this.downloadReport(e.url, `${e.name}.xlsx`)
+                        download: () => this.downloadReport(e.url, `${e.name}.${e.ext ? e.ext : 'xlsx'}`)
                     }
                 });
             } else {
