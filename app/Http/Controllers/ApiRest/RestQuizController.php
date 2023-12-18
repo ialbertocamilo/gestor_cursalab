@@ -142,7 +142,7 @@ class RestQuizController extends Controller
 
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
-        
+
         // not consider open evaluation to attempts and time validations
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
