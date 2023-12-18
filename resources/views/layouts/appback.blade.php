@@ -1,5 +1,6 @@
 @php
     use Illuminate\Support\Facades\DB;
+    use \App\Models\Master\Customer;
 
     $user = auth()->user();
     $roles = $user->getRoles();
@@ -11,6 +12,8 @@
     $show_meeting_section = $accounts_count > 0 ? "admin" : "admin_DISABLE";
     // dd($roles,$show_meeting_section);
     $workspace = get_current_workspace();
+
+    $customer = Customer::getCurrentStatusByCode('claro');
 @endphp
 
 @include('layouts.header')
@@ -57,6 +60,16 @@ if (isset($fullScreen)) {
 
         </div>
     @endImpersonating
+
+    @if(true)
+        <div class="d-flex align-items-stretch bg-red text-center">
+
+            <div class="col text-center">
+                ¡Tienes un pago vencido! En [X] días tu plataforma se suspenderá. Comunícate con nuestro equipo para regularizar tus pagos.
+            </div>
+
+        </div>
+    @endif
 
     <div class="d-flex align-items-stretch">
 

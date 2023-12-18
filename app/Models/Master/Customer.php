@@ -24,13 +24,16 @@ class Customer extends BaseModel
 
     protected function getCurrentStatusByCode($code)
     {
-        $customer = Customer::where('name', $code)->first();
+        $customer = Customer::where('slug_empresa', $code)->first();
 
         if (!$customer) return 'not-found';
 
         if (!$customer->auto_deactivation) return 'not-configured';
 
         if (!$customer->active) return 'inactive';
+
+        if ($customer->platform_finish_date <= now()) return 'payment-missing';
+        // if ($customer->platform_finish_date <= now()) return 'payment-missing';
 
         return 'active';
     }
