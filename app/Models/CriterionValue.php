@@ -83,7 +83,7 @@ class CriterionValue extends BaseModel
 
     protected function search($request = null)
     {
-        $q = self::with('criterion.field_type');
+        $q = self::with('criterion.field_type')->withCount('users');
 
         if ($request->code)
             $q->whereHas('criterion', fn($q) => $q->where('code', $request->code));

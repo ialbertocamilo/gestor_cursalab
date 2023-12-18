@@ -91,7 +91,7 @@ export default {
                     // {text: "Módulo", value: "order", align: 'center', sortable: false},
                     // {text: "Módulo", value: "image", align: 'center', sortable: false},
                     {text: "Valor", value: "name", sortable: false},
-                    // {text: "Tipo", align: 'center', value: "type", sortable: false},
+                    {text: "Cantidad de usuarios", align: 'center', value: "users_count", sortable: false},
                     // {text: "Cantidad de Usuarios", align: 'center', value: "usuarios_count"},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
