@@ -22,7 +22,16 @@ class ValidateCurrentSession
     {
         $user = auth()->user();
 
-        if (!$user->active) {
+        $service_available = Customer::isAvailableByCode();
+
+        if (!$service_available) {
+
+            $user->token()->revoke();
+            
+            return response()->json(['error' => 'Service unavailable. User logged out'], 403);
+        }
+
+        if (  !$user->active) {
 
             $user->token()->revoke();
 
