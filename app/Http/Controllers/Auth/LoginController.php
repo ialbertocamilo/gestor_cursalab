@@ -144,62 +144,76 @@ class LoginController extends Controller
 
             $user = $this->guard()->user();
             $user->resetToNullCode2FA(); // reset 2fa values
-            $roles = Role::getRolesAdminNames();
 
-            // Al menos un workspace activo
-            $workspaces_active = $user->isAn('super-user');
 
-            if (!$workspaces_active) {
-                $workspaces_active = $user->getWorkspaces()->where('active', ACTIVE)->count() > 0;
-            }
+            if (!$user->canAccessPlatform(false)) {
 
-            if ( $user->isAn(...$roles) && $workspaces_active)
-            {
-            // if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
-            // {
-                if ($request->hasSession()) {
-                    $request->session()->put('auth.password_confirmed_at', time());
-                }
-                if(config('slack.routes.demo')){
-                    $message = "[{$customer}] Cursalab 2.0";
-                    $attachments = [
-                        [
-                            "color" => "#36a64f",
-                            "text" => 'El usuario con email: '.$user->email_gestor. ' se ha logueado'
-                        ]
-                    ];
-                    messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
-                }
-                $user->resetAttemptsUser(); // reset attempts
-
-                if($user->enable_2fa) {
-                    // verificacion de doble autenticacion
-                    $response2FA = (bool) $user->generateCode2FA();
-                    if($response2FA) {
-                        session()->put('init_2fa', $user->id);
-                        return redirect('/2fa');
-                    }
-                    // verificacion de doble autenticacion
-
-                } else {
-                    
-                    // === reset password ===
-                    if($user->checkIfCanResetPassword()) {
-                        return $this->showResetPassword();
-                    }
-                    // === reset password ===
-
-                    return $this->sendLoginResponse($request); // login
-                }
-
-            } else {
                 $this->guard()->logout();
 
                 $request->session()->invalidate();
 
                 $request->session()->regenerateToken();
+            
+            } else {
+
+                $roles = Role::getRolesAdminNames();
+
+                // Al menos un workspace activo
+                $workspaces_active = $user->isAn('super-user');
+
+                if (!$workspaces_active) {
+                    $workspaces_active = $user->getWorkspaces()->where('active', ACTIVE)->count() > 0;
+                }
+
+                if ( $user->isAn(...$roles) && $workspaces_active)
+                {
+                // if ( $user->isAn('super-user', 'admin', 'config', 'content-manager', 'trainer', 'reports','only-reports') )
+                // {
+                    if ($request->hasSession()) {
+                        $request->session()->put('auth.password_confirmed_at', time());
+                    }
+                    if(config('slack.routes.demo')){
+                        $message = "[{$customer}] Cursalab 2.0";
+                        $attachments = [
+                            [
+                                "color" => "#36a64f",
+                                "text" => 'El usuario con email: '.$user->email_gestor. ' se ha logueado'
+                            ]
+                        ];
+                        messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+                    }
+                    $user->resetAttemptsUser(); // reset attempts
+
+                    if($user->enable_2fa) {
+                        // verificacion de doble autenticacion
+                        $response2FA = (bool) $user->generateCode2FA();
+                        if($response2FA) {
+                            session()->put('init_2fa', $user->id);
+                            return redirect('/2fa');
+                        }
+                        // verificacion de doble autenticacion
+
+                    } else {
+                        
+                        // === reset password ===
+                        if($user->checkIfCanResetPassword()) {
+                            return $this->showResetPassword();
+                        }
+                        // === reset password ===
+
+                        return $this->sendLoginResponse($request); // login
+                    }
+
+                } else {
+                    $this->guard()->logout();
+
+                    $request->session()->invalidate();
+
+                    $request->session()->regenerateToken();
+                }
             }
         }
+        
         // verificar intentos   
         $user->checkTimeToReset($request->email); 
         if(config('slack.routes.demo')){

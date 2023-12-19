@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
+use App\Models\Master\Customer;
+
 class SubworkspaceInMaintenance extends Exception {};
 
 class AuthController extends Controller
@@ -34,6 +36,13 @@ class AuthController extends Controller
         }
 
         try {
+
+            $customer = Customer::getCurrentSession();
+
+            if ($customer && !$customer->hasServiceAvailable()) {
+
+                return $this->error('Plataforma suspendida. Comunícate con tu coordinador para más información. [C]', http_code: 503);
+            }
 
             $ambiente = Ambiente::first();
             $data = $request->validated();
@@ -683,6 +692,7 @@ class AuthController extends Controller
     public function configuracion_ambiente()
     {
         $ambiente = Ambiente::first();
+        $customer = Customer::getCurrentSession();
 
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
@@ -702,6 +712,10 @@ class AuthController extends Controller
             $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
             $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
             $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
+
+            $ambiente->service = [
+                'active' => $customer->hasServiceAvailable(),
+            ];
 
             return response()->json($ambiente);
         }

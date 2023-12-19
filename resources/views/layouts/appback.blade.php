@@ -13,7 +13,9 @@
     // dd($roles,$show_meeting_section);
     $workspace = get_current_workspace();
 
-    $customer = Customer::getCurrentStatusByCode('claro');
+    $customer = Customer::getCurrentSession();
+
+    // dd($customer);
 @endphp
 
 @include('layouts.header')
@@ -61,11 +63,11 @@ if (isset($fullScreen)) {
         </div>
     @endImpersonating
 
-    @if(true)
+    @if($customer && $customer->showStatusMessage('payment-missing'))
         <div class="d-flex align-items-stretch bg-red text-center">
 
             <div class="col text-center">
-                ¡Tienes un pago vencido! En [X] días tu plataforma se suspenderá. Comunícate con nuestro equipo para regularizar tus pagos.
+                ¡Tienes un pago vencido! En {{ $customer->getDaysToCuttoff() }} días tu plataforma se suspenderá. Comunícate con nuestro equipo para regularizar tus pagos.
             </div>
 
         </div>

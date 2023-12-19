@@ -22,28 +22,91 @@ class Customer extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'recurrence_type_id');
     }
 
-    protected function getCurrentStatusByCode($code)
+    public function getCurrentStatus()
     {
-        $customer = Customer::where('slug_empresa', $code)->first();
+        $customer = $this;
 
         if (!$customer) return 'not-found';
 
-        if (!$customer->auto_deactivation) return 'not-configured';
+        // if (!$customer->auto_deactivation) return 'not-configured';
 
-        if (!$customer->active) return 'inactive';
+        if (!$customer->estado) return 'inactive';
 
         if ($customer->platform_finish_date <= now()) return 'payment-missing';
-        // if ($customer->platform_finish_date <= now()) return 'payment-missing';
+
+        if ($customer->platform_cutoff_date <= now()) return 'platform-closed';
 
         return 'active';
     }
 
-    protected function isAvailableByCode($code)
+    protected function getCurrentStatusByCode($code)
     {
-        $status = Customer::getCurrentStatusByCode($code);
+        $customer = Customer::getCurrentByCode($code);
+
+        return $customer->getCurrentStatus();
+    }
+
+    public function hasServiceAvailable()
+    {
+        $status = $this->getCurrentStatus();
 
         if ($status == 'inactive') return false;
 
         return true;
     }
+
+    protected function getCurrentSession()
+    {
+        $customer_id = config('app.customer.id');
+        $customer = Customer::getCurrentById($customer_id);
+        // $ambiente = Ambiente::first();
+        // $customer = Customer::getCurrentByCode($ambiente->customer_code);
+
+        return $customer;
+    }
+
+    protected function getCurrentByCode($code)
+    {
+        return Customer::where('slug_empresa', $code)->first();
+    }
+
+    protected function getCurrentById($id)
+    {
+        return Customer::find($id);
+    }
+
+    public function hasStatusCode($status_code)
+    {
+        $current_status = $this->getCurrentStatus();
+
+        return $status_code == $current_status;
+    }
+
+    public function showStatusMessage($status_code)
+    {
+        return ($this->enable_messages &&  $this->hasStatusCode($status_code));
+    }
+
+    public function getDaysToCuttoff()
+    {
+        $days = 0;
+
+        if ($this->platform_cutoff_date) {
+
+            $days = $this->platform_cutoff_date->diffInDays(now());
+
+            $days = $days > 0 ? $days : 0;
+        }
+
+        return $days;
+    }
+
+    // protected function isAvailableByCode($code)
+    // {
+    //     $status = Customer::getCurrentStatusByCode($code);
+
+    //     if ($status == 'inactive') return false;
+
+    //     return true;
+    // }
 }

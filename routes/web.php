@@ -98,7 +98,7 @@ Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
-Route::middleware(['auth_2fa','auth'])->group(function () {
+Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(function () {
 
     Route::get('/impersonate/leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
     Route::get('/impersonate/take/{value}', [ImpersonateController::class, 'take'])->name('impersonate')->middleware('checkrol:super-user');

@@ -48,6 +48,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Models\Master\Customer;
+
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
     use HasApiTokens, HasFactory, Notifiable, HasRolesAndAbilities, HasPushSubscriptions;
@@ -1900,4 +1902,32 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $user->config_data()->updateOrCreate( ['user_id' => $user->id], $data);
     }
+
+    public function canAccessPlatform($cursalab_exception = true)
+    {
+        $customer = Customer::getCurrentSession();
+
+        if (!$cursalab_exception) {
+            
+            return $customer->hasServiceAvailable();
+        }
+
+        return ($this->isCursalabUser() || $customer->hasServiceAvailable());
+    }
+
+    public function isCursalabUser($only_superuser = false)
+    {
+        if ($only_superuser) {
+
+            if (!$this->isAn('super-user')) {
+                return false;
+            }
+        }
+
+        $email_has_domain = str_contains($this->email_gestor, '@cursalab.io');
+        $is_cursalab_type = $this->type?->code == 'cursalab';
+
+        return ($email_has_domain && $is_cursalab_type);
+    }
+
 }
