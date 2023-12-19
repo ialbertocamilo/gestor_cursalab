@@ -274,9 +274,10 @@ export default {
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     // {text: "Nombre", value: "curso_nombre_escuela", sortable: false},
                     // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
+                    {text: "Fecha de creación", value: "created_at", sortable: false},
                     {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
-                    {text: "Módulos", value: "images", sortable: false},
+                    //{text: "Módulos", value: "images", sortable: false},
                     {text: "Estado", value: "statusActions", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -285,25 +286,49 @@ export default {
                 ],
                 actions: [
                     {
-                        text: "Temas",
-                        icon: 'fas fa-book',
-                        type: 'route',
-                        count: 'temas_count',
-                        route: 'temas_route'
-                    },
-                    {
-                        text: "Segmentación",
-                        icon: 'fa fa-square',
-                        type: 'action',
-                        count: 'segments_count',
-                        method_name: 'segmentation'
-                    },
-                    {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
                         // show_condition: "is_cursalab_super_user"
+                    },
+                    {
+                        text: "Temas",
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        route: 'temas_route',
+                        countBadgeConditions: [{
+                            message: 'El curso no tiene temas activos',
+                            minValue: 0,
+                            propertyCond: 'active_topics_count',
+                            propertyShow: 'active_inactive_topics_count',
+                            backgroundColor: 'red'
+                        },{
+                            message: '',
+                            minValue: 1,
+                            propertyCond: 'active_topics_count',
+                            propertyShow: 'active_inactive_topics_count',
+                            backgroundColor: '#5458EA'
+                        }]
+                    },
+                    {
+                        text: "Segmentación",
+                        icon: 'mdi mdi-account-group segmentation-icon',
+                        type: 'action',
+                        method_name: 'segmentation',
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes colaboradores participantes en el curso',
+                            minValue: 0,
+                            propertyCond: 'assigned_users',
+                            color: 'red',
+                            icon: 'mdi mdi-alert'
+                        },{
+                            message: 'Selecciona a los colaboradores que participarán en el curso',
+                            minValue: 1,
+                            propertyCond: 'assigned_users',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                     // {
                     //     text: "Editar",
@@ -691,3 +716,9 @@ export default {
 
 }
 </script>
+<style>
+.segmentation-icon {
+    font-size: 20px;
+    line-height: 6px;
+}
+</style>

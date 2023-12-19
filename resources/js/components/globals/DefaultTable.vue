@@ -247,6 +247,7 @@
                         height="65"
                         max-width="100"
                         :src="item.image"
+                        style="border-radius: 5px"
                     >
                         <template v-slot:placeholder>
                             <v-row
@@ -330,7 +331,7 @@
                         <br> <span class="table-default-icon-title" v-text="'Programado'"/>
                     </div>
 
-                    <div v-if="getStatusIcon(item) === 'scheduled'"
+                    <div v-if="getStatusIcon(item) === 'invisible'"
                          class="text-center">
                         <v-icon :color="'red'"
                         >
@@ -347,7 +348,7 @@
                     <!-- {{ item }} -->
                     <div v-for="action in dataTable.actions">
                         <button
-                            type="button" class="btn btn-md"
+                            type="button" class="btn btn-md position-relative"
                             :title="action.text"
                             @click="doAction(action, item)"
                             v-if="!action.show_condition || (action.show_condition && item[action.show_condition])"
@@ -361,6 +362,22 @@
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
                                 <br> <span class="table-default-icon-title" v-text="action.text"/>
                             </v-badge>
+
+                            <v-badge v-else-if="(action.countBadgeConditions)"
+                                     :color="item.active ? getConditionalCountColor(item, action.countBadgeConditions) : 'grey'"
+                                     :content="getConditionalCount(item, action.countBadgeConditions)"
+                                     :class="'badge-small'">
+                                <i :class="action.icon"/>
+                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                            </v-badge>
+
+                            <template v-else-if="(action.conditionalBadgeIcon)">
+                                <i :class="action.icon"/>
+                                <i :class="getConditionalBadgeIcon(item, action.conditionalBadgeIcon)"
+                                   class="badge-icon"
+                                   :style="{color: getConditionalBadgeIconColor(item, action.conditionalBadgeIcon) + ' !important'}"></i>
+                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                            </template>
 
                             <template v-else>
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
@@ -850,6 +867,32 @@
                 <div class="py-2">
 
                     <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
+                    <div class="d-flex justify-content-start modules-images pt-3">
+                        <v-img
+                            v-for="(row, index) in item.images"
+                            max-height="50"
+                            max-width="50"
+                            :key="index"
+                            :src="row.image"
+                            class="mr-3"
+                            :title="row.name"
+                            style="border-radius: 15px"
+                        >
+                            <template v-slot:placeholder>
+                                <v-row
+                                    class="fill-height ma-0"
+                                    align="center"
+                                    justify="center"
+                                >
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="grey lighten-5"
+                                    ></v-progress-circular>
+                                </v-row>
+                            </template>
+                        </v-img>
+                    </div>
+
 
                  <!--    <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
                         <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
@@ -1289,6 +1332,38 @@ export default {
             }
 
             return iconType
+        },
+        getConditionalCount(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return item[condition['propertyShow']]
+
+        },
+        getConditionalCountColor(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['backgroundColor']
+        },
+
+        getConditionalBadgeIconColor(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['color']
+        },
+
+        getConditionalBadgeIcon(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['icon']
+        },
+        getMatchedCondition(item, conditions) {
+
+            let higherIndex = -1;
+            conditions.forEach((condition, index) => {
+                const key = condition['propertyCond'];
+                const value = item[key];
+                if (value >= condition['minValue']) {
+                    higherIndex = index;
+                }
+            })
+
+            return conditions[higherIndex];
         }
     }
 }
@@ -1335,6 +1410,20 @@ span.custom_benefit_type {
 
 .row-icon.red {
     color: #FF4242
+}
+
+.badge-small .v-badge__badge {
+
+    border-radius: 3px;
+    padding: 2px 4px 0 4px;
+    font-size: 10px !important;
+    height: 12px !important;
+    letter-spacing: 2px !important;
+}
+
+.badge-icon {
+    position: absolute;
+    top: 0;
 }
 
 </style>
