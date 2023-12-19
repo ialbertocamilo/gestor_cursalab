@@ -226,6 +226,7 @@ class UsuarioController extends Controller
 
     public function getFormSelects($compactResponse = false)
     {
+
         $current_workspace = get_current_workspace();
 
         $all_modules = $current_workspace->subworkspaces()->get()->pluck('criterion_value_id')->toArray();
