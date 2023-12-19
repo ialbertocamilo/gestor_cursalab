@@ -52,8 +52,8 @@
                                 v-for="(item, i) in dataTable.customSelectActions"
                                 :key="i"
                             >
-                                <v-list-item-title 
-                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))" 
+                                <v-list-item-title
+                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))"
                                     style="cursor: pointer;"
                                 >
                                     {{ item.text }}
@@ -83,7 +83,7 @@
 
             <!-- VOTACIONES -->
             <template v-slot:item.etapa="{item, header}">
-                <DefaultButton 
+                <DefaultButton
                     dense
                     text
                     :label="item.etapa"
@@ -93,7 +93,7 @@
 
             <!-- VOTACIONES - DETALLE -->
             <template v-slot:item.actions_sustent="{item, header}">
-                <DefaultButton 
+                <DefaultButton
                     dense
                     small
                     :color="(item.state_sustent) ? 'success' : 'primary'"
@@ -106,8 +106,8 @@
 
                 <v-chip
                     v-if="dataObject.availableStageVotation"
-                    class="ma-2" 
-                    color="primary" 
+                    class="ma-2"
+                    color="primary"
                     :disabled="!item.candidate_state"
                     outlined
                     >
@@ -122,8 +122,8 @@
               <!-- VOTACIONES - DETALLE -->
             <template v-slot:item.criterio_porcent="{item, header}">
                 <v-chip
-                    class="ma-2" 
-                    :color="item.porcent_state ? 'success' : 'primary' " 
+                    class="ma-2"
+                    :color="item.porcent_state ? 'success' : 'primary' "
                     outlined
                     >
 
@@ -158,7 +158,7 @@
             <template v-slot:item.images="{ item, header }">
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
-<!-- 
+<!--
                     <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
                         :style="`
                             background-image: url(${row.image});
@@ -307,6 +307,38 @@
                             </v-row>
                         </template>
                     </v-img>
+                </div>
+            </template>
+            <template v-slot:item.statusActions="{ item, header }">
+                <div class="default-table-actions d-flex justify-center flex-row my-2"
+                     v-if="dataTable.statusActions">
+
+                    <div v-if="getStatusIcon(item) === 'active'">
+                        <i class="row-icon fa fa-circle"/>
+                        <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                    </div>
+
+                    <div v-if="getStatusIcon(item) === 'inactive'" >
+                        <i class="row-icon far fa-circle"/>
+                        <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                    </div>
+
+
+                    <div v-if="getStatusIcon(item) === 'scheduled'"
+                         class="text-center">
+                        <i class="row-icon fa fa-clock"/>
+                        <br> <span class="table-default-icon-title" v-text="'Programado'"/>
+                    </div>
+
+                    <div v-if="getStatusIcon(item) === 'scheduled'"
+                         class="text-center">
+                        <v-icon :color="'red'"
+                        >
+                            mdi-alert
+                        </v-icon>
+                        <br> <span class="table-default-icon-title" v-text="'No visible'"/>
+                    </div>
+
                 </div>
             </template>
             <template v-slot:item.actions="{ item, header }">
@@ -704,7 +736,7 @@
             <template v-slot:item.curso_nombre_escuela="{item, header}">
                 <div class="py-2">
                     <p class="my-0">
-                        {{ item.curso_nombre_escuela.curso }} 
+                        {{ item.curso_nombre_escuela.curso }}
                     </p>
                     <p class="my-0" v-if="item.curso_nombre_escuela.escuela"><small><strong>Escuela:</strong> {{ item.curso_nombre_escuela.escuela }}</small></p>
                     <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
@@ -743,16 +775,16 @@
                             </template>
                         </v-img>
                     </div>
-                    
+
                 </div>
             </template>
 
             <template v-slot:item.escuela_nombre="{item, header}">
                 <div class="py-2">
                     <p class="my-0">
-                        {{ item.escuela_nombre.name }} 
+                        {{ item.escuela_nombre.name }}
                     </p>
-                    
+
                     <!-- <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
 
                         <v-img
@@ -778,7 +810,7 @@
                             </template>
                         </v-img>
                     </div> -->
-                    
+
                 </div>
             </template>
 
@@ -1234,6 +1266,29 @@ export default {
         checkOrUncheckAllItems(){
             let vue = this;
             vue.rows.forEach(item => (item.selected = vue.all_check_select));
+        },
+        getStatusIcon(item) {
+
+            let iconType = ''
+            let isScheduled = item.activate_at || item.deactivate_at;
+
+            if (isScheduled) {
+                iconType = 'scheduled'
+            } else {
+                if (item.active) {
+
+                    if (item.active_topics_count) {
+                        iconType = 'active'
+                    } else {
+                        iconType = 'invisible' // active without topics
+                    }
+
+                } else {
+                    iconType = 'inactive'
+                }
+            }
+
+            return iconType
         }
     }
 }
@@ -1273,4 +1328,13 @@ span.custom_benefit_type {
         max-width: 100%;
     }
 }
+
+.row-icon {
+    font-size: 16px;
+}
+
+.row-icon.red {
+    color: #FF4242
+}
+
 </style>

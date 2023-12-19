@@ -70,7 +70,7 @@ class CursoSearchResource extends JsonResource
             // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,
 
-            'active_topics_count' => $this->active_topics_count,
+            'active_topics_count' => $this->topics_count,
             'inactive_topics_count' => $this->inactive_topics_count,
             'activate_at' => $this->activate_at,
             'deactivate_at' => $this->deactivate_at,

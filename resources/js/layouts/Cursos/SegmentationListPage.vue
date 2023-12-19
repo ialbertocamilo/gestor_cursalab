@@ -38,7 +38,7 @@
                     :label="'Crear curso'"
                     @click="openFormModal(modalCourseOptions, null, 'create')"
                 />
-   
+
             </v-card-title>
         </v-card>
         <!--        FILTROS-->
@@ -277,7 +277,11 @@ export default {
                     {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
                     {text: "Módulos", value: "images", sortable: false},
+                    {text: "Estado", value: "statusActions", align: 'center', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                ],
+                statusActions: [
+
                 ],
                 actions: [
                     {
