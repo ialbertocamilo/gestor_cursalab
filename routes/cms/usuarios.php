@@ -14,7 +14,7 @@ Route::controller(UsuarioController::class)->group(function () {
 	Route::get('/search', 'search');
 	Route::get('/get-list-selects', 'getListSelects');
 
-	Route::get('/form-selects', 'getFormSelects');
+	Route::get('/form-selects', 'getFormSelectsV2');
 
 	Route::post('/store', 'store');
     Route::get('/{user}/edit', 'edit');

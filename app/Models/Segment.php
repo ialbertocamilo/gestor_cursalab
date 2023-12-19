@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use App\Http\Resources\SegmentSearchUsersResource;
-use DB;
+use Illuminate\Support\Facades\DB;
 
-class
-Segment extends BaseModel
-{
+class Segment extends BaseModel{
     protected $fillable = [
         'name', 'model_id', 'model_type', 'active', 'type_id', 'code_id'
     ];
@@ -79,6 +77,85 @@ Segment extends BaseModel
             ->get();
     }
 
+    protected function getCriteriaByWorkspaceV2($workspace)
+{
+    $results = DB::select('
+        SELECT
+            c.id,
+            c.name,
+            c.code,
+            t.name AS taxonomy_name,
+            t.code AS taxonomy_code,
+            cv.value_text,
+            cv.value_date,
+            c.field_id,
+            cv.id as criterion_value_id
+
+        FROM
+            criterion_value_workspace cvw
+        LEFT JOIN criterion_values cv ON
+            cvw.criterion_value_id = cv.id
+        JOIN criteria c ON
+            cv.criterion_id = c.id
+        JOIN taxonomies t ON
+            c.field_id = t.id
+        WHERE
+            cvw.workspace_id = ?
+            AND cv.criterion_id IN (
+                SELECT
+                    criterion_id
+                FROM
+                    criterion_workspace cw
+                WHERE
+                    available_in_segmentation = 1
+                    AND workspace_id = ?
+            )
+    ', [$workspace->id, $workspace->id]);
+
+    $groupedCriteria = [];
+
+    foreach ($results as $result) {
+        $code = $result->code;
+
+        if (!isset($groupedCriteria[$code])) {
+            $groupedCriteria[$code] = [
+                'id' => $result->id,
+                'name' => $result->name,
+                'code' => $result->code,
+                'fiel_id' => $result->field_id,
+                'field_type' => [
+                    'id' => $result->field_id,
+                    'name' => $result->taxonomy_name,
+                    'code' => $result->taxonomy_code,
+                ],
+                'values' => [
+
+                        [
+                            'id' => $result->criterion_value_id,
+                            'criterion_id' => $result->id,
+                            'value_boolean' => 0,
+                            'value_date' => $result->value_date,
+                            'value_text' => $result->value_text,
+                        ],
+
+                ],
+            ];
+        } else {
+            $groupedCriteria[$code]['values'][] = [
+                'id' => $result->criterion_value_id,
+                'criterion_id' => $result->id,
+                'value_boolean' => 0,
+                'value_date' => $result->value_date,
+                'value_text' => $result->value_text,
+            ];
+        }
+    }
+
+    $groupedCriteria = array_values($groupedCriteria);
+
+    return $groupedCriteria;
+}
+
     protected function getSegmentsByModel($criteria, $model_type, $model_id)
     {
         if ($model_type and $model_id) {
@@ -121,6 +198,135 @@ Segment extends BaseModel
 
         return $segments;
     }
+
+    public static function getSegmentsByModelV2($model_type, $model_id)
+    {
+        $query = self::segmentsQuery($model_type, $model_id);
+        $segments = self::getSegmentsByCode($query);
+        return $segments;
+
+    }
+    public static function getSegmentsByCode($results ) {
+        $data = [];
+
+        foreach ($results as $result) {
+            // Agregar datos del primer conjunto
+            $data[$result->id]['id'] = $result->id;
+            $data[$result->id]['name'] = $result->name;
+            $data[$result->id]['model_id'] = $result->model_id;
+            $data[$result->id]['model_type'] = $result->model_type;
+            $data[$result->id]['type_id'] = $result->type_id;
+            $data[$result->id]['type_code'] = $result->code;
+            $data[$result->id]['type']['id'] = $result->field_id;
+            $data[$result->id]['type']['name'] = $result->name;
+            $data[$result->id]['type']['code'] = $result->code;
+
+            $criteriaId = $result->criteria_id;
+
+
+
+            if ($result->code === 'direct-segmentation'){
+                $data[$result->id]['criteria_selected'][$criteriaId] = [
+                    'name' => $result->criteria_name,
+                    'code' => $result->criteria_code,
+                    'id' => $criteriaId,
+                    'field_id' => $result->field_id,
+                    'field_type' => [
+                        'id' => $result->field_id,
+                        'name' => $result->criteria_taxonomie_name,
+                        'code' => $result->criteria_taxonomie_code,
+                    ]
+                ];
+                $data[$result->id]['direct_segmentation'][$criteriaId] = [
+                    'name' => $result->criteria_name,
+                    'code' => $result->criteria_code,
+                    'id' => $criteriaId,
+                    'field_id' => $result->field_id,
+                    'field_type' => [
+                        'id' => $result->field_id,
+                        'name' => $result->criteria_taxonomie_name,
+                        'code' => $result->criteria_taxonomie_code,
+                    ],
+                ];
+                $data[$result->id]['direct_segmentation'][$criteriaId]['values'][] = [
+                    'id' => $result->criterion_value_id,
+                    'criterion_id'=> $result->criteria_id,
+                    'value_text' => $result->value_text,
+                    'value_date' => $result->value_date,
+                    'value_boolean'=> 0,
+                ];
+                if ($result->criteria_taxonomie_code === 'date'){
+                    $starts_at = carbonFromFormat($result->starts_at)->format('Y-m-d');
+                    $finishes_at = carbonFromFormat($result->finishes_at)->format('Y-m-d');
+                    $data[$result->id]['direct_segmentation'][$criteriaId]['values_selected'][] = [
+                        'id' => $result->criterion_value_id,
+                        'value_text' => $result->value_text,
+                        'segment_value_id' => $result->segment_value_id,
+                        'start_date' => $starts_at,
+                        'end_date' => $finishes_at,
+                        'name' => $starts_at .' - '. $finishes_at,
+                        'date_range' => [
+                            $starts_at, $finishes_at
+                        ]
+                    ];
+                    $data[$result->id]['criteria_selected'][$criteriaId]['values_selected'][] = [
+                        'id' => $result->criterion_value_id,
+                        'value_text' => $result->value_text,
+                        'segment_value_id' => $result->segment_value_id,
+                        'start_date' => $starts_at,
+                        'end_date' => $finishes_at,
+                        'name' => $starts_at .' - '. $finishes_at,
+                        'date_range' => [
+                            $starts_at, $finishes_at
+                        ]
+                    ];
+                } else {
+                    $data[$result->id]['direct_segmentation'][$criteriaId]['values_selected'][] = [
+                        'id' => $result->criterion_value_id,
+                        'value_text' => $result->value_text,
+                        'segment_value_id' => $result->segment_value_id,
+                    ];
+                    $data[$result->id]['criteria_selected'][$criteriaId]['values_selected'][] = [
+                        'id' => $result->criterion_value_id,
+                        'value_text' => $result->value_text,
+                        'segment_value_id' => $result->segment_value_id,
+                    ];
+                }
+                $data[$result->id]['criteria_selected'][$criteriaId]['values'][] = [
+                    'id' => $result->criterion_value_id,
+                    'criterion_id'=> $result->criteria_id,
+                    'value_text' => $result->value_text,
+                    'value_date' => $result->value_date,
+                    'value_boolean'=> 0,
+                ];
+
+                $data[$result->id]['direct_segmentation'] = array_values($data[$result->id]['direct_segmentation']);
+            }
+            if ($result->code === 'segmentation-by-document'){
+                $data[$result->id]['criteria_selected'][] = [
+                    'criterion_value_id' => $result->criterion_value_id,
+                    'document' => $result->value_text,
+                    'fullname' => $result->fullName,
+                    'segment_value_id' => $result->segment_value_id,
+                ];
+
+                $data[$result->id]['segmentation_by_document'][] = [
+                    'criterion_value_id' => $result->criterion_value_id,
+                    'document' => $result->value_text,
+                    'fullname' => $result->fullName,
+                    'segment_value_id' => $result->segment_value_id,
+                ];
+
+            }
+
+            $data[$result->id]['criteria_selected'] = array_values($data[$result->id]['criteria_selected']);
+
+        }
+
+        return array_values($data);
+    }
+
+
 
     public function setDataDirectSegmentation($criteria, Segment $segment)
     {
@@ -729,5 +935,51 @@ Segment extends BaseModel
         array_push($list_segments_document, $segment);
 
         return $list_segments_document;
+    }
+    public static function segmentsStored ($model_id){
+        $segment = DB::select('call getSegmentData(2)');
+        return $segment;
+    }
+    public static function segmentsQuery ($model_type, $model_id){
+        if($model_type and $model_id)
+        $segments = DB::select(DB::raw("
+                SELECT
+                    s.id,
+                    s.type_id,
+                    s.name as segment_name,
+                    s.model_id,
+                    s.model_type,
+                    t2.code,
+                    t2.name,
+                    c.id as criteria_id,
+                    c.code as criteria_code,
+                    c.name as criteria_name,
+                    c.field_id,
+                    t.name as criteria_taxonomie_name,
+                    t.code as criteria_taxonomie_code,
+                    cv.value_date,
+                    cv.value_text,
+                    sv.starts_at,
+                    sv.finishes_at,
+                    CONCAT(u.name,' ',u.lastname) as fullName,
+                    sv.id as segment_value_id,
+                    cv.id as criterion_value_id
+                from
+                    segments_values sv
+                left join segments s on
+                    sv.segment_id = s.id
+                left join criterion_values cv on
+                    sv.criterion_value_id = cv.id
+                left join criteria c on
+                    cv.criterion_id = c.id
+                left join taxonomies t on
+                    c.field_id = t.id
+                left join taxonomies t2 on s.type_id = t2.id
+                left join users u on cv.value_text = u.document
+                WHERE
+                    s.model_id = :model_id AND s.model_type = :model_type;
+            "),
+            ['model_type' => $model_type, 'model_id' => $model_id]);
+            return $segments;
     }
 }
