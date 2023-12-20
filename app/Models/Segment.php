@@ -512,7 +512,8 @@ class Segment extends BaseModel{
                 $values = array_merge($values, $temp_values);
             }
 
-            $segment->values()->sync($values);
+            if ($segment)
+                $segment->values()->sync($values);
         }
     }
 
