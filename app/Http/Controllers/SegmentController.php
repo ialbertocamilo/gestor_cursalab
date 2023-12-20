@@ -36,8 +36,8 @@ class SegmentController extends Controller
     {
         $workspace = session('workspace');
 
-        // $criteria = Segment::getCriteriaByWorkspace($workspace);
-        $criteria = Segment::getCriteriaByWorkspaceV2($workspace);
+        $criteria = Segment::getCriteriaByWorkspace($workspace);
+        //$criteria = Segment::getCriteriaByWorkspaceV2($workspace);
         // $criteria = [];
 
          $segments = Segment::getSegmentsByModel($criteria,$request->model_type, $request->model_id);
