@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Http\Resources\SegmentSearchUsersResource;
 use DB;
+use mysql_xdevapi\Collection;
+use PHPUnit\Exception;
 
 class
 Segment extends BaseModel
@@ -493,7 +495,15 @@ Segment extends BaseModel
             ->first();
 
         // Load criteria values ids
-        return Segment::where('model_id',$supervisorId)->where('code_id',$supervisorTaxonomy->id)->with('values')->get();
+        $result = collect([]);
+        try {
+            $result = Segment::where('model_id',$supervisorId)
+                ->where('code_id',$supervisorTaxonomy->id)
+                ->with('values')
+                ->get();
+        } catch (Exception $exception) { }
+
+        return $result;
 
         // return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
         //     ->where('segments.model_id', $supervisorId)
