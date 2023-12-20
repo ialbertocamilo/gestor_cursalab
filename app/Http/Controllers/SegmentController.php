@@ -43,6 +43,7 @@ class SegmentController extends Controller
          $segments = Segment::getSegmentsByModel($criteria,$request->model_type, $request->model_id);
         //$segments = Segment::getSegmentsByModelV2($request->model_type, $request->model_id);
 
+
         // $users_count = Segment::usersReached($request->model_type, $request->model_id);
         $users_count = [];
 
