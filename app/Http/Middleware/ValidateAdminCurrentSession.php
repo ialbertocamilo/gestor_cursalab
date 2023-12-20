@@ -32,7 +32,8 @@ class ValidateAdminCurrentSession
             auth()->logout();
             
             if (! $expectsJson ) {
-                return redirect('/login');
+                // return redirect('/login');
+                return redirect('/plataforma-suspendida');
             }
 
             return response()->json(['error' => 'Platform service unavailable. User logged out'], 403);

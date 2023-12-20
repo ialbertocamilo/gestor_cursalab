@@ -59,8 +59,6 @@ class Customer extends BaseModel
     {
         $customer_id = config('app.customer.id');
         $customer = Customer::getCurrentById($customer_id);
-        // $ambiente = Ambiente::first();
-        // $customer = Customer::getCurrentByCode($ambiente->customer_code);
 
         return $customer;
     }
@@ -84,7 +82,7 @@ class Customer extends BaseModel
 
     public function showStatusMessage($status_code)
     {
-        return ($this->enable_messages &&  $this->hasStatusCode($status_code));
+        return ($this->enable_messages && $this->hasStatusCode($status_code));
     }
 
     public function getDaysToCuttoff()
@@ -94,19 +92,9 @@ class Customer extends BaseModel
         if ($this->platform_cutoff_date) {
 
             $days = $this->platform_cutoff_date->diffInDays(now());
-
             $days = $days > 0 ? $days : 0;
         }
 
         return $days;
     }
-
-    // protected function isAvailableByCode($code)
-    // {
-    //     $status = Customer::getCurrentStatusByCode($code);
-
-    //     if ($status == 'inactive') return false;
-
-    //     return true;
-    // }
 }

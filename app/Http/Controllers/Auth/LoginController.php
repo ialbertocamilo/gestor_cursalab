@@ -146,13 +146,15 @@ class LoginController extends Controller
             $user->resetToNullCode2FA(); // reset 2fa values
 
 
-            if (!$user->canAccessPlatform(false)) {
+            if (!$user->canAccessPlatform()) {
 
                 $this->guard()->logout();
 
                 $request->session()->invalidate();
 
                 $request->session()->regenerateToken();
+
+                return redirect('/plataforma-suspendida');
             
             } else {
 
@@ -213,7 +215,7 @@ class LoginController extends Controller
                 }
             }
         }
-        
+
         // verificar intentos   
         $user->checkTimeToReset($request->email); 
         if(config('slack.routes.demo')){

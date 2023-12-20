@@ -38,6 +38,7 @@ Route::redirect('/', 'login', 301);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
 Route::view('welcome_email','emails.welcome_email');
+Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
 Route::get('email_reset',function(){
     $mail_data=[

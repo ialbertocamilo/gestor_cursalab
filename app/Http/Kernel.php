@@ -72,6 +72,7 @@ class Kernel extends HttpKernel
         'auth.guard' => \App\Http\Middleware\AssignGuard::class,
         'validated-session' => \App\Http\Middleware\ValidateCurrentSession::class,
         'validated-admin-session' => \App\Http\Middleware\ValidateAdminCurrentSession::class,
+        'platform-access-blocked' => \App\Http\Middleware\PlatformAccessBlocked::class,
         'extend-session' => \App\Http\Middleware\RestartSessionLimit::class,
     ];
 }
