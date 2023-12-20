@@ -48,10 +48,14 @@
             <h3 class="mb-0">Plataforma suspendida</h3>
           </div>
 
-   {{--        <p> 
+          <p> 
             <span class="text-primary">
-            </span>, elige una contraseña segura y no la utilices en otras cuentas ni la compartas con nadie.
+              Comunícate con nuestro equipo para regularizar los pagos pendientes y reactivar los servicios de tu plataforma.
+            </span>
           </p>
+
+          <p><strong>finanzas@cursalab.io</strong></p>
+   {{--        
 
             <ul>
               <li>Mínimo 8 caracteres, debe incluir al menos una letra, un número y un caracter especial.</li>
