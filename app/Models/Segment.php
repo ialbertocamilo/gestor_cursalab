@@ -701,15 +701,10 @@ class Segment extends BaseModel{
             ->first();
 
         // Load criteria values ids
-        $result = collect([]);
-        try {
-            $result = Segment::where('model_id',$supervisorId)
-                ->where('code_id',$supervisorTaxonomy->id)
-                ->with('values')
-                ->get();
-        } catch (Exception $exception) { }
-
-        return $result;
+        return Segment::where('model_id',$supervisorId)
+            ->where('code_id',$supervisorTaxonomy->id)
+            ->with('values')
+            ->get();
 
         // return Segment::join('segments_values', 'segments.id', '=', 'segments_values.segment_id')
         //     ->where('segments.model_id', $supervisorId)
