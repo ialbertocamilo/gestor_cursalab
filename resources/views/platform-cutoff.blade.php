@@ -55,7 +55,7 @@
           </p>
 
           <p class="text-bold">
-              <a href="mailto:finanzas@cursalab.io">finanzas@cursalab.io</a>   finanzas@cursalab.io
+              <a href="mailto:finanzas@cursalab.io">finanzas@cursalab.io</a>
           </p>
    {{--        
 
