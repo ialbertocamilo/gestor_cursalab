@@ -42,19 +42,21 @@
   
   <div class="login-page d-flex justify-content-center align-items-center">
     <div class="content_login_form mr-0">
-      <div class="form-holder shadow-md px-5">
-        <div class="mb-5">
-          <div class="d-flex align-items-center mb-3">
-            <h3 class="mb-0">Plataforma suspendida</h3>
+      <div class="form-holder shadow-md px-5 py-5">
+        <div class="--mb-5 text-center">
+          <div class="--d-flex align-items-center mb-3">
+            <h3 class="mb-0 text-primary text-bold">¡Plataforma suspendida!</h3>
           </div>
 
           <p> 
-            <span class="text-primary">
+            <span class="--text-primary">
               Comunícate con nuestro equipo para regularizar los pagos pendientes y reactivar los servicios de tu plataforma.
             </span>
           </p>
 
-          <p><strong>finanzas@cursalab.io</strong></p>
+          <p class="text-bold">
+              <a href="mailto:finanzas@cursalab.io">finanzas@cursalab.io</a>   finanzas@cursalab.io
+          </p>
    {{--        
 
             <ul>
@@ -62,10 +64,6 @@
               <li>No debe incluir ningún dato personal (Ej: correo, doc. de identidad, nombres o apellidos).</li>
             </ul> --}}
 
-        </div>
-
-        <div class="form mt-2 p-0">
-        
         </div>
 
       </div>
