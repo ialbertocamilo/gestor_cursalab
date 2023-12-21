@@ -311,7 +311,7 @@
                 </div>
             </template>
             <template v-slot:item.statusActions="{ item, header }">
-                <div class="default-table-actions d-flex justify-center flex-row my-2"
+                <div class="default-table-actions d-flex justify-center flex-row my-2 position-relative"
                      v-if="dataTable.statusActions">
 
                     <div v-if="getStatusIcon(item) === 'active'">
@@ -319,17 +319,29 @@
                         <br> <span class="table-default-icon-title" v-text="'Activo'"/>
                     </div>
 
+
                     <div v-if="getStatusIcon(item) === 'inactive'" >
                         <i class="row-icon far fa-circle"/>
                         <br> <span class="table-default-icon-title" v-text="'Activo'"/>
                     </div>
 
+                    <v-tooltip :left="true" attach>
+                        <!-- Icon -->
+                        <template
+                            v-slot:activator="{ on, attrs }">
+                            <div v-if="getStatusIcon(item) === 'scheduled'"
+                                 class="text-center"
+                                 v-bind="attrs"
+                                 v-on="on">
+                                <i class="row-icon fa fa-clock"/>
+                                <br> <span class="table-default-icon-title" v-text="'Programado'"/>
+                            </div>
+                        </template>
 
-                    <div v-if="getStatusIcon(item) === 'scheduled'"
-                         class="text-center">
-                        <i class="row-icon fa fa-clock"/>
-                        <br> <span class="table-default-icon-title" v-text="'Programado'"/>
-                    </div>
+                        <!-- Tooltip message -->
+                        <div v-html="generateScheduleMessage(item)" />
+                    </v-tooltip>
+
 
                     <div v-if="getStatusIcon(item) === 'invisible'"
                          class="text-center">
@@ -363,19 +375,64 @@
                                 <br> <span class="table-default-icon-title" v-text="action.text"/>
                             </v-badge>
 
-                            <v-badge v-else-if="(action.countBadgeConditions)"
-                                     :color="item.active ? getConditionalCountColor(item, action.countBadgeConditions) : 'grey'"
-                                     :content="getConditionalCount(item, action.countBadgeConditions)"
-                                     :class="'badge-small'">
+                            <!--
+                                Badge counts and icons
+                            ================================================= -->
+
+                            <template v-else-if="(action.countBadgeConditions)">
                                 <i :class="action.icon"/>
+
+                                <v-tooltip :left="true" attach>
+
+                                    <!-- Badge count -->
+                                    <template
+                                        v-slot:activator="{ on, attrs }">
+                                        <span :class="'badge-count'"
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              :style="{backgroundColor: getConditionalCountColor(item, action.countBadgeConditions)}">
+                                            {{ getConditionalCount(item, action.countBadgeConditions) }}
+                                        </span>
+                                    </template>
+
+                                    <!-- Badge icon -->
+<!--                                    <template v-slot:activator="{ on, attrs }">-->
+<!--                                        <i :class="getConditionalBadgeIcon(item, action.countBadgeConditions)"-->
+<!--                                           class="badge-icon"-->
+<!--                                           v-bind="attrs"-->
+<!--                                           v-on="on"-->
+<!--                                           :style="{color: (item.active ? getConditionalCountColor(item, action.countBadgeConditions)  : 'grey') +'  !important'}"></i>-->
+<!--                                    </template>-->
+
+                                    <!-- Tooltip message -->
+                                    <div v-html="getConditionalCountMessage(item, action.countBadgeConditions)" />
+
+                                </v-tooltip>
+
                                 <br> <span class="table-default-icon-title" v-text="action.text"/>
-                            </v-badge>
+                            </template>
+
+                            <!--
+                                Badge Icons
+                            ================================================= -->
 
                             <template v-else-if="(action.conditionalBadgeIcon)">
                                 <i :class="action.icon"/>
-                                <i :class="getConditionalBadgeIcon(item, action.conditionalBadgeIcon)"
-                                   class="badge-icon"
-                                   :style="{color: getConditionalBadgeIconColor(item, action.conditionalBadgeIcon) + ' !important'}"></i>
+
+                                <v-tooltip :left="true" attach>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <i :class="getConditionalBadgeIcon(item, action.conditionalBadgeIcon)"
+                                           class="badge-icon"
+                                           v-bind="attrs"
+                                           v-on="on"
+                                           :style="{color: (item.active ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
+                                    </template>
+
+                                    <!-- Tooltip message -->
+                                    <div v-html="getConditionalBadgeIconMessage(item, action.conditionalBadgeIcon)" />
+
+                                </v-tooltip>
+
                                 <br> <span class="table-default-icon-title" v-text="action.text"/>
                             </template>
 
@@ -1343,6 +1400,16 @@ export default {
             return condition['backgroundColor']
         },
 
+        getConditionalCountMessage(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['message']
+        },
+
+        getConditionalCountMessageIcon(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['icon']
+        },
+
         getConditionalBadgeIconColor(item, conditions) {
             let condition = this.getMatchedCondition(item, conditions)
             return condition['color']
@@ -1351,6 +1418,10 @@ export default {
         getConditionalBadgeIcon(item, conditions) {
             let condition = this.getMatchedCondition(item, conditions)
             return condition['icon']
+        },
+        getConditionalBadgeIconMessage(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['message']
         },
         getMatchedCondition(item, conditions) {
 
@@ -1364,6 +1435,24 @@ export default {
             })
 
             return conditions[higherIndex];
+        },
+        /**
+         * Generate tooltip message for course schedule
+         * @param item
+         * @returns {string}
+         */
+        generateScheduleMessage(item) {
+
+            let messages = [];
+            if (item.activate_at) {
+                messages.push(`Se activará: ${item.activate_at}`);
+            }
+
+            if (item.activate_at) {
+                messages.push(`Se inactivará: ${item.deactivate_at}`);
+            }
+
+            return messages.join('<br>');
         }
     }
 }
@@ -1424,6 +1513,18 @@ span.custom_benefit_type {
 .badge-icon {
     position: absolute;
     top: 0;
+}
+
+.badge-count {
+    position: absolute;
+    top: 0;
+    left: 38px;
+    border-radius: 3px;
+    padding: 2px 4px 0 4px;
+    font-size: 10px !important;
+    height: 12px !important;
+    letter-spacing: 2px !important;
+    color: white;
 }
 
 </style>

@@ -304,7 +304,7 @@ export default {
                             propertyShow: 'active_inactive_topics_count',
                             backgroundColor: 'red'
                         },{
-                            message: '',
+                            message: 'El curso tiene temas activos',
                             minValue: 1,
                             propertyCond: 'active_topics_count',
                             propertyShow: 'active_inactive_topics_count',
