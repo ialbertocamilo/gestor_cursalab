@@ -39,12 +39,13 @@
 
 @section('content')
   
-  
+  {{-- platform-suspended.png --}}
   <div class="login-page d-flex justify-content-center align-items-center">
     <div class="content_login_form mr-0">
       <div class="form-holder shadow-md px-5 py-5">
         <div class="--mb-5 text-center">
           <div class="--d-flex align-items-center mb-3">
+            <img src="/img/platform-suspended-image.svg" width="60">
             <h3 class="mb-0 text-primary text-bold">¡Plataforma suspendida!</h3>
           </div>
 
