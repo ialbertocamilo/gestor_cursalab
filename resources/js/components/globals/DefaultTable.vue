@@ -343,14 +343,36 @@
                     </v-tooltip>
 
 
+
                     <div v-if="getStatusIcon(item) === 'invisible'"
                          class="text-center">
-                        <v-icon :color="'red'"
-                        >
-                            mdi-alert
-                        </v-icon>
-                        <br> <span class="table-default-icon-title" v-text="'No visible'"/>
+                        <div class="position-relative fancy-menu-wrapper">
+
+
+                            <v-icon :color="'red'">
+                                mdi-alert
+                            </v-icon>
+                            <br> <span class="table-default-icon-title"
+                                       v-text="'No visible'"/>
+
+                            <ul class="fancy-menu position-absolute">
+                                <li class="red-title">
+                                    <v-icon :color="'red'" :size="14">
+                                    mdi-alert
+                                    </v-icon>
+                                    Configuración faltante
+                                </li>
+                                <li @click="doAction({type:'route', route: 'temas_route'}, item)">
+                                    Agregar o activar temas del curso
+                                </li>
+                                <li @click="doAction({type: 'action', method_name: 'segmentation'}, item)">
+                                    Asignar colaboradores al curso
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
+
 
                 </div>
             </template>
@@ -1525,6 +1547,39 @@ span.custom_benefit_type {
     height: 12px !important;
     letter-spacing: 2px !important;
     color: white;
+}
+
+.fancy-menu {
+    display: none;
+    position: absolute;
+    top: 0px !important;
+    min-width: 220px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(200,200,200,0.5);
+    border-radius: 10px;
+    padding: 0 !important;
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+    z-index: 2
+}
+
+.fancy-menu-wrapper:hover .fancy-menu {
+    display: block;
+}
+
+.fancy-menu li {
+    padding: 11px 10px 11px 10px;
+    margin: 0;
+    font-size: 12px !important;
+}
+
+.fancy-menu li:not(.red-title) {
+    cursor: pointer
+}
+
+.fancy-menu li.red-title {
+    background: #fce6e5 !important;
 }
 
 </style>
