@@ -7,7 +7,7 @@
   }
 
   .login-page{
-    min-height: 90vh;
+/*    min-height: 90vh;*/
   }
 
   .login-page::before {
@@ -33,6 +33,12 @@
     transform: translate(-50%, -50%);
   }
 
+  .login-page{
+    background-image: url('/img/platform-suspended.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
 </style>
 
 @endsection
@@ -45,7 +51,7 @@
       <div class="form-holder shadow-md px-5 py-5">
         <div class="--mb-5 text-center">
           <div class="--d-flex align-items-center mb-3">
-            <img src="/img/platform-suspended-image.svg" width="60">
+            <img src="/img/platform-suspended-image.svg" width="" class="mb-5">
             <h3 class="mb-0 text-primary text-bold">¡Plataforma suspendida!</h3>
           </div>
 
