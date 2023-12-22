@@ -57,8 +57,15 @@ class Customer extends BaseModel
 
     protected function getCurrentSession()
     {
-        $customer_id = config('app.customer.id');
-        $customer = Customer::getCurrentById($customer_id);
+        $customer = cache('current_customer');
+
+        if (!$customer) {
+            
+            $customer_id = config('app.customer.id');
+            $customer = Customer::getCurrentById($customer_id);
+
+            cache(['current_customer' => $customer], now()->addHours(2));
+        }
 
         return $customer;
     }
