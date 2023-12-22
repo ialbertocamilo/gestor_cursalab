@@ -5,7 +5,7 @@
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
 <!--                Criterios-->
                 <v-spacer/>
-                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="$root.isSuperUser && criterion_type != 'date' "/>
+                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="criterion_type != 'date' "/>
 
                 <!-- {{ criterion_type }} -->
                 
