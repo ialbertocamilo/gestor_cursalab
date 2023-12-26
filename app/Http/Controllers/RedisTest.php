@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Redis;
 
-class TestController extends Controller
+class RedisTest extends Controller
 {
     public function storeValuesInRedis()
     {

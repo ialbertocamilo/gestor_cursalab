@@ -17,7 +17,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\RedisTest;
 
 
 Route::redirect('/', 'login', 301);
@@ -213,5 +213,5 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 });
 
 
-Route::get('/store-redis', [TestController::class, 'storeValuesInRedis']);
-Route::get('/retrieve-redis', [TestController::class, 'retrieveValuesFromRedis']);
+Route::get('/store-redis', [RedisTest::class, 'storeValuesInRedis']);
+Route::get('/retrieve-redis', [RedisTest::class, 'retrieveValuesFromRedis']);
