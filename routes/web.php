@@ -214,4 +214,5 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
 
 Route::get('/store-redis', [TestController::class, 'storeValuesInRedis']);
+
 Route::get('/retrieve-redis', [TestController::class, 'retrieveValuesFromRedis']);
