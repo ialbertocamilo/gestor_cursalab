@@ -83,7 +83,10 @@ class CriterionValue extends BaseModel
 
     protected function search($request = null)
     {
-        $q = self::with('criterion.field_type');
+        $q = self::with('criterion.field_type')
+                ->withCount(['users' => function($q) use ($request){
+                    $q->whereRelation('subworkspace', 'parent_id', $request->workspace_id);
+                }]);
 
         if ($request->code)
             $q->whereHas('criterion', fn($q) => $q->where('code', $request->code));

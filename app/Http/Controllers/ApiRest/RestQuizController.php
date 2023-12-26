@@ -142,7 +142,7 @@ class RestQuizController extends Controller
 
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
-        
+
         // not consider open evaluation to attempts and time validations
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
@@ -179,6 +179,16 @@ class RestQuizController extends Controller
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
+
+        // Adds 24 hours for Agile
+
+        if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
+            $data['attempt'] = [
+                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
+                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),
+                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))
+            ];
+        }
 
         // SummaryTopic::setUserLastTimeEvaluation($topic);
         // SummaryCourse::setUserLastTimeEvaluation($topic->course);

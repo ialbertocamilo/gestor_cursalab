@@ -224,7 +224,11 @@ class EntrenadorUsuario extends Model implements Recordable
             return $entrenador;
         }
         // TODO: Lista total de alumnos
-        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)->where('active', 1)->get();
+        $alumnos_ids = EntrenadorUsuario::entrenador($entrenador['data_usuario']->id)
+            ->join('users', 'users.id', '=', 'trainer_user.user_id')
+            ->where('users.active', 1)
+            ->where('trainer_user.active', 1)
+            ->get();
         $users_assigned = count($alumnos_ids);
 
         $queryDataAlumnos = User::leftJoin('workspaces as w', 'users.subworkspace_id', '=', 'w.id')
@@ -341,8 +345,8 @@ class EntrenadorUsuario extends Model implements Recordable
             $msg = "Se asignó el usuario y el entrenador.";
             $response['msg'] = $msg;
         }
-        
-        
+
+
         return $response;
     }
 }

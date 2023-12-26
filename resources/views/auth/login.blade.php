@@ -83,7 +83,7 @@
 
 
             <br>
-            <a href="{{ route('password.update') }}" target="_self" rel="noopener noreferrer" style="color:#5f59eb;" class="pt-4">
+            <a href="{{ route('password.update') }}" target="_self" rel="noopener noreferrer" style="color:#5f59eb;" class="mt-5">
                 <b>Olvidé mi contraseña</b>
             </a>
 

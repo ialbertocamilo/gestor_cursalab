@@ -3,12 +3,10 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
-<!--                Criterios-->
-                <v-spacer/>
-                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="$root.isSuperUser && criterion_type != 'date' "/>
 
-                <!-- {{ criterion_type }} -->
-                
+                <v-spacer/>
+                <DefaultModalButton color="default" icon_name="mdi-upload" :label="'Subida de valores de criterio'" @click="openFormModal(modalUploadOptions)" v-if="criterion_type != 'date' "/>
+
                 <DefaultModalButton :label="'Valor de criterio'" @click="openFormModal(modalOptions)"/>
             </v-card-title>
         </v-card>
@@ -91,7 +89,7 @@ export default {
                     // {text: "Módulo", value: "order", align: 'center', sortable: false},
                     // {text: "Módulo", value: "image", align: 'center', sortable: false},
                     {text: "Valor", value: "name", sortable: false},
-                    // {text: "Tipo", align: 'center', value: "type", sortable: false},
+                    {text: "Cantidad de usuarios", align: 'center', value: "users_count", sortable: false},
                     // {text: "Cantidad de Usuarios", align: 'center', value: "usuarios_count"},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],

@@ -686,7 +686,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
         $status = 'no_sent';
         if(!$from_massive && !$email_was_sent){
-            //send email by command 
+            //send email by command
             $status = 'sent';
             Mail::to($email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
             info('entra');
@@ -1007,7 +1007,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // info('S - 1');
         $user->loadMissing('subworkspace.parent');
 
-        $workspace = $user->subworkspace->parent;
+        //$workspace = $user->subworkspace->parent;
 
         $query = $this->getUserCourseSegmentationQuery('soft', $user);
         // info('S - 2');
@@ -1015,7 +1015,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $course_segmentations = $query->whereRelation('schools', 'active', ACTIVE)
             ->whereRelation('segments', 'active', ACTIVE)
             ->whereRelation('topics', 'active', ACTIVE)
-            ->whereRelation('workspaces', 'id', $workspace->id)
+            ->whereRelation('workspaces', 'id', $user->subworkspace->parent_id)
             ->when(!$withFreeCourses, function ($q) {
                 $q->whereRelation('type', 'code', '<>', 'free');
             })
@@ -1050,7 +1050,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         // info('S - 6');
 
         $document_criterion_id = Criterion::where('code', 'document')->first()->id;
-        $user_criteria_document_id = $user_criteria[$document_criterion_id][0]->id ?? NULL; 
+        $user_criteria_document_id = $user_criteria[$document_criterion_id][0]->id ?? NULL;
         $document_segments = SegmentValue::where('criterion_id', $document_criterion_id)->where('criterion_value_id', $user_criteria_document_id)->get();
 
         foreach ($course_segmentations as $course) {
