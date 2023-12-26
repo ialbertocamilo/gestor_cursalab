@@ -17,6 +17,9 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
 
+use App\Http\Controllers\TestController;
+
+
 Route::redirect('/', 'login', 301);
 //temporary route
 // Route::get('email_info',function(){
@@ -119,9 +122,9 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    
 
-    
+
+
     Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('hasHability:learning-analytics');
 
     Route::prefix('general')->middleware('hasHability:dashboard')->group(base_path('routes/cms/general.php'));
@@ -189,14 +192,14 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 
     Route::prefix('resumen_encuesta')->middleware('hasHability:poll-report')->group(base_path('routes/cms/resumen_encuesta.php'));
-    
+
     Route::prefix('resumen_evaluaciones')->middleware('hasHability:evaluation-report')->group(base_path('routes/cms/resumen_evaluaciones.php'));
 
     Route::prefix('beneficios')->middleware('hasHability:benefits')->group(base_path('routes/cms/beneficios.php'));
     Route::prefix('speakers')->middleware('hasHability:speaker')->group(base_path('routes/cms/speakers.php'));
     Route::prefix('diplomas')->middleware('hasHability:list-certificate')->group(base_path('routes/cms/diplomas.php'));
-    
-    // === votaciones === 
+
+    // === votaciones ===
     Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
 
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
@@ -208,3 +211,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));
 
 });
+
+
+Route::get('/store-redis', [TestController::class, 'storeValuesInRedis']);
+Route::get('/retrieve-redis', [TestController::class, 'retrieveValuesFromRedis']);
