@@ -8,6 +8,7 @@ class RedisTest extends Controller
     public function storeValuesInRedis()
     {
         // Obtén los valores desde el archivo .env
+
         $appName = env('APP_NAME');
         $customerId = env('CUSTOMER_ID');
         $customerSlug = env('CUSTOMER_SLUG');
