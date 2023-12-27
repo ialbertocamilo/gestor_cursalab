@@ -74,7 +74,7 @@
                             </td>
                             <td class="text-center">
                                 <v-icon
-                                    @click="download(item.download_url, item.name,item.id)"
+                                    @click="download(item.download_url, item.name,item.id,item.ext)"
                                     v-if="item.is_ready && item.download_url"
                                     color="#5457E7">
                                     mdi-download
@@ -199,10 +199,10 @@ export default {
             return JSON.stringify(obj) === '{}'
         }
         ,
-         async download(url, name, id) {
+         async download(url, name, id,ext) {
             let saveAuditUrl = `/reports/save/${id}`;
-
-            this.$root.downloadReport(url, name + '.xlsx');
+            const extension = ext || 'xlsx';
+            this.$root.downloadReport(url, name + '.'+extension);
             try {
                 let response = await axios({
                     url: saveAuditUrl,

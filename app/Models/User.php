@@ -93,7 +93,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
         'user_relations',
-        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating',
+        'national_occupation_id','curp'
     ];
 
     // protected $with = ['roles'
@@ -259,6 +260,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function subworkspaces()
     {
         return $this->belongsToMany(Workspace::class, 'subworkspace_user', 'user_id', 'subworkspace_id');
+    }
+
+    public function national_occupation()
+    {
+        return $this->belongsTo(NationalOccupationCatalog::class, 'national_occupation_id');
     }
 
     public function projects(){

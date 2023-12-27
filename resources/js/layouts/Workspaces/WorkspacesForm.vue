@@ -37,7 +37,16 @@
                         <v-icon>mdi-text-box-search-outline</v-icon>
                         <span class="ml-3">Configuración</span>
                     </v-tab>
-
+                    <!--  &&  -->
+                    <v-tab
+                        href="#tab-4"
+                        :key="4"
+                        class="primary--text"
+                        v-if="is_superuser && showDc3Section"
+                    >
+                        <v-icon>mdi-text-box-search-outline</v-icon>
+                        <span class="ml-3">Configuración (DC3-DC4)</span>
+                    </v-tab>
                 </v-tabs>
 
                 <v-tabs-items v-model="tabs">
@@ -277,6 +286,7 @@
                                                     hide-details
                                                     v-model="resource.selected_functionality[functionality.id]"
                                                     :label="functionality.name"
+                                                    @change="verifyFunactionality"
                                                 >
                                                 </v-checkbox>
                                             </v-col>
@@ -386,7 +396,139 @@
                             </template>
                         </DefaultSection>
                     </v-tab-item>
-
+                    <!-- v-if="resource.selected_functionality.find(sf == taxonomy_id_dc3)" -->
+                    <v-tab-item :key="4" :value="'tab-4'" v-if="showDc3Section">
+                        <DefaultSection title="Datos del trabajador (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row justify="space-around">
+                                    <!-- <v-col cols="9">
+                                        <DefaultInput
+                                            label="Clave Única de Registro de Población"
+                                            v-model="resource.dc3_configuration.value_unique_population_registry_code"
+                                            dense
+                                            class="mb-3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            clearable
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_unique_population_registry_code"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                        />
+                                    </v-col> -->
+                                    <!-- <v-col cols="9">
+                                        <DefaultInput
+                                            label="Ocupación específica (Catálogo Nacional Ocupaciones)"
+                                            v-model="resource.dc3_configuration.value_specific_occupation"
+                                            dense
+                                            class="mb-3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            clearable
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_specific_occupation"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                        />
+                                    </v-col> -->
+                                    <v-col cols="9">
+                                        <DefaultInput
+                                            label="Puesto"
+                                            value="Puesto"
+                                            v-model="resource.dc3_configuration.value_position"
+                                            dense
+                                            class="mb-3"
+                                            :rules="rules.dc3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultAutocomplete
+                                            :items="resource.criteria_workspace"
+                                            v-model="resource.dc3_configuration.criterion_position"
+                                            item-text="name"
+                                            item-value="criterion_id"
+                                            label="Relación criterio"
+                                            dense
+                                            :rules="rules.dc3"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+                        <DefaultSection title="Datos de la empresa (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row v-for="(subwokspace_data,index) in resource.dc3_configuration.subwokspace_data" :key="subwokspace_data.subworkspace_id">
+                                    <v-col cols="4">
+                                        <DefaultAutocomplete
+                                            :items="subworkspaces"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].subworkspace_id"
+                                            item-text="name"
+                                            item-value="id"
+                                            label="Módulo"
+                                            dense
+                                            disabled
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Nombre o razón social"
+                                            dense
+                                            class="mb-3 mx-1"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].name_or_social_reason"
+                                            :rules="rules.dc3"
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Registro Federal de Contribuyentes con homoclave (SHCP)"
+                                            dense
+                                            class="mb-3 mx-1"
+                                            v-model="resource.dc3_configuration.subwokspace_data[index].shcp"
+                                            :rules="rules.dc3"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
+                        <!-- <DefaultSection title="Logos y firmas (DC3)" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputLogoDC3"
+                                            v-model="resource.dc3_logo"
+                                            label="Logo Empresa DC3"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_logo')"/>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputInstructorSignature"
+                                            v-model="resource.dc3_instructor_signature"
+                                            label="Firma (Instructor o tutor)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_instructor_signature')"/>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSelectOrUploadMultimedia
+                                            ref="inputBossSignature"
+                                            v-model="resource.dc3_boss_signature"
+                                            label="Firma (Patrón o representante legal)"
+                                            :file-types="['image']"
+                                            @onSelect="setFile($event, resource,'dc3_boss_signature')"/>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection> -->
+                    </v-tab-item>
                 </v-tabs-items>
 
             </v-form>
@@ -401,7 +543,7 @@ const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo', 
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
-    'show_logo_in_app','limits'
+    'dc3_configuration','show_logo_in_app','limits'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -447,13 +589,24 @@ export default {
                 qualification_type: '',
                 criteria_workspace: [],
                 selected_functionality: {},
-                limits:{}
+                limits:{},
                 // selected_section_criteria: {
                 //     profile: false,
                 //     filters: false,
                 //     ranking: false,
                 //     reports: false,
                 // }
+                dc3_configuration:{
+                    // value_unique_population_registry_code:'Clave Única de Registro de Población',
+                    // criterion_unique_population_registry_code:null,
+                    // value_specific_occupation:'Ocupación específica (Catálogo Nacional Ocupaciones)',
+                    // criterion_specific_occupation:null,
+                    value_position:'Puesto',
+                    criterion_position:null,
+                    name_or_social_reason:'',
+                    shcp:'',
+                    client_name:[]
+                }
             },
             limit_allowed_users: null,
             resource: {
@@ -465,11 +618,15 @@ export default {
             functionalities: [],
             customCriteria: [],
             itemsCriterionDates: [],
+            subworkspaces:[],
             rules: {
                 name: this.getRules(['required', 'max:255']),
                 logo: this.getRules(['required']),
                 qualification_type_id: this.getRules(['required']),
-            }
+                dc3: this.getRules(['required']),
+            },
+            taxonomy_id_dc3:0,
+            showDc3Section:false
         }
     }
     // })
@@ -492,7 +649,7 @@ export default {
             vue.removeFileFromDropzone(vue.resource.logo, 'inputLogo')
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
             vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
-
+            vue.showDc3Section=false;
             vue.resource.limit_allowed_storage = null;
             vue.limit_allowed_users = null;
         }
@@ -532,7 +689,9 @@ export default {
                 formData.set(
                     'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
                 );
-
+                formData.set(
+                    'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
+                );
                 vue.setLimitUsersAllowed(formData);
                 vue.setJarvisConfiguration(formData);
 
@@ -590,7 +749,7 @@ export default {
             })
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
-
+            console.log(url,'url');
             await this.$http
                 .get(url)
                 .then(({data}) => {
@@ -623,13 +782,19 @@ export default {
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
                     vue.functionalities = data.data.functionalities;
-
+                    const taxonomy_id_dc3 = data.data.functionalities.find(f => f.code == 'dc3-dc4');
+                    vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
+                    vue.subworkspaces = data.data.subworkspaces;
                     vue.resource.selected_functionality = {};
                     data.data.functionalities_selected.forEach(c => {
+                        if(c.code == 'dc3-dc4'){
+                            vue.showDc3Section = true;
+                        }
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.functionalities
                         );
                     });
+                    
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -652,6 +817,10 @@ export default {
             }
 
             return exists;
+        },
+        verifyFunactionality(){
+            let vue = this;
+            vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
         }
     }
 }

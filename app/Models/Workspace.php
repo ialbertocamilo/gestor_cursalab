@@ -40,6 +40,7 @@ class Workspace extends BaseModel
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
+        'dc3_configuration'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -216,7 +217,31 @@ class Workspace extends BaseModel
             ->where('type', 'side_menu')
             ->select('id', 'name', 'code');
     }
-
+    public function getDc3ConfigurationAttribute($value)
+    {
+        // Puedes realizar alguna manipulación o formato antes de devolver el valor
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            // $data['value_unique_population_registry_code'] = 'Clave Única de Registro de Población';
+            // $data['criterion_unique_population_registry_code'] = null;
+            // $data['value_specific_occupation'] = 'Ocupación específica (Catálogo Nacional Ocupaciones)';
+            // $data['criterion_specific_occupation'] = null;
+            $data['value_position'] = 'Puesto';
+            $data['criterion_position'] = null;
+            $data['subwokspace_data'] = [];
+            $subworkspaces = get_subworkspaces(get_current_workspace());
+            foreach ($subworkspaces as $subworkspace) {
+                $data['subwokspace_data'][] = [
+                    'subworkspace_id' => $subworkspace->id,
+                    'name_or_social_reason' => '',
+                    'shcp'=>''
+                ];
+            }
+            return $data;
+        }
+        $data =json_decode($value); 
+        return $data;
+    }
     protected static function search($request)
     {
         // Get authenticated user's id

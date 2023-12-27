@@ -52,13 +52,16 @@ class CursosStoreUpdateRequest extends FormRequest
             'activate_at' => 'nullable',
             'deactivate_at' => 'nullable',
             'show_certification_to_user' => 'nullable',
-            'user_confirms_certificate' => 'nullable'
+            'user_confirms_certificate' => 'nullable',
+            'can_create_certificate_dc3_dc4' => 'nullable',
+            'dc3_configuration' => 'nullable',
         ];
     }
 
     public function validationData()
     {
         $active = ($this->active === 'true' or $this->active === true or $this->active === 1 or $this->active === '1');
+        $can_create_certificate_dc3_dc4 = ($this->can_create_certificate_dc3_dc4 === 'true' or $this->can_create_certificate_dc3_dc4 === true or $this->can_create_certificate_dc3_dc4 === 1 or $this->can_create_certificate_dc3_dc4 === '1');
         $show_certification_date = ($this->show_certification_date === 'true' or $this->show_certification_date === true or $this->show_certification_date === 1 or $this->show_certification_date === '1');
 
         $show_certification_to_user = ($this->show_certification_to_user === 'true' or $this->show_certification_to_user === true or $this->show_certification_to_user === 1 or $this->show_certification_to_user === '1');
@@ -85,7 +88,7 @@ class CursosStoreUpdateRequest extends FormRequest
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
         $data['mod_evaluaciones'] = $mod_evaluaciones;
         $data['qualification_type_id'] = $qualification_type_id;
-
+        $data['can_create_certificate_dc3_dc4'] = $can_create_certificate_dc3_dc4;
         return $this->merge($data)->all();
     }
 }

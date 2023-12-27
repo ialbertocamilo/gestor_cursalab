@@ -89,7 +89,7 @@
 
                         <v-row>
 
-                            <v-col cols="6">
+                            <v-col cols="6" v-if="!resource.can_create_certificate_dc3_dc4">
                                 <DefaultAutocomplete
                                     dense
                                     label="Duración (hrs.)"
@@ -218,7 +218,106 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-
+                <v-row justify="space-around" v-if="has_DC3_functionality">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="DC3-DC4"
+                            :expand="sections.showSectionDC3DC4"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col cols="12">
+                                        <DefaultToggle
+                                            active-label="Creación de formulario DC3-DC4"
+                                            inactive-label="Creación de formulario DC3-DC4"
+                                            v-model="resource.can_create_certificate_dc3_dc4"
+                                            dense
+                                        />
+                                        <div>
+                                            Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
+                                        </div>
+                                    </v-col>
+                                    <v-row v-if="resource.can_create_certificate_dc3_dc4" class="px-3">
+                                        <v-col cols="4">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Catálogo de área"
+                                                v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
+                                                :items="catalog_denominations"
+                                                item-text="name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInputDate
+                                                clearable
+                                                dense
+                                                range
+                                                :referenceComponent="'modalDateFilter3'"
+                                                :options="modalDateFilter3"
+                                                v-model="resource.dc3_configuration.date_range"
+                                                label="Periodo de ejecución"
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultAutocomplete
+                                                dense
+                                                label="Duración (hrs.)"
+                                                v-model="resource.duration"
+                                                :items="selects.duration"
+                                                item-text="name"
+                                                item-value="id"
+                                                placeholder="Ej. 2:00"
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="9">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Instructor"
+                                                v-model="resource.dc3_configuration.instructor"
+                                                :items="people.instructors"
+                                                item-text="person_attributes.name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="3" class="d-flex align-items-center">
+                                            <DefaultModalButton
+                                                label="Agregar"
+                                                outlined
+                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
+                                            />
+                                        </v-col>
+                                        <v-col cols="9">
+                                            <DefaultAutocomplete
+                                                placeholder=""
+                                                dense
+                                                label="Representante Legal"
+                                                v-model="resource.dc3_configuration.legal_representative"
+                                                :items="people.legal_representatives"
+                                                item-text="person_attributes.name"
+                                                clearable
+                                                :rules="rules.dc3"
+                                            />
+                                        </v-col>
+                                        <v-col cols="3" class="d-flex align-items-center">
+                                            <DefaultModalButton
+                                                label="Agregar"
+                                                outlined
+                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -377,6 +476,14 @@
                 @onConfirm="courseUpdateStatusModal.open = false"
                 @onCancel="closeModalStatusEdit"
             />
+            <DC3PersonModal
+                :ref="modalDC3PersonOptions.ref"
+                v-model="modalDC3PersonOptions.open"
+                :options="modalDC3PersonOptions"
+                width="30vw"
+                @onConfirm="setPersonDC3"
+                @onCancel="modalDC3PersonOptions.open = false"
+            />
         </template>
     </DefaultDialog>
 
@@ -387,15 +494,17 @@ const fields = [
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
-    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate'
+    'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4',
+    'dc3_configuration'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
+import DC3PersonModal from './DC3PersonModal';
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector },
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -424,6 +533,7 @@ export default {
                 showSectionCertification: {status: true},
                 showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
+                showSectionDC3DC4:{status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -461,10 +571,13 @@ export default {
                 publish_date_1: null,
                 publish_time_1: null,
                 publish_date_2: null,
-                publish_time_2: null
+                publish_time_2: null,
+                dc3_configuration:{},
+                can_create_certificate_dc3_dc4:false,
             },
             resource: {
                 qualification_type: {position: 0},
+                dc3_configuration :{}
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -474,6 +587,7 @@ export default {
                 nota_aprobatoria: this.getRules(['required']),
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
                 qualification_type_id: this.getRules(['required']),
+                dc3: this.getRules(['required']),
             },
             selects: {
                 requisito_id: [],
@@ -568,13 +682,33 @@ export default {
             modalDateFilter2: {
                 open: false
             },
+            modalDateFilter3: {
+                open: false,
+            },
+            modalDC3PersonOptions:{
+                open:false,
+                ref: 'PersonFormModal',
+                open: false,
+                base_endpoint: '/person',
+                confirmLabel: 'Guardar',
+                resource: 'person',
+                title: '',
+                action: null,
+                persistent: true,
+            },
             new_value: 0,
             loading_description:false,
             limits_descriptions_generate_ia:{
                 ia_descriptions_generated:0,
                 limit_descriptions_jarvis:0
             },
-            showButtonIaGenerate:false
+            showButtonIaGenerate:false,
+            has_DC3_functionality:false,
+            people:{
+                legal_representatives:[],
+                instructors:[]
+            },
+            catalog_denominations:[]
         }
     },
     async mounted(){
@@ -696,6 +830,9 @@ export default {
             let method = edit ? 'PUT' : 'POST';
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+            formData.set(
+                'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
+            );
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
             vue.getJSONEvaluaciones(formData)
@@ -812,10 +949,17 @@ export default {
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
+
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.types = response.types
                     vue.showButtonIaGenerate = response.show_buttom_ia_description_generate;
+
+                    vue.people.instructors = response.instructors;
+                    vue.people.legal_representatives = response.legal_representatives;
+                    vue.catalog_denominations = response.catalog_denominations;
+                    vue.has_DC3_functionality = response.has_DC3_functionality;
+
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
@@ -876,6 +1020,16 @@ export default {
             await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
                 this.limits_descriptions_generate_ia = data.data;
             })
+        },
+        setPersonDC3(person){
+            this.modalDC3PersonOptions.open = false;
+            if(person.type == 'dc3-instructor'){
+                this.people.instructors.push(person);
+                this.resource.dc3_configuration.instructor = person.id;
+                return 0;
+            }
+            this.people.legal_representatives.push(person);
+            this.resource.dc3_configuration.legal_representative = person.id;
         }
     }
 }

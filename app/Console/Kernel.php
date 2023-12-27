@@ -86,6 +86,8 @@ class Kernel extends ConsoleKernel
 
         //JARVIS
         $schedule->command('convert:multimedia-text')->everyMinute();
+        //DC3
+        $schedule->command('create:dc3')->everyFiveMinutes();
     }
 
     /**

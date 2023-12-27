@@ -10,6 +10,7 @@ use App\Models\Curso;
 use App\Models\Media;
 use App\Models\Topic;
 use App\Models\Course;
+use App\Models\Person;
 use App\Models\Posteo;
 
 // use App\Perfil;
@@ -118,9 +119,19 @@ class CursosController extends Controller
 
         $qualification_type = $workspace->qualification_type;
         $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
-
-        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types', 'qualification_type','show_buttom_ia_description_generate');
-
+        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $instructors = [];
+        $legal_representatives = [];
+        $catalog_denominations = [];
+        if($has_DC3_functionality){
+            $instructors = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-instructor')->get();
+            $legal_representatives = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-legal-representative')->get();
+            $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
+        }
+        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types',
+                             'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
+                             'instructors','legal_representatives','catalog_denominations'
+                    );
         return $compactResponse ? $response : $this->success($response);
     }
 
@@ -164,13 +175,28 @@ class CursosController extends Controller
         //     $course->mod_evaluaciones = $mod_evaluaciones;
         // }
         $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
+        $workspace = get_current_workspace();
+        $has_DC3_functionality = boolval($workspace->functionalities()->get()->where('code','dc3-dc4')->first());
+        $instructors = [];
+        $legal_representatives = [];
+        $catalog_denominations = [];
+        if($has_DC3_functionality){
+            $instructors = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-instructor')->get();
+            $legal_representatives = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-legal-representative')->get();
+            $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
+        }
         return $this->success([
             'curso' => $course,
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
+            'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
-            'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate
+            'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate,
+            'has_DC3_functionality' => $has_DC3_functionality,
+            'instructors' => $instructors,
+            'legal_representatives' => $legal_representatives,
+            'catalog_denominations' => $catalog_denominations
         ]);
     }
 

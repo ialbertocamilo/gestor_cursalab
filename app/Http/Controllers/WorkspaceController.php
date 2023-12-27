@@ -210,7 +210,8 @@ class WorkspaceController extends Controller
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
         $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
-
+        $workspace['subworkspaces'] = get_subworkspaces(get_current_workspace());
+        //S3
         return $this->success($workspace);
     }
 
@@ -224,11 +225,9 @@ class WorkspaceController extends Controller
     public function update(WorkspaceRequest $request, Workspace $workspace): JsonResponse
     {
         $data = $request->validated();
-
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
         $data = Media::requestUploadFile($data, 'logo_marca_agua');
-
         // Set constraint: limit allowed users
         $data['limits'] = [
             'limit_allowed_media_convert' => $data['limit_allowed_media_convert'] ?? null,
@@ -252,9 +251,7 @@ class WorkspaceController extends Controller
         endif;
 
         // Update record in database
-
         $workspace->update($data);
-
         // Save workspace's criteria
 
         if ( !empty($data['criteria']) ) {
@@ -421,7 +418,7 @@ class WorkspaceController extends Controller
         $subworkspace->contact_schedule = $contact_support['contact_schedule'] ?? NULL;
 
         $subworkspace->plantilla_diploma = $subworkspace->plantilla_diploma ? get_media_url($subworkspace->plantilla_diploma) : null;
-
+        
         return $this->success([
             'modulo' => $subworkspace,
             'main_menu' => $formSelects['main_menu'],
@@ -473,9 +470,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
-
         $subworkspace = Workspace::storeSubWorkspaceRequest($data);
-
         return $this->success(['msg' => 'Módulo registrado correctamente.']);
     }
 
@@ -486,7 +481,6 @@ class WorkspaceController extends Controller
         $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
         $subworkspace = Workspace::storeSubWorkspaceRequest($data, $subworkspace);
-
         return $this->success(['msg' => 'Módulo actualizado correctamente.']);
     }
 

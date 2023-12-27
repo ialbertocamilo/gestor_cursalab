@@ -8,6 +8,10 @@
             <td style="width:100%;center;background-color: #5eff00;width:30px">APELLIDO PATERNO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">APELLIDO MATERNO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">DOCUMENTO</td>
+            @if($has_DC3_functionality)
+                <td style="width:100%;center;background-color: #5eff00;width:30px">CURP</td>
+                <td style="width:100%;center;background-color: #5eff00;width:30px">OCUPACIÓN</td>
+            @endif
             <td style="width:100%;center;background-color: #5eff00;width:30px">NÚMERO DE TELÉFONO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">EMAIL</td>
             @foreach ($criteria as $criterion)
@@ -23,6 +27,10 @@
             <td style="width:100%;center;background-color: #5eff00;width:30px">APELLIDO PATERNO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">APELLIDO MATERNO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">DOCUMENTO</td>
+            @if($has_DC3_functionality)
+                <td style="width:100%;center;background-color: #5eff00;width:30px">CURP</td>
+                <td style="width:100%;center;background-color: #5eff00;width:30px">OCUPACIÓN</td>
+            @endif
             <td style="width:100%;center;background-color: #5eff00;width:30px">NÚMERO DE TELÉFONO</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">NÚMERO DE PERSONA COLABORADOR</td>
             <td style="width:100%;center;background-color: #5eff00;width:30px">EMAIL</td>
