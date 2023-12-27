@@ -278,8 +278,9 @@ export default {
                     {text: "Escuela", value: "schools", sortable: false},
                     // {text: "Módulos", value: "modules", sortable: false},
                     //{text: "Módulos", value: "images", sortable: false},
-                    {text: "Estado", value: "statusActions", align: 'center', sortable: false},
+
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                    {text: "Estado", value: "statusActions", align: 'center', sortable: false},
                 ],
                 statusActions: [
 
@@ -383,12 +384,12 @@ export default {
                         route: 'project_users_route',
                         // permission_name:'can_show_tarea'
                     },
-                    {
-                        text: "Actualizar estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
+                    // {
+                    //     text: "Actualizar estado",
+                    //     icon: 'fa fa-circle',
+                    //     type: 'action',
+                    //     method_name: 'status'
+                    // },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',

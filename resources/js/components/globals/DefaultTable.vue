@@ -314,18 +314,22 @@
                 <div class="default-table-actions d-flex justify-center flex-row my-2 position-relative"
                      v-if="dataTable.statusActions">
 
-                    <div v-if="getStatusIcon(item) === 'active'">
+                    <div v-if="getStatusIcon(item) === 'active'"
+                         @click="doAction({type: 'action', method_name: 'status'}, item)"
+                         style="cursor: pointer">
                         <i class="row-icon fa fa-circle"/>
                         <br> <span class="table-default-icon-title" v-text="'Activo'"/>
                     </div>
 
 
-                    <div v-if="getStatusIcon(item) === 'inactive'" >
+                    <div v-if="getStatusIcon(item) === 'inactive'"
+                         @click="doAction({type: 'action', method_name: 'status'}, item)"
+                         style="cursor: pointer">
                         <i class="row-icon far fa-circle"/>
                         <br> <span class="table-default-icon-title" v-text="'Activo'"/>
                     </div>
 
-                    <v-tooltip :left="true" attach>
+                    <v-tooltip :left="true" attach class="scheduled-tooltip">
                         <!-- Icon -->
                         <template
                             v-slot:activator="{ on, attrs }">
@@ -412,19 +416,10 @@
                                         <span :class="'badge-count'"
                                               v-bind="attrs"
                                               v-on="on"
-                                              :style="{backgroundColor: getConditionalCountColor(item, action.countBadgeConditions)}">
+                                              :style="{backgroundColor: item.active ? getConditionalCountColor(item, action.countBadgeConditions) : 'gray'}">
                                             {{ getConditionalCount(item, action.countBadgeConditions) }}
                                         </span>
                                     </template>
-
-                                    <!-- Badge icon -->
-<!--                                    <template v-slot:activator="{ on, attrs }">-->
-<!--                                        <i :class="getConditionalBadgeIcon(item, action.countBadgeConditions)"-->
-<!--                                           class="badge-icon"-->
-<!--                                           v-bind="attrs"-->
-<!--                                           v-on="on"-->
-<!--                                           :style="{color: (item.active ? getConditionalCountColor(item, action.countBadgeConditions)  : 'grey') +'  !important'}"></i>-->
-<!--                                    </template>-->
 
                                     <!-- Tooltip message -->
                                     <div v-html="getConditionalCountMessage(item, action.countBadgeConditions)" />
@@ -1392,7 +1387,8 @@ export default {
         getStatusIcon(item) {
 
             let iconType = ''
-            let isScheduled = item.activate_at || item.deactivate_at;
+            let isScheduled = (item.activate_at && !item.active) ||
+                (item.deactivate_at && item.active);
 
             if (isScheduled) {
                 iconType = 'scheduled'
@@ -1466,11 +1462,12 @@ export default {
         generateScheduleMessage(item) {
 
             let messages = [];
-            if (item.activate_at) {
+            if (item.activate_at && !item.active) {
+
                 messages.push(`Se activará: ${item.activate_at}`);
             }
 
-            if (item.activate_at) {
+            if (item.deactivate_at) {
                 messages.push(`Se inactivará: ${item.deactivate_at}`);
             }
 
@@ -1542,7 +1539,7 @@ span.custom_benefit_type {
     top: 0;
     left: 38px;
     border-radius: 3px;
-    padding: 2px 4px 0 4px;
+    padding: 2px 4px 2px 4px;
     font-size: 10px !important;
     height: 12px !important;
     letter-spacing: 2px !important;
@@ -1552,7 +1549,8 @@ span.custom_benefit_type {
 .fancy-menu {
     display: none;
     position: absolute;
-    top: 0px !important;
+    top: 0 !important;
+    right: 0;
     min-width: 220px;
     background: white;
     box-shadow: 0px 4px 10px rgba(200,200,200,0.5);
@@ -1580,6 +1578,20 @@ span.custom_benefit_type {
 
 .fancy-menu li.red-title {
     background: #fce6e5 !important;
+}
+
+/* Override tooltip styles */
+
+table .v-tooltip__content.menuable__content__active {
+    border-width: 1px !important;
+    /* Fix position to show tooltip from right position */
+    right: 0 !important;
+    left: unset !important;
+}
+
+.scheduled-tooltip .v-tooltip__content.menuable__content__active {
+    width: 300px;
+
 }
 
 </style>

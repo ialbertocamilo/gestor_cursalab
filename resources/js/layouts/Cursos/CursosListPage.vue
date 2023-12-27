@@ -278,31 +278,62 @@ export default {
                     {text: "Portada", value: "new_image_2", align: 'center', sortable: false},
                     {text: "Nombre", value: "custom_curso_nombre", sortable: false},
                     // {text: "Estado de curso", value: "curso_estado", align: 'center', sortable: false},
-                    {text: "Tipo", value: "type", sortable: false},
+                    //{text: "Tipo", value: "type", sortable: false},
+
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
+                    {text: "Escuela", value: "schools", sortable: false},
+
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
+                    {text: "Estado", value: "statusActions", align: 'center', sortable: false},
+                ],
+                statusActions: [
+
                 ],
                 actions: [
-                    {
-                        text: "Temas",
-                        icon: 'fas fa-book',
-                        type: 'route',
-                        count: 'temas_count',
-                        route: 'temas_route'
-                    },
-                    {
-                        text: "Segmentación",
-                        icon: 'fa fa-square',
-                        type: 'action',
-                        count: 'segments_count',
-                        method_name: 'segmentation'
-                    },
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
                         // show_condition: "is_cursalab_super_user"
+                    },
+                    {
+                        text: "Temas",
+                        icon: 'fas fa-book',
+                        type: 'route',
+                        route: 'temas_route',
+                        countBadgeConditions: [{
+                            message: 'El curso no tiene temas activos',
+                            minValue: 0,
+                            propertyCond: 'active_topics_count',
+                            propertyShow: 'active_inactive_topics_count',
+                            backgroundColor: 'red'
+                        },{
+                            message: 'El curso tiene temas activos',
+                            minValue: 1,
+                            propertyCond: 'active_topics_count',
+                            propertyShow: 'active_inactive_topics_count',
+                            backgroundColor: '#5458EA'
+                        }]
+                    },
+                    {
+                        text: "Segmentación",
+                        icon: 'mdi mdi-account-group segmentation-icon',
+                        type: 'action',
+                        method_name: 'segmentation',
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes colaboradores participantes en el curso',
+                            minValue: 0,
+                            propertyCond: 'assigned_users',
+                            color: 'red',
+                            icon: 'mdi mdi-alert'
+                        },{
+                            message: 'Selecciona a los colaboradores que participarán en el curso',
+                            minValue: 1,
+                            propertyCond: 'assigned_users',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                     // {
                     //     text: "Editar",
@@ -359,12 +390,12 @@ export default {
                         route: 'project_users_route',
                         // permission_name:'can_show_tarea'
                     },
-                    {
-                        text: "Actualizar Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
+                    // {
+                    //     text: "Actualizar Estado",
+                    //     icon: 'fa fa-circle',
+                    //     type: 'action',
+                    //     method_name: 'status'
+                    // },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
