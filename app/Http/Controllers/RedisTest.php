@@ -20,6 +20,7 @@ class RedisTest extends Controller
             'CUSTOMER_SLUG' => $customerSlug,
             'REDIS_DB' => $redisDb,
             'REDIS_CACHE_DB' => $redisCacheDb,
+
         ];
 
         // Almacena el array en Redis con una clave específica
