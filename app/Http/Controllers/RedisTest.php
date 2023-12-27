@@ -11,12 +11,15 @@ class RedisTest extends Controller
         $appName = env('APP_NAME');
         $customerId = env('CUSTOMER_ID');
         $customerSlug = env('CUSTOMER_SLUG');
-
+        $redisDb = env('REDIS_DB');
+        $redisCacheDb = env('REDIS_CACHE_DB');
         // Crea un array asociativo con los valores
         $values = [
             'APP_NAME' => $appName,
             'CUSTOMER_ID' => $customerId,
             'CUSTOMER_SLUG' => $customerSlug,
+            'REDIS_DB' => $redisDb,
+            'REDIS_CACHE_DB' => $redisCacheDb,
         ];
 
         // Almacena el array en Redis con una clave específica
