@@ -81,8 +81,7 @@ class CursosController extends Controller
             ->pluck('id')
             ->toArray();
 
-        self::$coursesUsersAssigned = CourseInfoUsersM::whereIn('course_id', $coursesIds)
-        ->get();
+        self::$coursesUsersAssigned = Course::calculateUsersSegmentedCount($coursesIds);
 
         CursoSearchResource::collection($paginatedCourses);
 

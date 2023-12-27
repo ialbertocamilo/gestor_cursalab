@@ -1787,4 +1787,32 @@ class Course extends BaseModel
         }
         return $topics;
     }
+
+    /**
+     * Calculate users segmented count for each course provided
+     */
+    public static function calculateUsersSegmentedCount($coursesIds) : array {
+
+        $count = [];
+        Course::select('id')
+            ->with([
+                'segments:id,model_id',
+                'segments.values:id,segment_id,criterion_id,criterion_value_id,type_id,starts_at,finishes_at',
+                'segments.values.criterion:id,field_id',
+                'segments.values.criterion.field_type:id,code',
+            ])
+            ->whereIn('courses.id', $coursesIds)
+            ->chunkById(200, function ($courses) use (&$count) {
+                foreach ($courses as $course) {
+                    $users_having_course = $course->usersSegmented($course->segments,'get_records');
+
+                    $count[] = [
+                        'course_id' => $course->id,
+                        'count' => $users_having_course->count()
+                    ];
+                }
+            });
+
+        return $count;
+    }
 }
