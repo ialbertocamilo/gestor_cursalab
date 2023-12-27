@@ -1913,6 +1913,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $customer = Customer::getCurrentSession();
 
+        // Si no hay cliente configurado, no validar (acceso por defecto)
+        if (!$customer) {
+
+            return true;
+        }
+
+        // No validar usuarios cursalab (todos restringidos)
         if (!$cursalab_exception) {
             
             return $customer->hasServiceAvailable();
