@@ -249,7 +249,46 @@
 
                     </template>
                 </DefaultModalSectionExpand>
-
+                <DefaultModalSectionExpand
+                    title="Gestión de etiquetas"
+                    :expand="sections.showSectionTags"
+                    class="my-4"
+                >
+                    <template slot="content">
+                        <v-row>
+                            <v-col cols="6">
+                                <DefaultAutocomplete
+                                    dense
+                                    label="Tags"
+                                    v-model="selectedItems"
+                                    :items="people"
+                                    custom-items
+                                    item-text="name"
+                                    item-value="id"
+                                    multiple
+                                    small-chips
+                                    :maxValuesSelected="3"
+                                    :showSelectAll="false"
+                                    :countShowValues="3"
+                                    clearable
+                                    :deleteChips="true"
+                                >
+                                    <template v-slot:customItems="{item}">
+                                        <!-- <template v-if="typeof item !== 'object'">
+                                            <v-list-item-title v-text="item"></v-list-item-title>
+                                        </template> -->
+                                        <!-- <template v-else> -->
+                                            <v-list-item-content>
+                                                <v-list-item-title v-html="item.name"></v-list-item-title>
+                                                <v-list-item-subtitle v-if="item.description" v-text="item.description"></v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        <!-- </template> -->
+                                    </template>
+                                </DefaultAutocomplete>
+                            </v-col>
+                        </v-row>
+                    </template>
+                </DefaultModalSectionExpand>
                 <v-row>
                     <v-col cols="2">
                         <DefaultInput
@@ -350,6 +389,7 @@ export default {
             sections: {
                 showSectionEvaluation: {status: true},
                 showSectionResources: {status: true},
+                showSectionTags:{status:true}
             },
             resourceDefault: {
                 id: null,
@@ -438,6 +478,38 @@ export default {
             },
             hasPermissionToUseIaDescription:false,
             hasPermissionToUseIaEvaluation:false,
+            selectedItems: [],
+            topLevelOptions: [
+                {
+                    text: '☆ Dificultad',
+                        children: [
+                            { text: 'Basico' },
+                            { text: 'Intermedio' },
+                            { text: 'Avanzado' }
+                        ]
+                    },
+                {
+                text: 'Competencia',
+                    children: [
+                        { text: 'Trabajo en equipo' },
+                        { text: 'Colaborativo' }
+                    ]
+                }
+            ],
+            people: [
+                { header: '🌟Dificultad:' },
+                { id:1,name: 'Basico', description: ''},
+                { id:2,name: 'Intermedio', description: ''},
+                { id:3,name: 'Avanzado', description: ''},
+                { divider: true },
+                { header: '💚 Competencia:' },
+                { id:4,name: 'Trabajo en equipo', description: 'Colabora efectivamente con otros para lograr objetivos comunes.'},
+                { id:5,name: 'Comunicación Efectiva', description: 'Expresa ideas de manera clara y concisa, tanto verbalmente como por escrito.'},
+                {divider:true},
+                {header:'💡 Habilidades prácticas:'},
+                { id:6,name: 'Dominio Técnico', description: 'Posee habilidades y conocimientos específicos relacionados con su función o industria.'},
+                { id:7,name: 'Manejo de Herramientas Tecnológicas', description: 'Utiliza eficientemente las herramientas y tecnologías necesarias para realizar sus tareas.'},
+            ]
         }
     },
     async mounted() {
@@ -452,7 +524,7 @@ export default {
                 return (evaluation_type.name === "Calificada")
             }
             return false;
-        }
+        },
     },
     methods: {
         resetValidation() {
@@ -856,7 +928,7 @@ export default {
             await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
                 vue.limits_descriptions_generate_ia = data.data;
             })
-        }
+        },
     }
 }
 </script>

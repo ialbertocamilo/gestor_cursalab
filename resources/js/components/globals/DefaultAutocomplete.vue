@@ -43,6 +43,7 @@
                 <div class="pt-1"></div>
                 <v-chip small v-if="index < countShowValues">
                     <span>{{ item[itemText] }}</span>
+
                 </v-chip>
                 <span
                     v-if="index === countShowValues"
@@ -157,6 +158,10 @@ export default {
             type: Boolean,
             default: true
         },
+        deleteChips:{
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
