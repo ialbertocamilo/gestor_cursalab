@@ -101,7 +101,8 @@ class Workspace extends BaseModel
         'contact_support' => 'array',
         'limit_allowed_users' => 'array',
         'limits' => 'json',
-        'jarvis_configuration' => 'json'
+        'jarvis_configuration' => 'json',
+        'dc3_configuration'=>'array'
     ];
 
 
@@ -219,6 +220,9 @@ class Workspace extends BaseModel
     }
     public function getDc3ConfigurationAttribute($value)
     {
+        if($this->parent_id){
+            return null;
+        }
         // Puedes realizar alguna manipulación o formato antes de devolver el valor
         if(is_null($value) || $value=='undefined'){
             $data = [];
@@ -773,18 +777,13 @@ class Workspace extends BaseModel
             $_subworkspace_data['criterion_value_id'] = $criterion_value->id;
 
             $workspace->criteriaValue()->syncWithoutDetaching($criterion_value);
-
-            $_subworkspace_data['dc3_configuration'] = json_encode($_subworkspace_data['dc3_configuration']);
-            
+            // $_subworkspace_data['dc3_configuration'] = json_encode($_subworkspace_data['dc3_configuration']);
             $subworkspace = $workspace->subworkspaces()->create($_subworkspace_data);
             $subworkspace->app_menu()->syncWithoutDetaching($_subworkspace->app_menu);
             $subworkspace->main_menu()->syncWithoutDetaching($_subworkspace->main_menu);
             $subworkspace->side_menu()->syncWithoutDetaching($_subworkspace->side_menu);
-
             foreach ($_subworkspace->schools as $_school) {
-
                 $current_subworkspaces = $workspace->subworkspaces()->get();
-
                 $school = School::whereRelationIn('subworkspaces', 'id', $current_subworkspaces->pluck('id'))
                             ->where('external_id', $_school->id)
                             ->first();
@@ -797,7 +796,6 @@ class Workspace extends BaseModel
                     $school_data['external_id'] = $_school->id;
 
                     $school = $subworkspace->schools()->create($school_data, $school_position);
-
                 } else {
 
                     $subworkspace->schools()->syncWithoutDetaching([$school->id => $school_position]);
@@ -813,9 +811,8 @@ class Workspace extends BaseModel
 
                         $course_data = $_course->toArray();
                         $course_data['external_id'] = $_course->id;
-
+                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration']);
                         $course = $school->courses()->create($course_data);
-
                         foreach ($_course->topics as $_topic) {
 
                             $topic_data = $_topic->toArray();
