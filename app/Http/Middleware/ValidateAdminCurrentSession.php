@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\Redirect;
 // use App\Models\Master\Customer;
 
-class ValidateCurrentSession
+class ValidateAdminCurrentSession
 
 {
     /**
@@ -23,18 +23,36 @@ class ValidateCurrentSession
     {
         $user = auth()->user();
 
+        $expectsJson = $request->expectsJson();
+
         if (!$user->canAccessPlatform()) {
 
-            $user->token()->revoke();
+            // $user->token()->revoke();
+            session()->invalidate();
+            auth()->logout();
             
+            if (! $expectsJson ) {
+                // return redirect('/login');
+                return redirect('/plataforma-suspendida');
+            }
+
             return response()->json(['error' => 'Platform service unavailable. User logged out'], 403);
         }
 
         if (!$user->active) {
 
-            $user->token()->revoke();
+            session()->invalidate();
+            auth()->logout();
+            // $user->token()->revoke();
+            // $request->guard()->logout();
+            // session()->invalidate();
+            // session()->regenerateToken();
 
-            return response()->json(['error' => 'User inactive logged out'], 403);
+            if (! $expectsJson ) {
+                return redirect('/login');
+            }
+
+            return response()->json(['error' => 'Admin inactive logged out'], 403);
         }
 
         return $next($request);

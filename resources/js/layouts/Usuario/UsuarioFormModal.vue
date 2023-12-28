@@ -130,6 +130,46 @@
                             />
                     </v-col>
                 </v-row>
+                <!-- DATOS PARA DC3 y DC4 -->
+                <div v-if="has_DC3_functionality">
+                    <v-row justify="space-around" align="start" align-content="center">
+                        <v-col cols="12" class="d-flex justify-content-between pb-0" style="cursor: pointer">
+                            <strong class="cg">Datos para STPS</strong>
+                        </v-col>
+                        <v-col cols="12" class="py-0 separated">
+                            <DefaultDivider/>
+                        </v-col>
+                    </v-row>
+                    <v-row justify="space-around" align="start" align-content="center">
+                        <v-col cols="4">
+                            <DefaultInput
+                                clearable
+                                v-model="resource.curp"
+                                label='CURP'
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                placeholder=""
+                                label="Ocupación"
+                                :items="national_occupations_catalog"
+                                v-model="resource.national_occupation_id"
+                                item-text="name"
+                                clearable
+                            />
+                        </v-col>
+                        <v-col cols="4">
+                            <DefaultAutocomplete
+                                placeholder=""
+                                :label="position_dc3.code"
+                                :items="position_dc3.values"
+                                v-model="resource.criterion_list[position_dc3.code]"
+                                item-text="value_text"
+                                clearable
+                            />
+                        </v-col>
+                    </v-row>
+                </div>
 
                 <v-row justify="space-around" align="start" align-content="center" v-if="criterion_list_opt.length > 0">
                     <v-col cols="12" class="d-flex justify-content-between pb-0"
@@ -306,6 +346,8 @@ export default {
                 criterion_list: {},
                 criterion_list_final: {},
                 active: true,
+                national_occupation_id:null,
+                curp:''
             },
             resource_criterion_static: {
                 usuario: {},
@@ -371,6 +413,10 @@ export default {
                     }
                 },
             },
+            /*DC3 - DC4*/
+            national_occupations_catalog:[],
+            position_dc3:{values:[],code:''},
+            has_DC3_functionality:false
        }
     },
     mounted() {
@@ -601,7 +647,11 @@ export default {
                 .then(({data}) => {
                     vue.criterion_list_req = [];
                     vue.criterion_list_opt = [];
-
+                    vue.has_DC3_functionality = data.data.has_DC3_functionality;
+                    if(vue.has_DC3_functionality){
+                        vue.national_occupations_catalog = data.data.national_occupations_catalog;
+                        vue.position_dc3 = data.data.position_dc3;
+                    }
 
 
                     vue.criterion_list = data.data.criteria

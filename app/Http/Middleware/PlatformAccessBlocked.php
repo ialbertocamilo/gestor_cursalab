@@ -6,9 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 // use Illuminate\Support\Facades\Redirect;
-// use App\Models\Master\Customer;
+use App\Models\Master\Customer;
 
-class ValidateCurrentSession
+class PlatformAccessBlocked
 
 {
     /**
@@ -21,20 +21,11 @@ class ValidateCurrentSession
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = auth()->user();
+        $customer = Customer::getCurrentSession();
 
-        if (!$user->canAccessPlatform()) {
+        if ($customer->hasServiceAvailable()) {
 
-            $user->token()->revoke();
-            
-            return response()->json(['error' => 'Platform service unavailable. User logged out'], 403);
-        }
-
-        if (!$user->active) {
-
-            $user->token()->revoke();
-
-            return response()->json(['error' => 'User inactive logged out'], 403);
+            return redirect('/login');
         }
 
         return $next($request);

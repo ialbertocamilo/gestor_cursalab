@@ -22,6 +22,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'customer' => [
+        'id' => env('CUSTOMER_ID', 'cursalab-id'),
         'slug' => env('CUSTOMER_SLUG', 'cursalab-default'),
     ],
 

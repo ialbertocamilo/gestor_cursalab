@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
 use App\Models\Cargo;
@@ -25,9 +26,11 @@ use App\Models\Categoria;
 use App\Models\Criterion;
 use App\Models\Matricula;
 use App\Models\Workspace;
+use App\Mail\EmailTemplate;
 use App\Models\AssignedRole;
 use App\Models\SegmentValue;
 use App\Models\SummaryTopic;
+use App\Models\UserProgress;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
 use App\Models\UsuarioMaster;
@@ -35,30 +38,28 @@ use App\Services\FileService;
 use App\Models\CriterionValue;
 use App\Models\Resumen_general;
 use App\Models\Resumen_x_curso;
-use App\Models\UserProgress;
 use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\UserStoreRequest;
+
 use Illuminate\Support\Facades\Session;
 use Altek\Accountant\Facades\Accountant;
+
+use App\Models\NationalOccupationCatalog;
 use App\Http\Requests\ResetPasswordRequest;
+
 
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\ApiRest\HelperController;
 
 use App\Http\Resources\Usuario\UsuarioSearchResource;
 use App\Http\Controllers\ApiRest\RestAvanceController;
-
-
-use App\Mail\EmailTemplate;
-use Illuminate\Support\Facades\Mail;
-
-use Carbon\Carbon;
 
 // use App\Perfil;
 
@@ -183,7 +184,10 @@ class UsuarioController extends Controller
     {
         $user->load('criterion_values');
 
-        $current_workspace_criterion_list = $this->getFormSelects(true);
+        $formSelects = $this->getFormSelects(true);
+        $current_workspace_criterion_list = $formSelects['criteria'];
+        $criterion_position_id = $formSelects['criterion_position_id'];
+
         $user_criteria = [];
 
         foreach ($current_workspace_criterion_list as $criterion) {
@@ -216,11 +220,15 @@ class UsuarioController extends Controller
 //            }
 //        }
         $user->criterion_list = $user_criteria;
-
+        $position_dc3 = $current_workspace_criterion_list->where('id',$criterion_position_id)->first();
+        $current_workspace_criterion_list = $current_workspace_criterion_list->filter(fn ($c) => $c->id <> $criterion_position_id)->values();
 //        $user->criterion_list = $criterion_grouped;
         return $this->success([
             'usuario' => $user,
-            'criteria' => $current_workspace_criterion_list
+            'criteria' => $current_workspace_criterion_list,
+            'has_DC3_functionality' =>$formSelects['has_DC3_functionality'],
+            'national_occupations_catalog' =>$formSelects['national_occupations_catalog'],
+            'position_dc3' => $position_dc3,
         ]);
     }
 
@@ -254,9 +262,18 @@ class UsuarioController extends Controller
             ->orderBy('position')
             ->get();
 
-        $response = compact('criteria');
+        //Campos para DC3
+        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $national_occupations_catalog = [];
+        $criterion_position_id = null;
 
-        return $compactResponse ? $criteria : $this->success($response);
+        if($has_DC3_functionality){
+            $criterion_position_id = get_current_workspace()->dc3_configuration->criterion_position;
+            $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
+        }
+        $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
+        
+        return $compactResponse ? $response : $this->success($response);
     }
 
     public function store(UserStoreRequest $request)

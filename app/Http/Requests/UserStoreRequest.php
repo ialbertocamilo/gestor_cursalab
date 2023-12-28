@@ -73,7 +73,9 @@ class UserStoreRequest extends FormRequest
             'person_number' => 'nullable',
 
             'criterion_list_final' => 'nullable',
-            'criterion_list' => 'nullable'
+            'criterion_list' => 'nullable',
+            'national_occupation_id'=>'nullable',
+            'curp' => 'nullable'
         ];
         if($id){
             $user = User::where('id',$id)->select('active')->first();

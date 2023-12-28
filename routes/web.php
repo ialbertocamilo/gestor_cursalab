@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CheckRol;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dc3Controller;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\GestorController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
+
+use App\Http\Controllers\RedisTest;
+
 
 Route::redirect('/', 'login', 301);
 //temporary route
@@ -38,6 +42,7 @@ Route::redirect('/', 'login', 301);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
 Route::view('welcome_email','emails.welcome_email');
+Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
 Route::get('email_reset',function(){
     $mail_data=[
@@ -98,7 +103,7 @@ Route::get('informacion_app', function () {
     return view('informacion_app');
 });
 
-Route::middleware(['auth_2fa','auth'])->group(function () {
+Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(function () {
 
     Route::get('/impersonate/leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
     Route::get('/impersonate/take/{value}', [ImpersonateController::class, 'take'])->name('impersonate')->middleware('checkrol:super-user');
@@ -119,9 +124,9 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
     Route::prefix('diploma')->middleware('hasHability:create-certificate')->group(base_path('routes/cms/diploma.php'));
 
-    
 
-    
+
+
     Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('hasHability:learning-analytics');
 
     Route::prefix('general')->middleware('hasHability:dashboard')->group(base_path('routes/cms/general.php'));
@@ -158,6 +163,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
 
 
     Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
+    Route::prefix('person')->middleware('hasHability:users')->group(base_path('routes/cms/person.php'));
     // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));
@@ -189,14 +195,14 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::view('/documentation-api/{list_apis?}', 'documentation-api.index')->name('documentation-api.index');
 
     Route::prefix('resumen_encuesta')->middleware('hasHability:poll-report')->group(base_path('routes/cms/resumen_encuesta.php'));
-    
+
     Route::prefix('resumen_evaluaciones')->middleware('hasHability:evaluation-report')->group(base_path('routes/cms/resumen_evaluaciones.php'));
 
     Route::prefix('beneficios')->middleware('hasHability:benefits')->group(base_path('routes/cms/beneficios.php'));
     Route::prefix('speakers')->middleware('hasHability:speaker')->group(base_path('routes/cms/speakers.php'));
     Route::prefix('diplomas')->middleware('hasHability:list-certificate')->group(base_path('routes/cms/diplomas.php'));
-    
-    // === votaciones === 
+
+    // === votaciones ===
     Route::prefix('votaciones')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votaciones.php'));
 
     Route::prefix('projects')->middleware('hasHability:projects')->group(base_path('routes/cms/projects.php'));
@@ -207,4 +213,49 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));
 
+    Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDFDownload']);
+    Route::get('/generate-pdf-blade', function(){
+        $national_occupations_catalog = App\Models\NationalOccupationCatalog::select('code','name')->get()->toArray();
+        $catalog_denominations = App\Models\Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
+        $data = [
+            'national_occupations_catalog'=>$national_occupations_catalog,
+            'catalog_denominations'=>$catalog_denominations,
+            "title"=>'74130119-sostenibilidad',
+            "user" => [
+              "name" => \Str::title("Marisol CABRERA CABRERA"),
+              "curp" => '145L0789asd',
+              "document" => "74130119",
+              "occupation" => '01.2',
+              "position" => "Asistente de Talento y Desarrollo"
+            ],
+            "subworkspace" => [
+              "id" => 4,
+              "name_or_social_reason" => "Intercorp IRC",
+              "shcp" => "IMF1-70223A702",
+              "subworkspace_logo" => get_media_url("images/wrkspc-1-logo-corporativo-1-02-20220829130652-iSA1RxfF31iv2fD.png",'s3')
+            ],
+            "course" =>  [
+              "id" => 112,
+              "name" => "Sostenibilidad",
+              "duration" => "0.35",
+              "instructor" => "Aldo Ramirez",
+              "instructor_signature" => get_media_url("images/wrkspc-1-1-20231205170625-dapwpNAKnyK4lPL.png","s3"),
+              "legal_representative" => "Representante 3",
+              "legal_representative_signature" => get_media_url("images/wrkspc-1-1-20231205173447-5s3MNfRDbDb8HFB.png","s3"),
+              "catalog_denomination_dc3" => "8000",
+              "init_date_course_year" => 2023,
+                "init_date_course_month" => 12,
+                "init_date_course_day" => 5,
+                "final_date_course_year" => 2023,
+                "final_date_course_month" => 12,
+                "final_date_course_day" => 5
+            ]
+        ];
+        return view('pdf.dc3',$data);
+    });
 });
+
+
+Route::get('/store-redis', [RedisTest::class, 'storeValuesInRedis']);
+
+Route::get('/retrieve-redis', [RedisTest::class, 'retrieveValuesFromRedis']);

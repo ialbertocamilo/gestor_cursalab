@@ -433,7 +433,7 @@ class Media extends BaseModel
         return compact('nombre','find_main_file');
     }
 
-    protected function requestUploadFile($data, $field)
+    protected function requestUploadFile($data, $field,$return_media = false)
     {
         if (!empty($data[$field])) {
 
@@ -444,7 +444,7 @@ class Media extends BaseModel
             $file_field = 'file_' . $field;
 
             if (!empty($data[$file_field])) {
-                $path = Media::uploadFile($data[$file_field]);
+                $path = Media::uploadFile($data[$file_field],$return_media,true);
                 $data[$field] = $path;
             } else {
                 $data[$field] = null;

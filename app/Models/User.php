@@ -48,6 +48,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Models\Master\Customer;
+
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
     use HasApiTokens, HasFactory, Notifiable, HasRolesAndAbilities, HasPushSubscriptions;
@@ -91,7 +93,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         'country_id', 'district_id', 'address', 'description', 'quote',
         'external_id', 'fcm_token', 'token_firebase', 'secret_key',
         'user_relations',
-        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating'
+        'summary_user_update', 'summary_course_update', 'summary_course_data', 'required_update_at', 'last_summary_updated_at', 'is_updating',
+        'national_occupation_id','curp'
     ];
 
     // protected $with = ['roles'
@@ -257,6 +260,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     public function subworkspaces()
     {
         return $this->belongsToMany(Workspace::class, 'subworkspace_user', 'user_id', 'subworkspace_id');
+    }
+
+    public function national_occupation()
+    {
+        return $this->belongsTo(NationalOccupationCatalog::class, 'national_occupation_id');
     }
 
     public function projects(){
@@ -1900,4 +1908,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         $user->config_data()->updateOrCreate( ['user_id' => $user->id], $data);
     }
+
+    public function canAccessPlatform($cursalab_exception = true)
+    {
+        // TEMP
+        // return true;
+
+        $customer = Customer::getCurrentSession();
+
+        // Si no hay cliente configurado, no validar (acceso por defecto)
+        if (!$customer) {
+
+            return true;
+        }
+
+        // No validar usuarios cursalab (todos restringidos)
+        if (!$cursalab_exception) {
+            
+            return $customer->hasServiceAvailable();
+        }
+
+        return ($this->isCursalabUser() || $customer->hasServiceAvailable());
+    }
+
+    public function isCursalabUser($only_superuser = false)
+    {
+        if ($only_superuser) {
+
+            if (!$this->isAn('super-user')) {
+                return false;
+            }
+        }
+
+        $email_has_domain = str_contains($this->email_gestor, '@cursalab.io');
+        $is_cursalab_type = $this->type?->code == 'cursalab';
+
+        return ($email_has_domain && $is_cursalab_type);
+    }
+
 }

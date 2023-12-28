@@ -15,7 +15,8 @@ class Course extends BaseModel
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
-        'activate_at', 'deactivate_at', 'user_confirms_certificate'
+        'activate_at', 'deactivate_at', 'user_confirms_certificate',
+        'can_create_certificate_dc3_dc4','dc3_configuration'
     ];
 
     protected $casts = [
@@ -93,7 +94,6 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
-
     public function compatibilities_a()
     {
         return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
@@ -115,7 +115,19 @@ class Course extends BaseModel
 
         return $this->compatibilities_a->merge($this->compatibilities_b);
     }
-
+    public function getDc3ConfigurationAttribute($value)
+    {
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['instructor'] = null;
+            $data['legal_representative'] = null;
+            $data['catalog_denomination_dc3_id'] = null;
+            $data['range_date'] = null;
+            return $data;
+        }
+        $data =json_decode($value); 
+        return $data;
+    }
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
