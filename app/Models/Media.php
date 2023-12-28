@@ -444,7 +444,7 @@ class Media extends BaseModel
             $file_field = 'file_' . $field;
 
             if (!empty($data[$file_field])) {
-                $path = Media::uploadFile($data[$file_field],$return_media,true);
+                $path = Media::uploadFile($data[$file_field],null,$return_media);
                 $data[$field] = $path;
             } else {
                 $data[$field] = null;
