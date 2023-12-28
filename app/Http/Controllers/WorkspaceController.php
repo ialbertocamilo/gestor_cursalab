@@ -132,7 +132,7 @@ class WorkspaceController extends Controller
         endif;
 
         // Update record in database
-
+        $data['dc3_configuration'] = json_decode($data['dc3_configuration']);
         $workspace = Workspace::create($data);
 
         // Save workspace's criteria
@@ -249,7 +249,7 @@ class WorkspaceController extends Controller
         else:
             $data['limit_allowed_users'] = null;
         endif;
-
+        $data['dc3_configuration'] = json_decode($data['dc3_configuration']);
         // Update record in database
         $workspace->update($data);
         // Save workspace's criteria
