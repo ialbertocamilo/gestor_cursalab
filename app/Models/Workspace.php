@@ -774,8 +774,9 @@ class Workspace extends BaseModel
 
             $workspace->criteriaValue()->syncWithoutDetaching($criterion_value);
 
+            $_subworkspace_data['dc3_configuration'] = json_encode($_subworkspace_data['dc3_configuration']);
+            
             $subworkspace = $workspace->subworkspaces()->create($_subworkspace_data);
-
             $subworkspace->app_menu()->syncWithoutDetaching($_subworkspace->app_menu);
             $subworkspace->main_menu()->syncWithoutDetaching($_subworkspace->main_menu);
             $subworkspace->side_menu()->syncWithoutDetaching($_subworkspace->side_menu);
