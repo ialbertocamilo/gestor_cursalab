@@ -975,14 +975,14 @@ class Workspace extends BaseModel
 
                     $children[] = [
                         'id' => $course_parent_key . '-' . $child_key,
-                        'name' => $topic->name,
+                        'name' => '[TEMA] ' . $topic->name,
                         'icon' => 'mdi-bookmark',
                     ];
                 }
 
                 $course_parent = [
                     'id' => $course_parent_key,
-                    'name' => $course->name,
+                    'name' => '[CURSO] ' . $course->name,
                     'icon' => 'mdi-book',
                     'children' => $children,
                 ];
@@ -992,7 +992,7 @@ class Workspace extends BaseModel
 
             $parent = [
                 'id' => $school_parent_key,
-                'name' => $school->name,
+                'name' => '[ESCUELA] ' . $school->name,
                 'icon' => 'mdi-school',
                 'children' => $school_children,
             ];
