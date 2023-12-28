@@ -48,6 +48,9 @@ class Customer extends BaseModel
 
     public function hasServiceAvailable()
     {
+        // TEMP
+        // return true;
+
         $status = $this->getCurrentStatus();
 
         if ($status == 'inactive') return false;
@@ -57,6 +60,9 @@ class Customer extends BaseModel
 
     protected function getCurrentSession()
     {
+        // TEMP
+        // return NULL;
+
         $customer = cache('current_customer');
 
         if (!$customer) {

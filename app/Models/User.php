@@ -1911,8 +1911,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     public function canAccessPlatform($cursalab_exception = true)
     {
-        return true;
-        
+        // TEMP
+        // return true;
+
         $customer = Customer::getCurrentSession();
 
         // Si no hay cliente configurado, no validar (acceso por defecto)
