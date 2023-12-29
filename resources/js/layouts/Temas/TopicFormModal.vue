@@ -259,7 +259,8 @@
                             <v-col cols="6">
                                 <DefaultAutocomplete
                                     dense
-                                    label="Tags"
+                                    label="Selección de etiquetas "
+                                    placeholder="Busca tu tag"
                                     v-model="selectedItems"
                                     :items="people"
                                     custom-items
@@ -270,21 +271,26 @@
                                     :maxValuesSelected="3"
                                     :showSelectAll="false"
                                     :countShowValues="3"
-                                    clearable
                                     :deleteChips="true"
                                 >
                                     <template v-slot:customItems="{item}">
-                                        <!-- <template v-if="typeof item !== 'object'">
-                                            <v-list-item-title v-text="item"></v-list-item-title>
-                                        </template> -->
-                                        <!-- <template v-else> -->
-                                            <v-list-item-content>
-                                                <v-list-item-title v-html="item.name"></v-list-item-title>
-                                                <v-list-item-subtitle v-if="item.description" v-text="item.description"></v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        <!-- </template> -->
+                                        <div class="d-flex">
+                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
+                                            </v-checkbox> -->
+                                            <div class="py-1">
+                                                <v-list-item-title class="list-item-name-tag" v-html="item.name"></v-list-item-title>
+                                                <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle>
+                                            </div>
+                                        </div>
                                     </template>
                                 </DefaultAutocomplete>
+                            </v-col>
+                            <v-col cols="6">
+                                <DefaultButton
+                                    outlined 
+                                    label="Otros a agregar"
+                                    @click="openFormModal(modalTagOptions)"
+                                />
                             </v-col>
                         </v-row>
                     </template>
@@ -344,6 +350,13 @@
                 @close="convertMediaToIaOptions.open = false "
                 @onConfirm="addIaConvert"
             />
+            <TagModal
+                :ref="modalTagOptions.ref"
+                width="40vw"
+                :options="modalTagOptions"
+                @close="modalTagOptions.open = false "
+                @onConfirm="modalTagOptions.open =false"
+            />
         </template>
     </DefaultDialog>
 </template>
@@ -358,14 +371,14 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
-
+import TagModal  from "../../components/basicos/TagModal.vue";
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
 
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal},
+    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal,TagModal},
 
     props: {
         options: {
@@ -509,7 +522,16 @@ export default {
                 {header:'💡 Habilidades prácticas:'},
                 { id:6,name: 'Dominio Técnico', description: 'Posee habilidades y conocimientos específicos relacionados con su función o industria.'},
                 { id:7,name: 'Manejo de Herramientas Tecnológicas', description: 'Utiliza eficientemente las herramientas y tecnologías necesarias para realizar sus tareas.'},
-            ]
+            ],
+            modalTagOptions:{
+                ref: 'TagFormModal',
+                open: false,
+                base_endpoint: '/tags',
+                resource: 'Tag',
+                confirmLabel: 'Confirmar',
+                action:'Retroceder',
+                create_from_course_list:false,
+            }
         }
     },
     async mounted() {
@@ -997,5 +1019,32 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+.list-item-name-tag{
+    color: #2A3649  !important;
+    font-family: Nunito !important;
+    font-size: 15px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    letter-spacing: 0.1px !important; 
+}
+.list-item-description-tag{
+    color: #2A3649 !important;
+    font-family: Nunito,sans-serif !important;
+    font-size: 12px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important; /* 166.667% */
+    letter-spacing: 0.1px !important;
+}
+.v-select-list .v-subheader{
+    color: #2A3649 !important;
+    font-family: Nunito,sans-serif !important;
+    font-size: 15px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important; /* 133.333% */
+    letter-spacing: 0.1px !important; 
 }
 </style>
