@@ -321,6 +321,7 @@ class GeneralController extends Controller
     public function executeCommandJarvis(){
         // try {
             //code...
+            sleep(70);
             Artisan::call('convert:multimedia-text');
             return 'Se ejecutó correctamente';
         // } catch (\Throwable $th) {
