@@ -544,12 +544,16 @@ class WorkspaceController extends Controller
         $_courses = Course::whereIn('id', $data['course_ids'])->get();
         $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
 
+        $prefix = '';
+        // $prefix = '[DUPLICADO] ';
+
         foreach ($data['schools'] as $school_id => $course_ids) {
 
             $_school = $_schools->where('id', $school_id)->first();
 
             $school_data = $_school->toArray();
             $school_data['external_id'] = $_school->id;
+            $school_data['name'] = $prefix . $_school->name;
 
             foreach ($subworkspaces as $subworkspace) {
 
@@ -568,6 +572,7 @@ class WorkspaceController extends Controller
 
                     $course_data = $_course->toArray();
                     $course_data['external_id'] = $_course->id;
+                    $course_data['name'] = $prefix . $_course->name;
 
                     $course = $school->courses()->create($course_data);
 
