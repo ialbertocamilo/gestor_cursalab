@@ -83,7 +83,7 @@ export default {
                 type:'competency',
             },
             rules:{
-                name: this.getRules(['required', 'max:20']),
+                name: this.getRules(['required', 'max:40']),
             }
         };
     },
