@@ -48,7 +48,15 @@ class Tag extends Model
     // protected function list(){
 
     // }
-    public function storeRequest($data){
-        dd($data);
+    protected function storeRequest($data){
+        $last_item = Taxonomy::where('group','tags')->where('type',$data['type'])->orderBy('position','desc')->select('position')->first();
+        $tag = new Taxonomy();
+        $tag['name'] = $data['name'];
+        $tag['description'] = $data['description'];
+        $tag['type'] = $data['type'];
+        $tag['group'] = 'tags';
+        $tag['position'] = $last_item?->position+1 ?? 1;
+        $tag->save();
+        return $tag;
     }
 }

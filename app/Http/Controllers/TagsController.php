@@ -51,10 +51,8 @@ class TagsController extends Controller
     public function store(TagSR $request)
     {
         $data = $request->validated();
-
         $tag = Tag::storeRequest($data);
-
-        return $this->success(['msg' => 'Tag creado correctamente.']);
+        return $this->success(['msg' => 'Tag creado correctamente.','tag'=>$tag]);
     }
 
     public function edit(Tag $tag)

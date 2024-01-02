@@ -503,7 +503,7 @@ export default {
                 ref: 'TagFormModal',
                 open: false,
                 base_endpoint: '/tags',
-                resource: 'Tag',
+                resource: 'Topic',
                 confirmLabel: 'Confirmar',
                 action:'Retroceder',
                 create_from_course_list:false,
@@ -936,6 +936,7 @@ export default {
             vue.insertTagsAfterHeader([tag],header,tag.type);
             if(vue.resource.tags.length < 3){
                 vue.resource.tags.push(tag.id);
+                vue.showAlert('El tag se ha asignado al tema.')
             }
         },
         formatTags(tags) {

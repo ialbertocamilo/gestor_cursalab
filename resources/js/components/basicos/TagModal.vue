@@ -13,51 +13,54 @@
                 </div>
             </template>
             <template v-slot:content>
-                <v-row>
-                    <v-col cols="12">
-                        <DefaultInput
-                            label="Nuevo Tag"
-                            placeholder="Escribe un nuevo Tag"
-                            v-model="resource.name"
-                            :rules="rules.name"
-                            show-required
-                            dense
-                            counter
-                        />
-                    </v-col>
-                    <v-col cols="12">
-                        <DefaultTextArea
-                            dense
-                            label="Descripción del tag(opcional)"
-                            placeholder="Descripción"
-                            v-model="resource.description"
-                            :rows="4"
-                            counter
-                        />
-                    </v-col>
-                    <v-col cols="12">
-                        <p class="label-type-tag">Selecciona el tipo de tag a crear</p>
-                        <v-radio-group
-                            v-model="resource.type"
-                            row
-                        >
-                            <v-radio
-                                value="competency"
+                <v-form ref="tagForm">
+                    <v-row>
+                        <v-col cols="12">
+                            <DefaultInput
+                                label="Nuevo Tag"
+                                placeholder="Escribe un nuevo Tag"
+                                v-model="resource.name"
+                                :rules="rules.name"
+                                show-required
+                                dense
+                                counter
+                            />
+                        </v-col>
+                        <v-col cols="12">
+                            <DefaultTextArea
+                                dense
+                                label="Descripción del tag(opcional)"
+                                placeholder="Descripción"
+                                v-model="resource.description"
+                                :rows="4"
+                                counter
+                                :rules="rules.description"
+                            />
+                        </v-col>
+                        <v-col cols="12">
+                            <p class="label-type-tag">Selecciona el tipo de tag a crear</p>
+                            <v-radio-group
+                                v-model="resource.type"
+                                row
                             >
-                                <template v-slot:label>
-                                    <div class="pt-1">Competencia</div>
-                                </template>
-                            </v-radio>
-                            <v-radio
-                                value="hability"
-                            >
-                                <template v-slot:label>
-                                    <div class="pt-1">Habilidad</div>
-                                </template>
-                            </v-radio>
-                        </v-radio-group>
-                    </v-col>
-                </v-row>
+                                <v-radio
+                                    value="competency"
+                                >
+                                    <template v-slot:label>
+                                        <div class="pt-1">Competencia</div>
+                                    </template>
+                                </v-radio>
+                                <v-radio
+                                    value="hability"
+                                >
+                                    <template v-slot:label>
+                                        <div class="pt-1">Habilidad</div>
+                                    </template>
+                                </v-radio>
+                            </v-radio-group>
+                        </v-col>
+                    </v-row>
+                </v-form>
             </template>
         </DefaultDialog>
     </div>
@@ -75,14 +78,12 @@ export default {
     data() {
         return {
             resource:{
-                id:2323,
                 name:'',
                 description:'',
-                type:''
+                type:'competency',
             },
             rules:{
                 name: this.getRules(['required', 'max:20']),
-                description: this.getRules(['only_max: 120']),
             }
         };
     },
@@ -92,7 +93,10 @@ export default {
             vue.$emit('onCancel')
         },
         resetValidation() {
-            let vue = this
+            let vue = this;
+            vue.resource.name = '';
+            vue.resource.description = '';
+            vue.resource.type = '';
         },
         async confirmModal() {
             let vue = this;
@@ -100,7 +104,25 @@ export default {
                 vue.showAlert('La descripción debe tener máximo 120 carácteres.','warning');
                 return;
             }
-            vue.$emit('onConfirm',this.resource)
+            const validateForm = vue.validateForm('tagForm')
+            let url = '/tags/store';
+            if (validateForm) {
+                const formData = vue.resource
+                await vue.$http
+                    .post(url, formData)
+                    .then(({ data }) => {
+                        vue.resetValidation()
+                        const tag = data.data.tag;
+                        console.log(tag,data);
+                        vue.showAlert('Tag creado correctamente')
+                        vue.$emit('onConfirm',tag)
+                    }).catch((error) => {
+                        if (error && error.errors) {
+                            const errors = error.errors ? error.errors : error;
+                            vue.show_http_errors(errors);
+                        }
+                    })
+            }
         },
         resetSelects() {
             let vue = this

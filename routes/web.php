@@ -135,7 +135,7 @@ Route::middleware(['auth_2fa','auth'])->group(function () {
     Route::prefix('glosario')->middleware('hasHability:glossary')->group(base_path('routes/cms/glosario.php'));
     Route::prefix('protocolos-y-documentos')->middleware('hasHability:vademecun')->group(base_path('routes/cms/vademecum.php'));
     Route::prefix('videoteca')->middleware('hasHability:videoteca')->group(base_path('routes/cms/videoteca.php'));
-    // Route::prefix('tags')->middleware('checkrol:admin,content-manager')->group(base_path('routes/cms/tags.php'));
+    Route::prefix('tags')->group(base_path('routes/cms/tags.php'));
 
 
     // Route::prefix('ayudas')->middleware('checkrol:admin')->group(base_path('routes/cms/ayudas.php'));
