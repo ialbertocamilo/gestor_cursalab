@@ -177,14 +177,14 @@ class School extends BaseModel
 
                 $children[] = [
                     'id' => $parent_key . '-' . $child_key,
-                    'name' => $topic->name,
+                    'name' => '[TEMA] ' . $topic->name,
                     'icon' => 'mdi-bookmark',
                 ];
             }
 
             $parent = [
                 'id' => $parent_key,
-                'name' => $course->name,
+                'name' => '[CURSO] ' . $course->name,
                 'avatar' => '',
                 'icon' => 'mdi-book',
                 'children' => $children,
@@ -217,14 +217,14 @@ class School extends BaseModel
 
                 $children[] = [
                     'id' => $parent_key . '-' . $child_key,
-                    'name' => $school->name,
+                    'name' => '[ESCUELA] ' . $school->name,
                     'icon' => 'mdi-school',
                 ];
             }
 
             $parent = [
                 'id' => $parent_key,
-                'name' => $subworkspace->name,
+                'name' => '[MÓDULO] ' . $subworkspace->name,
                 'avatar' => '',
                 'icon' => 'mdi-view-grid',
                 'children' => $children,
