@@ -272,6 +272,7 @@
                                     :showSelectAll="false"
                                     :countShowValues="3"
                                     :deleteChips="true"
+                                    attach
                                 >
                                     <template v-slot:customItems="{item}">
                                         <div class="d-flex">
