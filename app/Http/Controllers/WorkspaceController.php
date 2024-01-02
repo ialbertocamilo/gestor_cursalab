@@ -574,6 +574,9 @@ class WorkspaceController extends Controller
                     $course_data['external_id'] = $_course->id;
                     $course_data['name'] = $prefix . $_course->name;
 
+                    info('course_data');
+                    info($course_data);
+
                     $course = $school->courses()->create($course_data);
 
                     $workspace->courses()->attach($course);
