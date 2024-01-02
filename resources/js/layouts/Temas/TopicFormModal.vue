@@ -261,8 +261,8 @@
                                     dense
                                     label="Selección de etiquetas "
                                     placeholder="Busca tu tag"
-                                    v-model="selectedItems"
-                                    :items="people"
+                                    v-model="resource.tags"
+                                    :items="selects.tags"
                                     custom-items
                                     item-text="name"
                                     item-value="id"
@@ -354,8 +354,8 @@
                 :ref="modalTagOptions.ref"
                 width="40vw"
                 :options="modalTagOptions"
-                @close="modalTagOptions.open = false "
-                @onConfirm="modalTagOptions.open =false"
+                @onCancel="modalTagOptions.open = false "
+                @onConfirm="tagcreated"
             />
         </template>
     </DefaultDialog>
@@ -371,9 +371,9 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
-import TagModal  from "../../components/basicos/TagModal.vue";
-const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
+import TagModal  from "../../components/basicos/TagModal";
+const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type'];
 
 const file_fields = ['imagen'];
 
@@ -416,6 +416,7 @@ export default {
                 type_evaluation_id: null,
                 position: null,
                 media: [],
+                tags:[],
                 active: false,
                 active_results: false,
                 hide_evaluable: null,
@@ -435,6 +436,13 @@ export default {
                 evaluation_types: [],
                 requisitos: [],
                 qualification_types: [],
+                tags: [
+                    { header: '💚 Competencias:' },
+                    {divider:true},
+                    {header:'💡 Habilidades prácticas:'},
+                    { divider: true },
+                    { header: '🌟Dificultad:' },
+                ],
             },
             resource: {},
             rules: {
@@ -491,38 +499,6 @@ export default {
             },
             hasPermissionToUseIaDescription:false,
             hasPermissionToUseIaEvaluation:false,
-            selectedItems: [],
-            topLevelOptions: [
-                {
-                    text: '☆ Dificultad',
-                        children: [
-                            { text: 'Basico' },
-                            { text: 'Intermedio' },
-                            { text: 'Avanzado' }
-                        ]
-                    },
-                {
-                text: 'Competencia',
-                    children: [
-                        { text: 'Trabajo en equipo' },
-                        { text: 'Colaborativo' }
-                    ]
-                }
-            ],
-            people: [
-                { header: '🌟Dificultad:' },
-                { id:1,name: 'Basico', description: ''},
-                { id:2,name: 'Intermedio', description: ''},
-                { id:3,name: 'Avanzado', description: ''},
-                { divider: true },
-                { header: '💚 Competencia:' },
-                { id:4,name: 'Trabajo en equipo', description: 'Colabora efectivamente con otros para lograr objetivos comunes.'},
-                { id:5,name: 'Comunicación Efectiva', description: 'Expresa ideas de manera clara y concisa, tanto verbalmente como por escrito.'},
-                {divider:true},
-                {header:'💡 Habilidades prácticas:'},
-                { id:6,name: 'Dominio Técnico', description: 'Posee habilidades y conocimientos específicos relacionados con su función o industria.'},
-                { id:7,name: 'Manejo de Herramientas Tecnológicas', description: 'Utiliza eficientemente las herramientas y tecnologías necesarias para realizar sus tareas.'},
-            ],
             modalTagOptions:{
                 ref: 'TagFormModal',
                 open: false,
@@ -744,6 +720,8 @@ export default {
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.formatTags(data.data.tags);
+
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.evaluation_types = data.data.evaluation_types
@@ -951,6 +929,26 @@ export default {
                 vue.limits_descriptions_generate_ia = data.data;
             })
         },
+        tagcreated(tag){
+            let vue = this;
+            vue.modalTagOptions.open =false;
+            const header = tag.type  == 'hability' ? '💡 Habilidades prácticas:'  : '💚 Competencias:';
+            vue.insertTagsAfterHeader([tag],header,tag.type);
+            if(vue.resource.tags.length < 3){
+                vue.resource.tags.push(tag.id);
+            }
+        },
+        formatTags(tags) {
+            this.insertTagsAfterHeader(tags, '🌟Dificultad:', 'level');
+            this.insertTagsAfterHeader(tags, '💚 Competencias:', 'competency');
+            this.insertTagsAfterHeader(tags, '💡 Habilidades prácticas:', 'hability');
+        },
+        insertTagsAfterHeader(tags, header, type) {
+            const index = this.selects.tags.findIndex(tag => tag.header === header);
+            if (index !== -1) {
+                this.selects.tags.splice(index + 1, 0, ...tags.filter(t => t.type === type));
+            }
+        }
     }
 }
 </script>

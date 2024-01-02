@@ -27,7 +27,9 @@ class TagSR extends FormRequest
         
         $reglas = [
             // 'nombre' => 'required|min:3',
-            'nombre' => "required|min:3|unique:tags,nombre,{$id},id",
+            'name' => "required|min:3|max:20|unique:taxonomies,name,{$id},id",
+            'description' => "max:120",
+            'model_type' => "required",
             'color' => 'nullable',
         ];
 

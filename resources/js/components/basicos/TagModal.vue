@@ -1,40 +1,63 @@
 <template>
     <div>
-        <DefaultDialog :customTitle="true" :showCardActions="false" :noPaddingCardText="true" :options="options"
-            width="350px" @onCancel="closeModal" @onConfirm="confirmModal" vCardClass=" p-0 overflow-hidden ">
+        <DefaultDialog :customTitle="true" :options="options"
+            width="350px" @onCancel="closeModal" @onConfirm="confirmModal">
             <template v-slot:card-title>
-                <v-card-title class="py-0">
-                    Gestión de Tags
-                </v-card-title>
-                <div>
-                    <v-btn 
-                        color="white"
-                        fab
-                        small
-                        dark
-                        @click="closeModal"
-                    >
-                        <v-icon color="black" small> mdi-close </v-icon>
-                    </v-btn>
+                <div class="mt-2">
+                    <v-card-title class="py-0 d-flex justify-center">
+                        Gestión de Tags
+                    </v-card-title>
+                    <div style="position: absolute;right: 8px !important;top: 0 !important;">
+                        <v-icon color="black"  @click="closeModal"> mdi-close </v-icon>
+                    </div>
                 </div>
             </template>
             <template v-slot:content>
-                <div>
-                        modal
-                </div>
-            </template>
-            <template v-slot:card-actions>
-                <div style="width: 100%">
-                    <div style="background: #2E36CE;width: 100%; height: 45px; display: flex; justify-content: space-around;align-items: center;">
-                        <div class="circle-content mdi mdi-bullhorn mdi-24px"></div>
-                        <div class="circle-content mdi mdi-book-open-page-variant mdi-24px"></div>
-                        <div class="circle-content mdi mdi-video mdi-24px"></div>
-                        <div class="circle-content mdi mdi-chart-line mdi-24px"></div>
-                    </div>
-                    <div style="width: 100%;display: flex;justify-content: center;align-items: center;padding: 5px;">
-                        <div style="width: 150px;height: 4px;background: #434D56;"></div>
-                    </div>
-                </div>
+                <v-row>
+                    <v-col cols="12">
+                        <DefaultInput
+                            label="Nuevo Tag"
+                            placeholder="Escribe un nuevo Tag"
+                            v-model="resource.name"
+                            :rules="rules.name"
+                            show-required
+                            dense
+                            counter
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <DefaultTextArea
+                            dense
+                            label="Descripción del tag(opcional)"
+                            placeholder="Descripción"
+                            v-model="resource.description"
+                            :rows="4"
+                            counter
+                        />
+                    </v-col>
+                    <v-col cols="12">
+                        <p class="label-type-tag">Selecciona el tipo de tag a crear</p>
+                        <v-radio-group
+                            v-model="resource.type"
+                            row
+                        >
+                            <v-radio
+                                value="competency"
+                            >
+                                <template v-slot:label>
+                                    <div class="pt-1">Competencia</div>
+                                </template>
+                            </v-radio>
+                            <v-radio
+                                value="hability"
+                            >
+                                <template v-slot:label>
+                                    <div class="pt-1">Habilidad</div>
+                                </template>
+                            </v-radio>
+                        </v-radio-group>
+                    </v-col>
+                </v-row>
             </template>
         </DefaultDialog>
     </div>
@@ -51,6 +74,16 @@ export default {
     },
     data() {
         return {
+            resource:{
+                id:2323,
+                name:'',
+                description:'',
+                type:''
+            },
+            rules:{
+                name: this.getRules(['required', 'max:20']),
+                description: this.getRules(['only_max: 120']),
+            }
         };
     },
     methods: {
@@ -62,8 +95,12 @@ export default {
             let vue = this
         },
         async confirmModal() {
-            vue.$emit('onConfirm')
-
+            let vue = this;
+            if(vue.resource.description.length >120){
+                vue.showAlert('La descripción debe tener máximo 120 carácteres.','warning');
+                return;
+            }
+            vue.$emit('onConfirm',this.resource)
         },
         resetSelects() {
             let vue = this
@@ -77,3 +114,14 @@ export default {
     }
 }
 </script>
+<style scoped>
+.label-type-tag{
+    color: #666;
+    font-family: Nunito;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; 
+    letter-spacing: 0.1px; 
+}
+</style>

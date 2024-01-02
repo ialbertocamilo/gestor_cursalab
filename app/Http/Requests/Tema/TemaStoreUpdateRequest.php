@@ -46,6 +46,7 @@ class TemaStoreUpdateRequest extends FormRequest
             'validate' => 'required',
 
             'qualification_type_id' => 'nullable',
+            'tags' => 'nullable',
         ];
     }
 

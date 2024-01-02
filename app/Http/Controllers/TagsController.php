@@ -52,7 +52,7 @@ class TagsController extends Controller
     {
         $data = $request->validated();
 
-        $tag = Tag::create($data);
+        $tag = Tag::storeRequest($data);
 
         return $this->success(['msg' => 'Tag creado correctamente.']);
     }
