@@ -1,7 +1,7 @@
 <template>
     <div>
         <DefaultDialog :customTitle="true" :options="options"
-            width="350px" @onCancel="closeModal" @onConfirm="confirmModal">
+            width="550px" @onCancel="closeModal" @onConfirm="confirmModal">
             <template v-slot:card-title>
                 <div class="mt-2">
                     <v-card-title class="py-0 d-flex justify-center">
@@ -59,15 +59,65 @@
                                 </v-radio>
                             </v-radio-group>
                         </v-col>
+                        <v-col cols="12">
+                            <DefaultSelect
+                                v-model="filter.type"
+                                :items="types"
+                                label="Tipo"
+                                item-text="label"
+                                item-value="value"
+                                @onChange="getData"
+                                dense
+                            />
+                            <div style="min-height: 50px;">
+                                <v-list
+                                    two-line
+                                >   
+                                    <v-list-item
+                                        v-for="tag in tags"
+                                        :key="tag.id"
+                                    >
+                                        <v-list-item-content>
+                                            <v-list-item-title>{{ tag.name }}</v-list-item-title>
+                                            <v-tooltip bottom>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                    <v-list-item-subtitle
+                                                        v-bind="attrs"
+                                                        v-on="on"
+                                                    >{{ tag.description }}</v-list-item-subtitle>
+                                                </template>
+                                                <span>{{tag.description}}</span>
+                                            </v-tooltip>
+                                        </v-list-item-content>
+
+                                        <v-list-item-action>
+                                            <v-btn icon @click="openFormModal(modalDeleteOptions,tag,null,'Eliminar tag')">
+                                                <v-icon color="grey lighten-1">mdi-delete</v-icon>
+                                            </v-btn>
+                                        </v-list-item-action>
+                                    </v-list-item>
+                                </v-list>
+                            </div>
+                        </v-col>
                     </v-row>
                 </v-form>
             </template>
         </DefaultDialog>
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onConfirm="closeFormModal(modalDeleteOptions)"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+        />
     </div>
 </template>
 
 <script>
+import DefaultDeleteModal from "../../layouts/Default/DefaultDeleteModal.vue";
 export default {
+    components: {
+        DefaultDeleteModal,
+    },
     props: {
         options: {
             type: Object,
@@ -84,7 +134,23 @@ export default {
             },
             rules:{
                 name: this.getRules(['required', 'max:40']),
-            }
+            },
+            types:[
+                {value:'competency',label:'Competencias'},
+                {value:'hability',label:'Habilidades'},
+            ],
+            filter:{
+                type:''
+            },
+            tags:[
+            ],
+            modalDeleteOptions: {
+                ref: 'TagDeleteModal',
+                open: false,
+                base_endpoint: '/tags',
+                contentText: '¿Desea eliminar este registro?',
+                endpoint: '',
+            },
         };
     },
     methods: {
@@ -133,6 +199,36 @@ export default {
         async loadSelects() {
             let vue = this;
         },
+        async getData(){
+            let vue = this;
+            const url = '/tags/search-by-type';
+            vue.tags = [];
+            await vue.$http
+                    .post(url, vue.filter)
+                    .then(({ data }) => {
+                        vue.tags = data.data.tags;
+                        console.log(tag,data);
+                    }).catch((error) => {
+                        if (error && error.errors) {
+                            const errors = error.errors ? error.errors : error;
+                            vue.show_http_errors(errors);
+                        }
+                    })
+        },
+        async deleteTag(tag){
+            const url = `/tags/${tag.id}/delete`;
+            vue.tags = [];
+            await vue.$http
+                    .delete(url)
+                    .then(({ data }) => {
+                        vue.showAlert('Tag eliminado correctamente')
+                    }).catch((error) => {
+                        if (error && error.errors) {
+                            const errors = error.errors ? error.errors : error;
+                            vue.show_http_errors(errors);
+                        }
+                    })
+        }
     }
 }
 </script>
