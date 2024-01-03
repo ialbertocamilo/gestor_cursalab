@@ -279,8 +279,9 @@ export default {
                     // {text: "Módulos", value: "modules", sortable: false},
                     //{text: "Módulos", value: "images", sortable: false},
 
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     {text: "Estado", value: "statusActions", align: 'center', sortable: false},
+
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 statusActions: [
 

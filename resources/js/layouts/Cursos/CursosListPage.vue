@@ -283,8 +283,9 @@ export default {
                     {text: "Fecha de creación", value: "created_at", align: 'center', sortable: true},
                     {text: "Escuela", value: "schools", sortable: false},
 
-                    {text: "Opciones", value: "actions", align: 'center', sortable: false},
                     {text: "Estado", value: "statusActions", align: 'center', sortable: false},
+
+                    {text: "Opciones", value: "actions", align: 'center', sortable: false}
                 ],
                 statusActions: [
 
