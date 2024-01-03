@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Curso;
 
+use App\Http\Controllers\CursosController;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\FileService;
 use Carbon\Carbon;
@@ -41,6 +42,17 @@ class CursoSearchResource extends JsonResource
             $pivot_id_selected = $request->school_id  ?? $request->schools[0];
         }
 
+
+        // Set assigned users to every course
+
+        $usersCount = collect(CursosController::$coursesUsersAssigned)
+            ->where('course_id', $this->id)
+            ->first();
+
+        $assignedUsers = $usersCount
+            ? $usersCount['count']
+            : 0;
+
         $_course = [
             'id' => $this->id,
             'name' => $this->name,
@@ -57,6 +69,14 @@ class CursoSearchResource extends JsonResource
             'image' => FileService::generateUrl($this->imagen),
             // 'medium_image' => FileService::generateUrl($this->imagen),
             'temas_count' => $this->topics_count,
+
+            'active_topics_count' => $this->active_topics_count,
+            'inactive_topics_count' => $this->inactive_topics_count,
+            'active_inactive_topics_count' => $this->active_topics_count . '/' . $this->topics_count,
+            'activate_at' => $this->activate_at,
+            'deactivate_at' => $this->deactivate_at,
+            'assigned_users' => $assignedUsers,
+
             'encuesta_count' => $this->polls_count,
             'segments_count' => $this->segments_count,
             'active' => $this->active,
@@ -118,20 +138,20 @@ class CursoSearchResource extends JsonResource
         $subtitles = [];
 
         $subtitles[] = [
-            'name' => 'Temas activos: ' . $this->active_topics_count, 
-            'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            'name' => 'Temas activos: ' . $this->active_topics_count,
+            'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary',
         ];
 
         $subtitles[] = [
-            'name' => $this->segments_count ? 'Segmentado' : 'No segmentado', 
-            'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            'name' => $this->segments_count ? 'Segmentado' : 'No segmentado',
+            'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary',
         ];
 
         $active_schools_count = $this->schools->where('active', ACTIVE)->count();
 
         $subtitles[] = [
-            'name' => 'Escuelas activas: ' . $active_schools_count, 
-            'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            'name' => 'Escuelas activas: ' . $active_schools_count,
+            'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary',
         ];
 
         $visible = ($this->active_topics_count && $this->segments_count && $active_schools_count && $this->active);
@@ -175,13 +195,13 @@ class CursoSearchResource extends JsonResource
         $subtitles = [];
 
         $subtitles[] = [
-            'name' => 'Tipo: ' . ($this->type->name ?? 'No definido'), 
-            // 'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            'name' => 'Tipo: ' . ($this->type->name ?? 'No definido'),
+            // 'class' => $this->active_topics_count == 0 ? 'text-red text-bold' : 'text-primary',
         ];
 
         $subtitles[] = [
             'name' => ($this->qualification_type->name ?? 'Sistema no definido'),
-            // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+            // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary',
         ];
 
         if ($this->created_at) {
@@ -189,7 +209,7 @@ class CursoSearchResource extends JsonResource
             $subtitles[] = [
                 'name' => $this->created_at->format('d/m/Y'),
                 'title' => 'Creado: ' . $this->created_at->format('d/m/Y H:i:s'),
-                // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary', 
+                // 'class' => $this->segments_count == 0 ? 'text-red text-bold' : 'text-primary',
             ];
         }
 
@@ -197,8 +217,8 @@ class CursoSearchResource extends JsonResource
         // $active_schools_count = $this->schools->where('active', ACTIVE)->count();
 
         // $subtitles[] = [
-        //     'name' => 'Escuelas activas: ' . $active_schools_count, 
-        //     'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary', 
+        //     'name' => 'Escuelas activas: ' . $active_schools_count,
+        //     'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary',
         // ];
 
         $data = [
