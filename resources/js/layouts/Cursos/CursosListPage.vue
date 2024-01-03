@@ -16,7 +16,7 @@
 
                 <DefaultModalButton
                     :label="'Crear curso'"
-                     @click="openFormModal(modalCourseOptions, null, 'create')"
+                     @click="openFormModal(modalCourseType, null, null,'Que tipo de curso deseas agregar')"
                 />
                      <!-- v-if="$root.isSuperUser" -->
 
@@ -230,6 +230,14 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+            <course-type-modal
+                :ref="modalCourseType.ref"
+                v-model="modalCourseType.open"
+                :options="modalCourseType"
+                width="60vw"
+                @onConfirm="modalCourseType.open = false"
+                @onCancel="modalCourseType.open = false"
+            />
         </v-card>
     </section>
 </template>
@@ -245,7 +253,7 @@ import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
-
+import CourseTypeModal from "./CourseTypeModal.vue";
 export default {
     components: {
         ProjectFormModal,
@@ -258,7 +266,8 @@ export default {
         CompatibilityFormModal,
         LogsModal,
         CourseFormModal,
-        PreviewMediaTopicsModal
+        PreviewMediaTopicsModal,
+        CourseTypeModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -543,6 +552,17 @@ export default {
                 cancelLabel: 'Cancelar',
                 resource: 'Topic',
             },
+            modalCourseType:{
+                open:false,
+                ref: 'CourseTypeModal',
+                open: false,
+                base_endpoint: '/course',
+                confirmLabel: 'Guardar',
+                resource: 'course',
+                title: 'Que tipo de curso deseas agregar',
+                action: null,
+                persistent: true,
+            }
         }
     },
     mounted() {
