@@ -280,7 +280,18 @@
                                             </v-checkbox> -->
                                             <div class="py-1">
                                                 <v-list-item-title class="list-item-name-tag" v-html="item.name"></v-list-item-title>
-                                                <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle>
+                                                <v-tooltip bottom>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                        <v-list-item-subtitle
+                                                            v-if="item.description"
+                                                            class="list-item-description-tag"
+                                                            v-bind="attrs"
+                                                            v-on="on"
+                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                    </template>
+                                                    <span>{{item.description}}</span>
+                                                </v-tooltip>
+                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
                                             </div>
                                         </div>
                                     </template>

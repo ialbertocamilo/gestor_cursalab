@@ -160,7 +160,8 @@ class Topic extends BaseModel
             } else {
                 $tema->requirements()->delete();
             }
-            if(count($data['tags'])){
+            //Create tags relations
+            if(isset($data['tags']) && count($data['tags'])){
                 foreach ($data['tags'] as $tag_id) {
                     $tag =  ['model_type' => Topic::class, 'model_id' => $tema->id,'tag_id'=> (int)$tag_id];
                     Tag::firstOrCreate($tag,$tag);
@@ -169,6 +170,7 @@ class Topic extends BaseModel
             }else{
                 Tag::where('model_type',Topic::class)->where('model_id',$tema->id)->delete();
             }
+            //
             $_medias = collect($tema->medias()->get()); 
             $tema->medias()->delete();
             if (!empty($data['medias'])) :

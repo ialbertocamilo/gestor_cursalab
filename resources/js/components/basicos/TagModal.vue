@@ -63,13 +63,13 @@
                             <DefaultSelect
                                 v-model="filter.type"
                                 :items="types"
-                                label="Tipo"
+                                label="Gestionar tags realizados previamente"
                                 item-text="label"
                                 item-value="value"
                                 @onChange="getData"
                                 dense
                             />
-                            <div style="min-height: 50px;">
+                            <div style="height: 250px;overflow: scroll;scrollbar-width: thin;">
                                 <v-list
                                     two-line
                                 >   
@@ -106,14 +106,14 @@
         <DefaultDeleteModal
             :options="modalDeleteOptions"
             :ref="modalDeleteOptions.ref"
-            @onConfirm="closeFormModal(modalDeleteOptions)"
+            @onConfirm="closeFormModal(modalDeleteOptions),deleteTag()"
             @onCancel="closeFormModal(modalDeleteOptions)"
         />
     </div>
 </template>
 
 <script>
-import DefaultDeleteModal from "../../layouts/Default/DefaultDeleteModal.vue";
+import DefaultDeleteModal from "../../layouts/Default/DefaultDeleteModal";
 export default {
     components: {
         DefaultDeleteModal,
@@ -207,7 +207,6 @@ export default {
                     .post(url, vue.filter)
                     .then(({ data }) => {
                         vue.tags = data.data.tags;
-                        console.log(tag,data);
                     }).catch((error) => {
                         if (error && error.errors) {
                             const errors = error.errors ? error.errors : error;
@@ -215,19 +214,10 @@ export default {
                         }
                     })
         },
-        async deleteTag(tag){
-            const url = `/tags/${tag.id}/delete`;
+        async deleteTag(){
+            let vue = this;
             vue.tags = [];
-            await vue.$http
-                    .delete(url)
-                    .then(({ data }) => {
-                        vue.showAlert('Tag eliminado correctamente')
-                    }).catch((error) => {
-                        if (error && error.errors) {
-                            const errors = error.errors ? error.errors : error;
-                            vue.show_http_errors(errors);
-                        }
-                    })
+            vue.getData();
         }
     }
 }
