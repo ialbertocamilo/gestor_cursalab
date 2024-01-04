@@ -26,7 +26,7 @@ class TagSR extends FormRequest
         $id = $this->method() == 'PUT' ? $this->segment(2) : 'NULL';
         
         $reglas = [
-            'name' => "required|min:3|max:20|unique:taxonomies,name,{$id},id,group,tags",
+            'name' => "required|min:3|max:40|unique:taxonomies,name,{$id},id,group,tags",
             'description' => "max:120",
             'type' => 'required',
         ];
@@ -38,6 +38,7 @@ class TagSR extends FormRequest
     {
         return [
             'name.unique' => 'Ya existe un tag con el mismo nombre',
+            'type.required' => 'El tipo de tag es requerido',
         ];
     }
 

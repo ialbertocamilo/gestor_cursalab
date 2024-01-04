@@ -253,6 +253,7 @@
                     title="Gestión de etiquetas"
                     :expand="sections.showSectionTags"
                     class="my-4"
+                    v-if="hasPermissionToUseTags"
                 >
                     <template slot="content">
                         <v-row>
@@ -279,7 +280,7 @@
                                             <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
                                             </v-checkbox> -->
                                             <div class="py-1">
-                                                <v-list-item-title class="list-item-name-tag" v-html="item.name"></v-list-item-title>
+                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
                                                 <v-tooltip bottom>
                                                     <template v-slot:activator="{ on, attrs }">
                                                         <v-list-item-subtitle
@@ -298,9 +299,10 @@
                                 </DefaultAutocomplete>
                             </v-col>
                             <v-col cols="6">
+                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
                                 <DefaultButton
                                     outlined 
-                                    label="Otros a agregar"
+                                    label="Agregar Tag"
                                     @click="openFormModal(modalTagOptions)"
                                 />
                             </v-col>
@@ -511,6 +513,7 @@ export default {
             },
             hasPermissionToUseIaDescription:false,
             hasPermissionToUseIaEvaluation:false,
+            hasPermissionToUseTags:false,
             modalTagOptions:{
                 ref: 'TagFormModal',
                 open: false,
@@ -741,6 +744,7 @@ export default {
                     vue.limits_ia_convert = data.data.limits_ia_convert;
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");

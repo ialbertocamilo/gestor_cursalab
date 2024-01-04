@@ -130,7 +130,7 @@ export default {
             resource:{
                 name:'',
                 description:'',
-                type:'competency',
+                type:"competency",
             },
             rules:{
                 name: this.getRules(['required', 'max:40']),
@@ -140,7 +140,7 @@ export default {
                 {value:'hability',label:'Habilidades'},
             ],
             filter:{
-                type:''
+                type:'competency'
             },
             tags:[
             ],
@@ -170,6 +170,10 @@ export default {
                 vue.showAlert('La descripción debe tener máximo 120 carácteres.','warning');
                 return;
             }
+            if(!vue.resource.type){
+                vue.showAlert('Es necesario elegir un tipo de tag.','warning');
+                return;
+            }
             const validateForm = vue.validateForm('tagForm')
             let url = '/tags/store';
             if (validateForm) {
@@ -194,7 +198,8 @@ export default {
             let vue = this
         },
         async loadData() {
-            let vue = this
+            let vue = this;
+            vue.getData();
         },
         async loadSelects() {
             let vue = this;

@@ -67,9 +67,11 @@ class TemaController extends Controller
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
+
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
-                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description');
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -100,6 +102,7 @@ class TemaController extends Controller
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         
         return $this->success([
             'tema' => $topic,
@@ -110,7 +113,8 @@ class TemaController extends Controller
             'media_url' => $media_url,
             'limits_ia_convert'=>$limits_ia_convert,
             'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
-            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description
+            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description,
+            'has_permission_to_use_tags' => $has_permission_to_use_tags
         ]);
     }
 

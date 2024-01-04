@@ -78,7 +78,7 @@ class TagsController extends Controller
     {
         $hasTagRelation = Tag::where('tag_id',$tag->id)->first();
         if($hasTagRelation){
-            return $this->error('No se puede eliminar este tag debido a que esta relacionado a un tema.');
+            return $this->error('No se puede eliminar este tag debido a que esta relacionado a un tema.', 422, ['errors' => ['No se puede eliminar este tag debido a que esta relacionado a un tema.']]);
         }
         $tag->delete();
         return $this->success(['msg' => 'Tag eliminado correctamente.']);
