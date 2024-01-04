@@ -16,7 +16,7 @@
 
                 <DefaultModalButton
                     :label="'Crear curso'"
-                     @click="openFormModal(modalCourseType, null, null,'Que tipo de curso deseas agregar')"
+                     @click="openFormModal(modalCourseModality, null, null,'Que tipo de curso deseas agregar')"
                 />
                      <!-- v-if="$root.isSuperUser" -->
 
@@ -230,13 +230,14 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
-            <course-type-modal
-                :ref="modalCourseType.ref"
-                v-model="modalCourseType.open"
-                :options="modalCourseType"
+            <course-Modality-modal
+                :ref="modalCourseModality.ref"
+                v-model="modalCourseModality.open"
+                :options="modalCourseModality"
                 width="60vw"
-                @onConfirm="modalCourseType.open = false"
-                @onCancel="modalCourseType.open = false"
+                @onConfirm="openCourseModal"
+                @onCancel="modalCourseModality.open = false"
+                :modalities="selects.modalities"
             />
         </v-card>
     </section>
@@ -253,7 +254,7 @@ import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
-import CourseTypeModal from "./CourseTypeModal.vue";
+import CourseModalityModal from "./CourseModalityModal";
 export default {
     components: {
         ProjectFormModal,
@@ -267,7 +268,7 @@ export default {
         LogsModal,
         CourseFormModal,
         PreviewMediaTopicsModal,
-        CourseTypeModal
+        CourseModalityModal
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -399,6 +400,7 @@ export default {
             selects: {
                 modules: [],
                 types: [],
+                modalities:[],
                 statuses: [
                     {id: null, name: 'Todos'},
                     {id: 1, name: 'Activos'},
@@ -540,6 +542,7 @@ export default {
                 title: '',
                 action: null,
                 persistent: true,
+                modality:null
             },
             modalPreviewMediaTopicsOptions:{
                 ref: 'PreviewMediaTopics',
@@ -552,7 +555,7 @@ export default {
                 cancelLabel: 'Cancelar',
                 resource: 'Topic',
             },
-            modalCourseType:{
+            modalCourseModality:{
                 open:false,
                 ref: 'CourseTypeModal',
                 open: false,
@@ -581,6 +584,7 @@ export default {
                 .then(({data}) => {
                     // vue.selects.modules = data.data.modules
                     vue.selects.types = data.data.types
+                    vue.selects.modalities = data.data.modalities;
                     // vue.modalOptions.selects.modules = data.data.modules
                     // vue.modalOptions.selects.types = data.data.types
                 })
@@ -706,6 +710,12 @@ export default {
                     vue.loadingActionBtn = false
                 })
         },
+        openCourseModal(modality){
+            let vue = this;
+            vue.closeFormModal(vue.modalCourseModality);
+            vue.modalCourseOptions.modality = modality;
+            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso '+modality.name);
+        }
     }
 }
 </script>

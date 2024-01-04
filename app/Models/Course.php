@@ -10,7 +10,7 @@ class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug', 'external_id',
-        'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
+        'assessable', 'freely_eligible', 'type_id','modality_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date', 'show_certification_to_user',

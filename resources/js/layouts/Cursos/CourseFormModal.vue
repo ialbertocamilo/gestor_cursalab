@@ -58,6 +58,19 @@
                                     show-required
                                     :rules="rules.types"
                                     dense
+                                    label="Modalidad del curso"
+                                    v-model="resource.modality_id"
+                                    :items="selects.modalities"
+                                    item-text="name"
+                                    item-value="id"
+                                    disabled
+                                />
+                            </v-col>
+                            <v-col cols="12">
+                                <DefaultAutocomplete
+                                    show-required
+                                    :rules="rules.types"
+                                    dense
                                     label="Tipo de curso"
                                     v-model="resource.type_id"
                                     :items="selects.types"
@@ -495,7 +508,7 @@ const fields = [
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
     'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4',
-    'dc3_configuration'
+    'dc3_configuration','modality_id'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -574,6 +587,7 @@ export default {
                 publish_time_2: null,
                 dc3_configuration:{},
                 can_create_certificate_dc3_dc4:false,
+                modality_id:null,
             },
             resource: {
                 qualification_type: {position: 0},
@@ -604,6 +618,7 @@ export default {
                     { 'id':'5.00', 'name':'5:00' },
                     { 'id':'6.00', 'name':'6:00' },
                 ],
+                modalities:[]
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -943,7 +958,7 @@ export default {
             // let url = `${vue.base_endpoint}/${!resource ? 'form-selects' : `search/${resource.id}`}`
             let url = vue.base_endpoint;
             url += (resource ? `/search/${resource.id}` : '/form-selects');
-
+            
             await vue.$http.get(url)
                 .then(({data}) => {
                     let response = data.data ? data.data : data;
@@ -952,6 +967,7 @@ export default {
 
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
+                    vue.selects.modalities = response.modalities;
                     vue.selects.types = response.types
                     vue.showButtonIaGenerate = response.show_buttom_ia_description_generate;
 
@@ -980,7 +996,7 @@ export default {
 
                     } else {
                         vue.resource.qualification_type = response.qualification_type
-
+                        vue.resource.modality_id = vue.options.modality.id;
                         if (vue.school_id) {
 
                             const found = vue.selects.lista_escuelas.find((element) => element.id == vue.school_id);
