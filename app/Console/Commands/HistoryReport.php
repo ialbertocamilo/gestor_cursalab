@@ -35,17 +35,21 @@ class HistoryReport extends Command
         $workspace = Workspace::where('slug', 'super-food-holding-peru')->first();
         if (!$workspace) return Command::SUCCESS;
 
-        $modulesIds = Workspace::query()
+        $subworkspaces = Workspace::query()
             ->where('active', 1)
             ->where('parent_id', $workspace->id)
-            ->get()
-            ->pluck('id')
-            ->toArray();
+            ->get();
 
-        foreach ($modulesIds as $moduleId) {
+        foreach ($subworkspaces as $subworkspace) {
+
+
             $response = Http::acceptJson()->post($url, [
                 'workspaceId' => $workspace->id,
-                'modules' => [$moduleId],
+                'modules' => [$subworkspace->id],
+                'filtersDescriptions' => [
+                    'Módulos' => $subworkspace->name
+                ],
+                'reportName' => 'Histórico usuarios: ' .  $subworkspace->name,
                 'adminId' => 21494 // <- Definir aqui el id del gestor de SFH
             ]);
 
