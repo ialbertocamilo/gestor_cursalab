@@ -104,7 +104,7 @@
                        Notas por curso
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' v-if="permissions.hasPermissionToShowDc3Report">
+                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' >
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        DC3 - DC4
@@ -336,7 +336,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item v-if="permissions.hasPermissionToShowDc3Report">
+                <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <Dc3Dc4
@@ -793,7 +793,7 @@ export default {
             this.admins = admins
             this.VademecumList = VademecumList
 
-            
+
 
             vue.isSuperUser = vue.isSuper();
         },
