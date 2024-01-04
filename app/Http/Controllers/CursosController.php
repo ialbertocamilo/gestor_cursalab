@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mongo\CourseInfoUsersM;
 use DB;
 use App\Models\Poll;
 use App\Models\Ciclo;
@@ -45,6 +46,8 @@ use App\Http\Requests\Curso\CursosStoreUpdateRequest;
 class CursosController extends Controller
 {
 
+    public static $coursesUsersAssigned = [];
+
     public function search(School $school, Request $request)
     {
         $request->merge(['school_id' => $school->id ?? null]);
@@ -69,11 +72,21 @@ class CursosController extends Controller
         if (auth()->user()->getAbilities()->where('entity_id',$entity_id)->first()) {
             $request->hasHabilityToShowProjectButtons = true;
         }
-        //Get data
-        $cursos = Course::search($request);
-        CursoSearchResource::collection($cursos);
+//        //Get data
+        $paginatedCourses = Course::search($request);
 
-        return $this->success($cursos);
+        // Get users asigned to courses
+
+        $courses = $paginatedCourses->toArray()['data'];
+        $coursesIds = collect($courses)
+            ->pluck('id')
+            ->toArray();
+
+        self::$coursesUsersAssigned = Course::calculateUsersSegmentedCount($coursesIds);
+
+        CursoSearchResource::collection($paginatedCourses);
+
+        return $this->success($paginatedCourses);
     }
 
     public function getFormSelects(School $school, Course $course = null, $compactResponse = false)
@@ -509,7 +522,7 @@ class CursosController extends Controller
 
         $datetime = date('Y-m-d_H:i:s');
         $filename = "Reporte-de-segmentación-[{$code}].xlsx";
-        
+
         ob_end_clean();
         ob_start();
 

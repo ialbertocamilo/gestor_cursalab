@@ -135,7 +135,7 @@
                                                         </v-col>
                                                     </v-row>
                                                 </v-col>
-                                            </v-row>    
+                                            </v-row>
                                         </v-col>
                                     </v-row>
                                 </v-container>
@@ -199,7 +199,9 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="4">
+                                    <v-col
+                                        v-if="resource.limits"
+                                        cols="4">
                                         <DefaultInput
                                             label="Límite de multimedias convertidos"
                                             v-model="resource.limits.limit_allowed_media_convert"
@@ -209,7 +211,9 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="4">
+                                    <v-col
+                                        v-if="resource.limits"
+                                        cols="4">
                                         <DefaultInput
                                             label="Límite de evaluaciones generadas"
                                             v-model="resource.limits.limit_allowed_ia_evaluations"
@@ -219,7 +223,8 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="4">
+                                    <v-col
+                                        v-if="resource.limits"                   cols="4">
                                         <DefaultInput
                                             label="Límite de descripciones con IA"
                                             v-model="resource.limits.limit_descriptions_jarvis"
@@ -239,7 +244,7 @@
                         >
                             <template v-slot:content>
 
-                                <v-row >
+                                <v-row v-if="resource.jarvis_configuration">
                                     <v-col cols="8">
                                         <DefaultInput
                                             label="Token"
@@ -540,7 +545,7 @@
 
 
 const fields = [
-    'name', 'url_powerbi', 'logo', 'logo_negativo', 
+    'name', 'url_powerbi', 'logo', 'logo_negativo',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
     'dc3_configuration','show_logo_in_app','limits'
@@ -589,6 +594,7 @@ export default {
                 qualification_type: '',
                 criteria_workspace: [],
                 selected_functionality: {},
+                jarvis_configuration: {},
                 limits:{},
                 // selected_section_criteria: {
                 //     profile: false,
@@ -687,7 +693,10 @@ export default {
                     'criteria_workspace', JSON.stringify(vue.resource.criteria_workspace)
                 );
                 formData.set(
-                    'selected_functionality', JSON.stringify(vue.resource.selected_functionality)
+                    'selected_functionality',
+                    vue.resource.selected_functionality
+                    ? JSON.stringify(vue.resource.selected_functionality)
+                    : '[]'
                 );
                 formData.set(
                     'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
@@ -722,7 +731,7 @@ export default {
                 formData.append('limit_allowed_users_type', 'by_workspace');
                 formData.append('limit_allowed_users_limit', vue.limit_allowed_users);
             }
-            
+
         },
         setJarvisConfiguration(formData){
             let vue = this;
@@ -794,7 +803,7 @@ export default {
                             c.id, data.data.functionalities
                         );
                     });
-                    
+
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -803,6 +812,18 @@ export default {
         }
         ,
         loadSelects() {
+
+            // Initialize objects
+
+            if (!this.resource.jarvis_configuration) {
+                this.resource.jarvis_configuration = {}
+            }
+            if (!this.resource.limits) {
+                this.resource.limits = {}
+            }
+            if (!this.resource.dc3_configuration) {
+                this.resource.dc3_configuration = {}
+            }
         },
         criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
 
@@ -825,3 +846,4 @@ export default {
     }
 }
 </script>
+

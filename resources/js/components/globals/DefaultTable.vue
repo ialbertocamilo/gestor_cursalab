@@ -52,8 +52,8 @@
                                 v-for="(item, i) in dataTable.customSelectActions"
                                 :key="i"
                             >
-                                <v-list-item-title 
-                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))" 
+                                <v-list-item-title
+                                    @click="doAction({type:'action',method_name: item.method_name},rows.filter(r => r.selected))"
                                     style="cursor: pointer;"
                                 >
                                     {{ item.text }}
@@ -83,7 +83,7 @@
 
             <!-- VOTACIONES -->
             <template v-slot:item.etapa="{item, header}">
-                <DefaultButton 
+                <DefaultButton
                     dense
                     text
                     :label="item.etapa"
@@ -93,7 +93,7 @@
 
             <!-- VOTACIONES - DETALLE -->
             <template v-slot:item.actions_sustent="{item, header}">
-                <DefaultButton 
+                <DefaultButton
                     dense
                     small
                     :color="(item.state_sustent) ? 'success' : 'primary'"
@@ -106,8 +106,8 @@
 
                 <v-chip
                     v-if="dataObject.availableStageVotation"
-                    class="ma-2" 
-                    color="primary" 
+                    class="ma-2"
+                    color="primary"
                     :disabled="!item.candidate_state"
                     outlined
                     >
@@ -122,8 +122,8 @@
               <!-- VOTACIONES - DETALLE -->
             <template v-slot:item.criterio_porcent="{item, header}">
                 <v-chip
-                    class="ma-2" 
-                    :color="item.porcent_state ? 'success' : 'primary' " 
+                    class="ma-2"
+                    :color="item.porcent_state ? 'success' : 'primary' "
                     outlined
                     >
 
@@ -158,7 +158,7 @@
             <template v-slot:item.images="{ item, header }">
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
-<!-- 
+<!--
                     <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
                         :style="`
                             background-image: url(${row.image});
@@ -247,6 +247,7 @@
                         height="65"
                         max-width="100"
                         :src="item.image"
+                        style="border-radius: 5px"
                     >
                         <template v-slot:placeholder>
                             <v-row
@@ -309,13 +310,83 @@
                     </v-img>
                 </div>
             </template>
+            <template v-slot:item.statusActions="{ item, header }">
+                <div class="default-table-actions d-flex justify-center flex-row my-2 position-relative"
+                     v-if="dataTable.statusActions">
+
+                    <div v-if="getStatusIcon(item) === 'active'"
+                         @click="doAction({type: 'action', method_name: 'status'}, item)"
+                         style="cursor: pointer">
+                        <i class="row-icon fa fa-circle"/>
+                        <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                    </div>
+
+
+                    <div v-if="getStatusIcon(item) === 'inactive'"
+                         @click="doAction({type: 'action', method_name: 'status'}, item)"
+                         style="cursor: pointer">
+                        <i class="row-icon far fa-circle"/>
+                        <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                    </div>
+
+                    <v-tooltip :left="true" attach class="scheduled-tooltip">
+                        <!-- Icon -->
+                        <template
+                            v-slot:activator="{ on, attrs }">
+                            <div v-if="getStatusIcon(item) === 'scheduled'"
+                                 class="text-center"
+                                 v-bind="attrs"
+                                 v-on="on">
+                                <i class="row-icon fa fa-clock"/>
+                                <br> <span class="table-default-icon-title" v-text="'Programado'"/>
+                            </div>
+                        </template>
+
+                        <!-- Tooltip message -->
+                        <div v-html="generateScheduleMessage(item)" />
+                    </v-tooltip>
+
+
+
+                    <div v-if="getStatusIcon(item) === 'invisible'"
+                         class="text-center">
+                        <div class="position-relative fancy-menu-wrapper">
+
+
+                            <v-icon :color="'red'">
+                                mdi-alert
+                            </v-icon>
+                            <br> <span class="table-default-icon-title"
+                                       v-text="'No visible'"/>
+
+                            <ul class="fancy-menu position-absolute">
+                                <li class="red-title">
+                                    <v-icon :color="'red'" :size="14">
+                                    mdi-alert
+                                    </v-icon>
+                                    Configuración faltante
+                                </li>
+                                <li @click="doAction({type:'route', route: 'temas_route'}, item)">
+                                    Agregar o activar temas del curso
+                                </li>
+                                <li @click="doAction({type: 'action', method_name: 'segmentation'}, item)">
+                                    Asignar colaboradores al curso
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </template>
             <template v-slot:item.actions="{ item, header }">
                 <div class="default-table-actions d-flex justify-center flex-row my-2"
                      v-if="dataTable.actions && dataTable.actions.length > 0">
                     <!-- {{ item }} -->
                     <div v-for="action in dataTable.actions">
                         <button
-                            type="button" class="btn btn-md"
+                            type="button" class="btn btn-md position-relative"
                             :title="action.text"
                             @click="doAction(action, item)"
                             v-if="!action.show_condition || (action.show_condition && item[action.show_condition])"
@@ -329,6 +400,58 @@
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
                                 <br> <span class="table-default-icon-title" v-text="action.text"/>
                             </v-badge>
+
+                            <!--
+                                Badge counts and icons
+                            ================================================= -->
+
+                            <template v-else-if="(action.countBadgeConditions)">
+                                <i :class="action.icon"/>
+
+                                <v-tooltip :left="true" attach>
+
+                                    <!-- Badge count -->
+                                    <template
+                                        v-slot:activator="{ on, attrs }">
+                                        <span :class="'badge-count'"
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              :style="{backgroundColor: item.active ? getConditionalCountColor(item, action.countBadgeConditions) : 'gray'}">
+                                            {{ getConditionalCount(item, action.countBadgeConditions) }}
+                                        </span>
+                                    </template>
+
+                                    <!-- Tooltip message -->
+                                    <div v-html="getConditionalCountMessage(item, action.countBadgeConditions)" />
+
+                                </v-tooltip>
+
+                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                            </template>
+
+                            <!--
+                                Badge Icons
+                            ================================================= -->
+
+                            <template v-else-if="(action.conditionalBadgeIcon)">
+                                <i :class="action.icon"/>
+
+                                <v-tooltip :left="true" attach>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <i :class="getConditionalBadgeIcon(item, action.conditionalBadgeIcon)"
+                                           class="badge-icon"
+                                           v-bind="attrs"
+                                           v-on="on"
+                                           :style="{color: (item.active ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
+                                    </template>
+
+                                    <!-- Tooltip message -->
+                                    <div v-html="getConditionalBadgeIconMessage(item, action.conditionalBadgeIcon)" />
+
+                                </v-tooltip>
+
+                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                            </template>
 
                             <template v-else>
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
@@ -704,7 +827,7 @@
             <template v-slot:item.curso_nombre_escuela="{item, header}">
                 <div class="py-2">
                     <p class="my-0">
-                        {{ item.curso_nombre_escuela.curso }} 
+                        {{ item.curso_nombre_escuela.curso }}
                     </p>
                     <p class="my-0" v-if="item.curso_nombre_escuela.escuela"><small><strong>Escuela:</strong> {{ item.curso_nombre_escuela.escuela }}</small></p>
                     <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
@@ -743,16 +866,16 @@
                             </template>
                         </v-img>
                     </div>
-                    
+
                 </div>
             </template>
 
             <template v-slot:item.escuela_nombre="{item, header}">
                 <div class="py-2">
                     <p class="my-0">
-                        {{ item.escuela_nombre.name }} 
+                        {{ item.escuela_nombre.name }}
                     </p>
-                    
+
                     <!-- <div class="d-flex ---justify-center mt-2 " style="gap: 5px;" v-if="item.images">
 
                         <v-img
@@ -778,7 +901,7 @@
                             </template>
                         </v-img>
                     </div> -->
-                    
+
                 </div>
             </template>
 
@@ -818,6 +941,32 @@
                 <div class="py-2">
 
                     <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
+                    <div class="d-flex justify-content-start modules-images pt-3">
+                        <v-img
+                            v-for="(row, index) in item.images"
+                            max-height="50"
+                            max-width="50"
+                            :key="index"
+                            :src="row.image"
+                            class="mr-3"
+                            :title="row.name"
+                            style="border-radius: 15px"
+                        >
+                            <template v-slot:placeholder>
+                                <v-row
+                                    class="fill-height ma-0"
+                                    align="center"
+                                    justify="center"
+                                >
+                                    <v-progress-circular
+                                        indeterminate
+                                        color="grey lighten-5"
+                                    ></v-progress-circular>
+                                </v-row>
+                            </template>
+                        </v-img>
+                    </div>
+
 
                  <!--    <p class="my-0 course-status-subtitles" v-if="item.custom_curso_nombre.subtitles">
                         <span v-for="(subtitle, index) in item.custom_curso_nombre.subtitles" :key="index">
@@ -1234,6 +1383,95 @@ export default {
         checkOrUncheckAllItems(){
             let vue = this;
             vue.rows.forEach(item => (item.selected = vue.all_check_select));
+        },
+        getStatusIcon(item) {
+
+            let iconType = ''
+            let isScheduled = (item.activate_at && !item.active) ||
+                (item.deactivate_at && item.active);
+
+            if (isScheduled) {
+                iconType = 'scheduled'
+            } else {
+                if (item.active) {
+
+                    if (item.active_topics_count) {
+                        iconType = 'active'
+                    } else {
+                        iconType = 'invisible' // active without topics
+                    }
+
+                } else {
+                    iconType = 'inactive'
+                }
+            }
+
+            return iconType
+        },
+        getConditionalCount(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return item[condition['propertyShow']]
+
+        },
+        getConditionalCountColor(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['backgroundColor']
+        },
+
+        getConditionalCountMessage(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['message']
+        },
+
+        getConditionalCountMessageIcon(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['icon']
+        },
+
+        getConditionalBadgeIconColor(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['color']
+        },
+
+        getConditionalBadgeIcon(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['icon']
+        },
+        getConditionalBadgeIconMessage(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['message']
+        },
+        getMatchedCondition(item, conditions) {
+
+            let higherIndex = -1;
+            conditions.forEach((condition, index) => {
+                const key = condition['propertyCond'];
+                const value = item[key];
+                if (value >= condition['minValue']) {
+                    higherIndex = index;
+                }
+            })
+
+            return conditions[higherIndex];
+        },
+        /**
+         * Generate tooltip message for course schedule
+         * @param item
+         * @returns {string}
+         */
+        generateScheduleMessage(item) {
+
+            let messages = [];
+            if (item.activate_at && !item.active) {
+
+                messages.push(`Se activará: ${item.activate_at}`);
+            }
+
+            if (item.deactivate_at) {
+                messages.push(`Se inactivará: ${item.deactivate_at}`);
+            }
+
+            return messages.join('<br>');
         }
     }
 }
@@ -1273,4 +1511,87 @@ span.custom_benefit_type {
         max-width: 100%;
     }
 }
+
+.row-icon {
+    font-size: 16px;
+}
+
+.row-icon.red {
+    color: #FF4242
+}
+
+.badge-small .v-badge__badge {
+
+    border-radius: 3px;
+    padding: 2px 4px 0 4px;
+    font-size: 10px !important;
+    height: 12px !important;
+    letter-spacing: 2px !important;
+}
+
+.badge-icon {
+    position: absolute;
+    top: 0;
+}
+
+.badge-count {
+    position: absolute;
+    top: 0;
+    left: 38px;
+    border-radius: 3px;
+    padding: 2px 4px 2px 4px;
+    font-size: 10px !important;
+    height: 12px !important;
+    letter-spacing: 2px !important;
+    color: white;
+}
+
+.fancy-menu {
+    display: none;
+    position: absolute;
+    top: 0 !important;
+    right: 0;
+    min-width: 220px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(200,200,200,0.5);
+    border-radius: 10px;
+    padding: 0 !important;
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+    z-index: 2
+}
+
+.fancy-menu-wrapper:hover .fancy-menu {
+    display: block;
+}
+
+.fancy-menu li {
+    padding: 11px 10px 11px 10px;
+    margin: 0;
+    font-size: 12px !important;
+}
+
+.fancy-menu li:not(.red-title) {
+    cursor: pointer
+}
+
+.fancy-menu li.red-title {
+    background: #fce6e5 !important;
+}
+
+/* Override tooltip styles */
+
+table .v-tooltip__content.menuable__content__active {
+    border-width: 1px !important;
+    /* Fix position to show tooltip from right position */
+    right: 0 !important;
+    left: unset !important;
+}
+
+.scheduled-tooltip .v-tooltip__content.menuable__content__active {
+    width: 300px;
+
+}
+
 </style>
