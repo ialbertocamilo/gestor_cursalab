@@ -106,7 +106,7 @@
         <DefaultDeleteModal
             :options="modalDeleteOptions"
             :ref="modalDeleteOptions.ref"
-            @onConfirm="closeFormModal(modalDeleteOptions),deleteTag()"
+            @onConfirm="deleteTag"
             @onCancel="closeFormModal(modalDeleteOptions)"
         />
     </div>
@@ -183,7 +183,6 @@ export default {
                     .then(({ data }) => {
                         vue.resetValidation()
                         const tag = data.data.tag;
-                        console.log(tag,data);
                         vue.showAlert('Tag creado correctamente')
                         vue.$emit('onConfirm',tag)
                     }).catch((error) => {
@@ -219,10 +218,13 @@ export default {
                         }
                     })
         },
-        async deleteTag(){
+        async deleteTag(tag){
+            console.log(tag,'deleted');
             let vue = this;
             vue.tags = [];
+            vue.closeFormModal(vue.modalDeleteOptions);
             vue.getData();
+            vue.$emit('onDelete',tag)
         }
     }
 }

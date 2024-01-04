@@ -370,6 +370,7 @@
                 :options="modalTagOptions"
                 @onCancel="modalTagOptions.open = false "
                 @onConfirm="tagcreated"
+                @onDelete="tagDeleted"
             />
         </template>
     </DefaultDialog>
@@ -953,6 +954,16 @@ export default {
             if(vue.resource.tags.length < 3){
                 vue.resource.tags.push(tag.id);
                 vue.showAlert('El tag se ha asignado al tema.')
+            }
+        },
+        tagDeleted(tag){
+            const index = this.selects.tags.findIndex(t => t.id === tag.id);
+            if (index !== -1) {
+                this.selects.tags.splice(index,1);
+            }
+            const indexSelected = this.resource.tags.findIndex(t => t === tag.id);
+            if (indexSelected !== -1) {
+                this.resource.tags.splice(indexSelected,1);
             }
         },
         formatTags(tags) {
