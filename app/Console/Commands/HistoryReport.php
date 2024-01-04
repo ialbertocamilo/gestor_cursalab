@@ -56,6 +56,7 @@ class HistoryReport extends Command
             $this->info($response->getStatusCode());
         }
 
+
         return Command::SUCCESS;
     }
 }
