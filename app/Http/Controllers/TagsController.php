@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Taxonomy;
 use App\Http\Requests\TagSR;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,12 +52,14 @@ class TagsController extends Controller
     public function store(TagSR $request)
     {
         $data = $request->validated();
-
-        $tag = Tag::create($data);
-
-        return $this->success(['msg' => 'Tag creado correctamente.']);
+        $tag = Tag::storeRequest($data);
+        return $this->success(['msg' => 'Tag creado correctamente.','tag'=>$tag]);
     }
-
+    public function searchByType(Request $request){
+        $data = $request->all();
+        $tags = Taxonomy::where('group','tags')->where('type',$data['type'])->select('id','name','description')->get();
+        return $this->success(['tags'=>$tags]);
+    }
     public function edit(Tag $tag)
     {
         return $this->success(get_defined_vars());
@@ -71,10 +74,13 @@ class TagsController extends Controller
         return $this->success(['msg' => 'Tag actualizado correctamente.']);
     }
 
-    public function destroy(Tag $tag)
+    public function destroy(Taxonomy $tag)
     {
+        $hasTagRelation = Tag::where('tag_id',$tag->id)->first();
+        if($hasTagRelation){
+            return $this->error('No se puede eliminar este tag debido a que esta relacionado a un tema.', 422, ['errors' => ['No se puede eliminar este tag debido a que esta relacionado a un tema.']]);
+        }
         $tag->delete();
-
         return $this->success(['msg' => 'Tag eliminado correctamente.']);
     }
 }
