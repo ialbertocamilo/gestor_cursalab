@@ -138,7 +138,60 @@
                     </v-col>
 
                 </v-row>
-
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Ubicación"
+                            :expand="sections.showSectionPosition"
+                        >
+                            <template slot="content">
+                                <v-row justify="center" class="align-items-center">
+                                    <v-col cols="12">
+                                        <div class="box_search_direction_map">
+                                            <span class="lbl_search_direction">Dirección</span>
+                                            <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                        </div>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
+                                            <GmapMap
+                                                :center="center"
+                                                :zoom="zoom"
+                                                :options="{
+                                                    zoomControl: false,
+                                                    mapTypeControl: false,
+                                                    scaleControl: false,
+                                                    streetViewControl: false,
+                                                    rotateControl: false,
+                                                    fullscreenControl: false,
+                                                    disableDefaultUi: false
+                                                    }"
+                                                style="height: 300px"
+                                                >
+                                                <GmapMarker
+                                                    :key="index"
+                                                    v-for="(m, index) in markers"
+                                                    :position="m.position"
+                                                    @click="center = m.position"
+                                                    :draggable="true"
+                                                    @drag="updateCoordinates"
+                                                />
+                                            </GmapMap>
+                                        </div>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultTextArea
+                                            label="Referencia"
+                                            placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
+                                            v-model="resource.referencia"
+                                            :rules="rules.referencia"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -515,9 +568,10 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
+import GmapMap from 'vue2-google-maps/dist/components/map'
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal,GmapMap },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -546,7 +600,8 @@ export default {
                 showSectionCertification: {status: true},
                 showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
-                showSectionDC3DC4:{status:false}
+                showSectionDC3DC4:{status:false},
+                showSectionPosition:{status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -618,7 +673,8 @@ export default {
                     { 'id':'5.00', 'name':'5:00' },
                     { 'id':'6.00', 'name':'6:00' },
                 ],
-                modalities:[]
+                modalities:[],
+                hosts:[]
             },
             loadingActionBtn: false,
             courseValidationModal: {
@@ -712,18 +768,28 @@ export default {
                 persistent: true,
             },
             new_value: 0,
+            //Jarvis
             loading_description:false,
             limits_descriptions_generate_ia:{
                 ia_descriptions_generated:0,
                 limit_descriptions_jarvis:0
             },
+            //DC3
             showButtonIaGenerate:false,
             has_DC3_functionality:false,
             people:{
                 legal_representatives:[],
                 instructors:[]
             },
-            catalog_denominations:[]
+            catalog_denominations:[],
+            //Courses in person
+            center: { lat: -12.0529046, lng: -77.0253457 },
+            zoom: 16,
+            currentPlace: null,
+            markers: [{
+                position: { lat: -12.0529046, lng: -77.0253457 }
+            }],
+            ubicacion_mapa: null,
         }
     },
     async mounted(){
@@ -1046,7 +1112,29 @@ export default {
             }
             this.people.legal_representatives.push(person);
             this.resource.dc3_configuration.legal_representative = person.id;
-        }
+        },
+        updateCoordinates(location) {
+            let geocoder = new google.maps.Geocoder()
+            geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
+                if (status ===google.maps.GeocoderStatus.OK) {
+                    this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
+                    this.ubicacion_mapa = {...result[0]}
+                }
+            })
+        },
+        setPlace(place) {
+            this.currentPlace = place;
+            if (this.currentPlace) {
+                this.ubicacion_mapa = {...this.currentPlace}
+                const marker = {
+                lat: this.currentPlace.geometry.location.lat(),
+                lng: this.currentPlace.geometry.location.lng(),
+                };
+                this.markers = [{ position: marker }];
+                this.center = marker;
+                this.currentPlace = null;
+            }
+        },
     }
 }
 </script>
@@ -1112,5 +1200,23 @@ export default {
     content: '';
     top: 25px;
     bottom: 25px;
+}
+
+.box_search_direction_map {
+    border: 1px solid #D9D9D9;
+    border-radius: 5px;
+    position: relative;
+}
+.box_search_direction_map span.lbl_search_direction {
+    position: absolute;
+    top: -8px;
+    left: 9px;
+    font-size: 11.5px;
+    line-height: 1;
+    background: #fff;
+    padding: 0 2px;
+}
+.box_search_direction_map input {
+    width: 100%;
 }
 </style>
