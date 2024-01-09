@@ -329,7 +329,8 @@ export default {
                             color: 'red',
                             icon: 'fas fa-exclamation-triangle',
                             iconSize: '12px'
-                        },{
+                        },
+                            {
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
                             propertyCond: 'assigned_users',
