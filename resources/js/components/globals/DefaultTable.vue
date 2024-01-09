@@ -321,7 +321,6 @@
                         <br> <span class="table-default-icon-title" v-text="'Activo'"/>
                     </div>
 
-
                     <div v-if="getStatusIcon(item) === 'inactive'"
                          @click="doAction({type: 'action', method_name: 'status'}, item)"
                          style="cursor: pointer">
@@ -352,18 +351,15 @@
                          class="text-center">
                         <div class="position-relative fancy-menu-wrapper">
 
-
-                            <v-icon :color="'red'">
-                                mdi-alert
-                            </v-icon>
+                            <i class="fas fa-exclamation-triangle"
+                               style="color: red !important; font-size: 18px"></i>
                             <br> <span class="table-default-icon-title"
                                        v-text="'No visible'"/>
 
                             <ul class="fancy-menu position-absolute">
                                 <li class="red-title">
-                                    <v-icon :color="'red'" :size="14">
-                                    mdi-alert
-                                    </v-icon>
+                                    <i class="fas fa-exclamation-triangle"
+                                       style="color: red !important; font-size: 12px"></i>
                                     Configuración faltante
                                 </li>
                                 <li @click="doAction({type:'route', route: 'temas_route'}, item)">
@@ -442,7 +438,9 @@
                                            class="badge-icon"
                                            v-bind="attrs"
                                            v-on="on"
-                                           :style="{color: (item.active ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
+                                           :style="{
+                                               fontSize:getConditionalBadgeIconSize(item, action.conditionalBadgeIcon),
+                                               color: (item.active ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
                                     </template>
 
                                     <!-- Tooltip message -->
@@ -1437,6 +1435,10 @@ export default {
             let condition = this.getMatchedCondition(item, conditions)
             return condition['icon']
         },
+        getConditionalBadgeIconSize(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['iconSize']
+        },
         getConditionalBadgeIconMessage(item, conditions) {
             let condition = this.getMatchedCondition(item, conditions)
             return condition['message']
@@ -1547,7 +1549,7 @@ span.custom_benefit_type {
 }
 
 .fancy-menu {
-    display: none;
+    opacity: 0;
     position: absolute;
     top: 0 !important;
     right: 0;
@@ -1559,11 +1561,12 @@ span.custom_benefit_type {
     margin: 0;
     list-style: none;
     overflow: hidden;
-    z-index: 2
+    z-index: 2;
+    transition: all 700ms;
 }
 
 .fancy-menu-wrapper:hover .fancy-menu {
-    display: block;
+    opacity: 1;
 }
 
 .fancy-menu li {

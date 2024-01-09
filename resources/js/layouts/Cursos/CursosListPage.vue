@@ -327,7 +327,8 @@ export default {
                             minValue: 0,
                             propertyCond: 'assigned_users',
                             color: 'red',
-                            icon: 'mdi mdi-alert'
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
                         },{
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
