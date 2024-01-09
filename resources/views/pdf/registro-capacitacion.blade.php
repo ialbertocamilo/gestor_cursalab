@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{$title}}</title>
+    <title>REGISTRO DE CAPACITACIÓN - {{ $course['certificationCourseCode'] }}</title>
 </head>
-<body style="font-family: Arial, Helvetica, sans-serif;font-size: 14px">
-
-<div style="text-align: center">
-    <img
-        src="{{$subworkspace['subworkspace_logo']}}" alt="">
-</div>
+<body>
 
 <style>
 
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+    }
+
+    p, span {
+        font-size: 11px;
+    }
+
     .main-title {
         text-align: center;
+        font-size: 16px;
         font-weight: bold;
         margin: 0 0 15px 0;
     }
 
-    .table-title-wrapper {
+    .title-wrapper {
         text-align: center; background: black; color:white;
     }
 
     .table-title {
         font-weight: 700;
-        height: 28px;
+        height: 24px;
     }
 
     .table-form {
@@ -33,409 +38,280 @@
         border-collapse: collapse;
     }
 
+    .row {
+        border: 2px solid black;
+    }
+
+    .cell {
+        border-right: 2px solid black;
+    }
+
+    .cell-label {
+        font-size: 11px;
+        padding-left: 10px;
+    }
+
+    .cell-value {
+        font-weight: 700;
+        font-size: 16px;
+        padding-left: 10px;
+        height: 21px;
+    }
+
+    .topics {
+        min-height: 50px;
+    }
+
+    .margin-top {
+        margin-top: 35px
+    }
+
+    .margin-bottom {
+        margin-bottom: 35px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
 </style>
 
 <h4 class="main-title">
-    REGISTRO DE CAPACITACIÓN - FRM-GDH-SST-009
+    REGISTRO DE CAPACITACIÓN - {{ $course['certificationCourseCode'] }}
 </h4>
 
 <table class="table-form">
 
-    <tr class="table-title-wrapper">
-        <td colspan="2" class="table-title">
+    <tr class="title-wrapper">
+        <td colspan="12" class="table-title">
             DATOS DE "LA EMPRESA"
         </td>
     </tr>
 
-    <tr>
-        <td style="padding: 5px 5px 10px 5px;" colspan="2">
-            <div>Nombre (Anotar apellido paterno, apellido materno y
-                nombre(s))
+    <tr class="row">
+        <td class="cell" colspan="12">
+            <div class="cell-label">
+                Razón social
             </div>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    <td style="font-weight: bolder">{{$user['name']}}</td>
-                </tr>
-            </table>
+            <div class="cell-value">
+                {{ $company['businessName'] }}
+            </div>
         </td>
     </tr>
-    <tr style="border-top: 2px solid black;">
-        <td style="padding: 5px 5px 0px 5px;">
-            <div>Clave Única de Registro de Población</div>
-            @php
-                $curp = str_split($user['curp']);
-            @endphp
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    @foreach ($curp as $n)
-                        @if (!$loop->last)
-                            <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                        @else
-                            <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                        @endif
-                    @endforeach
-                </tr>
-            </table>
+
+    <tr class="row">
+        <td class="cell"  colspan="4">
+            <div class="cell-label">
+                RUC
+            </div>
+            <div class="cell-value">
+                {{ $company['businessNumber'] }}
+            </div>
         </td>
-        <td style="padding: 5px 5px 10px 5px;border-left: 2px solid black">
-            <div>Ocupación especifica (Catálogo Nacional de Ocupaciones)
-                <sup>1/</sup></div>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    <td style="font-weight: bolder">{{$user['occupation']}}</td>
-                </tr>
-            </table>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Actividad económica
+            </div>
+            <div class="cell-value">
+                {{ $company['economicActivity'] }}
+            </div>
+        </td>
+
+        <td class="cell"  colspan="2">
+            <div class="cell-label">
+                Con código CIIU Nº
+            </div>
+            <div class="cell-value">
+                {{ $company['CIIU'] }}
+            </div>
         </td>
     </tr>
-    <tr style="border-top: 2px solid black;">
-        <td style="padding: 5px 5px 10px 5px;" colspan="2">
-            <div>Puesto</div>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    <td style="font-weight: bolder">{{$user['position']}}</td>
-                </tr>
-            </table>
+
+    <tr class="row">
+        <td class="cell" colspan="12">
+            <div class="cell-label">
+                Dirección de la sede
+            </div>
+            <div class="cell-value">
+                {{ $company['address'] }}
+            </div>
+        </td>
+    </tr>
+
+    <tr class="row">
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Número de trabajadores del centro laboral
+            </div>
+            <div class="cell-value">
+                {{ $company['workersCount'] }}
+            </div>
+        </td>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Capacitador y encargado del registro
+            </div>
+            <div class="cell-value">
+                {{ $company['trainerAndRegistrar'] }}
+            </div>
         </td>
     </tr>
 </table>
 
-<table
-    style="width:100%; border-collapse: collapse;border: 2px solid black;margin-top:10px">
-    <tr style="text-align: center;background: black;color:white;padding:8px 0px 8px 0px;">
-        <td colspan="2">DATOS DE LA EMPRESA</td>
-    </tr>
-    <tr>
-        <td style="padding: 5px 5px 10px 5px;" colspan="2">
-            <div>Nombre o razón social (En caso de persona fisica, anotar
-                apellido paterno, apellido materno y nombre(s))
-            </div>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    <td style="font-weight: bolder">{{$subworkspace['name_or_social_reason']}}</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <td style="padding: 5px 5px 0px 5px; border-top: 2px solid black;"
-        colspan="2">
-        <div>Registro Federal de Contribuyentes con homoclave (SHCP)</div>
-        @php
-            $shcp = str_split($subworkspace['shcp']);
-        @endphp
-        <table style="width:100%; border-collapse: collapse;">
-            <tr>
-                @foreach ($shcp as $n)
-                    @if (!$loop->last)
-                        <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                    @else
-                        <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                    @endif
-                @endforeach
-            </tr>
-        </table>
-    </td>
-</table>
-<div style="border: 2px solid black;margin-top:10px">
-    <table style="width:100%; border-collapse: collapse;">
-        <tr style="text-align: center;background: black;color:white;padding:0px 0px 0px 0px;">
-            <td colspan="12">DATOS DEL PROGRAMA DE CAPACITACIÓN, ADIESTRAMIENTO
-                Y PRODUCTIVIDAD
-            </td>
-        </tr>
-        <tr style="border-top: 2px solid black;">
-            <td style="padding: 5px 5px 10px 5px;" colspan="12">
-                <div>Nombre del curso</div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="font-weight: bolder">{{$course['name']}}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr style="border-top:2px solid black">
-            <td style="padding: 5px 5px 10px 5px;border-right: 2px solid black;">
-                <div>Duración en horas</div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="font-weight: bolder">{{$course['duration']}}</td>
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 10px 5px;border-right: 2px solid black;">
-                <div>Periodo de ejecución</div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        <td>De:</td>
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Año</div>
-                @php
-                    $init_date_course_year = str_split($course['init_date_course_year']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($init_date_course_year as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Mes</div>
-                @php
-                    $init_date_course_month = str_split($course['init_date_course_month']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($init_date_course_month as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Día</div>
-                @php
-                    $init_date_course_day = str_split($course['init_date_course_day']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($init_date_course_day as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-            <td style="border-right: 2px solid black;border-left: 2px solid black;">
-                <div style="text-align: center">a</div>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Año</div>
-                @php
-                    $final_date_course_year = str_split($course['final_date_course_year']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($final_date_course_year as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Mes</div>
-                @php
-                    $final_date_course_month = str_split($course['final_date_course_month']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($final_date_course_month as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 0px 5px;border-right: 2px solid black">
-                <div style="text-align: center">Día</div>
-                @php
-                    $final_date_course_day = str_split($course['final_date_course_day']);
-                @endphp
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        @foreach ($final_date_course_day as $n)
-                            @if (!$loop->last)
-                                <td style="border-right: 2px solid black; padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @else
-                                <td style="padding: 0px 10px 10px 10px;font-weight: bolder">{{$n}}</td>
-                            @endif
-                        @endforeach
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr style="border-top: 2px solid black;">
-            <td style="padding: 5px 5px 10px 5px;" colspan="12">
-                <div>Área temática del curso <sup>2/</sup></div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="font-weight: bolder">{{$course['catalog_denomination_dc3']}}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr style="border-top: 2px solid black;">
-            <td style="padding: 5px 5px 10px 5px;" colspan="12">
-                <div>Nombre del agente capacitador o STPS <sup>3/</sup></div>
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="font-weight: bolder">{{$course['instructor']}}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
-<div style="border: 2px solid black;margin-top:10px">
-    <table style="width:100%; border-collapse: collapse;">
-        <tr style="text-align: center;font-weight: bolder">
-            <td colspan="12">Los datos se asientan en esta constancia bajo
-                protesta de decir verdad, apercibidos de las responsabilidad en
-                que incurre todo aquel que no conduce la verdad
-            </td>
-        </tr>
-        <tr style="text-align: center">
-            <td style="padding: 5px 5px 10px 5px;" colspan="6">
-                <div>Instructor o tutor</div>
-                <div>{{$course['instructor']}}</div>
-                <img width="170px" src="{{$course['instructor_signature']}}"
-                     alt="" srcset="">
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr style="text-align: center;">
-                        <td style="font-weight: bolder;">
-                                <span style="border-top:1px solid black;">
-                                    Nombre y Firma
-                                </span>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style="padding: 5px 5px 10px 5px;" colspan="6">
-                <div>Patrón o representante legal <sup>4/</sup></div>
-                <div>{{$course['legal_representative']}}</div>
-                <img width="170px"
-                     src="{{$course['legal_representative_signature']}}" alt=""
-                     srcset="">
-                <table style="width:100%; border-collapse: collapse;">
-                    <tr style="text-align: center">
-                        <td style="font-weight: bolder;">
+<table class="table-form margin-top">
 
-                                <span style="border-top:1px solid black;">
-                                    Nombre y Firma
-                                </span>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
-<div style="margin-top:10px">
-    <div>
-        <div><span style="font-weight: bold">INSTRUCCIONES</span></div>
-        <div>
-            <ul style="list-style-type: none;">
-                <li>- Llenar la máquina o con la letra de molde.</li>
-                <li>- Deberá entregarse al trabajador dentro de los veinte días
-                    hábiles siguientes al término de capacitación aprobado.
-                </li>
-                <li><sup>1/</sup> Las áreas y subáreas ocupacionales del
-                    Catálogo Nacional de Ocupaciones se encuentra disponible al
-                    reverso de este formato y en la página <a
-                        href="https://www.stps.gob.mx" target="_BLANK">www.stps.gob.mx</a>
-                </li>
-                <li><sup>2/</sup> Las áreas temáticas de los cursos disponibles
-                    en el reverso de este formato y en la página <a
-                        href="https://www.stps.gob.mx" target="_BLANK">www.stps.gob.mx</a>
-                </li>
-                <li><sup>3/</sup> Cursos impartidos por el área competente de la
-                    Secretaria del Trabajo y Previsión Social
-                </li>
-                <li><sup>4/</sup> Para empresas con menos de 51 trabajadores.
-                    Para empresas con más de 50 trabajadores firmaría el
-                    representante del patrón ante la Comisión de capacitación,
-                    adiestramiento y productividad
-                </li>
-                <li><sup>5/</sup> Solo para empresas on mas de 50 trabajadores
-                </li>
-                <li>* Dato no obligatorio.</li>
-            </ul>
-        </div>
-        {{-- <div style="text-align: right">
-            DC-3
-            ANVERSO
-        </div>                 --}}
-    </div>
-</div>
-<table style="width: 100%">
-    <tr>
-        <td colspan="12">
-            <div style="font-weight: bold;text-align: center;margin-top:40px">
-                CLAVES Y DENOMINACIONES DE ÁREAS Y SUBÁREAS DEL CATÁLOGO
-                NACIONAL DE OCUPACIONES
-            </div>
+    <tr class="title-wrapper">
+        <td colspan="12" class="table-title">
+            DATOS DEL “TRABAJADOR
         </td>
     </tr>
-    <tr>
-        <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
-        <td colspan="3" align="center">DENOMINACIÓN</td>
-        <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
-        <td colspan="3" align="center">DENOMINACIÓN</td>
-    </tr>
-    @foreach ($national_occupations_catalog as $noc)
-        @if ($loop->iteration % 2 == 1)
-            <tr>
-                @endif
-                <td colspan="3">
-                    {{ $noc['code'] }}
-                </td>
-                <td colspan="3">
-                    {{ $noc['name'] }}
-                </td>
-                @if ($loop->iteration % 2 == 0 || $loop->last)
-            </tr>
-        @endif
-    @endforeach
 
-    <tr>
-        <td colspan="12">
-            <div style="font-weight: bold;text-align: center;margin-top:40px">
-                CLAVES Y DENOMINACIONES DEL CATÁLOGO DE ÁREAS TEMÁTICAS DE LOS
-                CURSOS
+    <tr class="row">
+        <td class="cell" colspan="6">
+            <div class="cell-label">
+                Nombre completo
+            </div>
+            <div class="cell-value">
+                {{$user['name']}}
+            </div>
+        </td>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Documento de identificación
+            </div>
+            <div class="cell-value">
+                {{$user['document']}}
             </div>
         </td>
     </tr>
-    <tr>
-        <td colspan="3" align="center">CLAVE DEL <br> ÁREA/SUBÁREA</td>
-        <td colspan="3" align="center">DENOMINACIÓN</td>
-        <td colspan="3" align="center">CLAVE DEL <br> ÁREA</td>
-        <td colspan="3" align="center">DENOMINACIÓN</td>
+
+    <tr class="row">
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Cargo
+            </div>
+            <div class="cell-value">
+
+            </div>
+        </td>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Área
+            </div>
+            <div class="cell-value">
+
+            </div>
+        </td>
     </tr>
-    @foreach ($catalog_denominations as $cd)
-        @if ($loop->iteration % 2 == 1)
-            <tr>
-                @endif
-                <td colspan="3">
-                    {{ $cd['code'] }}
-                </td>
-                <td colspan="3">
-                    {{ $cd['name'] }}
-                </td>
-                @if ($loop->iteration % 2 == 0 || $loop->last)
-            </tr>
-        @endif
-    @endforeach
 </table>
+
+<p class="margin-top">
+    De acuerdo con el presente documento, declaro bajo conformidad haber realizado mi capacitación en el sistema establecido por la empresa - Plataforma digital de
+    capacitación, en la fecha registrada habiendo ingresado con mi usuario y contraseña a la página
+    {{ $company['appWebsite'] }}
+</p>
+
+<p>
+    <b>
+        El curso establecido por la empresa y que he aprobado de manera satisfactoria es:
+    </b>
+</p>
+
+<table class="table-form">
+
+    <tr class="row">
+        <td class="cell" colspan="6">
+            <div class="cell-label">
+                Nombre del curso
+            </div>
+            <div class="cell-value">
+                {{ $course['name'] }}
+            </div>
+        </td>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Horas lectivas
+            </div>
+            <div class="cell-value">
+                {{ $course['duration'] }} horas
+            </div>
+        </td>
+    </tr>
+
+    <tr class="row">
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Fecha de capacitación
+            </div>
+            <div class="cell-value">
+                {{ $summaryCourse['created_at'] }}
+            </div>
+        </td>
+
+        <td class="cell"  colspan="6">
+            <div class="cell-label">
+                Fecha de registro
+            </div>
+            <div class="cell-value">
+                {{ $summaryCourse['created_at'] }}
+            </div>
+        </td>
+    </tr>
+</table>
+
+<p>
+    <b>
+        Los temas o conceptos impartidos han sido los siguientes:
+    </b>
+</p>
+
+<div class="topics">
+{!!  $course['certificationSyllabus'] !!}
+</div>
+
+<p>
+    <b>
+        OBSERVACIONES:
+    </b>
+</p>
+
+<div class="comment margin-bottom">
+    {{ $course['certificationComment'] }}
+</div>
+
+<table class="table-form margin-bottom">
+    <tr>
+        <td colspan="2"
+            class="cell text-center pt-3"
+            style="padding-top: 15px">
+            <span>
+                <b>
+                Suscriben el presente acuerdo ambas partes en señal de conformidad con su contenido y forma.
+                </b>
+            </span>
+        </td>
+    </tr>
+    <tr>
+        <td class="text-center"  style="padding-top: 16px; padding-bottom: 20px">
+            <div style="height: 80px;"></div>
+            <hr style="width: 50%">
+            <span>LA EMPRESA</span>
+        </td>
+        <td class="text-center"  style="padding-top: 16px; padding-bottom: 20px">
+            <img src='data:image/png;base64, {{ $signatureData }}' alt=""
+                 style="width: auto; height: 80px;" >
+            <hr style="width: 50%">
+            <span>EL TRABAJADOR</span>
+        </td>
+
+    </tr>
+</table>
+
+
 </body>
 </html>

@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Course extends BaseModel
 {
@@ -130,7 +133,7 @@ class Course extends BaseModel
             $data['range_date'] = null;
             return $data;
         }
-        $data =json_decode($value); 
+        $data =json_decode($value);
         return $data;
     }
     public function qualification_type()
@@ -1826,5 +1829,16 @@ class Course extends BaseModel
             });
 
         return $count;
+    }
+
+    public static function generateAndStoreRegistroCapacitacion($data) {
+
+        $fileName = Str::random(10) . '.pdf';
+        $filePath = 'dc3/'.$fileName;
+        $pdf = PDF::loadView('pdf.registro-capacitacion', $data);
+
+        Storage::disk('local')->put($filePath, $pdf->output());
+
+        return $filePath;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\ApiRest;
 
+use App;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PollAnswerStoreRequest;
 use App\Models\Course;
@@ -13,6 +16,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Intervention\Image\Image;
 use Monolog\Handler\IFTTTHandler;
 
 class RestCourseController extends Controller
@@ -238,7 +243,7 @@ class RestCourseController extends Controller
         $query = SummaryCourse::with('course:id,name,user_confirms_certificate')
             ->whereHas('course', function($q) use ($qs) {
                 $q->where('show_certification_to_user', 1);
-                
+
                 if ($qs) {
                     $q->where('name', 'like', "%{$qs}%");
                 }
@@ -272,4 +277,62 @@ class RestCourseController extends Controller
 
         return $this->success(compact('data'));
     }
+
+    public function generateRegistroCapacitacion(Request $request) {
+
+
+        $uploadedFile = $request->file('signature');
+        if (!$uploadedFile) {
+            return response()->json([ ]);
+        }
+
+        $signatureData = base64_encode(file_get_contents($uploadedFile->path()));
+
+        $data = [
+            'signatureData' => $signatureData,
+            'company'=> [
+                'businessName' => 'NGR SAC',
+                'businessNumber' => '204594944',
+                'economicActivity' => 'La actividad económica va aquí',
+                'CIIU' => '5833',
+                'address' => 'Calle falsa 123',
+                'workersCount' => 435,
+                'trainerAndRegistrar' => 'Soyla Baca del Campo',
+                'appWebsite' => '“Potenciando tu Talento”: https://potenciandotutalentongr.pe/login'
+            ],
+            'user' => User::where('email_gestor', 'elvis@cursalab.io')->first(),
+
+            'course' => [
+                'name' => 'Algoritmica',
+                'duration' => 200,
+                'certificationCourseCode' => 'FRM-GDH-SST-00dd9',
+                'certificationComment' => 'Aquí van las observaciones de la capacitación',
+                'certificationSyllabus' => "
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit.<br>
+Aliquam tincidunt mauris eu risus.<br>
+Vestibulum auctor dapibus neque.<br>
+Nunc dignissim risus id metus.<br>
+Cras ornare tristique elit.<br>
+Vivamus vestibulum ntulla nec ante.<br>
+Praesent placerat risus quis eros.<br>
+Fusce pellentesque suscipit nibh.<br>
+Integer vitae libero ac risus egestas placerat.
+                ",
+            ],
+            'summaryCourse' => [
+              'created_at' => '2023-11-04'
+            ],
+//            'title' => 'Este es el titulo',
+//            'national_occupations_catalog' => $national_occupations_catalog,
+//            'catalog_denominations' => $catalog_denominations,
+//            'subworkspace' => App\Models\Workspace::find(1)
+        ];
+        Course::generateAndStoreRegistroCapacitacion($data);
+
+        return View('pdf.registro-capacitacion', $data);
+
+        return response()->json([ ]);
+    }
+
+
 }
