@@ -1236,7 +1236,7 @@ class Course extends BaseModel
         print_r($fun_2);
     }
 
-    public function usersSegmented($course_segments, $type = 'get_records')
+    public function usersSegmented($course_segments, $type = 'get_records',$filters=[])
     {
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
@@ -1263,6 +1263,16 @@ class Course extends BaseModel
             }
             // $counts[$key] = $query->count();
 //            dd($query->toSql());
+            foreach ($filters as $filter) {
+                $statement = $filter['statement'] ?? null;
+                $field = $filter['field'] ?? null;
+                $value = $filter['value'] ?? null;
+                $operator = $filter['operator'] ?? '=';
+                if($field && $statement){
+                    /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
+                    ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+                }
+            }
             $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');

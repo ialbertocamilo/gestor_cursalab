@@ -650,6 +650,7 @@ class Topic extends BaseModel
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                     'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                     'tags' => $topic->tags->map( fn($t) => $t->taxonomy),
+                    'require_view_all_media' =>true,
                 ]);
             }
     
