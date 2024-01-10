@@ -667,7 +667,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $user = $this;
         $email =  trim($user->email);
         //Solo de 380
-        if($user?->subworkspace_id != 6){
+        if($user?->subworkspace_id != 224){
             return;
         }
         // if(!$email){
