@@ -105,7 +105,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
-        
+
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
@@ -418,11 +418,18 @@ class WorkspaceController extends Controller
         $subworkspace->contact_schedule = $contact_support['contact_schedule'] ?? NULL;
 
         $subworkspace->plantilla_diploma = $subworkspace->plantilla_diploma ? get_media_url($subworkspace->plantilla_diploma) : null;
-        
+
+        $functionality = Taxonomy::getFirstData('system', 'functionality', 'registro-capacitacion');
+        $registroCapacitacionFunctionality = WorkspaceFunctionality::query()
+            ->where('workspace_id', $subworkspace->parent_id)
+            ->where('functionality_id', $functionality->id)
+            ->first();
+
         return $this->success([
             'modulo' => $subworkspace,
+            'has_registro_capacitacion_functionality' => $registroCapacitacionFunctionality ? true : false,
             'main_menu' => $formSelects['main_menu'],
-            'side_menu' => $formSelects['side_menu'],
+            'side_menu' => $formSelects['side_menu']
         ]);
     }
 
@@ -460,7 +467,16 @@ class WorkspaceController extends Controller
         //     $item->active = false;
         // });
 
-        $response = compact('main_menu', 'side_menu', 'qualification_types');
+
+        $functionality = Taxonomy::getFirstData('system', 'functionality', 'registro-capacitacion');
+        $registroCapacitacionFunctionality = WorkspaceFunctionality::query()
+            ->where('workspace_id', get_current_workspace()->id)
+            ->where('functionality_id', $functionality->id)
+            ->first();
+
+        $has_registro_capacitacion_functionality = $registroCapacitacionFunctionality ? true : false;
+
+        $response = compact('main_menu', 'side_menu', 'qualification_types', 'has_registro_capacitacion_functionality');
 
         return $compactResponse ? $response : $this->success($response);
     }
