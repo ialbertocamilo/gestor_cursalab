@@ -289,7 +289,7 @@ class RestCourseController extends Controller
             ? User::find($request->get('user_id'))
             : auth()->user();
         $subworkspace = Workspace::find($user->subworkspace_id);
-        $course = Course::find($request->get('course_id'));
+        $course = Course::find($request->course_id);
         $summary = SummaryCourse::query()
             ->where('user_id', $user->id)
             ->where('course_id', $course->id)
