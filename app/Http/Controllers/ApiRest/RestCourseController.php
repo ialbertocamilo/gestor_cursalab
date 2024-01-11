@@ -295,16 +295,16 @@ class RestCourseController extends Controller
             ->where('course_id', $course->id)
             ->first();
 
-        $uploadedFile = $request->file('signature');
-        if (!$uploadedFile) {
-            return Response::json([
-                'message' => 'Signature image is required'
-            ], 400);
-        }
+//        $uploadedFile = $request->file('signature');
+//        if (!$uploadedFile) {
+//            return Response::json([
+//                'message' => 'Signature image is required'
+//            ], 400);
+//        }
 
         // Encode signature with Base64 to render the template with
 
-        $signatureData = base64_encode(file_get_contents($uploadedFile->path()));
+        $signatureData = $request->get('signature');//base64_encode(file_get_contents($uploadedFile->path()));
 
         $data = [
             'signatureData' => $signatureData,

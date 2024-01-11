@@ -114,7 +114,7 @@ class Workspace extends BaseModel
 
     public function getRegistroCapacitacionAttribute($value)
     {
-        return $value ? json_decode($value, true) : json_decode('{"company":{}}');
+        return $value ? json_decode($value) : json_decode('{"company":{}}');
     }
 
     public function medias() {
