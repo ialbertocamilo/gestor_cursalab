@@ -836,7 +836,7 @@ class Topic extends BaseModel
             // Check whether 'registro capacitacion' is enabled for course
 
             $registroCapacitacionIsActive = $course->registro_capacitacion
-                ? $course->registro_capacitacion->active
+                ? $course->registro_capacitacion['active']
                 : false;
 
             // Get 'registro capacitacion' file

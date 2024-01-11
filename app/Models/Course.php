@@ -39,7 +39,7 @@ class Course extends BaseModel
 
     public function getRegistroCapacitacionAttribute($value)
     {
-        return $value ? json_decode($value, true) : json_decode('{"company":{}}');
+        return $value ? json_decode($value, true) : json_decode('{"active":false}');
     }
 
     //

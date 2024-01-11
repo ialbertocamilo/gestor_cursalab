@@ -458,56 +458,62 @@
                                         </v-col>
                                     </v-row>
 
+
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <label>Datos para registro</label>
+                                        </v-col>
+                                    </v-row>
                                     <v-row justify="center">
 
-                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                            <DefaultInputDate
+                                        <v-col cols="6">
+                                            <DefaultInput
                                                 clearable
-                                                :referenceComponent="'modalDateFilter1'"
-                                                :options="modalDateFilter1"
-                                                v-model="resource.publish_date_1"
-                                                label="Fecha de inicio"
+                                                label="Instructor"
                                                 dense
                                             />
                                         </v-col>
-                                        <v-col cols="3">
-                                            <DefaultInput
-                                                class="time-input"
-                                                type="time"
-                                                label="Hora"
-                                                v-model="resource.publish_time_1"
-                                                :disabled="!resource.publish_date_1"
-                                                :rules="rules.time"
-                                                step="60"
-                                            />
+                                        <v-col cols="6">
+
                                         </v-col>
 
-                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                            <DefaultInputDate
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultInput
                                                 clearable
-                                                :referenceComponent="'modalDateFilter1'"
-                                                :options="modalDateFilter2"
-                                                v-model="resource.publish_date_2"
-                                                label="Fecha de fin"
+                                                label="Campo de código de certificado personalizado"
                                                 dense
                                             />
                                         </v-col>
-
-                                        <v-col cols="3">
-                                            <DefaultInput
-                                                class="time-input"
-                                                type="time"
-                                                label="Hora"
-                                                v-model="resource.publish_time_2"
-                                                :disabled="!resource.publish_date_2"
-                                                :rules="rules.time"
-                                                step="60"
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultRichText
+                                                clearable
+                                                v-model="resource.content"
+                                                label="Descripción"
+                                                :rules="rules.content"
+                                                class="mt-2"
+                                                :ignoreHTMLinLengthCalculation="true"
+                                                :height="195"
+                                                :showGenerateIaDescription="hasPermissionToUseIaDescription"
+                                                :key="`${hasPermissionToUseIaDescription}-editor`"
+                                                :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
+                                                :loading="loading_description"
+                                                ref="descriptionRichText"
+                                                @generateIaDescription="generateIaDescription"
                                             />
                                         </v-col>
-
-                                        <v-col cols="12" class="py-1">
-                                            <p class="mb-0 p-small-instruction">** El curso pasará a estar activo de acuerdo a la fecha configurada.</p>
-                                            <p class="mb-0 p-small-instruction">** Recuerda que el curso debe estar segmentado, pertenecer a una escuela activa y contener al menos un tema activo para que este sea visible por tus usuarios cuando este se active.</p>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultTextArea
+                                                dense
+                                                label="Observaciones del curso"
+                                                placeholder="Ingrese una descripción del curso"
+                                                v-model="resource.description"
+                                            />
                                         </v-col>
                                     </v-row>
                                 </div>
@@ -569,6 +575,8 @@
 
 </template>
 <script>
+import editor from "@tinymce/tinymce-vue";
+
 const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
@@ -582,9 +590,12 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
+import DefaultRichText from "../../components/globals/DefaultRichText.vue";
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
+    components: {
+        DefaultRichText,
+        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
