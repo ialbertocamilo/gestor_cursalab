@@ -436,6 +436,86 @@
                     </v-col>
                 </v-row>
 
+                <v-row justify="space-around">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Registro de capacitación"
+                            :expand="sections.showSectionRegistroCapacitacion"
+                        >
+                            <template slot="content">
+                                <div>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultToggle
+                                                v-model="resource.active"
+                                                @onChange="modalStatusEdit"
+                                                :activeLabel="'Creación de registro de capacitación'"
+                                                :inactiveLabel="'Creación de registro de capacitación'"
+                                                dense/>
+                                        </v-col>
+                                        <v-col cols="12">
+                                            Anexa la elaboración del registro de capacitación para tus reportes.
+                                        </v-col>
+                                    </v-row>
+
+                                    <v-row justify="center">
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter1"
+                                                v-model="resource.publish_date_1"
+                                                label="Fecha de inicio"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora"
+                                                v-model="resource.publish_time_1"
+                                                :disabled="!resource.publish_date_1"
+                                                :rules="rules.time"
+                                                step="60"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultInputDate
+                                                clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter2"
+                                                v-model="resource.publish_date_2"
+                                                label="Fecha de fin"
+                                                dense
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora"
+                                                v-model="resource.publish_time_2"
+                                                :disabled="!resource.publish_date_2"
+                                                :rules="rules.time"
+                                                step="60"
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="12" class="py-1">
+                                            <p class="mb-0 p-small-instruction">** El curso pasará a estar activo de acuerdo a la fecha configurada.</p>
+                                            <p class="mb-0 p-small-instruction">** Recuerda que el curso debe estar segmentado, pertenecer a una escuela activa y contener al menos un tema activo para que este sea visible por tus usuarios cuando este se active.</p>
+                                        </v-col>
+                                    </v-row>
+                                </div>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col cols="2">
                         <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit" dense/>
@@ -533,7 +613,8 @@ export default {
                 showSectionCertification: {status: true},
                 showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
-                showSectionDC3DC4:{status:false}
+                showSectionDC3DC4:{status:false},
+                showSectionRegistroCapacitacion: {status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -903,14 +984,14 @@ export default {
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
                 const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
-                vue.showAlert(message, 'warning', '') 
+                vue.showAlert(message, 'warning', '')
                 return ''
             }
             if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
-                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
                 return ''
             }
-            vue.loading_description = true; 
+            vue.loading_description = true;
             await axios.post(url,{
                 name : vue.resource.name,
                 type:'course'
@@ -925,12 +1006,12 @@ export default {
                             updateDescription(index + 1);
                         }, 10);
                     }else{
-                        vue.loading_description = false; 
+                        vue.loading_description = false;
                     }
                 }
                 updateDescription(0);
             }).catch(()=>{
-                vue.loading_description = false; 
+                vue.loading_description = false;
             })
         },
         async loadData(resource) {

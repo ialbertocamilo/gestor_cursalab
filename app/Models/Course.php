@@ -1831,10 +1831,9 @@ class Course extends BaseModel
         return $count;
     }
 
-    public static function generateAndStoreRegistroCapacitacion($data) {
+    public static function generateAndStoreRegistroCapacitacion($filename, $data) {
 
-        $fileName = Str::random(10) . '.pdf';
-        $filePath = 'dc3/'.$fileName;
+        $filePath = '/registro-capacitacion/' . $filename;
         $pdf = PDF::loadView('pdf.registro-capacitacion', $data);
 
         Storage::disk('local')->put($filePath, $pdf->output());

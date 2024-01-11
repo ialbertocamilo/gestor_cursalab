@@ -157,7 +157,7 @@ class Topic extends BaseModel
             } else {
                 $tema->requirements()->delete();
             }
-            $_medias = collect($tema->medias()->get()); 
+            $_medias = collect($tema->medias()->get());
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -450,7 +450,7 @@ class Topic extends BaseModel
             'type' => 'validations-after-update'
         ];
     }
-    
+
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -471,6 +471,10 @@ class Topic extends BaseModel
                     ->where('school_id',$school_id)
                     ->whereIn('course_id',$courses_id)
                     ->get();
+        $summaryCourses = SummaryCourse::query()
+            ->whereIn('course_id', $courses_id)
+            ->where('user_id', $user->id)
+            ->get();
 
         $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
         $status_projects = collect();
@@ -637,7 +641,7 @@ class Topic extends BaseModel
                     'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                 ]);
             }
-    
+
             $project = $projects->where('course_id',$course->id)->first();
             if($project){
                 $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
@@ -677,7 +681,7 @@ class Topic extends BaseModel
                         if($requirement_course?->requirement_id){
                             $req = $req_course;
                             // $req = Course::where('id',$requirement_course?->requirement_id)->first();
-    
+
                             $available_course_req = true;
 
                             // if ($requirement_course_req) {
@@ -829,6 +833,20 @@ class Topic extends BaseModel
                 continue;
             }
 
+            // Check whether 'registro capacitacion' is enabled for course
+
+            $registroCapacitacionIsActive = $course->registro_capacitacion
+                ? $course->registro_capacitacion->active
+                : false;
+
+            // Get 'registro capacitacion' file
+
+            $registroCapacitacionPath = null;
+            $summary = $summaryCourses->where('course_id', $course->id)->first();
+            if ($summary) {
+                $registroCapacitacionPath = $summary->registro_capacitacion_path;
+            }
+
             $schools_courses->push([
                 'id' => $course->id,
                 'orden' => $course_position,
@@ -843,6 +861,8 @@ class Topic extends BaseModel
                 'status' => $course_status['status'],
                 'encuesta' => $course_status['available_poll'],
                 'encuesta_habilitada' => $course_status['enabled_poll'],
+                'registro_capacitacion_is_active' => $registroCapacitacionIsActive,
+                'registro_capacitacion_path' => $registroCapacitacionPath,
                 'encuesta_resuelta' => $course_status['solved_poll'],
                 'encuesta_id' => $course_status['poll_id'],
                 'temas_asignados' => $course_status['exists_summary_course'] ?
@@ -854,7 +874,7 @@ class Topic extends BaseModel
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
                 'tarea' => $project,
                 'scheduled_activation' => [
-                    'message' => $course->deactivate_at ? 
+                    'message' => $course->deactivate_at ?
                                     'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
                                     : null,
                 ],
@@ -985,24 +1005,24 @@ class Topic extends BaseModel
 
     protected function evaluateAnswers2($respuestas, $topic) {
         $questions = Question::select('id', 'rptas_json', 'pregunta','rpta_ok', 'score')->where('topic_id', $topic->id)->get();
-        
+
         $question_results = [];
 
         foreach ($respuestas as $key => $respuesta) {
 
             $question = $questions->where('id', $respuesta['preg_id'])->first();
-            $esCorrecto = ($question->rpta_ok == $respuesta['opc']); 
+            $esCorrecto = ($question->rpta_ok == $respuesta['opc']);
 
             if ($question) {
                 $question_results[] = [
-                    'pregunta' => $question->pregunta, 
+                    'pregunta' => $question->pregunta,
                     'esCorrecto' => $esCorrecto,
-                    'opcion_usuario' => ($respuesta['opc']) ? 
-                                        $question->rptas_json[$respuesta['opc']] : '' 
+                    'opcion_usuario' => ($respuesta['opc']) ?
+                                        $question->rptas_json[$respuesta['opc']] : ''
                 ];
                 /*
                 info([
-                    'pregunta' => $question->pregunta, 
+                    'pregunta' => $question->pregunta,
                     'esCorrecto' => $esCorrecto,
                     'opcion_usuario' => $question->rptas_json
                 ]);*/

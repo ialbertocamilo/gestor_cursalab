@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App;
+use App\Models\Workspace;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate;
 use App\Http\Controllers\Controller;
@@ -16,6 +17,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Intervention\Image\Image;
 use Monolog\Handler\IFTTTHandler;
@@ -281,57 +283,92 @@ class RestCourseController extends Controller
     public function generateRegistroCapacitacion(Request $request) {
 
 
+        //$user = auth()->user();
+
+        $user = $request->get('user_id')
+            ? User::find($request->get('user_id'))
+            : auth()->user();
+        $subworkspace = Workspace::find($user->subworkspace_id);
+        $course = Course::find($request->get('course_id'));
+        $summary = SummaryCourse::query()
+            ->where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
         $uploadedFile = $request->file('signature');
         if (!$uploadedFile) {
-            return response()->json([ ]);
+            return Response::json([
+                'message' => 'Signature image is required'
+            ], 400);
         }
+
+        // Encode signature with Base64 to render the template with
 
         $signatureData = base64_encode(file_get_contents($uploadedFile->path()));
 
         $data = [
             'signatureData' => $signatureData,
-            'company'=> [
-                'businessName' => 'NGR SAC',
-                'businessNumber' => '204594944',
-                'economicActivity' => 'La actividad económica va aquí',
-                'CIIU' => '5833',
-                'address' => 'Calle falsa 123',
-                'workersCount' => 435,
-                'trainerAndRegistrar' => 'Soyla Baca del Campo',
-                'appWebsite' => '“Potenciando tu Talento”: https://potenciandotutalentongr.pe/login'
-            ],
-            'user' => User::where('email_gestor', 'elvis@cursalab.io')->first(),
-
-            'course' => [
-                'name' => 'Algoritmica',
-                'duration' => 200,
-                'certificationCourseCode' => 'FRM-GDH-SST-00dd9',
-                'certificationComment' => 'Aquí van las observaciones de la capacitación',
-                'certificationSyllabus' => "
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit.<br>
-Aliquam tincidunt mauris eu risus.<br>
-Vestibulum auctor dapibus neque.<br>
-Nunc dignissim risus id metus.<br>
-Cras ornare tristique elit.<br>
-Vivamus vestibulum ntulla nec ante.<br>
-Praesent placerat risus quis eros.<br>
-Fusce pellentesque suscipit nibh.<br>
-Integer vitae libero ac risus egestas placerat.
-                ",
-            ],
-            'summaryCourse' => [
-              'created_at' => '2023-11-04'
-            ],
-//            'title' => 'Este es el titulo',
-//            'national_occupations_catalog' => $national_occupations_catalog,
-//            'catalog_denominations' => $catalog_denominations,
-//            'subworkspace' => App\Models\Workspace::find(1)
+            'user' => $user,
+            'company'=> $subworkspace->registro_capacitacion['company'],
+            'course' => $course,
+            'summaryCourse' => $summary
         ];
-        Course::generateAndStoreRegistroCapacitacion($data);
 
-        return View('pdf.registro-capacitacion', $data);
+//        $data = [
+//            'signatureData' => $signatureData,
+//            'company'=> [
+//                'businessName' => 'NGR SAC',
+//                'businessNumber' => '204594944',
+//                'economicActivity' => 'La actividad económica va aquí',
+//                'CIIU' => '5833',
+//                'address' => 'Calle falsa 123',
+//                'workersCount' => 435,
+//                'trainerAndRegistrar' => 'Soyla Baca del Campo',
+//                'appWebsite' => '“Potenciando tu Talento”: https://potenciandotutalentongr.pe/login'
+//            ],
+//            'user' => User::where('email_gestor', 'elvis@cursalab.io')->first(),
+//
+//            'course' => [
+//                'name' => 'Algoritmica',
+//                'duration' => 200,
+//                'certificationCourseCode' => 'FRM-GDH-SST-00dd9',
+//                'certificationComment' => 'Aquí van las observaciones de la capacitación',
+//                'certificationSyllabus' => "
+//                Lorem ipsum dolor sit amet, consectetuer adipiscing elit.<br>
+//Aliquam tincidunt mauris eu risus.<br>
+//Vestibulum auctor dapibus neque.<br>
+//Nunc dignissim risus id metus.<br>
+//Cras ornare tristique elit.<br>
+//Vivamus vestibulum ntulla nec ante.<br>
+//Praesent placerat risus quis eros.<br>
+//Fusce pellentesque suscipit nibh.<br>
+//Integer vitae libero ac risus egestas placerat.
+//                ",
+//            ],
+//            'summaryCourse' => [
+//              'created_at' => '2023-11-04'
+//            ]
+//        ];
 
-        return response()->json([ ]);
+        // Render template and store generated file
+
+        $filename = $subworkspace->id . '-' .
+                    $course->id .  '-' .
+                    $user->id . '-' .
+                    Str::random(5) . '.pdf';
+        $filepath = Course::generateAndStoreRegistroCapacitacion($filename, $data);
+
+        //return View('pdf.registro-capacitacion', $data);
+
+        // File path should also store in user's summary course
+
+        $summary->registro_capacitacion_path = $filepath;
+        $summary->save();
+
+
+        return Response::json([
+            'filepath' => $filepath
+        ], 201);
     }
 
 

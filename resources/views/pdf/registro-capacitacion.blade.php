@@ -94,7 +94,7 @@
                 Razón social
             </div>
             <div class="cell-value">
-                {{ $company['businessName'] }}
+                {{ $company['businessName'] ?? '' }}
             </div>
         </td>
     </tr>
@@ -105,7 +105,7 @@
                 RUC
             </div>
             <div class="cell-value">
-                {{ $company['businessNumber'] }}
+                {{ $company['businessNumber'] ?? '' }}
             </div>
         </td>
 
@@ -114,7 +114,7 @@
                 Actividad económica
             </div>
             <div class="cell-value">
-                {{ $company['economicActivity'] }}
+                {{ $company['economicActivity'] ?? '' }}
             </div>
         </td>
 
@@ -123,7 +123,7 @@
                 Con código CIIU Nº
             </div>
             <div class="cell-value">
-                {{ $company['CIIU'] }}
+                {{ $company['CIIU'] ?? '' }}
             </div>
         </td>
     </tr>
@@ -134,7 +134,7 @@
                 Dirección de la sede
             </div>
             <div class="cell-value">
-                {{ $company['address'] }}
+                {{ $company['address'] ?? '' }}
             </div>
         </td>
     </tr>
@@ -145,7 +145,7 @@
                 Número de trabajadores del centro laboral
             </div>
             <div class="cell-value">
-                {{ $company['workersCount'] }}
+                {{ $company['workersCount'] ?? '' }}
             </div>
         </td>
 
@@ -154,7 +154,7 @@
                 Capacitador y encargado del registro
             </div>
             <div class="cell-value">
-                {{ $company['trainerAndRegistrar'] }}
+                {{ $company['trainerAndRegistrar'] ?? '' }}
             </div>
         </td>
     </tr>
@@ -212,7 +212,7 @@
 <p class="margin-top">
     De acuerdo con el presente documento, declaro bajo conformidad haber realizado mi capacitación en el sistema establecido por la empresa - Plataforma digital de
     capacitación, en la fecha registrada habiendo ingresado con mi usuario y contraseña a la página
-    {{ $company['appWebsite'] }}
+    {{ $company['appWebsite'] ?? '' }}
 </p>
 
 <p>
