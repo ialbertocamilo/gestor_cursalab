@@ -19,7 +19,7 @@ class Course extends BaseModel
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4','dc3_configuration'
+        'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion'
     ];
 
     protected $casts = [
@@ -27,6 +27,24 @@ class Course extends BaseModel
         'scheduled_restarts' => 'array',
         'show_certification_date' => 'boolean',
     ];
+
+    //
+    // Mutators and accesors
+    // ========================================
+
+    public function setRegistroCapacitacionAttribute($value)
+    {
+        $this->attributes['registro_capacitacion'] = json_encode($value);
+    }
+
+    public function getRegistroCapacitacionAttribute($value)
+    {
+        return $value ? json_decode($value, true) : json_decode('{"company":{}}');
+    }
+
+    //
+    // Relationships
+    // ========================================
 
     public function schools()
     {
