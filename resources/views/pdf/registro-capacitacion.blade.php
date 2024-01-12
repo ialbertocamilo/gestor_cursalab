@@ -303,7 +303,7 @@
             <span>LA EMPRESA</span>
         </td>
         <td class="text-center"  style="padding-top: 16px; padding-bottom: 20px">
-            <img src='data:image/png;base64, {{ $signatureData }}' alt=""
+            <img src='{{ $signatureData }}' alt=""
                  style="width: auto; height: 80px;" >
             <hr style="width: 50%">
             <span>EL TRABAJADOR</span>

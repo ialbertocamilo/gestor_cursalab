@@ -1854,7 +1854,7 @@ class Course extends BaseModel
         $filePath = '/registro-capacitacion/' . $filename;
         $pdf = PDF::loadView('pdf.registro-capacitacion', $data);
 
-        Storage::disk('s3')->put($filePath, $pdf->output());
+        Storage::disk('s3')->put($filePath, $pdf->output(), 'public');
 
         return $filePath;
     }
