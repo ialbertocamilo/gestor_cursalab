@@ -309,7 +309,7 @@ class RestCourseController extends Controller
         $data = [
             'signatureData' => $signatureData,
             'user' => $user,
-            'company'=> $subworkspace->registro_capacitacion['company'],
+            'company'=> $subworkspace->registro_capacitacion->company,
             'course' => $course,
             'summaryCourse' => $summary
         ];
