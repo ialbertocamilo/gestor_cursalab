@@ -305,7 +305,8 @@ class RestCourseController extends Controller
 
         // Render template and store generated file
 
-        $filename = $subworkspace->id . '-' .
+        $filename = 'capacitacion-'.
+                    $subworkspace->id . '-' .
                     $course->id .  '-' .
                     $user->id . '-' .
                     Str::random(5) . '.pdf';
