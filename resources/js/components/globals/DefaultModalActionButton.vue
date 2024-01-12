@@ -20,7 +20,7 @@
                 color="primary"
                 @click="onConfirm"
                 v-if="!hideConfirmBtn"
-                :disabled="loading"
+                :disabled="loading || confirmDisabled"
             >
                 {{ confirmLabel }}
             </v-btn>
@@ -53,7 +53,11 @@ export default {
         loading: {
             type: Boolean,
             default: false
-        }
+        },
+        confirmDisabled: {
+            type: Boolean,
+            default: false
+        },
     },
     methods: {
         onCancel() {

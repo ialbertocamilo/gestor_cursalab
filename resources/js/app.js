@@ -232,6 +232,11 @@ Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesLi
 
 Vue.component("guest-layout", require("./layouts/Guest/GuestListPage.vue"));
 
+// Inducción
+Vue.component("processes-layout", require("./layouts/Processes/ProcessesList.vue"));
+Vue.component("stages-layout", require("./layouts/Stages/StagesList.vue"));
+
+
 
 /*----*/
 const app = new Vue({
@@ -284,6 +289,7 @@ const app = new Vue({
             const vue = this
 
             // Notify user that report is ready to donwload
+
             if (e.success) {
 
                 this.$toast.warning({
@@ -351,16 +357,6 @@ const app = new Vue({
             }
 
         },
-        // downloadReport(url, name) {
-        //     try {
-        //         FileSaver.saveAs(url, name)
-
-        //     } catch (error) {
-        //         console.log(error)
-
-        //     }
-        // },
-
         downloadReport(url, name) {
             try {
                 // Realizar una solicitud para obtener el archivo desde la URL

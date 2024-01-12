@@ -6,6 +6,7 @@
         :persistent="options.persistent"
         scrollable
         @click:outside="closeModalOutside"
+        :content-class="contentClass"
     >
         <v-card :height="height">
             <div v-if="customTitle">
@@ -59,7 +60,8 @@
                     :hide-cancel-btn="options.hideCancelBtn"
                     :hide-confirm-btn="options.hideConfirmBtn"
                     :loading="options.loading"
-                    @cancel="closeModal"
+                    :confirm-disabled="options.confirmDisabled"
+                    @cancel="steps ? closeModalSteps() : closeModal()"
                     @confirm="confirmModal"/>
             </v-card-actions>
         </v-card>
@@ -130,12 +132,24 @@ export default {
         vCardClass:{
             type: String,
             default: ''
+        },
+        steps:{
+            type: Boolean,
+            default: false
+        },
+        contentClass: {
+            type: String,
+            default: ''
         }
     },
     methods: {
         closeModal() {
             let vue = this
             vue.$emit('onCancel')
+        },
+        closeModalSteps() {
+            let vue = this
+            vue.$emit('onCancelSteps')
         },
         closeModalFromIcon(){
             let vue = this;

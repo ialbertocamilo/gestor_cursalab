@@ -39,11 +39,13 @@ import DefaultErrors from "./components/globals/DefaultErrors"
 import DefaultBreadcrumbs from "./components/globals/DefaultBreadcrumbs";
 import DefaultSimpleBreadcrumbs from "./components/globals/DefaultSimpleBreadcrumbs";
 import DefaultSimpleMessageAlert from "./components/globals/DefaultSimpleMessageAlert";
+import DefaultButtonModalSteps from "./components/globals/DefaultButtonModalSteps";
+import DefaultDropzoneCrop from "./components/globals/DefaultDropzoneCrop";
 
 export default {
     components: {
         DefaultSelectOrUploadMultimediaDimension,
-        
+
         DefaultTable,
         DefaultSelect,
         DefaultInput,
@@ -85,5 +87,7 @@ export default {
         DefaultSimpleBreadcrumbs,
 
         DefaultSimpleMessageAlert,
+        DefaultButtonModalSteps,
+        DefaultDropzoneCrop
     },
 }

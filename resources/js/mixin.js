@@ -875,6 +875,9 @@ export default {
                 localStorage.setItem(dataParams.key, JSON.stringify(filters));
                 vue.openInNewTab(route);
             }
-        }
+        },
+        validateRequired(input) {
+            return input != undefined && input != null && input != "";
+        },
     },
 };

@@ -1,0 +1,1642 @@
+
+
+<template>
+    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
+        <v-card class="modal_edit_process">
+            <v-card-title class="default-dialog-title">
+                Crear inducción {{ step_title }}
+                <v-spacer/>
+                <v-btn icon :ripple="false" color="white"
+                       @click="closeModal">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+            </v-card-title>
+            <v-card-text class="pt-0">
+
+                <v-stepper non-linear class="stepper_box" v-model="stepper_box">
+                    <v-stepper-items>
+                        <v-stepper-content step="1" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step1">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Indica la información que tendrá la inducción</span>
+                                        </v-col>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0">
+                                            <DefaultInput clearable
+                                                        v-model="process.title"
+                                                        label="Título"
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0">
+                                            <v-textarea
+                                                rows="5"
+                                                outlined
+                                                dense
+                                                hide-details="auto"
+                                                label="Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción"
+                                                v-model="process.description"
+                                                class="txt_desc"
+                                            ></v-textarea>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <div class="row_dates d-flex">
+                                                <div class="d-flex align-center">
+                                                    <span class="text_default">Fecha de inicio del proceso:</span>
+                                                    <div>
+                                                        <DefaultInputDate
+                                                            placeholder="Ingresar fecha"
+                                                            reference-component="StartProcessDate"
+                                                            :options="modalDateOptions"
+                                                            label=""
+                                                            v-model="process.date_start"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-center">
+                                                    <span class="text_default ms-3">Fecha de fin del proceso: (opcional)</span>
+                                                    <DefaultInputDate
+                                                        placeholder="Ingresar fecha"
+                                                        reference-component="StartProcessDate"
+                                                        :options="modalDateOptions2"
+                                                        label=""
+                                                        v-model="process.date_final"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <div class="bx_switch_attendance">
+                                                <v-switch
+                                                    class="default-toggle"
+                                                    inset
+                                                    label="Deseas contabilizar las inasistencias de los colaboradores"
+                                                    hide-details="auto"
+                                                    v-model="process.count_absences"
+                                                    dense
+                                                ></v-switch>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <transition name="fade">
+                                        <v-row v-if="process.count_absences">
+                                            <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                                <span class="text_default lbl_tit">¿Deseas agregar límite de inasistencia a este proceso de inducción?</span>
+                                            </v-col>
+                                            <v-col cols="12" md="12" lg="12">
+                                                <div class="d-flex">
+                                                    <div>
+                                                        <v-radio-group v-model="process.limit_absences" row>
+                                                            <v-radio label="No" :value="false"></v-radio>
+                                                            <div class="divider_inline"></div>
+                                                            <v-radio label="Sí, indica máximas inasistencias permitidas:" :value="true"></v-radio>
+                                                        </v-radio-group>
+                                                    </div>
+                                                    <div class="bx_input_inasistencias">
+                                                        <input type="number" v-model="process.absences">
+                                                    </div>
+                                                </div>
+                                            </v-col>
+                                        </v-row>
+                                    </transition>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                        <v-stepper-content step="2" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step2">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0 mb-2">
+                                            <span class="text_default lbl_tit fw-bold">Escribe un instructivo para tus trabajadores.</span>
+                                        </v-col>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Da indicaciones a tus trabajadores para organizarlos o darles unas pautas al ingresar a la plataforma, en caso de no contar con un instructivo puedes puedes usar el  Instructivo Cursalab.</span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row class="bx_instructions_list">
+                                        <v-col cols="8">
+                                            <div class="bx_overflow">
+                                                <draggable v-model="process.instructions" @start="drag=true"
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                    <transition-group type="transition" name="flip-list" tag="div">
+                                                        <div v-for="(instruction, i) in process.instructions"
+                                                            :key="instruction.id">
+                                                            <div class="item-draggable activities">
+                                                                <div class="item_instruction">
+                                                                    <div class="ii1 d-flex align-center justify-content-center ">
+                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                        </v-icon>
+                                                                    </div>
+                                                                    <div class="ii2">
+                                                                        <v-textarea
+                                                                            rows="4"
+                                                                            outlined
+                                                                            dense
+                                                                            hide-details="auto"
+                                                                            placeholder="Escribre aqui una indicación"
+                                                                            v-model="instruction.title"
+                                                                            class="txt_inst"
+                                                                            @focus="instructionSelected(instruction.title)"
+                                                                            @input="instructionSelected(instruction.title)"
+                                                                        ></v-textarea>
+                                                                    </div>
+                                                                    <div class="ii3 d-flex align-center">
+                                                                        <v-icon class="ml-0 mr-2 icon_size" color="black"
+                                                                                @click="deleteInstruction(instruction, i)">
+                                                                            mdi-delete
+                                                                        </v-icon>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </transition-group>
+                                                </draggable>
+                                            </div>
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <span class="text_default mb-2">Previsualización</span>
+                                            <div class="bx_prev_instructions">
+                                                <div class="bx_dialog bxd_right">
+                                                    <div class="content_dialog" v-html="content_instruction"></div>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
+                                            <v-btn color="primary" outlined @click="addInstruction" class="btn_add_instruction">
+                                                <v-icon class="icon_size">mdi-plus-circle</v-icon>
+                                            </v-btn>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                        <v-stepper-content step="3" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step3">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Previsualización de logotipo e imágenes de fondo</span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="5">
+                                            <v-row>
+                                                <v-col cols="12" class="bx_preview_change_logo">
+                                                    <DefaultSelectOrUploadMultimedia
+                                                        ref="inputLogo"
+                                                        v-model="resource.logotipo"
+                                                        label="Logotipo (500 x 500px)"
+                                                        :file-types="['image']"
+                                                        @onSelect="setFile($event, resource,'logotipo')"
+                                                        @onPreview="logo_selected = $event"
+                                                        @croppedImage="logo_cropped = $event"
+                                                        @removeImage="logo_cropped = $event"
+                                                        :sizeCropp="{width:500, height:500}"
+                                                        :showButton="false"
+                                                        :cropImage="true"
+                                                        />
+                                                </v-col>
+                                                <v-col cols="12">
+                                                    <div  v-show="tab_preview_images == 'mobile'">
+                                                        <DefaultSelectOrUploadMultimedia
+                                                            ref="inputFondoMobile"
+                                                            v-model="resource.fondo_mobile"
+                                                            label="Fondo (720 x 1280px)"
+                                                            :file-types="['image']"
+                                                            @onSelect="setFile($event, resource, 'fondo_mobile')"
+                                                            @onPreview="fondo_mobile_selected = $event"
+                                                            @croppedImage="fondo_mobile_cropped = $event"
+                                                            :sizeCropp="{width:720, height:1280}"
+                                                            :showButton="false"
+                                                            :cropImage="true"
+                                                            />
+                                                    </div>
+                                                    <div v-show="tab_preview_images == 'web'">
+                                                        <DefaultSelectOrUploadMultimedia
+                                                            ref="inputFondoWeb"
+                                                            v-model="resource.fondo_web"
+                                                            label="Fondo web (1280 x 720px)"
+                                                            :file-types="['image']"
+                                                            @onSelect="setFile($event, resource, 'fondo_web')"
+                                                            @onPreview="fondo_web_selected = $event"
+                                                            @croppedImage="fondo_web_cropped = $event"
+                                                            :sizeCropp="{width:1280, height:720}"
+                                                            :showButton="false"
+                                                            :cropImage="true"
+                                                            />
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                        <v-col cols="7">
+                                            <v-row>
+                                                <v-col cols="12">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="text_default">Previsualización</span>
+                                                        </div>
+                                                        <div class="btns_preview_type">
+                                                            <DefaultButton :label="'Mobile'"
+                                                                @click="tab_preview_images = 'mobile'"
+                                                                :outlined="tab_preview_images != 'mobile'"
+                                                                />
+                                                            <DefaultButton :label="'Web'"
+                                                                @click="tab_preview_images = 'web'"
+                                                                :outlined="tab_preview_images != 'web'"
+                                                                />
+                                                        </div>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                            <v-row style="height: calc(100% - 60px);">
+                                                <v-col cols="12">
+                                                    <div class="box_preview" v-if="tab_preview_images == 'mobile'">
+                                                        <div class="tpl_preview_mobile" v-if="logo_cropped && fondo_mobile_cropped">
+                                                            <div class="bx_imgs_pm">
+                                                                <div class="bx_fondo_pm" v-if="fondo_mobile_cropped">
+                                                                    <img :src="fondo_mobile_cropped">
+                                                                </div>
+                                                                <div class="bx_logo_pm" v-if="logo_cropped">
+                                                                    <img :src="logo_cropped">
+                                                                </div>
+                                                            </div>
+                                                            <span class="text_default">
+                                                                Bienvenidos
+                                                                <img src="/img/induccion/personalizacion/arrow_right.svg">
+                                                            </span>
+                                                        </div>
+                                                        <span class="text_default" v-else>
+                                                            Necesitas ambos archivos para poder generar una previsualización
+                                                        </span>
+                                                    </div>
+                                                    <div class="box_preview" v-if="tab_preview_images == 'web'">
+                                                        <div class="tpl_preview_web" v-if="logo_cropped && fondo_web_cropped">
+                                                            <div class="bx_imgs_pm">
+                                                                <div class="bx_fondo_pm" v-if="fondo_web_cropped">
+                                                                    <img :src="fondo_web_cropped">
+                                                                </div>
+                                                                <div class="bx_logo_pm" v-if="logo_cropped">
+                                                                    <img :src="logo_cropped">
+                                                                </div>
+                                                                <span class="text_default">
+                                                                    Bienvenidos
+                                                                    <img src="/img/induccion/personalizacion/arrow_right.svg">
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <span class="text_default" v-else>
+                                                            Necesitas ambos archivos para poder generar una previsualización
+                                                        </span>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                        <v-stepper-content step="4" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step3">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Indica la información que tendrá el onboarding</span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="5">
+                                            <v-row>
+                                                <v-col cols="12" class="pb-1">
+                                                    <span class="text_default">Previsualización móvil</span>
+                                                </v-col>
+                                                <v-col cols="12" class="pt-1">
+                                                    <div class="bx_preview_colors">
+                                                        <div class="bx_preview_map">
+                                                            <PreviewMap :color="colorSelected"/>
+                                                        </div>
+                                                        <div class="bg_instructions_profile">
+                                                            <div class="bg_bubble" :style="backgroundColorSelected"></div>
+                                                            <div class="bx_change_img_profile">
+                                                                <div class="bx_img_profile">
+                                                                    <img src="/img/induccion/personalizacion/perfil-hombre.png">
+                                                                    <div class="icon_edit" @click="changeAvatarSelected" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                </div>
+                                                                <span class="text_default">Cambiar perfil</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                        <v-col cols="7">
+                                            <v-row>
+                                                <v-col cols="12">
+                                                    <div>
+                                                        <span class="text_default">Colores</span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="box_select_colors">
+                                                            <div class="item_color_onb" :class="[colorSelected != colorDefault ? 'selected' : '']">
+                                                                <span class="text_default">Empresa</span>
+                                                                <div class="bg_color_item">
+                                                                    <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorSelected" :style="swatchStyle">
+                                                                        <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                    </v-btn>
+                                                                    <v-menu v-model="menuPicker"
+                                                                            bottom
+                                                                            :close-on-content-click="false"
+                                                                            offset-y
+                                                                            right
+                                                                            nudge-bottom="10"
+                                                                            min-width="auto">
+                                                                        <template v-slot:activator="{ on }">
+                                                                            <div  v-on="on" />
+                                                                        </template>
+                                                                        <v-card>
+                                                                            <v-card-text class="pa-0">
+                                                                                <v-color-picker v-model="colorPicker" flat />
+                                                                            </v-card-text>
+                                                                        </v-card>
+                                                                    </v-menu>
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_color_onb" @click="colorSelected = colorDefault" :class="[colorSelected == colorDefault ? 'selected' : '']">
+                                                                <span class="text_default">Cursalab</span>
+                                                                <div class="bg_color_item bg_color_item_default">
+                                                                    <div class="color_d"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-4 mb-2">
+                                                        <span class="text_default">Iconos al terminar el onboarding</span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="box_select_icons">
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/apreton-de-manos.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/rascacielos.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/fabrica.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/producto.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/tienda-de-comestibles.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/mercado.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/fabrica-2.png">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
+                                                                    <img src="/img/induccion/personalizacion/detallista.png">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                    </v-stepper-items>
+                    <v-stepper-header class="stepper_dots">
+                        <v-stepper-step step="1" :complete="stepper_box > 1">
+                            <v-divider></v-divider>
+                        </v-stepper-step>
+                        <v-stepper-step step="2" :complete="stepper_box > 2">
+                            <v-divider></v-divider>
+                        </v-stepper-step>
+                        <v-stepper-step step="3" :complete="stepper_box > 3">
+                            <v-divider></v-divider>
+                        </v-stepper-step>
+                        <v-stepper-step step="4">
+                        </v-stepper-step>
+                    </v-stepper-header>
+                </v-stepper>
+
+            </v-card-text>
+
+            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
+                <DefaultButtonModalSteps
+                    @cancel="prevStep"
+                    @confirm="nextStep"
+                    :cancelLabel="cancelLabel"
+                    confirmLabel="Continuar"
+                    :disabled_next="disabled_btn_next"
+                    />
+            </v-card-actions>
+        </v-card>
+        <!-- <DefaultAlertDialog
+            :ref="modalAlert.ref"
+            :options="modalAlert"
+            :confirmLabel="modalAlert.confirmLabel"
+            :hideCancelBtn="modalAlert.hideCancelBtn"
+            @onConfirm ="modalAlertClose()"
+            @onCancel ="modalAlertClose()"
+        >
+            <template v-slot:content> {{ modalAlert.contentText }}</template>
+        </DefaultAlertDialog> -->
+
+        <ModalAvatarsRepository
+            :ref="modalAvatarsRepository.ref"
+            v-model="modalAvatarsRepository.open"
+            :width="'650px'"
+            @onCancel="modalAvatarsRepositoryClose()"
+            @onConfirm="modalAvatarsRepositoryClose()"
+        />
+    </v-dialog>
+</template>
+
+
+<script>
+import draggable from 'vuedraggable'
+import DefaultButtonModalSteps from '../globals/DefaultButtonModalSteps.vue';
+import PreviewMap from './PreviewMap.vue';
+import ModalAvatarsRepository from './ModalAvatarsRepository.vue'
+
+export default {
+    components: {
+    draggable,
+    DefaultButtonModalSteps,
+    PreviewMap,
+    ModalAvatarsRepository
+},
+    props: {
+        value: Boolean,
+        width: String,
+        process: Object,
+        limitOne: {
+            type:Boolean,
+            default:false
+        },
+        tabs_title:{
+            type: String,
+            default: 'Segmentación'
+        },
+    },
+    data() {
+        return {
+
+            modalDateOptions: {
+                ref: 'DateEvent',
+                open: false,
+            },
+            modalDateOptions2: {
+                ref: 'DateEvent',
+                open: false,
+            },
+            content_instruction: '',
+            step_title: '',
+            // step 3
+            tab_preview_images: 'mobile',
+            logo_selected: null,
+            fondo_mobile_selected: null,
+            fondo_web_selected: null,
+            logo_cropped: null,
+            fondo_mobile_cropped: null,
+            fondo_web_cropped: null,
+            // step 4
+            menuPicker: false,
+            colorPicker: '#FE141F',
+            colorDefault: '#5458EA',
+            colorSelected: '#5458EA',
+
+            modalAvatarsRepository: {
+                ref: 'ModalAvatarsRepository',
+                open: false,
+                endpoint: '',
+            },
+            // steps
+            disabled_btn_next: true,
+            stepper_box_btn1: true,
+            stepper_box_btn2: true,
+            stepper_box_btn3: false,
+            stepper_box_btn4: false,
+            stepper_box: 1,
+            cancelLabel: "Cancelar",
+            list_segments:[],
+            sections: {
+                showAdvancedOptions: false
+            },
+            modalDateStart: {
+                open: false,
+            },
+            modalDateEnd:{
+                open: false,
+            },
+            drag: false,
+            expand_cursos: true,
+            actividades_expanded: [],
+            tipo_actividades: [
+                {
+                    text: "Se califica al alumno",
+                    value: "trainer_user"
+                },
+                {
+                    text: "Se califica al entrenador",
+                    value: "user_trainer"
+                }
+            ],
+            dialog: false,
+            file: null,
+            search_text: null,
+            results_search: [],
+            disabled_add_courses: false,
+            isLoading: false,
+            messageActividadesEmpty: false,
+            formRules: {
+                titulo_descripcion: [
+                    v => !!v || 'Campo requerido',
+                    v => (v && v.length <= 280) || 'Máximo 280 caracteres.',
+                ],
+                actividad: [
+                    v => !!v || 'Campo requerido',
+                ],
+            },
+            modalAlert: {
+                ref: 'modalAlert',
+                title: 'Alerta',
+                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Se califica al alumno"',
+                open: false,
+                endpoint: '',
+                confirmLabel:"Entendido",
+                hideCancelBtn:true,
+            },
+            selects: {
+                type_checklist: [
+                    {"id": "libre", "name": "Libre"},
+                    {"id": "curso", "name": "Por curso"},
+                ]
+            },
+            type_checklist: "libre",
+            tabs: null,
+            steps: 0,
+            // total: 0,
+            total: [],
+
+            errors: [],
+            showConfigTokens: false,
+            resourceDefault: {
+                id: null,
+                name: null,
+                type_checklist: null
+            },
+            resource: {},
+            segments: [{
+                id: `new-segment-${Date.now()}`,
+                type_code: '',
+                criteria_selected: []
+            }],
+            segment_by_document: {
+                id: `new-segment-${Date.now()}`,
+                type_code: '',
+                criteria_selected: []
+            },
+            criteria: [],
+            courseModules: [],
+            modulesSchools: [],
+
+            modalInfoOptions: {
+                ref: 'SegmentAlertModal',
+                open: false,
+                title: null,
+                resource:'data',
+                hideConfirmBtn: true,
+                persistent: true,
+                cancelLabel: 'Entendido'
+            },
+            stackModals: { continues: [],
+                backers: [] },
+            criteriaIndexModal: 0,
+
+            segment_by_document_clean: false,
+            rules: {
+                // name: this.getRules(['required', 'max:255']),
+            }
+            // data segmenteacion
+        };
+    },
+    computed: {
+        swatchStyle() {
+            const { colorPicker, menuPicker } = this
+            return {
+                backgroundColor: colorPicker,
+                borderRadius: menuPicker ? '50%' : '4px',
+                transition: 'border-radius 200ms ease-in-out'
+            }
+        },
+        backgroundColorSelected(){
+            const { colorSelected, colorDefault, colorPicker } = this
+            return {
+                backgroundColor: colorSelected != colorDefault ? colorPicker : colorDefault,
+                color: colorSelected != colorDefault ? colorPicker : colorDefault
+            }
+        }
+    },
+    async mounted() {
+        // this.addInstruction()
+    },
+    watch: {
+        logo_cropped: {
+            handler(n, o) {
+                let vue = this;
+                console.log(n);
+                console.log(o);
+            },
+            deep: true
+        },
+        colorPicker: {
+            handler(n, o) {
+                let vue = this;
+                vue.colorSelected = n;
+            },
+            deep: true
+        },
+        process: {
+            handler(n, o) {
+                let vue = this;
+
+                if(vue.stepper_box == 1) {
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
+                    vue.step_title = ''
+                }
+                else if(vue.stepper_box == 2){
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.step_title = '> Instructivo'
+                }
+                else if(vue.stepper_box == 3){
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
+                }
+                else if(vue.stepper_box == 4){
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn4 = false; //validarr subida de imagenes
+                    vue.disabled_btn_next = vue.stepper_box_btn4;
+                }
+                console.log('process');
+
+                console.log(vue.process)
+            },
+            deep: true
+        },
+        stepper_box: {
+            handler(n, o) {
+                let vue = this;
+
+                if(vue.stepper_box == 1) {
+                    if(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description)) {
+                        vue.stepper_box_btn1 = false;
+                    }
+                    vue.disabled_btn_next = vue.stepper_box_btn1;
+                    vue.step_title = ''
+                }
+                else if(vue.stepper_box == 2){
+                    vue.disabledBtnModal()
+                    vue.disabled_btn_next = vue.stepper_box_btn2;
+                    vue.step_title = '> Instructivo'
+                }
+                else if(vue.stepper_box == 3){
+                    vue.disabled_btn_next = vue.stepper_box_btn3;
+                }
+                else if(vue.stepper_box == 4){
+                    let errors = vue.showValidateActividades()
+                    vue.stepper_box_btn4 = false; //validarr subida de imagenes
+                    vue.disabled_btn_next = vue.stepper_box_btn4;
+                }
+                console.log('stepper');
+
+                console.log(vue.process)
+            },
+            deep: true
+        }
+    },
+    methods: {
+        modalAvatarsRepositoryClose() {
+            let vue = this
+            vue.modalAvatarsRepository.open = false
+        },
+        modalAlertClose() {
+            let vue = this
+            vue.modalAlert.open=false
+        },
+        instructionSelected(value) {
+            let vue = this
+            vue.content_instruction = value
+        },
+        changeLogoSelected($event) {
+            let vue = this
+            console.log($event);
+            if($event)
+            {
+                vue.logo_selected = $event
+            }
+        },
+        changeColorSelected() {
+            let vue = this
+            vue.menuPicker = !vue.menuPicker
+            vue.colorSelected = vue.colorPicker
+        },
+        changeAvatarSelected() {
+            let vue = this
+            vue.modalAvatarsRepository.open = true
+        },
+        rep(){
+            let vue = this
+        },
+        validateRequired(input) {
+            return input != undefined && input != null && input != "";
+        },
+        nextStep(){
+            let vue = this;
+            vue.cancelLabel = "Cancelar";
+
+
+            if(vue.stepper_box == 1){
+                vue.cancelLabel = "Retroceder";
+                vue.stepper_box = 2;
+                vue.step_title = ''
+            }
+            else if(vue.stepper_box == 2){
+                vue.cancelLabel = "Retroceder";
+                vue.stepper_box = 3;
+                vue.step_title = '> Instructivo'
+            }
+            else if(vue.stepper_box == 3){
+                vue.cancelLabel = "Retroceder";
+                vue.stepper_box = 4;
+                vue.step_title = '> Instructivo > Personalización'
+            }
+            else if(vue.stepper_box == 4){
+                vue.cancelLabel = "Retroceder";
+                vue.confirm();
+            }
+        },
+        prevStep(){
+            let vue = this;
+            if(vue.stepper_box == 1){
+                vue.closeModal();
+                // vue.stepper_box = 2;
+            }
+            else if(vue.stepper_box == 2){
+                vue.cancelLabel = "Cancelar";
+                vue.stepper_box = 1;
+            }
+            else if(vue.stepper_box == 3){
+                vue.cancelLabel = "Cancelar";
+                vue.stepper_box = 2;
+            }
+            else if(vue.stepper_box == 4){
+                vue.cancelLabel = "Retroceder";
+                vue.stepper_box = 3;
+            }
+        },
+        disabledBtnModal() {
+            let vue = this;
+            vue.stepper_box_btn2 = false;
+        },
+        setActividadesHasErrorProp() {
+            let vue = this
+            if (vue.checklist.checklist_actividades) {
+                vue.checklist.checklist_actividades.forEach(el => {
+                    el = Object.assign({}, el, {hasErrors: false})
+                })
+            }
+        },
+        closeModal() {
+            let vue = this;
+            vue.expand_cursos = true;
+            vue.actividades_expanded = [];
+            vue.search_text = null;
+            vue.resetValidation()
+            vue.$emit("onCancel");
+        },
+        resetValidation() {
+            let vue = this;
+            console.log('resetValidation')
+            // vue.search_text = null
+            // vue.results_search = []
+            vue.stepper_box = 1
+            vue.tab_preview_images = 'mobile'
+            vue.logo_selected = null
+            vue.fondo_mobile_selected = null
+            vue.fondo_web_selected = null
+            vue.resource = {}
+        },
+        confirm() {
+            let vue = this;
+
+            // const allIsValid = vue.moreValidaciones()
+
+            // if (allIsValid == 0)
+                vue.$emit("onConfirm", vue.process);
+        },
+        showValidateActividades() {
+            let vue = this
+            let errors = 0;
+
+            // if( vue.checklist.checklist_actividades.length > 0 ) {
+            //     vue.checklist.checklist_actividades.forEach((el, index) => {
+            //         el.hasErrors = !el.activity || el.activity === ''
+            //         if(el.hasErrors) errors++;
+            //     })
+            // }
+            return errors;
+        },
+        // moreValidaciones() {
+        //     let vue = this
+        //     let errors = 0
+
+        //     let hasActividadEntrenadorUsuario = false;
+        //     // vue.checklist.checklist_actividades.map(actividad=>{
+        //     //    if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
+        //     // });
+        //     if(!hasActividadEntrenadorUsuario){
+        //         this.modalAlert.open= true;
+        //        errors++
+        //     }
+        //     return errors > 0
+        // },
+        cancel() {
+            let vue = this;
+            vue.$emit("onCancel");
+        },
+        deleteInstruction(instruction, index) {
+            let vue = this;
+            if (String(instruction.id).charAt(0).includes('n')) {
+                vue.actividades_expanded = []
+                vue.process.instructions.splice(index, 1);
+                return
+            }
+            axios
+                .post(`/entrenamiento/checklists/delete_actividad_by_id`, instruction)
+                .then((res) => {
+                    if (res.data.error) {
+                        vue.$notification.warning(`${res.data.msg}`, {
+                            timer: 6,
+                            showLeftIcn: false,
+                            showCloseIcn: true
+                        });
+                    } else {
+                        vue.actividades_expanded = []
+                        vue.process.instructions.splice(index, 1);
+                        vue.$notification.success(`${res.data.msg}`, {
+                            timer: 6,
+                            showLeftIcn: false,
+                            showCloseIcn: true
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.err(err);
+                });
+        },
+        addInstruction() {
+            let vue = this;
+            const newID = `n-${Date.now()}`;
+            const newInstruction = {
+                id: newID,
+                title: "",
+                active: 1,
+                hasErrors: false
+            };
+            vue.process.instructions.push(newInstruction);
+        },
+        search() {
+            clearTimeout(this.timeout);
+            let vue = this;
+            if (vue.search_text == null || vue.search_text === "") return;
+            if (vue.isLoading) return;
+            this.timeout = setTimeout(function () {
+                vue.isLoading = true;
+                const data = {
+                    filtro: vue.search_text,
+                };
+                axios
+                    .post(`/entrenamiento/checklists/buscar_curso`, data)
+                    .then((res) => {
+                        console.log(vue.results_search);
+                        vue.results_search = res.data.data;
+                        // vue.$nextTick(() => {
+                        //     vue.$refs.resultSearch.focus()
+                        //     vue.$refs.resultSearch.isMenuActive = true
+                        //     vue.$refs.resultSearch.isMenuActive = true;
+                        // })
+                        setTimeout(() => {
+                            vue.isLoading = false;
+                        }, 1500);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        vue.isLoading = false;
+                    });
+            }, 1000);
+        },
+        removeCurso(curso, index) {
+            let vue = this;
+            vue.results_search.push(curso)
+            vue.checklist.courses.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
+
+        },
+        seleccionarCurso(curso, index) {
+            let vue = this;
+            vue.checklist.courses.push(curso)
+            vue.results_search.splice(index, 1)
+            if(vue.checklist.courses.length >= 2) {
+                vue.disabled_add_courses = true;
+            } else {
+                vue.disabled_add_courses = false;
+            }
+        },
+        getNewSegment(type_code) {
+            return {
+                id: `new-segment-${Date.now()}`,
+                type_code,
+                criteria_selected: []
+            };
+        },
+        async addSegmentation(type_code) {
+            let vue = this;
+            vue.segments.push(this.getNewSegment(type_code));
+
+            vue.steps = vue.segments.length - 1;
+        },
+        borrarBloque(segment) {
+            let vue = this;
+            // const isNewSegment = segment.id.search("new") !== -1;
+            // if (vue.segments.length === 1 && !isNewSegment) return;
+
+            vue.segments = vue.segments.filter((obj, idx) => {
+                return obj.id != segment.id;
+            });
+        },
+        isCourseSegmentation() {
+            return this.model_type === 'App\\Models\\Course'
+        },
+        async changeTypeChecklist() {
+
+            let vue = this;
+
+            console.log(vue.resource.type_checklist);
+            console.log(vue.type_checklist);
+            vue.type_checklist = vue.resource.type_checklist;
+        },
+    }
+};
+</script>
+<style lang="scss">
+.list-cursos-carreras {
+    width: 500px;
+    white-space: unset;
+}
+
+.ghost {
+    opacity: 0.5;
+    background: #c8ebfb;
+}
+
+.flip-list-move {
+    transition: transform 0.5s;
+}
+
+.no-move {
+    transition: transform 0s;
+}
+
+.txt-white-bold {
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.v-input__icon {
+    padding-bottom: 12px;
+}
+
+.v-icon.v-icon.v-icon--link {
+    color: #1976d2;
+}
+
+.icon_size .v-icon.v-icon {
+    font-size: 31px !important;
+}
+
+.lista-boticas {
+    list-style-type: disc;
+    -webkit-columns: 3;
+    -moz-columns: 3;
+    columns: 3;
+    list-style-position: inside;
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
+{
+    opacity: 0;
+}
+
+.custom-draggable, .custom-draggable span {
+    width: 100%;
+}
+
+.v-expansion-panel-header {
+    padding: 0.7rem !important;
+}
+.bx_steps .v-text-field__slot label.v-label,
+.bx_steps .v-select__slot label.v-label,
+.text_default {
+    color: #434D56;
+    font-weight: 400;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-size: 13px;
+}
+.box_info_checklist_1 {
+    text-align: justify;
+}
+.v-stepper__header.stepper_dots {
+    justify-content: center;
+    height: initial;
+}
+.v-stepper__header.stepper_dots .v-divider {
+    margin: 0;
+    flex: auto;
+    border-color: #5458ea !important;
+    border-width: 2px;
+    width: 30px;
+    min-width: 30px;
+    max-width: 30px;
+}
+.v-stepper__header.stepper_dots .v-stepper__step {
+    padding: 10px 0;
+    margin: 0;
+}
+.v-stepper__header.stepper_dots .v-stepper__step span.v-stepper__step__step {
+    margin: 0;
+}
+.v-stepper__header.stepper_dots .v-stepper__step:hover {
+    background: none;
+}
+.v-stepper.stepper_box {
+    box-shadow: none;
+}
+.txt_desc textarea {
+    min-height: 280px;
+}
+.v-tab span.title_sub {
+    font-size: 16px;
+    color: #B9E0E9;
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    position: relative;
+    text-transform: initial;
+    letter-spacing: 0.1px;
+}
+.v-tab.v-tab--active span.title_sub,
+span.title_sub {
+    font-size: 16px;
+    color: #5458EA;
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+    position: relative;
+    text-transform: initial;
+    letter-spacing: 0.1px;
+}
+.v-tab.v-tab--active span.title_sub:after,
+span.title_sub:after {
+    content: '';
+    border-bottom: 2px solid #5458EA;
+    width: 112px;
+    position: absolute;
+    bottom: -2px;
+}
+.v-tab span.title_sub:after  {
+    content: none;
+}
+button.btn_secondary {
+    background: none !important;
+    border: none;
+    box-shadow: none;
+}
+button.btn_secondary span.v-btn__content {
+    color: #5458EA;
+    font-weight: 700;
+    font-size: 12px;
+    font-family: "Nunito", sans-serif;
+}
+button.btn_secondary span.v-btn__content i{
+    font-size: 14px;
+    line-height: 1;
+}
+.divider_light{
+    border-color: #94DDDB !important;
+}
+.item-draggable.activities {
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+    margin: 10px 0;
+    border-radius: 8px;
+}
+.item-draggable.activities textarea,
+.no-white-space .v-select__selection--comma,
+.item-draggable.activities .toggle_text_default label.v-label {
+    color: #434D56;
+    font-weight: 400;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-size: 12px;
+}
+.no-white-space .v-select__selection--comma {
+    white-space: initial;
+    line-height: 13px;
+    font-size: 13px;
+}
+.item-draggable.activities textarea {
+    font-size: 13px;
+}
+.no-white-space .v-input__append-inner .v-input__icon {
+    padding: 0;
+}
+.item-draggable.activities .default-toggle.default-toggle.v-input--selection-controls {
+    margin-top: initial !important;
+}
+.box_resultados,
+.box_seleccionados {
+    height: 130px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid #D9D9D9;
+    padding: 10px 0;
+}
+.box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
+.box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
+    opacity: 0;
+}
+.bx_message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+span.v-stepper__step__step {
+    color: #5458ea !important;
+    background-color: #5458ea !important;
+    border-color: #5458ea !important;
+    position: relative;
+}
+span.v-stepper__step__step:before {
+    content: '';
+    background: #fff;
+    height: 17px;
+    width: 17px;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+span.v-stepper__step__step:after {
+    content: '';
+    background-color: #5458ea;
+    height: 6px;
+    width: 6px;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.v-stepper__step.v-stepper__step--inactive span.v-stepper__step__step,
+.v-stepper__step.v-stepper__step--inactive span.v-stepper__step__step:after,
+.v-stepper__step.v-stepper__step--inactive .v-divider {
+    color: #E4E4E4 !important;
+    background-color: #E4E4E4 !important;
+    border-color: #E4E4E4 !important;
+}
+.bx_type_checklist .v-input__icon.v-input__icon--append,
+.bx_steps .v-input__icon.v-input__icon--append {
+    margin: 0;
+    padding: 0;
+}
+.bx_steps .v-input__slot {
+    min-height: 40px !important;
+}
+.bx_steps .v-text-field--outlined .v-label {
+    top: 10px;
+}
+.bx_steps .v-btn--icon.v-size--default {
+    height: 22px;
+    width: 22px;
+}
+.bx_steps .v-select__slot,
+.v-dialog.v-dialog--active .bx_steps .v-select--is-multi.v-autocomplete .v-select__slot {
+    padding: 0 !important;
+}
+.bx_steps .v-text-field__details {
+    display: none;
+}
+.bx_step1 .default-toggle {
+    margin-top: 3px !important;
+}
+.bx_step1 .default-toggle .v-input__slot label.v-label {
+    color: #434D56;
+    font-weight: 400;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-size: 13px;
+}
+.v-stepper__step.v-stepper__step--complete span.v-stepper__step__step:before,
+.v-stepper__step.v-stepper__step--complete span.v-stepper__step__step:after {
+    content: initial;
+}
+.bx_steps .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
+    margin-top: 10px !important;
+}
+.v-card__actions.actions_btn_modal button.default-modal-action-button.btn_back.v-btn.v-btn--flat span.v-btn__content {
+    color: #5458ea;
+}
+.v-menu.bx_calendar_top .v-menu__content {
+    bottom: 0px;
+    top: initial !important;
+    right: calc(100% - 10px);
+    left: initial !important;
+    transform-origin: right bottom !important;
+}
+.bx_seg .v-select__slot .v-input__append-inner,
+.bx_steps .bx_seg .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
+    margin-top: 6px !important;
+}
+.border-error .v-input__slot fieldset {
+    border-color: #FF5252 !important;
+}
+
+.modal_edit_process {
+
+    .txt_desc textarea {
+        min-height: auto;
+    }
+
+    .bx_input_inasistencias input {
+        border: 1px solid #D9D9D9;
+        border-radius: 8px;
+        max-width: 100px;
+        height: 40px;
+        text-align: center;
+    }
+    .btn_add_instruction {
+        border: none;
+    }
+    .bx_instructions_list {
+        .bx_overflow {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0 20px;
+        }
+    }
+    .dropzone {
+        min-height: 140px !important;
+        padding: 0 20px !important;
+        .dz-message {
+            margin: 0 !important;
+            padding-top: 26px !important;
+        }
+        .icon_upload {
+            margin-bottom: 13px;
+        }
+    }
+    .vue-dropzone, .vue-dropzone:hover {
+        border: none !important;
+    }
+    .box_preview {
+        border: 1px solid #C4C4C4;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+        span.text_default {
+            font-size: 16px;
+            text-align: center;
+            max-width: 200px;
+        }
+        .tpl_preview_mobile {
+            text-align: center;
+            width: 140px;
+            min-height: 230px;
+            .bx_imgs_pm {
+                position: relative;
+                border-radius: 6px;
+                overflow: hidden;
+                .bx_fondo_pm img {
+                    max-width: 100%;
+                }
+                .bx_logo_pm {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 50px;
+                    img {
+                        max-width: 100%;
+                    }
+                }
+            }
+            span.text_default {
+                font-size: 11px !important;
+            }
+        }
+        .tpl_preview_web {
+            text-align: center;
+            .bx_imgs_pm {
+                position: relative;
+                border-radius: 6px;
+                overflow: hidden;
+                .bx_fondo_pm img {
+                    max-width: 100%;
+                }
+                .bx_logo_pm {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 50px;
+                    img {
+                        max-width: 100%;
+                    }
+                }
+                span.text_default {
+                    background-color: #fff;
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    padding: 2px 10px;
+                    font-size: 11px !important;
+                }
+            }
+        }
+    }
+    .btns_preview_type button.v-btn{
+        border-radius: 15px;
+    }
+    .bx_steps.bx_step1 .v-input--selection-controls .v-input__slot>.v-label,
+    .bx_steps.bx_step1 .v-input--selection-controls .v-radio>.v-label {
+        margin-bottom: 0;
+        font-family: "Nunito", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: #2C2D2F;
+    }
+    // step 4 - colores
+    .box_select_colors {
+        display: flex;
+        .item_color_onb {
+            margin-right: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 5px;
+            border-radius: 10px;
+            &.selected {
+                border-color: #5458EA;
+            }
+            span.text_default {
+                font-family: "Nunito", sans-serif;
+                font-size: 11px;
+                color: #434D56;
+            }
+            .bg_color_item button {
+                .icon_edit {
+                    opacity: 0;
+                    transition: .5s;
+                }
+                &:hover .icon_edit {
+                    opacity: 1;
+                    transition: .5s;
+                }
+            }
+            .bg_color_item button,
+            .bg_color_item .color_d {
+                height: 70px !important;
+                width: 55px !important;
+                min-width: auto !important;
+                border-radius: 8px !important;
+            }
+            .bg_color_item.bg_color_item_default .color_d {
+                background-color: #5458EA;
+            }
+        }
+    }
+    .box_select_icons {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 10px;
+        row-gap: 10px;
+        .item_icono_onb {
+            .bg_icon_item {
+                background-color: #5458EA;
+                border-radius: 50%;
+                width: 65px;
+                height: 65px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                opacity: .6;
+                cursor: pointer;
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+    .bx_preview_colors {
+        display: flex;
+        column-gap: 10px;
+        .bx_preview_map {
+            max-width: 50%;
+            flex: 1;
+            box-shadow: 2px 2px 10px #dfdfdf;
+            padding: 15px 4px;
+            svg {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+        .bg_instructions_profile {
+            position: relative;
+            flex: 1;
+            box-shadow: 2px 2px 10px #dfdfdf;
+            padding: 15px 4px;
+            .bg_bubble {
+                position: absolute;
+                background-color: #5458EA;
+                color: #5458EA;
+                height: 180px;
+                width: 90%;
+                border-radius: 10px;
+                max-width: 120px;
+                left: 50%;
+                transform: translateX(-50%);
+                top: 20px;
+                &:after {
+                    content: '';
+                    width: 0px;
+                    height: 0px;
+                    border-style: solid;
+                    border-width: 0 8px 15px 8px;
+                    border-color: transparent transparent currentColor transparent;
+                    transform: rotate(180deg);
+                    position: absolute;
+                    bottom: -15px;
+                    left: 14px;
+                }
+            }
+            .bx_change_img_profile {
+                position: absolute;
+                top: 170px;
+                right: 18px;
+                text-align: center;
+                .bx_img_profile {
+                    max-width: 80px;
+                    text-align: center;
+                    position: relative;
+                    border-radius: 50%;
+                    height: 80px;
+                    width: 80px;
+                    overflow: hidden;
+                    img {
+                        max-width: 100%;
+                    }
+                    .icon_edit {
+                        position: absolute;
+                        background-color: #434D56CC;
+                        left: 0;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        border-radius: 50%;
+                        align-items: center;
+                        justify-content: center;
+                        display: none;
+                        cursor: pointer;
+                    }
+                    &:hover{
+                        > img {
+                            filter: blur(4px);
+                        }
+                        .icon_edit {
+                            display: flex;
+                        }
+                    }
+                }
+                span.text_default {
+                    font-size: 11px;
+                }
+            }
+        }
+    }
+    .bx_preview_change_logo .dropzone .dz-preview.dz-image-preview .dz-image div {
+        background-size: initial !important;
+    }
+    .bx_prev_instructions {
+        border: 1px solid #C4C4C4;
+        padding: 20px 20px 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+        .bx_dialog {
+            background: #57BFE3;
+            min-height: 200px;
+            border-radius: 16px;
+            width: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            &:before {
+                content: '';
+                width: 0px;
+                height: 0px;
+                border-style: solid;
+                border-width: 15px 10px 0px 10px;
+                border-color: #57BFE3 transparent;
+                display: inline-block;
+                bottom: -15px;
+                position: absolute;
+                left: 25px;
+            }
+            .content_dialog {
+                color: #fff;
+                max-width: 165px;
+                font-weight: 400;
+                font-family: "Nunito", sans-serif;
+                line-height: 15px;
+                font-size: 12px;
+            }
+        }
+    }
+    .item_instruction {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        .ii3,
+        .ii1 {
+            width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .ii2 {
+            flex: 1;
+        }
+    }
+}
+</style>
