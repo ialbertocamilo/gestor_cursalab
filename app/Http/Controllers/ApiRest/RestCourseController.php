@@ -321,7 +321,7 @@ class RestCourseController extends Controller
         $url =
             env('AWS_ENDPOINT') . '/' .
             env('AWS_BUCKET') . '/' .
-            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') . '/' .
+            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
             $filepath;
         return Response::json([
             'filepath' => $filepath,
