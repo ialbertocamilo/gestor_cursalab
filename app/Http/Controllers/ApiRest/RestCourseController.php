@@ -314,8 +314,8 @@ class RestCourseController extends Controller
 
         // File path should also store in user's summary course
 
-        $summary->registro_capacitacion_path = $filepath;
-        $summary->save();
+        //$summary->registro_capacitacion_path = $filepath;
+        //$summary->save();
 
 
         return Response::json([
