@@ -1858,4 +1858,18 @@ class Course extends BaseModel
 
         return $filePath;
     }
+
+    /**
+     * Generate URL for 'registro de capacitación' file
+     * @param $filepath
+     * @return string
+     */
+    public static function generateRegistroCapacitacionURL($filepath) {
+
+        return
+            env('AWS_ENDPOINT') . '/' .
+            env('AWS_BUCKET') . '/' .
+            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
+            $filepath;
+    }
 }

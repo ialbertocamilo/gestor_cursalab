@@ -314,18 +314,12 @@ class RestCourseController extends Controller
 
         // File path should also store in user's summary course
 
-        //$summary->registro_capacitacion_path = $filepath;
-        //$summary->save();
+        $summary->registro_capacitacion_path = $filepath;
+        $summary->save();
 
-
-        $url =
-            env('AWS_ENDPOINT') . '/' .
-            env('AWS_BUCKET') . '/' .
-            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
-            $filepath;
         return Response::json([
             'filepath' => $filepath,
-            'url' => $url
+            'url' => Course::generateRegistroCapacitacionURL($filepath)
         ], 201);
     }
 
