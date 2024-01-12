@@ -1236,7 +1236,7 @@ class Course extends BaseModel
         print_r($fun_2);
     }
 
-    public function usersSegmented($course_segments, $type = 'get_records',$filters=[])
+    public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
     {
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
@@ -1298,6 +1298,9 @@ class Course extends BaseModel
         }
 
         $users_have_course = User::where('active', 1)->whereIn('id', $users_id_course)->select('id');
+        if($addSelect){
+            $users_have_course->addSelect($addSelect);
+        }
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
     }
 

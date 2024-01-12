@@ -44,13 +44,15 @@ Route::redirect('/', 'login', 301);
 Route::view('welcome_email','emails.welcome_email');
 Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
-Route::get('email_reset',function(){
+Route::get('email_reminder',function(){
     $mail_data=[
-        'user'=>'Aldo López',
-        'url_to_reset'=> 'aslkdjasldk',
-        'minutes' => 60
+        'courses'=>[
+            ['id'=> 265 ,'name' => 'Seguridad y Salud en el Trabajo'],
+            ['id'=> 1271 ,'name' => 'Seguridad de la información'],
+        ],
+        'web_url' => config('app.web_url')
     ];
-    return view('emails.reset_password_gestor',['data'=>$mail_data]);
+    return view('emails.reminder_inactivate_course',['data'=>$mail_data]);
 });
 
 // login routes
@@ -213,46 +215,6 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));
 
-    Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDFDownload']);
-    Route::get('/generate-pdf-blade', function(){
-        $national_occupations_catalog = App\Models\NationalOccupationCatalog::select('code','name')->get()->toArray();
-        $catalog_denominations = App\Models\Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
-        $data = [
-            'national_occupations_catalog'=>$national_occupations_catalog,
-            'catalog_denominations'=>$catalog_denominations,
-            "title"=>'74130119-sostenibilidad',
-            "user" => [
-              "name" => \Str::title("Marisol CABRERA CABRERA"),
-              "curp" => '145L0789asd',
-              "document" => "74130119",
-              "occupation" => '01.2',
-              "position" => "Asistente de Talento y Desarrollo"
-            ],
-            "subworkspace" => [
-              "id" => 4,
-              "name_or_social_reason" => "Intercorp IRC",
-              "shcp" => "IMF1-70223A702",
-              "subworkspace_logo" => get_media_url("images/wrkspc-1-logo-corporativo-1-02-20220829130652-iSA1RxfF31iv2fD.png",'s3')
-            ],
-            "course" =>  [
-              "id" => 112,
-              "name" => "Sostenibilidad",
-              "duration" => "0.35",
-              "instructor" => "Aldo Ramirez",
-              "instructor_signature" => get_media_url("images/wrkspc-1-1-20231205170625-dapwpNAKnyK4lPL.png","s3"),
-              "legal_representative" => "Representante 3",
-              "legal_representative_signature" => get_media_url("images/wrkspc-1-1-20231205173447-5s3MNfRDbDb8HFB.png","s3"),
-              "catalog_denomination_dc3" => "8000",
-              "init_date_course_year" => 2023,
-                "init_date_course_month" => 12,
-                "init_date_course_day" => 5,
-                "final_date_course_year" => 2023,
-                "final_date_course_month" => 12,
-                "final_date_course_day" => 5
-            ]
-        ];
-        return view('pdf.dc3',$data);
-    });
 });
 
 
