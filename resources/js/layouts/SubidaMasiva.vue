@@ -8,6 +8,7 @@
                 v-html="msg_alert"
                 >
             </v-alert>
+
             <v-row>
                 <v-col cols="12" md="5" sm="5">
                     <v-select
@@ -32,7 +33,7 @@
             <mUsuarios :key="1" v-show="s_masivo==1" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_usu" @update_q_error="onUpdate_q_error" />
             <mDesactivar :key="2" v-show="s_masivo==2" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_desct_usu" @update_q_error="onUpdate_q_error" />
             <mActivar :key="3" v-show="s_masivo==3" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_activ_usu" @update_q_error="onUpdate_q_error"  />
-            <mCarreras :key="4" v-show="s_masivo==4" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_cambio" @update_q_error="onUpdate_q_error" /> 
+            <mCarreras :key="4" v-show="s_masivo==4" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_cambio" @update_q_error="onUpdate_q_error" />
             <mCursos :key="5" v-show="s_masivo==5" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_cur_tem_eva" @update_q_error="onUpdate_q_error"  />
         </v-card>
     </section>

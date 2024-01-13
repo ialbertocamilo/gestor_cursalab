@@ -205,7 +205,8 @@ return [
                                     'last_media_access', 'last_media_duration', 'media_progress')
                                     ->with('status:id,name,code')
                                     ->where('user_id', $user_id);
-                            }
+                            },
+                            'tags.taxonomy:id,name,type,description'
                         ]);
                 },
                 'requirements' => [
