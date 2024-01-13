@@ -20,6 +20,7 @@ use App\Models\Ambiente;
 use App\Models\School;
 use App\Models\Course;
 use App\Models\Topic;
+use App\Models\Requirement;
 use App\Models\WorkspaceFunctionality;
 use App\Models\AssignedRole;
 use Illuminate\Contracts\Foundation\Application;
@@ -590,6 +591,36 @@ class WorkspaceController extends Controller
 
                         $topic->medias()->createMany($_topic->medias->toArray());
                         $topic->questions()->createMany($_topic->questions->toArray());
+
+                        $_requirement = $_topic->requirements->first();
+
+                        if ($_requirement) {
+
+                            $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                            if ($requirement) {
+
+                                Requirement::updateOrCreate(
+                                    ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                    ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                                );
+                            }
+                        }
+                    }
+                }
+
+                $_c_requirement = $_course->requirements->first();
+
+                if ($_c_requirement) {
+
+                    $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+                    if ($c_requirement) {
+
+                        Requirement::updateOrCreate(
+                            ['model_type' => Course::class, 'model_id' => $course->id],
+                            ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                        );
                     }
                 }
             }
