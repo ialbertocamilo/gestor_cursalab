@@ -139,7 +139,7 @@
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
-                @profile="openFormModal(modalProfileOptions, $event, 'profile', `Perfil de ${$event.nombre} - ${$event.document}`)"
+                @profile="openFormModal(modalProfileOptions, $event, 'profile', `Progreso de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
                 @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Acceder como ${$event.nombre} - ${$event.document}` )"
@@ -313,7 +313,12 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     },
-                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_cursalab_super_user",},
+                    {   text: "Progreso", 
+                        icon: 'mdi mdi-account-box',
+                        type: 'action',
+                        method_name: 'profile',
+                        // show_condition: "is_cursalab_super_user",
+                    },
 
                 ]
             },
