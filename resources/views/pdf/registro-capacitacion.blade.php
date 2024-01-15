@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>REGISTRO DE CAPACITACIÓN - {{
-        $course['registro_capacitacion']->courseCode
+        $course['registro_capacitacion']->certificateCode
     }}</title>
 </head>
 <body>
