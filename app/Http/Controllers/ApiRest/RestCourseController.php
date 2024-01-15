@@ -281,7 +281,7 @@ class RestCourseController extends Controller
     }
 
     public function generateRegistroCapacitacion(Request $request) {
-
+dd($request->all());
         $user = auth()->user();
         $subworkspace = Workspace::find($user->subworkspace_id);
         $course = Course::find($request->course_id);
