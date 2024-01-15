@@ -156,7 +156,7 @@
                 Capacitador y encargado del registro
             </div>
             <div class="cell-value">
-                {{ $company['registro_capacitacion']->trainerAndRegistrar }}
+                {{ $company->trainerAndRegistrar ?? '' }}
             </div>
         </td>
     </tr>
