@@ -214,7 +214,7 @@
 <p class="margin-top">
     De acuerdo con el presente documento, declaro bajo conformidad haber realizado mi capacitación en el sistema establecido por la empresa - Plataforma digital de
     capacitación, en la fecha registrada habiendo ingresado con mi usuario y contraseña a la página
-    {{ $company['registro_capacitacion']->appUrl ?? '' }}
+    {{ $company->appUrl ?? '' }}
 </p>
 
 <p>
