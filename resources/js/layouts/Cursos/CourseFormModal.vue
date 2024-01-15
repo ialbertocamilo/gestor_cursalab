@@ -447,7 +447,7 @@
                                     <v-row>
                                         <v-col cols="12">
                                             <DefaultToggle
-                                                v-model="resource.active"
+                                                v-model="resource.registro_capacitacion.active"
                                                 @onChange="modalStatusEdit"
                                                 :activeLabel="'Creación de registro de capacitación'"
                                                 :inactiveLabel="'Creación de registro de capacitación'"
@@ -469,6 +469,7 @@
                                         <v-col cols="6">
                                             <DefaultInput
                                                 clearable
+                                                v-model="resource.registro_capacitacion.trainerAndRegistrar"
                                                 label="Instructor"
                                                 dense
                                             />
@@ -482,7 +483,8 @@
                                         <v-col cols="12">
                                             <DefaultInput
                                                 clearable
-                                                label="Campo de código de certificado personalizado"
+                                                v-model="resource.registro_capacitacion.certificateCode"
+                                                label="Código de certificado personalizado"
                                                 dense
                                             />
                                         </v-col>
@@ -491,8 +493,8 @@
                                         <v-col cols="12">
                                             <DefaultRichText
                                                 clearable
-                                                v-model="resource.content"
-                                                label="Descripción"
+                                                v-model="resource.registro_capacitacion.syllabus"
+                                                label="Temario"
                                                 :rules="rules.content"
                                                 class="mt-2"
                                                 :ignoreHTMLinLengthCalculation="true"
@@ -512,7 +514,7 @@
                                                 dense
                                                 label="Observaciones del curso"
                                                 placeholder="Ingrese una descripción del curso"
-                                                v-model="resource.description"
+                                                v-model="resource.registro_capacitacion.comment"
                                             />
                                         </v-col>
                                     </v-row>
@@ -583,7 +585,7 @@ const fields = [
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
     'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4',
-    'dc3_configuration'
+    'dc3_configuration', 'registro_capacitacion'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -666,10 +668,12 @@ export default {
                 publish_time_2: null,
                 dc3_configuration:{},
                 can_create_certificate_dc3_dc4:false,
+                registro_capacitacion: {}
             },
             resource: {
                 qualification_type: {position: 0},
-                dc3_configuration :{}
+                dc3_configuration :{},
+                registro_capacitacion: {}
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -924,6 +928,9 @@ export default {
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.set(
                 'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
+            );
+            formData.set(
+                'registro_capacitacion', JSON.stringify(vue.resource.registro_capacitacion)
             );
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)

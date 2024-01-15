@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REGISTRO DE CAPACITACIÓN - {{ $course['certificationCourseCode'] }}</title>
+    <title>REGISTRO DE CAPACITACIÓN - {{
+        $course['registro_capacitacion']->courseCode
+    }}</title>
 </head>
 <body>
 
@@ -77,7 +79,7 @@
 </style>
 
 <h4 class="main-title">
-    REGISTRO DE CAPACITACIÓN - {{ $course['certificationCourseCode'] }}
+    REGISTRO DE CAPACITACIÓN - {{ $course['registro_capacitacion']->certificateCode }}
 </h4>
 
 <table class="table-form">
@@ -154,7 +156,7 @@
                 Capacitador y encargado del registro
             </div>
             <div class="cell-value">
-                {{ $company->trainerAndRegistrar ?? '' }}
+                {{ $company['registro_capacitacion']->trainerAndRegistrar }}
             </div>
         </td>
     </tr>
@@ -212,7 +214,7 @@
 <p class="margin-top">
     De acuerdo con el presente documento, declaro bajo conformidad haber realizado mi capacitación en el sistema establecido por la empresa - Plataforma digital de
     capacitación, en la fecha registrada habiendo ingresado con mi usuario y contraseña a la página
-    {{ $company->appWebsite ?? '' }}
+    {{ $company['registro_capacitacion']->appUrl ?? '' }}
 </p>
 
 <p>
@@ -271,7 +273,7 @@
 </p>
 
 <div class="topics">
-{!!  $course['certificationSyllabus'] !!}
+{!!  $course['registro_capacitacion']->syllabus !!}
 </div>
 
 <p>

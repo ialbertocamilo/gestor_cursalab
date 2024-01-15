@@ -282,7 +282,6 @@ class RestCourseController extends Controller
 
     public function generateRegistroCapacitacion(Request $request) {
 
-
         $user = auth()->user();
         $subworkspace = Workspace::find($user->subworkspace_id);
         $course = Course::find($request->course_id);
@@ -294,7 +293,6 @@ class RestCourseController extends Controller
         // Encode signature with Base64 to render the template with
 
         $signatureData = $request->get('signature');
-
         $data = [
             'signatureData' => $signatureData,
             'user' => $user,

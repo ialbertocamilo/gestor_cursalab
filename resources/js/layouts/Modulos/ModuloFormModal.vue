@@ -226,11 +226,19 @@
 
                                     <v-row v-if="resource.registro_capacitacion.company"
                                            justify="left">
-                                        <v-col cols="4">
+                                        <v-col cols="6">
                                             <DefaultInput
                                                 label="Número de trabajadores"
                                                 v-model="resource.registro_capacitacion.company.workersCount"
                                                 :rules="rules.workersCount"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="URL de la app"
+                                                v-model="resource.registro_capacitacion.company.appUrl"
+                                                :rules="rules.appUrl"
                                                 dense
                                             />
                                         </v-col>

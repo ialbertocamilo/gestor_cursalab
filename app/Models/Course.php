@@ -32,10 +32,10 @@ class Course extends BaseModel
     // Mutators and accesors
     // ========================================
 
-    public function setRegistroCapacitacionAttribute($value)
-    {
-        $this->attributes['registro_capacitacion'] = json_encode($value);
-    }
+//    public function setRegistroCapacitacionAttribute($value)
+//    {
+//        $this->attributes['registro_capacitacion'] = json_encode($value);
+//    }
 
     public function getRegistroCapacitacionAttribute($value)
     {
