@@ -3,91 +3,61 @@
         <!-- Resumen del reporte -->
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Genera el certificado DC3 y DC4 relacionado a tus colaboradores sobre los cursos completados.
+                Descarga los registros de capacitación generados sobre los cursos completados.
             </template>
         </ResumenExpand>
         <!-- Formulario del reporte -->
         <form @submit.prevent="generateReport" class="row">
-            <div class="col-sm-6 mb-3">
+            <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
-                    v-model="filters.type_report"
-                    :items="types_report"
-                    label="Tipo de reporte"
-                    item-text="name"
-                    item-value="code"
                     dense
-                />
-            </div>
-            <!-- <div class="col-sm-6 mb-3 d-flex align-items-center" v-if="filters.type_report == 'dc3_report'">
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Por Curso"
-                    color="primary"
-                    v-model="type_dc3_report"
-                    value="by_course"
-                    hide-details="false"
-                />
-                <v-checkbox
-                    class="my-0 mr-2"
-                    label="Por colaborador"
-                    color="primary"
-                    v-model="type_dc3_report"
-                    value="by_user"
-                    hide-details="false"
-                />
-            </div> -->
-            <!-- Escuela -->
-            <div class="col-sm-6 mb-3" v-if="filters.type_report == 'dc3_report' && type_dc3_report == 'by_course'">
-
-                <DefaultAutocomplete
-                    :disabled="!schools[0]"
-                    v-model="filters.school"
-                    :items="schools"
-                    label="Escuela"
+                    v-model="selectedModules"
+                    :items="modules"
+                    label="Módulo"
                     item-text="name"
                     item-value="id"
-                    dense
                     multiple
-                    @onChange="schoolsChange"
-                    placeholder="Seleccione las escuelas"
-                    :maxValuesSelected="10"
                     :showSelectAll="false"
+                    placeholder="Seleccione los módulos"
+                    @onChange="moduloChange"
+                    :maxValuesSelected="maxValuesSelected.modules"
+                />
+            </div>
+            <!-- Escuela -->
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <DefaultAutocomplete
+                    dense
+                    v-model="selectedSchools"
+                    :items="filteredSchools"
+                    :disabled="!filteredSchools[0]"
+                    label="Escuelas"
+                    item-text="name"
+                    item-value="id"
+                    multiple
+                    placeholder="Seleccione las escuelas"
+                    @onChange="schoolChange"
+                    :maxValuesSelected="maxValuesSelected.schools"
+                    :showSelectAll="maxValuesSelected.show_select_all"
                 />
             </div>
             <!-- Curso -->
-            <div class="col-sm-6 mb-3" v-if="filters.type_report == 'dc3_report' && type_dc3_report == 'by_course'">
-
+            <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
-                    :disabled="!courses[0]"
-                    v-model="filters.course"
+                    dense
+                    v-model="selectedCourses"
                     :items="courses"
+                    :disabled="!courses[0]"
                     label="Curso"
                     item-text="name"
                     item-value="id"
-                    dense
-                    placeholder="Seleccione los cursos"
-                    :showSelectAll="false"
 
+                    :showSelectAll="true"
+                    placeholder="Seleccione los cursos"
                 />
             </div>
-            <!-- Por usuario -->
-            <div class="col-sm-12 mb-3" v-if="filters.type_report == 'dc3_report' && type_dc3_report == 'by_user'">
-                <SearchByDocument
-                    ref="SearchByDocument"
-                    :segment="[]"
-                    :current-clean="segment_by_document_clean"
-                    @addUser="addUser"
-                    @deleteUser="deleteUser"
-                    @addUserAll="addUserAll"
-                    @deleteUserAll="deleteUserAll"
-                />
-            </div>
-            <!-- <div class="col-12">
-                <FiltersNotification></FiltersNotification>
-            </div> -->
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
-                        :disabled="filters.school.length === 0"
+                        :disabled="selectedCourses.length === 0"
                         class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Generar reporte</span>
@@ -117,57 +87,22 @@ export default {
     },
     data() {
         return {
-            reportType: 'dc3-report',
+            reportType: 'registro_capacitacion',
+            filteredSchools: [],
             schools: [],
             courses: [],
-            //
-            filters:{
-                school: [],
-                course: [],
-                type_report:null
-            },
-            types_report:[
-                {code:'dc3_report',name:'Reporte DC3'},
-                // {code:'dc4_report',name:'Reporte DC4'},
-            ],
-            type_dc3_report:'by_course',
-            search: null,
-            list_segments_document:{},
-            segment_by_document_clean: false,
+            selectedModules: [],
+            selectedSchools: [],
+            selectedCourses: [],
+            maxValuesSelected:{
+                modules:4,
+                schools:10,
+                show_select_all:false
+            }
         };
     },
     watch: {
-        search(filter_text) {
-            let vue = this;
 
-            if (filter_text === null) return vue.filter_result = [];
-
-            if (filter_text.length <= 2) return vue.filter_result = [];
-
-            const { docState, docData } = vue.checkIfExistUser(filter_text);
-            if (docState) return vue.filter_result = [];
-
-            vue.autocomplete_loading = true;
-
-            clearTimeout(this.debounce);
-
-            this.debounce = setTimeout(() => {
-                let data = { filter_text: filter_text,
-                             omit_documents: docData };
-                const url = `/segments/search-users`;
-
-                vue.$http.post(url, data)
-                    .then(({data}) => {
-                        const users = (data.data.users) ? data.data.users :  data.data;
-                        vue.filter_result = users;
-                        vue.autocomplete_loading = false;
-                    })
-                    .catch(err => {
-                        vue.autocomplete_loading = false;
-                    })
-
-            }, 1600);
-    }
     },
     mounted() {
         this.fetchFiltersData()
@@ -180,9 +115,7 @@ export default {
          */
         async fetchFiltersData () {
 
-            // Fetch schools
-
-            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0&hasDc3=1`
+            let urlSchools = `${this.$props.reportsBaseUrl}/filtros/schools/${this.$props.workspaceId}/${this.adminId}?grouped=0`
             let responseSchools = await axios({
                 url: urlSchools,
                 method: 'get'
@@ -191,17 +124,55 @@ export default {
             this.schools = responseSchools.data
         }
         ,
+        async moduloChange() {
+
+            let vue = this;
+
+            vue.selectedSchools = [];
+            vue.selectedCourses = [];
+
+            let alreadyAdded = []
+            vue.filteredSchools = vue.schools.filter(s => {
+
+                if (vue.selectedModules.includes(s.subworkspace_id) &&
+                    !alreadyAdded.includes(s.id)) {
+                    alreadyAdded.push(s.id)
+                    return true
+                } else {
+                    return false
+                }
+            })
+        }
+        ,
+        /**
+         * Fetch courses
+         * @returns {Promise<boolean>}
+         */
+        async schoolChange() {
+            this.selectedCourses = [];
+            this.courses = [];
+            if (this.selectedSchools.length === 0) return false;
+
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.selectedSchools.join()}`
+            let res = await axios({
+                url,
+                method: 'get'
+            });
+            this.courses = res.data;
+        }
+        ,
         generateReport() {
             const vue = this
-            console.log(vue.reportType);
-            vue.$emit('generateReport', {callback: vue.exportSegmentacion, type: vue.reportType})
-        },
-        async exportSegmentacion(reportName) {
+            vue.$emit('generateReport', {callback: vue.exportReport, type: vue.reportType})
+        }
+        ,
+        async exportReport(reportName) {
 
             this.$emit('reportStarted', {})
             const filtersDescriptions = {
-                "Escuelas": this.generateNamesArray(this.schools, this.filters.school),
-                "Cursos": this.generateNamesArray(this.courses, [this.filters.course]),
+                'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
+                Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
+                Cursos: this.generateNamesArray(this.courses, this.selectedCourses),
             }
 
             // Perform request to generate report
@@ -216,93 +187,21 @@ export default {
                         adminId: this.adminId,
                         reportName,
                         filtersDescriptions,
-                        modulos: this.modulo ? [this.modulo] : [],
-                        escuelas: this.filters.school,
-                        cursos: this.filters.course,
+                        modulesIds: this.selectedModules ? [this.selectedModules] : [],
+                        schoolsIds: this.selectedSchools,
+                        coursesIds: this.selectedCourses,
                         ext:'zip'
                     }
                 })
                 const vue = this
                 setTimeout(() => {
-                    vue.queryStatus("reportes", "descargar_reporte_segmentacion");
+                    vue.queryStatus("reportes", "descargar_reporte_registro_capacitacion");
                 }, 500);
 
             } catch (ex) {
                 console.log(ex.message)
             }
         }
-        ,
-        /**
-         * Fetch courses
-         * @returns {Promise<boolean>}
-         */
-         schoolsChange() {
-            const vue = this;
-            //clean data
-            vue.filters.course = [];
-            vue.courses = [];
-
-            //check schoolId
-            if(!vue.filters.school.length) return;
-
-            const reqPayload = {
-                schoolIds: vue.filters.school,
-                active:1,
-                inactive:0,
-                can_create_certificate_dc3_dc4:true
-            };
-
-            axios.post(`${vue.reportsBaseUrl}/filtros/school/courses/states`, reqPayload).then((res) => {
-
-                const { data } = res;
-                vue.courses = data;
-
-            }, (err) => console.log(err));
-        },
-        addUserAll(user) {
-            let vue = this;
-            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
-                vue.list_segments_document = {'segmentation_by_document': []};
-            }
-            const already_added = vue.list_segments_document.segmentation_by_document.filter(el => el.document == user.document).length > 0;
-
-            if (!already_added) {
-                vue.list_segments_document.segmentation_by_document.push(user)
-            }
-        },
-        deleteUserAll() {
-            let vue = this;
-            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
-                vue.list_segments_document = {'segmentation_by_document': []};
-            }
-            vue.list_segments_document.segmentation_by_document = [];
-        },
-        addUser(user) {
-            let vue = this;
-            if(vue.list_segments_document === undefined || vue.list_segments_document === null) {
-                vue.list_segments_document = {'segmentation_by_document': []};
-            }
-            const already_added = vue.list_segments_document.segmentation_by_document.filter(el => el.document == user.document).length > 0;
-
-            if (!already_added) {
-
-                vue.list_segments_document.segmentation_by_document.push(user)
-
-                vue.$refs["SearchByDocument"].addOrRemoveFromFilterResult(user, 'remove');
-            }
-        },
-        deleteUser(user) {
-            let vue = this;
-
-            const index = vue.list_segments_document.segmentation_by_document.findIndex(el => el.document == user.document);
-
-            if (index !== -1) {
-
-                vue.list_segments_document.segmentation_by_document.splice(index, 1);
-
-                // vue.$refs["SearchByDocument"].addOrRemoveFromFilterResult(user);
-            }
-        },
     }
 }
 </script>

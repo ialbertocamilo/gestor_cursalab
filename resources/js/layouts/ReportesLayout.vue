@@ -110,7 +110,7 @@
                        DC3 - DC4
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' >
+                <v-tab class="justify-content-start py-7" key='registro-capacitacion' >
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Registro de capacitación
@@ -357,7 +357,7 @@
                 <v-tab-item>
                     <v-card flat>
                         <v-card-text>
-                            <Dc3Dc4
+                            <RegistroCapacitacion
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
@@ -665,9 +665,12 @@ import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
 import Votaciones from "../components/Reportes/Votaciones.vue";
 import Dc3Dc4 from '../components/Reportes/Dc3Dc4'
+import RegistroCapacitacion
+    from "../components/Reportes/RegistroCapacitacion.vue";
 
 export default {
     components: {
+        RegistroCapacitacion,
         Votaciones,
         UsersHistory,
         EmptyCriteria,

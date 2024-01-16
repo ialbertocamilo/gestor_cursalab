@@ -1872,4 +1872,15 @@ class Course extends BaseModel
             env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
             $filepath;
     }
+
+    /**
+     * Check whether current course has registro capacitacion enabled or not
+     * @return false
+     */
+    public function registroCapacitacionIsActive() {
+
+        return  $this->registro_capacitacion
+            ? $this->registro_capacitacion->active
+            : false;
+    }
 }

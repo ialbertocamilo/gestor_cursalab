@@ -242,7 +242,10 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $qs = $request->q ?? NULL;
 
-        $query = SummaryCourse::with('course:id,name,user_confirms_certificate')
+        // Certificates
+        // ----------------------------------------
+
+        $certificatesQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
             ->whereHas('course', function($q) use ($qs) {
                 $q->where('show_certification_to_user', 1);
 
@@ -254,19 +257,52 @@ class RestCourseController extends Controller
             ->whereNotNull('certification_issued_at');
 
         if ($request->type == 'accepted')
-            $query->whereNotNull('certification_accepted_at');
+            $certificatesQuery->whereNotNull('certification_accepted_at');
 
         if ($request->type == 'pending')
-            $query->whereNull('certification_accepted_at');
+            $certificatesQuery->whereNull('certification_accepted_at');
 
-        $certificates = $query->get();
+        $certificates = $certificatesQuery->get();
+
+        // Registros
+        // ----------------------------------------
+
+        $registrosQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
+            ->whereHas('course', function($q) use ($qs) {
+                $q->whereRaw('json_extract(registro_capacitacion, "$.active")', 1);
+
+                if ($qs) {
+                    $q->where('name', 'like', "%{$qs}%");
+                }
+            })
+            ->where('user_id', $user->id);
+
+        if ($request->type == 'accepted')
+            $registrosQuery->whereNotNull('registro_capacitacion');
+
+        if ($request->type == 'pending')
+            $registrosQuery->whereNull('registro_capacitacion');
+
+        $registros = $registrosQuery->get();
+
+
+        $certificates = $certificates->merge($registros);
 
         foreach ($certificates as $certificate) {
 
             // if ($qs AND !stringContains($certificate->course->name, $qs)) continue;
 
+            $registroUrl = $certificate->registro_capacitacion_path
+             ? Course::generateRegistroCapacitacionURL($certificate->registro_capacitacion_path)
+             : null;
+
+            $course = Course::find($certificate->course_id);
+
             $data[] = [
                 'course_id' => $certificate->course_id,
+                'registro_capacitacion_is_active' => $course->registroCapacitacionIsActive(),
+                'registro_capacitacion_url' => $registroUrl,
+                'registro_capacitacion_path' => $certificate->registro_capacitacion_path,
                 'name' => $certificate->course->name,
                 'accepted' => $certificate->certification_accepted_at ? true : false,
                 'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),

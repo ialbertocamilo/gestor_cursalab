@@ -835,17 +835,20 @@ class Topic extends BaseModel
 
             // Check whether 'registro capacitacion' is enabled for course
 
-            $registroCapacitacionIsActive = $course->registro_capacitacion
-                ? $course->registro_capacitacion->active
-                : false;
+            $registroCapacitacionIsActive = $course->registroCapacitacionIsActive();
 
             // Get 'registro capacitacion' file
 
             $registroCapacitacionPath = null;
+            $registroCapacitacionUrl = null;
             $summary = $summaryCourses->where('course_id', $course->id)->first();
             if ($summary) {
                 $registroCapacitacionPath = $summary->registro_capacitacion_path;
+                $registroCapacitacionUrl = $registroCapacitacionPath
+                    ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
+                    : null;
             }
+
 
             $schools_courses->push([
                 'id' => $course->id,
@@ -863,6 +866,7 @@ class Topic extends BaseModel
                 'encuesta_habilitada' => $course_status['enabled_poll'],
                 'registro_capacitacion_is_active' => $registroCapacitacionIsActive,
                 'registro_capacitacion_path' => $registroCapacitacionPath,
+                'registro_capacitacion_url' => $registroCapacitacionUrl,
                 'encuesta_resuelta' => $course_status['solved_poll'],
                 'encuesta_id' => $course_status['poll_id'],
                 'temas_asignados' => $course_status['exists_summary_course'] ?
