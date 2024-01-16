@@ -571,41 +571,52 @@ class WorkspaceController extends Controller
 
                     $_course = $_courses->where('id', $course_id)->first();
 
-                    $course_data = $_course->toArray();
-                    $course_data['external_id'] = $_course->id;
-                    $course_data['name'] = $prefix . $_course->name;
-                    $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                    $course = $school->courses()->where('name', $_course)->first();
 
-                    $course = $school->courses()->create($course_data);
+                    if (!$course) {
 
-                    $workspace->courses()->attach($course);
+                        $course_data = $_course->toArray();
+                        $course_data['external_id'] = $_course->id;
+                        $course_data['name'] = $prefix . $_course->name;
+                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+
+                        $course = $school->courses()->create($course_data);
+
+                        $workspace->courses()->attach($course);
+                    }
 
                     foreach ($topic_ids['topics'] as $topic_id) {
 
                         $_topic = $_topics->where('id', $topic_id)->first();
 
-                        $topic_data = $_topic->toArray();
-                        $topic_data['external_id'] = $_topic->id;
+                        $topic = $course->topics()->where('name', $_topic->name)->first();
 
-                        $topic = $course->topics()->create($topic_data);
+                        if(!$topic) {
 
-                        $topic->medias()->createMany($_topic->medias->toArray());
-                        $topic->questions()->createMany($_topic->questions->toArray());
+                            $topic_data = $_topic->toArray();
+                            $topic_data['external_id'] = $_topic->id;
 
-                        $_requirement = $_topic->requirements->first();
+                            $topic = $course->topics()->create($topic_data);
 
-                        if ($_requirement) {
+                            $topic->medias()->createMany($_topic->medias->toArray());
+                            $topic->questions()->createMany($_topic->questions->toArray());
 
-                            $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+                            $_requirement = $_topic->requirements->first();
 
-                            if ($requirement) {
+                            if ($_requirement) {
 
-                                Requirement::updateOrCreate(
-                                    ['model_type' => Topic::class, 'model_id' => $topic->id],
-                                    ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
-                                );
+                                $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                                if ($requirement) {
+
+                                    Requirement::updateOrCreate(
+                                        ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                        ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                                    );
+                                }
                             }
                         }
+
                     }
                 }
 
