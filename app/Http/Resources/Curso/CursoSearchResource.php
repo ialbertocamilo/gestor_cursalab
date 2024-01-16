@@ -54,6 +54,7 @@ class CursoSearchResource extends JsonResource
 //            : 0;
         $assignedUsers = 1;
 
+
         $_course = [
             'id' => $this->id,
             'name' => $this->name,
