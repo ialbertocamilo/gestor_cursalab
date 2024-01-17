@@ -278,10 +278,10 @@ class RestCourseController extends Controller
             ->where('user_id', $user->id);
 
         if ($request->type == 'accepted')
-            $registrosQuery->whereNotNull('registro_capacitacion');
+            $registrosQuery->whereNotNull('registro_capacitacion_path');
 
         if ($request->type == 'pending')
-            $registrosQuery->whereNull('registro_capacitacion');
+            $registrosQuery->whereNull('registro_capacitacion_path');
 
         $registros = $registrosQuery->get();
 
