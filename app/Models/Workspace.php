@@ -40,7 +40,8 @@ class Workspace extends BaseModel
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
-        'dc3_configuration'
+        'dc3_configuration',
+        'reminders_configuration'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -102,7 +103,8 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array',
         'limits' => 'json',
         'jarvis_configuration' => 'json',
-        'dc3_configuration'=>'array'
+        'dc3_configuration'=>'array',
+        'reminders_configuration'=>'json'
     ];
 
 

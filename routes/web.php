@@ -54,6 +54,16 @@ Route::get('email_reminder',function(){
     ];
     return view('emails.reminder_inactivate_course',['data'=>$mail_data]);
 });
+Route::get('email_reminder_course',function(){
+    $mail_data=[
+        'courses'=>[
+            ['id'=> 265 ,'name' => 'Seguridad y Salud en el Trabajo'],
+            ['id'=> 1271 ,'name' => 'Seguridad de la información'],
+        ],
+        'web_url' => config('app.web_url')
+    ];
+    return view('emails.reminder_progress_courses',['data'=>$mail_data]);
+});
 
 // login routes
 Route::get('login', [LoginController::class, 'showLoginFormInit'])->name('login');

@@ -334,7 +334,30 @@
                                 </v-row>
                             </template>
                         </DefaultSection>
-
+                        <DefaultSection title="Configuración de envío de reminders" v-if="is_superuser && showReminderSection">
+                            <template v-slot:content>
+                                <v-row>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Número de usuarios por envío"
+                                            type="number"
+                                            dense
+                                            v-model="resource.reminders_configuration.interval"
+                                            :rules="rules.reminder"
+                                        />
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <DefaultInput
+                                            label="Frecuencia de envío por bloques (en minutos)"
+                                            type="number"
+                                            dense
+                                            v-model="resource.reminders_configuration.chunk"
+                                            :rules="rules.reminder"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
                         <DefaultSection title="Configuración de diplomas" v-if="is_superuser">
                             <template v-slot:content>
                                 <v-row>
@@ -548,7 +571,7 @@ const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
-    'dc3_configuration','show_logo_in_app','limits'
+    'dc3_configuration','show_logo_in_app','limits','reminders_configuration'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -612,6 +635,10 @@ export default {
                     name_or_social_reason:'',
                     shcp:'',
                     client_name:[]
+                },
+                reminders_configuration:{
+                    interval:0,
+                    chunk:0 
                 }
             },
             limit_allowed_users: null,
@@ -630,9 +657,12 @@ export default {
                 logo: this.getRules(['required']),
                 qualification_type_id: this.getRules(['required']),
                 dc3: this.getRules(['required']),
+                reminder: this.getRules(['required']),
             },
             taxonomy_id_dc3:0,
-            showDc3Section:false
+            showDc3Section:false,
+            showReminderSection:false,
+            taxonomy_id_reminder:0
         }
     }
     // })
@@ -656,6 +686,7 @@ export default {
             vue.removeFileFromDropzone(vue.resource.logo_negativo, 'inputLogoNegativo')
             vue.removeFileFromDropzone(vue.resource.logo_marca_agua,'inputLogoMarcaAgua');
             vue.showDc3Section=false;
+            vue.showReminderSection=false;
             vue.resource.limit_allowed_storage = null;
             vue.limit_allowed_users = null;
         }
@@ -701,6 +732,11 @@ export default {
                 formData.set(
                     'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
                 );
+                
+                formData.set(
+                    'reminders_configuration', JSON.stringify(vue.resource.reminders_configuration)
+                );
+                
                 vue.setLimitUsersAllowed(formData);
                 vue.setJarvisConfiguration(formData);
 
@@ -792,12 +828,18 @@ export default {
 
                     vue.functionalities = data.data.functionalities;
                     const taxonomy_id_dc3 = data.data.functionalities.find(f => f.code == 'dc3-dc4');
+                    const taxonomy_id_reminder = data.data.functionalities.find(f => f.code == 'reminder-course');
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
+                    vue.taxonomy_id_reminder = taxonomy_id_reminder.id || null;
+
                     vue.subworkspaces = data.data.subworkspaces;
                     vue.resource.selected_functionality = {};
                     data.data.functionalities_selected.forEach(c => {
                         if(c.code == 'dc3-dc4'){
                             vue.showDc3Section = true;
+                        }
+                        if(c.code == 'reminder-course'){
+                            vue.showReminderSection=true;
                         }
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.functionalities
@@ -842,6 +884,8 @@ export default {
         verifyFunactionality(){
             let vue = this;
             vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
+            vue.showReminderSection = vue.resource.selected_functionality[vue.taxonomy_id_reminder];
+            console.log(vue.taxonomy_id_reminder,vue.showReminderSection);
         }
     }
 }

@@ -2,17 +2,16 @@
 @section('body')
     <tr style="background-color:#F9FAFB;">
         <td align="center">
-            <img style="width: 250px" src="{{ url('/images/innovation-flatline.png') }}" alt="">
+            <img style="width: 250px" src="{{ url('/images/fast-working-flatline.png') }}" alt="">
         </td>
     </tr>
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; " align="center">
             @php
-                $message = count($data['courses']) > 0 ? 'tus cursos culminen!' : 'tus curso culmine!';
+                $message = count($data['courses']) > 0 ? 'tus cursos' : 'tu curso';
             @endphp
             <p style="color:#333D5D;font-size: 1.2rem;padding: 0px 46px;">
-
-                ¡Te quedan <span style="color:#FF4242;font-size: 1.4rem">4 días</span> para que {{ $message }}!
+                Te quedaste a medio camino, completa {{$message}}
             </p>
         </td>
     </tr>
@@ -21,14 +20,12 @@
             <h1
                 style="text-align:justify; color:#2A3649; margin-top:2rem;font-weight:bold;font-size: 25px; padding: 0px 46px;">
                 <div
-                    style="
-                        margin-left: 95%; 
-                        width:25px; 
-                        height:5px; 
-                        border-radius:4px; 
-                        background: #FFCD0C;">
+                    style="margin-left: 95%; 
+                          width:25px; 
+                          height:5px; 
+                          border-radius:4px; 
+                          background: #FFCD0C;">
                 </div>
-
                 @if (count($data['courses'])>1)
                     <ul style="margin: 0;padding: 10px 0">
                         @foreach ($data['courses'] as $course)
@@ -42,7 +39,6 @@
                         <br><br>
                     @endforeach
                 @endif
-
                 <div
                     style="margin-left: 8%;
                           width: 9px; 
