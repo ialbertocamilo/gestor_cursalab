@@ -15,13 +15,13 @@ use Illuminate\Support\Facades\DB;
 class DuplicateSchoolCourses extends Command
 {
 
-    const DATE_TIME = '2023-09-22 16:00';
+    const DATE_TIME = '2024-01-15 17:30';
 
     /**
      * The name and signature of the console command
      * @var string
      */
-    protected $signature = 'courses:duplicate-school-courses {mode} {originWorkspaceId} {destinationWorkspaceId} {schoolsIds}';
+    protected $signature = 'courses:duplicate-school-courses {mode} {originWorkspaceId} {destinationWorkspaceId} {schoolsIds} {destinationSchoolIds?}';
 
     /**
      * The console command description.
@@ -39,7 +39,8 @@ class DuplicateSchoolCourses extends Command
     {
         $originWorkspaceId = $this->argument('originWorkspaceId');
         $destinationWorkspaceId = $this->argument('destinationWorkspaceId');
-        $schoolsIds = explode(',', $this->argument('schoolsIds'));
+        $originSchoolsIds = explode(',', $this->argument('schoolsIds'));
+        $destinationSchoolsIds = explode(',', $this->argument('destinationSchoolIds'));
 
         // Print workspaces names
 
@@ -51,7 +52,7 @@ class DuplicateSchoolCourses extends Command
         // id has been found
 
         $originSchools = School::query()
-            ->whereIn('id', $schoolsIds)
+            ->whereIn('id', $originSchoolsIds)
             ->get();
 
         $this->info(PHP_EOL);
@@ -62,7 +63,7 @@ class DuplicateSchoolCourses extends Command
             $foundSchools[] = $school->id;
         }
 
-        if (count($foundSchools) < count($schoolsIds)) {
+        if (count($foundSchools) < count($originSchoolsIds)) {
             $this->error(
                 'Only '
                 . count($foundSchools)
@@ -84,10 +85,14 @@ class DuplicateSchoolCourses extends Command
 
         // Print found destination schools
 
-        $destinationSchools = $this->loadSchoolsByName(
-            $destinationWorkspaceId,
-            $originSchools->pluck('name')->toArray()
-        );
+        $destinationSchools = count($destinationSchoolsIds) === 0
+            ?
+                $this->loadSchoolsByName(
+                    $destinationWorkspaceId,
+                    $originSchools->pluck('name')->toArray()
+                )
+            : School::whereIn('id', $destinationSchoolsIds)->get();
+
         $this->info(PHP_EOL);
         $this->info('Found destination schools:');
         foreach ($destinationSchools as $school) {
@@ -111,17 +116,23 @@ class DuplicateSchoolCourses extends Command
 
         // Courses validation
 
-        $valid = $this->coursesAreValid($originCourses, $destinationCourses);
-        if ($valid) {
-            $this->info(PHP_EOL);
-            $this->info('OK - No courses exists in destination schools');
+//        $valid = $this->coursesAreValid($originCourses, $destinationCourses);
+//        if ($valid) {
+//            $this->info(PHP_EOL);
+//            $this->info('OK - No courses exists in destination schools');
+//
+//
+//            if ($this->argument('mode') === 'save') {
+//                $this->duplicateCourses(
+//                    $originCourses, $destinationSchools, $destinationWorkspaceId
+//                );
+//            }
+//        }
 
-
-            if ($this->argument('mode') === 'save') {
-                $this->duplicateCourses(
-                    $originCourses, $destinationSchools, $destinationWorkspaceId
-                );
-            }
+        if ($this->argument('mode') === 'save') {
+            $this->duplicateCourses(
+                $originCourses, $destinationSchools, $destinationWorkspaceId
+            );
         }
 
 
