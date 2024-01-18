@@ -436,7 +436,9 @@
                     </v-col>
                 </v-row>
 
-                <v-row justify="space-around">
+                <v-row
+                    v-if="has_registro_capacitacion_functionality"
+                    justify="space-around">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
                             title="Registro de capacitación"
@@ -448,7 +450,6 @@
                                         <v-col cols="12">
                                             <DefaultToggle
                                                 v-model="resource.registro_capacitacion.active"
-                                                @onChange="modalStatusEdit"
                                                 :activeLabel="'Creación de registro de capacitación'"
                                                 :inactiveLabel="'Creación de registro de capacitación'"
                                                 dense/>
@@ -457,67 +458,69 @@
                                             Anexa la elaboración del registro de capacitación para tus reportes.
                                         </v-col>
                                     </v-row>
+                                    <v-row v-if="resource.registro_capacitacion.active">
 
+                                            <v-col cols="12" class="pb-1">
+                                                <label style="font-weight: 500; font-size: 16px">
+                                                    Datos para registro
+                                                </label>
+                                            </v-col>
 
-                                    <v-row>
-                                        <v-col cols="12">
-                                            <label>Datos para registro</label>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row justify="center">
+                                            <v-col cols="6">
+                                                <DefaultInput
+                                                    clearable
+                                                    v-model="resource.registro_capacitacion.trainerAndRegistrar"
+                                                    label="Instructor"
+                                                    :rules="rules.trainerAndRegistrar"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultModalButton
+                                                    label="Agregar"
+                                                    outlined
+                                                    @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3"></v-col>
+                                            <v-col cols="12">
+                                                <DefaultInput
+                                                    clearable
+                                                    v-model="resource.registro_capacitacion.certificateCode"
+                                                    label="Código de certificado personalizado"
+                                                    :rules="rules.certificateCode"
+                                                    dense
+                                                />
+                                            </v-col>
 
-                                        <v-col cols="6">
-                                            <DefaultInput
-                                                clearable
-                                                v-model="resource.registro_capacitacion.trainerAndRegistrar"
-                                                label="Instructor"
-                                                dense
-                                            />
-                                        </v-col>
-                                        <v-col cols="6">
+                                            <v-col cols="12">
+                                                <DefaultRichText
+                                                    clearable
+                                                    v-model="resource.registro_capacitacion.syllabus"
+                                                    label="Temario para el registro"
+                                                    :rules="rules.syllabus"
+                                                    :ignoreHTMLinLengthCalculation="true"
+                                                    :height="195"
+                                                    :showGenerateIaDescription="hasPermissionToUseIaDescription"
+                                                    :key="`${hasPermissionToUseIaDescription}-editor`"
+                                                    :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
+                                                    :loading="loading_description"
+                                                    ref="descriptionRichText"
+                                                    @generateIaDescription="generateIaDescription"
+                                                />
+                                            </v-col>
 
-                                        </v-col>
+                                            <v-col cols="12">
+                                                <DefaultTextArea
+                                                    dense
+                                                    label="Observaciones del curso"
+                                                    placeholder="Ingrese una descripción del curso"
+                                                    v-model="resource.registro_capacitacion.comment"
+                                                />
+                                            </v-col>
 
                                     </v-row>
-                                    <v-row>
-                                        <v-col cols="12">
-                                            <DefaultInput
-                                                clearable
-                                                v-model="resource.registro_capacitacion.certificateCode"
-                                                label="Código de certificado personalizado"
-                                                dense
-                                            />
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12">
-                                            <DefaultRichText
-                                                clearable
-                                                v-model="resource.registro_capacitacion.syllabus"
-                                                label="Temario"
-                                                :rules="rules.content"
-                                                class="mt-2"
-                                                :ignoreHTMLinLengthCalculation="true"
-                                                :height="195"
-                                                :showGenerateIaDescription="hasPermissionToUseIaDescription"
-                                                :key="`${hasPermissionToUseIaDescription}-editor`"
-                                                :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
-                                                :loading="loading_description"
-                                                ref="descriptionRichText"
-                                                @generateIaDescription="generateIaDescription"
-                                            />
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12">
-                                            <DefaultTextArea
-                                                dense
-                                                label="Observaciones del curso"
-                                                placeholder="Ingrese una descripción del curso"
-                                                v-model="resource.registro_capacitacion.comment"
-                                            />
-                                        </v-col>
-                                    </v-row>
+
                                 </div>
                             </template>
                         </DefaultModalSectionExpand>
@@ -618,6 +621,7 @@ export default {
         let base_endpoint_temp = `/cursos`;
 
         return {
+            has_registro_capacitacion_functionality: false,
             url: window.location.search,
             errors: [],
             conf_focus: true,
@@ -684,6 +688,11 @@ export default {
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
                 qualification_type_id: this.getRules(['required']),
                 dc3: this.getRules(['required']),
+
+                trainerAndRegistrar: this.getRules(['required']),
+                certificateCode: this.getRules(['required']),
+                syllabus: this.getRules(['required']),
+                comment: this.getRules(['required']),
             },
             selects: {
                 requisito_id: [],
@@ -1058,6 +1067,7 @@ export default {
                     vue.people.legal_representatives = response.legal_representatives;
                     vue.catalog_denominations = response.catalog_denominations;
                     vue.has_DC3_functionality = response.has_DC3_functionality;
+                    vue.has_registro_capacitacion_functionality = response.has_registro_capacitacion_functionality;
 
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;

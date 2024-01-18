@@ -337,7 +337,14 @@ export default {
                 codigo_matricula: this.getRules(['required']),
                 nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
                 // preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
-                nro_intentos: this.getRules(['required', 'number', 'min_value:1'])
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+
+                businessName: this.getRules(['required']),
+                businessNumber: this.getRules(['required']),
+                CIIU: this.getRules(['required']),
+                address: this.getRules(['required']),
+                economicActivity: this.getRules(['required']),
+                appUrl: this.getRules(['required'])
             },
             resource: {},
             selects: {

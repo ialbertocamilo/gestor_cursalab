@@ -468,13 +468,8 @@ class WorkspaceController extends Controller
         // });
 
 
-        $functionality = Taxonomy::getFirstData('system', 'functionality', 'registro-capacitacion');
-        $registroCapacitacionFunctionality = WorkspaceFunctionality::query()
-            ->where('workspace_id', get_current_workspace()->id)
-            ->where('functionality_id', $functionality->id)
-            ->first();
 
-        $has_registro_capacitacion_functionality = $registroCapacitacionFunctionality ? true : false;
+        $has_registro_capacitacion_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
 
         $response = compact('main_menu', 'side_menu', 'qualification_types', 'has_registro_capacitacion_functionality');
 
