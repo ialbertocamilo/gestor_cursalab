@@ -98,9 +98,9 @@ class SupervisorController extends Controller
 
         $users = User::with('subworkspace.module_criterion_value')->whereIn('document', $user_documents)->get();
 
-        UserRelationship::setUsersAsSupervisor($users);
+        $users_segments = UserRelationship::setUsersAsSupervisor($users);
 
-        return $this->success([]);
+        return $this->success($users_segments ?? []);
     }
 
     public function setDataSupervisor(Request $request)

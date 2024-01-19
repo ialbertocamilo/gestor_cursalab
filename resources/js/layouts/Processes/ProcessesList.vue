@@ -38,7 +38,7 @@
             <v-card-title>
                 Proceso de Inducción
                 <v-spacer/>
-                <DefaultModalButton :label="'Asignar Supervisores'" @click="alert('sss')" :icon_name="'fa fa-portrait'" :outlined="true"/>
+                <DefaultModalButton :label="'Asignar Supervisores'" @click="openPageSupervisores()" :icon_name="'fa fa-portrait'" :outlined="true"/>
                 <DefaultModalButton :label="'Proceso de Inducción'" @click="openModalSelectActivitys()"/>
             </v-card-title>
         </v-card>
@@ -75,7 +75,14 @@
                 :data-table="dataTable"
                 :filters="filters"
                 type_table="process"
-                @segmentation="openModalSegment($event)"
+                @segmentation="
+                    openFormModal(
+                        modalFormSegmentationOptions,
+                        $event,
+                        'segmentation',
+                        `Segmentación de usuarios`
+                    )
+                "
                 @edit="openModalEditProcess($event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proceso')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un proceso')"
@@ -119,13 +126,32 @@
             />
 
         <ModalSegment
-            ref="ModalSegment"
-            v-model="modalSegment.open"
-            :width="'870px'"
-            @onClose="closeModalSegment"
-            @onConfirm="confirmModalSegment"
-            :segmentdata="dataModalSegment"
+            :options="modalFormSegmentationOptions"
+            width="870px"
+            model_type="App\Models\Process"
+            :model_id="null"
+            :ref="modalFormSegmentationOptions.ref"
+            @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+            @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
+        <!-- <SegmentFormModal
+            :options="modalFormSegmentationOptions"
+            width="870px"
+            model_type="App\Models\Process"
+            :model_id="null"
+            :ref="modalFormSegmentationOptions.ref"
+            @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+            @onConfirm="confirmFormModalSegment(modalFormSegmentationOptions, dataTable, filters)"
+        /> -->
+        <!-- <ModalSegmentSupervisors
+            :options="modalFormSegmentationSupervisor"
+            width="870px"
+            model_type="App\Models\Process"
+            :model_id="null"
+            :ref="modalFormSegmentationSupervisor.ref"
+            @onCancel="closeSimpleModal(modalFormSegmentationSupervisor)"
+            @onConfirm="closeFormModal(modalFormSegmentationSupervisor, dataTable, filters)"
+        /> -->
         <ModalSelectSpeaker
             :ref="modalSelectSpeaker.ref"
             v-model="modalSelectSpeaker.open"
@@ -182,9 +208,9 @@
 <script>
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
-import ModalSelectTemplate from "../../components/Process/ModalSelectTemplate";
-import ModalCreateProcess from "../../components/Process/ModalCreateProcess";
-import ModalEditProcess from "../../components/Process/ModalEditProcess";
+import ModalSelectTemplate from "../../components/Induction/Process/ModalSelectTemplate";
+import ModalCreateProcess from "../../components/Induction/Process/ModalCreateProcess";
+import ModalEditProcess from "../../components/Induction/Process/ModalEditProcess";
 
 import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
 import ModalGestorColaboradores from "../../components/Benefit/ModalGestorColaboradores";
@@ -192,6 +218,8 @@ import ModalCorreosSegmentados from "../../components/Benefit/ModalCorreosSegmen
 import ModalMaxColaborador from "../../components/Benefit/ModalMaxColaborador";
 
 import ModalSegment from "./ModalSegment";
+import SegmentFormModal from "../Blocks/SegmentFormModal";
+import ModalSegmentSupervisors from "./ModalSegmentSupervisors";
 
 export default {
     components: {
@@ -200,12 +228,13 @@ export default {
     ModalSelectTemplate,
     ModalCreateProcess,
     ModalEditProcess,
-
+    SegmentFormModal,
     ModalSegment,
     ModalSelectSpeaker,
     ModalGestorColaboradores,
     ModalCorreosSegmentados,
     ModalMaxColaborador,
+    ModalSegmentSupervisors
 },
     mounted() {
         let vue = this
@@ -213,6 +242,26 @@ export default {
     },
     data() {
         return {
+            dataForModalSegment: null,
+            modalFormSegmentationOptions: {
+                ref: 'ModalSegment',
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                cancelLabel: "Cancelar",
+                confirmLabel: "Continuar",
+                resource: "segmentación"
+            },
+            modalFormSegmentationSupervisor: {
+                ref: 'ModalSegmentSupervisors',
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                cancelLabel: "Cancelar",
+                confirmLabel: "Continuar",
+                resource: "segmentación"
+            },
+
             dataTable: {
                 endpoint: '/procesos/search',
                 ref: 'BenefitTable',
@@ -228,31 +277,106 @@ export default {
                         icon: 'mdi mdi-pencil',
                         type: 'action',
                         method_name: 'edit',
-                        complete: false
+                        conditionalBadgeIcon: [{
+                            message: 'Aún no terminas de personalizar el proceso de inducción',
+                            minValue: 0,
+                            propertyCond: 'config_completed',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },
+                            {
+                            message: 'Personaliza tu proceso de inducción',
+                            minValue: 1,
+                            propertyCond: 'config_completed',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
+                    // {
+                    //     text: "Editar",
+                    //     icon: 'mdi mdi-pencil',
+                    //     type: 'action',
+                    //     method_name: 'edit',
+                    //     complete: false
+                    // },
                     {
                         text: "Segmentación",
-                        icon: 'mdi mdi-clipboard-text',
+                        icon: 'mdi mdi-account-group segmentation-icon',
                         type: 'action',
-                        count: 'segments_count',
                         method_name: 'segmentation',
-                        complete: false
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes colaboradores participantes en el proceso',
+                            minValue: 0,
+                            propertyCond: 'assigned_users',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },
+                            {
+                            message: 'Selecciona a los colaboradores que participarán en el proceso',
+                            minValue: 1,
+                            propertyCond: 'assigned_users',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
+                    // {
+                    //     text: "Actividades",
+                    //     icon: 'mdi mdi-folder-star',
+                    //     type: 'route',
+                    //     route: 'stages_route',
+                    //     complete: false
+                    // },
                     {
                         text: "Actividades",
                         icon: 'mdi mdi-folder-star',
                         type: 'route',
                         route: 'stages_route',
-                        complete: false
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes actividades creadas en el proceso',
+                            minValue: 0,
+                            propertyCond: 'stages_count',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },
+                            {
+                            message: 'Crea actividades para el proceso',
+                            minValue: 1,
+                            propertyCond: 'stages_count',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                     {
                         text: "Certificado",
                         icon: 'mdi mdi-file-document-check',
-                        type: 'action',
-                        count: 'segments_count',
-                        method_name: 'segmentation',
-                        complete: false
+                        type: 'route',
+                        route: 'certificate_route',
+                        conditionalBadgeIcon: [{
+                            message: 'Aún no creas un certificado',
+                            minValue: 0,
+                            propertyCond: 'certificate_template_id',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },
+                            {
+                            message: 'Certificado que se entrega al usuario al terminar el proceso',
+                            minValue: 1,
+                            propertyCond: 'certificate_template_id',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
+                    // {
+                    //     text: "Certificado",
+                    //     icon: 'mdi mdi-file-document-check',
+                    //     type: 'route',
+                    //     route: 'stages_route',
+                    //     complete: false
+                    // },
                 ],
                 actions_extras: [
                     {
@@ -427,6 +551,34 @@ export default {
         }
     },
     methods: {
+        openPageSupervisores() {
+            window.location.href = 'supervisores';
+        },
+        openFormModalSegment(modalFormSegmentationOptions, event = null, action = null, title = null) {
+            let vue = this
+            console.log(event);
+            vue.dataForModalSegment = event
+
+            vue.openFormModal(
+                        modalFormSegmentationOptions,
+                        event,
+                        action,
+                        title
+                    )
+        },
+        confirmFormModalSegment(modalFormSegmentationOptions, dataTable, filters) {
+            console.log(modalFormSegmentationOptions);
+
+            let vue = this
+            vue.closeFormModal(modalFormSegmentationOptions, dataTable, filters)
+
+            vue.openFormModal(
+                        vue.modalFormSegmentationSupervisor,
+                        vue.dataForModalSegment,
+                        'segmentation',
+                        `Segmentación de usuarios > <b>Vinculación por criterios</b>`
+                    )
+        },
         confirmModalSegment() {
             let vue = this;
             this.showLoader()
@@ -486,6 +638,7 @@ export default {
                 }
             vue.modalSegment.open = false;
         },
+        // asd
         async openModalSegment(benefit, edit = false) {
             let vue = this;
 
@@ -579,7 +732,7 @@ export default {
                 const newID = `n-${Date.now()}`;
                 const newInstruction = {
                     id: newID,
-                    title: "",
+                    description: "",
                     active: 1,
                     hasErrors: false
                 };
@@ -820,9 +973,49 @@ export default {
                     'description' : item.description,
                     'limit_absences' : item.limit_absences,
                     'absences' : item.absences,
+                    'count_absences' : item.count_absences,
+                    'starts_at' : item.starts_at,
+                    'finishes_at' : item.finishes_at,
+                    'color' : item.color_selected
                 };
-                const fields = ['title', 'description', 'limit_absences', 'absences'];
-                const formData = vue.getMultipartFormData(method, resource, fields);
+
+                const fields = ['title',
+                                'description',
+                                'limit_absences',
+                                'absences',
+                                'count_absences',
+                                'starts_at',
+                                'finishes_at',
+                                'instructions',
+                                'color',
+                                'logo',
+                                'background_mobile',
+                                'background_web'
+                            ];
+                const file_fields = [
+                                'logo',
+                                'background_mobile',
+                                'background_web',
+                            ];
+
+                if(item.logotipo) {
+                    resource.logo = item.logotipo
+                    resource.file_logo = item.logotipo
+                }
+                if(item.fondo_mobile) {
+                    resource.background_mobile = item.fondo_mobile
+                    resource.file_background_mobile = item.fondo_mobile
+                }
+                if(item.fondo_web) {
+                    resource.background_web = item.fondo_web
+                    resource.file_background_web = item.fondo_web
+                }
+
+                const formData = vue.getMultipartFormData(method, resource, fields, file_fields);
+
+                let instructions = JSON.stringify(item.instructions)
+                formData.append('instructions', instructions)
+
                 // formData.append('validateForm', validateForm ? "1" : "0");
 
                 vue.$http.post(url, formData)

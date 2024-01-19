@@ -64,7 +64,7 @@
 
 <script>
 import draggable from 'vuedraggable'
-import DefaultButtonModalSteps from '../globals/DefaultButtonModalSteps.vue';
+import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
 
 export default {
     components: {

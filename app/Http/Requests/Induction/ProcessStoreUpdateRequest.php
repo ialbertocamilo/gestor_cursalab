@@ -30,6 +30,18 @@ class ProcessStoreUpdateRequest extends FormRequest
             'count_absences' => 'boolean',
             'absences' => 'nullable|numeric',
             'active' => 'nullable',
+            'starts_at' => 'nullable',
+            'finishes_at' => 'nullable',
+            'instructions' => 'nullable',
+
+            'background_mobile' => 'nullable',
+            'file_background_mobile' => 'nullable',
+            'background_web' => 'nullable',
+            'file_background_web' => 'nullable',
+            'logo' => 'nullable',
+            'file_logo' => 'nullable',
+
+            'color' => 'nullable'
         ];
     }
 
@@ -42,6 +54,8 @@ class ProcessStoreUpdateRequest extends FormRequest
         $data['active'] = $active;
         $data['limit_absences'] = $limit_absences;
         $data['count_absences'] = $count_absences;
+
+        $data['instructions'] = $this->instructions;
 
         return $this->merge($data)->all();
     }

@@ -448,16 +448,16 @@
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
-import ModalSelectActivity from "../../components/Stages/ModalSelectActivity";
-import ModalCreateProcess from "../../components/Process/ModalCreateProcess";
+import ModalSelectActivity from "../../components/Induction/Stages/ModalSelectActivity";
+import ModalCreateProcess from "../../components/Induction/Process/ModalCreateProcess";
 
-import ModalActivityTareas from "../../components/Stages/ModalActivityTareas";
-import ModalActivitySesiones from "../../components/Stages/ModalActivitySesiones";
-import ModalActivityTemas from "../../components/Stages/ModalActivityTemas";
-import ModalEditStage from "../../components/Stages/ModalEditStage";
-import ModalActivityChecklist from "../../components/Stages/ModalActivityChecklist";
-import ModalActivityEncuestas from "../../components/Stages/ModalActivityEncuestas";
-import ModalActivityEvaluaciones from "../../components/Stages/ModalActivityEvaluaciones";
+import ModalActivityTareas from "../../components/Induction/Stages/ModalActivityTareas";
+import ModalActivitySesiones from "../../components/Induction/Stages/ModalActivitySesiones";
+import ModalActivityTemas from "../../components/Induction/Stages/ModalActivityTemas";
+import ModalEditStage from "../../components/Induction/Stages/ModalEditStage";
+import ModalActivityChecklist from "../../components/Induction/Stages/ModalActivityChecklist";
+import ModalActivityEncuestas from "../../components/Induction/Stages/ModalActivityEncuestas";
+import ModalActivityEvaluaciones from "../../components/Induction/Stages/ModalActivityEvaluaciones";
 
 export default {
     components: {

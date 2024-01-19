@@ -3,8 +3,8 @@
          <v-card flat class="elevation-0 mb-4">
             <v-card-title>
                 Diplomas: {{ diploma_id ? 'Editar plantilla' : 'Crear plantilla' }}
-                <v-btn 
-                    icon 
+                <v-btn
+                    icon
                     color="primary"
                     class="ml-2"
                     @click="openFormModal(modalDiplomaFormInfoOptions, null, 'status', 'Instrucciones')">
@@ -23,7 +23,7 @@
             <div class="mx-8 mb-0 d-flex justify-content-center">
                 <v-row class="mt-0 container-box">
 
-                    <div id="overlay-div" class="overlay-div ma-auto mt-5" v-show="overlay"> 
+                    <div id="overlay-div" class="overlay-div ma-auto mt-5" v-show="overlay">
                         <v-file-input
                             full-width
                             prepend-icon=""
@@ -36,7 +36,7 @@
                         />
                         <div class="overlay-icon">
                             <div class="d-flex flex-column text-center">
-                                <span class="fas fa-images" 
+                                <span class="fas fa-images"
                                       style="font-size: 1.5rem"></span>
                                 <span style="font-size: 1rem; margin-top: 1rem;">Agregar imagen</span>
                             </div>
@@ -46,7 +46,7 @@
 
                     <v-col cols="12" md="12" sm="12" class="d-flex align-items-center justify-center">
                         <!-- === CANVAS-MENU === -->
-                        <div class="c_menu text-center elevation-4 mx-2 my-1 px-2 py-1" id="c_menu" 
+                        <div class="c_menu text-center elevation-4 mx-2 my-1 px-2 py-1" id="c_menu"
                              style="display: none; flex-direction: row; align-items: center; border-radius: .3rem; grid-gap: .5rem;">
                             <v-btn-toggle
                                 dense
@@ -54,32 +54,32 @@
                                 v-model="toggle_multiple"
                                 class="position-relative d-flex" style="grid-gap: .5rem;">
 
-                                <div class="css-tooltip css-tooltip--top" 
+                                <div class="css-tooltip css-tooltip--top"
                                      data-tooltip="Negrita">
                                     <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('bold')" text>
                                         <v-icon>mdi-format-bold</v-icon>
-                                    </v-btn>  
+                                    </v-btn>
                                 </div>
                                 <div class="css-tooltip css-tooltip--top" data-tooltip="Cursiva">
                                     <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('italic')" text>
                                         <v-icon>mdi-format-italic</v-icon>
-                                    </v-btn>  
+                                    </v-btn>
                                 </div>
                                 <div class="css-tooltip css-tooltip--top" data-tooltip="Centrado">
                                     <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('centrado')" text>
                                         <v-icon>mdi-format-align-center</v-icon>
-                                    </v-btn>  
+                                    </v-btn>
                                 </div>
                             </v-btn-toggle>
                             <div class="css-tooltip css-tooltip--top" data-tooltip="Tamaño">
-                                <input @input="edit_object('size')" elevation="2" v-model="size_t" class="p-2" 
+                                <input @input="edit_object('size')" elevation="2" v-model="size_t" class="p-2"
                                         style="max-width: 61px;" type="number">
                             </div>
                             <div class="css-tooltip css-tooltip--top" data-tooltip="Formato">
-                                <v-select elevation="2" solo style="max-height: 0vh;max-width:200px;padding-bottom:43px" 
-                                        @change="edit_object('formato')" 
-                                        return-object v-model="select_m" 
-                                        v-show="select_s" :items="options" item-text="text" item-value="id" 
+                                <v-select elevation="2" solo style="max-height: 0vh;max-width:200px;padding-bottom:43px"
+                                        @change="edit_object('formato')"
+                                        return-object v-model="select_m"
+                                        v-show="select_s" :items="options" item-text="text" item-value="id"
                                         hide-details filled dense></v-select>
                             </div>
                             <v-text-field style="max-width:170px" class="pb-1 ml-2" v-model="color" hide-details solo filled dense>
@@ -99,10 +99,10 @@
                             <div class="css-tooltip css-tooltip--top" data-tooltip="Eliminar">
                                 <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="delete_object()" text>
                                     <v-icon>mdi-delete</v-icon>
-                                </v-btn>  
+                                </v-btn>
                             </div>
                         </div>
-                        <div class="c_menu text-center elevation-4 mx-2 my-1" id="c_menu_image" 
+                        <div class="c_menu text-center elevation-4 mx-2 my-1" id="c_menu_image"
                                 style=" display:none; flex-direction:row; align-items: center; border-radius: .3rem; grid-gap: .5rem;">
                             <v-btn-toggle
                                 v-model="toggle_multiple_image"
@@ -112,14 +112,14 @@
                                 <div class="css-tooltip css-tooltip--top" data-tooltip="Bloquear">
                                     <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('bloquear')" text>
                                         <v-icon>mdi-lock</v-icon>
-                                    </v-btn>  
+                                    </v-btn>
                                 </div>
                             </v-btn-toggle>
 
                             <div class="css-tooltip css-tooltip--top" data-tooltip="Eliminar">
                                 <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="delete_object()" text>
                                     <v-icon>mdi-delete</v-icon>
-                                </v-btn>  
+                                </v-btn>
                             </div>
                         </div>
                         <!-- === CANVAS-MENU === -->
@@ -135,13 +135,13 @@
             </div>
 
             <div class="d-flex justify-center position-relative menu-save">
-                <panelEditor 
-                    :d_btn="d_btn" 
-                    @emit_add_text="add_text" 
-                    @emit_add_itext="add_itext" 
-                    @emit_add_image="add_image" 
-                    @emit_prev="prev" 
-                    @emit_delete="delete_object" 
+                <panelEditor
+                    :d_btn="d_btn"
+                    @emit_add_text="add_text"
+                    @emit_add_itext="add_itext"
+                    @emit_add_image="add_image"
+                    @emit_prev="prev"
+                    @emit_delete="delete_object"
                 />
                 <!-- <div class="menu-cancel-btn">
                     <v-btn
@@ -158,7 +158,7 @@
 
 
                 <div class="menu-save-btn">
-                    <DefaultModalButton 
+                    <DefaultModalButton
                         :disabled="bg_image ? false : true"
                         :icon="false"
                         label="Guardar"
@@ -170,7 +170,7 @@
         </v-card>
 
         <!-- === INSTRUCCIONES MODAL === -->
-        <DiplomaFormInfoModal 
+        <DiplomaFormInfoModal
             width="30vh"
             :ref="modalDiplomaFormInfoOptions.ref"
             :options="modalDiplomaFormInfoOptions"
@@ -178,13 +178,13 @@
         />
 
         <!-- === PREVIEW MODAL -->
-        <DiplomaPreviewModal 
+        <DiplomaPreviewModal
             width="50vh"
             :ref="modalDiplomaPreviewOptions.ref"
             :options="modalDiplomaPreviewOptions"
             @onConfirm="closeFormModal(modalDiplomaPreviewOptions)"
         />
-        
+
         <!-- === GUARDAR MODAL === -->
         <DiplomaFormSave
             width="50vh"
@@ -214,11 +214,11 @@ import DiplomaAlertModal from './DiplomaAlertModal.vue';
 import DiplomaFormSave from './DiplomaFormSave.vue';
 
 export default {
-    components:{ 
-        DiplomaPreviewModal, DiplomaFormInfoModal, DiplomaAlertModal, 
-        DiplomaFormSave, panelEditor 
+    components:{
+        DiplomaPreviewModal, DiplomaFormInfoModal, DiplomaAlertModal,
+        DiplomaFormSave, panelEditor
     },
-    props:['modulo_id', 'diploma_id'],
+    props:['modulo_id', 'diploma_id', 'model_id', 'model_type', 'redirect'],
     data(){
         return {
             size:'16',
@@ -368,7 +368,7 @@ export default {
     methods:{
         leavePage() {
             const vue = this
-            window.location.href = vue.base_endpoint;
+            window.location.href = vue.redirect ? vue.redirect : vue.base_endpoint;
         },
         async openFormModalSave(){
             const vue = this;
@@ -416,7 +416,7 @@ export default {
             }
             if(modified){
                 target.set("left", left);
-                target.set("top", top);   
+                target.set("top", top);
             }
         },
         context_menu(target){
@@ -436,7 +436,7 @@ export default {
                 if(target.centrado){
                     this.toggle_multiple.push(2);
                 }
-                this.select_m = target.id_formato; 
+                this.select_m = target.id_formato;
             }
             //POR TIPO
             switch (target.id) {
@@ -472,7 +472,7 @@ export default {
             if(activeObject.length==1){
                 this.click_object=true;
                 this.obj_select = target;
-                this.select_m = target.id_formato; 
+                this.select_m = target.id_formato;
             }
             if(target.lockMovementX){
                 this.toggle_multiple_image.push(0);
@@ -509,7 +509,7 @@ export default {
                 case 'centrado':
                     if(vue.obj_select.centrado==false){
                             let bg=vue.canvas.backgroundImage;
-                        let left = bg.left+(bg.width/2)-(this.obj_select.width/2); 
+                        let left = bg.left+(bg.width/2)-(this.obj_select.width/2);
                         vue.obj_select.set({ left: left,centrado:true,lockMovementX:true});
                         vue.obj_select.setCoords();
                         vue.toggle_multiple=2;
@@ -526,7 +526,7 @@ export default {
                     }
                 break
             }
-            this.canvas.renderAll() 
+            this.canvas.renderAll()
         },
         add_image(){
             let img = document.getElementById('input_image').files[0];
@@ -535,7 +535,7 @@ export default {
             // console.log('add_image', file);
             let reader = new FileReader();
             reader.onload = function (f) {
-                let data = f.target.result;                    
+                let data = f.target.result;
                 fabric.Image.fromURL(data, function (img) {
                     let oImg = img.set({image:true,left: 200, top: 200, angle: 0,contextMenuImage:true,static:true,lockRotation:true});
                     vue.canvas.add(oImg).renderAll();
@@ -553,7 +553,7 @@ export default {
 
             let reader = new FileReader();
             reader.onload = function (f) {
-                let data = f.target.result;                    
+                let data = f.target.result;
                 fabric.Image.fromURL(data, function (img) {
                     let oImg = img.set({
                         image: true,
@@ -567,9 +567,9 @@ export default {
                         angle: 0,
                         contextMenuImage:true,
                         static:true,
-                        lockRotation:true 
+                        lockRotation:true
                     });
-                    
+
                     vue.canvas.add(oImg).renderAll();
                     vue.canvas.setActiveObject(oImg);
                     vue.canvas.toDataURL({format: 'jpg', quality: 1});
@@ -607,7 +607,7 @@ export default {
         },
         add_text_param(data){
             const vue = this;
-            const { id: tipo, fill, text, id_formato, 
+            const { id: tipo, fill, text, id_formato,
                     fontSize, fontStyle, fontWeight, centrado,
                     top, left, height, width } = data;
 
@@ -645,10 +645,10 @@ export default {
         add_itext(){
             this.close_context_menu();
             let font_size = parseInt(30/this.canvas.getZoom());
-            let t = new fabric.IText('Escribe aquí..', { 
+            let t = new fabric.IText('Escribe aquí..', {
                 fontFamily: 'calisto-mt',
                 fontSize: font_size,
-                left: 300, 
+                left: 300,
                 top: 300,
                 fill: '#000000FF',
                 static:true,
@@ -667,14 +667,14 @@ export default {
             vue.close_context_menu();
 
             let font_size = parseInt(30/this.canvas.getZoom());
-            let t = new fabric.IText(text, { 
+            let t = new fabric.IText(text, {
                 fontFamily: 'calisto-mt',
                 // === props data ===
                 fontSize,
                 textAlign,
                 fontStyle,
                 fontWeight,
-                left, 
+                left,
                 top,
                 fill,
                 // === props data ===
@@ -705,12 +705,12 @@ export default {
             // console.log('set_plantilla', { clientWidth, clientHeight, file });
 
             reader.onload = function (f) {
-                let data = f.target.result;    
+                let data = f.target.result;
                 fabric.Image.fromURL(data, function (img) {
                     let oImg = img.set({
                         id:'bg',
-                        left: 0, 
-                        top: 0, 
+                        left: 0,
+                        top: 0,
                         angle: 0,
                         static:true,
                         hasControls:false,
@@ -725,7 +725,7 @@ export default {
                     let zoom = vue.canvas.getZoom();
                     vue.canvas.backgroundColor = '#efefef';
                     //Centrar
-                    let left = (vue.canvas.width/zoom-oImg.width)/2; 
+                    let left = (vue.canvas.width/zoom-oImg.width)/2;
                     oImg.set({ left,centrado:true});
                     oImg.setCoords();
                     //insertar imagen
@@ -752,13 +752,13 @@ export default {
             // console.log('set_plantilla_param', { clientWidth, clientHeight, file });
 
             reader.onload = function (f) {
-                let data = f.target.result;    
+                let data = f.target.result;
                 fabric.Image.fromURL(data, function (img) {
                     let oImg = img.set({
                         id:'bg',
 
                         // === props data ===
-                        left, 
+                        left,
                         top,
                         // === props data ===
 
@@ -776,7 +776,7 @@ export default {
                     let zoom = vue.canvas.getZoom();
                     vue.canvas.backgroundColor = '#efefef';
                     //Centrar
-                    let left = (vue.canvas.width/zoom-oImg.width)/2; 
+                    let left = (vue.canvas.width/zoom-oImg.width)/2;
                     oImg.set({ left,centrado:true});
                     oImg.setCoords();
                     //insertar imagen
@@ -827,10 +827,10 @@ export default {
                 case 90:
                     //RETROCEDES CON CTRL+Z
                     let evtobj = window.event? event : e
-                    if (evtobj.keyCode == 90 && evtobj.ctrlKey){ 
+                    if (evtobj.keyCode == 90 && evtobj.ctrlKey){
                         let canvas_objects = this.canvas._objects;
                         if(canvas_objects.length !== 0){
-                            let last = canvas_objects[canvas_objects.length -1]; 
+                            let last = canvas_objects[canvas_objects.length -1];
                             if(last.id=='bg'){
                                 this.d_btn=true;
                                 this.overlay=true;
@@ -871,7 +871,7 @@ export default {
 
             this.showLoader();
             await axios.post('/diplomas/get_preview_data',data).then((res) => {
-                
+
                 this.preview = res.data.preview;
                 this.modalDiplomaPreviewOptions.resource = res.data;
                 this.modalDiplomaFormSaveOptions.resource = res.data;
@@ -896,15 +896,17 @@ export default {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
                 // 'nombre_plantilla': this.name_plantilla,
                 'nombre_plantilla': title_plantilla,
+                'model_id': vue.model_id,
+                'model_type': vue.model_type
             };
-            
+
             vue.showLoader();
 
             if(vue.diploma_id) {
                 data = { ...data, edit_plantilla: vue.edit_plantilla }
                 // === actualizar ===
                 axios.put('/diplomas/update/'+vue.diploma_id, data).then((res) => {
-                    
+
                     vue.d_preview = false;
                     vue.dialog_save = false;
 
@@ -939,13 +941,13 @@ export default {
         zoom(tipo){
             let vue = this;
             let zoom = vue.canvas.getZoom();
-            zoom = (tipo=='plus') ? zoom + 0.1 : zoom - 0.1 ; 
+            zoom = (tipo=='plus') ? zoom + 0.1 : zoom - 0.1 ;
             vue.canvas.setZoom(zoom);
         },
         async base64ToFile(base64) {
             const imagePromise = await fetch(base64);
             const imageBlob = await imagePromise.blob();
-            
+
             return new File([imageBlob], 'image', { type: 'image/png' });
         },
         async loadData() {
@@ -965,7 +967,7 @@ export default {
 
             // === renderizar imagenes ===
             for(const [, image] of entries(s_objects_images)) {
-                const imageFile = await vue.base64ToFile(image.src); 
+                const imageFile = await vue.base64ToFile(image.src);
                 vue.add_image_param({ img: imageFile, ...image });
             }
 
@@ -1044,7 +1046,7 @@ export default {
     color: #5458ea !important;
 }
 
-.overlay-div .v-input__slot::before, 
+.overlay-div .v-input__slot::before,
 .overlay-div .v-input__slot::after {
     transition: none !important;
     width: 0 !important;

@@ -1,168 +1,266 @@
-
-
 <template>
-    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
-        <v-card>
-            <v-card-title class="default-dialog-title">
-                Segmentar Beneficio
-                <v-spacer/>
-                <v-btn icon :ripple="false" color="white"
-                       @click="closeModal">
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
-            </v-card-title>
-            <v-card-text class="pt-0 bx_card_modal_segment">
-                <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step2">
-                    <v-card-text>
-                        <!-- (segmentacion) -->
-                        <div>
-                            <v-row>
-                                <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                    <span class="text_default lbl_tit">Relaciona el beneficio a los usuarios según criterio o doc. de identidad.</span>
-                                </v-col>
-                                <v-col cols="12" class="pb-0 pt-0">
-                                    <SegmentFormModal
-                                        :options="modalFormSegmentationOptions"
-                                        :list_segments="segmentdata.segments"
-                                        :list_segments_document="segmentdata.segmentation_by_document"
-                                        width="55vw"
-                                        model_type="App\Models\Benefit"
-                                        :model_id="segmentdata.id"
-                                        ref="modalFormSegmentationOptions"
-                                        @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-                                        @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
-                                        @disabledBtnModal="disabledBtnModal"
-                                    />
-                                </v-col>
-                            </v-row>
-                        </div>
-                        <!-- (segmentacion) -->
-                    </v-card-text>
-                </v-card>
+    <DefaultDialog
+        :options="options"
+        :width="width"
+        @onCancel="closeModal"
+        @onConfirm="confirmModal"
+        @onCancelSteps="prevStep"
+        :persistent="true"
+        :steps="true"
+        content-class="br-dialog dialog_segment_process"
+    >
+        <template v-slot:content>
+            <div>
+                <v-form ref="segmentForm" class="---mb-6">
+                    <DefaultErrors :errors="errors"/>
+                    <v-stepper non-linear class="stepper_box" v-model="stepper_box">
+                        <v-stepper-items>
+                            <v-stepper-content step="1" class="p-0">
+                                <v-tabs
+                                    v-model="tabs"
+                                    fixed-tabs
+                                    slider-color="primary"
 
-            </v-card-text>
+                                    class="col-10 offset-1"
+                                >
+                                    <v-tab>
+                                        {{ tabs_title }} Directa
+                                    </v-tab>
+                                    <v-tab>
+                                        {{ tabs_title }} por Documento
+                                    </v-tab>
+                                </v-tabs>
 
-            <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
-                <ButtonsModal
-                    @cancel="prevStep"
-                    @confirm="nextStep"
-                    :cancelLabel="cancelLabel"
-                    confirmLabel="Continuar"
-                    :disabled_next="disabled_btn_next"
-                    />
-            </v-card-actions>
-        </v-card>
-        <DefaultAlertDialog
-            :ref="modalAlert.ref"
-            :options="modalAlert"
-            :confirmLabel="modalAlert.confirmLabel"
-            :hideCancelBtn="modalAlert.hideCancelBtn"
-            @onConfirm ="modalAlert.open=false"
-            @onCancel ="modalAlert.open=false"
-        >
-            <template v-slot:content> {{ modalAlert.contentText }}</template>
-        </DefaultAlertDialog>
-    </v-dialog>
+                                <v-tabs-items v-model="tabs">
+
+                                    <v-tab-item>
+
+                                        <v-row justify="space-around" v-if="!limitOne">
+                                            <v-col cols="10" class="d-flex justify-content-end">
+                                                <v-btn
+                                                    class="--add-button"
+                                                    color="primary"
+                                                    @click="addSegmentation('direct-segmentation')"
+                                                >
+                                                    <v-icon class="" v-text="'mdi-plus'"/>
+                                                    Segmento
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+
+                                        <v-row justify="space-around">
+                                            <v-col cols="11" class="d-flex justify-content-center">
+                                                <!-- hide-delimiter-background -->
+                                                <v-carousel
+                                                    height="100%"
+                                                    show-arrows-on-hover
+                                                    light
+                                                    v-model="steps"
+                                                    hide-delimiters
+                                                    class="---mb-6"
+                                                >
+                                                    <v-carousel-item
+                                                        v-for="(row, i) in segments"
+                                                        :key="i"
+                                                    >
+                                                        <v-sheet class="group-sheet" height="100%">
+                                                            <div class="text-h6 text-center"  v-if="!limitOne">
+                                                                {{ tabs_title }} {{ i + 1 }} /
+                                                                {{ segments.length }}
+                                                            </div>
+
+                                                            <v-divider class="mx-12"/>
+
+                                                            <segment
+                                                                :is-course-segmentation="isCourseSegmentation()"
+                                                                :segments="segments"
+                                                                :segment="row"
+                                                                :criteria="criteria"
+                                                                :course-modules="courseModules"
+                                                                class="mx-5"
+                                                                :options="options"
+                                                                @borrar_segment="borrarBloque"
+                                                            />
+
+                                                            <!-- <v-divider class="mx-12"/>
+
+                                                            <p class="text-center">Usuarios alcanzados: <strong>{{ total[i] || 0 }}</strong></p> -->
+
+                                                        </v-sheet>
+                                                    </v-carousel-item>
+                                                </v-carousel>
+                                            </v-col>
+                                        </v-row>
+
+                                    </v-tab-item>
+
+                                    <v-tab-item>
+
+                                        <SegmentByDocument
+                                            ref="SegmentByDocument"
+                                            :segment="segment_by_document"
+                                            :modules-ids="modulesIds"
+                                            :current-clean="segment_by_document_clean"
+                                            @addUser="addUser"
+                                            @deleteUser="deleteUser"
+                                        />
+
+                                    </v-tab-item>
+                                </v-tabs-items>
+
+                                <SegmentAlertModal
+                                    :options="modalInfoOptions"
+                                    :ref="modalInfoOptions.ref"
+                                    @onConfirm="closeFormModal(modalInfoOptions)"
+                                    @onCancel="closeFormModal(modalInfoOptions)"
+                                />
+                            </v-stepper-content>
+                            <v-stepper-content step="2" class="p-0">
+                                <v-row justify="space-around">
+                                    <v-col cols="11">
+                                        <span class="title_sub">Criterios de vinculación</span>
+                                        <span class="text_default lbl_tit">Define los criterios que se aplicaran para hacer la relación entre los supervisores y los colaboradores.</span>
+                                    </v-col>
+                                    <v-col cols="11" v-if="stepper_box == 2">
+                                        <DefaultAutocompleteOrder
+                                            dense
+                                            label="Criterios"
+                                            v-model="list_criteria_selected"
+                                            :items="list_criteria"
+                                            multiple
+                                            item-text="name"
+                                            item-id="id"
+                                            return-object
+                                            :count-show-values="4"
+                                            :showSelectAll="true"
+                                            :loading-state="true"
+                                            placeholder="Indicar criterios aquí"
+                                        />
+                                        <div class="bx_criteria_selected">
+                                            <div class="d-flex align-items-center justify-content-center" style="height: 100%;" v-if="list_criteria_selected == 0">
+                                                <span class="text_default text-center">Aquí se listaran tus criterios<br>de vinculación a tus<br>administadores</span>
+                                            </div>
+                                            <div v-else>
+                                                <span v-for="(itemc, indexc) in list_criteria_selected " :key="indexc">
+                                                    <v-chip
+                                                    class="ma-2"
+                                                    close
+                                                    close-icon="mdi-minus-circle"
+                                                    @click:close="list_criteria_selected.splice(indexc, 1)"
+                                                    >
+                                                    {{ itemc.name }}
+                                                    </v-chip>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <span class="text_default c-default fw-bold cursor-pointer" @click="openModalUserSupervisors()">Ver listado de los supervisores</span>
+                                        </div>
+                                    </v-col>
+                                </v-row>
+                            </v-stepper-content>
+                        </v-stepper-items>
+                        <v-stepper-header class="stepper_dots">
+                            <v-stepper-step step="1" :complete="stepper_box > 1">
+                                <v-divider></v-divider>
+                            </v-stepper-step>
+                            <v-stepper-step step="2">
+                            </v-stepper-step>
+                        </v-stepper-header>
+                    </v-stepper>
+                </v-form>
+
+                <ModalUsersSupervisors
+                    :ref="modalUserSupervisors.ref"
+                    v-model="modalUserSupervisors.open"
+                    width="650px"
+                    :list_supervisors="modalUserSupervisors.supervisors"
+                    @onCancel="modalUserSupervisors.open = false"
+                />
+            </div>
+        </template>
+    </DefaultDialog>
+
 </template>
 
-
 <script>
-import draggable from 'vuedraggable'
-import SegmentFormModal from "../../components/Segment/SegmentFormModal";
-import ButtonsModal from '../../components/Segment/ButtonsModal.vue';
+const fields = [
+    "name",
+    "email",
+    "username",
+    "password",
+    "key",
+    "secret",
+    "token",
+    "active"
+];
+
+const CustomMessages = {
+    module: {
+        title: '¡Ups! Olvidaste seleccionar un módulo',
+        noexist: 'Recuerda que cuando segmentas por criterios, es necesario que selecciones mínimo un módulo.',
+        nodata: 'Selecciona uno o varios modulos'
+    }
+}
+
+import Segment from "../Blocks/Segment";
+import SegmentAlertModal from "../Blocks/SegmentAlertModal";
+import SegmentByDocument from "../Blocks/SegmentByDocument";
+import ModalUsersSupervisors from "./ModalUsersSupervisors";
 
 export default {
     components: {
-    draggable,
-    SegmentFormModal,
-    ButtonsModal
+    Segment,
+    SegmentAlertModal,
+    SegmentByDocument,
+    ModalUsersSupervisors
 },
     props: {
-        value: Boolean,
+        options: {
+            type: Object,
+            required: true
+        },
         width: String,
-        segmentdata: Object,
-        limitOne: {
-            type:Boolean,
-            default:false
+        model_type: String,
+        model_id: Number,
+        code: {
+            type: String,
+            default: null
         },
         tabs_title:{
             type: String,
             default: 'Segmentación'
         },
+        limitOne: {
+            type:Boolean,
+            default:false
+        },
+        for_section: {
+            type: String,
+            default: null
+        }
     },
     data() {
         return {
-            disabled_btn_next: true,
-            stepper_box_btn1: true,
-            stepper_box_btn2: true,
-            stepper_box_btn3: false,
-            stepper_box: 1,
-            cancelLabel: "Cancelar",
-            list_segments:[],
-            sections: {
-                showAdvancedOptions: false
-            },
-            modalDateStart: {
-                open: false,
-            },
-            modalDateEnd:{
-                open: false,
-            },
-            drag: false,
-            expand_cursos: true,
-            actividades_expanded: [],
-            tipo_actividades: [
-                {
-                    text: "Se califica al alumno",
-                    value: "trainer_user"
-                },
-                {
-                    text: "Se califica al entrenador",
-                    value: "user_trainer"
-                }
-            ],
-            dialog: false,
-            file: null,
-            search_text: null,
-            results_search: [],
-            disabled_add_courses: false,
-            isLoading: false,
-            messageActividadesEmpty: false,
-            formRules: {
-                titulo_descripcion: [
-                    v => !!v || 'Campo requerido',
-                    v => (v && v.length <= 280) || 'Máximo 280 caracteres.',
-                ],
-                actividad: [
-                    v => !!v || 'Campo requerido',
-                ],
-            },
-            modalAlert: {
-                ref: 'modalAlert',
-                title: 'Alerta',
-                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Se califica al alumno"',
+
+            modalUserSupervisors: {
+                ref: 'ModalUsersSupervisors',
                 open: false,
                 endpoint: '',
-                confirmLabel:"Entendido",
-                hideCancelBtn:true,
             },
-            selects: {
-                type_checklist: [
-                    {"id": "libre", "name": "Libre"},
-                    {"id": "curso", "name": "Por curso"},
-                ]
-            },
-            type_checklist: "libre",
-            // data segmentacion
-            modalFormSegmentationOptions: {
-                ref: 'SegmentFormModal',
-                open: false,
-                persistent: true,
-                base_endpoint: '/segments',
-                confirmLabel: 'Guardar',
-                resource: 'segmentación',
-            },
-            // data segmentacion
+            list_criteria: [],
+            list_criteria_selected: [],
+            // steps
+                step_title: '',
+                disabled_btn_next: true,
+                stepper_box_btn1: true,
+                stepper_box_btn2: true,
+                stepper_box_btn3: false,
+                stepper_box_btn4: false,
+                stepper_box: 1,
+                cancelLabel: "Cancelar",
+
+            // steps
             tabs: null,
             steps: 0,
             // total: 0,
@@ -172,23 +270,15 @@ export default {
             showConfigTokens: false,
             resourceDefault: {
                 id: null,
-                name: null,
-                type_checklist: null
+                name: null
             },
-            resource: {},
-            segments: [{
-                id: `new-segment-${Date.now()}`,
-                type_code: '',
-                criteria_selected: []
-            }],
-            segment_by_document: {
-                id: `new-segment-${Date.now()}`,
-                type_code: '',
-                criteria_selected: []
-            },
+            // resource: {},
+            segments: [],
+            segment_by_document: null,
             criteria: [],
             courseModules: [],
             modulesSchools: [],
+            modulesIds: [],
 
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
@@ -207,127 +297,103 @@ export default {
             rules: {
                 // name: this.getRules(['required', 'max:255']),
             }
-            // data segmenteacion
         };
     },
-    watch: {
-        segmentdata: {
-            handler(n, o) {
-                let vue = this;
-
-                if(vue.stepper_box == 1){
-                    vue.disabledBtnModal()
-                    vue.disabled_btn_next = vue.stepper_box_btn1;
-                }
-            },
-            deep: true
-        },
-        stepper_box: {
-            handler(n, o) {
-                let vue = this;
-
-                if(vue.stepper_box == 1){
-                    vue.disabledBtnModal()
-                    vue.disabled_btn_next = vue.stepper_box_btn1;
-                }
-            },
-            deep: true
-        }
-    },
     methods: {
-        rep(){
+
+        async openModalUserSupervisors() {
             let vue = this
-        },
-        validateRequired(input) {
-            return input != undefined && input != null && input != "";
+
+            let url = 'procesos/supervisors_users'
+            let formData = JSON.stringify({
+                        model_type: vue.model_type,
+                        model_id: null,
+                        code: vue.code,
+                        segments: vue.segments,
+                        segment_by_document: vue.segment_by_document,
+                        segments_supervisors: vue.list_criteria_selected
+                    });
+
+            vue.$http
+                .post(url, formData)
+                .then(({data}) => {
+                    console.log(data);
+
+                })
+                .catch(error => {
+                    if (error && error.errors) vue.errors = error.errors;
+                    vue.hideLoader();
+                });
+
+            vue.modalUserSupervisors.supervisors = [
+                {
+                    id: 1,
+                    name: "asdas",
+                    users: [
+                        {
+                            id:1,
+                            name: "aaaa"
+                        },
+                        {
+                            id:2,
+                            name:"bbbbb"
+                        }
+                    ]
+                }
+            ]
+            vue.modalUserSupervisors.open = true
         },
         nextStep(){
             let vue = this;
-            vue.cancelLabel = "Cancelar";
+            vue.options.cancelLabel = "Cancelar";
+            vue.options.confirmLabel = "Continuar";
 
-            // if(vue.stepper_box == 1){
-            //     vue.cancelLabel = "Retroceder";
-            //     vue.stepper_box = 2;
-            // }
-            // else if(vue.stepper_box == 2){
-            //     vue.cancelLabel = "Retroceder";
-            //     vue.confirm();
-            // }
+
+            if(vue.stepper_box == 1){
+                vue.options.cancelLabel = "Retroceder";
+                vue.stepper_box = 2;
+                vue.step_title = '> Instructivo'
+            }
+            else if(vue.stepper_box == 2){
+                vue.options.cancelLabel = "Retroceder";
                 vue.confirm();
+            }
         },
         prevStep(){
             let vue = this;
             if(vue.stepper_box == 1){
                 vue.closeModal();
+                // vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 2){
-                vue.cancelLabel = "Cancelar";
+                vue.options.cancelLabel = "Cancelar";
+                vue.options.confirmLabel = "Continuar";
+                vue.options.title = "Segmentación de usuarios";
                 vue.stepper_box = 1;
-            }
-        },
-        disabledBtnModal() {
-            let vue = this;
-            vue.stepper_box_btn1 = false;
-
-            let direct_segmentation = (vue.segmentdata.segments != null && vue.segmentdata.segments.length > 0) ? vue.segmentdata.segments[0].direct_segmentation : [];
-            let segmentation_by_document = vue.segmentdata.segmentation_by_document != null && vue.segmentdata.segmentation_by_document.segmentation_by_document.length > 0;
-
-            if((direct_segmentation.length > 0 && direct_segmentation[0] == null) && !segmentation_by_document) {
-                vue.stepper_box_btn1 = true;
-            } else {
-
-                if (direct_segmentation.length > 0)  {
-                    if( direct_segmentation[0] == null ) {}
-                    else {
-                        direct_segmentation.forEach(element => {
-                            if (direct_segmentation.length < 1 || element == null || element.values_selected == undefined || element.values_selected == null){
-                                vue.stepper_box_btn1 = true;
-                            }
-                        });
-                    }
-                }
             }
         },
         closeModal() {
             let vue = this;
-            vue.expand_cursos = true;
-            vue.actividades_expanded = [];
-            vue.search_text = null;
-            vue.resetValidation()
-            vue.$emit("onClose");
+            // vue.options.open = false
+            vue.resetSelects();
+            vue.resetValidation();
+
+            // alert modal info
+            vue.modalInfoOptions.hideConfirmBtn = false;
+            vue.criteriaIndexModal = 0;
+            vue.stackModals.continues = [];
+
+            // clean segment_by_document_clean
+            vue.segment_by_document_clean = !vue.segment_by_document_clean;
+
+            vue.$emit("onCancel");
+            // vue.$refs["SegmentByDocument"].resetFields();
         },
         resetValidation() {
             let vue = this;
-            console.log('resetValidation')
-            vue.search_text = null
-            vue.results_search = []
-            vue.stepper_box = 1
-
-            // if (vue.$refs.modalFormSegmentationOptions)
-            //     vue.$refs.modalFormSegmentationOptions.closeModal()
-        },
-        confirm() {
-            let vue = this;
-            vue.segmentdata.list_segments = {
-                'segments' : vue.segmentdata.segments,
-                'model_type': "App\\Models\\Benefit",
-                'model_id': null,
-                'code': "direct-segmentation"
-            };
-            vue.segmentdata.list_segments_document = {
-                'segment_by_document' : vue.segmentdata.segmentation_by_document,
-                'model_type': "App\\Models\\Benefit",
-                'model_id': null,
-                'code': "segmentation-by-document"
-            };
-            // const allIsValid = vue.moreValidaciones()
-
-            // if (allIsValid == 0)
-                vue.$emit("onConfirm");
-        },
-        cancel() {
-            let vue = this;
-            vue.$emit("onCancel");
+            vue.list_criteria = [];
+            vue.stepper_box = 1;
+            vue.$refs.segmentForm.resetValidation();
         },
         getNewSegment(type_code) {
             return {
@@ -351,315 +417,380 @@ export default {
                 return obj.id != segment.id;
             });
         },
-        isCourseSegmentation() {
-            return this.model_type === 'App\\Models\\Course'
-        },
-        async changeTypeChecklist() {
+        checkIfExistCriteria(stackSegments, current) {
+            const vue = this;
+            let stackMessage = [];
 
+            //local scope function
+            const VerifyCodeAndValues = (criterians, current) => {
+                let cri_state = false,
+                    cri_data = false;
+
+                for (let i = 0; i < criterians.length; i++) {
+                    const { code, values_selected } = criterians[i];
+
+                    if(code === current) {
+                        cri_state = true;
+                        cri_data = values_selected ? values_selected.length > 0 : false;
+                        break;
+                    }
+                }
+                return { cri_state, cri_data };
+            };
+
+            const SetMessageByCurrent = (customMessage, stateVerify, segIndex) => {
+
+                const { noexist, nodata, title } = customMessage;
+                const { cri_state, cri_data } = stateVerify;
+
+                const state = (!cri_state || !cri_data);
+                let message;
+
+                if(!cri_state) message = `${noexist}`;
+                else if(!cri_data) message = `${nodata} en la segmentación ${segIndex}, para continuar.`;
+                else message = null;
+
+                return { state, message, title, detail: { cri_data, cri_state } };
+            };
+
+            for (let i = 0; i < stackSegments.length; i++) {
+                const { criteria_selected } = stackSegments[i];
+
+                const stateVerify = VerifyCodeAndValues(criteria_selected, current);
+                const stateMessage = SetMessageByCurrent(CustomMessages[current], stateVerify, i + 1);
+
+                if(stateMessage.state) stackMessage.push(stateMessage);
+            }
+
+            return stackMessage;
+        },
+        setAndOpenAlertModal(responseCheck) {
+            const vue = this;
+            const count = responseCheck.length;
+
+            for (let i = 0; i < count; i++) {
+                const responseData = responseCheck[i];
+                const { message, title } = responseData;
+                vue.modalInfoOptions.resource = message;
+                vue.modalInfoOptions.title = title;
+
+                const { cri_state, cri_data } = responseData.detail;
+
+                if(cri_state && !cri_data) vue.modalInfoOptions.hideConfirmBtn = true;
+                else vue.modalInfoOptions.hideConfirmBtn = true;
+
+                if(vue.criteriaIndexModal === i) {
+                    vue.criteriaIndexModal = i + 1;
+                    vue.openFormModal(vue.modalInfoOptions, null, null, title);
+                    break;
+                }
+            }
+
+            let continues = [];
+            let backers = [];
+
+            for (let i = 0; i < count; i++) {
+                const responseData = responseCheck[i];
+                const { cri_state, cri_data } = responseData.detail;
+
+                //continues count
+                if(cri_state && !cri_data) backers.push(i);
+                else continues.push(i);
+            }
+
+            vue.stackModals.continues = continues;
+            vue.stackModals.backers = backers;
+        },
+        continueRegister(flag) {
+            const vue = this;
+            vue.confirmModal();
+        },
+        backRegister() {
+            const vue = this;
+            vue.criteriaIndexModal = 0;
+        },
+        showModalCondition(){
+            const vue = this;
+            const responseCheck = vue.checkIfExistCriteria(vue.segments, 'module');
+
+            let state = true;
+
+            if(responseCheck.length) {
+                if(vue.criteriaIndexModal) {
+                    const continuesCount = vue.stackModals.continues.length;
+
+                    if(vue.criteriaIndexModal === continuesCount){
+                        state = true;
+                    } else {
+                        vue.setAndOpenAlertModal(responseCheck);
+                        state = false;
+                    }
+                } else {
+                    vue.setAndOpenAlertModal(responseCheck);
+                    state = false;
+                }
+            }
+
+            return state;
+        },
+        confirmModal() {
+            let vue = this;
+            vue.criteriaIndexModal = 0;
+            vue.options.cancelLabel = "Cancelar";
+            vue.options.confirmLabel = "Continuar";
+console.log(vue.options);
+console.log(vue.segments);
+            if(vue.stepper_box == 1)
+            {
+                vue.list_criteria = [];
+                if(vue.segments.length > 0) {
+                    vue.segments.forEach(element => {
+                        if(element.criteria_selected.length > 0) {
+                            element.criteria_selected.forEach(item => {
+                                vue.$nextTick(() => {
+                                    vue.list_criteria.push(item)
+                                })
+                            });
+                        }
+                    });
+                }
+
+                vue.stepper_box = 2;
+                vue.options.title = "Segmentación de usuarios > <b>Vinculación por criterios</b>";
+                vue.options.cancelLabel = "Retroceder";
+                vue.options.confirmLabel = "Guardar";
+            }
+            else if(vue.stepper_box == 2) {
+                vue.errors = [];
+
+                this.showLoader();
+
+                const validateForm = vue.validateForm("segmentForm");
+                const edit = vue.options.action === "edit";
+
+                // let base = `${vue.options.base_endpoint}`;
+                let base = 'procesos/segments';
+                let url = `${base}/store`;
+
+                // let method = edit ? 'PUT' : 'POST';
+                let method = "POST";
+
+                // === check criteria and open alert === SEGMENTACION DIRECTA ===
+                if(vue.segments.length && vue.tabs === 0) {
+                    const state = vue.showModalCondition();
+                    if(!state) return;
+                }
+                // === check criteria and open alert === SEGMENTACION DIRECTA ===
+
+                // if (validateForm && validateSelectedModules) {
+                if (validateForm) {
+                    // let formData = vue.getMultipartFormData(method, vue.segments, fields);
+                    let formData = JSON.stringify({
+                        model_type: vue.model_type,
+                        model_id: vue.resource.id,
+                        code: vue.code,
+                        segments: vue.segments,
+                        segment_by_document: vue.segment_by_document,
+                        segments_supervisors: vue.list_criteria_selected
+                    });
+
+                    vue.$http
+                        .post(url, formData)
+                        .then(({data}) => {
+
+                            vue.$emit("onConfirm");
+                            vue.closeModal();
+                            vue.showAlert(data.data.msg);
+
+                            vue.hideLoader();
+                        })
+                        .catch(error => {
+                            if (error && error.errors) vue.errors = error.errors;
+                            vue.hideLoader();
+                        });
+                }
+            }
+        },
+        resetSelects() {
+            let vue = this;
+            vue.tabs = null;
+
+            //reset selects at blocks
+            for(const segment of vue.segments) {
+                vue.borrarBloque(segment);
+            }
+        },
+        async loadData(resource) {
+            let vue = this;
+            vue.errors = [];
+
+            vue.resource = resource;
+
+            let base = `${vue.options.base_endpoint}`;
+            let url = resource
+                ? `${base}/${resource.id}/edit`
+                : `${base}/create`;
+
+            url = url + "?model_type=" + vue.model_type +
+                "&model_id=" + resource.id;
+
+            await vue.$http.get(url).then(({data}) => {
+                let _data = data.data;
+
+                vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
+                vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
+
+                if (vue.segments.length === 0) this.addSegmentation();
+                if (vue.segment_by_document === undefined) {
+                    vue.segment_by_document = {
+                        criteria_selected: []
+                    };
+                }
+                vue.criteria = _data.criteria;
+                vue.courseModules = _data.courseModules;
+                vue.total = _data.users_count;
+
+                // Replace modules with course's school modules
+
+                if (vue.isCourseSegmentation()) {
+
+                    let courseModulesIds = [];
+                    vue.courseModules.forEach(cm => courseModulesIds.push(cm.module_id))
+
+                    // Replace modules in criteria collection
+                    let modules = [];
+                    vue.criteria.forEach((c, index, collection) => {
+                        if (c.code === 'module') {
+                            collection[index].values = c.values.filter(v => {
+                                return courseModulesIds.includes(v.id)
+                            })
+                            modules = collection[index].values
+                        }
+                    })
+
+                    // Replace modules in existing segments
+
+                    vue.segments.forEach(s => {
+                        s.criteria_selected.forEach((cs, index, collection) => {
+                            if (cs.code === 'module') {
+                                collection[index].values = modules;
+                            }
+                        })
+                    })
+
+                }
+            });
+
+            // When model type is course, load module ids
+
+            if (resource.id && vue.isCourseSegmentation()) {
+                await vue.loadModulesFromCourseSchools(resource.id)
+            }
+
+            return 0;
+        },
+        /**
+         * Load modules ids from schools the course belongs to
+         * @param courseId
+         * @returns {Promise<void>}
+         */
+        async loadModulesFromCourseSchools(courseId) {
+            if (!this.resource) return
+            let url = `${this.options.base_endpoint}/modules/course/${courseId}`;
+            try {
+                const response = await this.$http.get(url);
+
+                if (response.data.data) {
+                    this.modulesIds = response.data.data.modulesIds
+                    this.modulesSchools = response.data.data.modulesSchools
+
+                    // When there is no criteria selected, adds
+                    // module criteria and select modules from
+                    // course schools
+
+                    // let moduleCriteria = this.criteria.find(c => c.code === 'module')
+                    // if (moduleCriteria) {
+                    //     if (this.segments[0].criteria_selected.length === 0) {
+                    //         moduleCriteria.values_selected = moduleCriteria.values.filter(v => modulesIds.includes(v.id))
+                    //         this.segments[0].criteria_selected.push(moduleCriteria)
+                    //     }
+                    // }
+                }
+            } catch (ex) {
+                console.log(ex)
+            }
+        },
+        loadSelects() {
+            let vue = this;
+        },
+        addUser(user) {
             let vue = this;
 
-            console.log(vue.resource.type_checklist);
-            console.log(vue.type_checklist);
-            vue.type_checklist = vue.resource.type_checklist;
+            const already_added = vue.segment_by_document.criteria_selected.filter(el => el.document == user.document).length > 0;
+
+            if (!already_added) {
+
+                vue.segment_by_document.criteria_selected.push(user)
+
+                vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user, 'remove');
+            }
         },
+        deleteUser(user) {
+            let vue = this;
+
+            const index = vue.segment_by_document.criteria_selected.findIndex(el => el.document == user.document);
+
+            if (index !== -1) {
+
+                vue.segment_by_document.criteria_selected.splice(index, 1);
+
+                // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
+            }
+        },
+        isCourseSegmentation() {
+            return this.model_type === 'App\\Models\\Course'
+        }
     }
 };
 </script>
-<style>
-.list-cursos-carreras {
-    width: 500px;
-    white-space: unset;
-}
-
-.ghost {
-    opacity: 0.5;
-    background: #c8ebfb;
-}
-
-.flip-list-move {
-    transition: transform 0.5s;
-}
-
-.no-move {
-    transition: transform 0s;
-}
-
-.txt-white-bold {
-    color: white !important;
-    font-weight: bold !important;
-}
-
-.v-input__icon {
-    padding-bottom: 12px;
-}
-
-.v-icon.v-icon.v-icon--link {
-    color: #1976d2;
-}
-
-.icon_size .v-icon.v-icon {
-    font-size: 31px !important;
-}
-
-.lista-boticas {
-    list-style-type: disc;
-    -webkit-columns: 3;
-    -moz-columns: 3;
-    columns: 3;
-    list-style-position: inside;
-}
-
-.fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
-}
-
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
-{
-    opacity: 0;
-}
-
-.custom-draggable, .custom-draggable span {
-    width: 100%;
-}
-
-.v-expansion-panel-header {
-    padding: 0.7rem !important;
-}
-.bx_steps .v-text-field__slot label.v-label,
-.bx_steps .v-select__slot label.v-label,
-.text_default {
-    color: #434D56;
-    font-weight: 400;
-    font-family: "Nunito", sans-serif;
-    line-height: 20px;
-    letter-spacing: 0.1px;
-    font-size: 13px;
-}
-.box_info_checklist_1 {
-    text-align: justify;
-}
-.v-stepper__header.stepper_dots {
-    justify-content: center;
-    height: initial;
-}
-.v-stepper__header.stepper_dots .v-divider {
-    margin: 0;
-    flex: auto;
-    border-color: #5458ea !important;
-    border-width: 2px;
-    width: 30px;
-    min-width: 30px;
-    max-width: 30px;
-}
-.v-stepper__header.stepper_dots .v-stepper__step {
-    padding: 10px 0;
-    margin: 0;
-}
-.v-stepper__header.stepper_dots .v-stepper__step span.v-stepper__step__step {
-    margin: 0;
-}
-.v-stepper__header.stepper_dots .v-stepper__step:hover {
-    background: none;
-}
-.v-stepper.stepper_box {
-    box-shadow: none;
-}
-.txt_desc textarea {
-    min-height: 280px;
-}
-.v-tab span.title_sub {
-    font-size: 16px;
-    color: #B9E0E9;
-    display: flex;
-    justify-content: center;
-    margin: 12px 0;
-    font-family: "Nunito", sans-serif;
-    font-weight: 400;
-    position: relative;
-    text-transform: initial;
-    letter-spacing: 0.1px;
-}
-.v-tab.v-tab--active span.title_sub,
-span.title_sub {
-    font-size: 16px;
-    color: #5458EA;
-    display: flex;
-    justify-content: center;
-    margin: 12px 0;
-    font-family: "Nunito", sans-serif;
-    font-weight: 700;
-    position: relative;
-    text-transform: initial;
-    letter-spacing: 0.1px;
-}
-.v-tab.v-tab--active span.title_sub:after,
-span.title_sub:after {
-    content: '';
-    border-bottom: 2px solid #5458EA;
-    width: 112px;
-    position: absolute;
-    bottom: -2px;
-}
-.v-tab span.title_sub:after  {
-    content: none;
-}
-button.btn_secondary {
-    background: none !important;
-    border: none;
-    box-shadow: none;
-}
-button.btn_secondary span.v-btn__content {
-    color: #5458EA;
-    font-weight: 700;
-    font-size: 12px;
-    font-family: "Nunito", sans-serif;
-}
-button.btn_secondary span.v-btn__content i{
-    font-size: 14px;
-    line-height: 1;
-}
-.divider_light{
-    border-color: #94DDDB !important;
-}
-.item-draggable.activities {
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-    margin: 10px 0;
-}
-.item-draggable.activities textarea,
-.no-white-space .v-select__selection--comma,
-.item-draggable.activities .toggle_text_default label.v-label {
-    color: #434D56;
-    font-weight: 400;
-    font-family: "Nunito", sans-serif;
-    line-height: 20px;
-    letter-spacing: 0.1px;
-    font-size: 12px;
-}
-.no-white-space .v-select__selection--comma {
-    white-space: initial;
-    line-height: 13px;
-    font-size: 13px;
-}
-.item-draggable.activities textarea {
-    font-size: 13px;
-}
-.no-white-space .v-input__append-inner .v-input__icon {
-    padding: 0;
-}
-.item-draggable.activities .default-toggle.default-toggle.v-input--selection-controls {
-    margin-top: initial !important;
-}
-.box_resultados,
-.box_seleccionados {
-    height: 130px;
-    overflow-y: auto;
-    border-radius: 8px;
-    border: 1px solid #D9D9D9;
-    padding: 10px 0;
-}
-.box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
-.box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
-    opacity: 0;
-}
-.bx_message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-span.v-stepper__step__step {
-    color: #5458ea !important;
-    background-color: #5458ea !important;
-    border-color: #5458ea !important;
-    position: relative;
-}
-span.v-stepper__step__step:before {
-    content: '';
-    background: #fff;
-    height: 17px;
-    width: 17px;
-    left: 50%;
-    top: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-}
-span.v-stepper__step__step:after {
-    content: '';
-    background-color: #5458ea;
-    height: 6px;
-    width: 6px;
-    left: 50%;
-    top: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-}
-.v-stepper__step.v-stepper__step--inactive span.v-stepper__step__step,
-.v-stepper__step.v-stepper__step--inactive span.v-stepper__step__step:after,
-.v-stepper__step.v-stepper__step--inactive .v-divider {
-    color: #E4E4E4 !important;
-    background-color: #E4E4E4 !important;
-    border-color: #E4E4E4 !important;
-}
-.bx_type_checklist .v-input__icon.v-input__icon--append,
-.bx_steps .v-input__icon.v-input__icon--append {
-    margin: 0;
-    padding: 0;
-}
-.bx_steps .v-input__slot {
-    min-height: 40px !important;
-}
-.bx_steps .v-text-field--outlined .v-label {
-    top: 10px;
-}
-.bx_steps .v-btn--icon.v-size--default {
-    height: 22px;
-    width: 22px;
-}
-.bx_steps .v-select__slot,
-.v-dialog.v-dialog--active .bx_steps .v-select--is-multi.v-autocomplete .v-select__slot {
-    padding: 0 !important;
-}
-.bx_steps .v-text-field__details {
-    display: none;
-}
-.bx_step1 .default-toggle {
-    margin-top: 3px !important;
-}
-.bx_step1 .default-toggle .v-input__slot label.v-label {
-    color: #434D56;
-    font-weight: 400;
-    font-family: "Nunito", sans-serif;
-    line-height: 20px;
-    letter-spacing: 0.1px;
-    font-size: 13px;
-}
-.v-stepper__step.v-stepper__step--complete span.v-stepper__step__step:before,
-.v-stepper__step.v-stepper__step--complete span.v-stepper__step__step:after {
-    content: initial;
-}
-.bx_steps .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
-    margin-top: 10px !important;
-}
-.v-card__actions.actions_btn_modal button.default-modal-action-button.btn_back.v-btn.v-btn--flat span.v-btn__content {
-    color: #5458ea;
-}
-.v-menu.bx_calendar_top .v-menu__content {
-    bottom: 0px;
-    top: initial !important;
-    right: calc(100% - 10px);
-    left: initial !important;
-    transform-origin: right bottom !important;
-}
-.bx_seg .v-select__slot .v-input__append-inner,
-.bx_steps .bx_seg .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo).v-text-field--outlined .v-input__append-inner {
-    margin-top: 6px !important;
-}
-.border-error .v-input__slot fieldset {
-    border-color: #FF5252 !important;
-}
-.bx_card_modal_segment .bx_steps.bx_step2 {
-    box-shadow: none;
+<style lang="scss">
+.dialog_segment_process {
+    .v-stepper, .v-stepper__header {
+        box-shadow: none !important;
+    }
+    .v-stepper__header.stepper_dots {
+        justify-content: center;
+        height: initial;
+    }
+    .v-stepper__header.stepper_dots .v-divider {
+        margin: 0;
+        flex: auto;
+        border-color: #5458ea !important;
+        border-width: 2px;
+        width: 30px;
+        min-width: 30px;
+        max-width: 30px;
+    }
+    .v-stepper__header.stepper_dots .v-stepper__step {
+        padding: 10px 0;
+        margin: 0;
+    }
+    .v-stepper__header.stepper_dots .v-stepper__step span.v-stepper__step__step {
+        margin: 0;
+    }
+    .v-stepper__header.stepper_dots .v-stepper__step:hover {
+        background: none;
+    }
+    .bx_criteria_selected {
+        height: 350px;
+        border: 1px solid #D9D9D9;
+        width: 100%;
+        margin-top: 12px;
+        border-radius: 8px;
+        span.v-chip .v-icon.v-icon.v-icon--link {
+            color: #fff !important;
+            margin-top: -5px;
+        }
+    }
 }
 </style>

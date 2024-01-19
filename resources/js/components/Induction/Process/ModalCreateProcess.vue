@@ -40,6 +40,34 @@
                         </v-row>
                         <v-row>
                             <v-col cols="12">
+                                <div class="row_dates d-flex">
+                                    <div class="d-flex align-center">
+                                        <span class="text_default">Fecha de inicio del proceso:</span>
+                                        <div>
+                                            <DefaultInputDate
+                                                placeholder="Ingresar fecha"
+                                                reference-component="StartProcessDate"
+                                                :options="modalDateOptions"
+                                                label=""
+                                                v-model="process.starts_at"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-center">
+                                        <span class="text_default ms-3">Fecha de fin del proceso: (opcional)</span>
+                                        <DefaultInputDate
+                                            placeholder="Ingresar fecha"
+                                            reference-component="StartProcessDate"
+                                            :options="modalDateOptions2"
+                                            label=""
+                                            v-model="process.finishes_at"
+                                        />
+                                    </div>
+                                </div>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="12">
                                 <div class="bx_switch_attendance">
                                     <v-switch
                                         class="default-toggle"
@@ -94,7 +122,7 @@
 
 <script>
 import draggable from 'vuedraggable'
-import DefaultButtonModalSteps from '../globals/DefaultButtonModalSteps.vue';
+import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
 
 export default {
     components: {
@@ -107,6 +135,14 @@ export default {
     },
     data() {
         return {
+            modalDateOptions: {
+                ref: 'DateEvent',
+                open: false,
+            },
+            modalDateOptions2: {
+                ref: 'DateEvent',
+                open: false,
+            },
             disabled_btn_next: true,
             process: {
                 limit_absences: false,

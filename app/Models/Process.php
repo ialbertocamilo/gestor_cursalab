@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class Process extends BaseModel
@@ -19,15 +20,20 @@ class Process extends BaseModel
         'active',
         'logo',
         'background_web',
-        'background_web',
+        'background_mobile',
         'color',
         'icon_finished',
+        'config_completed',
+        'certificate_template_id',
+        'starts_at',
+        'finishes_at'
     ];
 
     protected $casts = [
         'active' => 'boolean',
         'count_absences' => 'boolean',
         'limit_absences' => 'boolean',
+        'config_completed' => 'boolean',
     ];
 
     protected $hidden = [
@@ -44,6 +50,11 @@ class Process extends BaseModel
         return $this->hasMany(Stage::class, 'process_id', 'id');
     }
 
+    public function segments()
+    {
+        return $this->morphMany(Segment::class, 'model');
+    }
+
 
     protected function getProcessesList( $data )
     {
@@ -52,7 +63,7 @@ class Process extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $processes_query = Process::with(['instructions'])->where('workspace_id', $workspace->id);
+        $processes_query = Process::with(['instructions', 'segments', 'stages'])->where('workspace_id', $workspace->id);
 
         $field = request()->sortBy ?? 'created_at';
         $sort = !is_null(request()->sortDesc) ? (request()->sortDesc == 'true' ? 'DESC' : 'ASC') : 'DESC';
@@ -74,13 +85,23 @@ class Process extends BaseModel
         $processes_items = $processes->items();
         foreach($processes_items as $item) {
             $item->title_process = $item->title;
-            // $item->instructions = [];
-            // $item->benefit_speaker = $item->speaker?->name ?? null;
-            // $item->benefit_type = $item->type?->name ?? null;
-            // $item->benefit_stars = null;
 
             $stages_route = route('stages.index', [$item->id]);
+            $certificate_route = ($item->certificate_template_id) ?
+                                        route('process.diploma.edit', [$item->id, $item->certificate_template_id]) :
+                                        route('process.diploma.create', [$item->id]);
+
             $item->stages_route = $stages_route;
+            $item->certificate_route = $certificate_route;
+            $item->assigned_users = $item->segments->count();
+            if($item->segments->count())
+                $item->progress_process = 0;
+            else
+                $item->progress_process = null;
+            $item->stages_count = $item->stages->count();
+
+            $item->starts_at = date('Y-m-d', strtotime($item->starts_at));
+            $item->finishes_at = date('Y-m-d', strtotime($item->finishes_at));
         }
 
         $response['data'] = $processes->items();
@@ -113,8 +134,27 @@ class Process extends BaseModel
 
             else:
                 $process = self::create($data);
-
             endif;
+
+
+            //instructions
+            if($data['instructions'])
+            {
+                $instructions = json_decode($data['instructions']);
+                if(is_array($instructions))
+                {
+                    foreach ($instructions as $key => $instruction) {
+                        Instruction::updateOrCreate(
+                            ['id' => str_contains($instruction->id, 'n-') ? null : $instruction->id],
+                            [
+                                'description' => $instruction->description,
+                                'process_id' => $process->id,
+                                'position' => $key + 1,
+                            ]
+                        );
+                    }
+                }
+            }
 
             DB::commit();
         } catch (\Exception $e) {

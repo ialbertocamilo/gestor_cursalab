@@ -41,8 +41,8 @@
 
 <script>
 const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
-import ModalUpgrade from '../../../layouts/ModalUpgrade';
-import GeneralStorageEmailSendModal from '../../../layouts/General/GeneralStorageEmailSendModal';
+import ModalUpgrade from '../../../../layouts/ModalUpgrade';
+import GeneralStorageEmailSendModal from '../../../../layouts/General/GeneralStorageEmailSendModal';
 export default {
     components:{ModalUpgrade,GeneralStorageEmailSendModal},
     props:{

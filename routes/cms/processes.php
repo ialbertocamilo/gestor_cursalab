@@ -11,6 +11,8 @@ Route::controller(ProcessController::class)->group(function() {
 	Route::put('/update/{process}', 'update')->name('process.update');
 
     Route::get('/search', 'search');
+    Route::post('/supervisors_users', 'supervisorsUsers');
+    Route::post('/segments/store', 'storeSegments');
     // Route::get('/search/{process}', 'getData')->name('process.getData');
     // Route::get('/segments/{process}', 'getSegments')->name('process.getSegments');
     // Route::post('/segments/save', 'saveSegment');
@@ -25,3 +27,4 @@ Route::controller(ProcessController::class)->group(function() {
 
 // Stages
 Route::prefix('{process}/etapas')->group(base_path('routes/cms/stages.php'));
+Route::prefix('{process}/diploma')->group(base_path('routes/cms/induccion/diploma.php'));

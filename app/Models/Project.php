@@ -11,11 +11,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Project extends BaseModel
 {
     use HasFactory;
-    protected $fillable = ['workspace_id','course_id','indications','active'];
+    protected $fillable = ['workspace_id','course_id','indications','active', 'model_id', 'model_type'];
     use SoftDeletes;
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function model()
+    {
+        return $this->morphTo();
     }
 
     public function resources()
@@ -30,7 +35,7 @@ class Project extends BaseModel
         switch ($request->type) {
             case 'module':
                 $current_workspace = get_current_workspace();
-                $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get(); 
+                $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get();
                 break;
             case 'school':
                 $data = School::where('active',1)
@@ -65,10 +70,10 @@ class Project extends BaseModel
                     // DB::raw('CASE WHEN p.id IS NULL and p.deleted_at is null THEN 0 courses 1 END AS disabled')
                 )
                 ->paginate(10)->map(function($course){
-                    $course['disabled']  = 0; 
+                    $course['disabled']  = 0;
                     if(Project::where('course_id',$course->id)->select('id')->first()){
                         $course['name'] = $course['name'].' (Ya tiene una tarea asignada)';
-                        $course['disabled']  = 1; 
+                        $course['disabled']  = 1;
                     }
                     return $course;
                 });
@@ -142,18 +147,21 @@ class Project extends BaseModel
             DB::beginTransaction();
             if (!$project) {
                 $project = new Project();
-                $project->course_id = $request_project['course_id'];
+                // $project->course_id = $request_project['course_id']; //crusbel - revisar cambio se puede cruzar con induccion con capa
+                $project->model_id = $request_project['model_id'];
+                $project->model_type = $request_project['model_type'];
                 $project->workspace_id  = get_current_workspace()->id;
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
             $project->save();
             //Verificar espacio del storage:
-            
-            ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);  
+
+            ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);
             DB::commit();
             return [
                 'msg'=>'La tarea se ha creado correctamente',
-                'still_has_storage'=>true
+                'still_has_storage'=>true,
+                'project' => $project?->id ?? null
             ];
         // } catch (\Exception $e) {
         //     DB::rollBack();

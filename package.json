@@ -40,6 +40,7 @@
         "node-sass": "^4.14.0",
         "prismjs": "^1.27.0",
         "qrcode": "^1.5.3",
+        "vue-advanced-cropper": "^1.11.6",
         "vue-apexcharts": "^1.6.2",
         "vue-doc-preview": "^0.3.2",
         "vue-router": "^3.5.3",

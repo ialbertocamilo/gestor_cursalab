@@ -200,8 +200,8 @@ import TemaMultimediaTypes from "./Topics/TemaMultimediaTypes";
 import draggable from 'vuedraggable'
 import TemaValidacionesModal from "./Topics/TemaValidacionesModal";
 import Editor from "@tinymce/tinymce-vue";
-import DialogConfirm from "../../components/basicos/DialogConfirm";
-import DefaultRichText from "../../components/globals/DefaultRichText";
+import DialogConfirm from "../../../components/basicos/DialogConfirm";
+import DefaultRichText from "../../../components/globals/DefaultRichText";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type', 'model_id', 'model_type', 'requirement', 'school_id'];

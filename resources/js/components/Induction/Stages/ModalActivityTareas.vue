@@ -133,11 +133,11 @@
 </template>
 
 <script>
-import SelectMultimedia from '../forms/SelectMultimedia.vue'
+import SelectMultimedia from '../../forms/SelectMultimedia.vue'
 
-import DefaultStorageAlertModal from '../../layouts/Default/DefaultStorageAlertModal.vue';
-import GeneralStorageEmailSendModal from '../../layouts/General/GeneralStorageEmailSendModal.vue';
-import GeneralStorageModal from '../../layouts/General/GeneralStorageModal.vue';
+import DefaultStorageAlertModal from '../../../layouts/Default/DefaultStorageAlertModal.vue';
+import GeneralStorageEmailSendModal from '../../../layouts/General/GeneralStorageEmailSendModal.vue';
+import GeneralStorageModal from '../../../layouts/General/GeneralStorageModal.vue';
 
 export default {
     components: { SelectMultimedia,DefaultStorageAlertModal,GeneralStorageEmailSendModal,GeneralStorageModal },

@@ -53,7 +53,10 @@
                                                             reference-component="StartProcessDate"
                                                             :options="modalDateOptions"
                                                             label=""
-                                                            v-model="process.date_start"
+                                                            v-model="process.starts_at"
+                                                            :offset-y="false"
+                                                            :offset-x="true"
+                                                            :top="true"
                                                         />
                                                     </div>
                                                 </div>
@@ -64,7 +67,11 @@
                                                         reference-component="StartProcessDate"
                                                         :options="modalDateOptions2"
                                                         label=""
-                                                        v-model="process.date_final"
+                                                        v-model="process.finishes_at"
+                                                        :offset-y="false"
+                                                        :offset-x="true"
+                                                        :top="true"
+                                                        :left="true"
                                                     />
                                                 </div>
                                             </div>
@@ -139,11 +146,11 @@
                                                                             outlined
                                                                             dense
                                                                             hide-details="auto"
-                                                                            placeholder="Escribre aqui una indicación"
-                                                                            v-model="instruction.title"
+                                                                            placeholder="Escribe aquí una indicación"
+                                                                            v-model="instruction.description"
                                                                             class="txt_inst"
-                                                                            @focus="instructionSelected(instruction.title)"
-                                                                            @input="instructionSelected(instruction.title)"
+                                                                            @focus="instructionSelected(instruction.description)"
+                                                                            @input="instructionSelected(instruction.description)"
                                                                         ></v-textarea>
                                                                     </div>
                                                                     <div class="ii3 d-flex align-center">
@@ -208,10 +215,10 @@
                                                     <div  v-show="tab_preview_images == 'mobile'">
                                                         <DefaultSelectOrUploadMultimedia
                                                             ref="inputFondoMobile"
-                                                            v-model="resource.fondo_mobile"
+                                                            v-model="process.fondo_mobile"
                                                             label="Fondo (720 x 1280px)"
                                                             :file-types="['image']"
-                                                            @onSelect="setFile($event, resource, 'fondo_mobile')"
+                                                            @onSelect="setFile($event, process, 'fondo_mobile')"
                                                             @onPreview="fondo_mobile_selected = $event"
                                                             @croppedImage="fondo_mobile_cropped = $event"
                                                             :sizeCropp="{width:720, height:1280}"
@@ -222,10 +229,10 @@
                                                     <div v-show="tab_preview_images == 'web'">
                                                         <DefaultSelectOrUploadMultimedia
                                                             ref="inputFondoWeb"
-                                                            v-model="resource.fondo_web"
+                                                            v-model="process.fondo_web"
                                                             label="Fondo web (1280 x 720px)"
                                                             :file-types="['image']"
-                                                            @onSelect="setFile($event, resource, 'fondo_web')"
+                                                            @onSelect="setFile($event, process, 'fondo_web')"
                                                             @onPreview="fondo_web_selected = $event"
                                                             @croppedImage="fondo_web_cropped = $event"
                                                             :sizeCropp="{width:1280, height:720}"
@@ -482,7 +489,7 @@
 
 <script>
 import draggable from 'vuedraggable'
-import DefaultButtonModalSteps from '../globals/DefaultButtonModalSteps.vue';
+import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
 import PreviewMap from './PreviewMap.vue';
 import ModalAvatarsRepository from './ModalAvatarsRepository.vue'
 
@@ -855,13 +862,30 @@ export default {
             vue.fondo_web_selected = null
             vue.resource = {}
         },
-        confirm() {
+        async confirm() {
             let vue = this;
 
             // const allIsValid = vue.moreValidaciones()
 
             // if (allIsValid == 0)
-                vue.$emit("onConfirm", vue.process);
+            vue.process.color_selected = vue.colorSelected;
+
+            if(vue.logo_cropped)
+            {
+                let logotipo_blob = await fetch(vue.logo_cropped).then(res => res.blob());
+                vue.process.logotipo = logotipo_blob;
+            }
+            if(vue.fondo_mobile_cropped)
+            {
+                let fondo_mobile_blob = await fetch(vue.fondo_mobile_cropped).then(res => res.blob());
+                vue.process.fondo_mobile = fondo_mobile_blob;
+            }
+            if(vue.fondo_web_cropped)
+            {
+                let fondo_web_blob = await fetch(vue.fondo_web_cropped).then(res => res.blob());
+                vue.process.fondo_web = fondo_web_blob;
+            }
+            vue.$emit("onConfirm", vue.process);
         },
         showValidateActividades() {
             let vue = this
@@ -928,7 +952,7 @@ export default {
             const newID = `n-${Date.now()}`;
             const newInstruction = {
                 id: newID,
-                title: "",
+                description: "",
                 active: 1,
                 hasErrors: false
             };

@@ -125,7 +125,7 @@ import moment from 'moment'
 moment.locale("es");
 
 import Editor from "@tinymce/tinymce-vue";
-import DefaultLogoImage from "../../components/globals/DefaultLogoImage";
+import DefaultLogoImage from "../../../components/globals/DefaultLogoImage";
 import VueTimepicker from 'vue2-timepicker'
 import 'vue2-timepicker/dist/VueTimepicker.css'
 
