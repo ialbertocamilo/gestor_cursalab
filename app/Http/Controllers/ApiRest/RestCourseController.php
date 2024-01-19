@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App;
+use App\Models\RegistroCapacitacionTrainer;
 use App\Models\Workspace;
+use App\Services\FileService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate;
 use App\Http\Controllers\Controller;
@@ -321,18 +323,27 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $subworkspace = Workspace::find($user->subworkspace_id);
         $course = Course::find($request->course_id);
+
+        $criterionId = $subworkspace->registro_capacitacion->criteriaWorkersCount->id;
+        $criterionValueIdForCounting = User::getCriterionValueId($user->id, $criterionId);
+
+        $trainer = RegistroCapacitacionTrainer::find($course->registro_capacitacion->trainerAndRegistrar);
         $summary = SummaryCourse::query()
             ->where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->first();
 
-        // Encode signature with Base64 to render the template with
+        $trainerSignatureUrl = 'https://www.shutterstock.com/shutterstock/photos/2248268539/display_1500/stock-vector-handwritten-signature-for-signed-papers-and-documents-random-fake-signature-blank-template-2248268539.jpg';FileService::generateUrl($trainer->signature->path);
 
-        $signatureData = $request->get('signature');
+        $userSignatureData = $request->get('signature');
+        $trainerSignatureData = 'data:image/jpg;base64,'.base64_encode(file_get_contents($trainerSignatureUrl));
         $data = [
-            'signatureData' => $signatureData,
+            'userSignatureData' => $userSignatureData,
+            'trainerSignatureData' => $trainerSignatureData,
+            'trainer' => $trainer,
             'user' => $user,
             'company'=> $subworkspace->registro_capacitacion->company,
+            'workersCount' => User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting),
             'course' => $course,
             'summaryCourse' => $summary
         ];

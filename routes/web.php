@@ -164,6 +164,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
 
     Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('person')->middleware('hasHability:users')->group(base_path('routes/cms/person.php'));
+    Route::prefix('registrotrainer')->middleware('hasHability:users')->group(base_path('routes/cms/registrotrainer.php'));
     // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));

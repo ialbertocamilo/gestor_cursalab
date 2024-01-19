@@ -467,19 +467,22 @@
                                             </v-col>
 
                                             <v-col cols="6">
-                                                <DefaultInput
-                                                    clearable
-                                                    v-model="resource.registro_capacitacion.trainerAndRegistrar"
-                                                    label="Instructor"
-                                                    :rules="rules.trainerAndRegistrar"
+                                                <DefaultAutocomplete
+                                                    placeholder=""
                                                     dense
+                                                    label="Instructor"
+                                                    v-model="resource.registro_capacitacion.trainerAndRegistrar"
+                                                    :items="registro_capacitacion_trainers"
+                                                    item-text="name"
+                                                    clearable
+                                                    :rules="rules.dc3"
                                                 />
                                             </v-col>
                                             <v-col cols="3">
                                                 <DefaultModalButton
                                                     label="Agregar"
                                                     outlined
-                                                    @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
+                                                    @click="openFormModal(modalRegistroTrainerOptions, {type:'registro-trainer'}, 'create','Agregar Instructor')"
                                                 />
                                             </v-col>
                                             <v-col cols="3"></v-col>
@@ -501,12 +504,10 @@
                                                     :rules="rules.syllabus"
                                                     :ignoreHTMLinLengthCalculation="true"
                                                     :height="195"
-                                                    :showGenerateIaDescription="hasPermissionToUseIaDescription"
-                                                    :key="`${hasPermissionToUseIaDescription}-editor`"
-                                                    :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
+                                                    :key="`temario-editor`"
                                                     :loading="loading_description"
+                                                    :maxLength="3000"
                                                     ref="descriptionRichText"
-                                                    @generateIaDescription="generateIaDescription"
                                                 />
                                             </v-col>
 
@@ -575,6 +576,14 @@
                 @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false"
             />
+            <RegistroTrainerModal
+                :ref="modalRegistroTrainerOptions.ref"
+                v-model="modalRegistroTrainerOptions.open"
+                :options="modalRegistroTrainerOptions"
+                width="30vw"
+                @onConfirm="setTrainer"
+                @onCancel="modalRegistroTrainerOptions.open = false"
+            />
         </template>
     </DefaultDialog>
 
@@ -595,12 +604,13 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
+import RegistroTrainerModal from './RegistroTrainerModal';
 import DefaultRichText from "../../components/globals/DefaultRichText.vue";
 
 export default {
     components: {
         DefaultRichText,
-        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
+        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -801,6 +811,16 @@ export default {
                 action: null,
                 persistent: true,
             },
+            modalRegistroTrainerOptions:{
+                open:false,
+                ref: 'TrainerFormModal',
+                base_endpoint: '/person',
+                confirmLabel: 'Guardar',
+                resource: 'person',
+                title: '',
+                action: null,
+                persistent: true,
+            },
             new_value: 0,
             loading_description:false,
             limits_descriptions_generate_ia:{
@@ -813,6 +833,7 @@ export default {
                 legal_representatives:[],
                 instructors:[]
             },
+            registro_capacitacion_trainers: [],
             catalog_denominations:[]
         }
     },
@@ -1067,6 +1088,7 @@ export default {
                     vue.people.legal_representatives = response.legal_representatives;
                     vue.catalog_denominations = response.catalog_denominations;
                     vue.has_DC3_functionality = response.has_DC3_functionality;
+                    vue.registro_capacitacion_trainers = response.registro_capacitacion_trainers;
                     vue.has_registro_capacitacion_functionality = response.has_registro_capacitacion_functionality;
 
                     if (resource && resource.id) {
@@ -1139,6 +1161,11 @@ export default {
             }
             this.people.legal_representatives.push(person);
             this.resource.dc3_configuration.legal_representative = person.id;
+        },
+        setTrainer(item){
+            this.modalRegistroTrainerOptions.open = false;
+            this.registro_capacitacion_trainers.push(item);
+            this.resource.registro_capacitacion.trainerAndRegistrar = item.id;
         }
     }
 }

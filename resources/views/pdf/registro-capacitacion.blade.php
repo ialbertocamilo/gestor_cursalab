@@ -76,6 +76,16 @@
         text-align: center;
     }
 
+    .number {
+        border-right: 2px solid black;
+        width: 15px;
+        height: 20px;
+        margin-top: 8px;
+        padding-right: 3px;
+        text-align: center;
+        display: inline-block;
+    }
+
 </style>
 
 <h4 class="main-title">
@@ -107,7 +117,9 @@
                 RUC
             </div>
             <div class="cell-value">
-                {{ $company->businessNumber ?? '' }}
+                @foreach (str_split($company->businessNumber ?? '') as $char)
+                    <div class="number">{{ $char }}</div>
+                @endforeach
             </div>
         </td>
 
@@ -125,7 +137,9 @@
                 Con código CIIU Nº
             </div>
             <div class="cell-value">
-                {{ $company->CIIU ?? '' }}
+                @foreach (str_split($company->CIIU ?? '') as $char)
+                    <div class="number">{{ $char }}</div>
+                @endforeach
             </div>
         </td>
     </tr>
@@ -147,7 +161,7 @@
                 Número de trabajadores del centro laboral
             </div>
             <div class="cell-value">
-                {{ $company->workersCount ?? '' }}
+                {{ $workersCount }}
             </div>
         </td>
 
@@ -156,7 +170,7 @@
                 Capacitador y encargado del registro
             </div>
             <div class="cell-value">
-                {{ $company->trainerAndRegistrar ?? '' }}
+                {{ $trainer->name ?? '' }}
             </div>
         </td>
     </tr>
@@ -185,7 +199,9 @@
                 Documento de identificación
             </div>
             <div class="cell-value">
-                {{$user['document']}}
+                @foreach (str_split($user['document']) as $char)
+                    <div class="number">{{ $char }}</div>
+                @endforeach
             </div>
         </td>
     </tr>
@@ -251,7 +267,7 @@
                 Fecha de capacitación
             </div>
             <div class="cell-value">
-                {{ $summaryCourse['created_at'] }}
+                {{ substr($summaryCourse['created_at'], 0, 10) }}
             </div>
         </td>
 
@@ -260,7 +276,7 @@
                 Fecha de registro
             </div>
             <div class="cell-value">
-                {{ $summaryCourse['created_at'] }}
+                {{ substr($summaryCourse['created_at'], 0, 10) }}
             </div>
         </td>
     </tr>
@@ -300,12 +316,13 @@
     </tr>
     <tr>
         <td class="text-center"  style="padding-top: 16px; padding-bottom: 20px">
-            <div style="height: 80px;"></div>
+            <img src='{{ $trainerSignatureData }}' alt=""
+                 style="width: auto; height: 80px;" >
             <hr style="width: 50%">
             <span>LA EMPRESA</span>
         </td>
         <td class="text-center"  style="padding-top: 16px; padding-bottom: 20px">
-            <img src='{{ $signatureData }}' alt=""
+            <img src='{{ $userSignatureData }}' alt=""
                  style="width: auto; height: 80px;" >
             <hr style="width: 50%">
             <span>EL TRABAJADOR</span>

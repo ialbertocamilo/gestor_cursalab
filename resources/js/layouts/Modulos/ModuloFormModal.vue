@@ -227,12 +227,17 @@
                                     <v-row v-if="resource.registro_capacitacion.company"
                                            justify="left">
                                         <v-col cols="6">
-                                            <DefaultInput
-                                                label="Número de trabajadores"
-                                                v-model="resource.registro_capacitacion.company.workersCount"
-                                                :rules="rules.workersCount"
+                                            <DefaultSelect
                                                 dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaWorkersCount"
+                                                label="Criterio para conteo de trabajadores"
+                                                :rules="rules.criteriaWorkersCount"
                                             />
+
                                         </v-col>
                                         <v-col cols="6">
                                             <DefaultInput
@@ -344,12 +349,14 @@ export default {
                 CIIU: this.getRules(['required']),
                 address: this.getRules(['required']),
                 economicActivity: this.getRules(['required']),
-                appUrl: this.getRules(['required'])
+                appUrl: this.getRules(['required']),
+                criteriaWorkersCount: this.getRules(['required'])
             },
             resource: {},
             selects: {
                 main_menu: [],
                 side_menu: [],
+                workspace_criteria: []
             },
             has_registro_capacitacion_functionality: false,
             error_reinicios: false
@@ -498,6 +505,7 @@ export default {
                 .then(({data}) => {
                     vue.selects.main_menu = data.data.main_menu
                     vue.selects.side_menu = data.data.side_menu
+                    vue.selects.workspace_criteria = data.data.workspace_criteria
                     vue.has_registro_capacitacion_functionality = data.data.has_registro_capacitacion_functionality
                     if (resource) {
                         vue.resource = Object.assign({}, data.data.modulo)
