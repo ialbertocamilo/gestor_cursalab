@@ -333,7 +333,7 @@ class RestCourseController extends Controller
             ->where('course_id', $course->id)
             ->first();
 
-        $trainerSignatureUrl = 'https://www.shutterstock.com/shutterstock/photos/2248268539/display_1500/stock-vector-handwritten-signature-for-signed-papers-and-documents-random-fake-signature-blank-template-2248268539.jpg';FileService::generateUrl($trainer->signature->path);
+        $trainerSignatureUrl = FileService::generateUrl($trainer->signature->path);
 
         $userSignatureData = $request->get('signature');
         $trainerSignatureData = 'data:image/jpg;base64,'.base64_encode(file_get_contents($trainerSignatureUrl));
