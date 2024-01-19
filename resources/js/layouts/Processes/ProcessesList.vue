@@ -269,7 +269,7 @@ export default {
                     {text: "Título", value: "title_process", align: 'start', sortable: true, width: '40%'},
                     {text: "Progreso", value: "progress_process", align: 'center', sortable: false, width: '30%'},
                     {text: "Edición", value: "actions", align: 'center', sortable: false},
-                    {text: "Extras", value: "actions_extras", align: 'center', sortable: false},
+                    {text: "Opciones", value: "actions_extras", align: 'center', sortable: false},
                 ],
                 actions: [
                     {
@@ -935,8 +935,17 @@ export default {
                     'description' : item.description,
                     'limit_absences' : item.limit_absences,
                     'absences' : item.absences,
+                    'count_absences' : item.count_absences,
+                    'starts_at' : item.starts_at,
+                    'finishes_at' : item.finishes_at,
                 };
-                const fields = ['title', 'description', 'limit_absences', 'absences'];
+                const fields = ['title',
+                                'description',
+                                'limit_absences',
+                                'absences',
+                                'count_absences',
+                                'starts_at',
+                                'finishes_at',];
                 const formData = vue.getMultipartFormData(method, resource, fields);
                 // formData.append('validateForm', validateForm ? "1" : "0");
 

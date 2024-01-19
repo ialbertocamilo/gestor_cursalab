@@ -130,8 +130,8 @@ class Process extends BaseModel
 
 
             if ($process) :
+                $data['config_completed'] = true;
                 $process->update($data);
-
             else:
                 $process = self::create($data);
             endif;

@@ -50,6 +50,9 @@
                                                 :options="modalDateOptions"
                                                 label=""
                                                 v-model="process.starts_at"
+                                                :offset-y="false"
+                                                :offset-x="true"
+                                                :top="true"
                                             />
                                         </div>
                                     </div>
@@ -61,6 +64,10 @@
                                             :options="modalDateOptions2"
                                             label=""
                                             v-model="process.finishes_at"
+                                            :offset-y="false"
+                                            :offset-x="true"
+                                            :top="true"
+                                            :left="true"
                                         />
                                     </div>
                                 </div>

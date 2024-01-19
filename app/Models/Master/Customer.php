@@ -66,7 +66,7 @@ class Customer extends BaseModel
         $customer = cache('current_customer');
 
         if (!$customer) {
-            
+
             $customer_id = config('app.customer.id');
             $customer = Customer::getCurrentById($customer_id);
 
