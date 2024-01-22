@@ -16,7 +16,7 @@
 
                 <DefaultModalButton
                     :label="'Crear curso'"
-                     @click="openFormModal(modalCourseModality, null, null,'Que tipo de curso deseas agregar')"
+                     @click="openFormModal(modalCourseModality, null, null,'Selecciona qué modalidad de curso deseas crear')"
                 />
                      <!-- v-if="$root.isSuperUser" -->
 
@@ -234,7 +234,7 @@
                 :ref="modalCourseModality.ref"
                 v-model="modalCourseModality.open"
                 :options="modalCourseModality"
-                width="60vw"
+                width="900px"
                 @onConfirm="openCourseModal"
                 @onCancel="modalCourseModality.open = false"
                 :modalities="selects.modalities"
@@ -594,7 +594,7 @@ export default {
                 base_endpoint: '/course',
                 confirmLabel: 'Guardar',
                 resource: 'course',
-                title: 'Que tipo de curso deseas agregar',
+                title: 'Selecciona qué modalidad de curso deseas crear',
                 action: null,
                 persistent: true,
             }
@@ -746,7 +746,7 @@ export default {
             let vue = this;
             vue.closeFormModal(vue.modalCourseModality);
             vue.modalCourseOptions.modality = modality;
-            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso '+modality.name);
+            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso ('+ modality.name.toLowerCase()+')');
         }
     }
 }

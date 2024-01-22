@@ -12,8 +12,9 @@ use App\Models\Posteo;
 use App\Models\School;
 use App\Models\Ability;
 
-use App\Models\Abconfig;
+use App\Models\Usuario;
 
+use App\Models\Abconfig;
 use App\Models\Pregunta;
 use App\Models\Question;
 use App\Models\Taxonomy;
@@ -61,14 +62,17 @@ class TemaController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $course->qualification_type;
+        $course_code_modality = $course->modality->code;
+
         $media_url = get_media_root_url();
 
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
-        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
+        $hosts = Usuario::getCurrentHosts();
+        $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type','course_code_modality',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
-                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description');
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','hosts');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -104,6 +108,8 @@ class TemaController extends Controller
             'tema' => $topic,
             'tags' => $form_selects['tags'],
             'requisitos' => $form_selects['requisitos'],
+            'hosts' =>  $form_selects['hosts'],
+            'course_code_modality' => $form_selects['course_code_modality'],
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,

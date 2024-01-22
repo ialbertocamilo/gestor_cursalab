@@ -141,60 +141,6 @@
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                            title="Ubicación"
-                            :expand="sections.showSectionPosition"
-                        >
-                            <template slot="content">
-                                <v-row justify="center" class="align-items-center">
-                                    <v-col cols="12">
-                                        <div class="box_search_direction_map">
-                                            <span class="lbl_search_direction">Dirección</span>
-                                            <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
-                                        </div>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
-                                            <GmapMap
-                                                :center="center"
-                                                :zoom="zoom"
-                                                :options="{
-                                                    zoomControl: false,
-                                                    mapTypeControl: false,
-                                                    scaleControl: false,
-                                                    streetViewControl: false,
-                                                    rotateControl: false,
-                                                    fullscreenControl: false,
-                                                    disableDefaultUi: false
-                                                    }"
-                                                style="height: 300px"
-                                                >
-                                                <GmapMarker
-                                                    :key="index"
-                                                    v-for="(m, index) in markers"
-                                                    :position="m.position"
-                                                    @click="center = m.position"
-                                                    :draggable="true"
-                                                    @drag="updateCoordinates"
-                                                />
-                                            </GmapMap>
-                                        </div>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <DefaultTextArea
-                                            label="Referencia"
-                                            placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
-                                            v-model="resource.referencia"
-                                            :rules="rules.referencia"
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                <v-row justify="space-around" class="menuable">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
                             title="Configuración de calificación"
                             :expand="sections.showSectionQualification"
                         >
@@ -501,7 +447,103 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-
+                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Tipo de asistencias y firmas"
+                            :expand="sections.showSectionAssistance"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col cols="12">
+                                        <v-radio-group
+                                            v-model="resource.modality_in_person_properties.assistance_type"
+                                            row
+                                        >
+                                            <v-radio value="assistance-topic">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Asistencia por tema
+                                                        </div>
+                                                        </template>
+                                                        <span>Se tomará asistencia por cada fecha correspondiente al tema</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                            <v-radio value="assistance-course">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Asistencia por curso
+                                                        </div>
+                                                        </template>
+                                                        <span>Se tomará asistencia por cada fecha de curso</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                        </v-radio-group>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultToggle 
+                                            label="Requiere firma digital del colaborador" 
+                                            type="not-active"
+                                            v-model="resource.modality_in_person_properties.required_signature" 
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Visualización"
+                            :expand="sections.showSectionVisualization"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col>
+                                        <v-radio-group
+                                            v-model="resource.modality_in_person_properties.visualization_type"
+                                            mandatory
+                                            row
+                                        >
+                                            <v-radio value="only-assistance">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Todos los asistentes
+                                                        </div>
+                                                        </template>
+                                                        <span>Solo podrán visualizar los datos del curso los que participaron en él.</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                            <v-radio value="all">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Todos los agendados
+                                                        </div>
+                                                        </template>
+                                                        <span>Todos los participantes podrán ver el curso luego de culminado.</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                        </v-radio-group>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row>
                     <v-col cols="2">
                         <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit" dense/>
@@ -568,10 +610,9 @@ import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
-import GmapMap from 'vue2-google-maps/dist/components/map'
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal,GmapMap },
+    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -601,7 +642,9 @@ export default {
                 showSectionRestarts: {status: false},
                 showSectionSchedule: {status: false},
                 showSectionDC3DC4:{status:false},
-                showSectionPosition:{status:false}
+                showSectionPosition:{status:false},
+                showSectionAssistance:{status:false},
+                showSectionVisualization:{status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -643,10 +686,20 @@ export default {
                 dc3_configuration:{},
                 can_create_certificate_dc3_dc4:false,
                 modality_id:null,
+                modality_in_person_properties:{
+                    assistance_type:'assistance-course',
+                    required_signature:false,
+                    visualization_type:'only-assistence'
+                }
             },
             resource: {
                 qualification_type: {position: 0},
-                dc3_configuration :{}
+                dc3_configuration :{},
+                modality_in_person_properties:{
+                    assistance_type:'assistance-course',
+                    required_signature:false,
+                    visualization_type:'only-assistence'
+                }
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -774,15 +827,17 @@ export default {
                 ia_descriptions_generated:0,
                 limit_descriptions_jarvis:0
             },
-            //DC3
-            showButtonIaGenerate:false,
-            has_DC3_functionality:false,
             people:{
                 legal_representatives:[],
                 instructors:[]
             },
+            //Permissions
+            showButtonIaGenerate:false,
+            has_DC3_functionality:false,
+            current_modality:{},
             catalog_denominations:[],
             //Courses in person
+            //maps
             center: { lat: -12.0529046, lng: -77.0253457 },
             zoom: 16,
             currentPlace: null,
@@ -914,6 +969,10 @@ export default {
             formData.set(
                 'dc3_configuration', JSON.stringify(vue.resource.dc3_configuration)
             );
+            formData.set(
+                'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
+            );
+            
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
             vue.getJSONEvaluaciones(formData)
@@ -1072,6 +1131,7 @@ export default {
                             }
                         }
                     }
+                    vue.current_modality =  vue.selects.modalities.find(m => m.id == vue.resource.modality_id);
                 })
             return 0;
         },
@@ -1112,29 +1172,7 @@ export default {
             }
             this.people.legal_representatives.push(person);
             this.resource.dc3_configuration.legal_representative = person.id;
-        },
-        updateCoordinates(location) {
-            let geocoder = new google.maps.Geocoder()
-            geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
-                if (status ===google.maps.GeocoderStatus.OK) {
-                    this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
-                    this.ubicacion_mapa = {...result[0]}
-                }
-            })
-        },
-        setPlace(place) {
-            this.currentPlace = place;
-            if (this.currentPlace) {
-                this.ubicacion_mapa = {...this.currentPlace}
-                const marker = {
-                lat: this.currentPlace.geometry.location.lat(),
-                lng: this.currentPlace.geometry.location.lng(),
-                };
-                this.markers = [{ position: marker }];
-                this.center = marker;
-                this.currentPlace = null;
-            }
-        },
+        }
     }
 }
 </script>
@@ -1200,23 +1238,5 @@ export default {
     content: '';
     top: 25px;
     bottom: 25px;
-}
-
-.box_search_direction_map {
-    border: 1px solid #D9D9D9;
-    border-radius: 5px;
-    position: relative;
-}
-.box_search_direction_map span.lbl_search_direction {
-    position: absolute;
-    top: -8px;
-    left: 9px;
-    font-size: 11.5px;
-    line-height: 1;
-    background: #fff;
-    padding: 0 2px;
-}
-.box_search_direction_map input {
-    width: 100%;
 }
 </style>

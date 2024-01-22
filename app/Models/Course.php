@@ -16,13 +16,14 @@ class Course extends BaseModel
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4','dc3_configuration'
+        'can_create_certificate_dc3_dc4','dc3_configuration','modality_in_person_properties'
     ];
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
         'scheduled_restarts' => 'array',
         'show_certification_date' => 'boolean',
+        'modality_in_person_properties' => 'json'
     ];
 
     public function schools()
@@ -99,6 +100,10 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
+    public function modality()
+    {
+        return $this->belongsTo(Taxonomy::class, 'modality_id');
+    }
     public function compatibilities_a()
     {
         return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
@@ -133,6 +138,18 @@ class Course extends BaseModel
         $data =json_decode($value); 
         return $data;
     }
+
+    public function getModalityInPersonPropertiesAttribute($value){
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['assistance_type'] = 'assistance-course';
+            $data['required_signature'] = false;
+            $data['visualization_type'] = 'only-assistence';
+            return $data;
+        }
+        return json_decode($value);
+    }
+ 
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');

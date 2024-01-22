@@ -32,6 +32,17 @@
                             class="mt-4"
                         />
 
+                        <DefaultAutocomplete
+                            dense
+                            label="Ponente"
+                            placeholder="Seleccione un ponente"
+                            v-model="resource.modality_in_person_properties.host_id"
+                            :items="selects.hosts"
+                            clearable
+                            item-text="name"
+                            class="mt-4"
+                        />
+
                         <DefaultRichText
                             clearable
                             v-model="resource.content"
@@ -62,6 +73,127 @@
                 </v-row>
 
                     <!-- class="my-5" -->
+                    <v-row justify="space-around" class="menuable">
+                    <v-col cols="12" v-if="selects.course_code_modality == 'in-person'">
+                        <DefaultModalSectionExpand
+                            title="Ubicación"
+                            :expand="sections.showSectionPosition"
+                        >
+                            <template slot="content">
+                                <v-row justify="center" class="align-items-center">
+                                    <v-col cols="12">
+                                        <div class="box_search_direction_map">
+                                            <span class="lbl_search_direction">Dirección</span>
+                                            <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                        </div>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
+                                            <GmapMap
+                                                :center="center"
+                                                :zoom="zoom"
+                                                :options="{
+                                                    zoomControl: false,
+                                                    mapTypeControl: false,
+                                                    scaleControl: false,
+                                                    streetViewControl: false,
+                                                    rotateControl: false,
+                                                    fullscreenControl: false,
+                                                    disableDefaultUi: false
+                                                    }"
+                                                style="height: 300px"
+                                                >
+                                                <GmapMarker
+                                                    :key="index"
+                                                    v-for="(m, index) in markers"
+                                                    :position="m.position"
+                                                    @click="center = m.position"
+                                                    :draggable="true"
+                                                    @drag="updateCoordinates"
+                                                />
+                                            </GmapMap>
+                                        </div>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultTextArea
+                                            label="Referencia"
+                                            placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
+                                            v-model="resource.modality_in_person_properties.reference"
+                                            :rules="rules.required"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                          title="Programación del tema"
+                          :expand="sections.showSectionTopicDates"
+                        >
+                        <template slot="content">
+                            <v-row justify="center">
+
+                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                        <DefaultInputDate
+                                            clearable
+                                            :referenceComponent="'modalDateFilter1'"
+                                            :options="modalDateFilter1"
+                                            v-model="resource.modality_in_person_properties.start_date"
+                                            label="Fecha de inicio"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                      <DefaultInput
+                                          class="time-input"
+                                          type="time"
+                                          label="Hora"
+                                          dense
+                                          v-model="resource.modality_in_person_properties.start_time"
+                                          :disabled="!resource.modality_in_person_properties.start_date"
+                                          :rules="rules.time"
+                                          step="60"
+                                      />
+                                    </v-col>
+
+                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                       <DefaultInputDate
+                                           clearable
+                                           :referenceComponent="'modalDateFilter1'"
+                                           :options="modalDateFilter2"
+                                           v-model="resource.modality_in_person_properties.finish_date"
+                                           label="Fecha de fin"
+                                           dense
+                                       />
+                                    </v-col>
+
+                                    <v-col cols="3">
+                                      <DefaultInput
+                                          class="time-input"
+                                          type="time"
+                                          label="Hora"
+                                          v-model="resource.modality_in_person_properties.finish_time"
+                                          :disabled="!resource.modality_in_person_properties.finish_date"
+                                          :rules="rules.time"
+                                          step="60"
+                                          dense
+                                      />
+                                    </v-col>
+
+                                    <v-col cols="12" class="py-1">
+                                        <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
+                                        <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
+                                            ** Se creara una reunión en ZOOM.
+                                        </p>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <DefaultModalSectionExpand
                     title="Método de evaluación"
                     :expand="sections.showSectionEvaluation"
@@ -319,14 +451,15 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
+import GmapMap from 'vue2-google-maps/dist/components/map'
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type','modality_in_person_properties'];
 
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal},
+    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal},
 
     props: {
         options: {
@@ -350,6 +483,14 @@ export default {
             sections: {
                 showSectionEvaluation: {status: true},
                 showSectionResources: {status: true},
+                showSectionPosition:{status:true},
+                showSectionTopicDates:{status:true}
+            },
+            modalDateFilter1: {
+                open: false
+            },
+            modalDateFilter2: {
+                open: false
             },
             resourceDefault: {
                 id: null,
@@ -373,6 +514,14 @@ export default {
                 max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
+                modality_in_person_properties:{
+                    reference:'',
+                    geometry:'',
+                    formatted_address:'',
+                    url:'',
+                    ubicacion:'',
+                    host_id:null
+                }
             },
             selects: {
                 assessable: [
@@ -382,13 +531,29 @@ export default {
                 evaluation_types: [],
                 requisitos: [],
                 qualification_types: [],
+                hosts:[],
+                course_code_modality:null
             },
-            resource: {},
+            resource: {
+                modality_in_person_properties:{
+                    reference:'',
+                    geometry:'',
+                    formatted_address:'',
+                    url:'',
+                    ubicacion:'',
+                    host_id:null,
+                    start_date:null,
+                    start_time:null,
+                    finish_date:null,
+                    finish_time:null,
+                }
+            },
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 // assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
+                required: this.getRules(['required'])
             },
             loadingActionBtn: false,
             topicsValidationModal: {
@@ -438,6 +603,14 @@ export default {
             },
             hasPermissionToUseIaDescription:false,
             hasPermissionToUseIaEvaluation:false,
+            //Courses in person
+            center: { lat: -12.0529046, lng: -77.0253457 },
+            zoom: 16,
+            currentPlace: null,
+            markers: [{
+                position: { lat: -12.0529046, lng: -77.0253457 }
+            }],
+            ubicacion_mapa: null,
         }
     },
     async mounted() {
@@ -545,6 +718,22 @@ export default {
             //     vue.closeModal()
             //     return
             // }
+            // let data_maps = {
+            //             geometry: null,
+            //             formatted_address: null,
+            //             url: null,
+            //             ubicacion: null,
+            //         }
+            vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
+            vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
+            vue.resource.modality_in_person_properties.url = vue.ubicacion_mapa.url
+
+            for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
+                if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
+                    vue.resource.modality_in_person_properties.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
+                    break;
+                }
+            }
 
             vue.topicsValidationModal.open = false
             vue.loadingActionBtn = true
@@ -575,6 +764,9 @@ export default {
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
+            formData.set(
+                'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
+            );
             vue.addMedias(formData)
             if (data.checkbox)
                 formData.append('check_tipo_ev', data.checkbox)
@@ -652,21 +844,28 @@ export default {
                 .then(({data}) => {
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
+                    vue.selects.hosts = data.data.hosts
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
                     vue.limits_ia_convert = data.data.limits_ia_convert;
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    vue.course_code_modality = data.data.course_code_modality;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
                             let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
                             ia_descriptions_generated.textContent = parseInt(vue.limits_descriptions_generate_ia.ia_descriptions_generated);
                             limit_descriptions_jarvis.textContent = parseInt(vue.limits_descriptions_generate_ia.limit_descriptions_jarvis);
-                            console.log('ia_descriptions_generated',ia_descriptions_generated,limit_descriptions_jarvis,limits_descriptions_generate_ia);
                         }, 200);
                     }
                     if (resource && resource.id) {
+                        const formatted_address  = data.data.tema.modality_in_person_properties.formatted_address || null;
+                        if( formatted_address != null && formatted_address != null) {
+                            setTimeout(() => {
+                                vue.$refs.autocompleteMap.$refs.input.value = formatted_address
+                            }, 2000);
+                        }
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     } else {
@@ -856,7 +1055,29 @@ export default {
             await axios.get('/jarvis/limits?type=descriptions').then(({data})=>{
                 vue.limits_descriptions_generate_ia = data.data;
             })
-        }
+        },
+        updateCoordinates(location) {
+            let geocoder = new google.maps.Geocoder()
+            geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
+                if (status ===google.maps.GeocoderStatus.OK) {
+                    this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
+                    this.ubicacion_mapa = {...result[0]}
+                }
+            })
+        },
+        setPlace(place) {
+            this.currentPlace = place;
+            if (this.currentPlace) {
+                this.ubicacion_mapa = {...this.currentPlace}
+                const marker = {
+                lat: this.currentPlace.geometry.location.lat(),
+                lng: this.currentPlace.geometry.location.lng(),
+                };
+                this.markers = [{ position: marker }];
+                this.center = marker;
+                this.currentPlace = null;
+            }
+        },
     }
 }
 </script>
@@ -925,5 +1146,23 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+.box_search_direction_map {
+    border: 1px solid #D9D9D9 !important;
+    border-radius: 5px !important;
+    position: relative !important;
+}
+.box_search_direction_map span.lbl_search_direction {
+    position: absolute !important;
+    top: -8px !important;
+    left: 9px !important;
+    font-size: 11.5px !important;
+    line-height: 1 !important;
+    background: #fff !important;
+    padding: 0 2px !important;
+}
+.box_search_direction_map input {
+    width: 100% !important;
+    padding: 10px 15px !important;
 }
 </style>

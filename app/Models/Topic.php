@@ -11,12 +11,12 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active', 'active_results', 'position'
+        'active', 'active_results', 'position','modality_in_person_properties'
     ];
 
-    //    protected $casts = [
-    //        'assessable' => 'string'
-    //    ];
+       protected $casts = [
+           'modality_in_person_properties' => 'json'
+       ];
 
     public $defaultRelationships = [
         'type_evaluation_id' => 'evaluation_type',
@@ -83,6 +83,22 @@ class Topic extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
+    public function getModalityInPersonPropertiesAttribute($value){
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['reference'] = '';
+            $data['geometry'] = null;
+            $data['formatted_address'] = null;
+            $data['url'] = null;
+            $data['ubicacion'] = null;
+            $data['start_date'] = null;
+            $data['start_time'] = null;
+            $data['finish_date'] = null;
+            $data['finish_time'] = null;
+            return $data;
+        }
+        return json_decode($value);
+    }
     public function countQuestionsByTypeEvaluation($code)
     {
         return $this->questions()

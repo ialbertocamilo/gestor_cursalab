@@ -142,7 +142,7 @@ class CursosController extends Controller
             $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
         }
 
-        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name')->get();
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code')->get();
         $response = compact('escuelas', 'requisitos', 'types', 'qualification_types',
                              'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
                              'instructors','legal_representatives','catalog_denominations','modalities'
@@ -446,7 +446,7 @@ class CursosController extends Controller
         $workspace = get_current_workspace();
 
         $types = Taxonomy::getSelectData('course', 'type');
-        $modalities = Taxonomy::getSelectData('course', 'modality',[],['description']);
+        $modalities = Taxonomy::getSelectData('course', 'modality',[],['code']);
 
         return $this->success(compact('types','modalities'));
     }
