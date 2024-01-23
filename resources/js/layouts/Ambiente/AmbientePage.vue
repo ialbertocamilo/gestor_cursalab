@@ -2,7 +2,7 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Ambiente
+                Espacio
                 <v-spacer/>
             </v-card-title>
         </v-card>

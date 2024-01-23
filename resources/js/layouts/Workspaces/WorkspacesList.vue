@@ -99,8 +99,8 @@
             <v-col cols="5" class="d-flex justify-end">
                 <DefaultModalButton
                     icon_name="fas fa-cog"
-                    :label="'Configurar ambiente'"
-                    @click="openFormModal(modalConfigAmbienteOptions, null, null, 'Configurar ambiente')"
+                    :label="'Configurar espacio'"
+                    @click="openFormModal(modalConfigAmbienteOptions, null, null, 'Configurar espacio')"
                 />
                 <v-btn
                     elevation="0"
