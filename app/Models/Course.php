@@ -1880,7 +1880,7 @@ class Course extends BaseModel
     public function registroCapacitacionIsActive() {
 
         return  $this->registro_capacitacion
-            ? $this->registro_capacitacion->active
+            ? $this->registro_capacitacion->active ?? false
             : false;
     }
 }
