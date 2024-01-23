@@ -356,7 +356,7 @@
                             <br> <span class="table-default-icon-title"
                                        v-text="'No visible'"/>
 
-                            <ul class="fancy-menu position-absolute">
+                            <ul class="fancy-menu">
                                 <li class="red-title">
                                     <i class="fas fa-exclamation-triangle"
                                        style="color: red !important; font-size: 12px"></i>
