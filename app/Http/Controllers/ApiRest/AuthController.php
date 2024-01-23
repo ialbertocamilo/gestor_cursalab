@@ -244,15 +244,16 @@ class AuthController extends Controller
                 ->where('id', $workspace->parent_id)
                 ->first()
             : null;
-
+        //CUSTOM DESIGN BY WORKSPACE
+        $custom_ambiente = Ambiente::getCustomAmbienteByWorkspace($workspace->parent_id);
         if ($workspace_data) {
             $show_logo_in_app = $workspace_data->show_logo_in_app ?? false;
 
             if ($show_logo_in_app) {
                 $workspace_data->logo = get_media_url($workspace_data->logo);
             } else {
-                $ambiente = Ambiente::first();
-                $workspace_data->logo = get_media_url($ambiente->logo);
+                $ambiente = $custom_ambiente ? $custom_ambiente : Ambiente::first() ;
+                $workspace_data->logo =  get_media_url($ambiente['logo']);
             }
         }
 
@@ -281,7 +282,11 @@ class AuthController extends Controller
             // 'criteria' => $user->criterion_values,
             'rol_entrenamiento' => $user->getTrainingRole(),
             'supervisor' => !!$supervisor,
-            'module' => $user->subworkspace,
+            'module' => [
+                'id'=> $user->subworkspace->id,
+                'name' => $user->subworkspace->name,
+                'contact_support' => $user->subworkspace->contact_support,
+            ],
             'workspace' => $workspace_data,
             'can_be_host' => $can_be_host,
             'ciclo_actual' => $ciclo_actual,
@@ -311,7 +316,8 @@ class AuthController extends Controller
             'bucket_base_url' => get_media_root_url(),
             // 'expires_in' => auth('api')->factory()->getTTL() * 60,
             'config_data' => $config_data,
-            'usuario' => $user_data
+            'usuario' => $user_data,
+            'custom_ambiente'=> $custom_ambiente
         ];
     }
 

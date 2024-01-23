@@ -9,10 +9,10 @@
         <v-card flat class="elevation-0 mb-4 px-4 py-3">
 
             <v-tabs v-model="tab">
-                <v-tab href="#tab-1" class="tab-primary text-capitalize mt-2">
+                <v-tab href="#tab-1" class="tab-primary text-capitalize mt-2" v-if="type == 'general'">
                     Gestor
                 </v-tab>
-                <v-tab href="#tab-2" class="tab-primary text-capitalize mt-2">
+                <v-tab href="#tab-2" class="tab-primary text-capitalize mt-2" >
                     Aplicación
                 </v-tab>
             </v-tabs>
@@ -462,6 +462,8 @@ const fields = [
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
     'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo',
     'identity_validation_enabled', 'password_expiration_enabled',
+    //relation
+    'type'
 ];
 
 const file_fields = [
@@ -474,6 +476,7 @@ const file_fields = [
 
     export default {
         name: 'AmbientePage',
+        props:['type'],
         data() {
             return {
                 tab: null,
@@ -529,7 +532,7 @@ const file_fields = [
             },
             loadData() {
                 const vue = this;
-                const base_url = `${vue.base_endpoint}/edit`;
+                const base_url = `${vue.base_endpoint}/edit/${vue.type}`;
                 vue.resource = { 
                     form_login_position: null,
                     logo_cursalab_position: null
@@ -544,6 +547,7 @@ const file_fields = [
                             }
                             vue.hideLoader();
                          }, (err) => console.error(err));
+                return (vue.type == 'general') ? 0 : 1;
             },
             storeForm() {
 
@@ -554,7 +558,7 @@ const file_fields = [
                 const isValid_app = vue.validateForm('applicationForm');
                 const isValid_gestor = vue.validateForm('gestorForm');
                 let base_url = `${vue.base_endpoint}/store`;
-                
+                vue.resource.type = vue.type;
                 if (isValid_app || isValid_gestor) {
 
                     // Prepare data
