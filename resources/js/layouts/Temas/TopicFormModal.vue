@@ -409,7 +409,66 @@
                         </v-row>
                     </template>
                 </DefaultModalSectionExpand>
-
+                <DefaultModalSectionExpand
+                    title="Gestión de etiquetas"
+                    :expand="sections.showSectionTags"
+                    class="my-4"
+                    v-if="hasPermissionToUseTags"
+                >
+                    <template slot="content">
+                        <v-row>
+                            <v-col cols="6">
+                                <DefaultAutocomplete
+                                    dense
+                                    label="Selección de etiquetas "
+                                    placeholder="Busca tu tag"
+                                    v-model="resource.tags"
+                                    :items="selects.tags"
+                                    custom-items
+                                    item-text="name"
+                                    item-value="id"
+                                    multiple
+                                    small-chips
+                                    :maxValuesSelected="3"
+                                    :showSelectAll="false"
+                                    :countShowValues="3"
+                                    :deleteChips="true"
+                                    attach
+                                >
+                                    <template v-slot:customItems="{item}">
+                                        <div class="d-flex">
+                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
+                                            </v-checkbox> -->
+                                            <div class="py-1">
+                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                <v-tooltip bottom>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                        <v-list-item-subtitle
+                                                            v-if="item.description"
+                                                            class="list-item-description-tag"
+                                                            v-bind="attrs"
+                                                            v-on="on"
+                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                    </template>
+                                                    <span>{{item.description}}</span>
+                                                </v-tooltip>
+                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
+                                            </div>
+                                        </div>
+                                    </template>
+                                </DefaultAutocomplete>
+                            </v-col>
+                            <v-col cols="6">
+                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
+                                <DefaultButton
+                                    outlined 
+                                    label="Agregar Tag"
+                                    @click="openFormModal(modalTagOptions)"
+                                />
+                            </v-col>
+                        </v-row>
+                    </template>
+                </DefaultModalSectionExpand>
                 <v-row>
                     <v-col cols="2">
                         <DefaultInput
@@ -465,6 +524,14 @@
                 @close="convertMediaToIaOptions.open = false "
                 @onConfirm="addIaConvert"
             />
+            <TagModal
+                :ref="modalTagOptions.ref"
+                width="40vw"
+                :options="modalTagOptions"
+                @onCancel="modalTagOptions.open = false "
+                @onConfirm="tagcreated"
+                @onDelete="tagDeleted"
+            />
         </template>
     </DefaultDialog>
 </template>
@@ -480,15 +547,15 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
 import GmapMap from 'vue2-google-maps/dist/components/map'
+import TagModal  from "../../components/basicos/TagModal";
 
-const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable',
+const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type','modality_in_person_properties'];
 
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal},
-
+    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal,TagModal},
     props: {
         options: {
             type: Object,
@@ -512,7 +579,8 @@ export default {
                 showSectionEvaluation: {status: true},
                 showSectionResources: {status: true},
                 showSectionPosition:{status:true},
-                showSectionTopicDates:{status:true}
+                showSectionTopicDates:{status:true},
+                showSectionTags:{status:true}
             },
             modalDateFilter1: {
                 open: false
@@ -532,6 +600,7 @@ export default {
                 type_evaluation_id: null,
                 position: null,
                 media: [],
+                tags:[],
                 active: false,
                 active_results: false,
                 hide_evaluable: null,
@@ -577,7 +646,14 @@ export default {
                     finish_time:null,
                     required:null,
                     multimedia:null
-                }
+                },
+                tags: [
+                    { header: '💚 Competencias:' },
+                    {divider:true},
+                    {header:'💡 Habilidades prácticas:'},
+                    { divider: true },
+                    { header: '🌟Dificultad:' },
+                ],
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -642,6 +718,17 @@ export default {
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
             ubicacion_mapa: null,
+            //TAGS
+            hasPermissionToUseTags:false,
+            modalTagOptions:{
+                ref: 'TagFormModal',
+                open: false,
+                base_endpoint: '/tags',
+                resource: 'Topic',
+                confirmLabel: 'Confirmar',
+                action:'Retroceder',
+                create_from_course_list:false,
+            }
         }
     },
     async mounted() {
@@ -656,7 +743,7 @@ export default {
                 return (evaluation_type.name === "Calificada")
             }
             return false;
-        }
+        },
     },
     methods: {
         resetValidation() {
@@ -873,6 +960,8 @@ export default {
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
+                    vue.formatTags(data.data.tags);
+
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
                     vue.selects.hosts = data.data.hosts
@@ -882,6 +971,7 @@ export default {
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
                     vue.course_code_modality = data.data.course_code_modality;
+                    vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -1109,6 +1199,37 @@ export default {
                 this.currentPlace = null;
             }
         },
+        tagcreated(tag){
+            let vue = this;
+            vue.modalTagOptions.open =false;
+            const header = tag.type  == 'hability' ? '💡 Habilidades prácticas:'  : '💚 Competencias:';
+            vue.insertTagsAfterHeader([tag],header,tag.type);
+            if(vue.resource.tags.length < 3){
+                vue.resource.tags.push(tag.id);
+                vue.showAlert('El tag se ha asignado al tema.')
+            }
+        },
+        tagDeleted(tag){
+            const index = this.selects.tags.findIndex(t => t.id === tag.id);
+            if (index !== -1) {
+                this.selects.tags.splice(index,1);
+            }
+            const indexSelected = this.resource.tags.findIndex(t => t === tag.id);
+            if (indexSelected !== -1) {
+                this.resource.tags.splice(indexSelected,1);
+            }
+        },
+        formatTags(tags) {
+            this.insertTagsAfterHeader(tags, '🌟Dificultad:', 'level');
+            this.insertTagsAfterHeader(tags, '💚 Competencias:', 'competency');
+            this.insertTagsAfterHeader(tags, '💡 Habilidades prácticas:', 'hability');
+        },
+        insertTagsAfterHeader(tags, header, type) {
+            const index = this.selects.tags.findIndex(tag => tag.header === header);
+            if (index !== -1) {
+                this.selects.tags.splice(index + 1, 0, ...tags.filter(t => t.type === type));
+            }
+        }
     }
 }
 </script>
@@ -1195,5 +1316,32 @@ export default {
 .box_search_direction_map input {
     width: 100% !important;
     padding: 10px 15px !important;
+}
+.list-item-name-tag{
+    color: #2A3649  !important;
+    font-family: Nunito !important;
+    font-size: 15px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    letter-spacing: 0.1px !important; 
+}
+.list-item-description-tag{
+    color: #2A3649 !important;
+    font-family: Nunito,sans-serif !important;
+    font-size: 12px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important; /* 166.667% */
+    letter-spacing: 0.1px !important;
+}
+.v-select-list .v-subheader{
+    color: #2A3649 !important;
+    font-family: Nunito,sans-serif !important;
+    font-size: 15px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 20px !important; /* 133.333% */
+    letter-spacing: 0.1px !important; 
 }
 </style>

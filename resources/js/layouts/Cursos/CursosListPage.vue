@@ -335,13 +335,15 @@ export default {
                         conditionalBadgeIcon: [{
                             message: 'No tienes colaboradores participantes en el curso',
                             minValue: 0,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: 'red',
-                            icon: 'mdi mdi-alert'
-                        },{
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                            },
+                            {
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: '#7fbade',
                             icon: 'mdi mdi-check-circle'
                         }]

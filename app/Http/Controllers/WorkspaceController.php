@@ -20,6 +20,7 @@ use App\Models\Ambiente;
 use App\Models\School;
 use App\Models\Course;
 use App\Models\Topic;
+use App\Models\Requirement;
 use App\Models\WorkspaceFunctionality;
 use App\Models\AssignedRole;
 use Illuminate\Contracts\Foundation\Application;
@@ -544,12 +545,16 @@ class WorkspaceController extends Controller
         $_courses = Course::whereIn('id', $data['course_ids'])->get();
         $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
 
+        $prefix = '';
+        // $prefix = '[DUPLICADO] ';
+
         foreach ($data['schools'] as $school_id => $course_ids) {
 
             $_school = $_schools->where('id', $school_id)->first();
 
             $school_data = $_school->toArray();
             $school_data['external_id'] = $_school->id;
+            $school_data['name'] = $prefix . $_school->name;
 
             foreach ($subworkspaces as $subworkspace) {
 
@@ -566,24 +571,67 @@ class WorkspaceController extends Controller
 
                     $_course = $_courses->where('id', $course_id)->first();
 
-                    $course_data = $_course->toArray();
-                    $course_data['external_id'] = $_course->id;
+                    $course = $school->courses()->where('name', $_course)->first();
 
-                    $course = $school->courses()->create($course_data);
+                    if (!$course) {
 
-                    $workspace->courses()->attach($course);
+                        $course_data = $_course->toArray();
+                        $course_data['external_id'] = $_course->id;
+                        $course_data['name'] = $prefix . $_course->name;
+                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+
+                        $course = $school->courses()->create($course_data);
+
+                        $workspace->courses()->attach($course);
+                    }
 
                     foreach ($topic_ids['topics'] as $topic_id) {
 
                         $_topic = $_topics->where('id', $topic_id)->first();
 
-                        $topic_data = $_topic->toArray();
-                        $topic_data['external_id'] = $_topic->id;
+                        $topic = $course->topics()->where('name', $_topic->name)->first();
 
-                        $topic = $course->topics()->create($topic_data);
+                        if(!$topic) {
 
-                        $topic->medias()->createMany($_topic->medias->toArray());
-                        $topic->questions()->createMany($_topic->questions->toArray());
+                            $topic_data = $_topic->toArray();
+                            $topic_data['external_id'] = $_topic->id;
+
+                            $topic = $course->topics()->create($topic_data);
+
+                            $topic->medias()->createMany($_topic->medias->toArray());
+                            $topic->questions()->createMany($_topic->questions->toArray());
+
+                            $_requirement = $_topic->requirements->first();
+
+                            if ($_requirement) {
+
+                                $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                                if ($requirement) {
+
+                                    Requirement::updateOrCreate(
+                                        ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                        ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                                    );
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                $_c_requirement = $_course->requirements->first();
+
+                if ($_c_requirement) {
+
+                    $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+                    if ($c_requirement) {
+
+                        Requirement::updateOrCreate(
+                            ['model_type' => Course::class, 'model_id' => $course->id],
+                            ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                        );
                     }
                 }
             }

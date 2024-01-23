@@ -45,13 +45,15 @@ class CursoSearchResource extends JsonResource
 
         // Set assigned users to every course
 
-        $usersCount = collect(CursosController::$coursesUsersAssigned)
-            ->where('course_id', $this->id)
-            ->first();
+//        $usersCount = collect(CursosController::$coursesUsersAssigned)
+//            ->where('course_id', $this->id)
+//            ->first();
+//
+//        $assignedUsers = $usersCount
+//            ? $usersCount['count']
+//            : 0;
+        $assignedUsers = 1;
 
-        $assignedUsers = $usersCount
-            ? $usersCount['count']
-            : 0;
 
         $_course = [
             'id' => $this->id,

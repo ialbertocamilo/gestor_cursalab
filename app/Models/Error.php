@@ -360,6 +360,9 @@ class Error extends Model
     {
         if ($code == 404) {
 
+            // temp fix issue with bots
+            return true;
+
             $folders = [
                 '/uploads/scorm',
             ];

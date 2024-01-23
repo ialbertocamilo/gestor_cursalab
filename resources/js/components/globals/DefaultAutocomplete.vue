@@ -13,7 +13,7 @@
             :multiple="multiple"
             :show-select-all="showSelectAll"
             :placeholder="placeholder"
-            :label="label"
+            :label="multiple && maxValuesSelected > 0 ? `${label} (${localSelected.length}/${maxValuesSelected})` : label"
             :item-text="itemText"
             :item-value="itemValue"
             :color="color"
@@ -40,9 +40,10 @@
                 <slot name="customItems" :item="item"/>
             </template>
             <template v-slot:selection="{ item, index }" v-if="multiple">
-                <div class="pt-1"></div>
+                <div class="pt-2" style="height: 30px;"></div>
                 <v-chip small v-if="index < countShowValues">
                     <span>{{ item[itemText] }}</span>
+                    <v-icon class="ml-1 mb-1" small @click="removeItem(index)">mdi-close</v-icon>
                 </v-chip>
                 <span
                     v-if="index === countShowValues"
@@ -58,9 +59,9 @@
                 <DefaultInfoTooltipForm v-if="tooltip != ''" :tooltip="tooltip" />
             </template>
         </v-autocomplete>
-        <div v-if="multiple && maxValuesSelected > 0">
+        <!-- <div v-if="multiple && maxValuesSelected > 0">
             {{ localSelected.length }} de {{ maxValuesSelected }}
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -157,6 +158,10 @@ export default {
             type: Boolean,
             default: true
         },
+        deleteChips:{
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
@@ -218,6 +223,9 @@ export default {
         selectSome() {
             return this.localSelected.length > 0 && !this.selectAll;
         },
+        removeItem(index) {
+            this.localSelected.splice(index, 1);
+        }
     },
     updated() {
         let vue = this;

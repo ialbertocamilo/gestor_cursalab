@@ -8,6 +8,7 @@ Route::controller(TagsController::class)->group(function() {
 	// ->middleware('permission:tags.list');
 
 	Route::get('/search', 'search');
+	Route::post('/search-by-type', 'searchByType');
 	// Route::get('/form-selects', 'getFormSelects');
 	// Route::get('/get-list-selects', 'getListSelects');
 
@@ -19,7 +20,6 @@ Route::controller(TagsController::class)->group(function() {
 
 	Route::put('/{tag}/status', 'status');
 	Route::delete('/{tag}/destroy', 'destroy');
-
 });
 
 // Route::post('tags', 'TagsController@get');

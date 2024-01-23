@@ -62,7 +62,10 @@ class Topic extends BaseModel
     {
         return $this->morphMany(Requirement::class, 'model');
     }
-
+    public function tags()
+    {
+        return $this->morphMany(Tag::class, 'model');
+    }
     public function requirements()
     {
         return $this->morphMany(Requirement::class, 'model');
@@ -173,6 +176,17 @@ class Topic extends BaseModel
             } else {
                 $tema->requirements()->delete();
             }
+            //Create tags relations
+            if(isset($data['tags']) && count($data['tags'])){
+                foreach ($data['tags'] as $tag_id) {
+                    $tag =  ['model_type' => Topic::class, 'model_id' => $tema->id,'tag_id'=> (int)$tag_id];
+                    Tag::firstOrCreate($tag,$tag);
+                }
+                Tag::where('model_type',Topic::class)->where('model_id',$tema->id)->whereNotIn('tag_id',$data['tags'])->delete();
+            }else{
+                Tag::where('model_type',Topic::class)->where('model_id',$tema->id)->delete();
+            }
+            //
             $_medias = collect($tema->medias()->get()); 
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
@@ -629,7 +643,7 @@ class Topic extends BaseModel
                 }
 
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
-
+                
                 $topics_data->push([
                     'id' => $topic->id,
                     'nombre' => $topic->name,
@@ -651,6 +665,7 @@ class Topic extends BaseModel
                     //                    'estado_tema_str' => $topic_status['status'],
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                     'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
+                    'tags' => $topic->tags->map( fn($t) => $t->taxonomy),
                 ]);
             }
     
