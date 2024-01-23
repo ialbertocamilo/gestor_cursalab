@@ -145,7 +145,7 @@
                             
                             <DefaultErrors :errors="errors"/>
 
-                            <v-row>
+                            <v-row v-if="type == 'general'">
                                 <v-col cols="12" class="pb-0 mt-4">
                                     <h5 class="text-primary-sub"> 
                                         <i class="fas fa-sign-in-alt"></i> Login
@@ -298,8 +298,42 @@
                                     />
                                 </v-col> -->
                             </v-row>
-
-                            <v-row class="my-4">
+                            <v-row v-else>
+                                <v-col cols="12" class="pb-0 mt-4">
+                                    <h5 class="text-primary-sub"> 
+                                        <i class="mdi mdi-format-color-fill"></i> Colores
+                                    </h5>
+                                </v-col>
+                                <v-col cols="12" class="pt-0">
+                                    <v-row>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_primario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color primario" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_secundario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color secundario" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_terciario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color terciario" 
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </v-col>
+                            </v-row>
+                            <v-row class="my-4" v-if="type == 'general'">
                                 <v-col cols="12">
                                     <h5 class="text-primary-sub">
                                         <i class="fas fa-bookmark"></i> Logo Cursalab
@@ -316,7 +350,7 @@
                                         @onSelect="setFile($event, resource,'logo_cursalab')"
                                     />
                                 </v-col>
-                                <v-col cols="6" class="d-flex flex-column">
+                                <v-col cols="6" class="d-flex flex-column" >
                                     <div class="d-flex my-4">
                                         <p class="mb-1 mr-2">Posición del logo Cursalab</p>
                                         <div class="d-flex justify-content-between">

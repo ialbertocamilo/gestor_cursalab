@@ -52,8 +52,7 @@ class AmbienteController extends Controller
     {
         $ambiente = $type == 'general' 
             ? Ambiente::whereNull('workspace_id')->where('type','general')->first()
-            : Ambiente::whereNotNull('workspace_id')->where('type','workspace')->first();
-     
+            : Ambiente::whereNotNull('workspace_id')->where('workspace_id',get_current_workspace()->id)->where('type','workspace')->first();
         if($ambiente) {
             $ambiente['show_blog_btn'] = (bool) $ambiente->show_blog_btn;
             $ambiente['is_superuser'] = auth()->user()->isAn('super-user');

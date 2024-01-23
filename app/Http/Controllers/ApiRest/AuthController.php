@@ -252,7 +252,7 @@ class AuthController extends Controller
             if ($show_logo_in_app) {
                 $workspace_data->logo = get_media_url($workspace_data->logo);
             } else {
-                $ambiente = $custom_ambiente ? $custom_ambiente : Ambiente::first() ;
+                $ambiente = Ambiente::first() ;
                 $workspace_data->logo =  get_media_url($ambiente['logo']);
             }
         }
