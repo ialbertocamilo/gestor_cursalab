@@ -1500,6 +1500,7 @@ span.custom_benefit_type {
     font-size: 14px;
     font-family: "Nunito", sans-serif;
 }
+
 .tbl_perfil_speaker {
     width: 40px;
     height: 40px;
