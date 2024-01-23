@@ -20,7 +20,7 @@
                                             <v-icon color="white" large>{{ modality_asynchronus.icon }}</v-icon>
                                         </div>
                                     </div>
-                                    <v-card-title class="d-flex justify-content-center">{{ modality_asynchronus.name
+                                    <v-card-title class="d-flex justify-content-center mb-3">{{ modality_asynchronus.name
                                     }}</v-card-title>
                                     <v-card-subtitle v-html="modality_asynchronus.description"></v-card-subtitle>
                                 </v-card>
@@ -39,7 +39,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <v-card-title class="d-flex justify-content-between" style="width: 100%;">
+                                            <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
                                                 {{ modality_virtual.name }}
                                                 <div class="ml-1 tag-premium d-flex align-items-center"><img
                                                         src="/img/premiun.svg"> Pro</div>
@@ -61,7 +61,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <v-card-title class="d-flex justify-content-between" style="width: 100%;">
+                                            <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
                                                 {{ modality_in_person.name }}
                                                 <div class="ml-1 tag-premium d-flex align-items-center"><img
                                                         src="/img/premiun.svg"> Pro</div>

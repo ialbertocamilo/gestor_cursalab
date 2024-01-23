@@ -42,7 +42,16 @@
                             item-text="name"
                             class="mt-4"
                         />
-
+                        <DefaultAutocomplete
+                            dense
+                            label="Encuesta"
+                            placeholder="Seleccione una encuesta"
+                            v-model="resource.modality_in_person_properties.poll_id"
+                            :items="selects.polls"
+                            clearable
+                            item-text="name"
+                            class="mt-4"
+                        />
                         <DefaultRichText
                             clearable
                             v-model="resource.content"
@@ -74,7 +83,8 @@
 
                     <!-- class="my-5" -->
                     <v-row justify="space-around" class="menuable">
-                    <v-col cols="12" v-if="selects.course_code_modality == 'in-person'">
+                        <!-- v-if="selects.course_code_modality == 'in-person'" -->
+                    <v-col cols="12">
                         <DefaultModalSectionExpand
                             title="Ubicación"
                             :expand="sections.showSectionPosition"
@@ -127,10 +137,11 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around" v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'">
+                <!-- v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'" -->
+                <v-row justify="space-around">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                          title="Programación del tema"
+                          title="Programación de sesión"
                           :expand="sections.showSectionTopicDates"
                         >
                         <template slot="content">
@@ -378,7 +389,24 @@
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
                         </v-row>
-
+                        <v-row>
+                            <v-col>
+                                <DefaultToggle 
+                                    v-model="resource.modality_in_person_properties.required"
+                                    active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
+                                    inactive-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
+                                    dense
+                                />
+                            </v-col>
+                            <v-col>
+                                <DefaultToggle 
+                                    v-model="resource.modality_in_person_properties.multimedia"
+                                    active-label="El usuario debe terminar de visualizar los videos para continuar con los recursos multimedia"
+                                    inactive-label="El usuario debe terminar de visualizar los videos para continuar con los recursos multimedia"
+                                    dense
+                                />
+                            </v-col>
+                        </v-row>
                     </template>
                 </DefaultModalSectionExpand>
 
@@ -532,7 +560,8 @@ export default {
                 requisitos: [],
                 qualification_types: [],
                 hosts:[],
-                course_code_modality:null
+                course_code_modality:null,
+                polls:[]
             },
             resource: {
                 modality_in_person_properties:{
@@ -546,6 +575,8 @@ export default {
                     start_time:null,
                     finish_date:null,
                     finish_time:null,
+                    required:null,
+                    multimedia:null
                 }
             },
             rules: {

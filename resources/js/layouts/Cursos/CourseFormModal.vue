@@ -468,7 +468,7 @@
                                                             Asistencia por tema
                                                         </div>
                                                         </template>
-                                                        <span>Se tomará asistencia por cada fecha correspondiente al tema</span>
+                                                        <span>Se tomará asistencia en cada sesión del curso</span>
                                                     </v-tooltip>
                                                 </template>
                                             </v-radio>
@@ -480,7 +480,7 @@
                                                             Asistencia por curso
                                                         </div>
                                                         </template>
-                                                        <span>Se tomará asistencia por cada fecha de curso</span>
+                                                        <span>Se tomará una sola asistencia durante el curso</span>
                                                     </v-tooltip>
                                                 </template>
                                             </v-radio>
@@ -502,7 +502,7 @@
                 <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                            title="Visualización"
+                            title="Disponibilidad de contenido"
                             :expand="sections.showSectionVisualization"
                         >
                             <template slot="content">
@@ -521,7 +521,7 @@
                                                             Todos los asistentes
                                                         </div>
                                                         </template>
-                                                        <span>Solo podrán visualizar los datos del curso los que participaron en él.</span>
+                                                        <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
                                                     </v-tooltip>
                                                 </template>
                                             </v-radio>
@@ -533,7 +533,7 @@
                                                             Todos los agendados
                                                         </div>
                                                         </template>
-                                                        <span>Todos los participantes podrán ver el curso luego de culminado.</span>
+                                                        <span>Todos los participantes podrán ver los datos del curso</span>
                                                     </v-tooltip>
                                                 </template>
                                             </v-radio>
