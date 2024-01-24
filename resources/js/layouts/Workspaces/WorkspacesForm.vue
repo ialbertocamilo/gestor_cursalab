@@ -841,6 +841,7 @@ export default {
                     console.log('entra 10');
                     vue.subworkspaces = data.data.subworkspaces;
                     console.log('entra 11',vue.subworkspaces);
+                    let selected_functionality ={};
                     for (const c of data.data.functionalities_selected) {
                         console.log('entra 12',c.code);
                         if(c.code == 'dc3-dc4') {
@@ -851,11 +852,13 @@ export default {
                             vue.showReminderSection=true;
                         }
                         console.log('entra 14',c.code);
-                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
+                        selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.functionalities
                         );
                         console.log('entra 15',c.code);
                     }
+                    console.log('selected_functionality',selected_functionality);
+                    vue.resource.selected_functionality = selected_functionality;
                     console.log('entra 16');
                     vue.functionalities = functionalities;
                     console.log('functionalities',vue.functionalities,vue.resource.selected_functionality);
