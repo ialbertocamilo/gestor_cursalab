@@ -29,20 +29,20 @@ class RegistroCapacitacionTrainer extends BaseModel
         return $value ? json_decode($value) : json_decode('{}');
     }
 
-    protected function storeDataRequest($data, $file) {
+    protected function storeDataRequest($data) {
 
         try {
 
             $url = '';
-            //if (isset($data['file_signature'])) {
+            if (isset($data['file_signature'])) {
 
-              //  $file = $data['file_signature'];
+                $file = $data['file_signature'];
                 $filename = Str::random(20);
                 $ext = $file->getClientOriginalExtension();
-                $url = Course::generateRegistroCapacitacionURL("/signatures/$filename.$ext");
-                $result = Storage::disk('s3')->put($url, $file, 'public');
+                $path = "/signatures/$filename.$ext";
+                $result = Storage::disk('s3')->put($path, $file, 'public');
                 info($result);
-            //}
+            }
 
             $trainer = new RegistroCapacitacionTrainer();
             $trainer->workspace_id = get_current_workspace()->id;
