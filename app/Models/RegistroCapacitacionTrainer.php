@@ -41,7 +41,7 @@ class RegistroCapacitacionTrainer extends BaseModel
                 $workspaceId = get_current_workspace()->id;
                 $ext = $file->getClientOriginalExtension();
                 $path = "/signatures/$workspaceId-$filename.$ext";
-                $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
+                Storage::disk('s3')->put($path, file_get_contents($file), 'public');
             }
 
             $trainer = new RegistroCapacitacionTrainer();
