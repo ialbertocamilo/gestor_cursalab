@@ -795,8 +795,8 @@ export default {
             })
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
-            console.log(url,'url');
             vue.resource.selected_functionality = {};
+            console.log(url,'url');
             await this.$http
                 .get(url)
                 .then(({data}) => {
