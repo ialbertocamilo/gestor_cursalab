@@ -827,9 +827,9 @@ export default {
                     // });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
-
-                    const taxonomy_id_dc3 = data.data.functionalities.find(f => f.code == 'dc3-dc4');
-                    const taxonomy_id_reminder = data.data.functionalities.find(f => f.code == 'reminder-course');
+                    const functionalities = data.data.functionalities;
+                    const taxonomy_id_dc3 = functionalities.find(f => f.code == 'dc3-dc4');
+                    const taxonomy_id_reminder = functionalities.find(f => f.code == 'reminder-course');
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
                     vue.taxonomy_id_reminder = taxonomy_id_reminder.id || null;
 
@@ -842,10 +842,11 @@ export default {
                             vue.showReminderSection=true;
                         }
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.functionalities
+                            c.id, functionalities
                         );
                     });
-                    vue.functionalities = data.data.functionalities;
+                    vue.functionalities = functionalities;
+                    console.log('functionalities',vue.functionalities,vue.resource.selected_functionality);
                     this.hideLoader();
                 })
                 .catch((error) => {
