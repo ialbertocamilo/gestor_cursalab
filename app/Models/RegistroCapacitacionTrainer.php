@@ -39,7 +39,7 @@ class RegistroCapacitacionTrainer extends BaseModel
                 $file = $data['file_signature'];
                 $filename = Str::random(20);
                 $ext = $file->getClientOriginalExtension();
-                $url = Course::generateRegistroCapacitacionURL("signatures/$filename.$ext");
+                $url = Course::generateRegistroCapacitacionURL("/signatures/$filename.$ext");
                 Storage::disk('s3')->put($url, file_get_contents($file), 'public');
             }
 
