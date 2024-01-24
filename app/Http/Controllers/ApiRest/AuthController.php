@@ -719,7 +719,9 @@ class AuthController extends Controller
             $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
             $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
 
-            $service_status = $customer->hasServiceAvailable();
+            if($customer){
+                $service_status = $customer->hasServiceAvailable();
+            }
 
             $ambiente->service = [
                 'active' => $service_status,
