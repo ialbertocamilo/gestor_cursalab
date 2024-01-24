@@ -138,6 +138,103 @@
                     </v-col>
 
                 </v-row>
+                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Tipo de asistencias y firmas"
+                            :expand="sections.showSectionAssistance"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col cols="12">
+                                        <v-radio-group
+                                            v-model="resource.modality_in_person_properties.assistance_type"
+                                            row
+                                        >
+                                            <v-radio value="assistance-topic">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Asistencia por tema
+                                                        </div>
+                                                        </template>
+                                                        <span>Se tomará asistencia en cada sesión del curso</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                            <v-radio value="assistance-course">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Asistencia por curso
+                                                        </div>
+                                                        </template>
+                                                        <span>Se tomará una sola asistencia durante el curso</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                        </v-radio-group>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultToggle 
+                                            label="Requiere firma digital del colaborador" 
+                                            type="not-active"
+                                            v-model="resource.modality_in_person_properties.required_signature" 
+                                            dense
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Disponibilidad de contenido"
+                            :expand="sections.showSectionVisualization"
+                        >
+                            <template slot="content">
+                                <v-row justify="center">
+                                    <v-col>
+                                        <v-radio-group
+                                            v-model="resource.modality_in_person_properties.visualization_type"
+                                            mandatory
+                                            row
+                                        >
+                                            <v-radio value="only-assistance">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Todos los asistentes
+                                                        </div>
+                                                        </template>
+                                                        <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                            <v-radio value="all">
+                                                <template v-slot:label>
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <div v-bind="attrs" v-on="on">
+                                                            Todos los agendados
+                                                        </div>
+                                                        </template>
+                                                        <span>Todos los participantes podrán ver los datos del curso</span>
+                                                    </v-tooltip>
+                                                </template>
+                                            </v-radio>
+                                        </v-radio-group>
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -330,7 +427,7 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around">
+                <v-row justify="space-around"  v-if="current_modality.code != 'in-person'">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
                             title="Programación de reinicios"
@@ -447,103 +544,7 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Tipo de asistencias y firmas"
-                            :expand="sections.showSectionAssistance"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="12">
-                                        <v-radio-group
-                                            v-model="resource.modality_in_person_properties.assistance_type"
-                                            row
-                                        >
-                                            <v-radio value="assistance-topic">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Asistencia por tema
-                                                        </div>
-                                                        </template>
-                                                        <span>Se tomará asistencia en cada sesión del curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                            <v-radio value="assistance-course">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Asistencia por curso
-                                                        </div>
-                                                        </template>
-                                                        <span>Se tomará una sola asistencia durante el curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                        </v-radio-group>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <DefaultToggle 
-                                            label="Requiere firma digital del colaborador" 
-                                            type="not-active"
-                                            v-model="resource.modality_in_person_properties.required_signature" 
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Disponibilidad de contenido"
-                            :expand="sections.showSectionVisualization"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col>
-                                        <v-radio-group
-                                            v-model="resource.modality_in_person_properties.visualization_type"
-                                            mandatory
-                                            row
-                                        >
-                                            <v-radio value="only-assistance">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Todos los asistentes
-                                                        </div>
-                                                        </template>
-                                                        <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                            <v-radio value="all">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Todos los agendados
-                                                        </div>
-                                                        </template>
-                                                        <span>Todos los participantes podrán ver los datos del curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                        </v-radio-group>
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
+                
                 <v-row>
                     <v-col cols="2">
                         <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit" dense/>
