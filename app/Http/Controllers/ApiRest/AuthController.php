@@ -718,7 +718,7 @@ class AuthController extends Controller
             $ambiente->diplomas_logo = $this->getMediaUrl($ambiente->diplomas_logo);
             $ambiente->male_logo   = $this->getMediaUrl($ambiente->male_logo);
             $ambiente->female_logo = $this->getMediaUrl($ambiente->female_logo);
-            $service_status = null;
+            $service_status = true;
             if($customer){
                 $service_status = $customer->hasServiceAvailable();
             }
