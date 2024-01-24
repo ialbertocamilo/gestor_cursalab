@@ -841,19 +841,22 @@ export default {
                     console.log('entra 10');
                     vue.subworkspaces = data.data.subworkspaces;
                     console.log('entra 11',vue.subworkspaces);
-                    data.data.functionalities_selected.forEach(c => {
+                    for (const c of data.data.functionalities_selected) {
                         console.log('entra 12',c.code);
                         if(c.code == 'dc3-dc4') {
                             vue.showDc3Section = true;
                         }
+                        console.log('entra 13',c.code);
                         if(c.code == 'reminder-course'){
                             vue.showReminderSection=true;
                         }
+                        console.log('entra 14',c.code);
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, functionalities
                         );
-                    });
-                    console.log('entra 13');
+                        console.log('entra 15',c.code);
+                    }
+                    console.log('entra 16');
                     vue.functionalities = functionalities;
                     console.log('functionalities',vue.functionalities,vue.resource.selected_functionality);
                     this.hideLoader();
