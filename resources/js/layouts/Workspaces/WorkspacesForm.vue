@@ -852,7 +852,7 @@ export default {
                         }
                         console.log('entra 14',c.code);
                         vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, functionalities
+                            c.id, data.data.functionalities
                         );
                         console.log('entra 15',c.code);
                     }
