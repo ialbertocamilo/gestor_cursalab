@@ -643,6 +643,7 @@ export default {
             },
             limit_allowed_users: null,
             resource: {
+                selected_functionality: {},
             },
             selects: {
                 qualification_types: [],
