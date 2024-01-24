@@ -33,14 +33,13 @@ class RegistroCapacitacionTrainer extends BaseModel
 
         try {
 
-            $url = '';
+            $path = '';
             if (isset($data['file_signature'])) {
 
                 $file = $data['file_signature'];
                 $filename = Str::random(20);
                 $ext = $file->getClientOriginalExtension();
                 $path = "/signatures/$filename.$ext";
-                $url = Course::generateRegistroCapacitacionURL($path);
                 $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
                 info($result);
             }
@@ -49,7 +48,7 @@ class RegistroCapacitacionTrainer extends BaseModel
             $trainer->workspace_id = get_current_workspace()->id;
             $trainer->name = $data['name'];
             $trainer->signature = [
-                'path' => $url
+                'path' => $path
             ];
 
             $trainer->save();
