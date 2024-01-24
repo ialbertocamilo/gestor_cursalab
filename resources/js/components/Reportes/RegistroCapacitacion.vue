@@ -50,8 +50,6 @@
                     label="Curso"
                     item-text="name"
                     item-value="id"
-
-                    :showSelectAll="true"
                     placeholder="Seleccione los cursos"
                 />
             </div>
@@ -169,10 +167,11 @@ export default {
         async exportReport(reportName) {
 
             this.$emit('reportStarted', {})
+            let selectedCourses = [this.selectedCourses];
             const filtersDescriptions = {
                 'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
                 Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
-                Cursos: this.generateNamesArray(this.courses, this.selectedCourses),
+                Cursos: this.generateNamesArray(this.courses, selectedCourses),
             }
 
             // Perform request to generate report
@@ -189,7 +188,7 @@ export default {
                         filtersDescriptions,
                         modulesIds: this.selectedModules ? [this.selectedModules] : [],
                         schoolsIds: this.selectedSchools,
-                        coursesIds: this.selectedCourses,
+                        coursesIds: selectedCourses,
                         ext:'zip'
                     }
                 })
