@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RegistroCapacitacionTrainer extends BaseModel
 {
@@ -31,22 +33,21 @@ class RegistroCapacitacionTrainer extends BaseModel
 
         try {
 
+            $url = '';
             if (isset($data['file_signature'])) {
-                $media = Media::requestUploadFile($data, 'signature',true);
-                $signature_file_id = $media['signature']['id'];
-                $signature_file = $media['signature']['file'];
-            } else {
-                $media = Media::where('file',$data['signature'])->select('id')->first();
-                $signature_file_id = $media?->id;
-                $signature_file = $data['signature'];
+
+                $file = $data['file_signature'];
+                $filename = Str::random(20);
+                $ext = $file->getClientOriginalExtension();
+                $url = Course::generateRegistroCapacitacionURL("signatures/$filename.$ext");
+                Storage::disk('s3')->put($url, file_get_contents($file), 'public');
             }
 
             $trainer = new RegistroCapacitacionTrainer();
             $trainer->workspace_id = get_current_workspace()->id;
             $trainer->name = $data['name'];
             $trainer->signature = [
-                'media_id' => $signature_file_id,
-                'path' => $signature_file
+                'path' => $url
             ];
 
             $trainer->save();

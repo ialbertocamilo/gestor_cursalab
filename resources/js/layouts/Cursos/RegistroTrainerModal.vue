@@ -28,9 +28,17 @@
                             ref="inputSignature"
                             v-model="resource.signature"
                             label="Firma (500x350px)"
+                            :show-button="false"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource, 'signature')"
                         />
+                    </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
+                    <v-col cols="12" class="d-flex-- justify-content-center">
+                        Esta firma se utilizará únicamente para el de registro de este curso.<br>
+                        No se guardar para ningún otro propósito.
                     </v-col>
                 </v-row>
             </v-form>
