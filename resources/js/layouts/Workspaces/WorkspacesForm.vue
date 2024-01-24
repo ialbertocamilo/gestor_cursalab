@@ -801,15 +801,16 @@ export default {
                 .get(url)
                 .then(({data}) => {
                     // vue.hideLoader();
-
+                    console.log('entra 0');
                     vue.selects.qualification_types = data.data.qualification_types
-                    vue.hideLoader();
+                    console.log('entra 1');
                     // criterion dates
                     vue.itemsCriterionDates = data.data.criteria_workspace_dates;
-
+                    console.log('entra 2');
                     vue.is_superuser = data.data.is_superuser || false;
-
+                    console.log('entra 3');
                     vue.resource = Object.assign({}, data.data);
+                    console.log('entra 4');
 
                     // Filter criteria in two collections,
                     // according its "required" properties
@@ -827,17 +828,22 @@ export default {
                     // });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
+                    console.log('entra 5');
                     const functionalities = data.data.functionalities;
+                    console.log('entra 6');
                     const taxonomy_id_dc3 = functionalities.find(f => f.code == 'dc3-dc4');
+                    console.log('entra 7');
                     const taxonomy_id_reminder = functionalities.find(f => f.code == 'reminder-course');
+                    console.log('entra 8');
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
+                    console.log('entra 9');
                     vue.taxonomy_id_reminder = taxonomy_id_reminder.id || null;
-                    console.log('entra 1');
+                    console.log('entra 10');
                     vue.subworkspaces = data.data.subworkspaces;
-                    console.log('entra 2',vue.subworkspaces);
+                    console.log('entra 11',vue.subworkspaces);
                     data.data.functionalities_selected.forEach(c => {
-                        console.log('entra3',c.code);
-                        if(c.code == 'dc3-dc4'){
+                        console.log('entra 12',c.code);
+                        if(c.code == 'dc3-dc4') {
                             vue.showDc3Section = true;
                         }
                         if(c.code == 'reminder-course'){
@@ -847,7 +853,7 @@ export default {
                             c.id, functionalities
                         );
                     });
-                    console.log('entra 4');
+                    console.log('entra 13');
                     vue.functionalities = functionalities;
                     console.log('functionalities',vue.functionalities,vue.resource.selected_functionality);
                     this.hideLoader();
