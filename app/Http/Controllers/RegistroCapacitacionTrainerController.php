@@ -10,7 +10,8 @@ class RegistroCapacitacionTrainerController extends Controller
 {
     public function storeRequest(Request $request){
         $data = $request->all();
-        $item = RegistroCapacitacionTrainer::storeDataRequest($data);
+        $file = $request->file('file_signature');
+        $item = RegistroCapacitacionTrainer::storeDataRequest($data, $file);
         return $this->success($item);
     }
 }
