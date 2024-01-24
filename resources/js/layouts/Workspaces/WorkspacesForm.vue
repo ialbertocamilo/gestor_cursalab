@@ -834,7 +834,7 @@ export default {
                     const taxonomy_id_dc3 = functionalities.find(f => f.code == 'dc3-dc4');
                     console.log('entra 7');
                     const taxonomy_id_reminder = functionalities.find(f => f.code == 'reminder-course');
-                    console.log('entra 8');
+                    console.log('entra 8',taxonomy_id_dc3,taxonomy_id_reminder);
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id;
                     console.log('entra 9');
                     vue.taxonomy_id_reminder = taxonomy_id_reminder.id;
