@@ -828,7 +828,6 @@ export default {
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
 
-                    vue.functionalities = data.data.functionalities;
                     const taxonomy_id_dc3 = data.data.functionalities.find(f => f.code == 'dc3-dc4');
                     const taxonomy_id_reminder = data.data.functionalities.find(f => f.code == 'reminder-course');
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
@@ -842,11 +841,11 @@ export default {
                         if(c.code == 'reminder-course'){
                             vue.showReminderSection=true;
                         }
-                        // vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
-                        //     c.id, data.data.functionalities
-                        // );
+                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
+                            c.id, data.data.functionalities
+                        );
                     });
-
+                    vue.functionalities = data.data.functionalities;
                     this.hideLoader();
                 })
                 .catch((error) => {
