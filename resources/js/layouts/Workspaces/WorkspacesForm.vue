@@ -796,21 +796,15 @@ export default {
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
             vue.resource.selected_functionality = {};
-            console.log(url,'url');
             await this.$http
                 .get(url)
                 .then(({data}) => {
                     // vue.hideLoader();
-                    console.log('entra 0');
                     vue.selects.qualification_types = data.data.qualification_types
-                    console.log('entra 1');
                     // criterion dates
                     vue.itemsCriterionDates = data.data.criteria_workspace_dates;
-                    console.log('entra 2');
                     vue.is_superuser = data.data.is_superuser || false;
-                    console.log('entra 3');
                     vue.resource = Object.assign({}, data.data);
-                    console.log('entra 4');
 
                     // Filter criteria in two collections,
                     // according its "required" properties
@@ -828,40 +822,26 @@ export default {
                     // });
 
                     vue.limit_allowed_users = data.data.limit_allowed_users;
-                    console.log('entra 5');
                     const functionalities = data.data.functionalities;
-                    console.log('entra 6');
                     const taxonomy_id_dc3 = functionalities.find(f => f.code == 'dc3-dc4');
-                    console.log('entra 7');
                     const taxonomy_id_reminder = functionalities.find(f => f.code == 'reminder-course');
-                    console.log('entra 8',taxonomy_id_dc3,taxonomy_id_reminder);
                     vue.taxonomy_id_dc3 = taxonomy_id_dc3.id;
-                    console.log('entra 9');
                     vue.taxonomy_id_reminder = taxonomy_id_reminder.id;
-                    console.log('entra 10');
                     vue.subworkspaces = data.data.subworkspaces;
-                    console.log('entra 11',vue.subworkspaces);
                     let selected_functionality ={};
                     for (const c of data.data.functionalities_selected) {
-                        console.log('entra 12',c.code);
                         if(c.code == 'dc3-dc4') {
                             vue.showDc3Section = true;
                         }
-                        console.log('entra 13',c.code);
                         if(c.code == 'reminder-course'){
                             vue.showReminderSection=true;
                         }
-                        console.log('entra 14',c.code);
                         selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
                             c.id, data.data.functionalities
                         );
-                        console.log('entra 15',c.code);
                     }
-                    console.log('selected_functionality',selected_functionality);
                     vue.resource.selected_functionality = selected_functionality;
-                    console.log('entra 16');
                     vue.functionalities = functionalities;
-                    console.log('functionalities',vue.functionalities,vue.resource.selected_functionality);
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -884,26 +864,20 @@ export default {
             }
         },
         criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
-            console.log('criterionExistsInCriteriaValue',1);
             let exists = false;
-            console.log('criterionExistsInCriteriaValue',2);
             if (criteria_workspace) {
-                console.log('criterionExistsInCriteriaValue',3,criteria_workspace);
                 criteria_workspace.forEach(v => {
-                    console.log('criterionExistsInCriteriaValue',v.id);
                     if (v.id === criterionId){
                         exists = true;
                     }
                 });
             }
-            console.log('criterionExistsInCriteriaValue','termina');
             return exists;
         },
         verifyFunactionality(){
             let vue = this;
             vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
             vue.showReminderSection = vue.resource.selected_functionality[vue.taxonomy_id_reminder];
-            console.log(vue.taxonomy_id_reminder,vue.showReminderSection);
         }
     }
 }
