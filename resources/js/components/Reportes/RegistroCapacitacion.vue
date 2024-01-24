@@ -186,7 +186,7 @@ export default {
                         adminId: this.adminId,
                         reportName,
                         filtersDescriptions,
-                        modulesIds: this.selectedModules ? [this.selectedModules] : [],
+                        modulesIds: this.selectedModules ? this.selectedModules : [],
                         schoolsIds: this.selectedSchools,
                         coursesIds: selectedCourses,
                         ext:'zip'
