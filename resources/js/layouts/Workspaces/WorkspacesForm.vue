@@ -698,7 +698,7 @@ export default {
             vue.$emit('onCancel');
         }
         ,
-        confirmModal() {
+        async confirmModal() {
 
             let vue = this
             vue.errors = []
@@ -743,7 +743,7 @@ export default {
 
                 // Submit data to be saved
 
-                vue.$http
+                await vue.$http
                     .post(url, formData)
                     .then(({data}) => {
                         vue.resetForm();
@@ -796,6 +796,7 @@ export default {
 
             let url = !workspace ? '/workspaces/create' : `/workspaces/${workspace.workspaceId}/edit`;
             console.log(url,'url');
+            vue.resource.selected_functionality = {};
             await this.$http
                 .get(url)
                 .then(({data}) => {
@@ -834,7 +835,6 @@ export default {
                     vue.taxonomy_id_reminder = taxonomy_id_reminder.id || null;
 
                     vue.subworkspaces = data.data.subworkspaces;
-                    vue.resource.selected_functionality = {};
                     data.data.functionalities_selected.forEach(c => {
                         if(c.code == 'dc3-dc4'){
                             vue.showDc3Section = true;
