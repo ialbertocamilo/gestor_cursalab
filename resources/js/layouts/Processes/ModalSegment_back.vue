@@ -117,16 +117,45 @@
                             </v-stepper-content>
                             <v-stepper-content step="2" class="p-0">
                                 <v-row justify="space-around">
-                                    <v-col cols="12">
-                                        <AsignacionXDni
-                                            description='Elige a los supervisores.'
-                                            apiSearchUser="/supervisores/search-usuarios"
-                                            apiUploadPlantilla="/supervisores/subir-excel-usuarios"
-                                            :showSubidaMasiva="false"
-                                            ref="AsignacionSupervisores"
-                                            :load_data_default="true"
-                                        >
-                                        </AsignacionXDni>
+                                    <v-col cols="11">
+                                        <span class="title_sub">Criterios de vinculación</span>
+                                        <span class="text_default lbl_tit">Define los criterios que se aplicaran para hacer la relación entre los supervisores y los colaboradores.</span>
+                                    </v-col>
+                                    <v-col cols="11" v-if="stepper_box == 2">
+                                        <DefaultAutocompleteOrder
+                                            dense
+                                            label="Criterios"
+                                            v-model="list_criteria_selected"
+                                            :items="list_criteria"
+                                            multiple
+                                            item-text="name"
+                                            item-id="id"
+                                            return-object
+                                            :count-show-values="4"
+                                            :showSelectAll="true"
+                                            :loading-state="true"
+                                            placeholder="Indicar criterios aquí"
+                                        />
+                                        <div class="bx_criteria_selected">
+                                            <div class="d-flex align-items-center justify-content-center" style="height: 100%;" v-if="list_criteria_selected == 0">
+                                                <span class="text_default text-center">Aquí se listaran tus criterios<br>de vinculación a tus<br>administadores</span>
+                                            </div>
+                                            <div v-else>
+                                                <span v-for="(itemc, indexc) in list_criteria_selected " :key="indexc">
+                                                    <v-chip
+                                                    class="ma-2"
+                                                    close
+                                                    close-icon="mdi-minus-circle"
+                                                    @click:close="list_criteria_selected.splice(indexc, 1)"
+                                                    >
+                                                    {{ itemc.name }}
+                                                    </v-chip>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <span class="text_default c-default fw-bold cursor-pointer" @click="openModalUserSupervisors()">Ver listado de los supervisores</span>
+                                        </div>
                                     </v-col>
                                 </v-row>
                             </v-stepper-content>
@@ -177,7 +206,6 @@ const CustomMessages = {
 import Segment from "../Blocks/Segment";
 import SegmentAlertModal from "../Blocks/SegmentAlertModal";
 import SegmentByDocument from "../Blocks/SegmentByDocument";
-import AsignacionXDni from "../Supervisores/AsignacionXDni";
 import ModalUsersSupervisors from "./ModalUsersSupervisors";
 
 export default {
@@ -185,8 +213,7 @@ export default {
     Segment,
     SegmentAlertModal,
     SegmentByDocument,
-    ModalUsersSupervisors,
-    AsignacionXDni
+    ModalUsersSupervisors
 },
     props: {
         options: {
@@ -529,70 +556,58 @@ console.log(vue.segments);
                 }
 
                 vue.stepper_box = 2;
-                vue.options.title = "Segmentación de usuarios > <b>Supervisores</b>";
+                vue.options.title = "Segmentación de usuarios > <b>Vinculación por criterios</b>";
                 vue.options.cancelLabel = "Retroceder";
                 vue.options.confirmLabel = "Guardar";
             }
             else if(vue.stepper_box == 2) {
                 vue.errors = [];
 
-                if(vue.$refs.AsignacionSupervisores.usuarios_ok.length==0)
-                {
-                    vue.$notification.warning('Tiene que seleccionar almenos 1 usuario para continuar.', {
-                        timer: 8,
-                        showLeftIcn: false,
-                        showCloseIcn: true,
-                    });
+                this.showLoader();
+
+                const validateForm = vue.validateForm("segmentForm");
+                const edit = vue.options.action === "edit";
+
+                // let base = `${vue.options.base_endpoint}`;
+                let base = 'procesos/segments';
+                let url = `${base}/store`;
+
+                // let method = edit ? 'PUT' : 'POST';
+                let method = "POST";
+
+                // === check criteria and open alert === SEGMENTACION DIRECTA ===
+                if(vue.segments.length && vue.tabs === 0) {
+                    const state = vue.showModalCondition();
+                    if(!state) return;
                 }
-                else
-                {
+                // === check criteria and open alert === SEGMENTACION DIRECTA ===
 
-                    this.showLoader();
+                // if (validateForm && validateSelectedModules) {
+                if (validateForm) {
+                    // let formData = vue.getMultipartFormData(method, vue.segments, fields);
+                    let formData = JSON.stringify({
+                        model_type: vue.model_type,
+                        model_id: vue.resource.id,
+                        code: vue.code,
+                        segments: vue.segments,
+                        segment_by_document: vue.segment_by_document,
+                        segments_supervisors: vue.list_criteria_selected
+                    });
 
-                    const validateForm = vue.validateForm("segmentForm");
-                    const edit = vue.options.action === "edit";
+                    vue.$http
+                        .post(url, formData)
+                        .then(({data}) => {
 
-                    // let base = `${vue.options.base_endpoint}`;
-                    let base = 'procesos/segments';
-                    let url = `${base}/store`;
+                            vue.$emit("onConfirm");
+                            vue.closeModal();
+                            vue.showAlert(data.data.msg);
 
-                    // let method = edit ? 'PUT' : 'POST';
-                    let method = "POST";
-
-                    // === check criteria and open alert === SEGMENTACION DIRECTA ===
-                    if(vue.segments.length && vue.tabs === 0) {
-                        const state = vue.showModalCondition();
-                        if(!state) return;
-                    }
-                    // === check criteria and open alert === SEGMENTACION DIRECTA ===
-
-                    // if (validateForm && validateSelectedModules) {
-                    if (validateForm) {
-                        // let formData = vue.getMultipartFormData(method, vue.segments, fields);
-                        let formData = JSON.stringify({
-                            model_type: vue.model_type,
-                            model_id: vue.resource.id,
-                            code: vue.code,
-                            segments: vue.segments,
-                            segment_by_document: vue.segment_by_document,
-                            segments_supervisors: vue.$refs.AsignacionSupervisores.usuarios_ok,
+                            vue.hideLoader();
+                        })
+                        .catch(error => {
+                            if (error && error.errors) vue.errors = error.errors;
+                            vue.hideLoader();
                         });
-
-                        vue.$http
-                            .post(url, formData)
-                            .then(({data}) => {
-
-                                vue.$emit("onConfirm");
-                                vue.closeModal();
-                                vue.showAlert(data.data.msg);
-
-                                vue.hideLoader();
-                            })
-                            .catch(error => {
-                                if (error && error.errors) vue.errors = error.errors;
-                                vue.hideLoader();
-                            });
-                    }
                 }
             }
         },

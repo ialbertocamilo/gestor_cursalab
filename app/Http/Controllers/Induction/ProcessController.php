@@ -118,6 +118,13 @@ class ProcessController extends Controller
 
     public function storeSegments(Request $request)
     {
+        $segments_supervisors = $request->segments_supervisors;
+
+        return Segment::storeRequestData($request);
+    }
+
+    public function storeSegmentsBack(Request $request)
+    {
         $criteria_selected = $request->segments_supervisors;
         $values = array_column($criteria_selected, 'values');
         $values_selected = array_column($criteria_selected, 'values_selected');
