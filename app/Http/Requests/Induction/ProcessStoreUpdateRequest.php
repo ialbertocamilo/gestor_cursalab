@@ -41,7 +41,9 @@ class ProcessStoreUpdateRequest extends FormRequest
             'logo' => 'nullable',
             'file_logo' => 'nullable',
 
-            'color' => 'nullable'
+            'color' => 'nullable',
+            'color_map_even' => 'nullable',
+            'color_map_odd' => 'nullable'
         ];
     }
 

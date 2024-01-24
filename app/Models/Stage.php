@@ -13,7 +13,8 @@ class Stage extends BaseModel
         'title',
         'duration',
         'position',
-        'active'
+        'active',
+        'certificate_template_id'
     ];
 
     protected $hidden = [
@@ -66,6 +67,10 @@ class Stage extends BaseModel
 
         $stages_items = $stages->items();
         foreach($stages_items as $item) {
+            $certificate_route = ($item->certificate_template_id) ?
+                                        route('stage.diploma.edit', [$item->process_id, $item->id, $item->certificate_template_id]) :
+                                        route('stage.diploma.create', [$item->process_id, $item->id]);
+            $item->certificate_route = $certificate_route;
         }
 
         $response['data'] = $stages->items();

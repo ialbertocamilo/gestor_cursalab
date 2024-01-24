@@ -10,9 +10,10 @@
             $workspace_id = is_array($workspace) ? $workspace['id'] : null;
 
             $diploma = $diploma ?? NULL;
-            $model_id = $process ?? NULL;
-            $model_type = Process::class;
-            $redirect = route('process.index');
+            $model_id = $stage ?? NULL;
+            $model_type = Stage::class;
+            $redirect = route('stages.index', [$process]);
+
         @endphp
         <diploma-form-page modulo_id="{{ $workspace_id }}"
                             diploma_id="{{ $diploma }}"

@@ -293,13 +293,6 @@ export default {
                             icon: 'mdi mdi-check-circle'
                         }]
                     },
-                    // {
-                    //     text: "Editar",
-                    //     icon: 'mdi mdi-pencil',
-                    //     type: 'action',
-                    //     method_name: 'edit',
-                    //     complete: false
-                    // },
                     {
                         text: "Segmentación",
                         icon: 'mdi mdi-account-group segmentation-icon',
@@ -321,13 +314,6 @@ export default {
                             icon: 'mdi mdi-check-circle'
                         }]
                     },
-                    // {
-                    //     text: "Actividades",
-                    //     icon: 'mdi mdi-folder-star',
-                    //     type: 'route',
-                    //     route: 'stages_route',
-                    //     complete: false
-                    // },
                     {
                         text: "Actividades",
                         icon: 'mdi mdi-folder-star',
@@ -370,13 +356,6 @@ export default {
                             icon: 'mdi mdi-check-circle'
                         }]
                     },
-                    // {
-                    //     text: "Certificado",
-                    //     icon: 'mdi mdi-file-document-check',
-                    //     type: 'route',
-                    //     route: 'stages_route',
-                    //     complete: false
-                    // },
                 ],
                 actions_extras: [
                     {
@@ -391,12 +370,12 @@ export default {
                         type: 'action',
                         method_name: 'gestion_colab'
                     },
-                    {
-                        text: "Duplicar",
-                        icon: 'far fa-clone',
-                        type: 'action',
-                        method_name: 'delete'
-                    },
+                    // {
+                    //     text: "Duplicar",
+                    //     icon: 'far fa-clone',
+                    //     type: 'action',
+                    //     method_name: 'delete'
+                    // },
                     {
                         text: "Listado",
                         icon: 'fas fa-file-alt',
@@ -985,7 +964,10 @@ export default {
                     'count_absences' : item.count_absences,
                     'starts_at' : item.starts_at,
                     'finishes_at' : item.finishes_at,
-                    'color' : item.color_selected
+                    'color' : item.color_selected,
+                    'color_map_even' : item.color_map_even,
+                    'color_map_odd' : item.color_map_odd,
+                    'active': item.active
                 };
 
                 const fields = ['title',
@@ -997,9 +979,12 @@ export default {
                                 'finishes_at',
                                 'instructions',
                                 'color',
+                                'color_map_even',
+                                'color_map_odd',
                                 'logo',
                                 'background_mobile',
-                                'background_web'
+                                'background_web',
+                                'active'
                             ];
                 const file_fields = [
                                 'logo',

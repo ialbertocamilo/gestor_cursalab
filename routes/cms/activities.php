@@ -12,7 +12,7 @@ Route::controller(ActivityController::class)->group(function() {
 
     // Route::post('/store','store');
     // Route::get('/{stage}/edit', 'edit');
-    // Route::post('/{stage}/update','update');
+    Route::post('/{activity}/update','update');
     Route::put('/{activity}/status', 'status');
     Route::delete('/{activity}/delete', 'destroy');
 

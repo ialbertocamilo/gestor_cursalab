@@ -15,7 +15,8 @@ class Activity extends BaseModel
         'type_id',
         'model_id',
         'model_type',
-        'activity_requirement_id'
+        'activity_requirement_id',
+        'percentage_ev'
     ];
 
     protected $hidden = [

@@ -8,7 +8,7 @@ use App\Models\Media;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\SummaryCourse;
-use App\Models\{ Certificate as Diploma, Process};
+use App\Models\{ Certificate as Diploma, Process, Stage};
 use Carbon\Carbon;
 use File;
 use Illuminate\Http\Request;
@@ -94,8 +94,17 @@ class DiplomaController extends Controller
             $model_type = $request->model_type;
             if($model_type == 'Process') {
                 $process = Process::where('id', $model_id)->first();
-                $process->certificate_template_id = $diploma?->id;
-                $process->save();
+                if($process) {
+                    $process->certificate_template_id = $diploma?->id;
+                    $process->save();
+                }
+            }
+            else if($model_type == 'Stage') {
+                $stage = Stage::where('id', $model_id)->first();
+                if($stage) {
+                    $stage->certificate_template_id = $status;
+                    $stage->save();
+                }
             }
 
         }
@@ -116,8 +125,17 @@ class DiplomaController extends Controller
             $model_type = $request->model_type;
             if($model_type == 'Process') {
                 $process = Process::where('id', $model_id)->first();
-                $process->certificate_template_id = $status;
-                $process->save();
+                if($process) {
+                    $process->certificate_template_id = $status;
+                    $process->save();
+                }
+            }
+            else if($model_type == 'Stage') {
+                $stage = Stage::where('id', $model_id)->first();
+                if($stage) {
+                    $stage->certificate_template_id = $status;
+                    $stage->save();
+                }
             }
         }
 

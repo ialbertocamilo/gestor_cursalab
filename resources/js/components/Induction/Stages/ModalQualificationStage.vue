@@ -4,69 +4,50 @@
     <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
         <v-card class="modal_create_process">
             <v-card-title class="default-dialog-title">
-                Crear una etapa
+                Calificación de inducción
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
-            <v-card-text class="pt-0">
+            <v-card-text class="p-0">
                 <v-card style="box-shadow:none !important;" class="bx_steps bx_step1">
                     <v-card-text>
                         <v-form ref="stageForm">
                             <v-row class="align-center">
                                 <v-col cols="12">
-                                    <v-text-field
-                                        outlined
+                                    <DefaultSelect
+                                        clearable
                                         dense
-                                        auto-grow
-                                        hide-details="auto"
-                                        v-model="resource.title"
-                                        label="Título"
-                                        :class="{'border-error': resource.hasErrors}"
-                                    ></v-text-field>
+                                        :items="selects.qualification_types"
+                                        item-text="name"
+                                        return-object
+                                        show-required
+                                        v-model="resource.qualification_type"
+                                        label="Sistema de calificación"
+                                        :rules="rules.qualification_type_id"
+                                    />
                                 </v-col>
                             </v-row>
-                            <v-row class="align-center">
-                                <v-col cols="5">
-                                    <div class="txt_duration">
-                                        <v-text-field
-                                            outlined
-                                            dense
-                                            auto-grow
-                                            hide-details="auto"
-                                            v-model="resource.duration"
-                                            label="Duración"
-                                            :class="{'border-error': resource.hasErrors}"
-                                            type="number"
-                                        ></v-text-field>
-                                        <span class="txt_after">
-                                            días
-                                            <div id="tooltip-target-duration_stage" class="btn_tooltip d-inline-flex ms-2">
-                                                <v-icon class="icon_size" small color="#434D56" style="font-size: 1.1rem !important;">
-                                                    mdi-information
-                                                </v-icon>
-                                            </div>
-                                            <b-tooltip target="tooltip-target-duration_stage" triggers="hover" placement="top">
-                                                Tiempo que durará la etapa, y que se bloqueará la etapa siguiente
-                                            </b-tooltip>
-                                        </span>
-                                    </div>
+                            <v-row class="align-center" v-for="(stage, index) in resource.stages" :key="index">
+                                <v-col cols="12" class="py-1">
+                                    <span class="text_default">Etapa {{ index + 1 }}:</span>
                                 </v-col>
-                                <!-- <v-col cols="3">
-                                    <div class="bx_switch_options">
-                                        <v-switch
-                                            class="default-toggle"
-                                            inset
-                                            :label="resource.active ? 'Activo' : 'Inactivo'"
-                                            dense
-                                            density="compact"
-                                            hide-details="auto"
-                                            v-model="resource.active"
-                                        ></v-switch>
-                                    </div>
-                                </v-col> -->
+                                <v-col cols="6">
+                                    <DefaultInput
+                                                v-model="stage.percentage"
+                                                label="Porcentaje del total"
+                                                placeholder="0"
+                                    />
+                                </v-col>
+                                <v-col cols="6">
+                                    <DefaultInput
+                                                v-model="stage.equivalent"
+                                                label="Equivalente"
+                                                placeholder="0"
+                                    />
+                                </v-col>
                             </v-row>
                         </v-form>
                     </v-card-text>
@@ -79,7 +60,7 @@
                     @cancel="closeModal"
                     @confirm="confirmModal"
                     :cancelLabel="cancelLabel"
-                    confirmLabel="Continuar"
+                    confirmLabel="Guardar"
                     :disabled_next="disabled_btn_next"
                     />
             </v-card-actions>
@@ -125,15 +106,23 @@ export default {
                 process_id: null,
                 title: '',
                 duration: '',
-                active: false
+                active: false,
+                stages: []
             },
             resource: {
                 id: null,
                 process_id: null,
                 title: '',
                 duration: '',
-                active: false
+                active: false,
+                stages: []
             },
+            selects: {
+                qualification_types: [],
+            },
+            rules: {
+                qualification_type_id: this.getRules(['required']),
+            }
         };
     },
     watch: {
@@ -154,19 +143,28 @@ export default {
             let vue = this
             console.log('cargando');
             console.log(resource);
-            console.log(vue.process_id);
-            if(resource){
-                vue.resource = resource
-                vue.$nextTick(() => {
-                    vue.resource = Object.assign({}, vue.resource, vue.resourceDefault, resource)
-                })
-            }
-            else{
-                vue.resource.process_id = vue.process_id
-            }
+            vue.resource.stages = resource
+            // console.log(vue.process_id);
+            // if(resource){
+            //     vue.resource = resource
+            //     vue.$nextTick(() => {
+            //         vue.resource = Object.assign({}, vue.resource, vue.resourceDefault, resource)
+            //     })
+            // }
+            // else{
+            //     vue.resource.process_id = vue.process_id
+            // }
         },
         async loadSelects() {
             let vue = this;
+
+            let base = `${vue.options.endpoint}`
+            let url = `${base}/${vue.process_id}/etapas/form-selects`;
+
+            await vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.qualification_types = data.qualification_types
+                })
         },
         resetValidation() {
             let vue = this

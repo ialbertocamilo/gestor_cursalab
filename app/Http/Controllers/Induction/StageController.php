@@ -8,10 +8,21 @@ use App\Models\Course;
 use App\Models\Process;
 use App\Models\School;
 use App\Models\Stage;
+use App\Models\Taxonomy;
 use Illuminate\Http\Request;
 
 class StageController extends Controller
 {
+
+    public function getFormSelects($compactResponse = false)
+    {
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
+
+        $response = compact('qualification_types');
+
+        return $compactResponse ? $response : $this->success($response);
+    }
+
     public function search(Process $process, Request $request)
     {
         $workspace = get_current_workspace();
@@ -39,7 +50,7 @@ class StageController extends Controller
         return $this->success($response);
     }
 
-    public function store(StageStoreUpdateRequest $request)
+    public function store(Process $process, StageStoreUpdateRequest $request)
     {
         $data = $request->validated();
 
@@ -51,12 +62,6 @@ class StageController extends Controller
 
         $school = School::storeRequest($data_school);
 
-        // $data = [
-        //     'title' => $request->title,
-        //     'process_id' => $request->process_id,
-        //     'duration' => $request->duration,
-        //     'active' => $request->active ?? false,
-        // ];
         $data['school_id'] = $school?->id ?? null;
 
         $stage = Stage::storeRequest($data);
@@ -66,6 +71,30 @@ class StageController extends Controller
         $response = [
             'msg' => 'Etapa creada correctamente.',
             'stage' => $stage,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    public function update(Process $process, Stage $stage, StageStoreUpdateRequest $request)
+    {
+        $data = $request->validated();
+        $data_school = [
+            'name' => $data['title'],
+            'active' => $data['active'],
+            'subworkspaces' => current_subworkspaces_id()
+        ];
+        $school = School::where('id', $stage?->school_id)->first() ?? null;
+        $school = School::storeRequest($data_school, $school);
+        $data['school_id'] = $school?->id ?? null;
+
+        $stage_result = Stage::storeRequest($data, $stage);
+
+        cache_clear_model(Stage::class);
+
+        $response = [
+            'msg' => 'Etapa actualizada correctamente.',
+            'stage' => $stage_result,
             'messages' => ['list' => []]
         ];
         return $this->success($response);
@@ -84,7 +113,7 @@ class StageController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function status(Stage $stage, Request $request)
+    public function status(Process $process, Stage $stage, Request $request)
     {
         $stage->update(['active' => !$stage->active]);
 

@@ -141,17 +141,29 @@
                                                                         </v-icon>
                                                                     </div>
                                                                     <div class="ii2">
-                                                                        <v-textarea
-                                                                            rows="4"
-                                                                            outlined
-                                                                            dense
-                                                                            hide-details="auto"
-                                                                            placeholder="Escribe aquí una indicación"
-                                                                            v-model="instruction.description"
-                                                                            class="txt_inst"
-                                                                            @focus="instructionSelected(instruction.description)"
-                                                                            @input="instructionSelected(instruction.description)"
-                                                                        ></v-textarea>
+                                                                        <fieldset class="editor">
+                                                                            <legend>Escribe aquí una indicación
+                                                                            </legend>
+                                                                            <editor
+                                                                                @onfocus="instructionSelected(instruction.description)"
+                                                                                @input="instructionSelected(instruction.description)"
+                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                                v-model="instruction.description"
+                                                                                :init="{
+                                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                                    height: 170,
+                                                                                    menubar: false,
+                                                                                    language: 'es',
+                                                                                    force_br_newlines : true,
+                                                                                    force_p_newlines : false,
+                                                                                    forced_root_block : '',
+                                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                                                    toolbar:
+                                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                                    images_upload_handler: images_upload_handler,
+                                                                                }"
+                                                                            />
+                                                                        </fieldset>
                                                                     </div>
                                                                     <div class="ii3 d-flex align-center">
                                                                         <v-icon class="ml-0 mr-2 icon_size" color="black"
@@ -266,13 +278,13 @@
                                             <v-row style="height: calc(100% - 60px);">
                                                 <v-col cols="12">
                                                     <div class="box_preview" v-if="tab_preview_images == 'mobile'">
-                                                        <div class="tpl_preview_mobile" v-if="logo_cropped && fondo_mobile_cropped">
+                                                        <div class="tpl_preview_mobile" v-if="(logo_cropped && fondo_mobile_cropped) || (process.logo && process.background_mobile)">
                                                             <div class="bx_imgs_pm">
-                                                                <div class="bx_fondo_pm" v-if="fondo_mobile_cropped">
-                                                                    <img :src="fondo_mobile_cropped">
+                                                                <div class="bx_fondo_pm" v-if="fondo_mobile_cropped || process.background_mobile">
+                                                                    <img :src="fondo_mobile_cropped ? fondo_mobile_cropped: process.background_mobile">
                                                                 </div>
-                                                                <div class="bx_logo_pm" v-if="logo_cropped">
-                                                                    <img :src="logo_cropped">
+                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
+                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
                                                                 </div>
                                                             </div>
                                                             <span class="text_default">
@@ -285,13 +297,13 @@
                                                         </span>
                                                     </div>
                                                     <div class="box_preview" v-if="tab_preview_images == 'web'">
-                                                        <div class="tpl_preview_web" v-if="logo_cropped && fondo_web_cropped">
+                                                        <div class="tpl_preview_web" v-if="(logo_cropped && fondo_web_cropped) || (process.logo && process.background_web)">
                                                             <div class="bx_imgs_pm">
-                                                                <div class="bx_fondo_pm" v-if="fondo_web_cropped">
-                                                                    <img :src="fondo_web_cropped">
+                                                                <div class="bx_fondo_pm" v-if="fondo_web_cropped || process.background_web">
+                                                                    <img :src="fondo_web_cropped ? fondo_web_cropped : process.background_web">
                                                                 </div>
-                                                                <div class="bx_logo_pm" v-if="logo_cropped">
-                                                                    <img :src="logo_cropped">
+                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
+                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
                                                                 </div>
                                                                 <span class="text_default">
                                                                     Bienvenidos
@@ -327,7 +339,7 @@
                                                 <v-col cols="12" class="pt-1">
                                                     <div class="bx_preview_colors">
                                                         <div class="bx_preview_map">
-                                                            <PreviewMap :color="colorSelected"/>
+                                                            <PreviewMap :color="colorSelected" :fondoMapa="colorMapaSelected"/>
                                                         </div>
                                                         <div class="bg_instructions_profile">
                                                             <div class="bg_bubble" :style="backgroundColorSelected"></div>
@@ -336,7 +348,7 @@
                                                                     <img src="/img/induccion/personalizacion/perfil-hombre.png">
                                                                     <div class="icon_edit" @click="changeAvatarSelected" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
                                                                 </div>
-                                                                <span class="text_default">Cambiar perfil</span>
+                                                                <span class="text_default">Cambiar guía</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -346,39 +358,101 @@
                                         <v-col cols="7">
                                             <v-row>
                                                 <v-col cols="12">
-                                                    <div>
-                                                        <span class="text_default">Colores</span>
-                                                    </div>
-                                                    <div>
-                                                        <div class="box_select_colors">
-                                                            <div class="item_color_onb" :class="[colorSelected != colorDefault ? 'selected' : '']">
-                                                                <span class="text_default">Empresa</span>
-                                                                <div class="bg_color_item">
-                                                                    <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorSelected" :style="swatchStyle">
-                                                                        <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
-                                                                    </v-btn>
-                                                                    <v-menu v-model="menuPicker"
-                                                                            bottom
-                                                                            :close-on-content-click="false"
-                                                                            offset-y
-                                                                            right
-                                                                            nudge-bottom="10"
-                                                                            min-width="auto">
-                                                                        <template v-slot:activator="{ on }">
-                                                                            <div  v-on="on" />
-                                                                        </template>
-                                                                        <v-card>
-                                                                            <v-card-text class="pa-0">
-                                                                                <v-color-picker v-model="colorPicker" flat />
-                                                                            </v-card-text>
-                                                                        </v-card>
-                                                                    </v-menu>
+                                                    <div class="d-flex">
+                                                        <div style="border-right: 1px solid #A9B2B9; margin-right: 15px;">
+                                                            <div>
+                                                                <span class="text_default">Color tema</span>
+                                                            </div>
+                                                            <div>
+                                                                <div class="box_select_colors">
+                                                                    <div class="item_color_onb" @click="colorSelected = colorDefault" :class="[colorSelected == colorDefault ? 'selected' : '']">
+                                                                        <span class="text_default">Cursalab</span>
+                                                                        <div class="bg_color_item bg_color_item_default">
+                                                                            <div class="color_d"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="item_color_onb" :class="[colorSelected != colorDefault ? 'selected' : '']">
+                                                                        <span class="text_default">Editable</span>
+                                                                        <div class="bg_color_item">
+                                                                            <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorSelected" :style="swatchStyle">
+                                                                                <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                            </v-btn>
+                                                                            <v-menu v-model="menuPicker"
+                                                                                    bottom
+                                                                                    :close-on-content-click="false"
+                                                                                    offset-y
+                                                                                    right
+                                                                                    nudge-bottom="10"
+                                                                                    min-width="auto">
+                                                                                <template v-slot:activator="{ on }">
+                                                                                    <div  v-on="on" />
+                                                                                </template>
+                                                                                <v-card>
+                                                                                    <v-card-text class="pa-0">
+                                                                                        <v-color-picker v-model="colorPicker" flat />
+                                                                                    </v-card-text>
+                                                                                </v-card>
+                                                                            </v-menu>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div class="item_color_onb" @click="colorSelected = colorDefault" :class="[colorSelected == colorDefault ? 'selected' : '']">
-                                                                <span class="text_default">Cursalab</span>
-                                                                <div class="bg_color_item bg_color_item_default">
-                                                                    <div class="color_d"></div>
+                                                        </div>
+
+                                                        <div>
+                                                            <div>
+                                                                <span class="text_default">Fondo de mapa</span>
+                                                            </div>
+                                                            <div>
+                                                                <div class="box_select_colors">
+                                                                    <div class="item_color_onb">
+                                                                        <span class="text_default">Etapa impar</span>
+                                                                        <div class="bg_color_item">
+                                                                            <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorImparSelected" :style="swatchStyleImpar">
+                                                                                <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                            </v-btn>
+                                                                            <v-menu v-model="menuImparPicker"
+                                                                                    bottom
+                                                                                    :close-on-content-click="false"
+                                                                                    offset-y
+                                                                                    right
+                                                                                    nudge-bottom="10"
+                                                                                    min-width="auto">
+                                                                                <template v-slot:activator="{ on }">
+                                                                                    <div  v-on="on" />
+                                                                                </template>
+                                                                                <v-card>
+                                                                                    <v-card-text class="pa-0">
+                                                                                        <v-color-picker v-model="colorImparPicker" flat />
+                                                                                    </v-card-text>
+                                                                                </v-card>
+                                                                            </v-menu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="item_color_onb">
+                                                                        <span class="text_default">Etapa par</span>
+                                                                        <div class="bg_color_item">
+                                                                            <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorParSelected" :style="swatchStylePar">
+                                                                                <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                            </v-btn>
+                                                                            <v-menu v-model="menuParPicker"
+                                                                                    bottom
+                                                                                    :close-on-content-click="false"
+                                                                                    offset-y
+                                                                                    right
+                                                                                    nudge-bottom="10"
+                                                                                    min-width="auto">
+                                                                                <template v-slot:activator="{ on }">
+                                                                                    <div  v-on="on" />
+                                                                                </template>
+                                                                                <v-card>
+                                                                                    <v-card-text class="pa-0">
+                                                                                        <v-color-picker v-model="colorParPicker" flat />
+                                                                                    </v-card-text>
+                                                                                </v-card>
+                                                                            </v-menu>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -492,13 +566,15 @@ import draggable from 'vuedraggable'
 import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
 import PreviewMap from './PreviewMap.vue';
 import ModalAvatarsRepository from './ModalAvatarsRepository.vue'
+import Editor from "@tinymce/tinymce-vue";
 
 export default {
     components: {
     draggable,
     DefaultButtonModalSteps,
     PreviewMap,
-    ModalAvatarsRepository
+    ModalAvatarsRepository,
+    editor: Editor
 },
     props: {
         value: Boolean,
@@ -536,9 +612,14 @@ export default {
             fondo_web_cropped: null,
             // step 4
             menuPicker: false,
+            menuImparPicker: false,
+            menuParPicker: false,
             colorPicker: '#FE141F',
             colorDefault: '#5458EA',
             colorSelected: '#5458EA',
+            colorMapaSelected: '#27f748',
+            colorImparPicker: '#27F748',
+            colorParPicker: '#8BFC89',
 
             modalAvatarsRepository: {
                 ref: 'ModalAvatarsRepository',
@@ -664,6 +745,22 @@ export default {
                 transition: 'border-radius 200ms ease-in-out'
             }
         },
+        swatchStyleImpar() {
+            const { colorImparPicker, menuImparPicker } = this
+            return {
+                backgroundColor: colorImparPicker,
+                borderRadius: menuImparPicker ? '50%' : '4px',
+                transition: 'border-radius 200ms ease-in-out'
+            }
+        },
+        swatchStylePar() {
+            const { colorParPicker, menuParPicker } = this
+            return {
+                backgroundColor: colorParPicker,
+                borderRadius: menuParPicker ? '50%' : '4px',
+                transition: 'border-radius 200ms ease-in-out'
+            }
+        },
         backgroundColorSelected(){
             const { colorSelected, colorDefault, colorPicker } = this
             return {
@@ -688,6 +785,20 @@ export default {
             handler(n, o) {
                 let vue = this;
                 vue.colorSelected = n;
+            },
+            deep: true
+        },
+        colorImparPicker: {
+            handler(n, o) {
+                let vue = this;
+                vue.colorMapaSelected = n;
+            },
+            deep: true
+        },
+        colorParPicker: {
+            handler(n, o) {
+                let vue = this;
+                vue.colorMapaSelected = n;
             },
             deep: true
         },
@@ -746,11 +857,34 @@ export default {
                 console.log('stepper');
 
                 console.log(vue.process)
+                if(vue.process.instructions != null && vue.process.instructions.length > 0){
+                    // vue.process.instructions.forEach(el => {
+                    //     vue.instructionSelected(el.instruction)
+                    // })
+                    vue.instructionSelected(vue.process.instructions[0].description);
+                }
             },
             deep: true
         }
     },
     methods: {
+        images_upload_handler(blobInfo, success, failure) {
+            console.log(blobInfo.blob());
+            let vue = this
+            let formdata = new FormData();
+            formdata.append("image", blobInfo.blob(), blobInfo.filename());
+            formdata.append("model_id", null);
+
+            vue.$http
+                .post("/upload-image/induccion_instrucciones", formdata)
+                .then((res) => {
+                    success(res.data.location);
+                })
+                .catch((err) => {
+                    console.log(err)
+                    failure("upload failed!");
+                });
+        },
         modalAvatarsRepositoryClose() {
             let vue = this
             vue.modalAvatarsRepository.open = false
@@ -775,6 +909,16 @@ export default {
             let vue = this
             vue.menuPicker = !vue.menuPicker
             vue.colorSelected = vue.colorPicker
+        },
+        changeColorImparSelected() {
+            let vue = this
+            vue.menuImparPicker = !vue.menuImparPicker
+            vue.colorMapaSelected = vue.colorImparPicker
+        },
+        changeColorParSelected() {
+            let vue = this
+            vue.menuParPicker = !vue.menuParPicker
+            vue.colorMapaSelected = vue.colorParPicker
         },
         changeAvatarSelected() {
             let vue = this
@@ -869,6 +1013,8 @@ export default {
 
             // if (allIsValid == 0)
             vue.process.color_selected = vue.colorSelected;
+            vue.process.color_map_even = vue.colorParPicker
+            vue.process.color_map_odd = vue.colorImparPicker
 
             if(vue.logo_cropped)
             {
@@ -1625,6 +1771,7 @@ span.v-stepper__step__step:after {
             align-items: center;
             text-align: center;
             position: relative;
+            padding: 20px 0;
             &:before {
                 content: '';
                 width: 0px;
@@ -1644,6 +1791,10 @@ span.v-stepper__step__step:after {
                 font-family: "Nunito", sans-serif;
                 line-height: 15px;
                 font-size: 12px;
+                img {
+                    max-width: 100%;
+                    height: auto !important;
+                }
             }
         }
     }

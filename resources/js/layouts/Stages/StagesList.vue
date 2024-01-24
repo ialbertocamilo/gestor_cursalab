@@ -4,7 +4,7 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs" class="breadcrumbs_line"/>
                 <v-spacer/>
-                <DefaultModalButton :label="'Agregar etapa'" @click="openFormModal(modalEditStage)"/>
+                <DefaultModalButton :label="'Agregar etapa'" @click="openFormModal(modalEditStage)" :disabled="!(stages.length < max_stages)"/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -22,7 +22,7 @@
                     </v-col>
                     <v-col cols="8">
                         <div class="d-flex bx_actions_stages">
-                            <div class="bx_item_stage">
+                            <div class="bx_item_stage cursor-pointer" @click="openFormModal(modalQualificationStage, stages)">
                                 <div id="tooltip-target-assigned_value" class="btn_tooltip d-inline-flex me-2">
                                     <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
                                         mdi-percent-box
@@ -37,14 +37,26 @@
                             <div class="bx_item_stage">
                                 <span class="text_default">Etapas: {{ count_stages }}</span>
 
-                                <div id="tooltip-target-count_stages" class="btn_tooltip d-inline-flex ms-2">
-                                    <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
-                                        mdi-information
-                                    </v-icon>
-                                </div>
-                                <b-tooltip target="tooltip-target-count_stages" triggers="hover" placement="top">
-                                    Cantidad de etapas máximas que se permiten en el sistema
-                                </b-tooltip>
+                                <span v-if="stages.length < max_stages">
+                                    <div id="tooltip-target-count_stages" class="btn_tooltip d-inline-flex ms-2">
+                                        <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
+                                            mdi-information
+                                        </v-icon>
+                                    </div>
+                                    <b-tooltip target="tooltip-target-count_stages" triggers="hover" placement="top">
+                                        Cantidad de etapas máximas que se permiten en el sistema
+                                    </b-tooltip>
+                                </span>
+                                <span v-else>
+                                    <div id="tooltip-target-count_stages_limit" class="btn_tooltip d-inline-flex ms-2" style="padding-bottom: 7px;">
+                                        <v-icon class="icon_size" small color="#FF4242" style="font-size: 0.9rem !important;">
+                                            fas fa-exclamation-triangle
+                                        </v-icon>
+                                    </div>
+                                    <b-tooltip target="tooltip-target-count_stages_limit" triggers="hover" placement="top">
+                                        Haz llegado al límite de etapas permitidas
+                                    </b-tooltip>
+                                </span>
                             </div>
                             <div class="bx_item_stage">
                                 <span class="text_default">Duración (días): {{ count_days }} días</span>
@@ -104,7 +116,7 @@
                                             </v-col>
                                             <v-col cols="3" class="bx_actions_stage">
                                                 <div>
-                                                    <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': !stage.active}">
+                                                    <div class="btn_action" @click="openFormModal(modalEditStage, stage)" :class="{'disabled': !stage.active}">
                                                         <v-icon class="ml-0 icon_size">
                                                             mdi mdi-pencil
                                                         </v-icon>
@@ -112,15 +124,15 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': !stage.active}">
+                                                    <div class="btn_action" @click="createEditCertificate(stage, i)" :class="{'disabled': !stage.active}">
                                                         <v-icon class="ml-0 icon_size">
                                                             mdi mdi-certificate
                                                         </v-icon>
-                                                        <span class="text_default">Diploma</span>
+                                                        <span class="text_default">Certificado</span>
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': !stage.active}">
+                                                    <div class="btn_action" @click="statusStage(stage, i)" :class="{'disabled': !stage.active}">
                                                         <v-icon class="ml-0 icon_size">
                                                             {{stage.active ? 'fas fa-circle' : 'far fa-circle'}}
                                                         </v-icon>
@@ -169,15 +181,28 @@
                                                                     </v-col>
                                                                     <v-col cols="2" class="d-flex align-center justify-content-center">
                                                                         <div class="input_edit_percentage">
-                                                                            <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
-                                                                                mdi-percent-box
-                                                                            </v-icon>
-                                                                            <input type="number" placeholder="0%">
+                                                                            <div :id="'tooltip-target-percentage_'+i " class="btn_tooltip d-inline-flex ms-2">
+                                                                                <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
+                                                                                    mdi-percent-box
+                                                                                </v-icon>
+                                                                            </div>
+                                                                            <b-tooltip :target="'tooltip-target-percentage_'+i " triggers="hover" placement="top">
+                                                                                Porcentaje de evaluación correspondiente a la actividad
+                                                                            </b-tooltip>
+                                                                            <input type="number"
+                                                                            placeholder="0"
+                                                                            max="100"
+                                                                            min="0"
+                                                                            v-model="activity.percentage_ev" :ref="'inputPercentage_'+stage.id+'_'+activity.id"
+                                                                            @focusout="updatePercentageActivity(stage, activity, 'inputPercentage_'+stage.id+'_'+activity.id, $event)"
+                                                                            v-on:keyup.enter="updatePercentageActivity(stage, activity, 'inputPercentage_'+stage.id+'_'+activity.id, $event)"
+                                                                            >
+                                                                            <span class="text_default">%</span>
                                                                         </div>
                                                                     </v-col>
                                                                     <v-col cols="3" class="d-flex align-items-center justify-content-around bx_actions_activities">
                                                                         <div>
-                                                                            <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new}">
+                                                                            <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     fas fa-exchange-alt
                                                                                 </v-icon>
@@ -185,7 +210,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <div>
-                                                                            <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new}">
+                                                                            <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     mdi mdi-pencil
                                                                                 </v-icon>
@@ -193,7 +218,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <div style="min-width: 40px;">
-                                                                            <div class="btn_action" @click="statusActivity(stage, activity, i)" :class="{'disabled': activity.new}">
+                                                                            <div class="btn_action" @click="statusActivity(stage, activity, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     {{activity.active ? 'fas fa-circle' : 'far fa-circle'}}
                                                                                 </v-icon>
@@ -201,7 +226,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <div>
-                                                                            <div class="btn_action" @click="deleteActivity(stage, activity, i)" :class="{'disabled': activity.new}">
+                                                                            <div class="btn_action" @click="deleteActivity(stage, activity, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     mdi mdi-trash-can
                                                                                 </v-icon>
@@ -287,8 +312,8 @@
                 <v-row>
                     <v-col cols="12">
                         <div class="d-flex align-items-center justify-content-center">
-                            <div id="tooltip-target-1" class="btn_tooltip d-inline-flex" @click="openFormModal(modalEditStage)">
-                                <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
+                            <div id="tooltip-target-1" class="btn_tooltip d-inline-flex" @click="!(stages.length < max_stages) ? null : openFormModal(modalEditStage)">
+                                <v-icon class="icon_size" small :color="!(stages.length < max_stages) ? '#BDBEC0' : '#5458EA'" style="font-size: 1.25rem !important;">
                                     mdi-plus-circle
                                 </v-icon>
                             </div>
@@ -301,7 +326,7 @@
             </v-card-text>
         </v-card>
 
-
+        <!--
         <DialogConfirm
             v-model="confirmationUpdateTitleModal.open"
             :options="confirmationUpdateTitleModal"
@@ -321,7 +346,7 @@
             @onConfirm="confirmationUpdateDurationModal.open = false"
             @onCancel="confirmationUpdateDurationModal.open = false"
         />
-
+        -->
         <DialogConfirm
             v-model="deleteActivityModal.open"
             :options="deleteActivityModal"
@@ -336,10 +361,20 @@
             v-model="statusActivityModal.open"
             :options="statusActivityModal"
             width="408px"
-            title="Editar 1 actividad"
+            title="Editar actividad"
             subtitle="¡Estás por cambiar de estado esta actividad!"
             @onConfirm="confirmStatusActivityModal"
             @onCancel="statusActivityModal.open = false"
+        />
+
+        <DialogConfirm
+            v-model="statusStageModal.open"
+            :options="statusStageModal"
+            width="408px"
+            title="Editar etapa"
+            subtitle="¡Estás por cambiar el estado de esta etapa!"
+            @onConfirm="confirmStatusStageModal"
+            @onCancel="statusStageModal.open = false"
         />
 
         <DialogConfirm
@@ -350,6 +385,14 @@
             subtitle="¡Estás por eliminar esta etapa!"
             @onConfirm="confirmDeleteStageModal"
             @onCancel="deleteStageModal.open = false"
+        />
+
+        <DialogConfirm
+            v-model="updatePercentageActivityModal.open"
+            :options="updatePercentageActivityModal"
+            width="408px"
+            @onConfirm="updatePercentageActivityModal.open = false"
+            @onCancel="updatePercentageActivityModal.open = false"
         />
 
         <DialogConfirm
@@ -384,6 +427,16 @@
             :process_id="process_id"
             @onCancel="modalEditStage.open = false"
             @onConfirm="saveEditStage(true)"
+        />
+
+        <ModalQualificationStage
+            :options="modalQualificationStage"
+            :ref="modalQualificationStage.ref"
+            v-model="modalQualificationStage.open"
+            width="400px"
+            :process_id="process_id"
+            @onCancel="modalQualificationStage.open = false"
+            @onConfirm="saveQualificationStages"
         />
 
         <ModalSelectActivity
@@ -458,6 +511,7 @@ import ModalEditStage from "../../components/Induction/Stages/ModalEditStage";
 import ModalActivityChecklist from "../../components/Induction/Stages/ModalActivityChecklist";
 import ModalActivityEncuestas from "../../components/Induction/Stages/ModalActivityEncuestas";
 import ModalActivityEvaluaciones from "../../components/Induction/Stages/ModalActivityEvaluaciones";
+import ModalQualificationStage from "../../components/Induction/Stages/ModalQualificationStage";
 
 export default {
     components: {
@@ -472,7 +526,8 @@ export default {
     ModalEditStage,
     ModalActivityChecklist,
     ModalActivityEncuestas,
-    ModalActivityEvaluaciones
+    ModalActivityEvaluaciones,
+    ModalQualificationStage
 },
     mounted() {
         let vue = this
@@ -510,7 +565,7 @@ export default {
                 {title: '', text: 'Etapas y Actividades', disabled: true, href: '',tooltip:false},
             ],
             stages:[],
-            positioned_stage: null,
+            // positioned_stage: null,
             base_endpoint: '/etapas',
             modalSegment: {
                 open: false,
@@ -577,34 +632,34 @@ export default {
                 model_id: 0
             },
 
-            confirmationUpdateTitleModal: {
-                open: false,
-                title_modal: 'Cambio de nombre de etapa',
-                type_modal: 'confirm',
-                content_modal: {
-                    confirm: {
-                        title: '¡Estás por cambiar el nombre de la etapa!',
-                        details: [
-                            'Esto afectará en la visualización de esta etapa.',
-                            'Esto afectará al nombre indicado en el diploma.'
-                        ],
-                    }
-                },
-            },
+            // confirmationUpdateTitleModal: {
+            //     open: false,
+            //     title_modal: 'Cambio de nombre de etapa',
+            //     type_modal: 'confirm',
+            //     content_modal: {
+            //         confirm: {
+            //             title: '¡Estás por cambiar el nombre de la etapa!',
+            //             details: [
+            //                 'Esto afectará en la visualización de esta etapa.',
+            //                 'Esto afectará al nombre indicado en el diploma.'
+            //             ],
+            //         }
+            //     },
+            // },
 
-            confirmationUpdateDurationModal: {
-                open: false,
-                title_modal: 'Cambio de fecha de etapa',
-                type_modal: 'confirm',
-                content_modal: {
-                    confirm: {
-                        title: '¡Estás por cambiar la fecha de la etapa!',
-                        details: [
-                            'Esto afectará los tiempos de visualización de esta etapa y las siguientes.'
-                        ],
-                    }
-                },
-            },
+            // confirmationUpdateDurationModal: {
+            //     open: false,
+            //     title_modal: 'Cambio de fecha de etapa',
+            //     type_modal: 'confirm',
+            //     content_modal: {
+            //         confirm: {
+            //             title: '¡Estás por cambiar la fecha de la etapa!',
+            //             details: [
+            //                 'Esto afectará los tiempos de visualización de esta etapa y las siguientes.'
+            //             ],
+            //         }
+            //     },
+            // },
 
             deleteActivityModal: {
                 open: false,
@@ -634,6 +689,20 @@ export default {
                 },
             },
 
+            statusStageModal: {
+                open: false,
+                title_modal: 'Desactivar etapa',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Estas por desactivar una etapa!',
+                        details: [
+                            'Recuerda que al desactivar una etapa todas las actividades que estén enlazadas tambien serán desactivadas.'
+                        ],
+                    }
+                },
+            },
+
             deleteStageModal: {
                 open: false,
                 title_modal: 'Eliminar etapa',
@@ -644,6 +713,20 @@ export default {
                         details: [
                             'Los datos de la actividad no se podrán recuperar.',
                             'Se eliminarán todas las actividades relacionadas a esta etapa.'
+                        ],
+                    }
+                },
+            },
+
+            updatePercentageActivityModal: {
+                open: false,
+                title_modal: 'Porcentaje erróneo',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡El porcentaje indicado supera el 100% de la etapa!',
+                        details: [
+                            'Recuerda que por cada etapa la suma de los porcentajes debe ser de 100% para que este activa.'
                         ],
                     }
                 },
@@ -670,7 +753,11 @@ export default {
                 open: false,
                 endpoint: '/procesos',
             },
-
+            modalQualificationStage: {
+                ref: 'ModalQualificationStage',
+                open: false,
+                endpoint: '/procesos',
+            },
             modalSelectActivity: {
                 ref: 'ModalSelectActivity',
                 open: false,
@@ -756,6 +843,67 @@ export default {
         }
     },
     methods: {
+        updatePercentageActivity( stage, activity, ref, event) {
+            console.log(activity);
+            console.log(ref);
+            console.log(event);
+            let vue = this
+            if(activity.percentage_ev && activity.percentage_ev > 0)
+            {
+                if(activity.percentage_ev > 100){
+                    this.$nextTick(() => {
+                        activity.percentage_ev = 0;
+                    });
+                }
+                else {
+                    if(stage.activities && stage.activities.length > 0)
+                    {
+                        let sum_act = 0;
+                        stage.activities.forEach(element => {
+                            sum_act += parseFloat(element.percentage_ev)
+                        });
+                        console.log(sum_act);
+                        if(sum_act > 100) {
+                            console.log('mucho');
+                            vue.updatePercentageActivityModal.open = true
+                            this.$nextTick(() => {
+                                activity.percentage_ev = 0
+                            });
+                        }
+                        else {
+                            console.log('save');
+                            this.showLoader()
+
+                            const url = `/procesos/${stage.process_id}/etapas/${stage.id}/activity/${activity.id}/update`
+                            const formData = new FormData();
+                            formData.append('percentage_ev', activity.percentage_ev);
+
+                            vue.$http.post(url, formData)
+                                .then(async ({data}) => {
+
+                                    let result = data.data.msg;
+                                    vue.showAlert(result)
+
+                                    this.hideLoader()
+
+                                    vue.$nextTick(() => {
+                                        vue.loadInfo()
+                                    });
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                    this.hideLoader()
+                                });
+                        }
+                    }
+                    console.log('save2');
+                }
+            }
+        },
+        createEditCertificate( stage, index ) {
+            if(stage.certificate_route)
+                window.location.href = stage.certificate_route;
+        },
         async saveEditStage( scroll = false )
         {
             let vue = this
@@ -764,6 +912,9 @@ export default {
                 if(scroll)
                     window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
 			});
+        },
+        async saveQualificationStages() {
+
         },
         typeActivity( activity, icon = false )
         {
@@ -814,17 +965,17 @@ export default {
 
             vue.openFormModal(this.modalSelectActivity)
         },
-        updateValueStage( input, item )
-        {
-            let vue = this;
-            // console.log(item.new != undefined);
-            if(vue.positioned_stage[input] != item[input]) {
-                if(input == 'duration')
-                    vue.confirmationUpdateDurationModal.open = true
-                else if(input == 'title')
-                    vue.confirmationUpdateTitleModal.open = true
-            }
-        },
+        // updateValueStage( input, item )
+        // {
+        //     let vue = this;
+        //     // console.log(item.new != undefined);
+        //     if(vue.positioned_stage[input] != item[input]) {
+        //         if(input == 'duration')
+        //             vue.confirmationUpdateDurationModal.open = true
+        //         else if(input == 'title')
+        //             vue.confirmationUpdateTitleModal.open = true
+        //     }
+        // },
         async deleteStage( stage, position )
         {
             console.log(stage);
@@ -932,6 +1083,42 @@ export default {
                         let result = data.data.msg;
                         vue.statusActivityModal.open = false
                         vue.statusActivityModal.stage_id = null
+                        vue.showAlert(result)
+
+                        this.hideLoader()
+
+                        vue.$nextTick(() => {
+                            vue.loadInfo()
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
+        },
+        statusStage( stage, position )
+        {
+            let vue = this;
+            vue.statusStageModal.open = true
+            vue.statusStageModal.stage_id = stage.id
+        },
+        confirmStatusStageModal()
+        {
+            let vue = this;
+
+            if(vue.validateRequired(vue.statusStageModal.stage_id))
+            {
+                this.showLoader()
+
+                const url = `/procesos/${vue.process_id}/etapas/${vue.statusStageModal.stage_id}/status`
+
+                vue.$http.put(url)
+                    .then(async ({data}) => {
+
+                        let result = data.data.msg;
+                        vue.statusStageModal.open = false
+                        vue.statusStageModal.stage_id = null
                         vue.showAlert(result)
 
                         this.hideLoader()
@@ -1230,6 +1417,8 @@ export default {
         top: 50%;
         right: 4px;
         transform: translateY(-50%);
+        align-items: center;
+        display: flex;
     }
 }
 input::-webkit-outer-spin-button,
@@ -1295,9 +1484,14 @@ i.icon_size_drag {
     border: 1px solid #D9D9D9;
     border-radius: 4px;
     input[type="number"] {
-        width: 40px;
-        text-align: center;
+        width: 28px;
+        text-align: right;
         height: 30px;
+    }
+    span.text_default {
+        line-height: 1;
+        padding-top: 3px;
+        padding-right: 10px;
     }
 }
 </style>

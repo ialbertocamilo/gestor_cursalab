@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use App\Services\FileService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class Process extends BaseModel
@@ -26,7 +28,9 @@ class Process extends BaseModel
         'config_completed',
         'certificate_template_id',
         'starts_at',
-        'finishes_at'
+        'finishes_at',
+        'color_map_even',
+        'color_map_odd'
     ];
 
     protected $casts = [
@@ -39,6 +43,11 @@ class Process extends BaseModel
     protected $hidden = [
         'created_at', 'updated_at', 'deleted_at'
     ];
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('active', 1);
+    }
 
     public function instructions()
     {
@@ -65,9 +74,18 @@ class Process extends BaseModel
 
         $processes_query = Process::with(['instructions', 'segments', 'stages'])->where('workspace_id', $workspace->id);
 
-        $field = request()->sortBy ?? 'created_at';
+        if(request()->sortBy){
+            if (request()->sortBy == 'title_process')
+                $field = 'title';
+            else
+                request()->sortBy;
+        }
+        else {
+            $field = 'created_at';
+        }
         $sort = !is_null(request()->sortDesc) ? (request()->sortDesc == 'true' ? 'DESC' : 'ASC') : 'DESC';
 
+        $processes_query->orderBy('active', $sort);
         $processes_query->orderBy($field, $sort);
 
         if (!is_null($filtro) && !empty($filtro)) {
@@ -100,8 +118,13 @@ class Process extends BaseModel
                 $item->progress_process = null;
             $item->stages_count = $item->stages->count();
 
-            $item->starts_at = date('Y-m-d', strtotime($item->starts_at));
-            $item->finishes_at = date('Y-m-d', strtotime($item->finishes_at));
+            $item->starts_at = $item->starts_at ? date('Y-m-d', strtotime($item->starts_at)) : null;
+            $item->finishes_at = $item->finishes_at ? date('Y-m-d', strtotime($item->finishes_at)) : null;
+
+
+            $item->logo = $item->logo ? FileService::generateUrl($item->logo) : $item->logo;
+            $item->background_mobile = $item->background_mobile ? FileService::generateUrl($item->background_mobile) : $item->background_mobile;
+            $item->background_web = $item->background_web ? FileService::generateUrl($item->background_web) : $item->background_web;
         }
 
         $response['data'] = $processes->items();

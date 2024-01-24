@@ -487,4 +487,19 @@ class ActivityController extends Controller
 
         return $this->success(['msg' => 'Actividad eliminado correctamente.']);
     }
+
+
+    public function update(Process $process, Stage $stage, Activity $activity, Request $request)
+    {
+        $data = $request->all();
+
+        $activity = Activity::storeRequest($data, $activity);
+
+        $response = [
+            'msg' => 'La actividad se actualizó correctamente',
+            'process' => $activity,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
 }
