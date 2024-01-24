@@ -881,17 +881,19 @@ export default {
             }
         },
         criterionExistsInCriteriaValue(criterionId, criteria_workspace) {
-
+            console.log('criterionExistsInCriteriaValue',1);
             let exists = false;
-
+            console.log('criterionExistsInCriteriaValue',2);
             if (criteria_workspace) {
-
+                console.log('criterionExistsInCriteriaValue',3,criteria_workspace);
                 criteria_workspace.forEach(v => {
-                    if (v.id === criterionId)
+                    console.log('criterionExistsInCriteriaValue',v.id);
+                    if (v.id === criterionId){
                         exists = true;
+                    }
                 });
             }
-
+            console.log('criterionExistsInCriteriaValue','termina');
             return exists;
         },
         verifyFunactionality(){
