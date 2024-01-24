@@ -842,9 +842,9 @@ export default {
                         if(c.code == 'reminder-course'){
                             vue.showReminderSection=true;
                         }
-                        vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
-                            c.id, data.data.functionalities
-                        );
+                        // vue.resource.selected_functionality[c.id] = vue.criterionExistsInCriteriaValue(
+                        //     c.id, data.data.functionalities
+                        // );
                     });
 
                     this.hideLoader();
