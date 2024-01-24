@@ -835,9 +835,9 @@ export default {
                     console.log('entra 7');
                     const taxonomy_id_reminder = functionalities.find(f => f.code == 'reminder-course');
                     console.log('entra 8');
-                    vue.taxonomy_id_dc3 = taxonomy_id_dc3.id || null;
+                    vue.taxonomy_id_dc3 = taxonomy_id_dc3.id;
                     console.log('entra 9');
-                    vue.taxonomy_id_reminder = taxonomy_id_reminder.id || null;
+                    vue.taxonomy_id_reminder = taxonomy_id_reminder.id;
                     console.log('entra 10');
                     vue.subworkspaces = data.data.subworkspaces;
                     console.log('entra 11',vue.subworkspaces);
