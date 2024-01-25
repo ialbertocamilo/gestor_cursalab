@@ -46,7 +46,8 @@ class TemaController extends Controller
 
     public function getFormSelects(School $school, Course $course, Topic $topic = null, $compactResponse = false)
     {
-        $tags = []; //Tag::select('id', 'nombre')->get();
+        // $tags = []; //Tag::select('id', 'nombre')->get();
+        $tags = Taxonomy::where('group','tags')->whereIn('type',['competency','hability','level'])->select('id','name','type','description')->get();
         $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
         if ($topic) {
             $q_requisitos->whereNotIn('id', [$topic->id]);
@@ -66,9 +67,11 @@ class TemaController extends Controller
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
+
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
-                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description');
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -94,11 +97,12 @@ class TemaController extends Controller
         $topic->tipo_ev = $topic->hide_tipo_ev;
         $requirement = $topic->requirements()->first();
         $requirement && $topic->topic_requirement_id =  $requirement->requirement_id;
-
+        $topic->tags = $topic->tags()->pluck('tag_id');
         $media_url = get_media_root_url();
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         
         return $this->success([
             'tema' => $topic,
@@ -109,7 +113,8 @@ class TemaController extends Controller
             'media_url' => $media_url,
             'limits_ia_convert'=>$limits_ia_convert,
             'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
-            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description
+            'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description,
+            'has_permission_to_use_tags' => $has_permission_to_use_tags
         ]);
     }
 

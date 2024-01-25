@@ -822,7 +822,7 @@ class Workspace extends BaseModel
 
                         $course_data = $_course->toArray();
                         $course_data['external_id'] = $_course->id;
-                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration']);
+                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
                         $course = $school->courses()->create($course_data);
                         foreach ($_course->topics as $_topic) {
 
@@ -984,14 +984,14 @@ class Workspace extends BaseModel
 
                     $children[] = [
                         'id' => $course_parent_key . '-' . $child_key,
-                        'name' => $topic->name,
+                        'name' => '[TEMA] ' . $topic->name,
                         'icon' => 'mdi-bookmark',
                     ];
                 }
 
                 $course_parent = [
                     'id' => $course_parent_key,
-                    'name' => $course->name,
+                    'name' => '[CURSO] ' . $course->name,
                     'icon' => 'mdi-book',
                     'children' => $children,
                 ];
@@ -1001,7 +1001,7 @@ class Workspace extends BaseModel
 
             $parent = [
                 'id' => $school_parent_key,
-                'name' => $school->name,
+                'name' => '[ESCUELA] ' . $school->name,
                 'icon' => 'mdi-school',
                 'children' => $school_children,
             ];
@@ -1029,7 +1029,7 @@ class Workspace extends BaseModel
 
             $parent = [
                 'id' => $parent_key,
-                'name' => $subworkspace->name,
+                'name' => '[MÓDULO] ' . $subworkspace->name,
                 'avatar' => '',
                 'icon' => 'mdi-view-grid',
                 'children' => $children,

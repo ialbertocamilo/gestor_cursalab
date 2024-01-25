@@ -2,17 +2,17 @@
     <section class="section-list">
         <v-card flat class="elevation-0 mb-4">
             <v-card-title>
-                Ambiente
+                Espacio
                 <v-spacer/>
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4 px-4 py-3">
 
             <v-tabs v-model="tab">
-                <v-tab href="#tab-1" class="tab-primary text-capitalize mt-2">
+                <v-tab href="#tab-1" class="tab-primary text-capitalize mt-2" v-if="type == 'general'">
                     Gestor
                 </v-tab>
-                <v-tab href="#tab-2" class="tab-primary text-capitalize mt-2">
+                <v-tab href="#tab-2" class="tab-primary text-capitalize mt-2" >
                     Aplicación
                 </v-tab>
             </v-tabs>
@@ -145,7 +145,7 @@
                             
                             <DefaultErrors :errors="errors"/>
 
-                            <v-row>
+                            <v-row v-if="type == 'general'">
                                 <v-col cols="12" class="pb-0 mt-4">
                                     <h5 class="text-primary-sub"> 
                                         <i class="fas fa-sign-in-alt"></i> Login
@@ -298,8 +298,42 @@
                                     />
                                 </v-col> -->
                             </v-row>
-
-                            <v-row class="my-4">
+                            <v-row v-else>
+                                <v-col cols="12" class="pb-0 mt-4">
+                                    <h5 class="text-primary-sub"> 
+                                        <i class="mdi mdi-format-color-fill"></i> Colores
+                                    </h5>
+                                </v-col>
+                                <v-col cols="12" class="pt-0">
+                                    <v-row>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_primario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color primario" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_secundario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color secundario" 
+                                            />
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput 
+                                                v-model="resource.color_terciario_app"
+                                                type="color" 
+                                                clearable 
+                                                label="Color terciario" 
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </v-col>
+                            </v-row>
+                            <v-row class="my-4" v-if="type == 'general'">
                                 <v-col cols="12">
                                     <h5 class="text-primary-sub">
                                         <i class="fas fa-bookmark"></i> Logo Cursalab
@@ -316,7 +350,7 @@
                                         @onSelect="setFile($event, resource,'logo_cursalab')"
                                     />
                                 </v-col>
-                                <v-col cols="6" class="d-flex flex-column">
+                                <v-col cols="6" class="d-flex flex-column" >
                                     <div class="d-flex my-4">
                                         <p class="mb-1 mr-2">Posición del logo Cursalab</p>
                                         <div class="d-flex justify-content-between">
@@ -462,6 +496,8 @@ const fields = [
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
     'completed_courses_logo', 'enrolled_courses_logo', 'diplomas_logo',
     'identity_validation_enabled', 'password_expiration_enabled',
+    //relation
+    'type'
 ];
 
 const file_fields = [
@@ -474,6 +510,7 @@ const file_fields = [
 
     export default {
         name: 'AmbientePage',
+        props:['type'],
         data() {
             return {
                 tab: null,
@@ -529,7 +566,7 @@ const file_fields = [
             },
             loadData() {
                 const vue = this;
-                const base_url = `${vue.base_endpoint}/edit`;
+                const base_url = `${vue.base_endpoint}/edit/${vue.type}`;
                 vue.resource = { 
                     form_login_position: null,
                     logo_cursalab_position: null
@@ -544,6 +581,7 @@ const file_fields = [
                             }
                             vue.hideLoader();
                          }, (err) => console.error(err));
+                return (vue.type == 'general') ? 0 : 1;
             },
             storeForm() {
 
@@ -554,7 +592,7 @@ const file_fields = [
                 const isValid_app = vue.validateForm('applicationForm');
                 const isValid_gestor = vue.validateForm('gestorForm');
                 let base_url = `${vue.base_endpoint}/store`;
-                
+                vue.resource.type = vue.type;
                 if (isValid_app || isValid_gestor) {
 
                     // Prepare data

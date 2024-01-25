@@ -67,6 +67,9 @@
 
                             <v-row justify="space-around">
                                 <v-col cols="12" class="px-8">
+                                    Selecciona los temas, cursos y escuelas que deseas copiar a otros módulos.
+                                </v-col>
+                                <v-col cols="12" class="px-8">
 
                                     <v-container
                                         id="scroll-target"
@@ -95,6 +98,9 @@
                         </v-stepper-content>
                         <v-stepper-content step="2" class="p-0">
                            <v-row justify="space-around">
+                                <v-col cols="12" class="px-8">
+                                    Selecciona los módulos donde copiarás el contenido seleccionado.
+                                </v-col>
                                 <v-col cols="12" class="px-8">
 
                                     <!-- <div class="mx-5 mb-3">

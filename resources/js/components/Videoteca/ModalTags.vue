@@ -77,7 +77,7 @@
                 <v-card-title class="text-h5">
                     ¿Está seguro de eliminar este elemento?
                 </v-card-title>
-                <v-card-text v-text="'Esta acción no se puede revertir'"/>
+                <v-card-text>Esta acción no se puede revertir </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn

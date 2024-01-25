@@ -116,11 +116,11 @@ class UserMassive extends Massive implements ToCollection
                 if (env('MULTIMARCA') === true) {
                     $master_user = UsuarioMaster::where('dni', $data_user['user']['document'])->first();
                     $master_user_arr = [
-                            'dni' => $data_user['user']['document'],
-                            'username' => isset($data_user['user']['username']) ? $data_user['user']['username']: null,
-                            'email' => isset($data_user['user']['email']) && trim($data_user['user']['email']) !== '' ? $data_user['user']['email'] : null,
-                            'customer_id' => ENV('CUSTOMER_ID'),
-                            'created_at' => now()
+                        'dni' => $data_user['user']['document'],
+                        'username' => isset($data_user['user']['username']) ? $data_user['user']['username']: null,
+                        'email' => isset($data_user['user']['email']) && trim($data_user['user']['email']) !== '' ? $data_user['user']['email'] : null,
+                        'customer_id' => ENV('CUSTOMER_ID'),
+                        'created_at' => now()
                     ];
                     //Insert user and criteria
                     UsuarioMaster::storeRequest($master_user_arr, $master_user);
@@ -242,10 +242,12 @@ class UserMassive extends Massive implements ToCollection
                         'message' => ($this->messageInSpanish) ? 'Este username es usado por otro usuario.' : 'The field username must be unique.'
                     ];
                 }
-                if ($user['email'] != '' && !is_null($user_username_email->email)
-                    && mb_strtolower($user_username_email->email) == mb_strtolower($user['email'])
+
+
+                if ($user['email'] != '' && !is_null($user_username_email->email ?? null)
+                    && mb_strtolower($user_username_email->email ?? '') == mb_strtolower($user['email'])
                     || $user['email'] != '' && !is_null($master_username_email)
-                    && mb_strtolower($master_username_email->email) == mb_strtolower($user['email'])) {
+                    && mb_strtolower($master_username_email->email ?? '') == mb_strtolower($user['email'])) {
 
                     $has_error = true;
                     $errors_index[] = [
@@ -255,7 +257,7 @@ class UserMassive extends Massive implements ToCollection
                 }
             }
         } else {
-              if ($user_username_email ) {
+            if ($user_username_email ) {
                 if (isset($user['username']) && $user['username'] != '' &&
                     !is_null($user_username_email->username) &&
                     mb_strtolower($user_username_email->username) == mb_strtolower($user['username']) ) {

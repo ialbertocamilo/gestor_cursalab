@@ -70,9 +70,9 @@ export default {
 
             vue.$http.post(url, {'_method': 'DELETE'})
                 .then(({data}) => {
-                    vue.$emit('onConfirm')
                     vue.showAlert(data.data.msg, data.type)
                     this.hideLoader()
+                    vue.$emit('onConfirm',vue.resource)
                 }).catch((error) => {
 
                     if (error && error.errors)

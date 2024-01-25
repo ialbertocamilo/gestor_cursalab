@@ -13,6 +13,7 @@
             hide-details="auto"
             :rows="rows"
             :loading="loading"
+            :counter="counter"
         >
             <template v-slot:label v-if="showRequired">
                 {{ label }}<RequiredFieldSymbol/>
@@ -78,6 +79,10 @@ export default {
         limits:{
             required: false,
             type: Object | Array,
+        },
+        counter:{
+            type: Boolean,
+            default: false,
         }
     },
     data() {

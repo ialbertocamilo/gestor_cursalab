@@ -6,6 +6,7 @@
         :persistent="options.persistent"
         scrollable
         @click:outside="closeModalOutside"
+        :fullscreen="fullscreen"
     >
         <v-card :height="height">
             <div v-if="customTitle">
@@ -130,6 +131,10 @@ export default {
         vCardClass:{
             type: String,
             default: ''
+        },
+        fullscreen:{
+            type: Boolean,
+            default: false
         }
     },
     methods: {

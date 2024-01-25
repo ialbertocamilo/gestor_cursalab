@@ -71,13 +71,13 @@
                             <v-list-group v-for="topic in topics" :key="topic.id" class="not-show-arrow v-list-custom-group">
                                 <template v-slot:activator>
                                     <v-list-item-content class="v-list-custom-color">
-                                        <v-list-item-title style="font-size: 0.8rem !important;">{{ topic.name }}</v-list-item-title>
+                                        <v-list-item-title style="font-size: 0.8rem !important;" >{{ topic.name }}</v-list-item-title>
                                     </v-list-item-content>
                                 </template>
         
                                 <v-list-item v-for="media in topic.medias" :key="media.id">
                                     <v-list-item-content @click="changeMedia(media)" class="v-list-item-custom">
-                                        <v-list-item-title style="font-size: 0.8rem !important;">
+                                        <v-list-item-title style="font-size: 0.8rem !important;" :style="currentMedia.id == media.id ? 'color:#2E36CE' : null">
                                             <i
                                                 :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'" />
                                             {{ media.name }}</v-list-item-title>
