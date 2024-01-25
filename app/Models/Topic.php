@@ -90,14 +90,17 @@ class Topic extends BaseModel
         if(is_null($value) || $value=='undefined'){
             $data = [];
             $data['reference'] = '';
-            $data['geometry'] = null;
-            $data['formatted_address'] = null;
-            $data['url'] = null;
-            $data['ubicacion'] = null;
+            $data['geometry'] = '';
+            $data['formatted_address'] = '';
+            $data['url'] = '';
+            $data['ubicacion'] = '';
+            $data['host_id'] = null;
+            $data['poll_id'] = null;
             $data['start_date'] = null;
             $data['start_time'] = null;
             $data['finish_date'] = null;
             $data['finish_time'] = null;
+            $data['show_medias_since_start_course'] = 0;
             return $data;
         }
         return json_decode($value);

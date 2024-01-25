@@ -88,6 +88,7 @@ Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 're
 
     Route::prefix('progreso')->group(base_path('routes/app/progreso.php'));
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
+    Route::prefix('courses-in-person')->group(base_path('routes/app/course-in-person.php'));
     Route::prefix('temas')->group(base_path('routes/app/topics.php'));
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
     Route::prefix('/ranking')->group(base_path('routes/app/ranking.php'));

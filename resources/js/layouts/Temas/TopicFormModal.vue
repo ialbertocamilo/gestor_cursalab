@@ -49,7 +49,7 @@
                             v-model="resource.modality_in_person_properties.poll_id"
                             :items="selects.polls"
                             clearable
-                            item-text="name"
+                            item-text="titulo"
                             class="mt-4"
                         />
                         <DefaultRichText
@@ -80,11 +80,8 @@
                         />
                     </v-col>
                 </v-row>
-
-                    <!-- class="my-5" -->
-                    <v-row justify="space-around" class="menuable">
-                        <!-- v-if="selects.course_code_modality == 'in-person'" -->
-                    <v-col cols="12">
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12" v-if="selects.course_code_modality == 'in-person'">
                         <DefaultModalSectionExpand
                             title="Ubicación"
                             :expand="sections.showSectionPosition"
@@ -129,7 +126,6 @@
                                             label="Referencia"
                                             placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
                                             v-model="resource.modality_in_person_properties.reference"
-                                            :rules="rules.required"
                                         />
                                     </v-col>
                                 </v-row>
@@ -137,8 +133,8 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <!-- v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'" -->
-                <v-row justify="space-around">
+                <!-- -->
+                <v-row justify="space-around"  v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
                           title="Programación de sesión"
@@ -154,6 +150,7 @@
                                             :options="modalDateFilter1"
                                             v-model="resource.modality_in_person_properties.start_date"
                                             label="Fecha de inicio"
+                                            :min="new Date().toISOString().substr(0, 10)"
                                             dense
                                         />
                                     </v-col>
@@ -176,6 +173,8 @@
                                            :referenceComponent="'modalDateFilter1'"
                                            :options="modalDateFilter2"
                                            v-model="resource.modality_in_person_properties.finish_date"
+                                           :disabled="!resource.modality_in_person_properties.start_date"
+                                           :min="resource.modality_in_person_properties.start_date"
                                            label="Fecha de fin"
                                            dense
                                        />
@@ -392,17 +391,9 @@
                         <v-row>
                             <v-col>
                                 <DefaultToggle 
-                                    v-model="resource.modality_in_person_properties.required"
+                                    v-model="resource.modality_in_person_properties.show_medias_since_start_course"
                                     active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
                                     inactive-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
-                                    dense
-                                />
-                            </v-col>
-                            <v-col>
-                                <DefaultToggle 
-                                    v-model="resource.modality_in_person_properties.multimedia"
-                                    active-label="El usuario debe terminar de visualizar los videos para continuar con los recursos multimedia"
-                                    inactive-label="El usuario debe terminar de visualizar los videos para continuar con los recursos multimedia"
                                     dense
                                 />
                             </v-col>
@@ -617,7 +608,13 @@ export default {
                     formatted_address:'',
                     url:'',
                     ubicacion:'',
-                    host_id:null
+                    host_id:null,
+                    poll_id:null,
+                    start_date:null,
+                    start_time:null,
+                    finish_date:null,
+                    finish_time:null,
+                    show_medias_since_start_course:0
                 }
             },
             selects: {
@@ -630,7 +627,8 @@ export default {
                 qualification_types: [],
                 hosts:[],
                 course_code_modality:null,
-                polls:[]
+                polls:[],
+                tags:[]
             },
             resource: {
                 modality_in_person_properties:{
@@ -644,8 +642,7 @@ export default {
                     start_time:null,
                     finish_date:null,
                     finish_time:null,
-                    required:null,
-                    multimedia:null
+                    show_medias_since_start_course:0
                 },
                 tags: [
                     { header: '💚 Competencias:' },
@@ -831,27 +828,19 @@ export default {
         },
         sendForm(data, validateForm = true) {
             let vue = this
+            if(vue.selects.course_code_modality = 'in-person' && vue.ubicacion_mapa){
+                vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
+                vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
+                vue.resource.modality_in_person_properties.url = vue.ubicacion_mapa.url
 
-            // if (data.confirmMethod === 'messagesActions') {
-            //     vue.closeModal()
-            //     return
-            // }
-            // let data_maps = {
-            //             geometry: null,
-            //             formatted_address: null,
-            //             url: null,
-            //             ubicacion: null,
-            //         }
-            vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
-            vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
-            vue.resource.modality_in_person_properties.url = vue.ubicacion_mapa.url
-
-            for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
-                if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
-                    vue.resource.modality_in_person_properties.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
-                    break;
+                for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
+                    if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
+                        vue.resource.modality_in_person_properties.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
+                        break;
+                    }
                 }
             }
+
 
             vue.topicsValidationModal.open = false
             vue.loadingActionBtn = true
@@ -970,8 +959,10 @@ export default {
                     vue.limits_ia_convert = data.data.limits_ia_convert;
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
-                    vue.course_code_modality = data.data.course_code_modality;
+                    vue.selects.course_code_modality = data.data.course_code_modality;
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
+                    vue.selects.polls = data.data.polls;
+                    vue.selects.tags = data.data.tags;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -1229,6 +1220,15 @@ export default {
             if (index !== -1) {
                 this.selects.tags.splice(index + 1, 0, ...tags.filter(t => t.type === type));
             }
+        },
+        minDate( date = null ){
+            if(date != null)
+            {
+                let result = new Date(date);
+                result.setDate(result.getDate() + 1);
+                return result.toISOString().substr(0, 10);
+            }
+            return new Date().toISOString().substr(0, 10)
         }
     }
 }

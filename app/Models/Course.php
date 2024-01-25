@@ -551,6 +551,8 @@ class Course extends BaseModel
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
 
+        $modalities = Taxonomy::where('group', 'course')->where('type', 'modality')->select('id','code')->get();
+
 
         foreach ($schools as $school_id => $courses) {
             $school_workspace = $positions_schools->where('school_id', $school_id)->first();
@@ -737,8 +739,10 @@ class Course extends BaseModel
                 }
                 else
                 {
+                    $modality = $modalities->where('id',$course->modality_id)->first();
                     $school_courses[] = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'descripcion' => $course->description,
                         'orden' => $course_position,

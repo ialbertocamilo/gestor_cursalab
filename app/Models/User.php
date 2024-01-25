@@ -925,6 +925,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $response_type = 'courses-separated',
         $byCoursesId = [],
         $bySchoolsId = [],
+        $modality_code = null,
+        $only_ids_courses=null
     )
     {
         $user = $this;
@@ -973,10 +975,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if(count($byCoursesId)>0){
             $query->whereIn('id', $byCoursesId);
         }
-
+        if($modality_code){
+            $query->whereRelation('modality','code',$modality_code);
+        }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
         // info('D');
-
+        if($only_ids_courses){
+            return $courses->pluck('id');
+        }
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
         $isUserUcfp = $user->subworkspace->parent_id === 25;

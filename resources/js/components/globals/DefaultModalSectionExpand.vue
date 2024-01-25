@@ -37,9 +37,9 @@
     <v-row justify="space-around" align="start" align-content="center" class="px-3 pt-2 section-expanded" v-show="expand.status">
         <v-col cols="12" class="d-flex justify-content-center py-1 content-background">
             <v-expand-transition>
-
-                <slot name="content"/>
-                
+                <div style="width:100%">
+                    <slot name="content"/>
+                </div>
             </v-expand-transition>
         </v-col>
     </v-row>

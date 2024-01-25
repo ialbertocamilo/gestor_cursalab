@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Poll;
 use App\Models\Post;
 use App\Models\Curso;
 use App\Models\Media;
@@ -10,10 +11,10 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\School;
+
 use App\Models\Ability;
 
 use App\Models\Usuario;
-
 use App\Models\Abconfig;
 use App\Models\Pregunta;
 use App\Models\Question;
@@ -72,10 +73,11 @@ class TemaController extends Controller
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
         $hosts = Usuario::getCurrentHosts();
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
-
+        $polls = Poll::loadPollsByType('xtema');
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
-                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags','hosts');
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
+                             'hosts','polls','course_code_modality');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -117,6 +119,7 @@ class TemaController extends Controller
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
+            'polls' => $form_selects['polls'],
             'limits_ia_convert'=>$limits_ia_convert,
             'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
             'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description,
