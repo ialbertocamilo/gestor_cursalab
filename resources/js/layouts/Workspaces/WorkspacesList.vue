@@ -97,6 +97,11 @@
             </v-col>
 
             <v-col cols="5" class="d-flex justify-end">
+                <DefaultModalButton
+                    icon_name="fas fa-cog"
+                    :label="'Configurar espacio'"
+                    @click="openFormModal(modalConfigAmbienteOptions, null, null, 'Configurar espacio')"
+                />
                 <v-btn
                     elevation="0"
                     small
@@ -477,13 +482,19 @@
             @onConfirm="closeFormModal(modalStatusOptions); loadData();"
             @onCancel="closeFormModal(modalStatusOptions)"
         />
-
+        <ConfigAmbiente
+            :options="modalConfigAmbienteOptions"
+            :ref="modalConfigAmbienteOptions.ref"
+            @onConfirm="closeFormModal(modalConfigAmbienteOptions)"
+            @onCancel="closeFormModal(modalConfigAmbienteOptions)"
+        />
     </div>
 </template>
 
 <script>
 
 import WorkspacesForm from "./WorkspacesForm";
+import ConfigAmbiente from './ConfigAmbiente';
 import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
@@ -500,7 +511,7 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal, DefaultStatusModal
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal, DefaultStatusModal,ConfigAmbiente
 
     },
     data: () => ({
@@ -613,6 +624,16 @@ export default {
                 },
             }
         },
+        modalConfigAmbienteOptions:{
+            ref: 'ConfigAmbienteModal',
+            open: false,
+            base_endpoint: '/ambiente',
+            confirmLabel: 'Guardar',
+            resource: 'Ambiente',
+            title: 'Configurar Ambiente',
+            action: null,
+            persistent: true,
+        }
     })
     ,
     mounted() {
