@@ -1257,7 +1257,7 @@ class Course extends BaseModel
         print_r($fun_2);
     }
 
-    public function usersSegmented($course_segments, $type = 'get_records')
+    public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
     {
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
@@ -1284,6 +1284,16 @@ class Course extends BaseModel
             }
             // $counts[$key] = $query->count();
 //            dd($query->toSql());
+            foreach ($filters as $filter) {
+                $statement = $filter['statement'] ?? null;
+                $field = $filter['field'] ?? null;
+                $value = $filter['value'] ?? null;
+                $operator = $filter['operator'] ?? '=';
+                if($field && $statement){
+                    /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
+                    ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+                }
+            }
             $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
@@ -1309,147 +1319,10 @@ class Course extends BaseModel
         }
 
         $users_have_course = User::where('active', 1)->whereIn('id', $users_id_course)->select('id');
+        if($addSelect){
+            $users_have_course->addSelect($addSelect);
+        }
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
-    }
-
-    public function getUsersBySegmentation($type = 'count')
-    {
-        $this->load('segments.values');
-
-        if (!$this->hasBeenSegmented()) return [];
-
-        // $users = collect();
-        $users = [];
-
-        $counts = [];
-
-        foreach ($this->segments as $key => $segment) {
-
-            $query = User::select('id')->where('active', 1);
-            // $clause = $key == 0 ? 'where' : 'orWhere';
-
-            $grouped = $segment->values->groupBy('criterion_id');
-
-            foreach ($grouped as $idx => $values) {
-
-                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
-
-                    $ids = $values->pluck('criterion_value_id');
-
-                    $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
-                        ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
-                });
-            }
-
-
-            // info($query->toSql());
-            $counts[$key] = $query->count();
-
-            // $result = $query->get()->pluck('id')->toArray();
-            // $users[$key] = $result;
-            // $counts[$key] = count($result);
-        }
-
-        // info($users);
-        // info($counts);
-
-        return $counts;
-        // return $query->$type();
-    }
-
-    public function getUsersBySegmentations($type = 'count')
-    {
-        $this->load('segments.values');
-
-        if (!$this->hasBeenSegmented()) return [];
-
-        // $users = collect();
-        $users = [];
-
-        $counts = [];
-
-        $query = User::select('id');
-
-        foreach ($this->segments as $key => $segment) {
-
-            $clause = $key == 0 ? 'where' : 'orWhere';
-            $query->$clause(function ($q) use ($segment, $key) {
-
-                $grouped = $segment->values->groupBy('criterion_id');
-
-                foreach ($grouped as $i => $values) {
-
-
-                    // info($idx);
-
-                    $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
-
-                        $ids = $values->pluck('criterion_value_id');
-
-                        // info($ids);
-
-                        $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
-                            ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
-                    });
-                }
-            });
-        }
-
-        // info($counts);
-        $a = $query->$type();
-
-        // info($query->toSql());
-        return $a;
-    }
-
-    public function getCourseTagsToUCByUser($course, $user,$valid_segment,$cycles)
-    {
-        $tags = [];
-
-        $user_active_cycle = $user->getActiveCycle(true);
-
-        if (!$user_active_cycle) return $tags;
-
-        if ($user_active_cycle->value_text === 'Ciclo 0') {
-
-            $tags = ['Ciclo 0'];
-
-        } else {
-
-            // $temp_segment = null;
-            // $user_criteria = $user->criterion_values->groupBy('criterion_id');
-            // // $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-
-            // foreach ($course->segments as $segment) {
-
-            //     $course_segment_criteria = $segment->values->groupBy('criterion_id');
-
-            //     $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
-
-            //     if ($valid_segment) :
-            //         $temp_segment = $segment;
-            //         break;
-            //     endif;
-
-            // }
-
-//            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
-//            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
-
-            $ciclo = null;
-            if ($valid_segment)
-                $ciclo = $cycles->whereIn('id', $valid_segment->values->pluck('criterion_value_id'))->first();
-                // $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
-                //     ->whereRelation('criterion', 'code', 'cycle')
-                //     ->where('value_text', '<>', 'Ciclo 0')
-                //     ->orderBy('position')
-                //     ->first();
-
-            if ($ciclo)
-                $tags = [$ciclo->value_text];
-        }
-
-        return $tags;
     }
 
     public function updateOnModifyingCompatibility()

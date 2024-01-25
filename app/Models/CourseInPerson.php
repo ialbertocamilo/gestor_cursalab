@@ -76,7 +76,7 @@ class CourseInPerson extends Model
 
     protected function listGuestsByCourse($course_id){
         $course = Course::with(['segments','segments.values'])->where('id',$course_id)->select('id')->first();
-        $usersSegmented = $course->usersSegmented($course->segments,'get_records');
+        $users_segmented = $course->usersSegmented($course->segments,'get_records',$filters,['id','name','lastname','document']);
         return $usersSegmented;
     }
 
