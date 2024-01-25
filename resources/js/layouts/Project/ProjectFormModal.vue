@@ -9,7 +9,7 @@
                             <v-autocomplete clearable outlined v-model="resource.course_id" :items="selects.courses"
                                 no-data-text="No hay datos para mostrar." label="Curso"
                                 item-value='id' item-text='name' :rules="rules.required" :search-input.sync="search"
-                                :loading="isLoading" 
+                                :loading="isLoading"
                                 :disabled="isLoading || options.action === 'edit' || options.create_from_course_list"
                             />
                         </v-col>
@@ -56,7 +56,7 @@
             :options="modalGeneralStorageOptions"
             width="45vw"
             @onCancel="closeFormModal(modalGeneralStorageOptions)"
-            @onConfirm="closeFormModal(modalGeneralStorageOptions), 
+            @onConfirm="closeFormModal(modalGeneralStorageOptions),
                         openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
         />
         <!-- MODAL ALMACENAMIENTO -->
@@ -77,7 +77,7 @@
             :options="modalAlertStorageOptions"
             width="25vw"
             @onCancel="closeFormModal(modalAlertStorageOptions)"
-            @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'), 
+            @onConfirm="openFormModal(modalGeneralStorageOptions, null, 'status', 'Aumentar mi plan'),
                         closeFormModal(modalAlertStorageOptions)"
         />
     </div>
@@ -216,7 +216,7 @@ export default {
                         if(!data.data.still_has_storage){
                             vue.showAlert(data.data.msg,'warning')
                             vue.openFormModal(vue.modalAlertStorageOptions, null, null, 'Alerta de almacenamiento');
-                            return ''; 
+                            return '';
                         }
                         vue.closeModal()
                         vue.showAlert(data.data.msg)
@@ -295,7 +295,8 @@ export default {
             // Items have already been requested
             if (vue.isLoading) return
             vue.isLoading = true
-            let url = `${vue.options.base_endpoint}/get-selects?type=search-course&q=${value}`
+
+            let url = `${vue.options.base_endpoint}/get-selects?type=search-course&q=${value ? value : ''}`
             await vue.$http.get(url)
                 .then(({ data }) => {
                     console.log(data);
