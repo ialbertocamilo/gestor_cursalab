@@ -467,7 +467,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return null;
         }
     }
-
+   
     public function updateStatusUser($active = null, $termination_date = null,$from_massive=false)
     {
         $user = $this;
