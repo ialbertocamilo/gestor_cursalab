@@ -245,6 +245,13 @@
                             </v-col>
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
+                            <v-col cols="12">
+                                <DefaultToggle v-model="resource.review_all_duration_media"
+                                    active-label="El colaborador necesita terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El colaborador necesita terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    dense
+                                />
+                            </v-col>
                         </v-row>
 
                     </template>
@@ -388,7 +395,7 @@ import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
 import TagModal  from "../../components/basicos/TagModal";
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type','review_all_duration_media'];
 
 const file_fields = ['imagen'];
 
@@ -442,6 +449,7 @@ export default {
                 max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
+                review_all_duration_media:0
             },
             selects: {
                 assessable: [
