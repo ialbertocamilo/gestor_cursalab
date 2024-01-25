@@ -20,7 +20,7 @@ class Taxonomy extends Model
     // Cross Database support
     use HybridRelations;
 
-    protected $connection = 'mysql';
+    // protected $connection = 'mysql';
     // protected $rememberFor = WEEK_MINUTES;
     // use Cachable;
     use Cachable {
