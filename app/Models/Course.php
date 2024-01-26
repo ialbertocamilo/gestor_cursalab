@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Course extends BaseModel
 {
@@ -16,7 +19,7 @@ class Course extends BaseModel
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4','dc3_configuration','modality_in_person_properties'
+        'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion','modality_in_person_properties'
     ];
 
     protected $casts = [
@@ -25,6 +28,24 @@ class Course extends BaseModel
         'show_certification_date' => 'boolean',
         'modality_in_person_properties' => 'json'
     ];
+
+    //
+    // Mutators and accesors
+    // ========================================
+
+//    public function setRegistroCapacitacionAttribute($value)
+//    {
+//        $this->attributes['registro_capacitacion'] = json_encode($value);
+//    }
+
+    public function getRegistroCapacitacionAttribute($value)
+    {
+        return $value ? json_decode($value) : json_decode('{"active":false}');
+    }
+
+    //
+    // Relationships
+    // ========================================
 
     public function schools()
     {
@@ -135,7 +156,7 @@ class Course extends BaseModel
             $data['range_date'] = null;
             return $data;
         }
-        $data =json_decode($value); 
+        $data =json_decode($value);
         return $data;
     }
 
@@ -1720,5 +1741,40 @@ class Course extends BaseModel
             });
 
         return $count;
+    }
+
+    public static function generateAndStoreRegistroCapacitacion($filename, $data) {
+
+        $filePath = '/registro-capacitacion/' . $filename;
+        $pdf = PDF::loadView('pdf.registro-capacitacion', $data);
+
+        Storage::disk('s3')->put($filePath, $pdf->output(), 'public');
+
+        return $filePath;
+    }
+
+    /**
+     * Generate URL for 'registro de capacitación' file
+     * @param $filepath
+     * @return string
+     */
+    public static function generateRegistroCapacitacionURL($filepath) {
+
+        return
+            env('AWS_ENDPOINT') . '/' .
+            env('AWS_BUCKET') . '/' .
+            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
+            $filepath;
+    }
+
+    /**
+     * Check whether current course has registro capacitacion enabled or not
+     * @return false
+     */
+    public function registroCapacitacionIsActive() {
+
+        return  $this->registro_capacitacion
+            ? $this->registro_capacitacion->active ?? false
+            : false;
     }
 }

@@ -545,6 +545,99 @@
                     </v-col>
                 </v-row>
                 
+
+                <v-row
+                    v-if="has_registro_capacitacion_functionality"
+                    justify="space-around">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Registro de capacitación"
+                            :expand="sections.showSectionRegistroCapacitacion"
+                        >
+                            <template slot="content">
+                                <div>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <DefaultToggle
+                                                v-model="resource.registro_capacitacion.active"
+                                                :activeLabel="'Creación de registro de capacitación'"
+                                                :inactiveLabel="'Creación de registro de capacitación'"
+                                                dense/>
+                                        </v-col>
+                                        <v-col cols="12">
+                                            Anexa la elaboración del registro de capacitación para tus reportes.
+                                        </v-col>
+                                    </v-row>
+                                    <v-row v-if="resource.registro_capacitacion.active">
+
+                                            <v-col cols="12" class="pb-1">
+                                                <label style="font-weight: 500; font-size: 16px">
+                                                    Datos para registro
+                                                </label>
+                                            </v-col>
+
+                                            <v-col cols="6">
+                                                <DefaultAutocomplete
+                                                    placeholder=""
+                                                    dense
+                                                    label="Instructor"
+                                                    v-model="resource.registro_capacitacion.trainerAndRegistrar"
+                                                    :items="registro_capacitacion_trainers"
+                                                    item-text="name"
+                                                    clearable
+                                                    :rules="rules.dc3"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultModalButton
+                                                    label="Agregar"
+                                                    outlined
+                                                    @click="openFormModal(modalRegistroTrainerOptions, {type:'registro-trainer'}, 'create','Agregar Instructor')"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3"></v-col>
+                                            <v-col cols="12">
+                                                <DefaultInput
+                                                    clearable
+                                                    v-model="resource.registro_capacitacion.certificateCode"
+                                                    label="Código de certificado personalizado"
+                                                    :rules="rules.certificateCode"
+                                                    dense
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <DefaultRichText
+                                                    clearable
+                                                    v-model="resource.registro_capacitacion.syllabus"
+                                                    label="Temario para el registro"
+                                                    :rules="rules.syllabus"
+                                                    :ignoreHTMLinLengthCalculation="true"
+                                                    :height="195"
+                                                    :key="`temario-editor`"
+                                                    :loading="loading_description"
+                                                    :maxLength="3000"
+                                                    ref="descriptionRichText"
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="12">
+                                                <DefaultTextArea
+                                                    dense
+                                                    label="Observaciones del curso"
+                                                    placeholder="Ingrese una descripción del curso"
+                                                    v-model="resource.registro_capacitacion.comment"
+                                                />
+                                            </v-col>
+
+                                    </v-row>
+
+                                </div>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col cols="2">
                         <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit" dense/>
@@ -593,27 +686,41 @@
                 @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false"
             />
+            <RegistroTrainerModal
+                :ref="modalRegistroTrainerOptions.ref"
+                v-model="modalRegistroTrainerOptions.open"
+                :options="modalRegistroTrainerOptions"
+                width="30vw"
+                @onConfirm="setTrainer"
+                @onCancel="modalRegistroTrainerOptions.open = false"
+            />
         </template>
     </DefaultDialog>
 
 </template>
 <script>
+import editor from "@tinymce/tinymce-vue";
+
 const fields = [
     'name', 'reinicios_programado', 'active', 'position', 'imagen',
     'plantilla_diploma', 'config_id', 'categoria_id', 'type_id', 'qualification_type',
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
     'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate','can_create_certificate_dc3_dc4',
-    'dc3_configuration','modality_id'
+    'dc3_configuration', 'registro_capacitacion','modality_id'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
+import RegistroTrainerModal from './RegistroTrainerModal';
+import DefaultRichText from "../../components/globals/DefaultRichText.vue";
 
 export default {
-    components: { CursoValidacionesModal, DialogConfirm, DiplomaSelector,DC3PersonModal },
+    components: {
+        DefaultRichText,
+        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
         options: {
@@ -634,6 +741,7 @@ export default {
         let base_endpoint_temp = `/cursos`;
 
         return {
+            has_registro_capacitacion_functionality: false,
             url: window.location.search,
             errors: [],
             conf_focus: true,
@@ -645,7 +753,8 @@ export default {
                 showSectionDC3DC4:{status:false},
                 showSectionPosition:{status:false},
                 showSectionAssistance:{status:false},
-                showSectionVisualization:{status:false}
+                showSectionVisualization:{status:false},
+                showSectionRegistroCapacitacion: {status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -691,7 +800,8 @@ export default {
                     assistance_type:'assistance-course',
                     required_signature:false,
                     visualization_type:'only-assistence'
-                }
+                },
+                registro_capacitacion: {}
             },
             resource: {
                 qualification_type: {position: 0},
@@ -700,7 +810,8 @@ export default {
                     assistance_type:'assistance-course',
                     required_signature:false,
                     visualization_type:'only-assistence'
-                }
+                },
+                registro_capacitacion: {}
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -711,6 +822,11 @@ export default {
                 nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
                 qualification_type_id: this.getRules(['required']),
                 dc3: this.getRules(['required']),
+
+                trainerAndRegistrar: this.getRules(['required']),
+                certificateCode: this.getRules(['required']),
+                syllabus: this.getRules(['required']),
+                comment: this.getRules(['required']),
             },
             selects: {
                 requisito_id: [],
@@ -821,6 +937,16 @@ export default {
                 action: null,
                 persistent: true,
             },
+            modalRegistroTrainerOptions:{
+                open:false,
+                ref: 'TrainerFormModal',
+                base_endpoint: '/person',
+                confirmLabel: 'Guardar',
+                resource: 'person',
+                title: '',
+                action: null,
+                persistent: true,
+            },
             new_value: 0,
             //Jarvis
             loading_description:false,
@@ -846,6 +972,8 @@ export default {
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
             ubicacion_mapa: null,
+            registro_capacitacion_trainers: [],
+            catalog_denominations:[]
         }
     },
     async mounted(){
@@ -973,7 +1101,9 @@ export default {
             formData.set(
                 'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
             );
-            
+            formData.set(
+                'registro_capacitacion', JSON.stringify(vue.resource.registro_capacitacion)
+            );
             formData.append('validateForm', validateForm ? "1" : "0");
             vue.setJSONReinicioProgramado(formData)
             vue.getJSONEvaluaciones(formData)
@@ -1044,14 +1174,14 @@ export default {
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
                 const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
-                vue.showAlert(message, 'warning', '') 
+                vue.showAlert(message, 'warning', '')
                 return ''
             }
             if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
-                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
                 return ''
             }
-            vue.loading_description = true; 
+            vue.loading_description = true;
             await axios.post(url,{
                 name : vue.resource.name,
                 type:'course'
@@ -1066,12 +1196,12 @@ export default {
                             updateDescription(index + 1);
                         }, 10);
                     }else{
-                        vue.loading_description = false; 
+                        vue.loading_description = false;
                     }
                 }
                 updateDescription(0);
             }).catch(()=>{
-                vue.loading_description = false; 
+                vue.loading_description = false;
             })
         },
         async loadData(resource) {
@@ -1101,6 +1231,8 @@ export default {
                     vue.people.legal_representatives = response.legal_representatives;
                     vue.catalog_denominations = response.catalog_denominations;
                     vue.has_DC3_functionality = response.has_DC3_functionality;
+                    vue.registro_capacitacion_trainers = response.registro_capacitacion_trainers;
+                    vue.has_registro_capacitacion_functionality = response.has_registro_capacitacion_functionality;
 
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
@@ -1173,6 +1305,11 @@ export default {
             }
             this.people.legal_representatives.push(person);
             this.resource.dc3_configuration.legal_representative = person.id;
+        },
+        setTrainer(item){
+            this.modalRegistroTrainerOptions.open = false;
+            this.registro_capacitacion_trainers.push(item);
+            this.resource.registro_capacitacion.trainerAndRegistrar = item.id;
         }
     }
 }

@@ -40,7 +40,8 @@ class Workspace extends BaseModel
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
-        'dc3_configuration'
+        'dc3_configuration',
+        'registro_capacitacion'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -102,9 +103,19 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array',
         'limits' => 'json',
         'jarvis_configuration' => 'json',
-        'dc3_configuration'=>'array'
+        'dc3_configuration'=>'array',
+        'registro_capacitacion' => 'json'
     ];
 
+    public function setRegistroCapacitacionAttribute($value)
+    {
+        $this->attributes['registro_capacitacion'] = json_encode($value);
+    }
+
+    public function getRegistroCapacitacionAttribute($value)
+    {
+        return $value ? json_decode($value) : json_decode('{"company":{}}');
+    }
 
     public function medias() {
         return $this->hasMany(Media::class, 'workspace_id');
@@ -243,7 +254,7 @@ class Workspace extends BaseModel
             }
             return $data;
         }
-        $data =json_decode($value); 
+        $data =json_decode($value);
         return $data;
     }
     protected static function search($request)
@@ -951,7 +962,7 @@ class Workspace extends BaseModel
                     'ia_descriptions_generated' => JarvisAttempt::getAttempt($workspace->id,'descriptions'),
                 ];
         }
-        return $data;        
+        return $data;
     }
     protected function getSchoolsForTree($schools)
     {

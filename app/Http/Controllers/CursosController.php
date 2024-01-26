@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mongo\CourseInfoUsersM;
+use App\Models\RegistroCapacitacionTrainer;
 use DB;
 use App\Models\Poll;
 use App\Models\Ciclo;
@@ -143,10 +144,24 @@ class CursosController extends Controller
         }
 
         $modalities = DB::table('taxonomies')->where('group','course')->where('type','modality')->select('id','name','code')->get();
-        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types',
-                             'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
-                             'instructors','legal_representatives','catalog_denominations','modalities'
-                    );
+       
+        $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
+        $registro_capacitacion_trainers = [];
+        if ($has_registro_capacitacion_functionality) {
+            $registro_capacitacion_trainers = RegistroCapacitacionTrainer::query()
+                ->where('workspace_id', $workspace->id)
+                ->get();
+        }
+
+
+        $response = compact(
+            'escuelas', 'requisitos', 'types', 'qualification_types',
+            'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
+            'instructors','legal_representatives','catalog_denominations','modalities',
+            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers'
+        );
+
+
         return $compactResponse ? $response : $this->success($response);
     }
 
@@ -207,6 +222,8 @@ class CursosController extends Controller
             'types' => $form_selects['types'],
             'modalities' => $form_selects['modalities'],
             'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
+            'has_registro_capacitacion_functionality' => $form_selects['has_registro_capacitacion_functionality'],
+            'registro_capacitacion_trainers' => $form_selects['registro_capacitacion_trainers'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
             'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate,
             'has_DC3_functionality' => $has_DC3_functionality,

@@ -56,7 +56,8 @@ class CursosStoreUpdateRequest extends FormRequest
             'can_create_certificate_dc3_dc4' => 'nullable',
             'dc3_configuration' => 'nullable',
             'modality_in_person_properties' => 'nullable',
-            'modality_id' => 'nullable'
+            'modality_id' => 'nullable',
+            'registro_capacitacion' => 'nullable',
         ];
     }
 
@@ -81,6 +82,7 @@ class CursosStoreUpdateRequest extends FormRequest
             $qualification_type = Taxonomy::find($qualification_type_id);
             $mod_evaluaciones['nota_aprobatoria'] = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], 20, $qualification_type->position);
         }
+
 
         $data['active'] = $active;
         $data['show_certification_date'] = $show_certification_date;

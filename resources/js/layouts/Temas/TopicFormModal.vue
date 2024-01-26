@@ -387,6 +387,13 @@
                             </v-col>
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
+                            <v-col cols="12">
+                                <DefaultToggle v-model="resource.review_all_duration_media"
+                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    dense
+                                />
+                            </v-col>
                         </v-row>
                         <v-row>
                             <v-col>
@@ -541,7 +548,8 @@ import GmapMap from 'vue2-google-maps/dist/components/map'
 import TagModal  from "../../components/basicos/TagModal";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type','modality_in_person_properties'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',
+    'review_all_duration_media','modality_in_person_properties'];
 
 const file_fields = ['imagen'];
 
@@ -615,7 +623,8 @@ export default {
                     finish_date:null,
                     finish_time:null,
                     show_medias_since_start_course:0
-                }
+                },
+                review_all_duration_media:0
             },
             selects: {
                 assessable: [
