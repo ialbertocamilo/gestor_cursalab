@@ -13,7 +13,7 @@
                 <v-row>
                     <v-col cols="6" class="pb-0">
                         <DefaultInput
-                            label="Nombre"
+                            label="Nombre del curso"
                             placeholder="Ingrese un nombre"
                             v-model="resource.name"
                             :rules="rules.name"
@@ -26,7 +26,7 @@
                         <DefaultAutocomplete
                             show-required
                             :rules="rules.lista_escuelas"
-                            label="Escuelas"
+                            label="Escuelas a la pertenece"
                             v-model="resource.lista_escuelas"
                             :items="selects.lista_escuelas"
                             item-text="name"
@@ -35,96 +35,20 @@
                             dense
                         />
                     </v-col>
-                </v-row>
-                <v-row>
                     <v-col cols="6">
-                        <v-row>
-                            <v-col cols="12">
-                                <DefaultTextArea
-                                    dense
-                                    label="Descripción"
-                                    placeholder="Ingrese una descripción del curso"
-                                    v-model="resource.description"
-                                    @eventGenerateIA="generateIaDescription"
-                                    :limits="limits_descriptions_generate_ia"
-                                    :loading="loading_description"
-                                    :disabled="loading_description"
-                                    :rows="4"
-                                    :showButtonIaGenerate="showButtonIaGenerate"
-                                />
-                            </v-col>
-                            <v-col cols="12">
-                                <DefaultAutocomplete
-                                    show-required
-                                    :rules="rules.types"
-                                    dense
-                                    label="Modalidad del curso"
-                                    v-model="resource.modality_id"
-                                    :items="selects.modalities"
-                                    item-text="name"
-                                    item-value="id"
-                                    disabled
-                                />
-                            </v-col>
-                            <v-col cols="12">
-                                <DefaultAutocomplete
-                                    show-required
-                                    :rules="rules.types"
-                                    dense
-                                    label="Tipo de curso"
-                                    v-model="resource.type_id"
-                                    :items="selects.types"
-                                    item-text="name"
-                                    item-value="id"
-                                />
-                            </v-col>
-                            <v-col cols="12">
-                                <DefaultAutocomplete
-                                    dense
-                                    label="Requisito"
-                                    v-model="resource.requisito_id"
-                                    :items="selects.requisito_id"
-                                    custom-items
-                                    item-text="name"
-                                    item-value="id"
-                                    clearable
-                                >
-                                    <template v-slot:customItems="{item}">
-                                        <v-list-item-content>
-                                            <v-list-item-title v-html="item.name"/>
-                                            <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
-                                        </v-list-item-content>
-                                    </template>
-                                </DefaultAutocomplete>
-                            </v-col>
-
-                        </v-row>
-
-                        <v-row>
-
-                            <v-col cols="6" v-if="!resource.can_create_certificate_dc3_dc4">
-                                <DefaultAutocomplete
-                                    dense
-                                    label="Duración (hrs.)"
-                                    v-model="resource.duration"
-                                    :items="selects.duration"
-                                    item-text="name"
-                                    item-value="id"
-                                    placeholder="Ej. 2:00"
-                                />
-                            </v-col>
-                            <v-col cols="6">
-                                <DefaultInput
-                                    numbersOnly
-                                    dense
-                                    label="Inversión"
-                                    placeholder="Ej. 2000"
-                                    v-model="resource.investment"
-                                />
-                            </v-col>
-                        </v-row>
+                        <DefaultTextArea
+                            dense
+                            label="Descripción u objetivo"
+                            placeholder="Agrega una descripción u objetivo del curso"
+                            v-model="resource.description"
+                            @eventGenerateIA="generateIaDescription"
+                            :limits="limits_descriptions_generate_ia"
+                            :loading="loading_description"
+                            :disabled="loading_description"
+                            :rows="10"
+                            :showButtonIaGenerate="showButtonIaGenerate"
+                        />
                     </v-col>
-
                     <v-col cols="6">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
@@ -133,117 +57,175 @@
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
-                            select-height="75vh"
+                            select-height="100%"
                         />
                     </v-col>
-
-                </v-row>
-                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Tipo de asistencias y firmas"
-                            :expand="sections.showSectionAssistance"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="12">
-                                        <v-radio-group
-                                            v-model="resource.modality_in_person_properties.assistance_type"
-                                            row
-                                        >
-                                            <v-radio value="assistance-topic">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Asistencia por tema
-                                                        </div>
-                                                        </template>
-                                                        <span>Se tomará asistencia en cada sesión del curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                            <v-radio value="assistance-course">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Asistencia por curso
-                                                        </div>
-                                                        </template>
-                                                        <span>Se tomará una sola asistencia durante el curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                        </v-radio-group>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <DefaultToggle 
-                                            label="Requiere firma digital del colaborador" 
-                                            type="not-active"
-                                            v-model="resource.modality_in_person_properties.required_signature" 
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
+                    <v-col cols="6">
+                        <DefaultAutocomplete
+                            show-required
+                            :rules="rules.types"
+                            dense
+                            label="Modalidad del curso"
+                            v-model="resource.modality_id"
+                            :items="selects.modalities"
+                            item-text="name"
+                            item-value="id"
+                            disabled
+                        />
                     </v-col>
-                </v-row>
-                <v-row justify="space-around" class="menuable" v-if="current_modality.code == 'in-person'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Disponibilidad de contenido"
-                            :expand="sections.showSectionVisualization"
+                    <v-col cols="6">
+                        <DefaultAutocomplete
+                            show-required
+                            :rules="rules.types"
+                            dense
+                            label="Tipo de curso"
+                            v-model="resource.type_id"
+                            :items="selects.types"
+                            item-text="name"
+                            item-value="id"
+                        />
+                    </v-col>
+                    <div  v-if="current_modality.code == 'in-person'">
+                        <v-col cols="6">
+                            <div class="card_border card mt-3" style="border-radius: 4px;">
+                                <h5 class="px-2 card-text m-2 title-card-border">
+                                    Toma de asistencia
+                                </h5>
+                                <v-radio-group
+                                    v-model="resource.modality_in_person_properties.assistance_type"
+                                    row
+                                    class="ml-2"
+                                >
+                                    <v-radio value="assistance-by-session">
+                                        <template v-slot:label>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                <div v-bind="attrs" v-on="on" class="mt-2">
+                                                    Asistencia por sesión
+                                                </div>
+                                                </template>
+                                                <span>Se tomará asistencia en cada sesión del curso</span>
+                                            </v-tooltip>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="assistance-by-day">
+                                        <template v-slot:label>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                <div v-bind="attrs" v-on="on" class="mt-2">
+                                                    Asitencia por día
+                                                </div>
+                                                </template>
+                                                <span>Si se tiene 2 o más sesiones en el día se tomará solo una asistencia</span>
+                                            </v-tooltip>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
+                            </div>
+                        </v-col>
+                        <v-col cols="6">
+                            <div class="card_border card mt-3" style="border-radius: 4px;">
+                                <h5 class="px-2 card-text m-2 title-card-border">
+                                    Quienes pueden ver el contenido
+                                </h5>
+                                <v-radio-group
+                                    v-model="resource.modality_in_person_properties.visualization_type"
+                                    row
+                                    class="ml-2"
+                                >
+                                    <v-radio value="scheduled-users">
+                                        <template v-slot:label>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                <div v-bind="attrs" v-on="on" class="mt-2">
+                                                    Todos los agendados
+                                                </div>
+                                                </template>
+                                                <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
+                                            </v-tooltip>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="all-users">
+                                        <template v-slot:label>
+                                            <v-tooltip top>
+                                                <template v-slot:activator="{ on, attrs }">
+                                                <div v-bind="attrs" v-on="on" class="mt-2">
+                                                    Solo los asistentes
+                                                </div>
+                                                </template>
+                                                <span>Todos los participantes podrán ver los datos del curso</span>
+                                            </v-tooltip>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
+                            </div>
+                        </v-col>
+                        <v-col cols="6">
+                            <div class="card_border card mt-3" style="border-radius: 4px;">
+                                <h5 class="px-2 card-text m-2 title-card-border">
+                                    Firmas
+                                </h5>
+                                <DefaultToggle
+                                    class="ml-4 mb-2"
+                                    v-model="resource.modality_in_person_properties.required_signature" 
+                                    dense
+                                    :active-label="'Solicitar firma del colaborador'"
+                                    :inactive-label="'Solicitar firma del colaborador'"
+                                />
+                            </div>
+                        </v-col>
+                        <v-col cols="6">
+                        </v-col>
+                    </div>
+                    <v-col cols="6" v-if="current_modality.code == 'in-person'">
+                        <DefaultAutocomplete
+                            dense
+                            label="Requisito"
+                            v-model="resource.requisito_id"
+                            :items="selects.requisito_id"
+                            custom-items
+                            item-text="name"
+                            item-value="id"
+                            clearable
                         >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col>
-                                        <v-radio-group
-                                            v-model="resource.modality_in_person_properties.visualization_type"
-                                            mandatory
-                                            row
-                                        >
-                                            <v-radio value="only-assistance">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Todos los asistentes
-                                                        </div>
-                                                        </template>
-                                                        <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                            <v-radio value="all">
-                                                <template v-slot:label>
-                                                    <v-tooltip top>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <div v-bind="attrs" v-on="on">
-                                                            Todos los agendados
-                                                        </div>
-                                                        </template>
-                                                        <span>Todos los participantes podrán ver los datos del curso</span>
-                                                    </v-tooltip>
-                                                </template>
-                                            </v-radio>
-                                        </v-radio-group>
-                                    </v-col>
-                                </v-row>
+                            <template v-slot:customItems="{item}">
+                                <v-list-item-content>
+                                    <v-list-item-title v-html="item.name"/>
+                                    <v-list-item-subtitle class="list-cursos-carreras" v-html="item.escuelas"/>
+                                </v-list-item-content>
                             </template>
-                        </DefaultModalSectionExpand>
+                        </DefaultAutocomplete>
+                    </v-col>
+                    <v-col cols="3" v-if="!resource.can_create_certificate_dc3_dc4">
+                        <DefaultAutocomplete
+                            dense
+                            label="Duración (hrs.)"
+                            v-model="resource.duration"
+                            :items="selects.duration"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Ej. 2:00"
+                        />
+                    </v-col>
+                    <v-col :cols="resource.can_create_certificate_dc3_dc4 ? '6' : '3'">
+                        <DefaultInput
+                            numbersOnly
+                            dense
+                            label="Inversión"
+                            placeholder="Ej. 2000"
+                            v-model="resource.investment"
+                        />
                     </v-col>
                 </v-row>
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                            title="Configuración de calificación"
-                            :expand="sections.showSectionQualification"
+                            title="Configuración avanzada"
+                            subtitle=" Configuración general de evaluación"
+                            :expand="sections.shosSectionAdvancedconfiguration"
                         >
                             <template slot="content">
                                 <v-row justify="center">
-
                                     <v-col cols="6">
 
                                         <DefaultSelect
@@ -257,7 +239,6 @@
                                             :rules="rules.qualification_type_id"
                                         />
                                     </v-col>
-
                                     <v-col cols="3">
                                         <DefaultInput
                                             label="Nota mínima aprobatoria"
@@ -271,7 +252,6 @@
                                             @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
                                         />
                                     </v-col>
-
                                     <v-col cols="3">
                                         <DefaultInput
                                             label="Cantidad de intentos"
@@ -287,41 +267,77 @@
                                         <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
                                     </v-col>
                                 </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-
-                <v-row justify="space-around">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Configuración de diploma"
-                            :expand="sections.showSectionCertification"
-                        >
-                            <template slot="content">
-                                <div>
-
-                                    <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
-
-                                    <DefaultDivider class="my-1"/>
-
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <DefaultToggle dense
-                                              :active-label="'Mostrar diploma al usuario'"
-                                              :inactive-label="'Mostrar diploma al usuario'"
-                                              v-model="resource.show_certification_to_user" />
-
-                                        </div>
-                                        <div class="col-6">
-
-                                            <DefaultToggle dense
-                                              :active-label="'Habilitar aceptación de diploma al usuario'"
-                                              :inactive-label="'Habilitar aceptación de diploma al usuario'"
-                                              v-model="resource.user_confirms_certificate" />
+                                <div class="card_border card mt-3" style="border-radius: 4px;">
+                                    <h5 class="px-2 card-text m-2 title-card-border">
+                                        Programación de reinicios de evaluaciones
+                                    </h5>
+                                    <v-row justify="center" class="px-4">
+                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                active-label="Automático"
+                                                inactive-label="Manual"
+                                                v-model="resource.scheduled_restarts_activado"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Días"
+                                                v-model="resource.scheduled_restarts_dias"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Horas"
+                                                v-model="resource.scheduled_restarts_horas"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="Minutos"
+                                                v-model="resource.scheduled_restarts_minutos"
+                                                :disabled="!resource.scheduled_restarts_activado"
+                                                type="number"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                    <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                        <div style="color: #FF5252" class="v-messages__wrapper">
+                                            <div class="v-messages__message">Validar hora de reinicio</div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="card_border card mt-3" style="border-radius: 4px;">
+                                    <h5 class="px-2 card-text m-2 title-card-border">
+                                        Configuración de diplomas
+                                    </h5>
+                                    <v-row class="px-8">
+                                        <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
+                                        <DefaultDivider class="my-1"/>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <DefaultToggle dense
+                                                :active-label="'Mostrar diploma al usuario'"
+                                                :inactive-label="'Mostrar diploma al usuario'"
+                                                v-model="resource.show_certification_to_user" />
 
+                                            </div>
+                                            <div class="col-6">
+
+                                                <DefaultToggle dense
+                                                :active-label="'Habilitar aceptación de diploma al usuario'"
+                                                :inactive-label="'Habilitar aceptación de diploma al usuario'"
+                                                v-model="resource.user_confirms_certificate" />
+                                            </div>
+                                        </div>
+                                    </v-row>
                                 </div>
                             </template>
                         </DefaultModalSectionExpand>
@@ -427,60 +443,6 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around"  v-if="current_modality.code != 'in-person'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Programación de reinicios"
-                            :expand="sections.showSectionRestarts"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultToggle
-                                            active-label="Automático"
-                                            inactive-label="Manual"
-                                            v-model="resource.scheduled_restarts_activado"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Días"
-                                            v-model="resource.scheduled_restarts_dias"
-                                            :disabled="!resource.scheduled_restarts_activado"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Horas"
-                                            v-model="resource.scheduled_restarts_horas"
-                                            :disabled="!resource.scheduled_restarts_activado"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Minutos"
-                                            v-model="resource.scheduled_restarts_minutos"
-                                            :disabled="!resource.scheduled_restarts_activado"
-                                            type="number"
-                                            dense
-                                        />
-                                    </v-col>
-                                </v-row>
-                                <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
-                                    <div style="color: #FF5252" class="v-messages__wrapper">
-                                        <div class="v-messages__message">Validar hora de reinicio</div>
-                                    </div>
-                                </div>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-
                 <v-row justify="space-around">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -754,7 +716,8 @@ export default {
                 showSectionPosition:{status:false},
                 showSectionAssistance:{status:false},
                 showSectionVisualization:{status:false},
-                showSectionRegistroCapacitacion: {status:false}
+                showSectionRegistroCapacitacion: {status:false},
+                shosSectionAdvancedconfiguration : {status:false}
             },
             // base_endpoint: base_endpoint_temp,
             base_endpoint: base_endpoint_temp,
@@ -797,9 +760,9 @@ export default {
                 can_create_certificate_dc3_dc4:false,
                 modality_id:null,
                 modality_in_person_properties:{
-                    assistance_type:'assistance-course',
+                    assistance_type:'assistance-by-session',
                     required_signature:false,
-                    visualization_type:'only-assistence'
+                    visualization_type:'scheduled-users'
                 },
                 registro_capacitacion: {}
             },
@@ -807,9 +770,9 @@ export default {
                 qualification_type: {position: 0},
                 dc3_configuration :{},
                 modality_in_person_properties:{
-                    assistance_type:'assistance-course',
+                    assistance_type:'assistance-by-session',
                     required_signature:false,
-                    visualization_type:'only-assistence'
+                    visualization_type:'scheduled-users'
                 },
                 registro_capacitacion: {}
             },
@@ -1376,5 +1339,11 @@ export default {
     content: '';
     top: 25px;
     bottom: 25px;
+}
+.title-card-border{
+	top: -17px;
+	position: absolute; 
+	background: white; 
+	font-size: 12px;
 }
 </style>

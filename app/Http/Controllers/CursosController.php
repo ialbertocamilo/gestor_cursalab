@@ -143,7 +143,7 @@ class CursosController extends Controller
             $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
         }
 
-        $modalities = DB::table('taxonomies')->where('group','course')->where('type','modality')->select('id','name','code')->get();
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code')->get();
        
         $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
         $registro_capacitacion_trainers = [];
@@ -463,7 +463,7 @@ class CursosController extends Controller
         $workspace = get_current_workspace();
 
         $types = Taxonomy::getSelectData('course', 'type');
-        $modalities = Taxonomy::getSelectData('course', 'modality',[],['code']);
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code')->get();
 
         return $this->success(compact('types','modalities'));
     }

@@ -36,6 +36,11 @@
 
     <v-row justify="space-around" align="start" align-content="center" class="px-3 pt-2 section-expanded" v-show="expand.status">
         <v-col cols="12" class="d-flex justify-content-center py-1 content-background">
+            <div v-if="subtitle">
+                <h5 class="px-2 card-text m-2 title-card-border">
+                    {{ subtitle }}
+                </h5>
+            </div>
             <v-expand-transition>
                 <div style="width:100%">
                     <slot name="content"/>
@@ -53,6 +58,10 @@ export default {
         title: {
             type: String,
             default: 'Título de la sección'
+        },
+        subtitle:{
+            type: String,
+            default: null
         },
         tooltip: String,
         right: {
