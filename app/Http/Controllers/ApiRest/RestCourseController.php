@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\ApiRest;
 
+use App;
+use App\Models\RegistroCapacitacionTrainer;
+use App\Models\Workspace;
+use App\Services\FileService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PollAnswerStoreRequest;
 use App\Models\Course;
@@ -13,6 +19,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
+use Intervention\Image\Image;
 use Monolog\Handler\IFTTTHandler;
 
 class RestCourseController extends Controller
@@ -235,10 +244,13 @@ class RestCourseController extends Controller
         $user = auth()->user();
         $qs = $request->q ?? NULL;
 
-        $query = SummaryCourse::with('course:id,name,user_confirms_certificate')
+        // Certificates
+        // ----------------------------------------
+
+        $certificatesQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
             ->whereHas('course', function($q) use ($qs) {
                 $q->where('show_certification_to_user', 1);
-                
+
                 if ($qs) {
                     $q->where('name', 'like', "%{$qs}%");
                 }
@@ -247,19 +259,52 @@ class RestCourseController extends Controller
             ->whereNotNull('certification_issued_at');
 
         if ($request->type == 'accepted')
-            $query->whereNotNull('certification_accepted_at');
+            $certificatesQuery->whereNotNull('certification_accepted_at');
 
         if ($request->type == 'pending')
-            $query->whereNull('certification_accepted_at');
+            $certificatesQuery->whereNull('certification_accepted_at');
 
-        $certificates = $query->get();
+        $certificates = $certificatesQuery->get();
+
+        // Registros
+        // ----------------------------------------
+
+        $registrosQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
+            ->whereHas('course', function($q) use ($qs) {
+                $q->whereRaw('json_extract(registro_capacitacion, "$.active") = 1');
+
+                if ($qs) {
+                    $q->where('name', 'like', "%{$qs}%");
+                }
+            })
+            ->where('user_id', $user->id);
+
+        if ($request->type == 'accepted')
+            $registrosQuery->whereNotNull('registro_capacitacion_path');
+
+        if ($request->type == 'pending')
+            $registrosQuery->whereNull('registro_capacitacion_path');
+
+        $registros = $registrosQuery->get();
+
+
+        $certificates = $certificates->merge($registros);
 
         foreach ($certificates as $certificate) {
 
             // if ($qs AND !stringContains($certificate->course->name, $qs)) continue;
 
+            $registroUrl = $certificate->registro_capacitacion_path
+             ? Course::generateRegistroCapacitacionURL($certificate->registro_capacitacion_path)
+             : null;
+
+            $course = Course::find($certificate->course_id);
+
             $data[] = [
                 'course_id' => $certificate->course_id,
+                'registro_capacitacion_is_active' => $course->registroCapacitacionIsActive(),
+                'registro_capacitacion_url' => $registroUrl,
+                'registro_capacitacion_path' => $certificate->registro_capacitacion_path,
                 'name' => $certificate->course->name,
                 'accepted' => $certificate->certification_accepted_at ? true : false,
                 'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
@@ -272,4 +317,56 @@ class RestCourseController extends Controller
 
         return $this->success(compact('data'));
     }
+
+    public function generateRegistroCapacitacion(Request $request) {
+
+        $user = auth()->user();
+        $subworkspace = Workspace::find($user->subworkspace_id);
+        $course = Course::find($request->course_id);
+
+        $criterionId = $subworkspace->registro_capacitacion->criteriaWorkersCount->id;
+        $criterionValueIdForCounting = User::getCriterionValueId($user->id, $criterionId);
+
+        $trainer = RegistroCapacitacionTrainer::find($course->registro_capacitacion->trainerAndRegistrar);
+        $summary = SummaryCourse::query()
+            ->where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        $trainerSignatureUrl = FileService::generateUrl($trainer->signature->path);
+
+        $userSignatureData = $request->get('signature');
+        $trainerSignatureData = 'data:image/jpg;base64,'.base64_encode(file_get_contents($trainerSignatureUrl));
+        $data = [
+            'userSignatureData' => $userSignatureData,
+            'trainerSignatureData' => $trainerSignatureData,
+            'trainer' => $trainer,
+            'user' => $user,
+            'company'=> $subworkspace->registro_capacitacion->company,
+            'workersCount' => User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting),
+            'course' => $course,
+            'summaryCourse' => $summary
+        ];
+
+        // Render template and store generated file
+
+        $filename = 'capacitacion-'.
+                    $subworkspace->id . '-' .
+                    $course->id .  '-' .
+                    $user->id . '-' .
+                    Str::random(5) . '.pdf';
+        $filepath = Course::generateAndStoreRegistroCapacitacion($filename, $data);
+
+        // File path should also store in user's summary course
+
+        $summary->registro_capacitacion_path = $filepath;
+        $summary->save();
+
+        return Response::json([
+            'filepath' => $filepath,
+            'url' => Course::generateRegistroCapacitacionURL($filepath)
+        ], 201);
+    }
+
+
 }

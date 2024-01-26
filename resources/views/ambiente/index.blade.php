@@ -3,6 +3,6 @@
 @section('content')
     @include('layouts.user-header')
     <v-app>
-        <ambiente-layout/>
+        <ambiente-layout type='workspace' />
     </v-app>
 @endsection

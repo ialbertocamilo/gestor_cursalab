@@ -1924,7 +1924,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         // No validar usuarios cursalab (todos restringidos)
         if (!$cursalab_exception) {
-            
+
             return $customer->hasServiceAvailable();
         }
 
@@ -1946,4 +1946,31 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return ($email_has_domain && $is_cursalab_type);
     }
 
+    /**
+     * Get user's criterion value id from specific criterion
+     */
+    public static function getCriterionValueId($userId, $criterionId) {
+
+        $user = User::find($userId);
+        $criterionValuesIds = $user->criterion_user->pluck('criterion_value_id');
+        $criterionValue = CriterionValue::query()
+            ->whereIn('id', $criterionValuesIds)
+            ->where('criterion_id', $criterionId)
+            ->first();
+
+
+        return $criterionValue->id ?: null;
+    }
+
+    /**
+     * Counts how many users exist with a specific criterion value
+     */
+    public static function countWithCriteria($subworkspaceId, $criterionValueId) {
+
+        return User::query()
+            ->where('subworkspace_id', $subworkspaceId)
+            ->whereHas('criterion_user', function($q) use ($criterionValueId) {
+                $q->where('criterion_value_id', $criterionValueId);
+            })->count();
+    }
 }
