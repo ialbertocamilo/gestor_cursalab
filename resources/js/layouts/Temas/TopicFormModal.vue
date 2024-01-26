@@ -247,8 +247,8 @@
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
                             <v-col cols="12">
                                 <DefaultToggle v-model="resource.review_all_duration_media"
-                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    active-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     dense
                                 />
                             </v-col>
