@@ -407,7 +407,6 @@ class Segment extends BaseModel{
             if ($user->criterion_values->first()) {
 
                 $criterion_value_id = $user->criterion_values->first()->id;
-
                 $temp[] = [
                     // 'segment_value_id' => $segment->values->where('criterion_value_id', $criterion_value_id)->first()?->id,
                     'segment_value_id' => $segment_values_id[$criterion_value_id] ?? null,
