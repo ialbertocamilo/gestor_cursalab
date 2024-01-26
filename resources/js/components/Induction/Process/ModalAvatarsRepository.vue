@@ -25,19 +25,17 @@
                                     <div class="item_avatar_img">
                                         <img src="/img/induccion/personalizacion/perfil-mujer.png">
                                     </div>
-                                    <div class="item_avatar_img"></div>
-                                    <div class="item_avatar_img"></div>
-                                    <div class="item_avatar_img"></div>
-                                    <div class="item_avatar_img"></div>
-                                    <div class="item_avatar_img"></div>
-                                    <div class="item_avatar_img"></div>
+                                    <div class="item_avatar_img" v-for="(img, index) in list_avatars" :key="999+index" @click="img_selected = img">
+                                        <img :src="img.logo_cropped">
+                                    </div>
+                                    <div class="item_avatar_img" v-for="(img, index) in list_avatars_empty" :key="111+index"></div>
                                 </div>
                             </v-col>
                         </v-row>
                         <v-row class="mt-4 text-center">
                             <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                 <DefaultButton :label="'Agregar otra foto de perfil personalizada'"
-                                    @click="null"
+                                    @click="openFormModal(modalUploadImageResize)"
                                     :outlined="true"
                                     style="border-radius: 20px;"
                                     />
@@ -58,6 +56,14 @@
                     />
             </v-card-actions>
         </v-card>
+
+        <ModalUploadImageResize
+            :ref="modalUploadImageResize.ref"
+            v-model="modalUploadImageResize.open"
+            :width="'500px'"
+            @onCancel="closeFormModal(modalUploadImageResize)"
+            @onConfirm="addIconFinishedOnboarding"
+        />
     </v-dialog>
 </template>
 
@@ -65,11 +71,13 @@
 <script>
 import draggable from 'vuedraggable'
 import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
+import ModalUploadImageResize from './ModalUploadImageResize';
 
 export default {
     components: {
         draggable,
-        DefaultButtonModalSteps
+        DefaultButtonModalSteps,
+        ModalUploadImageResize
     },
     props: {
         value: Boolean,
@@ -84,18 +92,45 @@ export default {
             limit_absences: false,
             cancelLabel: "Cancelar",
             isLoading: false,
+            modalUploadImageResize: {
+                ref: 'ModalUploadImageResize',
+                open: false,
+                endpoint: '',
+            },
+            list_avatars: [],
+            list_avatars_empty: [null,null,null,null],
+            logo_selected: null,
+            logo_cropped: null,
+            img_selected: null
         };
     },
     watch: {
-        process: {
+        // process: {
+        //     handler(n, o) {
+        //         let vue = this;
+        //         vue.disabled_btn_next = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
+        //     },
+        //     deep: true
+        // }
+        img_selected: {
             handler(n, o) {
                 let vue = this;
-                vue.disabled_btn_next = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
+                vue.disabled_btn_next = n ? false : true
+                console.log(n);
+                console.log(o);
             },
             deep: true
-        }
+        },
     },
     methods: {
+        addIconFinishedOnboarding(data) {
+            console.log(data);
+            let vue = this
+            if(data.logo_cropped)
+                vue.list_avatars.push(data)
+
+            vue.closeFormModal(vue.modalUploadImageResize)
+        },
         validateRequired(input) {
             return input != undefined && input != null && input != "";
         },
@@ -114,9 +149,9 @@ export default {
             vue.process = {}
             vue.$emit("onCancel");
         },
-        confirm() {
+        async confirm() {
             let vue = this;
-            vue.$emit("onConfirm", vue.process);
+            vue.$emit("onConfirm", vue.img_selected);
         },
         cancel() {
             let vue = this;

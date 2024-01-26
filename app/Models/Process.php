@@ -30,7 +30,8 @@ class Process extends BaseModel
         'starts_at',
         'finishes_at',
         'color_map_even',
-        'color_map_odd'
+        'color_map_odd',
+        'image_guia'
     ];
 
     protected $casts = [
@@ -195,13 +196,14 @@ class Process extends BaseModel
     // Api
     protected function getProcessesApi( $data )
     {
-        $user = auth()->user();
-        $workspace_id = $user?->subworkspace?->parent?->id;
+        $user = $data['user'];
 
         $response['data'] = null;
-        $user_id = $data['user'];
 
-        $processes_query = Process::with(['instructions','stages.activities.type'])->where('workspace_id', $workspace_id);
+        $benefits_asigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+
+        $processes_query = Process::with(['instructions','stages.activities.type'])
+                                    ->whereIn('id', $benefits_asigned);
 
         $field = 'created_at';
         $sort = 'DESC';

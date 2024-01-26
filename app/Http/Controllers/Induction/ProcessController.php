@@ -41,14 +41,6 @@ class ProcessController extends Controller
 
     public function store(ProcessStoreUpdateRequest $request)
     {
-        // $data = [
-        //     'title' => $request->title,
-        //     'description' => $request->description,
-        //     'limit_absences' => $request->limit_absences ?? false,
-        //     'count_absences' => $request->count_absences ?? false,
-        //     'absences' => $request->absences ?? null,
-        // ];
-
         $process = Process::storeRequest($request->validated());
 
         $response = [
@@ -64,9 +56,21 @@ class ProcessController extends Controller
 
         $data = $request->validated();
 
-        $data = Media::requestUploadFile($data, 'background_mobile', false, 'background_mobile', 'png');
-        $data = Media::requestUploadFile($data, 'background_web', false, 'background_web', 'png');
-        $data = Media::requestUploadFile($data, 'logo', false, 'logo', 'png');
+        if(isset($data['file_background_mobile']))
+            $data = Media::requestUploadFile($data, 'background_mobile', false, 'background_mobile', 'png');
+
+        if(isset($data['file_background_web']))
+            $data = Media::requestUploadFile($data, 'background_web', false, 'background_web', 'png');
+
+        if(isset($data['file_logo']))
+            $data = Media::requestUploadFile($data, 'logo', false, 'logo', 'png');
+
+        if(isset($data['file_image_guia']))
+            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png');
+
+        if(isset($data['file_icon_finished']))
+            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png');
+
         $process = Process::storeRequest($data, $process);
 
         $response = [

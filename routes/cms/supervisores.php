@@ -34,4 +34,6 @@ Route::controller(SupervisorController::class)->group(function () {
 
     Route::delete('{supervisor}/destroy', 'destroy');
 
+    Route::post('/search-instructors', 'searchInstructors');
+
 });

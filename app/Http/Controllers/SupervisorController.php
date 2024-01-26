@@ -175,4 +175,37 @@ class SupervisorController extends Controller
         ]);
     }
 
+    public function searchInstructors(Request $request)
+    {
+        $workspace = get_current_workspace();
+        $request->mergeIfMissing(['workspace' => $workspace?->id]);
+        $request->mergeIfMissing(['code' => 'supervise']);
+
+        $data = User::query()
+            ->whereHas('segments')
+            ->withCount([
+                'segments' => function ($q) {
+                    $q->
+                    whereRelation('code', 'code', 'user-supervise');
+                },
+            ])
+            ->whereRelation('segments.code', 'code', 'user-supervise');
+
+        $data->withWhereHas('subworkspace', function ($query) use ($request) {
+            if ($request->subworkspace)
+                $query->whereIn('id', $request->subworkspace);
+            else
+                $query->where('parent_id', $request->workspace);
+        });
+
+        if ($request->has('filtro'))
+            $data->filterText($request->filtro);
+
+        $data = $data->select('id', 'document', 'name', 'lastname', 'surname')
+                    ->limit(40)
+                    ->get();
+
+        return $this->success(['users' => $data]);
+    }
+
 }

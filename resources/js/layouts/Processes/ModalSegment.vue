@@ -120,7 +120,7 @@
                                     <v-col cols="12">
                                         <AsignacionXDni
                                             description='Elige a los supervisores.'
-                                            apiSearchUser="/supervisores/search-usuarios"
+                                            apiSearchUser="/supervisores/search-instructors"
                                             apiUploadPlantilla="/supervisores/subir-excel-usuarios"
                                             :showSubidaMasiva="false"
                                             ref="AsignacionSupervisores"
@@ -538,7 +538,7 @@ console.log(vue.segments);
 
                 if(vue.$refs.AsignacionSupervisores.usuarios_ok.length==0)
                 {
-                    vue.$notification.warning('Tiene que seleccionar almenos 1 usuario para continuar.', {
+                    vue.$notification.warning('Tienes que seleccionar al menos 1 usuario para continuar.', {
                         timer: 8,
                         showLeftIcn: false,
                         showCloseIcn: true,

@@ -21,7 +21,7 @@ class RestProcessController extends Controller
     {
         $user = Auth::user();
         $data = [
-            'user' => $user?->id ?? null,
+            'user' => $user ?? null,
         ];
         $apiResponse = Process::getProcessesApi($data);
 

@@ -83,13 +83,10 @@
                         `Segmentación de usuarios`
                     )
                 "
-                @edit="openModalEditProcess($event)"
+                @edit="openFormModal(modalEditProcess, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proceso')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un proceso')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del proceso - ${$event.title}`)"
-                @addSpeaker="addSpeaker($event)"
-                @gestion_colab="openModalGestionColab($event)"
-                @send_emails="openModalCorreoSegmentados($event)"
                 @saveNewProcessInline="saveNewProcessInline($event)"
             />
         </v-card>
@@ -108,20 +105,11 @@
             @onCancel="closeFormModal(modalStatusOptions)"
         />
 
-        <ModalMaxColaborador
-            :ref="modalMaxColaborador.ref"
-            v-model="modalMaxColaborador.open"
-            width="560px"
-            :max_benefits="max_benefits_x_users"
-            @closeModalMaxColaborador="modalMaxColaborador.open = false"
-            @confirmModalMaxColaborador="confirmModalMaxColaborador"
-        />
-
         <ModalSelectTemplate
                 :ref="modalSelectTemplate.ref"
                 v-model="modalSelectTemplate.open"
                 width="650px"
-                @onCancel="modalSelectTemplate.open = false"
+                @onCancel="closeFormModal(modalSelectTemplate)"
                 @selectTemplateOrNewProcessModal="selectTemplateOrNewProcessModal"
             />
 
@@ -134,63 +122,11 @@
             @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
             @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
-        <!-- <SegmentFormModal
-            :options="modalFormSegmentationOptions"
-            width="870px"
-            model_type="App\Models\Process"
-            :model_id="null"
-            :ref="modalFormSegmentationOptions.ref"
-            @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-            @onConfirm="confirmFormModalSegment(modalFormSegmentationOptions, dataTable, filters)"
-        /> -->
-        <!-- <ModalSegmentSupervisors
-            :options="modalFormSegmentationSupervisor"
-            width="870px"
-            model_type="App\Models\Process"
-            :model_id="null"
-            :ref="modalFormSegmentationSupervisor.ref"
-            @onCancel="closeSimpleModal(modalFormSegmentationSupervisor)"
-            @onConfirm="closeFormModal(modalFormSegmentationSupervisor, dataTable, filters)"
-        /> -->
-        <ModalSelectSpeaker
-            :ref="modalSelectSpeaker.ref"
-            v-model="modalSelectSpeaker.open"
-            :data="modalSelectSpeaker.data"
-            width="650px"
-            @closeModalSelectSpeaker="modalSelectSpeaker.open = false"
-            @confirmSelectSpeaker="confirmSelectSpeaker"
-            @saveSelectSpeaker="saveSelectSpeaker"
-            @newSpeaker="newSpeaker"
-            :show_button="true"
-            />
-        <ModalGestorColaboradores
-            :ref="modalGestorColaboradores.ref"
-            v-model="modalGestorColaboradores.open"
-            :data="modalGestorColaboradores.data"
-            :segmentados="modalGestorColaboradores.segmentados"
-            :seleccionados="modalGestorColaboradores.seleccionados"
-            :benefit_id="modalGestorColaboradores.benefit_id"
-            :benefit_name="modalGestorColaboradores.benefit_name"
-            width="850px"
-            @closemodalGestorColaboradores="modalGestorColaboradores.open = false"
-            @confirmModalGestorColaboradores="confirmModalGestorColaboradores"
-            />
-        <ModalCorreosSegmentados
-            :ref="modalCorreosSegmentados.ref"
-            v-model="modalCorreosSegmentados.open"
-            :data="modalCorreosSegmentados.data"
-            :users="modalCorreosSegmentados.users"
-            :benefit_id="modalCorreosSegmentados.benefit_id"
-            width="560px"
-            @closeModalCorreoSegmentados="modalCorreosSegmentados.open = false"
-            @confirmModalCorreoSegmentados="confirmModalCorreoSegmentados"
-            />
-
         <ModalCreateProcess
             :ref="modalCreateProcess.ref"
             v-model="modalCreateProcess.open"
             :width="'870px'"
-            @onCancel="modalCreateProcess.open = false"
+            @onCancel="closeFormModal(modalCreateProcess)"
             @onConfirm="saveNewProcessModal"
         />
 
@@ -198,7 +134,7 @@
             :ref="modalEditProcess.ref"
             v-model="modalEditProcess.open"
             :width="'870px'"
-            @onCancel="modalEditProcess.open = false"
+            @onCancel="closeFormModal(modalEditProcess)"
             @onConfirm="saveEditProcessModal"
             :process="modalEditProcess.process"
         />
@@ -212,14 +148,7 @@ import ModalSelectTemplate from "../../components/Induction/Process/ModalSelectT
 import ModalCreateProcess from "../../components/Induction/Process/ModalCreateProcess";
 import ModalEditProcess from "../../components/Induction/Process/ModalEditProcess";
 
-import ModalSelectSpeaker from "../../components/Benefit/ModalSelectSpeaker";
-import ModalGestorColaboradores from "../../components/Benefit/ModalGestorColaboradores";
-import ModalCorreosSegmentados from "../../components/Benefit/ModalCorreosSegmentados";
-import ModalMaxColaborador from "../../components/Benefit/ModalMaxColaborador";
-
 import ModalSegment from "./ModalSegment";
-import SegmentFormModal from "../Blocks/SegmentFormModal";
-import ModalSegmentSupervisors from "./ModalSegmentSupervisors";
 
 export default {
     components: {
@@ -228,13 +157,7 @@ export default {
     ModalSelectTemplate,
     ModalCreateProcess,
     ModalEditProcess,
-    SegmentFormModal,
     ModalSegment,
-    ModalSelectSpeaker,
-    ModalGestorColaboradores,
-    ModalCorreosSegmentados,
-    ModalMaxColaborador,
-    ModalSegmentSupervisors
 },
     mounted() {
         let vue = this
@@ -245,15 +168,6 @@ export default {
             dataForModalSegment: null,
             modalFormSegmentationOptions: {
                 ref: 'ModalSegment',
-                open: false,
-                persistent: true,
-                base_endpoint: "/segments",
-                cancelLabel: "Cancelar",
-                confirmLabel: "Continuar",
-                resource: "segmentación"
-            },
-            modalFormSegmentationSupervisor: {
-                ref: 'ModalSegmentSupervisors',
                 open: false,
                 persistent: true,
                 base_endpoint: "/segments",
@@ -391,45 +305,6 @@ export default {
                 ]
             },
             base_endpoint: '/procesos',
-            modalSegment: {
-                open: false,
-                ver_items: false,
-                asignar: false,
-                subida_masiva: false
-            },
-            // modal speaker
-
-            modalSelectSpeaker: {
-                ref: 'modalSelectSpeaker',
-                open: false,
-                data: [],
-                benefit_id: null,
-                speaker_id: null,
-                endpoint: '',
-            },
-            modalGestorColaboradores: {
-                ref: 'modalGestorColaboradores',
-                open: false,
-                data: [],
-                segmentados: [],
-                seleccionados: [],
-                benefit_id: null,
-                benefit_name: null,
-                speaker_id: null,
-                endpoint: '',
-            },
-            modalCorreosSegmentados: {
-                ref: 'modalCorreosSegmentados',
-                open: false,
-                data: [],
-                benefit_id: null,
-                users: null,
-                endpoint: '',
-            },
-            modalMaxColaborador: {
-                ref: 'BenefitModalMaxColab',
-                open: false,
-            },
             dataModalSegment: {},
 
             modalSelectTemplate: {
@@ -545,36 +420,6 @@ export default {
                         title
                     )
         },
-        confirmFormModalSegment(modalFormSegmentationOptions, dataTable, filters) {
-            console.log(modalFormSegmentationOptions);
-
-            let vue = this
-            vue.closeFormModal(modalFormSegmentationOptions, dataTable, filters)
-
-            vue.openFormModal(
-                        vue.modalFormSegmentationSupervisor,
-                        vue.dataForModalSegment,
-                        'segmentation',
-                        `Segmentación de usuarios > <b>Vinculación por criterios</b>`
-                    )
-        },
-        confirmModalSegment() {
-            let vue = this;
-            this.showLoader()
-            vue.$http.post(`/beneficios/segments/save`, vue.dataModalSegment)
-                .then((res) => {
-                    if (res.data.type == "success") {
-  						vue.$toast.success(`${res.data.data.msg}`, {position: 'bottom-center'});
-                        vue.closeModalSegment();
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
-  					}
-                    this.hideLoader()
-                })
-                .catch((err) => {
-                    console.log(err);
-                    this.hideLoader()
-                });
-        },
         loadInfo() {
             let vue = this
             const url = `/beneficios/max_benefits_x_users`
@@ -582,109 +427,6 @@ export default {
                 .then(({data}) => {
                     vue.max_benefits_x_users = data.data.max_benefits_x_users
                 })
-        },
-        confirmModalMaxColaborador(value = null) {
-            let vue = this;
-            if(value != null)
-            {
-                this.showLoader()
-                vue.$http.post(`/beneficios/max_benefits_x_users/update`, {'value': value})
-                    .then((res) => {
-                        vue.max_benefits_x_users = res.data.data.max_benefits;
-                        if (res.data.type == "success") {
-                            vue.$notification.success(`${res.data.data.msg}`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-                        }
-                        this.hideLoader()
-                        vue.modalMaxColaborador.open = false
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                        vue.modalMaxColaborador.open = false
-                    });
-            }
-        },
-        closeModalSegment() {
-            let vue = this
-
-            vue.dataModalSegment.segments = [];
-            vue.dataModalSegment.segmentation_by_document = {
-                    segmentation_by_document:[]
-                }
-            vue.modalSegment.open = false;
-        },
-        // asd
-        async openModalSegment(benefit, edit = false) {
-            let vue = this;
-
-            this.showLoader()
-
-            vue.$http.get(`/beneficios/segments/${benefit.id}`)
-                .then((res) => {
-                    let res_benefit = res.data.data.benefit;
-                    console.log(res);
-                    console.log(res_benefit);
-                    if (res_benefit != null) {
-
-                        benefit.segmentation_by_document = res_benefit.segmentation_by_document;
-
-                        if(res_benefit.segments != null && res_benefit.segments.length > 0)
-                        {
-                            benefit.segments = res_benefit.segments;
-
-                            // if no direct segmentation exists, adds one
-
-                            if (!benefit.segments.find(s => s.type_code === 'direct-segmentation')) {
-                                benefit.segments.push({
-                                    id: `new-segment-${Date.now()}`,
-                                    type_code: 'direct-segmentation',
-                                    criteria_selected: [],
-                                    direct_segmentation: [null]
-                                })
-                            }
-
-                        } else {
-                            benefit.segments = [{
-                                id: `new-segment-${Date.now()}`,
-                                type_code: 'direct-segmentation',
-                                criteria_selected: [],
-                                direct_segmentation: [null]
-                            }];
-                        }
-
-                        vue.dataModalSegment = {...benefit};
-
-                    }else{
-                        vue.$notification.warning(`No se pudo obtener datos del beneficio`, {
-                            timer: 6,
-                            showLeftIcn: false,
-                            showCloseIcn: true
-                        });
-                        vue.closeModalSegment();
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                    }
-                    this.hideLoader()
-                })
-                .catch((err) => {
-                    console.log(err);
-                    this.hideLoader()
-                });
-
-            await vue.$refs.ModalSegment.resetValidation()
-
-            vue.modalSegment.open = true;
-        },
-        addSpeaker( item ) {
-            console.log(item.id);
-            this.openModalSelectSpeaker(item.id)
-        },
-        async openModalMaxColaborador() {
-            let vue = this
-            vue.modalMaxColaborador.open = true
         },
         async openModalSelectActivitys() {
             let vue = this
@@ -718,182 +460,6 @@ export default {
                 vue.modalEditProcess.process.instructions.push(newInstruction);
             }
             vue.modalEditProcess.open = true;
-        },
-        confirmModalCorreoSegmentados( benefit_id = null ) {
-            let vue = this;
-
-            if( benefit_id != null )
-            {
-                vue.showLoader();
-
-                vue.$http.post(`/beneficios/segments/enviar_correo`, {'benefit_id': benefit_id})
-                    .then((res) => {
-                        if (res.data.type == "success") {
-                            vue.$notification.success(`${res.data.data.msg}`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-
-                            vue.modalCorreosSegmentados.benefit_id = null
-                            vue.modalCorreosSegmentados.open = false
-                            vue.modalCorreosSegmentados.users = null
-                        }
-                        this.hideLoader()
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            }
-
-        },
-        async openModalCorreoSegmentados( benefit = null) {
-            let vue = this;
-
-            if(benefit != null)
-            {
-                vue.showLoader();
-
-                vue.modalCorreosSegmentados.open = true
-                vue.modalCorreosSegmentados.benefit_id = benefit.id
-
-                await vue.$http.post(`/beneficios/segments/users`, {'benefit_id': benefit.id})
-                    .then((res) => {
-                        let users = res.data.data.users;
-                        vue.modalCorreosSegmentados.users = users
-                        console.log(users);
-                        console.log(vue.modalCorreosSegmentados);
-                        this.hideLoader()
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            }
-        },
-        confirmModalGestorColaboradores( benefit_id = null, seleccionados = null) {
-            let vue = this;
-
-            if(benefit_id != null && seleccionados != null)
-            {
-                vue.showLoader();
-
-                vue.$http.post(`/beneficios/colaboradores/update`, {'benefit_id': benefit_id, 'seleccionados': seleccionados})
-                    .then((res) => {
-                        if (res.data.type == "success") {
-                            vue.$notification.success(`${res.data.data.msg}`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-
-                            vue.modalGestorColaboradores.benefit_id = null
-                            vue.modalGestorColaboradores.benefit_name = null
-                            vue.modalGestorColaboradores.seleccionados = null
-                            vue.modalGestorColaboradores.segmentados = null
-                            vue.modalGestorColaboradores.open = false
-                        }
-                        this.hideLoader()
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            }
-        },
-        async openModalGestionColab( benefit = null) {
-            let vue = this;
-
-            if(benefit != null)
-            {
-                vue.showLoader();
-
-                vue.modalGestorColaboradores.open = true
-                vue.modalGestorColaboradores.benefit_id = benefit.id
-                vue.modalGestorColaboradores.benefit_name = benefit.title
-
-                await vue.$http.post(`/beneficios/colaboradores/suscritos`, {'benefit_id': benefit.id})
-                    .then((res) => {
-                        let res_seleccionados = res.data.data.users;
-                        let res_segmentados = res.data.data.segmentados;
-                        vue.modalGestorColaboradores.seleccionados = res_seleccionados
-                        vue.modalGestorColaboradores.segmentados = res_segmentados
-                        console.log(res_seleccionados);
-                        this.hideLoader()
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            }
-        },
-        async openModalSelectSpeaker( benefit_id = null) {
-            let vue = this;
-
-            vue.showLoader();
-
-            vue.modalSelectSpeaker.open = true
-            vue.modalSelectSpeaker.benefit_id = benefit_id
-
-                await vue.$http.get(`/beneficios/speakers/search`)
-                    .then((res) => {
-                        let res_speakers = res.data.data.data;
-                        vue.modalSelectSpeaker.data = res_speakers
-                        this.hideLoader()
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-        },
-        confirmSelectSpeaker( value ){
-            let vue = this;
-            console.log(value.id);
-            vue.modalSelectSpeaker.speaker_id = value.id
-
-            console.log(vue.modalSelectSpeaker.benefit_id );
-            // vue.modalSelectSpeaker.open = false
-            // vue.modalSelectSpeaker.benefit_id = null
-        },
-        saveSelectSpeaker() {
-            let vue = this;
-            console.log(vue.modalSelectSpeaker.speaker_id );
-            console.log(vue.modalSelectSpeaker.benefit_id );
-            let speaker_id = vue.modalSelectSpeaker.speaker_id;
-            let benefit_id = vue.modalSelectSpeaker.benefit_id;
-
-            if(benefit_id != null && speaker_id != null)
-            {
-                this.showLoader()
-                vue.$http.post(`/beneficios/assigned_speaker`, {'benefit_id': benefit_id, 'speaker_id': speaker_id})
-                    .then((res) => {
-                        if (res.data.type == "success") {
-                            vue.$notification.success(`${res.data.data.msg}`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-
-                            vue.modalSelectSpeaker.speaker_id = null
-                            vue.modalSelectSpeaker.benefit_id = null
-                            vue.modalSelectSpeaker.open = false
-                        }
-                        this.hideLoader()
-                        vue.refreshDefaultTable(vue.dataTable, vue.filters);
-            console.log(vue.modalSelectSpeaker.speaker_id );
-            console.log(vue.modalSelectSpeaker.benefit_id );
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            }
-        },
-        newSpeaker(){
-            window.location.href = `/speakers/create`;
         },
         saveNewProcessModal( item ) {
 
@@ -984,12 +550,16 @@ export default {
                                 'logo',
                                 'background_mobile',
                                 'background_web',
-                                'active'
+                                'active',
+                                'image_guia',
+                                'icon_finished'
                             ];
                 const file_fields = [
                                 'logo',
                                 'background_mobile',
                                 'background_web',
+                                'image_guia',
+                                'icon_finished'
                             ];
 
                 if(item.logotipo) {
@@ -1004,6 +574,15 @@ export default {
                     resource.background_web = item.fondo_web
                     resource.file_background_web = item.fondo_web
                 }
+                if(item.img_guia_blob) {
+                    resource.image_guia = item.img_guia_blob
+                    resource.file_image_guia = item.img_guia_blob
+                }
+                if(item.icon_finished_blob) {
+                    resource.icon_finished = item.icon_finished_blob
+                    resource.file_icon_finished = item.icon_finished_blob
+                }
+
 
                 const formData = vue.getMultipartFormData(method, resource, fields, file_fields);
 
@@ -1014,9 +593,11 @@ export default {
 
                 vue.$http.post(url, formData)
                         .then(async ({data}) => {
-                            this.hideLoader()
+                            // this.hideLoader()
                             vue.showAlert(data.data.msg)
-                            vue.modalEditProcess.open = false
+                            // vue.modalEditProcess.open = false
+                            console.log(vue.$refs);
+                            vue.$refs.ModalEditProcess.closeModal()
                             vue.refreshDefaultTable(vue.dataTable, vue.filters);
                         })
                         .catch(error => {

@@ -116,213 +116,6 @@
                             </v-card>
                         </v-stepper-content>
                         <v-stepper-content step="2" class="p-0">
-                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step2">
-                                <v-card-text>
-                                    <v-row>
-                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0 mb-2">
-                                            <span class="text_default lbl_tit fw-bold">Escribe un instructivo para tus trabajadores.</span>
-                                        </v-col>
-                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                            <span class="text_default lbl_tit">Da indicaciones a tus trabajadores para organizarlos o darles unas pautas al ingresar a la plataforma, en caso de no contar con un instructivo puedes puedes usar el  Instructivo Cursalab.</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row class="bx_instructions_list">
-                                        <v-col cols="8">
-                                            <div class="bx_overflow">
-                                                <draggable v-model="process.instructions" @start="drag=true"
-                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
-                                                    <transition-group type="transition" name="flip-list" tag="div">
-                                                        <div v-for="(instruction, i) in process.instructions"
-                                                            :key="instruction.id">
-                                                            <div class="item-draggable activities">
-                                                                <div class="item_instruction">
-                                                                    <div class="ii1 d-flex align-center justify-content-center ">
-                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                                        </v-icon>
-                                                                    </div>
-                                                                    <div class="ii2">
-                                                                        <fieldset class="editor">
-                                                                            <legend>Escribe aquí una indicación
-                                                                            </legend>
-                                                                            <editor
-                                                                                @onfocus="instructionSelected(instruction.description)"
-                                                                                @input="instructionSelected(instruction.description)"
-                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
-                                                                                v-model="instruction.description"
-                                                                                :init="{
-                                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
-                                                                                    height: 170,
-                                                                                    menubar: false,
-                                                                                    language: 'es',
-                                                                                    force_br_newlines : true,
-                                                                                    force_p_newlines : false,
-                                                                                    forced_root_block : '',
-                                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
-                                                                                    toolbar:
-                                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
-                                                                                    images_upload_handler: images_upload_handler,
-                                                                                }"
-                                                                            />
-                                                                        </fieldset>
-                                                                    </div>
-                                                                    <div class="ii3 d-flex align-center">
-                                                                        <v-icon class="ml-0 mr-2 icon_size" color="black"
-                                                                                @click="deleteInstruction(instruction, i)">
-                                                                            mdi-delete
-                                                                        </v-icon>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </transition-group>
-                                                </draggable>
-                                            </div>
-                                        </v-col>
-                                        <v-col cols="4">
-                                            <span class="text_default mb-2">Previsualización</span>
-                                            <div class="bx_prev_instructions">
-                                                <div class="bx_dialog bxd_right">
-                                                    <div class="content_dialog" v-html="content_instruction"></div>
-                                                </div>
-                                            </div>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
-                                            <v-btn color="primary" outlined @click="addInstruction" class="btn_add_instruction">
-                                                <v-icon class="icon_size">mdi-plus-circle</v-icon>
-                                            </v-btn>
-                                        </v-col>
-                                    </v-row>
-                                </v-card-text>
-                            </v-card>
-                        </v-stepper-content>
-                        <v-stepper-content step="3" class="p-0">
-                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step3">
-                                <v-card-text>
-                                    <v-row>
-                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                            <span class="text_default lbl_tit">Previsualización de logotipo e imágenes de fondo</span>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="5">
-                                            <v-row>
-                                                <v-col cols="12" class="bx_preview_change_logo">
-                                                    <DefaultSelectOrUploadMultimedia
-                                                        ref="inputLogo"
-                                                        v-model="resource.logotipo"
-                                                        label="Logotipo (500 x 500px)"
-                                                        :file-types="['image']"
-                                                        @onSelect="setFile($event, resource,'logotipo')"
-                                                        @onPreview="logo_selected = $event"
-                                                        @croppedImage="logo_cropped = $event"
-                                                        @removeImage="logo_cropped = $event"
-                                                        :sizeCropp="{width:500, height:500}"
-                                                        :showButton="false"
-                                                        :cropImage="true"
-                                                        />
-                                                </v-col>
-                                                <v-col cols="12">
-                                                    <div  v-show="tab_preview_images == 'mobile'">
-                                                        <DefaultSelectOrUploadMultimedia
-                                                            ref="inputFondoMobile"
-                                                            v-model="process.fondo_mobile"
-                                                            label="Fondo (720 x 1280px)"
-                                                            :file-types="['image']"
-                                                            @onSelect="setFile($event, process, 'fondo_mobile')"
-                                                            @onPreview="fondo_mobile_selected = $event"
-                                                            @croppedImage="fondo_mobile_cropped = $event"
-                                                            :sizeCropp="{width:720, height:1280}"
-                                                            :showButton="false"
-                                                            :cropImage="true"
-                                                            />
-                                                    </div>
-                                                    <div v-show="tab_preview_images == 'web'">
-                                                        <DefaultSelectOrUploadMultimedia
-                                                            ref="inputFondoWeb"
-                                                            v-model="process.fondo_web"
-                                                            label="Fondo web (1280 x 720px)"
-                                                            :file-types="['image']"
-                                                            @onSelect="setFile($event, process, 'fondo_web')"
-                                                            @onPreview="fondo_web_selected = $event"
-                                                            @croppedImage="fondo_web_cropped = $event"
-                                                            :sizeCropp="{width:1280, height:720}"
-                                                            :showButton="false"
-                                                            :cropImage="true"
-                                                            />
-                                                    </div>
-                                                </v-col>
-                                            </v-row>
-                                        </v-col>
-                                        <v-col cols="7">
-                                            <v-row>
-                                                <v-col cols="12">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <span class="text_default">Previsualización</span>
-                                                        </div>
-                                                        <div class="btns_preview_type">
-                                                            <DefaultButton :label="'Mobile'"
-                                                                @click="tab_preview_images = 'mobile'"
-                                                                :outlined="tab_preview_images != 'mobile'"
-                                                                />
-                                                            <DefaultButton :label="'Web'"
-                                                                @click="tab_preview_images = 'web'"
-                                                                :outlined="tab_preview_images != 'web'"
-                                                                />
-                                                        </div>
-                                                    </div>
-                                                </v-col>
-                                            </v-row>
-                                            <v-row style="height: calc(100% - 60px);">
-                                                <v-col cols="12">
-                                                    <div class="box_preview" v-if="tab_preview_images == 'mobile'">
-                                                        <div class="tpl_preview_mobile" v-if="(logo_cropped && fondo_mobile_cropped) || (process.logo && process.background_mobile)">
-                                                            <div class="bx_imgs_pm">
-                                                                <div class="bx_fondo_pm" v-if="fondo_mobile_cropped || process.background_mobile">
-                                                                    <img :src="fondo_mobile_cropped ? fondo_mobile_cropped: process.background_mobile">
-                                                                </div>
-                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
-                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
-                                                                </div>
-                                                            </div>
-                                                            <span class="text_default">
-                                                                Bienvenidos
-                                                                <img src="/img/induccion/personalizacion/arrow_right.svg">
-                                                            </span>
-                                                        </div>
-                                                        <span class="text_default" v-else>
-                                                            Necesitas ambos archivos para poder generar una previsualización
-                                                        </span>
-                                                    </div>
-                                                    <div class="box_preview" v-if="tab_preview_images == 'web'">
-                                                        <div class="tpl_preview_web" v-if="(logo_cropped && fondo_web_cropped) || (process.logo && process.background_web)">
-                                                            <div class="bx_imgs_pm">
-                                                                <div class="bx_fondo_pm" v-if="fondo_web_cropped || process.background_web">
-                                                                    <img :src="fondo_web_cropped ? fondo_web_cropped : process.background_web">
-                                                                </div>
-                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
-                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
-                                                                </div>
-                                                                <span class="text_default">
-                                                                    Bienvenidos
-                                                                    <img src="/img/induccion/personalizacion/arrow_right.svg">
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <span class="text_default" v-else>
-                                                            Necesitas ambos archivos para poder generar una previsualización
-                                                        </span>
-                                                    </div>
-                                                </v-col>
-                                            </v-row>
-                                        </v-col>
-                                    </v-row>
-                                </v-card-text>
-                            </v-card>
-                        </v-stepper-content>
-                        <v-stepper-content step="4" class="p-0">
                             <v-card style="box-shadow:none !important;" class="bx_steps bx_step3">
                                 <v-card-text>
                                     <v-row>
@@ -345,7 +138,7 @@
                                                             <div class="bg_bubble" :style="backgroundColorSelected"></div>
                                                             <div class="bx_change_img_profile">
                                                                 <div class="bx_img_profile">
-                                                                    <img src="/img/induccion/personalizacion/perfil-hombre.png">
+                                                                    <img :src="process.img_guia ? process.img_guia : '/img/induccion/personalizacion/perfil-hombre.png'">
                                                                     <div class="icon_edit" @click="changeAvatarSelected" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
                                                                 </div>
                                                                 <span class="text_default">Cambiar guía</span>
@@ -502,10 +295,230 @@
                                                                     <img src="/img/induccion/personalizacion/detallista.png">
                                                                 </div>
                                                             </div>
+                                                            <div class="item_icono_onb" v-for="(icon, index) in list_icons_finished_onboarding" :key="index">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="process.icon_finished_selected = icon.logo_cropped">
+                                                                    <img :src="icon.logo_cropped">
+                                                                </div>
+                                                            </div>
+                                                            <div class="item_icono_onb">
+                                                                <div class="bg_icon_item" style="background: none !important;" @click="openFormModal(modalUploadImageResize)">
+                                                                    <v-icon style="color: #5458EA;">
+                                                                        mdi-plus-circle
+                                                                    </v-icon>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </v-col>
                                             </v-row>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                        <v-stepper-content step="3" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step3">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Previsualización de logotipo e imágenes de fondo</span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="5">
+                                            <v-row>
+                                                <v-col cols="12" class="bx_preview_change_logo">
+                                                    <DefaultSelectOrUploadMultimedia
+                                                        ref="inputLogo"
+                                                        v-model="resource.logotipo"
+                                                        label="Logotipo (500 x 500px)"
+                                                        :file-types="['image']"
+                                                        @onSelect="setFile($event, resource,'logotipo')"
+                                                        @onPreview="logo_selected = $event"
+                                                        @croppedImage="logo_cropped = $event"
+                                                        @removeImage="logo_cropped = $event"
+                                                        :sizeCropp="{width:500, height:500}"
+                                                        :showButton="false"
+                                                        :cropImage="true"
+                                                        />
+                                                </v-col>
+                                                <v-col cols="12">
+                                                    <div  v-show="tab_preview_images == 'mobile'">
+                                                        <DefaultSelectOrUploadMultimedia
+                                                            ref="inputFondoMobile"
+                                                            v-model="process.fondo_mobile"
+                                                            label="Fondo (720 x 1280px)"
+                                                            :file-types="['image']"
+                                                            @onSelect="setFile($event, process, 'fondo_mobile')"
+                                                            @onPreview="fondo_mobile_selected = $event"
+                                                            @croppedImage="fondo_mobile_cropped = $event"
+                                                            :sizeCropp="{width:720, height:1280}"
+                                                            :showButton="false"
+                                                            :cropImage="true"
+                                                            />
+                                                    </div>
+                                                    <div v-show="tab_preview_images == 'web'">
+                                                        <DefaultSelectOrUploadMultimedia
+                                                            ref="inputFondoWeb"
+                                                            v-model="process.fondo_web"
+                                                            label="Fondo web (1280 x 720px)"
+                                                            :file-types="['image']"
+                                                            @onSelect="setFile($event, process, 'fondo_web')"
+                                                            @onPreview="fondo_web_selected = $event"
+                                                            @croppedImage="fondo_web_cropped = $event"
+                                                            :sizeCropp="{width:1280, height:720}"
+                                                            :showButton="false"
+                                                            :cropImage="true"
+                                                            />
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                        <v-col cols="7">
+                                            <v-row>
+                                                <v-col cols="12">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="text_default">Previsualización</span>
+                                                        </div>
+                                                        <div class="btns_preview_type">
+                                                            <DefaultButton :label="'Mobile'"
+                                                                @click="tab_preview_images = 'mobile'"
+                                                                :outlined="tab_preview_images != 'mobile'"
+                                                                />
+                                                            <DefaultButton :label="'Web'"
+                                                                @click="tab_preview_images = 'web'"
+                                                                :outlined="tab_preview_images != 'web'"
+                                                                />
+                                                        </div>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                            <v-row style="height: calc(100% - 60px);">
+                                                <v-col cols="12">
+                                                    <div class="box_preview" v-if="tab_preview_images == 'mobile'">
+                                                        <div class="tpl_preview_mobile" v-if="(logo_cropped && fondo_mobile_cropped) || (process.logo && process.background_mobile)">
+                                                            <div class="bx_imgs_pm">
+                                                                <div class="bx_fondo_pm" v-if="fondo_mobile_cropped || process.background_mobile">
+                                                                    <img :src="fondo_mobile_cropped ? fondo_mobile_cropped: process.background_mobile">
+                                                                </div>
+                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
+                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
+                                                                </div>
+                                                            </div>
+                                                            <span class="text_default">
+                                                                Bienvenidos
+                                                                <img src="/img/induccion/personalizacion/arrow_right.svg">
+                                                            </span>
+                                                        </div>
+                                                        <span class="text_default" v-else>
+                                                            Necesitas ambos archivos para poder generar una previsualización
+                                                        </span>
+                                                    </div>
+                                                    <div class="box_preview" v-if="tab_preview_images == 'web'">
+                                                        <div class="tpl_preview_web" v-if="(logo_cropped && fondo_web_cropped) || (process.logo && process.background_web)">
+                                                            <div class="bx_imgs_pm">
+                                                                <div class="bx_fondo_pm" v-if="fondo_web_cropped || process.background_web">
+                                                                    <img :src="fondo_web_cropped ? fondo_web_cropped : process.background_web">
+                                                                </div>
+                                                                <div class="bx_logo_pm" v-if="logo_cropped || process.logo">
+                                                                    <img :src="logo_cropped ? logo_cropped : process.logo">
+                                                                </div>
+                                                                <span class="text_default">
+                                                                    Bienvenidos
+                                                                    <img src="/img/induccion/personalizacion/arrow_right.svg">
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <span class="text_default" v-else>
+                                                            Necesitas ambos archivos para poder generar una previsualización
+                                                        </span>
+                                                    </div>
+                                                </v-col>
+                                            </v-row>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-stepper-content>
+                        <v-stepper-content step="4" class="p-0">
+                            <v-card style="box-shadow:none !important;" class="bx_steps bx_step2">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0 mb-2">
+                                            <span class="text_default lbl_tit fw-bold">Escribe un instructivo para tus trabajadores.</span>
+                                        </v-col>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <span class="text_default lbl_tit">Da indicaciones a tus trabajadores para organizarlos o darles unas pautas al ingresar a la plataforma, en caso de no contar con un instructivo puedes puedes usar el  Instructivo Cursalab.</span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row class="bx_instructions_list">
+                                        <v-col cols="8">
+                                            <div class="bx_overflow">
+                                                <draggable v-model="process.instructions" @start="drag=true"
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                    <transition-group type="transition" name="flip-list" tag="div">
+                                                        <div v-for="(instruction, i) in process.instructions"
+                                                            :key="instruction.id">
+                                                            <div class="item-draggable activities">
+                                                                <div class="item_instruction">
+                                                                    <div class="ii1 d-flex align-center justify-content-center ">
+                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                        </v-icon>
+                                                                    </div>
+                                                                    <div class="ii2">
+                                                                        <fieldset class="editor">
+                                                                            <legend>Escribe aquí una indicación
+                                                                            </legend>
+                                                                            <editor
+                                                                                @onfocus="instructionSelected(instruction.description)"
+                                                                                @input="instructionSelected(instruction.description)"
+                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                                v-model="instruction.description"
+                                                                                :init="{
+                                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                                    height: 170,
+                                                                                    menubar: false,
+                                                                                    language: 'es',
+                                                                                    force_br_newlines : true,
+                                                                                    force_p_newlines : false,
+                                                                                    forced_root_block : '',
+                                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                                                    toolbar:
+                                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                                    images_upload_handler: images_upload_handler,
+                                                                                    toolbar_location: 'bottom'
+                                                                                }"
+                                                                            />
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="ii3 d-flex align-center">
+                                                                        <v-icon class="ml-0 mr-2 icon_size" color="black"
+                                                                                @click="deleteInstruction(instruction, i)">
+                                                                            mdi-delete
+                                                                        </v-icon>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </transition-group>
+                                                </draggable>
+                                            </div>
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <span class="text_default mb-2">Previsualización</span>
+                                            <div class="bx_prev_instructions">
+                                                <div class="bx_dialog bxd_right">
+                                                    <div class="content_dialog" v-html="content_instruction"></div>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12" md="12" lg="12" class="d-flex justify-content-center">
+                                            <v-btn color="primary" outlined @click="addInstruction" class="btn_add_instruction">
+                                                <v-icon class="icon_size">mdi-plus-circle</v-icon>
+                                            </v-btn>
                                         </v-col>
                                     </v-row>
                                 </v-card-text>
@@ -555,7 +568,14 @@
             v-model="modalAvatarsRepository.open"
             :width="'650px'"
             @onCancel="modalAvatarsRepositoryClose()"
-            @onConfirm="modalAvatarsRepositoryClose()"
+            @onConfirm="changeImgGuia"
+        />
+        <ModalUploadImageResize
+            :ref="modalUploadImageResize.ref"
+            v-model="modalUploadImageResize.open"
+            :width="'500px'"
+            @onCancel="closeFormModal(modalUploadImageResize)"
+            @onConfirm="addIconFinishedOnboarding"
         />
     </v-dialog>
 </template>
@@ -567,6 +587,7 @@ import DefaultButtonModalSteps from '../../globals/DefaultButtonModalSteps.vue';
 import PreviewMap from './PreviewMap.vue';
 import ModalAvatarsRepository from './ModalAvatarsRepository.vue'
 import Editor from "@tinymce/tinymce-vue";
+import ModalUploadImageResize from './ModalUploadImageResize';
 
 export default {
     components: {
@@ -574,12 +595,13 @@ export default {
     DefaultButtonModalSteps,
     PreviewMap,
     ModalAvatarsRepository,
-    editor: Editor
+    editor: Editor,
+    ModalUploadImageResize
 },
     props: {
         value: Boolean,
         width: String,
-        process: Object,
+        // process: Object,
         limitOne: {
             type:Boolean,
             default:false
@@ -591,7 +613,8 @@ export default {
     },
     data() {
         return {
-
+            list_icons_finished_onboarding: [],
+            process: {},
             modalDateOptions: {
                 ref: 'DateEvent',
                 open: false,
@@ -623,6 +646,11 @@ export default {
 
             modalAvatarsRepository: {
                 ref: 'ModalAvatarsRepository',
+                open: false,
+                endpoint: '',
+            },
+            modalUploadImageResize: {
+                ref: 'ModalUploadImageResize',
                 open: false,
                 endpoint: '',
             },
@@ -885,6 +913,27 @@ export default {
                     failure("upload failed!");
                 });
         },
+        addIconFinishedOnboarding(data) {
+            console.log(data);
+            let vue = this
+            if(data.logo_cropped)
+                vue.list_icons_finished_onboarding.push(data)
+
+            vue.closeFormModal(vue.modalUploadImageResize)
+        },
+        changeImgGuia(data) {
+            console.log(data);
+            let vue = this
+            if(data.logo_cropped) {
+                vue.$nextTick(() => {
+                    vue.process.img_guia = data.logo_cropped
+                })
+            }
+            console.log(vue.process, vue.process.img_guia);
+
+            vue.closeFormModal(vue.modalAvatarsRepository)
+        },
+
         modalAvatarsRepositoryClose() {
             let vue = this
             vue.modalAvatarsRepository.open = false
@@ -991,6 +1040,21 @@ export default {
             vue.expand_cursos = true;
             vue.actividades_expanded = [];
             vue.search_text = null;
+
+            vue.stepper_box = 1
+            vue.tab_preview_images = 'mobile'
+            vue.logo_selected = null
+            vue.fondo_mobile_selected = null
+            vue.fondo_web_selected = null
+            vue.resource = {}
+            vue.process = {}
+
+            vue.colorPicker = '#FE141F'
+            vue.colorSelected = '#5458EA'
+            vue.colorMapaSelected = '#27f748'
+            vue.colorImparPicker = '#27F748'
+            vue.colorParPicker = '#8BFC89'
+
             vue.resetValidation()
             vue.$emit("onCancel");
         },
@@ -999,12 +1063,6 @@ export default {
             console.log('resetValidation')
             // vue.search_text = null
             // vue.results_search = []
-            vue.stepper_box = 1
-            vue.tab_preview_images = 'mobile'
-            vue.logo_selected = null
-            vue.fondo_mobile_selected = null
-            vue.fondo_web_selected = null
-            vue.resource = {}
         },
         async confirm() {
             let vue = this;
@@ -1030,6 +1088,14 @@ export default {
             {
                 let fondo_web_blob = await fetch(vue.fondo_web_cropped).then(res => res.blob());
                 vue.process.fondo_web = fondo_web_blob;
+            }
+            if(vue.process.img_guia)
+            {
+                vue.process.img_guia_blob = await fetch(vue.process.img_guia).then(res => res.blob());
+            }
+            if(vue.process.icon_finished_selected)
+            {
+                vue.process.icon_finished_blob = await fetch(vue.process.icon_finished_selected).then(res => res.blob());
             }
             vue.$emit("onConfirm", vue.process);
         },
@@ -1187,6 +1253,38 @@ export default {
             console.log(vue.resource.type_checklist);
             console.log(vue.type_checklist);
             vue.type_checklist = vue.resource.type_checklist;
+        },
+
+        async loadData(resource) {
+            let vue = this
+
+            vue.$nextTick(() => {
+                vue.process = Object.assign({}, vue.process, resource)
+
+                if(resource.color) {
+                    if(resource.color != vue.colorDefault) {
+                        vue.colorPicker = resource.color
+                        vue.colorSelected = resource.color
+                    }
+                }
+                vue.colorParPicker = resource.color_map_even ? resource.color_map_even : vue.colorParPicker
+                vue.colorImparPicker = resource.color_map_odd ? resource.color_map_odd : vue.colorImparPicker
+
+                if(resource.instructions.length == 0)
+                {
+                    const newID = `n-${Date.now()}`;
+                    const newInstruction = {
+                        id: newID,
+                        description: "",
+                        active: 1,
+                        hasErrors: false
+                    };
+                    vue.process.instructions.push(newInstruction);
+                }
+            })
+        },
+        loadSelects() {
+            let vue = this
         },
     }
 };
@@ -1659,6 +1757,10 @@ span.v-stepper__step__step:after {
                 align-items: center;
                 opacity: .6;
                 cursor: pointer;
+                overflow: hidden;
+                img {
+                    max-width: 100%;
+                }
                 &:hover {
                     opacity: 1;
                 }
