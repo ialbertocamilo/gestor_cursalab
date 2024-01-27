@@ -56,6 +56,7 @@ class PosteoSearchResource extends JsonResource
             'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $topic->id]),
             'is_super_user'=>auth()->user()->isAn('super-user'),
             'is_cursalab_super_user'=> is_cursalab_superuser(),
+            'is_poll_available' => true
             // 'is_super_user'=> true
 
         ];

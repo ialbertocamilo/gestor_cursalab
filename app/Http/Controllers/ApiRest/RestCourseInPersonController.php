@@ -26,4 +26,15 @@ class RestCourseInPersonController extends Controller
         $users = CourseInPerson::listGuestsByCourse($course_id);
         return $this->success(['users'=>$users]);
     }
+
+    public function listResources($course_id,$topic_id){
+        if(!$course_id){
+            return $this->error('Es necesario el curso_id.');
+        }
+        if(!$topic_id){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $resources = CourseInPerson::listResources($course_id,$topic_id);
+        return $this->success(['resources'=>$resources]);
+    }
 }

@@ -58,6 +58,14 @@
                         `Logs del tema - ${$event.nombre}`
                     )
                 "
+                @encuesta="
+                    openFormModal(
+                        modalCursoEncuesta,
+                        $event,
+                        'encuesta',
+                        `Encuesta del tema - ${$event.nombre}`
+                    )
+                "
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
@@ -127,6 +135,13 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+            <CursosEncuestaModal
+                width="50vw"
+                :ref="modalCursoEncuesta.ref"
+                :options="modalCursoEncuesta"
+                @onCancel="closeFormModal(modalCursoEncuesta)"
+                @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
+            />
         </v-card>
     </section>
 </template>
@@ -137,6 +152,7 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal";
+import CursosEncuestaModal from "../Cursos/CursosEncuestaModal";
 
 export default {
     components: {
@@ -145,7 +161,8 @@ export default {
     TopicFormModal,
     'TopicValidationsDelete': TemaValidacionesModal,
     'TopicValidationsUpdateStatus': TemaValidacionesModal,
-    PreviewMediaTopicsModal
+    PreviewMediaTopicsModal,
+    CursosEncuestaModal
 },
     props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
@@ -204,6 +221,14 @@ export default {
                     },
                 ],
                 more_actions: [
+                    {
+                        text: "Encuesta",
+                        icon: 'mdi mdi-poll',
+                        type: 'action',
+                        count: 'encuesta_count',
+                        method_name: 'encuesta',
+                        show_condition: 'is_poll_available'
+                    },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
@@ -321,6 +346,11 @@ export default {
                 title: '',
                 action: null,
                 persistent: true,
+            },
+            modalCursoEncuesta: {
+                ref: 'CursoEncuestaModal',
+                open: false,
+                base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             },
             showPreviewButton:false
         }

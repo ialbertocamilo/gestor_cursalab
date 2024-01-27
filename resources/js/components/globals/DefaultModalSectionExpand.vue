@@ -34,13 +34,10 @@
         </v-col>
     </v-row>
 
-    <v-row justify="space-around" align="start" align-content="center" class="px-3 pt-2 section-expanded" v-show="expand.status">
-        <v-col cols="12" class="d-flex justify-content-center py-1 content-background">
-            <div v-if="subtitle">
-                <h5 class="px-2 card-text m-2 title-card-border">
-                    {{ subtitle }}
-                </h5>
-            </div>
+    <v-row justify="space-around" align="start" align-content="center"   :class="[simple ? '' : 'px-3 pt-2', 'section-expanded']"  v-show="expand.status">
+        <v-col cols="12" 
+            :class="[simple ? '' : 'content-background', 'd-flex justify-content-center py-1']"
+        >
             <v-expand-transition>
                 <div style="width:100%">
                     <slot name="content"/>
@@ -59,10 +56,6 @@ export default {
             type: String,
             default: 'Título de la sección'
         },
-        subtitle:{
-            type: String,
-            default: null
-        },
         tooltip: String,
         right: {
             type: Boolean,
@@ -70,6 +63,10 @@ export default {
         },
         comingSoon: false,
         expand: Object,
+        simple:{
+            type: String,
+            default: false
+        }
     }
 }
 </script>

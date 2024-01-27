@@ -9,18 +9,19 @@
         <template v-slot:content>
 
             <v-form ref="TemaForm">
-                <v-row justify="center">
-                    <v-col cols="7">
+                <v-row>
+                    <v-col cols="6">
                         <DefaultInput
                             dense
-                            label="Nombre"
+                            label="Nombre del tema"
                             show-required
                             placeholder="Ingrese un nombre"
                             v-model="resource.name"
                             :rules="rules.name"
                             emojiable
                         />
-                            <!-- counter="120" -->
+                    </v-col>
+                    <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
                         <DefaultAutocomplete
                             dense
                             label="Requisito"
@@ -29,37 +30,27 @@
                             :items="selects.requisitos"
                             clearable
                             item-text="name"
-                            class="mt-4"
                         />
-
+                    </v-col>
+                    <v-col cols="6" v-if="selects.course_code_modality != 'asynchronous'">
                         <DefaultAutocomplete
                             dense
-                            label="Ponente"
+                            label="Ponente *"
                             placeholder="Seleccione un ponente"
                             v-model="resource.modality_in_person_properties.host_id"
                             :items="selects.hosts"
                             clearable
                             item-text="name"
-                            class="mt-4"
                         />
-                        <DefaultAutocomplete
-                            dense
-                            label="Encuesta"
-                            placeholder="Seleccione una encuesta"
-                            v-model="resource.modality_in_person_properties.poll_id"
-                            :items="selects.polls"
-                            clearable
-                            item-text="titulo"
-                            class="mt-4"
-                        />
+                    </v-col>
+                    <v-col cols="6">
                         <DefaultRichText
                             clearable
                             v-model="resource.content"
                             label="Descripción"
                             :rules="rules.content"
-                            class="mt-2"
                             :ignoreHTMLinLengthCalculation="true"
-                            :height="195"
+                            height="290px"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
                             :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
@@ -68,7 +59,7 @@
                             @generateIaDescription="generateIaDescription"
                         />
                     </v-col>
-                    <v-col cols="5">
+                    <v-col cols="6">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.imagen"
@@ -76,216 +67,121 @@
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
-                            select-height="75vh"
+                            select-height="195px"
                         />
                     </v-col>
                 </v-row>
-                <v-row justify="space-around" class="menuable">
-                    <v-col cols="12" v-if="selects.course_code_modality == 'in-person'">
-                        <DefaultModalSectionExpand
-                            title="Ubicación"
-                            :expand="sections.showSectionPosition"
-                        >
-                            <template slot="content">
-                                <v-row justify="center" class="align-items-center">
-                                    <v-col cols="12">
-                                        <div class="box_search_direction_map">
-                                            <span class="lbl_search_direction">Dirección</span>
-                                            <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
-                                        </div>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
-                                            <GmapMap
-                                                :center="center"
-                                                :zoom="zoom"
-                                                :options="{
-                                                    zoomControl: false,
-                                                    mapTypeControl: false,
-                                                    scaleControl: false,
-                                                    streetViewControl: false,
-                                                    rotateControl: false,
-                                                    fullscreenControl: false,
-                                                    disableDefaultUi: false
-                                                    }"
-                                                style="height: 300px"
-                                                >
-                                                <GmapMarker
-                                                    :key="index"
-                                                    v-for="(m, index) in markers"
-                                                    :position="m.position"
-                                                    @click="center = m.position"
-                                                    :draggable="true"
-                                                    @drag="updateCoordinates"
-                                                />
-                                            </GmapMap>
-                                        </div>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <DefaultTextArea
-                                            label="Referencia"
-                                            placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
-                                            v-model="resource.modality_in_person_properties.reference"
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                <!-- -->
-                <v-row justify="space-around"  v-if="selects.course_code_modality == 'in-person' || selects.course_code_modality == 'virtual'">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                          title="Programación de sesión"
-                          :expand="sections.showSectionTopicDates"
-                        >
-                        <template slot="content">
-                            <v-row justify="center">
-
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultInputDate
-                                            clearable
-                                            :referenceComponent="'modalDateFilter1'"
-                                            :options="modalDateFilter1"
-                                            v-model="resource.modality_in_person_properties.start_date"
-                                            label="Fecha de inicio"
-                                            :min="new Date().toISOString().substr(0, 10)"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                      <DefaultInput
-                                          class="time-input"
-                                          type="time"
-                                          label="Hora"
-                                          dense
-                                          v-model="resource.modality_in_person_properties.start_time"
-                                          :disabled="!resource.modality_in_person_properties.start_date"
-                                          :rules="rules.time"
-                                          step="60"
-                                      />
-                                    </v-col>
-
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                       <DefaultInputDate
-                                           clearable
-                                           :referenceComponent="'modalDateFilter1'"
-                                           :options="modalDateFilter2"
-                                           v-model="resource.modality_in_person_properties.finish_date"
-                                           :disabled="!resource.modality_in_person_properties.start_date"
-                                           :min="resource.modality_in_person_properties.start_date"
-                                           label="Fecha de fin"
-                                           dense
-                                       />
-                                    </v-col>
-
-                                    <v-col cols="3">
-                                      <DefaultInput
-                                          class="time-input"
-                                          type="time"
-                                          label="Hora"
-                                          v-model="resource.modality_in_person_properties.finish_time"
-                                          :disabled="!resource.modality_in_person_properties.finish_date"
-                                          :rules="rules.time"
-                                          step="60"
-                                          dense
-                                      />
-                                    </v-col>
-
-                                    <v-col cols="12" class="py-1">
-                                        <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
-                                        <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
-                                            ** Se creara una reunión en ZOOM.
-                                        </p>
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                <DefaultModalSectionExpand
-                    title="Método de evaluación"
-                    :expand="sections.showSectionEvaluation"
-                    class="my-4"
-                >
+                <DefaultSimpleSection title="Ubicación" v-if="selects.course_code_modality == 'in-person'">
                     <template slot="content">
-
-                        <v-row justify="center">
-                            <v-col cols="4" class="d-flex align-items-center">
-                                <DefaultToggle v-model="resource.assessable"
-                                    active-label="Sí, el tema es evaluable"
-                                    inactive-label="No, el tema no es evaluable"
-                                    @onChange="validateTipoEv"
-                                    dense
-                                />
-                                <!-- :rules="rules.assessable" -->
+                        <v-row justify="center" class="align-items-center">
+                            <v-col cols="12">
+                                <div class="box_search_direction_map">
+                                    <span class="lbl_search_direction">Dirección</span>
+                                    <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                </div>
                             </v-col>
-
-                            <v-col cols="4">
-                                <DefaultSelect
-                                    dense
-                                    :show-required="resource.assessable == 1"
-                                    label="Tipo de evaluación"
-                                    v-model="resource.type_evaluation_id"
-                                    :items="selects.evaluation_types"
-                                    :rules="resource.assessable == 1 ? rules.tipo_ev : []"
-                                    :disabled="resource.assessable == 0 || !resource.assessable"
-                                    @onChange="showAlertEvaluacion"
+                            <v-col cols="12">
+                                <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
+                                    <GmapMap
+                                        :center="center"
+                                        :zoom="zoom"
+                                        :options="{
+                                            zoomControl: false,
+                                            mapTypeControl: false,
+                                            scaleControl: false,
+                                            streetViewControl: false,
+                                            rotateControl: false,
+                                            fullscreenControl: false,
+                                            disableDefaultUi: false
+                                            }"
+                                        style="height: 300px"
+                                        >
+                                        <GmapMarker
+                                            :key="index"
+                                            v-for="(m, index) in markers"
+                                            :position="m.position"
+                                            @click="center = m.position"
+                                            :draggable="true"
+                                            @drag="updateCoordinates"
+                                        />
+                                    </GmapMap>
+                                </div>
+                            </v-col>
+                            <v-col cols="12">
+                                <DefaultTextArea
+                                    label="Referencia"
+                                    placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
+                                    v-model="resource.modality_in_person_properties.reference"
                                 />
                             </v-col>
-
-                            <v-col cols="4">
-                                <DefaultSelect
-                                    v-show="showActiveResults"
-                                    dense
-                                    :items="selects.qualification_types"
-                                    item-text="name"
-                                    return-object
-                                    show-required
-                                    v-model="resource.qualification_type"
-                                    label="Sistema de calificación"
-                                    :rules="rules.qualification_type_id"
-                                />
-                            </v-col>
-
-                            <DefaultSection
-                                v-if="showActiveResults"
-                                title="Resultados de evaluación"
-                                class="--mt-4 col col-12 pt-0"
-                                style="background-color: #f5f5f52e;"
-                            >
-                                <template slot="content">
-                                    <v-row justify="center">
-                                        <v-col cols="2" class="d-flex justify-content-center align-items-center">
-                                            <DefaultToggle
-                                                v-model="resource.active_results" dense
-                                            />
-                                        </v-col>
-
-                                        <v-col cols="10">
-                                            <p class="mb-0 p-small-instruction">
-                                                * Al activar resultados se visualizarán las respuestas ingresadas (correctas e incorrectas) en la aplicación del usuario al realizar una evaluación.
-                                            </p>
-                                        </v-col>
-
-                                    </v-row>
-
-                                </template>
-                            </DefaultSection>
                         </v-row>
-
                     </template>
-                </DefaultModalSectionExpand>
-
-                    <!-- class="my-5" -->
-                <DefaultModalSectionExpand
-                    title="Recursos multimedia"
-                    :expand="sections.showSectionResources"
-                    class="my-4"
-                >
+                </DefaultSimpleSection>
+                <DefaultSimpleSection title="Programación" v-if="selects.course_code_modality != 'asynchronous'">
                     <template slot="content">
+                        <v-row justify="center">
+                            <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                <DefaultInputDate
+                                    clearable
+                                    :referenceComponent="'modalDateFilter1'"
+                                    :options="modalDateFilter1"
+                                    v-model="resource.modality_in_person_properties.start_date"
+                                    label="Fecha de inicio"
+                                    :min="new Date().toISOString().substr(0, 10)"
+                                    dense
+                                />
+                            </v-col>
+                            <v-col cols="3">
+                            <DefaultInput
+                                class="time-input"
+                                type="time"
+                                label="Hora"
+                                dense
+                                v-model="resource.modality_in_person_properties.start_time"
+                                :disabled="!resource.modality_in_person_properties.start_date"
+                                :rules="rules.time"
+                                step="60"
+                            />
+                            </v-col>
 
+                            <!-- <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                            <DefaultInputDate
+                                clearable
+                                :referenceComponent="'modalDateFilter1'"
+                                :options="modalDateFilter2"
+                                v-model="resource.modality_in_person_properties.finish_date"
+                                :disabled="!resource.modality_in_person_properties.start_date"
+                                :min="resource.modality_in_person_properties.start_date"
+                                label="Fecha de fin"
+                                dense
+                            />
+                            </v-col> -->
+
+                            <v-col cols="3">
+                                <DefaultInput
+                                    class="time-input"
+                                    type="time"
+                                    label="Hora"
+                                    v-model="resource.modality_in_person_properties.finish_time"
+                                    :disabled="!resource.modality_in_person_properties.start_time"
+                                    :min="resource.modality_in_person_properties.start_time"
+                                    :rules="rules.time"
+                                    step="60"
+                                    dense
+                                />
+                            </v-col>
+
+                            <v-col cols="12" class="py-1">
+                                <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
+                                <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
+                                    ** Se creara una reunión en ZOOM.
+                                </p>
+                            </v-col>
+                        </v-row>
+                    </template>
+                </DefaultSimpleSection>
+                <DefaultSimpleSection title="Recursos multimedia" v-if="selects.course_code_modality != 'asynchronous'">
+                    <template slot="content">
                         <v-row justify="center">
                             <v-col cols="12">
 
@@ -388,15 +284,23 @@
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
                             <v-col cols="12">
-                                <DefaultToggle v-model="resource.review_all_duration_media"
+                                
+                            </v-col>
+                        </v-row>
+                    </template>
+                </DefaultSimpleSection>
+                <DefaultSimpleSection title="Validación de contenido" >
+                    <template slot="content">
+                        <v-row>
+                            <v-col cols="12" v-if="selects.course_code_modality == 'asynchronous'">
+                                <DefaultToggle 
+                                    v-model="resource.review_all_duration_media"
                                     active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     dense
                                 />
                             </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col>
+                            <v-col cols="12" v-if="selects.course_code_modality != 'asynchronous'">
                                 <DefaultToggle 
                                     v-model="resource.modality_in_person_properties.show_medias_since_start_course"
                                     active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
@@ -406,69 +310,143 @@
                             </v-col>
                         </v-row>
                     </template>
-                </DefaultModalSectionExpand>
-                <DefaultModalSectionExpand
-                    title="Gestión de etiquetas"
-                    :expand="sections.showSectionTags"
-                    class="my-4"
-                    v-if="hasPermissionToUseTags"
-                >
-                    <template slot="content">
-                        <v-row>
-                            <v-col cols="6">
-                                <DefaultAutocomplete
-                                    dense
-                                    label="Selección de etiquetas "
-                                    placeholder="Busca tu tag"
-                                    v-model="resource.tags"
-                                    :items="selects.tags"
-                                    custom-items
-                                    item-text="name"
-                                    item-value="id"
-                                    multiple
-                                    small-chips
-                                    :maxValuesSelected="3"
-                                    :showSelectAll="false"
-                                    :countShowValues="3"
-                                    :deleteChips="true"
-                                    attach
-                                >
-                                    <template v-slot:customItems="{item}">
-                                        <div class="d-flex">
-                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
-                                            </v-checkbox> -->
-                                            <div class="py-1">
-                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
-                                                <v-tooltip bottom>
-                                                    <template v-slot:activator="{ on, attrs }">
-                                                        <v-list-item-subtitle
-                                                            v-if="item.description"
-                                                            class="list-item-description-tag"
-                                                            v-bind="attrs"
-                                                            v-on="on"
-                                                        >{{ item.description }}</v-list-item-subtitle>
-                                                    </template>
-                                                    <span>{{item.description}}</span>
-                                                </v-tooltip>
-                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
-                                            </div>
-                                        </div>
+                </DefaultSimpleSection>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Configuración avanzada"
+                            :expand="sections.shosSectionAdvancedconfiguration"
+                            :simple="true"
+                        >
+                            <template slot="content">
+                                <DefaultSimpleSection title="Método de evaluación">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="4" class="d-flex align-items-center">
+                                                <DefaultToggle v-model="resource.assessable"
+                                                    active-label="Sí, el tema es evaluable"
+                                                    inactive-label="No, el tema no es evaluable"
+                                                    @onChange="validateTipoEv"
+                                                    dense
+                                                />
+                                                <!-- :rules="rules.assessable" -->
+                                            </v-col>
+
+                                            <v-col cols="4">
+                                                <DefaultSelect
+                                                    dense
+                                                    :show-required="resource.assessable == 1"
+                                                    label="Tipo de evaluación"
+                                                    v-model="resource.type_evaluation_id"
+                                                    :items="selects.evaluation_types"
+                                                    :rules="resource.assessable == 1 ? rules.tipo_ev : []"
+                                                    :disabled="resource.assessable == 0 || !resource.assessable"
+                                                    @onChange="showAlertEvaluacion"
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="4">
+                                                <DefaultSelect
+                                                    v-show="showActiveResults"
+                                                    dense
+                                                    :items="selects.qualification_types"
+                                                    item-text="name"
+                                                    return-object
+                                                    show-required
+                                                    v-model="resource.qualification_type"
+                                                    label="Sistema de calificación"
+                                                    :rules="rules.qualification_type_id"
+                                                />
+                                            </v-col>
+
+                                            <DefaultSection
+                                                v-if="showActiveResults"
+                                                title="Resultados de evaluación"
+                                                class="--mt-4 col col-12 pt-0"
+                                                style="background-color: #f5f5f52e;"
+                                            >
+                                                <template slot="content">
+                                                    <v-row justify="center">
+                                                        <v-col cols="2" class="d-flex justify-content-center align-items-center">
+                                                            <DefaultToggle
+                                                                v-model="resource.active_results" dense
+                                                            />
+                                                        </v-col>
+
+                                                        <v-col cols="10">
+                                                            <p class="mb-0 p-small-instruction">
+                                                                * Al activar resultados se visualizarán las respuestas ingresadas (correctas e incorrectas) en la aplicación del usuario al realizar una evaluación.
+                                                            </p>
+                                                        </v-col>
+
+                                                    </v-row>
+
+                                                </template>
+                                            </DefaultSection>
+                                        </v-row>
                                     </template>
-                                </DefaultAutocomplete>
-                            </v-col>
-                            <v-col cols="6">
-                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
-                                <DefaultButton
-                                    outlined 
-                                    label="Agregar Tag"
-                                    @click="openFormModal(modalTagOptions)"
-                                />
-                            </v-col>
-                        </v-row>
-                    </template>
-                </DefaultModalSectionExpand>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Gestión de etiquetas" v-if="hasPermissionToUseTags">
+                                    <template slot="content">
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Selección de etiquetas "
+                                                    placeholder="Busca tu tag"
+                                                    v-model="resource.tags"
+                                                    :items="selects.tags"
+                                                    custom-items
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :maxValuesSelected="3"
+                                                    :showSelectAll="false"
+                                                    :countShowValues="3"
+                                                    :deleteChips="true"
+                                                    attach
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
+                                                            </v-checkbox> -->
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
+                                                <DefaultButton
+                                                    outlined 
+                                                    label="Agregar Tag"
+                                                    @click="openFormModal(modalTagOptions)"
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row>
-                    <v-col cols="2">
+                    <v-col cols="2" v-if="selects.course_code_modality == 'asynchronous'">
                         <DefaultInput
                             dense
                             type="number"
@@ -482,7 +460,6 @@
                     </v-col>
                     <v-col cols="6">
                         <div class="mt-2">
-
                             <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"
                                 active-label="Tema activo"
                                 inactive-label="Tema inactivo"
@@ -579,7 +556,8 @@ export default {
                 showSectionResources: {status: true},
                 showSectionPosition:{status:true},
                 showSectionTopicDates:{status:true},
-                showSectionTags:{status:true}
+                showSectionTags:{status:true},
+                shosSectionAdvancedconfiguration:{status:false}
             },
             modalDateFilter1: {
                 open: false
@@ -636,7 +614,7 @@ export default {
                 qualification_types: [],
                 hosts:[],
                 course_code_modality:null,
-                polls:[],
+                // polls:[],
                 tags:[]
             },
             resource: {
@@ -970,7 +948,7 @@ export default {
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
                     vue.selects.course_code_modality = data.data.course_code_modality;
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
-                    vue.selects.polls = data.data.polls;
+                    // vue.selects.polls = data.data.polls;
                     vue.selects.tags = data.data.tags;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {

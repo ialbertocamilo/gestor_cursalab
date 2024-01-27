@@ -73,11 +73,10 @@ class TemaController extends Controller
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
         $hosts = Usuario::getCurrentHosts();
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
-        $polls = Poll::loadPollsByType('xtema');
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
                              'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
-                             'hosts','polls','course_code_modality');
+                             'hosts','course_code_modality');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -119,7 +118,6 @@ class TemaController extends Controller
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'media_url' => $media_url,
-            'polls' => $form_selects['polls'],
             'limits_ia_convert'=>$limits_ia_convert,
             'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
             'has_permission_to_use_ia_description' => $has_permission_to_use_ia_description,
@@ -220,7 +218,28 @@ class TemaController extends Controller
 
         return $this->success($response);
     }
+    ////////////////////// Tema ENCUESTA ////////////////////////////
 
+    public function getEncuesta(School $school, Course $course,Topic $topic)
+    {
+        $workspace = get_current_workspace();
+
+        $encuestas = Poll::select('titulo as nombre', 'id')->whereRelation('type','code','xtema')->where('workspace_id', $workspace->id)->get();
+        $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
+        $topic->encuesta_id = $topic->poll_id ?? "ninguno";
+        return $this->success(['encuestas'=>$encuestas,'course'=>$topic]);
+    }
+
+    public function storeUpdateEncuesta(School $school, Course $course, Topic $topic,Request $request)
+    {
+        $data = $request->all();
+        $poll_id = $data['encuesta_id'] === "ninguno" ? null : $data['encuesta_id'];
+        $topic->poll_id = $poll_id;
+        $topic->save();
+        cache_clear_model(Topic::class);
+
+        return $this->success(['msg' => 'Encuesta de curso actualizada.']);
+    }
     // ========================================== EVALUACIONES TEMAS ===================================================
     public function preguntas_list(School $school, Course $course, Topic $topic, Request $request)
     {

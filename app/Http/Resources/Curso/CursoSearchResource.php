@@ -105,15 +105,16 @@ class CursoSearchResource extends JsonResource
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
             'is_super_user'=>auth()->user()->isAn('super-user'),
+            'is_course_asynchronous'=> $this->modality->code == 'asynchronous'
         ];
         if($request->hasHabilityToShowProjectButtons){
             //relation projects
             $create_project = !isset($this->project->id);
             $edit_project = !$create_project;
             $project_id = isset($this->project->id) ? $this->project->id : 0;
-            $_course['create_project'] = $create_project;
-            $_course['edit_project'] = $edit_project;
-            $_course['project_users'] = ($edit_project && $this->active);
+            $_course['create_project'] = $create_project && $this->modality->code == 'asynchronous';
+            $_course['edit_project'] = $edit_project && $this->modality->code == 'asynchronous';
+            $_course['project_users'] = ($edit_project && $this->active) && $this->modality->code == 'asynchronous';
             $_course['project_users_route'] = route('project_users.list', [$project_id]);
             $_course['project'] = $this->project;
         }

@@ -342,7 +342,7 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $encuestas = Poll::select('titulo as nombre', 'id')->where('workspace_id', $workspace->id)->get();
+        $encuestas = Poll::select('titulo as nombre', 'id')->whereRelation('type','code','xcurso')->where('workspace_id', $workspace->id)->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
         $course->encuesta_id = $course->polls->first()->id ?? "ninguno";
 

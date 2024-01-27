@@ -27,7 +27,9 @@ Route::controller(TemaController::class)->group(function() {
 
 	Route::get('/{topic}/medias', 'listMedias');
 
+	Route::get('/{topic}/encuesta', 'getEncuesta');
+	Route::post('/{topic}/encuesta', 'storeUpdateEncuesta');
 });
-
+//encuestas
 // PREGUNTAS
 Route::prefix('{topic}/preguntas')->group(base_path('routes/cms/temas_preguntas.php'));

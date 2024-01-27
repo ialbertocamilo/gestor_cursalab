@@ -85,99 +85,96 @@
                             item-value="id"
                         />
                     </v-col>
-                    <div  v-if="current_modality.code == 'in-person'">
+                    <v-row  v-if="current_modality.code == 'in-person'" class="mx-1" style="width: 100%;">
                         <v-col cols="6">
-                            <div class="card_border card mt-3" style="border-radius: 4px;">
-                                <h5 class="px-2 card-text m-2 title-card-border">
-                                    Toma de asistencia
-                                </h5>
-                                <v-radio-group
-                                    v-model="resource.modality_in_person_properties.assistance_type"
-                                    row
-                                    class="ml-2"
-                                >
-                                    <v-radio value="assistance-by-session">
-                                        <template v-slot:label>
-                                            <v-tooltip top>
-                                                <template v-slot:activator="{ on, attrs }">
-                                                <div v-bind="attrs" v-on="on" class="mt-2">
-                                                    Asistencia por sesión
-                                                </div>
-                                                </template>
-                                                <span>Se tomará asistencia en cada sesión del curso</span>
-                                            </v-tooltip>
-                                        </template>
-                                    </v-radio>
-                                    <v-radio value="assistance-by-day">
-                                        <template v-slot:label>
-                                            <v-tooltip top>
-                                                <template v-slot:activator="{ on, attrs }">
-                                                <div v-bind="attrs" v-on="on" class="mt-2">
-                                                    Asitencia por día
-                                                </div>
-                                                </template>
-                                                <span>Si se tiene 2 o más sesiones en el día se tomará solo una asistencia</span>
-                                            </v-tooltip>
-                                        </template>
-                                    </v-radio>
-                                </v-radio-group>
-                            </div>
+                            <DefaultSimpleSection title="Toma de asistencia" marginy="my-1" marginx="mx-0" >
+                                <template slot="content">
+                                    <v-radio-group
+                                        v-model="resource.modality_in_person_properties.assistance_type"
+                                        row
+                                        class="ml-2"
+                                    >
+                                        <v-radio value="assistance-by-session">
+                                            <template v-slot:label>
+                                                <v-tooltip top>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                    <div v-bind="attrs" v-on="on" class="mt-2">
+                                                        Asistencia por sesión
+                                                    </div>
+                                                    </template>
+                                                    <span>Se tomará asistencia en cada sesión del curso</span>
+                                                </v-tooltip>
+                                            </template>
+                                        </v-radio>
+                                        <v-radio value="assistance-by-day">
+                                            <template v-slot:label>
+                                                <v-tooltip top>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                    <div v-bind="attrs" v-on="on" class="mt-2">
+                                                        Asitencia por día
+                                                    </div>
+                                                    </template>
+                                                    <span>Si se tiene 2 o más sesiones en el día se tomará solo una asistencia</span>
+                                                </v-tooltip>
+                                            </template>
+                                        </v-radio>
+                                    </v-radio-group>
+                                </template>
+                            </DefaultSimpleSection>
                         </v-col>
                         <v-col cols="6">
-                            <div class="card_border card mt-3" style="border-radius: 4px;">
-                                <h5 class="px-2 card-text m-2 title-card-border">
-                                    Quienes pueden ver el contenido
-                                </h5>
-                                <v-radio-group
-                                    v-model="resource.modality_in_person_properties.visualization_type"
-                                    row
-                                    class="ml-2"
-                                >
-                                    <v-radio value="scheduled-users">
-                                        <template v-slot:label>
-                                            <v-tooltip top>
-                                                <template v-slot:activator="{ on, attrs }">
-                                                <div v-bind="attrs" v-on="on" class="mt-2">
-                                                    Todos los agendados
-                                                </div>
-                                                </template>
-                                                <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
-                                            </v-tooltip>
-                                        </template>
-                                    </v-radio>
-                                    <v-radio value="all-users">
-                                        <template v-slot:label>
-                                            <v-tooltip top>
-                                                <template v-slot:activator="{ on, attrs }">
-                                                <div v-bind="attrs" v-on="on" class="mt-2">
-                                                    Solo los asistentes
-                                                </div>
-                                                </template>
-                                                <span>Todos los participantes podrán ver los datos del curso</span>
-                                            </v-tooltip>
-                                        </template>
-                                    </v-radio>
-                                </v-radio-group>
-                            </div>
+                            <DefaultSimpleSection title="Quienes pueden ver el contenido" marginy="my-1" marginx="mx-0" >
+                                <template slot="content">
+                                    <v-radio-group
+                                        v-model="resource.modality_in_person_properties.visualization_type"
+                                        row
+                                        class="ml-2"
+                                    >
+                                        <v-radio value="scheduled-users">
+                                            <template v-slot:label>
+                                                <v-tooltip top>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                    <div v-bind="attrs" v-on="on" class="mt-2">
+                                                        Todos los agendados
+                                                    </div>
+                                                    </template>
+                                                    <span>Todos los agendados al curso podrán ver al contenido luego de culminado</span>
+                                                </v-tooltip>
+                                            </template>
+                                        </v-radio>
+                                        <v-radio value="all-users">
+                                            <template v-slot:label>
+                                                <v-tooltip top>
+                                                    <template v-slot:activator="{ on, attrs }">
+                                                    <div v-bind="attrs" v-on="on" class="mt-2">
+                                                        Solo los asistentes
+                                                    </div>
+                                                    </template>
+                                                    <span>Todos los participantes podrán ver los datos del curso</span>
+                                                </v-tooltip>
+                                            </template>
+                                        </v-radio>
+                                    </v-radio-group>
+                                </template>
+                            </DefaultSimpleSection>
                         </v-col>
                         <v-col cols="6">
-                            <div class="card_border card mt-3" style="border-radius: 4px;">
-                                <h5 class="px-2 card-text m-2 title-card-border">
-                                    Firmas
-                                </h5>
-                                <DefaultToggle
-                                    class="ml-4 mb-2"
-                                    v-model="resource.modality_in_person_properties.required_signature" 
-                                    dense
-                                    :active-label="'Solicitar firma del colaborador'"
-                                    :inactive-label="'Solicitar firma del colaborador'"
-                                />
-                            </div>
+                            <DefaultSimpleSection title="Firmas" marginy="my-1" marginx="mx-0" >
+                                <template slot="content">
+                                    <DefaultToggle
+                                        class="ml-4 mb-2"
+                                        v-model="resource.modality_in_person_properties.required_signature" 
+                                        dense
+                                        :active-label="'Solicitar firma del colaborador'"
+                                        :inactive-label="'Solicitar firma del colaborador'"
+                                    />
+                                </template>
+                            </DefaultSimpleSection>
                         </v-col>
                         <v-col cols="6">
                         </v-col>
-                    </div>
-                    <v-col cols="6" v-if="current_modality.code == 'in-person'">
+                    </v-row>
+                    <v-col cols="6" v-if="current_modality.code == 'asynchronous'">
                         <DefaultAutocomplete
                             dense
                             label="Requisito"
@@ -196,7 +193,7 @@
                             </template>
                         </DefaultAutocomplete>
                     </v-col>
-                    <v-col cols="3" v-if="!resource.can_create_certificate_dc3_dc4">
+                    <v-col cols="3" v-if="!resource.can_create_certificate_dc3_dc4 && current_modality.code == 'asynchronous'">
                         <DefaultAutocomplete
                             dense
                             label="Duración (hrs.)"
@@ -207,7 +204,7 @@
                             placeholder="Ej. 2:00"
                         />
                     </v-col>
-                    <v-col :cols="resource.can_create_certificate_dc3_dc4 ? '6' : '3'">
+                    <v-col :cols="resource.can_create_certificate_dc3_dc4 ? '6' : '3'" v-if="current_modality.code == 'asynchronous'">
                         <DefaultInput
                             numbersOnly
                             dense
@@ -221,393 +218,361 @@
                     <v-col cols="12">
                         <DefaultModalSectionExpand
                             title="Configuración avanzada"
-                            subtitle=" Configuración general de evaluación"
                             :expand="sections.shosSectionAdvancedconfiguration"
+                            :simple="true"
                         >
                             <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="6">
+                                <DefaultSimpleSection v-if="has_DC3_functionality" title="DC3-DC4">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="12">
+                                                <DefaultToggle
+                                                    active-label="Creación de formulario DC3-DC4"
+                                                    inactive-label="Creación de formulario DC3-DC4"
+                                                    v-model="resource.can_create_certificate_dc3_dc4"
+                                                    dense
+                                                />
+                                                <div>
+                                                    Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
+                                                </div>
+                                            </v-col>
+                                            <v-row v-if="resource.can_create_certificate_dc3_dc4">
+                                                <v-col cols="4">
+                                                    <DefaultAutocomplete
+                                                        placeholder=""
+                                                        dense
+                                                        label="Catálogo de área"
+                                                        v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
+                                                        :items="catalog_denominations"
+                                                        item-text="name"
+                                                        clearable
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="4">
+                                                    <DefaultInputDate
+                                                        clearable
+                                                        dense
+                                                        range
+                                                        :referenceComponent="'modalDateFilter3'"
+                                                        :options="modalDateFilter3"
+                                                        v-model="resource.dc3_configuration.date_range"
+                                                        label="Periodo de ejecución"
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="4">
+                                                    <DefaultAutocomplete
+                                                        dense
+                                                        label="Duración (hrs.)"
+                                                        v-model="resource.duration"
+                                                        :items="selects.duration"
+                                                        item-text="name"
+                                                        item-value="id"
+                                                        placeholder="Ej. 2:00"
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="9">
+                                                    <DefaultAutocomplete
+                                                        placeholder=""
+                                                        dense
+                                                        label="Instructor"
+                                                        v-model="resource.dc3_configuration.instructor"
+                                                        :items="people.instructors"
+                                                        item-text="person_attributes.name"
+                                                        clearable
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="3" class="d-flex align-items-center">
+                                                    <DefaultModalButton
+                                                        label="Agregar"
+                                                        outlined
+                                                        @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="9">
+                                                    <DefaultAutocomplete
+                                                        placeholder=""
+                                                        dense
+                                                        label="Representante Legal"
+                                                        v-model="resource.dc3_configuration.legal_representative"
+                                                        :items="people.legal_representatives"
+                                                        item-text="person_attributes.name"
+                                                        clearable
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="3" class="d-flex align-items-center">
+                                                    <DefaultModalButton
+                                                        label="Agregar"
+                                                        outlined
+                                                        @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
+                                                    />
+                                                </v-col>
+                                            </v-row>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection v-if="has_registro_capacitacion_functionality" title="Registro de capacitación">
+                                    <template slot="content">
+                                        <v-row>
+                                            <v-col cols="12">
+                                                <DefaultToggle
+                                                    v-model="resource.registro_capacitacion.active"
+                                                    :activeLabel="'Creación de registro de capacitación'"
+                                                    :inactiveLabel="'Creación de registro de capacitación'"
+                                                    dense/>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                Anexa la elaboración del registro de capacitación para tus reportes.
+                                            </v-col>
+                                        </v-row>
+                                        <v-row v-if="resource.registro_capacitacion.active">
 
-                                        <DefaultSelect
-                                            dense
-                                            :items="selects.qualification_types"
-                                            item-text="name"
-                                            return-object
-                                            show-required
-                                            v-model="resource.qualification_type"
-                                            label="Sistema de calificación"
-                                            :rules="rules.qualification_type_id"
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Nota mínima aprobatoria"
-                                            v-model="resource.nota_aprobatoria"
-                                            :rules="rules.nota_aprobatoria"
-                                            type="number"
-                                            :min="0"
-                                            :max="resource.qualification_type ? resource.qualification_type.position : 0"
-                                            show-required
-                                            dense
-                                            @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                        <DefaultInput
-                                            label="Cantidad de intentos"
-                                            v-model="resource.nro_intentos"
-                                            :rules="rules.nro_intentos"
-                                            type="number"
-                                            show-required
-                                            dense
-                                        />
-                                    </v-col>
+                                                <v-col cols="12" class="pb-1">
+                                                    <label style="font-weight: 500; font-size: 16px">
+                                                        Datos para registro
+                                                    </label>
+                                                </v-col>
 
-                                    <v-col cols="12" class="py-1">
-                                        <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
-                                    </v-col>
-                                </v-row>
-                                <div class="card_border card mt-3" style="border-radius: 4px;">
-                                    <h5 class="px-2 card-text m-2 title-card-border">
-                                        Programación de reinicios de evaluaciones
-                                    </h5>
-                                    <v-row justify="center" class="px-4">
-                                        <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                            <DefaultToggle
-                                                active-label="Automático"
-                                                inactive-label="Manual"
-                                                v-model="resource.scheduled_restarts_activado"
-                                                dense
-                                            />
-                                        </v-col>
-                                        <v-col cols="3">
-                                            <DefaultInput
-                                                label="Días"
-                                                v-model="resource.scheduled_restarts_dias"
-                                                :disabled="!resource.scheduled_restarts_activado"
-                                                type="number"
-                                                dense
-                                            />
-                                        </v-col>
-                                        <v-col cols="3">
-                                            <DefaultInput
-                                                label="Horas"
-                                                v-model="resource.scheduled_restarts_horas"
-                                                :disabled="!resource.scheduled_restarts_activado"
-                                                type="number"
-                                                dense
-                                            />
-                                        </v-col>
-                                        <v-col cols="3">
-                                            <DefaultInput
-                                                label="Minutos"
-                                                v-model="resource.scheduled_restarts_minutos"
-                                                :disabled="!resource.scheduled_restarts_activado"
-                                                type="number"
-                                                dense
-                                            />
-                                        </v-col>
-                                    </v-row>
-                                    <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
-                                        <div style="color: #FF5252" class="v-messages__wrapper">
-                                            <div class="v-messages__message">Validar hora de reinicio</div>
+                                                <v-col cols="6">
+                                                    <DefaultAutocomplete
+                                                        placeholder=""
+                                                        dense
+                                                        label="Instructor"
+                                                        v-model="resource.registro_capacitacion.trainerAndRegistrar"
+                                                        :items="registro_capacitacion_trainers"
+                                                        item-text="name"
+                                                        clearable
+                                                        :rules="rules.dc3"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="3">
+                                                    <DefaultModalButton
+                                                        label="Agregar"
+                                                        outlined
+                                                        @click="openFormModal(modalRegistroTrainerOptions, {type:'registro-trainer'}, 'create','Agregar Instructor')"
+                                                    />
+                                                </v-col>
+                                                <v-col cols="3"></v-col>
+                                                <v-col cols="12">
+                                                    <DefaultInput
+                                                        clearable
+                                                        v-model="resource.registro_capacitacion.certificateCode"
+                                                        label="Código de certificado personalizado"
+                                                        :rules="rules.certificateCode"
+                                                        dense
+                                                    />
+                                                </v-col>
+
+                                                <v-col cols="12">
+                                                    <DefaultRichText
+                                                        clearable
+                                                        v-model="resource.registro_capacitacion.syllabus"
+                                                        label="Temario para el registro"
+                                                        :rules="rules.syllabus"
+                                                        :ignoreHTMLinLengthCalculation="true"
+                                                        :height="195"
+                                                        :key="`temario-editor`"
+                                                        :loading="loading_description"
+                                                        :maxLength="3000"
+                                                        ref="descriptionRichText"
+                                                    />
+                                                </v-col>
+
+                                                <v-col cols="12">
+                                                    <DefaultTextArea
+                                                        dense
+                                                        label="Observaciones del curso"
+                                                        placeholder="Ingrese una descripción del curso"
+                                                        v-model="resource.registro_capacitacion.comment"
+                                                    />
+                                                </v-col>
+
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Configuración de evaluaciones">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="6">
+        
+                                                <DefaultSelect
+                                                    dense
+                                                    :items="selects.qualification_types"
+                                                    item-text="name"
+                                                    return-object
+                                                    show-required
+                                                    v-model="resource.qualification_type"
+                                                    label="Sistema de calificación"
+                                                    :rules="rules.qualification_type_id"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Nota mínima aprobatoria"
+                                                    v-model="resource.nota_aprobatoria"
+                                                    :rules="rules.nota_aprobatoria"
+                                                    type="number"
+                                                    :min="0"
+                                                    :max="resource.qualification_type ? resource.qualification_type.position : 0"
+                                                    show-required
+                                                    dense
+                                                    @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Cantidad de intentos"
+                                                    v-model="resource.nro_intentos"
+                                                    :rules="rules.nro_intentos"
+                                                    type="number"
+                                                    show-required
+                                                    dense
+                                                />
+                                            </v-col>
+        
+                                            <v-col cols="12" class="py-1">
+                                                <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Programación de reinicios de evaluaciones">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="3" class="d-flex justify-content-center align-items-center">
+                                                <DefaultToggle
+                                                    active-label="Automático"
+                                                    inactive-label="Manual"
+                                                    v-model="resource.scheduled_restarts_activado"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Días"
+                                                    v-model="resource.scheduled_restarts_dias"
+                                                    :disabled="!resource.scheduled_restarts_activado"
+                                                    type="number"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Horas"
+                                                    v-model="resource.scheduled_restarts_horas"
+                                                    :disabled="!resource.scheduled_restarts_activado"
+                                                    type="number"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Minutos"
+                                                    v-model="resource.scheduled_restarts_minutos"
+                                                    :disabled="!resource.scheduled_restarts_activado"
+                                                    type="number"
+                                                    dense
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                        <div class="d-flex justify-content-center mt-1" v-if="showErrorReinicios">
+                                            <div style="color: #FF5252" class="v-messages__wrapper">
+                                                <div class="v-messages__message">Validar hora de reinicio</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="card_border card mt-3" style="border-radius: 4px;">
-                                    <h5 class="px-2 card-text m-2 title-card-border">
-                                        Configuración de diplomas
-                                    </h5>
-                                    <v-row class="px-8">
-                                        <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
-                                        <DefaultDivider class="my-1"/>
-                                        <div class="row">
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Configuración de diplomas">
+                                    <template slot="content">
+                                        <v-row class="px-8">
+                                            <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
+                                            <v-col cols="12">
+                                                <DefaultDivider class="my-1"/>
+                                            </v-col>
                                             <div class="col-6">
                                                 <DefaultToggle dense
                                                 :active-label="'Mostrar diploma al usuario'"
                                                 :inactive-label="'Mostrar diploma al usuario'"
                                                 v-model="resource.show_certification_to_user" />
-
                                             </div>
                                             <div class="col-6">
-
                                                 <DefaultToggle dense
                                                 :active-label="'Habilitar aceptación de diploma al usuario'"
                                                 :inactive-label="'Habilitar aceptación de diploma al usuario'"
                                                 v-model="resource.user_confirms_certificate" />
                                             </div>
-                                        </div>
-                                    </v-row>
-                                </div>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                <v-row justify="space-around" v-if="has_DC3_functionality">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="DC3-DC4"
-                            :expand="sections.showSectionDC3DC4"
-                        >
-                            <template slot="content">
-                                <v-row justify="center">
-                                    <v-col cols="12">
-                                        <DefaultToggle
-                                            active-label="Creación de formulario DC3-DC4"
-                                            inactive-label="Creación de formulario DC3-DC4"
-                                            v-model="resource.can_create_certificate_dc3_dc4"
-                                            dense
-                                        />
-                                        <div>
-                                            Anexa la elaboración de los formularios DC3 (colaborador) y DC4(gestor)
-                                        </div>
-                                    </v-col>
-                                    <v-row v-if="resource.can_create_certificate_dc3_dc4" class="px-3">
-                                        <v-col cols="4">
-                                            <DefaultAutocomplete
-                                                placeholder=""
-                                                dense
-                                                label="Catálogo de área"
-                                                v-model="resource.dc3_configuration.catalog_denomination_dc3_id"
-                                                :items="catalog_denominations"
-                                                item-text="name"
-                                                clearable
-                                                :rules="rules.dc3"
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Programación de curso">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="4" class="d-flex justify-content-center align-items-center">
+                                                <DefaultInputDate
+                                                    clearable
+                                                    :referenceComponent="'modalDateFilter1'"
+                                                    :options="modalDateFilter1"
+                                                    v-model="resource.publish_date_1"
+                                                    label="Fecha de inicio"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="2">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora"
+                                                v-model="resource.publish_time_1"
+                                                :disabled="!resource.publish_date_1"
+                                                :rules="rules.time"
+                                                step="60"
                                             />
-                                        </v-col>
-                                        <v-col cols="4">
+                                            </v-col>
+
+                                            <v-col cols="4" class="d-flex justify-content-center align-items-center">
                                             <DefaultInputDate
                                                 clearable
+                                                :referenceComponent="'modalDateFilter1'"
+                                                :options="modalDateFilter2"
+                                                v-model="resource.publish_date_2"
+                                                label="Fecha de fin"
                                                 dense
-                                                range
-                                                :referenceComponent="'modalDateFilter3'"
-                                                :options="modalDateFilter3"
-                                                v-model="resource.dc3_configuration.date_range"
-                                                label="Periodo de ejecución"
-                                                :rules="rules.dc3"
                                             />
-                                        </v-col>
-                                        <v-col cols="4">
-                                            <DefaultAutocomplete
-                                                dense
-                                                label="Duración (hrs.)"
-                                                v-model="resource.duration"
-                                                :items="selects.duration"
-                                                item-text="name"
-                                                item-value="id"
-                                                placeholder="Ej. 2:00"
-                                                :rules="rules.dc3"
+                                            </v-col>
+
+                                            <v-col cols="2">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora"
+                                                v-model="resource.publish_time_2"
+                                                :disabled="!resource.publish_date_2"
+                                                :rules="rules.time"
+                                                step="60"
                                             />
-                                        </v-col>
-                                        <v-col cols="9">
-                                            <DefaultAutocomplete
-                                                placeholder=""
-                                                dense
-                                                label="Instructor"
-                                                v-model="resource.dc3_configuration.instructor"
-                                                :items="people.instructors"
-                                                item-text="person_attributes.name"
-                                                clearable
-                                                :rules="rules.dc3"
-                                            />
-                                        </v-col>
-                                        <v-col cols="3" class="d-flex align-items-center">
-                                            <DefaultModalButton
-                                                label="Agregar"
-                                                outlined
-                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-instructor'}, 'create','Agregar Instructor')"
-                                            />
-                                        </v-col>
-                                        <v-col cols="9">
-                                            <DefaultAutocomplete
-                                                placeholder=""
-                                                dense
-                                                label="Representante Legal"
-                                                v-model="resource.dc3_configuration.legal_representative"
-                                                :items="people.legal_representatives"
-                                                item-text="person_attributes.name"
-                                                clearable
-                                                :rules="rules.dc3"
-                                            />
-                                        </v-col>
-                                        <v-col cols="3" class="d-flex align-items-center">
-                                            <DefaultModalButton
-                                                label="Agregar"
-                                                outlined
-                                                @click="openFormModal(modalDC3PersonOptions, {type:'dc3-legal-representative'}, 'create','Representante Legal')"
-                                            />
-                                        </v-col>
-                                    </v-row>
-                                </v-row>
+                                            </v-col>
+
+                                            <v-col cols="12" class="py-1">
+                                                <p class="mb-0 p-small-instruction">** El curso pasará a estar activo de acuerdo a la fecha configurada.</p>
+                                                <p class="mb-0 p-small-instruction">** Recuerda que el curso debe estar segmentado, pertenecer a una escuela activa y contener al menos un tema activo para que este sea visible por tus usuarios cuando este se active.</p>
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
                             </template>
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-                <v-row justify="space-around">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                          title="Programación de curso"
-                          :expand="sections.showSectionSchedule"
-                        >
-                        <template slot="content">
-                            <v-row justify="center">
-
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                        <DefaultInputDate
-                                            clearable
-                                            :referenceComponent="'modalDateFilter1'"
-                                            :options="modalDateFilter1"
-                                            v-model="resource.publish_date_1"
-                                            label="Fecha de inicio"
-                                            dense
-                                        />
-                                    </v-col>
-                                    <v-col cols="3">
-                                      <DefaultInput
-                                          class="time-input"
-                                          type="time"
-                                          label="Hora"
-                                          v-model="resource.publish_time_1"
-                                          :disabled="!resource.publish_date_1"
-                                          :rules="rules.time"
-                                          step="60"
-                                      />
-                                    </v-col>
-
-                                    <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                                       <DefaultInputDate
-                                           clearable
-                                           :referenceComponent="'modalDateFilter1'"
-                                           :options="modalDateFilter2"
-                                           v-model="resource.publish_date_2"
-                                           label="Fecha de fin"
-                                           dense
-                                       />
-                                    </v-col>
-
-                                    <v-col cols="3">
-                                      <DefaultInput
-                                          class="time-input"
-                                          type="time"
-                                          label="Hora"
-                                          v-model="resource.publish_time_2"
-                                          :disabled="!resource.publish_date_2"
-                                          :rules="rules.time"
-                                          step="60"
-                                      />
-                                    </v-col>
-
-                                    <v-col cols="12" class="py-1">
-                                        <p class="mb-0 p-small-instruction">** El curso pasará a estar activo de acuerdo a la fecha configurada.</p>
-                                        <p class="mb-0 p-small-instruction">** Recuerda que el curso debe estar segmentado, pertenecer a una escuela activa y contener al menos un tema activo para que este sea visible por tus usuarios cuando este se active.</p>
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-                
-
-                <v-row
-                    v-if="has_registro_capacitacion_functionality"
-                    justify="space-around">
-                    <v-col cols="12">
-                        <DefaultModalSectionExpand
-                            title="Registro de capacitación"
-                            :expand="sections.showSectionRegistroCapacitacion"
-                        >
-                            <template slot="content">
-                                <div>
-                                    <v-row>
-                                        <v-col cols="12">
-                                            <DefaultToggle
-                                                v-model="resource.registro_capacitacion.active"
-                                                :activeLabel="'Creación de registro de capacitación'"
-                                                :inactiveLabel="'Creación de registro de capacitación'"
-                                                dense/>
-                                        </v-col>
-                                        <v-col cols="12">
-                                            Anexa la elaboración del registro de capacitación para tus reportes.
-                                        </v-col>
-                                    </v-row>
-                                    <v-row v-if="resource.registro_capacitacion.active">
-
-                                            <v-col cols="12" class="pb-1">
-                                                <label style="font-weight: 500; font-size: 16px">
-                                                    Datos para registro
-                                                </label>
-                                            </v-col>
-
-                                            <v-col cols="6">
-                                                <DefaultAutocomplete
-                                                    placeholder=""
-                                                    dense
-                                                    label="Instructor"
-                                                    v-model="resource.registro_capacitacion.trainerAndRegistrar"
-                                                    :items="registro_capacitacion_trainers"
-                                                    item-text="name"
-                                                    clearable
-                                                    :rules="rules.dc3"
-                                                />
-                                            </v-col>
-                                            <v-col cols="3">
-                                                <DefaultModalButton
-                                                    label="Agregar"
-                                                    outlined
-                                                    @click="openFormModal(modalRegistroTrainerOptions, {type:'registro-trainer'}, 'create','Agregar Instructor')"
-                                                />
-                                            </v-col>
-                                            <v-col cols="3"></v-col>
-                                            <v-col cols="12">
-                                                <DefaultInput
-                                                    clearable
-                                                    v-model="resource.registro_capacitacion.certificateCode"
-                                                    label="Código de certificado personalizado"
-                                                    :rules="rules.certificateCode"
-                                                    dense
-                                                />
-                                            </v-col>
-
-                                            <v-col cols="12">
-                                                <DefaultRichText
-                                                    clearable
-                                                    v-model="resource.registro_capacitacion.syllabus"
-                                                    label="Temario para el registro"
-                                                    :rules="rules.syllabus"
-                                                    :ignoreHTMLinLengthCalculation="true"
-                                                    :height="195"
-                                                    :key="`temario-editor`"
-                                                    :loading="loading_description"
-                                                    :maxLength="3000"
-                                                    ref="descriptionRichText"
-                                                />
-                                            </v-col>
-
-                                            <v-col cols="12">
-                                                <DefaultTextArea
-                                                    dense
-                                                    label="Observaciones del curso"
-                                                    placeholder="Ingrese una descripción del curso"
-                                                    v-model="resource.registro_capacitacion.comment"
-                                                />
-                                            </v-col>
-
-                                    </v-row>
-
-                                </div>
-                            </template>
-                        </DefaultModalSectionExpand>
-                    </v-col>
-                </v-row>
-
                 <v-row>
                     <v-col cols="2">
                         <DefaultToggle v-model="resource.active" @onChange="modalStatusEdit" dense/>
                     </v-col>
                 </v-row>
-
             </v-form>
-
             <CursoValidacionesModal
                 width="408px"
                 :ref="courseValidationModal.ref"
@@ -1340,10 +1305,5 @@ export default {
     top: 25px;
     bottom: 25px;
 }
-.title-card-border{
-	top: -17px;
-	position: absolute; 
-	background: white; 
-	font-size: 12px;
-}
+
 </style>
