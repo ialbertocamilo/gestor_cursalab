@@ -40,6 +40,7 @@ class CourseInPerson extends Model
         return Topic::with(['course:id,modality_in_person_properties'])->select('id', 'name','course_id','modality_in_person_properties')
                     ->whereIn('course_id',$assigned_courses)
                     ->whereNotNull('modality_in_person_properties')
+                    ->where('active',1)
                     ->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)
                     ->get()->map(function($topic) use ($user){
                         $format_day =  Carbon::parse($topic->modality_in_person_properties->start_date)->format('l, j \d\e F');
@@ -89,16 +90,15 @@ class CourseInPerson extends Model
     protected function listResources($course_id,$topic_id){
         $topic_status_arr = config('topics.status');
         $user = auth()->user();
-        $topic = Topic::select('id','name','course_id','assessable','type_evaluation_id')
+        $topic = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
                     ->where('course_id',$course_id)
                     ->where('id',$topic_id)
-                    ->with(['medias','course:id,mod_evaluaciones','evaluation_type:id,code'])
+                    ->with([
+                        'medias:id,topic_id,title,value,type_id,embed,downloadable,position,created_at,updated_at,deleted_at',
+                        'evaluation_type:id,code'
+                    ])
                     ->first();
-        $statuses_topic = Taxonomy::where('type', 'user-status')->where('group', 'topic')->where('type', 'user-status')
-                        ->whereIn('code', ['aprobado', 'realizado', 'revisado'])->get()
-                            ->pluck('id')->toArray();
         $summary_topic =  SummaryTopic::where('topic_id',$topic_id)->where('user_id',$user->id)->first();
-        $max_attempts = $topic->course->mod_evaluaciones['nro_intentos'];
         $media_topics = $topic->medias;
 
         $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
@@ -138,9 +138,13 @@ class CourseInPerson extends Model
                                     'last_media_access' => $last_media_access,
                                     'last_media_duration' => $last_media_duration);
 
-
-        $topic_status = $topic->getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
-        
+        $is_host = $user->id == $topic->modality_in_person_properties->host_id;
+        $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
+        if(!$avaiable_to_show_resources){
+            $current_time = Carbon::now();
+            $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+            $avaiable_to_show_resources = $current_time>=$datetime;
+        }
         $topics_data = [
             'id' => $topic->id,
             'nombre' => $topic->name,
@@ -149,19 +153,72 @@ class CourseInPerson extends Model
             'media' => $media_embed,
             'media_not_embed' => $media_not_embed,
             'media_topic_progress'=>$media_topic_progress,
-            'evaluable' => $topic->assessable ? 'si' : 'no',
-            'tipo_ev' => $topic->evaluation_type->code ?? NULL,
-            'nota' => $topic_status['grade'],
-            'nota_sistema_nombre' => $topic_status['system_grade_name'] ?? NULL,
-            'nota_sistema_valor' => $topic_status['system_grade_value'] ?? NULL,
-            'disponible' => $topic_status['available'],
-            'intentos_restantes' => $topic_status['remaining_attempts'],
-            'estado_tema' => $topic_status['status'],
-            //                    'estado_tema_str' => $topic_status['status'],
-            'estado_tema_str' => $topic_status_arr[$topic_status['status']],
-            'mod_evaluaciones' => $topic->course->getModEvaluacionesConverted($topic),
-            'review_all_duration_media' => boolval($topic->review_all_duration_media)
+            'review_all_duration_media' => boolval($topic->review_all_duration_media),
+            'avaiable_to_show_resources'=> $avaiable_to_show_resources,
+            'is_host' => $is_host
         ];
         return $topics_data;
+    }
+
+    protected function startEvaluation($data){
+        $topic = Topic::select('id','modality_in_person_properties')->where('id',$data['topic_id'])->first();
+        $action = $data['action'];
+        $time = $data['time'];
+        $message = '';
+        $now = Carbon::now();
+        switch ($action) {
+            case 'start':
+                $time_evaluation = Carbon::createFromFormat('H:i', $time);
+                $minutes_duration = $time_evaluation->hour * 60 + $time_evaluation->minute;
+                $finish_evaluation = $now->copy()->addMinutes($minutes_duration);
+
+                // Obtener y decodificar las propiedades del tema
+                $modality_in_person_properties = $topic->modality_in_person_properties;
+                
+                // Inicializar el campo evaluation si no existe
+                if (!isset($modality_in_person_properties->evaluation)) {
+                    $modality_in_person_properties->evaluation = [];
+                }else{
+                    $message = 'La evaluación ya esta iniciadalizada';
+                    break;
+                }
+                // Actualizar las propiedades de evaluación
+                $modality_in_person_properties->evaluation['date_init'] = $now->format('Y-m-d H:i');
+                $modality_in_person_properties->evaluation['date_finish'] = $finish_evaluation->format('Y-m-d H:i');
+                $modality_in_person_properties->evaluation['duration_in_minutes'] = $minutes_duration;
+                $modality_in_person_properties->evaluation['time'] = $time;
+                $modality_in_person_properties->evaluation['status'] = 'started';
+                $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
+                // Codificar nuevamente y guardar las propiedades actualizadas
+                $topic->modality_in_person_properties = $modality_in_person_properties;
+                $topic->save();
+                $message = 'Se inicio la evaluación';
+            break;
+            case 'start-before-finished-time':
+                $topic->modality_in_person_properties->evaluation['status'] = 'extra-time';
+                $topic->save();
+                $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
+                $message = 'Se activo manualmente la evaluación';
+            break;
+            case 'finish-early':
+                $topic->modality_in_person_properties->evaluation['status'] = 'finished';
+                $topic->save();
+                $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
+                $message = 'Se activo manualmente la evaluación';
+            break;
+            case 'finish-in-time':
+                $topic->modality_in_person_properties->evaluation['status'] = 'finished';
+                $topic->save();
+                $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>'finish-in-time'];
+                $message = 'Se activo manualmente la evaluación';
+            break;
+            case 'finish-manually':
+                $modality_in_person_properties->evaluation['status'] = 'finished';
+                $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
+                $topic->save();
+                $message = 'Se terminó manualmente la evaluación';
+            break;
+        }
+        return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
     }
 }

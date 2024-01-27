@@ -487,8 +487,8 @@ class CursosController extends Controller
             });
 
         $schools = [];
-
-        return $this->success(compact('modules', 'schools'));
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code')->get();
+        return $this->success(compact('modules', 'schools','modalities'));
     }
 
     public function getEncuestaSegmentation(Course $course)

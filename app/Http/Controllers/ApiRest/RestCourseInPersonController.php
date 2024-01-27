@@ -37,4 +37,13 @@ class RestCourseInPersonController extends Controller
         $resources = CourseInPerson::listResources($course_id,$topic_id);
         return $this->success(['resources'=>$resources]);
     }
+
+    public function startEvaluation(Request $request){
+        $data = $request->all();
+        if(!isset($data['topic_id'])){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $result = CourseInPerson::startEvaluation($data);
+        return $this->success(['result'=>$result]);
+    }
 }

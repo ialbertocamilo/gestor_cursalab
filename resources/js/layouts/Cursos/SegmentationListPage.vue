@@ -36,7 +36,7 @@
 
                 <DefaultModalButton
                     :label="'Crear curso'"
-                    @click="openFormModal(modalCourseOptions, null, 'create')"
+                    @click="openFormModal(modalCourseModality, null, null,'Selecciona qué modalidad de curso deseas crear')"
                 />
 
             </v-card-title>
@@ -226,6 +226,15 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+            <course-Modality-modal
+                :ref="modalCourseModality.ref"
+                v-model="modalCourseModality.open"
+                :options="modalCourseModality"
+                width="900px"
+                @onConfirm="openCourseModal"
+                @onCancel="modalCourseModality.open = false"
+                :modalities="selects.modalities"
+            />
         </v-card>
     </section>
 </template>
@@ -241,6 +250,7 @@ import CompatibilityFormModal from "./CompatibilityFormModal";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
+import CourseModalityModal from "./CourseModalityModal";
 
 export default {
     components: {
@@ -254,7 +264,8 @@ export default {
         CompatibilityFormModal,
         CourseFormModal,
         LogsModal,
-        PreviewMediaTopicsModal
+        PreviewMediaTopicsModal,
+        CourseModalityModal
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -424,6 +435,7 @@ export default {
                     {id: 1, name: 'Activos'},
                     {id: 2, name: 'Inactivos'},
                 ],
+                modalities:[],
             },
             filters: {
                 q: '',
@@ -478,6 +490,17 @@ export default {
                 resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create'
+            },
+            modalCourseModality:{
+                open:false,
+                ref: 'CourseTypeModal',
+                open: false,
+                base_endpoint: '/course',
+                confirmLabel: 'Guardar',
+                resource: 'course',
+                title: 'Selecciona qué modalidad de curso deseas crear',
+                action: null,
+                persistent: true,
             },
             courseUpdateStatusModal: {
                 ref: 'CourseUpdateStatusModal',
@@ -594,7 +617,7 @@ export default {
                 .then(({data}) => {
                     vue.selects.schools = data.data.schools;
                     vue.selects.modules = data.data.modules;
-
+                    vue.selects.modalities = data.data.modalities;
                     // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
         },
@@ -715,6 +738,12 @@ export default {
 
             // const win = window.open(course.edit_route, '_blank');
             // win.focus();
+        },
+        openCourseModal(modality){
+            let vue = this;
+            vue.closeFormModal(vue.modalCourseModality);
+            vue.modalCourseOptions.modality = modality;
+            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso ('+ modality.name.toLowerCase()+')');
         }
     }
 
