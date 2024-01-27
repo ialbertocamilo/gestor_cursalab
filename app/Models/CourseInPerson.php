@@ -192,31 +192,31 @@ class CourseInPerson extends Model
                 // Codificar nuevamente y guardar las propiedades actualizadas
                 $topic->modality_in_person_properties = $modality_in_person_properties;
                 $topic->save();
-                $message = 'Se inicio la evaluación';
+                $message = 'Se inició la evaluación.';
             break;
             case 'start-before-finished-time':
                 $topic->modality_in_person_properties->evaluation['status'] = 'extra-time';
                 $topic->save();
                 $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
-                $message = 'Se activo manualmente la evaluación';
+                $message = 'Se activó manualmente la evaluación.';
             break;
             case 'finish-early':
                 $topic->modality_in_person_properties->evaluation['status'] = 'finished';
                 $topic->save();
                 $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
-                $message = 'Se activo manualmente la evaluación';
+                $message = 'Se finalizó antes de terminar la evaluación.';
             break;
             case 'finish-in-time':
                 $topic->modality_in_person_properties->evaluation['status'] = 'finished';
                 $topic->save();
                 $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>'finish-in-time'];
-                $message = 'Se activo manualmente la evaluación';
+                $message = 'Se terminó a tiempo la evaluación.';
             break;
             case 'finish-manually':
                 $modality_in_person_properties->evaluation['status'] = 'finished';
                 $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
                 $topic->save();
-                $message = 'Se terminó manualmente la evaluación';
+                $message = 'Se terminó manualmente la evaluación.';
             break;
         }
         return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
