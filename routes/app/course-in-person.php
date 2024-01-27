@@ -7,5 +7,5 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     Route::get('/{course}/assigned', 'listGuestsByCourse');
     Route::get('/course/{course}/topic/{topic}', 'listResources');
 
-    Route::post('/topic/evaluation', 'startEvaluation');
+    Route::post('/topic/evaluation', 'changeStatusEvaluation');
 });

@@ -160,7 +160,7 @@ class CourseInPerson extends Model
         return $topics_data;
     }
 
-    protected function startEvaluation($data){
+    protected function changeStatusEvaluation($data){
         $topic = Topic::select('id','modality_in_person_properties')->where('id',$data['topic_id'])->first();
         $action = $data['action'];
         $time = $data['time'];

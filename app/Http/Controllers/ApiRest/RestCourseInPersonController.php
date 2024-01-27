@@ -38,12 +38,12 @@ class RestCourseInPersonController extends Controller
         return $this->success(['resources'=>$resources]);
     }
 
-    public function startEvaluation(Request $request){
+    public function changeStatusEvaluation(Request $request){
         $data = $request->all();
         if(!isset($data['topic_id'])){
             return $this->error('Es necesario el topic_id.');
         }
-        $result = CourseInPerson::startEvaluation($data);
+        $result = CourseInPerson::changeStatusEvaluation($data);
         return $this->success(['result'=>$result]);
     }
 }
