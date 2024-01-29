@@ -599,6 +599,7 @@ class WorkspaceController extends Controller
                         $course_data['external_id'] = $_course->id;
                         $course_data['name'] = $prefix . $_course->name;
                         $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                        $course_data['registro_capacitacion'] = json_encode($course_data['registro_capacitacion'] ?? []);
 
                         $course = $school->courses()->create($course_data);
 
