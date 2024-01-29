@@ -55,7 +55,7 @@ class RestCourseInPersonController extends Controller
         return $this->success(['result'=>$result]);
     }
 
-    public function takeAssistance(Resquest $request,$topic_id){
+    public function takeAssistance(Request $request,$topic_id){
         if(!isset($topic_id)){
             return $this->error('Es necesario el topic_id.');
         }

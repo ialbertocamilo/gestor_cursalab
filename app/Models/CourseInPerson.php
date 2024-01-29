@@ -76,32 +76,34 @@ class CourseInPerson extends Model
     }
 
     protected function listGuestsByCourse($course_id,$topic_id,$code){
-        $course = Course::with(['segments','segments.values'])->where('id',$course_id)->select('id')->first();
-        $filters = [
-            ['statement'=>'where','field'=>'active','operator'=>'=','value'=>1]
-        ];
-        $users_segmented = $course->usersSegmented($course->segments,'get_records',$filters,['id','name','lastname','surname','document']);
+        $topic =    Topic::select('id', 'name','course_id','modality_in_person_properties')
+                        ->where('id',$topic_id)
+                        ->with(['course.segments','course.segments.values'])
+                        ->first();
+        
+        $users_segmented = $topic->course->usersSegmented($topic->course->segments,'get_records',[],['id','name','lastname','surname','document']);
         $users = [];
         $codes = [];
+        $codes_taxonomy = Taxonomy::getDataForSelectAttrs(groupName:'course',typeName:'assistance',attributes:['id','code','name','color']);
+        $_users_with_status = TopicAssistanceUser::listUserWithAssistance($users_segmented,$topic_id,$codes_taxonomy);
         switch ($code) {
             case 'all':
-                
+                $users = $_users_with_status;
                 break;
             case 'pending':
-
-                $codes = Taxonomy::where('group','course')
-                            ->where('type','assistance')
+                $users = $_users_with_status->where('status','absent')->values()->all();
+                $codes = $codes_taxonomy
                             ->whereIn('code',['attended','late'])
-                            ->select('id','code','name','color')->get();
+                            ->values()->all();
                 break;
             case 'present':
-                $codes = Taxonomy::where('group','course')
-                            ->where('type','assistance')
-                            ->whereIn('code',['late','absent'])
-                            ->select('id','code','name','color')->get();
+                $users = $_users_with_status->where('status','<>','absent')->values()->all();
+                $codes = $codes_taxonomy
+                            ->whereIn('code',['attended','late','absent'])
+                            ->values()->all();
                 break;
         }
-        return compact('users_segmented','codes');
+        return compact('users','codes');
     }
 
     protected function listResources($course_id,$topic_id){
@@ -277,12 +279,47 @@ class CourseInPerson extends Model
         return array_values($menus);
     }
 
-    private function takeAssistance($user_ids,$data){
+    protected function takeAssistance($topic_id,$data){
         $user_ids = $data['user_ids'];
         $action = $data['action'];
-        // $topic_id = Topic::where('id',$topic_id)->select('');
-        foreach ($documents as $key => $value) {
-            # code...
+        $assistance_users = TopicAssistanceUser::assistance($topic_id,$user_ids);
+
+        $assistance = Taxonomy::select('id','name','code')
+                        ->where('group','course')
+                        ->where('type','assistance')
+                        ->where('code',$data['action'])
+                        ->first();
+
+        $users_to_create = [];
+        $users_to_update = [];
+        $now = Carbon::now()->format('Y-m-d H:i:s');
+        $historic_assistance = [
+            'status_id' => $assistance->id,
+            'status_code' => $assistance->code,
+            'date_assistance' => $now
+        ];
+        foreach ($user_ids as $user_id) {
+            $user_has_assistance = $assistance_users->where('user_id',$user_id)->first()?->toArray();
+            if($user_has_assistance && $user_has_assistance['status_id'] != $assistance->id){
+                $user_has_assistance['status_id'] = $assistance->id;
+                $user_has_assistance['date_assistance'] = $now;
+                $user_has_assistance['historic_assistance'][] = $historic_assistance;
+                $user_has_assistance['historic_assistance'] = json_encode($user_has_assistance['historic_assistance']);
+                $users_to_update[] = $user_has_assistance;
+            }
+            if(is_null($user_has_assistance)){
+                $users_to_create[] = [
+                    'user_id' => $user_id,
+                    'topic_id' => $topic_id,
+                    'status_id'=> $assistance->id,
+                    'date_assistance'=>$now,
+                    'historic_assistance' =>json_encode([$historic_assistance])
+                ];
+            }
         }
+        TopicAssistanceUser::insertUpdateMassive($users_to_create,'insert');
+        TopicAssistanceUser::insertUpdateMassive($users_to_update,'update');
+        
+        return ['message' => 'Se ha asignado la asistencia correctamente.'];
     }
 }
