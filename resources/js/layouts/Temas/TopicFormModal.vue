@@ -71,6 +71,73 @@
                         />
                     </v-col>
                 </v-row>
+                <DefaultSimpleSection title="Método de evaluación">
+                    <template slot="content">
+                        <v-row justify="center">
+                            <v-col cols="4" class="d-flex align-items-center">
+                                <DefaultToggle v-model="resource.assessable"
+                                    active-label="Sí, el tema es evaluable"
+                                    inactive-label="No, el tema no es evaluable"
+                                    @onChange="validateTipoEv"
+                                    dense
+                                />
+                                <!-- :rules="rules.assessable" -->
+                            </v-col>
+
+                            <v-col cols="4">
+                                <DefaultSelect
+                                    dense
+                                    :show-required="resource.assessable == 1"
+                                    label="Tipo de evaluación"
+                                    v-model="resource.type_evaluation_id"
+                                    :items="selects.evaluation_types"
+                                    :rules="resource.assessable == 1 ? rules.tipo_ev : []"
+                                    :disabled="resource.assessable == 0 || !resource.assessable"
+                                    @onChange="showAlertEvaluacion"
+                                />
+                            </v-col>
+
+                            <v-col cols="4">
+                                <DefaultSelect
+                                    v-show="showActiveResults"
+                                    dense
+                                    :items="selects.qualification_types"
+                                    item-text="name"
+                                    return-object
+                                    show-required
+                                    v-model="resource.qualification_type"
+                                    label="Sistema de calificación"
+                                    :rules="rules.qualification_type_id"
+                                />
+                            </v-col>
+
+                            <DefaultSection
+                                v-if="showActiveResults"
+                                title="Resultados de evaluación"
+                                class="--mt-4 col col-12 pt-0"
+                                style="background-color: #f5f5f52e;"
+                            >
+                                <template slot="content">
+                                    <v-row justify="center">
+                                        <v-col cols="2" class="d-flex justify-content-center align-items-center">
+                                            <DefaultToggle
+                                                v-model="resource.active_results" dense
+                                            />
+                                        </v-col>
+
+                                        <v-col cols="10">
+                                            <p class="mb-0 p-small-instruction">
+                                                * Al activar resultados se visualizarán las respuestas ingresadas (correctas e incorrectas) en la aplicación del usuario al realizar una evaluación.
+                                            </p>
+                                        </v-col>
+
+                                    </v-row>
+
+                                </template>
+                            </DefaultSection>
+                        </v-row>
+                    </template>
+                </DefaultSimpleSection>
                 <DefaultSimpleSection title="Ubicación" v-if="selects.course_code_modality == 'in-person'">
                     <template slot="content">
                         <v-row justify="center" class="align-items-center">
@@ -319,73 +386,6 @@
                             :simple="true"
                         >
                             <template slot="content">
-                                <DefaultSimpleSection title="Método de evaluación">
-                                    <template slot="content">
-                                        <v-row justify="center">
-                                            <v-col cols="4" class="d-flex align-items-center">
-                                                <DefaultToggle v-model="resource.assessable"
-                                                    active-label="Sí, el tema es evaluable"
-                                                    inactive-label="No, el tema no es evaluable"
-                                                    @onChange="validateTipoEv"
-                                                    dense
-                                                />
-                                                <!-- :rules="rules.assessable" -->
-                                            </v-col>
-
-                                            <v-col cols="4">
-                                                <DefaultSelect
-                                                    dense
-                                                    :show-required="resource.assessable == 1"
-                                                    label="Tipo de evaluación"
-                                                    v-model="resource.type_evaluation_id"
-                                                    :items="selects.evaluation_types"
-                                                    :rules="resource.assessable == 1 ? rules.tipo_ev : []"
-                                                    :disabled="resource.assessable == 0 || !resource.assessable"
-                                                    @onChange="showAlertEvaluacion"
-                                                />
-                                            </v-col>
-
-                                            <v-col cols="4">
-                                                <DefaultSelect
-                                                    v-show="showActiveResults"
-                                                    dense
-                                                    :items="selects.qualification_types"
-                                                    item-text="name"
-                                                    return-object
-                                                    show-required
-                                                    v-model="resource.qualification_type"
-                                                    label="Sistema de calificación"
-                                                    :rules="rules.qualification_type_id"
-                                                />
-                                            </v-col>
-
-                                            <DefaultSection
-                                                v-if="showActiveResults"
-                                                title="Resultados de evaluación"
-                                                class="--mt-4 col col-12 pt-0"
-                                                style="background-color: #f5f5f52e;"
-                                            >
-                                                <template slot="content">
-                                                    <v-row justify="center">
-                                                        <v-col cols="2" class="d-flex justify-content-center align-items-center">
-                                                            <DefaultToggle
-                                                                v-model="resource.active_results" dense
-                                                            />
-                                                        </v-col>
-
-                                                        <v-col cols="10">
-                                                            <p class="mb-0 p-small-instruction">
-                                                                * Al activar resultados se visualizarán las respuestas ingresadas (correctas e incorrectas) en la aplicación del usuario al realizar una evaluación.
-                                                            </p>
-                                                        </v-col>
-
-                                                    </v-row>
-
-                                                </template>
-                                            </DefaultSection>
-                                        </v-row>
-                                    </template>
-                                </DefaultSimpleSection>
                                 <DefaultSimpleSection title="Gestión de etiquetas" v-if="hasPermissionToUseTags">
                                     <template slot="content">
                                         <v-row>
