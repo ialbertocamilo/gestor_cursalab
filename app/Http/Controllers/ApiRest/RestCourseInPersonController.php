@@ -18,13 +18,13 @@ class RestCourseInPersonController extends Controller
         return $this->success(['sessions'=>$sessions]);
     }
 
-    public function listGuestsByCourse(Request $request,$course_id){
+    public function listGuestsByCourse(Request $request,$course_id,$topic_id){
         $code = $request->code;
         if(!$code){
             return $this->error('Es necesario el código.');
         }
-        $users = CourseInPerson::listGuestsByCourse($course_id);
-        return $this->success(['users'=>$users]);
+        $data = CourseInPerson::listGuestsByCourse($course_id,$topic_id,$code);
+        return $this->success($data);
     }
 
     public function listResources($course_id,$topic_id){
@@ -44,6 +44,14 @@ class RestCourseInPersonController extends Controller
             return $this->error('Es necesario el topic_id.');
         }
         $result = CourseInPerson::changeStatusEvaluation($data);
+        return $this->success(['result'=>$result]);
+    }
+
+    public function getListMenu($topic_id){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $result = CourseInPerson::getListMenu($topic_id);
         return $this->success(['result'=>$result]);
     }
 }

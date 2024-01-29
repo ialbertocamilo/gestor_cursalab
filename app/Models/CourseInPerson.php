@@ -75,16 +75,33 @@ class CourseInPerson extends Model
                     });
     }
 
-    protected function listGuestsByCourse($course_id){
+    protected function listGuestsByCourse($course_id,$topic_id,$code){
         $course = Course::with(['segments','segments.values'])->where('id',$course_id)->select('id')->first();
         $filters = [
             ['statement'=>'where','field'=>'active','operator'=>'=','value'=>1]
         ];
         $users_segmented = $course->usersSegmented($course->segments,'get_records',$filters,['id','name','lastname','surname','document']);
-        foreach ($users_segmented as $user) {
-            $user['status'] = 'attended';
+        $users = [];
+        $codes = [];
+        switch ($code) {
+            case 'all':
+                
+                break;
+            case 'pending':
+
+                $codes = Taxonomy::where('group','course')
+                            ->where('type','assistance')
+                            ->whereIn('code',['attended','late'])
+                            ->select('id','code','name','color')->get();
+                break;
+            case 'present':
+                $codes = Taxonomy::where('group','course')
+                            ->where('type','assistance')
+                            ->whereIn('code',['late','absent'])
+                            ->select('id','code','name','color')->get();
+                break;
         }
-        return $users_segmented;
+        return compact('users_segmented','codes');
     }
 
     protected function listResources($course_id,$topic_id){
@@ -220,5 +237,43 @@ class CourseInPerson extends Model
             break;
         }
         return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
+    }
+
+    protected function getListMenu($topic_id){
+        $user = auth()->user();
+        $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')
+                    ->with(['course:id,modality_id','course.modality:id,code'])
+                    ->where('id',$topic_id)
+                    ->first();
+
+        $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
+        $menus = config('course-in-person.'.$rol);
+        if(!$topic->poll_id){
+            $menus = $this->modifyMenus($menus,'poll');
+        }
+        if(!$topic->type_evaluation_id){
+            $menus = $this->modifyMenus($menus,'evaluation');
+        }
+        if($rol == 'host' && $topic->course->modality->code == 'take-assistance'){
+            $menus = $this->modifyMenus($menus,'evaluation');
+        }
+        return $menus;
+    }
+
+    private function modifyMenus($menus,$code,$action='change_status'){
+        $pollIndex = array_search($code, array_column($menus, 'code'));
+        if ($pollIndex !== false) {
+            switch ($action) {
+                case 'change_status':
+                    $menus[$pollIndex]['show'] = false;
+                    break;
+                case 'unset':
+                    unset($menus[$pollIndex]);
+                    break;
+                default:
+                    throw new InvalidArgumentException('Acción no válida especificada');
+            }
+        }
+        return array_values($menus);
     }
 }
