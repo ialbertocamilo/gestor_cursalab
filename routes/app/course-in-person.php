@@ -9,4 +9,5 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     
     Route::get('/course/{course}/topic/{topic}/assigned', 'listGuestsByCourse');  // HOST
     Route::post('/topic/evaluation', 'changeStatusEvaluation'); // HOST
+    Route::post('/topic/{topic}/take-assistance', 'takeAssistance'); // HOST
 });

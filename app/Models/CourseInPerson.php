@@ -276,4 +276,13 @@ class CourseInPerson extends Model
         }
         return array_values($menus);
     }
+
+    private function takeAssistance($user_ids,$data){
+        $user_ids = $data['user_ids'];
+        $action = $data['action'];
+        // $topic_id = Topic::where('id',$topic_id)->select('');
+        foreach ($documents as $key => $value) {
+            # code...
+        }
+    }
 }

@@ -54,4 +54,19 @@ class RestCourseInPersonController extends Controller
         $result = CourseInPerson::getListMenu($topic_id);
         return $this->success(['result'=>$result]);
     }
+
+    public function takeAssistance(Resquest $request,$topic_id){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $data = $request->all();
+        if(!isset($data['user_ids']) || count($data['user_ids']) == 0){
+            return $this->error('Es necesario los documentos.');
+        }
+        if(!isset($data['action'])){
+            return $this->error('Es necesario la acción.');
+        }
+        $result = CourseInPerson::takeAssistance($topic_id,$data);
+        return $this->success(['result'=>$result]);
+    }
 }

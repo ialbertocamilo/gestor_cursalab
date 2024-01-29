@@ -30,7 +30,7 @@ return [
     'user' =>[
         [
             'title'=>'Material del curso',
-            'code'=>'Descarga archivos complementarios de tu evento.',
+            'code'=>'multimedias',
             'description'=> 'Descarga archivos complementarios de tu evento.',
             'show'=>true
         ],
@@ -48,7 +48,7 @@ return [
         ],
         [
             'title'=>'Certificado',
-            'code'=>'poll',
+            'code'=>'certificate',
             'description'=> 'Descargalo y compartelo en tus redes.',
             'show'=>true
         ],
