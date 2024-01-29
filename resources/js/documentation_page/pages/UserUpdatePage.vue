@@ -44,10 +44,8 @@ export default {
                 "document": text,
                 "criterions": {
                     "module":text,
-                    "email_type":text,
-                    "national_identifier_number_manager":text,
-                    "nombre_de_jefe":text,
-                    "posicion_jefe":text,
+                    "gender":text,
+                    "area":text,
                 }
             }
         ]
