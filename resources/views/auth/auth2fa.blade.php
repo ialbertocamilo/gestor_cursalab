@@ -74,6 +74,7 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
+
         <img src="img/poweredByCursalab_v2.png" alt="..." class="img-fluid" width="120">
       </a>
     </div>
