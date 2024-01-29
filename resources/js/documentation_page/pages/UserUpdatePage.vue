@@ -14,6 +14,19 @@
 <script>
 import descriptionApi from '../components/description_api.vue';
 let base_url = window.location.origin;
+const is_inretail =  base_url.includes('inretail');
+const criterions = is_inretail ?
+`
+                    "module":text,
+                    "email_type":text,
+                    "national_identifier_number_manager":text,
+                    "nombre_de_jefe":text,
+                    "posicion_jefe":text,`
+: 
+`
+                    "module":text,
+                    "gender":text,
+                    "area":text` 
 export default {
     components: {descriptionApi},
     data() {
@@ -42,12 +55,7 @@ export default {
         "users": [
             {
                 "document": text,
-                "criterions": {
-                    "module":text,
-                    "email_type":text,
-                    "national_identifier_number_manager":text,
-                    "nombre_de_jefe":text,
-                    "posicion_jefe":text,
+                "criterions": {${criterions}
                 }
             }
         ]
@@ -94,18 +102,12 @@ let axios = require('axios');
 let data = JSON.stringify({
     "users":
         [
-                    {
-            "document": text,
-            "email": text,
-            "criterions": {
-                "module":text,
-                "email_type":text,
-                "national_identifier_number_manager":text,
-                "nombre_de_jefe":text,
-                "posicion_jefe":text,
+            {
+                "document": text,
+                "email": text,
+                "criterions": {${criterions}
+                }
             }
-            
-        }
         ]
     }
 );
