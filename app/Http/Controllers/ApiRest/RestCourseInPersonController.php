@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ApiRest;
 
+use App\Models\Meeting;
 use Illuminate\Http\Request;
 use App\Models\CourseInPerson;
 use App\Http\Controllers\Controller;
@@ -9,13 +10,14 @@ use App\Http\Controllers\Controller;
 class RestCourseInPersonController extends Controller
 {
     public function listCoursesByUser(Request $request){
-        $code = $request->code;
-        if(!$code){
+        if(!$request->code){
             return $this->error('Es necesario el código.');
         }
         $user = auth()->user();
-        $sessions = CourseInPerson::listCoursesByUser($user,$code);
-        return $this->success(['sessions'=>$sessions]);
+        $request->user = $user;
+        $sessions_in_person = CourseInPerson::listCoursesByUser($request);
+        $sessions_live = Meeting::getListMeetingsByUser($request);
+        return $this->success(compact('sessions_in_person','sessions_live'));
     }
 
     public function listGuestsByCourse(Request $request,$course_id,$topic_id){

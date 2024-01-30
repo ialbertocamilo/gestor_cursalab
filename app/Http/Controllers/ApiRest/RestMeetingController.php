@@ -35,46 +35,7 @@ class RestMeetingController extends Controller
 
     public function listUserMeetings(Request $request)
     {
-        $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
-        $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
-        $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
-        $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
-        $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
-
-        $subworkspace = auth()->user()->subworkspace;
-
-        $request->merge(['usuario_id' => auth()->user()->id, 'workspace_id' => $subworkspace->parent_id]);
-
-        if ($request->code) {
-            if ($request->code == 'today')
-                $request->merge([
-                    'statuses' => [$scheduled->id, $started->id],
-                    'date' => Carbon::today(),
-                ]);
-
-            if ($request->code == 'scheduled')
-                $request->merge([
-                    'statuses' => [$scheduled->id],
-                    'date_start' => Carbon::tomorrow(),
-                ]);
-
-            if ($request->code == 'finished')
-                $request->merge([
-                    'statuses' => [$finished->id, $overdue->id, $cancelled->id],
-                    'sortDesc' => 'true',
-                ]);
-        }
-
-        $meetings = Meeting::search($request);
-        MeetingAppResource::collection($meetings);
-
-        // info(__function__);
-
-        $result = json_decode($meetings->toJson(), true);
-        $result['data'] = collect($result['data'])->groupBy('key')->all();
-
-        if (count($result['data']) === 0) $result['data'] = new stdClass();
-
+        $result = Meeting::getListMeetingsByUser($request);
         return $this->successApp($result);
     }
 
