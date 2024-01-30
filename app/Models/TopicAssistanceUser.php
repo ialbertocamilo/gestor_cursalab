@@ -44,13 +44,14 @@ class TopicAssistanceUser extends BaseModel
         $assistance_users = self::assistance($topic_id,$users->pluck('id'));
         return $users->map(function($user) use ($codes_taxonomy,$assistance_users){
             $user_has_assistance = $assistance_users->where('user_id',$user->id)->first();
-            $status = 'absent';
+            $status = null;
             if($user_has_assistance){
                 $status = $codes_taxonomy->where('id',$user_has_assistance->status_id)->first()?->code;
             }
             return [
                 'id' => $user->id,
                 'name' => $user->name,
+                'document' => $user->document,
                 'lastname' => $user->lastname,
                 'surname' => $user->surname,
                 'status' => $status
