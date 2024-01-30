@@ -262,22 +262,7 @@ class CourseInPerson extends Model
         return $menus;
     }
 
-    private function modifyMenus($menus,$code,$action='change_status'){
-        $pollIndex = array_search($code, array_column($menus, 'code'));
-        if ($pollIndex !== false) {
-            switch ($action) {
-                case 'change_status':
-                    $menus[$pollIndex]['show'] = false;
-                    break;
-                case 'unset':
-                    unset($menus[$pollIndex]);
-                    break;
-                default:
-                    throw new InvalidArgumentException('Acción no válida especificada');
-            }
-        }
-        return array_values($menus);
-    }
+    
 
     protected function takeAssistance($topic_id,$data){
         $user_ids = $data['user_ids'];
@@ -321,5 +306,22 @@ class CourseInPerson extends Model
         TopicAssistanceUser::insertUpdateMassive($users_to_update,'update');
         
         return ['message' => 'Se ha asignado la asistencia correctamente.'];
+    }
+
+    private function modifyMenus($menus,$code,$action='change_status'){
+        $pollIndex = array_search($code, array_column($menus, 'code'));
+        if ($pollIndex !== false) {
+            switch ($action) {
+                case 'change_status':
+                    $menus[$pollIndex]['show'] = false;
+                    break;
+                case 'unset':
+                    unset($menus[$pollIndex]);
+                    break;
+                default:
+                    throw new InvalidArgumentException('Acción no válida especificada');
+            }
+        }
+        return array_values($menus);
     }
 }
