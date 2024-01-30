@@ -605,6 +605,7 @@ class Course extends BaseModel
 
             foreach ($courses as $course) {
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
+                $modality = $modalities->where('id',$course->modality_id)->first();
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
@@ -707,6 +708,7 @@ class Course extends BaseModel
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -717,6 +719,7 @@ class Course extends BaseModel
                 if ($course_status['status'] != 'completado' && $course_status['status'] != 'bloqueado') {
                     $last_school_courses[] = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -760,7 +763,6 @@ class Course extends BaseModel
                 }
                 else
                 {
-                    $modality = $modalities->where('id',$course->modality_id)->first();
                     $school_courses[] = [
                         'id' => $course->id,
                         'modality_code' => $modality?->code,
