@@ -17,7 +17,8 @@ class RestCourseInPersonController extends Controller
         $request->user = $user;
         $sessions_in_person = CourseInPerson::listCoursesByUser($request);
         $sessions_live = Meeting::getListMeetingsByUser($request);
-        return $this->success(compact('sessions_in_person','sessions_live'));
+        $sessions_course_live  = [];
+        return $this->success(compact('sessions_in_person','sessions_live','sessions_course_live'));
     }
 
     public function listGuestsByCourse(Request $request,$course_id,$topic_id){
