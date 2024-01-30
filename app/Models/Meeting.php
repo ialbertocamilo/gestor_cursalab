@@ -710,6 +710,7 @@ class Meeting extends BaseModel
         }
         // info(__function__);
         $result = json_decode($meetings->toJson(), true);
+        dd($result);
         $result['data'] = collect($result['data'])->groupBy('key')->all();
         if (count($result['data']) === 0) $result['data'] = new stdClass();
         return $result;
