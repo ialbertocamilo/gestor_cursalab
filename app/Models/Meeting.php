@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use stdClass;
 // use function foo\func;
+use Carbon\Carbon;
 use App\Services\ZoomService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\MeetingAppResource;
