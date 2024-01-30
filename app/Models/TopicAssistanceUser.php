@@ -51,11 +51,19 @@ class TopicAssistanceUser extends BaseModel
             return [
                 'id' => $user->id,
                 'name' => $user->name,
-                'document' => $user->document,
+                'document' => $this->maskDocument($user->document),
                 'lastname' => $user->lastname,
                 'surname' => $user->surname,
                 'status' => $status
             ];
         });
+    }
+
+    private function maskDocument($document){
+        $document = $document;
+        $len_document = strlen($document);
+        $asterisks = str_repeat('*', $len_document - 3); 
+        $last_3_digits = substr($document, -3);
+        return $asterisks . $last_3_digits;
     }
 }
