@@ -52,5 +52,23 @@ return [
             'description'=> 'Descargalo y compartelo en tus redes.',
             'show'=>true
         ],
+    ],
+    'filters'=>[
+        [
+            'title'=>'Todos',
+            'code'=>'all',
+        ],
+        [
+            'title'=>'Sesiones live',
+            'code'=>'live',
+        ],
+        [
+            'title'=>'Cursos presenciales',
+            'code'=>'in-person',
+        ],
+        [
+            'title'=>'Cursos online',
+            'code'=>'online',
+        ]
     ]
 ];

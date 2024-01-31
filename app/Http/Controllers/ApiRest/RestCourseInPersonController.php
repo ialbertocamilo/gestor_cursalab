@@ -13,12 +13,8 @@ class RestCourseInPersonController extends Controller
         if(!$request->code){
             return $this->error('Es necesario el código.');
         }
-        $user = auth()->user();
-        $request->user = $user;
-        $sessions_in_person = CourseInPerson::listCoursesByUser($request);
-        $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
-        $sessions_course_live  = [];
-        return $this->success(compact('sessions_in_person','sessions_live','sessions_course_live'));
+        $data = CourseInPerson::listCoursesByUser($request);
+        return $this->success($data);
     }
 
     public function getData(Request $request){

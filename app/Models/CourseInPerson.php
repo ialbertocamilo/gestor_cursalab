@@ -17,6 +17,36 @@ class CourseInPerson extends Model
     use HasFactory;
 
     protected function listCoursesByUser($request){
+        $user = auth()->user();
+        $request->user = $user;
+        $type = $request->type;
+        $sessions_in_person = [];
+        $sessions_live = [];
+        $sessions_course_live = [];
+        if ($type) {
+            switch ($type) {
+                case 'in-person':
+                    $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+                    break;
+                case 'live':
+                    $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
+                    break;
+                case 'online':
+                    break;
+                case 'all':
+                    $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+                    $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
+                    $sessions_course_live  = [];
+                    break;
+            }
+        }else{
+            $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+            $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
+            $sessions_course_live  = [];
+        }
+        return compact('sessions_in_person','sessions_live','sessions_course_live');
+    }
+    protected function listCoursesInPerson($request){
         $code = $request->code;
         $user = $request->user;
         
@@ -90,6 +120,7 @@ class CourseInPerson extends Model
                 'value' => now(),
             ],
             'recommendations' => config('meetings.recommendations'),
+            'filters'=> config('course-in-person.filters')
         ];
         return $data;
     }
