@@ -44,7 +44,7 @@ class CourseInPerson extends Model
             $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
             $sessions_course_live  = [];
         }
-        return compact('sessions_in_person','sessions_live','sessions_course_live');
+        return compact('type','sessions_in_person','sessions_live','sessions_course_live');
     }
     protected function listCoursesInPerson($request){
         $code = $request->code;
