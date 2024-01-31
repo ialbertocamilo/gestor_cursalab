@@ -41,57 +41,7 @@ class RestMeetingController extends Controller
 
     public function getData(Request $request)
     {
-        $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
-        $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
-        $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
-        $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
-        $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
-
-        $subworkspace = auth()->user()->subworkspace;
-        $request->merge(['workspace_id' => $subworkspace->parent_id]);
-
-        $filters_today = new Request([
-            'usuario_id' => auth()->user()->id,
-            'statuses' => [$scheduled->id, $started->id],
-            'date' => Carbon::today(),
-        ]);
-
-        $filters_scheduled = new Request([
-            'usuario_id' => auth()->user()->id,
-            'statuses' => [$scheduled->id],
-            'date_start' => Carbon::tomorrow(),
-        ]);
-
-        $filters_finished = new Request([
-            'usuario_id' => auth()->user()->id,
-            'statuses' => [$finished->id, $overdue->id, $cancelled->id],
-        ]);
-
-        $data = [
-            'today' => [
-                'code' => 'today',
-                'title' => 'Hoy',
-                'total' => Meeting::search($filters_today, 'count'),
-            ],
-            'scheduled' => [
-                'code' => 'scheduled',
-                'title' => 'Próximas',
-                'total' => Meeting::search($filters_scheduled, 'count'),
-            ],
-            'finished' => [
-                'code' => 'finished',
-                'title' => 'Historial',
-                'total' => Meeting::search($filters_finished, 'count'),
-            ],
-
-            'current_server_time' => [
-                'timestamp' => (int) (now()->timestamp . '000'),
-                'value' => now(),
-            ],
-
-            'recommendations' => config('meetings.recommendations'),
-        ];
-
+        $data = Meeting::getAppData();
         return $this->success($data);
     }
 

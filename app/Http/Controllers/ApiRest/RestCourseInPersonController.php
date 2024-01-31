@@ -21,6 +21,11 @@ class RestCourseInPersonController extends Controller
         return $this->success(compact('sessions_in_person','sessions_live','sessions_course_live'));
     }
 
+    public function getData(Request $request){
+        $result = CourseInPerson::getData($request);
+        return $this->success(['result'=>$result]);
+    }
+
     public function listGuestsByCourse(Request $request,$course_id,$topic_id){
         $code = $request->code;
         if(!$code){

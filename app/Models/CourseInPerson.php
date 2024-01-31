@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\TopicInPersonAppResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Http\Request;
 
 class CourseInPerson extends Model
 {
@@ -42,7 +43,11 @@ class CourseInPerson extends Model
         }
         $months = config('data.months');
         $days = config('data.days');
-        $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen'])->select('id', 'name','course_id','modality_in_person_properties')
+        $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen'])
+                    ->whereHas('course',function($q){
+                        $q->where('active',1);
+                    })
+                    ->select('id', 'name','course_id','modality_in_person_properties')
                     ->whereIn('course_id',$assigned_courses)
                     ->whereNotNull('modality_in_person_properties')
                     ->where('active',1)
@@ -59,6 +64,37 @@ class CourseInPerson extends Model
 
     }
 
+    protected function getData($request){
+        $user = auth()->user();
+        $sessions_live = $this->getCountLiveSession($user,$request);
+        $sessions_in_person = $this->getCountCourseInPerson($user);
+        $data = [
+            'today' => [
+                'code' => 'today',
+                'title' => 'Hoy',
+                'total' => $sessions_live['count_today'] + $sessions_in_person['count_today'],
+            ],
+            'scheduled' => [
+                'code' => 'scheduled',
+                'title' => 'Próximas',
+                'total' => $sessions_live['count_scheduled'] + $sessions_in_person['count_scheduled'],
+            ],
+            'finished' => [
+                'code' => 'finished',
+                'title' => 'Historial',
+                'total' => $sessions_live['count_finished'] + $sessions_in_person['count_finished'],
+            ],
+
+            'current_server_time' => [
+                'timestamp' => (int) (now()->timestamp . '000'),
+                'value' => now(),
+            ],
+            'recommendations' => config('meetings.recommendations'),
+        ];
+        return $data;
+    }
+
+   
     protected function listGuestsByCourse($course_id,$topic_id,$code){
         $topic =    Topic::select('id', 'name','course_id','modality_in_person_properties')
                         ->where('id',$topic_id)
@@ -385,5 +421,56 @@ class CourseInPerson extends Model
             }
         }
         return array_values($menus);
+    }
+
+    private function getCountLiveSession($user,$request){
+        $subworkspace = $user->subworkspace;
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+        $status_meeting = Taxonomy::getDataForSelectAttrs(groupName:'meeting',typeName:'status',attributes:['id','code','name','color']);
+        $scheduled = $status_meeting->where('code','scheduled')->first();
+        $started = $status_meeting->where('code','in-progress')->first();
+        $finished = $status_meeting->where('code','finished')->first();
+        $overdue = $status_meeting->where('code','overdue')->first();
+        $cancelled = $status_meeting->where('code','cancelled')->first();
+
+        $filters_today = new Request([
+            'usuario_id' => $user->id,
+            'statuses' => [$scheduled->id, $started->id],
+            'date' => Carbon::today(),
+        ]);
+
+        $filters_scheduled = new Request([
+            'usuario_id' => $user->id,
+            'statuses' => [$scheduled->id],
+            'date_start' => Carbon::tomorrow(),
+        ]);
+
+        $filters_finished = new Request([
+            'usuario_id' => $user->id,
+            'statuses' => [$finished->id, $overdue->id, $cancelled->id],
+        ]);
+
+        return [
+            'count_today' => Meeting::search($filters_today, 'count'),
+            'count_scheduled' => Meeting::search($filters_scheduled, 'count'),
+            'count_finished' => Meeting::search($filters_finished, 'count'),
+        ];
+    }
+    private function getCountCourseInPerson($user){
+        $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:'in-person');
+        $today = Carbon::today()->format('Y-m-d');
+        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+        $query = Topic::select('id', 'name','course_id','modality_in_person_properties')
+                    ->whereHas('course',function($q){
+                        $q->where('active',1);
+                    })
+                    ->whereIn('course_id',$assigned_courses)
+                    ->whereNotNull('modality_in_person_properties')
+                    ->where('active',1);
+        return [
+            'count_today' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->count(),
+            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->count(),
+            'count_finished' =>$query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->count(),
+        ];
     }
 }
