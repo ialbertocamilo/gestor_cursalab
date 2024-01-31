@@ -67,7 +67,9 @@
 
                             <v-row justify="space-around">
                                 <v-col cols="12" class="px-8">
-                                    Selecciona los temas, cursos y escuelas que deseas copiar a otros módulos.
+                                    <span v-if="duplicate_level == 'module'">Selecciona los temas, cursos y escuelas que deseas copiar a otros módulos.</span>
+                                    <span v-if="duplicate_level == 'school'">Selecciona los temas y cursos que deseas copiar a otras escuelas.</span>
+                                    <!-- <span v-if="duplicate_level == 'course'">Selecciona los temas que deseas se dupliquen con el curso.</span> -->
                                 </v-col>
                                 <v-col cols="12" class="px-8">
 
@@ -99,7 +101,9 @@
                         <v-stepper-content step="2" class="p-0">
                            <v-row justify="space-around">
                                 <v-col cols="12" class="px-8">
-                                    Selecciona los módulos donde copiarás el contenido seleccionado.
+                                    <span v-if="duplicate_level == 'module'">Selecciona los módulos donde copiarás el contenido seleccionado.</span>
+                                    <span v-if="duplicate_level == 'school'">Selecciona las escuelas donde copiarás el contenido seleccionado.</span>
+                                    <!-- <span v-if="duplicate_level == 'course'">Selecciona los módulos donde copiarás el contenido seleccionado.</span> -->
                                 </v-col>
                                 <v-col cols="12" class="px-8">
 
@@ -188,7 +192,11 @@ export default {
             type: Object,
             required: true
         },
-        width: String
+        width: String,
+        duplicate_level: {
+            type: String,
+            default: 'module'
+        },
     },
     data() {
         return {
