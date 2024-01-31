@@ -19,12 +19,12 @@ class CourseInPerson extends Model
     protected function listCoursesByUser($request){
         $user = auth()->user();
         $request->user = $user;
-        $type = $request->type;
+        $type_session = $request->type_session;
         $sessions_in_person = [];
         $sessions_live = [];
         $sessions_course_live = [];
-        if ($type) {
-            switch ($type) {
+        if ($type_session) {
+            switch ($type_session) {
                 case 'in-person':
                     $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
                     break;
@@ -44,7 +44,7 @@ class CourseInPerson extends Model
             $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
             $sessions_course_live  = [];
         }
-        return compact('type','sessions_in_person','sessions_live','sessions_course_live');
+        return compact('sessions_in_person','sessions_live','sessions_course_live');
     }
     protected function listCoursesInPerson($request){
         $code = $request->code;
