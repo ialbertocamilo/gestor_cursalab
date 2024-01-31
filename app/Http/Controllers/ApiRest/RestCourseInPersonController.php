@@ -105,4 +105,12 @@ class RestCourseInPersonController extends Controller
         $result = CourseInPerson::startPoll($topic_id);
         return $this->success(['result'=>$result]);
     }
+
+    public function loadPoll($topic_id){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $data = CourseInPerson::loadPoll($topic_id);
+        return $this->success($data);
+    }
 }

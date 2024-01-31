@@ -8,8 +8,9 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     Route::get('/topic/{topic}/menu', 'getListMenu'); // USER AND HOST
     Route::get('/topic/{topic}/validate-resource', 'validateResource'); // USER
     Route::post('/topic/{topic}/upload-signature', 'uploadSignature'); // USER
-    Route::get('/get-data', 'getData');
-    
+    Route::get('/get-data', 'getData');// USER
+    Route::get('/topic/{topic}/load-poll-questions', 'loadPoll');
+
     Route::get('/course/{course}/topic/{topic}/assigned', 'listGuestsByCourse');  // HOST
     Route::post('/topic/evaluation', 'changeStatusEvaluation'); // HOST
     Route::post('/topic/{topic}/take-assistance', 'takeAssistance'); // HOST

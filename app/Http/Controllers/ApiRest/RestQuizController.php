@@ -126,8 +126,15 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
-
+        $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
+        $code_modality = $topic->course->modality->code;
+        if(($code_modality == 'in-person' || $code_modality=='virtual') && !$topic->isAccessibleEvaluation()){
+            return response()->json(['error' => true, 'data' => [
+                'is_accessible'=>false,
+                'message' => 'La evaluación aún no ha sido iniciada.'
+            ]], 200);
+        }
+        dd($topic->course->modality->code);
         if ($topic->course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
 

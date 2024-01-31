@@ -47,7 +47,10 @@ class Topic extends BaseModel
     {
         return $this->hasMany(Question::class);
     }
-
+    public function poll()
+    {
+        return $this->belongsTo(Poll::class,'poll_id');
+    }
     public function requirement()
     {
         return $this->belongsTo(Topic::class, 'topic_requirement_id');
@@ -1252,5 +1255,40 @@ class Topic extends BaseModel
             default:
                 return $value;
         }
+    }
+
+    public function isAccessiblePoll(){
+        $topic = $this;
+        $is_accessible = false;
+        if($topic && isset($topic->modality_in_person_properties->poll_started)){
+            $is_accessible = $topic->modality_in_person_properties->poll_started;
+        }
+        return $is_accessible;
+    }
+
+    public function isAccessibleEvaluation(){
+        $topic = $this;
+        $is_accessible = false;
+        if(isset($topic->modality_in_person_properties->evaluation->status)){
+            $evaluationStatus = $evaluationTopic->modality_in_person_properties->evaluation->status;
+            $evaluationFinishDate = $evaluationTopic->modality_in_person_properties->evaluation['date_finish'];
+
+            $is_accessible = $evaluationStatus == 'started';
+            if(Carbon::now()->format('Y-m-d H:i') > $evaluationFinishDate){
+                $is_accessible = false;
+            }
+        }
+        return $is_accessible;
+    }
+
+    public function isAccessibleMultimedia(){
+        $topic = $this;
+        $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
+        if(!$avaiable_to_show_resources){
+            $current_time = Carbon::now();
+            $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+            $avaiable_to_show_resources = $current_time>=$datetime;
+        }
+        return $avaiable_to_show_resources;
     }
 }

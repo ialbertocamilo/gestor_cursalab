@@ -249,7 +249,7 @@ class CourseInPerson extends Model
                 if (!isset($modality_in_person_properties->evaluation)) {
                     $modality_in_person_properties->evaluation = [];
                 }else{
-                    $message = 'La evaluación ya esta iniciadalizada';
+                    $message = 'La evaluación ya esta inicializada.';
                     break;
                 }
                 // Actualizar las propiedades de evaluación
@@ -390,33 +390,20 @@ class CourseInPerson extends Model
                 $resource = $assistance;
                 break;
             case 'multimedias':
-                $topic = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
+                $resource = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
                     ->where('id',$topic_id)
-                    ->first();
-                $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
-                if(!$avaiable_to_show_resources){
-                    $current_time = Carbon::now();
-                    $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
-                    $avaiable_to_show_resources = $current_time>=$datetime;
-                }
-                $resource = $avaiable_to_show_resources;
+                    ->first()?->isAccessibleMultimedia();
                 break;
             case 'evaluation':
-                $topic = Topic::select('modality_in_person_properties')
+                $resource = Topic::select('modality_in_person_properties')
                     ->where('id',$topic_id)
-                    ->first();
-                if(isset($topic->modality_in_person_properties->evaluation['status'])){
-                    $resource = $topic->modality_in_person_properties->evaluation['status'] == 'started';
-                }
+                    ->first()?->isAccessibleEvaluation();
                 break;
             case 'poll':
-                $topic = Topic::select('poll_id','modality_in_person_properties')
+                $resource =  Topic::select('poll_id','modality_in_person_properties')
                 ->where('id',$topic_id)
-                ->first();
-                if($topic && isset($topic->modality_in_person_properties->poll_started)){
-                    $resource = $topic->modality_in_person_properties->poll_started;
-                }
-                break;
+                ->first()?->isAccessiblePoll();
+            break;
         }
         $is_accessible = boolval($resource);
         return ['is_accessible'=>$is_accessible];
@@ -437,6 +424,28 @@ class CourseInPerson extends Model
         $topic->save();
         return ['message'=>'Se inició la encuesta.'];
     }
+    protected function loadPoll($topic_id){
+        $topic = Topic::select('id','poll_id','modality_in_person_properties')
+                    ->where('id',$topic_id)
+                    ->with([
+                        'poll:id,titulo,imagen,anonima',
+                        'poll.questions' => function ($q) {
+                            $q->with('type:id,code')
+                                ->where('active', ACTIVE)
+                                ->select('id', 'poll_id', 'titulo', 'type_id', 'opciones');
+                        }
+                    ])
+                    ->where('active', ACTIVE)
+                    ->first();
+
+        $is_accessible = $topic->isAccessiblePoll();
+        
+        if($is_accessible){
+            $poll = $topic->poll;
+        }
+        return ['is_accessible'=>$is_accessible,'poll'=>$topic->poll];
+    }
+    //SUBFUNCTIONS
     private function modifyMenus($menus,$code,$action='change_status'){
         $pollIndex = array_search($code, array_column($menus, 'code'));
         if ($pollIndex !== false) {
