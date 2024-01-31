@@ -34,6 +34,7 @@ class TopicInPersonAppResource extends JsonResource
         }
         return [
             'key' => $this->modality_in_person_properties->start_date,
+            'image' => get_media_url($this->course->imagen,'s3'),
             'name' => $this->name,
             'course_id' => $this->course_id,
             'topic_id' => $this->id,
