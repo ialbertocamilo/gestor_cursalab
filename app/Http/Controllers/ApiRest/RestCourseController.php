@@ -350,10 +350,12 @@ class RestCourseController extends Controller
 
         // Render template and store generated file
 
+        $fullname = "$user->name $user->lastname $user->surname";
         $filename = 'capacitacion-'.
                     $subworkspace->id . '-' .
                     $course->id .  '-' .
-                    $user->id . '-' .
+                    $user->document . '-' .
+                    Str::slug($fullname, '-') . '-' .
                     Str::random(5) . '.pdf';
         $filepath = Course::generateAndStoreRegistroCapacitacion($filename, $data);
 
