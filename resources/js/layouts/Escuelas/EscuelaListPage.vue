@@ -231,9 +231,9 @@ export default {
                         text: "Copiar cursos",
                         icon: 'mdi mdi-content-copy',
                         type: 'action',
-                        show_condition: "is_cursalab_super_user",
                         method_name: 'duplicate'
                     },
+                        // show_condition: "is_cursalab_super_user",
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
