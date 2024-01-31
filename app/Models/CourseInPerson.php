@@ -4,8 +4,10 @@ namespace App\Models;
 
 use stdClass;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\TopicInPersonAppResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -46,7 +48,9 @@ class CourseInPerson extends Model
                     ->where('active',1)
                     ->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)
                     ->get();
-
+        if(count($sessions_in_person) == 0){
+            return [];
+        }
         $sessions_in_person = TopicInPersonAppResource::collection($sessions_in_person);
         $sessions_group_by_date = json_decode($sessions_in_person->toJson(), true);
         $sessions_group_by_date = collect($sessions_group_by_date)->groupBy('key')->all();
@@ -288,6 +292,84 @@ class CourseInPerson extends Model
         return ['message' => 'Se ha asignado la asistencia correctamente.'];
     }
 
+    protected function uploadSignature($signature,$topic_id){
+        $user = auth()->user();
+        // workspace creation reference
+        $str_random = Str::random(5);
+        $name_image = $user->subworkspace_id . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+        // Ruta donde se guardará la imagen en el servidor
+        $path = 'course-in-person-signatures/'.$topic_id.'/'.$name_image;
+        Media::uploadMediaBase64(name:'', path:$path, base64:$signature,save_in_media:false,status:'private');
+        TopicAssistanceUser::updateOrCreate(
+            ['user_id'=>$user->id,'topic_id'=>$topic_id],
+            ['user_id'=>$user->id,'topic_id'=>$topic_id,'signature'=>$path]
+        );
+        $user_attended = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
+        return [
+            'message'=> 'Se ha guardado la firma.',
+            'has_assistance'=> boolval($user_attended)
+        ];
+    }
+    protected function validateResource($type,$topic_id){
+        $resource = null;
+        $user = auth()->user();
+        $assistance = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
+        //Si no tiene la asistencia en late o absent no debería acceder ni a los recursos multimedia ni a la evaluación  ni a la encuesta
+        if(!$assistance){
+            return false;          
+        }
+        switch ($type) {
+            case 'assistance':
+                $resource = $assistance;
+                break;
+            case 'multimedias':
+                $topic = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
+                    ->where('id',$topic_id)
+                    ->first();
+                $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
+                if(!$avaiable_to_show_resources){
+                    $current_time = Carbon::now();
+                    $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+                    $avaiable_to_show_resources = $current_time>=$datetime;
+                }
+                $resource = $avaiable_to_show_resources;
+                break;
+            case 'evaluation':
+                $topic = Topic::select('modality_in_person_properties')
+                    ->where('id',$topic_id)
+                    ->first();
+                if(isset($topic->modality_in_person_properties->evaluation['status'])){
+                    $resource = $topic->modality_in_person_properties->evaluation['status'] == 'started';
+                }
+                break;
+            case 'poll':
+                $topic = Topic::select('poll_id','modality_in_person_properties')
+                ->where('id',$topic_id)
+                ->first();
+                if($topic && isset($topic->modality_in_person_properties->poll_started)){
+                    $resource = $topic->modality_in_person_properties->poll_started;
+                }
+                break;
+        }
+        $is_accessible = boolval($resource);
+        return ['is_accessible'=>$is_accessible];
+    }
+    protected function startPoll($topic_id){
+        $topic = Topic::select('id','poll_id','modality_in_person_properties')
+                    ->where('id',$topic_id)
+                    ->first();
+        if(!$topic->poll_id){
+            return ['message'=>'Esta sesión no tiene una encuesta asignada'];
+        }          
+        $modality_in_person_properties = $topic->modality_in_person_properties;
+        if($topic && isset($modality_in_person_properties->poll_started)){
+            return ['message'=>'La encuesta ya ha sido iniciada.'];
+        }
+        $modality_in_person_properties->poll_started = true;
+        $topic->modality_in_person_properties = $modality_in_person_properties;
+        $topic->save();
+        return ['message'=>'Se inició la encuesta.'];
+    }
     private function modifyMenus($menus,$code,$action='change_status'){
         $pollIndex = array_search($code, array_column($menus, 'code'));
         if ($pollIndex !== false) {

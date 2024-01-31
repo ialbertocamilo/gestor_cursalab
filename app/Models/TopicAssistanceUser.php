@@ -13,13 +13,16 @@ class TopicAssistanceUser extends BaseModel
     protected $table = 'topic_assistance_user';
 
     protected $fillable = [
-        'id','topic_id','user_id','status_id','date_assistance','historic_assistance','updated_at','created_at','deleted_at'
+        'id','topic_id','user_id','status_id','date_assistance','historic_assistance','signature','updated_at','created_at','deleted_at'
     ];
 
     protected $casts = [
         'historic_assistance' => 'array',
     ];
-
+    public function status()
+    {
+        return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
     protected function insertUpdateMassive($topic_assistance_user,$type){
         $users_chunk = array_chunk($topic_assistance_user,250);
         foreach ($users_chunk as $users) {
@@ -39,7 +42,12 @@ class TopicAssistanceUser extends BaseModel
             ->whereIn('user_id',$user_ids)
             ->get();
     }
-
+    protected function userIsPresent($user_id,$topic_id){
+        return self::where('user_id',$user_id)
+                ->where('topic_id',$topic_id)
+                ->whereHas('status', fn($q) => $q->whereIn('code',['attended','late']))
+                ->first();
+    }
     protected function listUserWithAssistance($users,$topic_id,$codes_taxonomy){
         $assistance_users = self::assistance($topic_id,$users->pluck('id'));
         return $users->map(function($user) use ($codes_taxonomy,$assistance_users){

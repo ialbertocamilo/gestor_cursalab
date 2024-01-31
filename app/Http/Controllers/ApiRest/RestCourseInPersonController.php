@@ -16,7 +16,7 @@ class RestCourseInPersonController extends Controller
         $user = auth()->user();
         $request->user = $user;
         $sessions_in_person = CourseInPerson::listCoursesByUser($request);
-        $sessions_live = Meeting::getListMeetingsByUser($request);
+        $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
         $sessions_course_live  = [];
         return $this->success(compact('sessions_in_person','sessions_live','sessions_course_live'));
     }
@@ -70,6 +70,38 @@ class RestCourseInPersonController extends Controller
             return $this->error('Es necesario la acción.');
         }
         $result = CourseInPerson::takeAssistance($topic_id,$data);
+        return $this->success(['result'=>$result]);
+    }
+
+    public function uploadSignature(Request $request,$topic_id){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $signature = $request->get('signature');
+        if(!$signature){
+            return $this->error('Es necesario la firma.');
+        }
+        $result = CourseInPerson::uploadSignature($signature,$topic_id);
+        return $this->success(['result'=>$result]);
+    }
+
+    public function validateResource(Request $request,$topic_id){
+        $type = $request->type;
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        if(!$type){
+            return $this->error('Es necesario el tipo.');
+        }
+        $result = CourseInPerson::validateResource($type,$topic_id);
+        return $this->success(['result'=>$result]);
+    }
+
+    public function startPoll($topic_id){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $result = CourseInPerson::startPoll($topic_id);
         return $this->success(['result'=>$result]);
     }
 }

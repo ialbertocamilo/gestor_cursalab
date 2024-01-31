@@ -672,7 +672,7 @@ class Meeting extends BaseModel
 
         return true;
     }
-    protected function getListMeetingsByUser($request){
+    protected function getListMeetingsByUser($request,$format_response = 'data'){
         $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
         $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
         $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
@@ -710,8 +710,15 @@ class Meeting extends BaseModel
         }
         // info(__function__);
         $result = json_decode($meetings->toJson(), true);
-        $result['data'] = collect($result)->groupBy('key')->all();
-        if (count($result['data']) === 0) $result['data'] = new stdClass();
+        if($format_response == 'data'){
+            $result['data'] = collect($result)->groupBy('key')->all();
+            if (count($result['data']) === 0) $result['data'] = new stdClass();
+        }else{
+            $sessions_group_by_date = json_decode($result->toJson(), true);
+            $sessions_group_by_date = collect($sessions_group_by_date)->groupBy('key')->all();
+            if (count($sessions_group_by_date) === 0) $sessions_group_by_date = new stdClass();
+            return $sessions_group_by_date;
+        }
         return $result;
     }
     public function getDatesFormatted()
