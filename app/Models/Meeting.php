@@ -714,7 +714,7 @@ class Meeting extends BaseModel
             $result['data'] = collect($result)->groupBy('key')->all();
             if (count($result['data']) === 0) $result['data'] = new stdClass();
         }else{
-            $sessions_group_by_date = json_decode($result->toJson(), true);
+            $sessions_group_by_date = $result;
             $sessions_group_by_date = collect($sessions_group_by_date)->groupBy('key')->all();
             if (count($sessions_group_by_date) === 0) $sessions_group_by_date = new stdClass();
             return $sessions_group_by_date;
