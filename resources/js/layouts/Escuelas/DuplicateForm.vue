@@ -104,7 +104,12 @@
                                 <v-col cols="12" class="px-8">
                                     <span v-if="duplicate_level == 'module'">Selecciona los módulos donde copiarás el contenido seleccionado.</span>
                                     <span v-if="duplicate_level == 'school'">Selecciona las escuelas donde copiarás el contenido seleccionado.</span>
-                                    <!-- <span v-if="duplicate_level == 'course'">Selecciona los módulos donde copiarás el contenido seleccionado.</span> -->
+                                    <v-row justify="space-around" v-if="duplicate_level == 'course'" class="text-center">
+                                        <div class="col col-12">El contenido seleccionado será duplicado en la escuela actual.</div>
+                                        <div class="col col-12">
+                                            <img src="/svg/duplicate-content.svg" width="120" class="--my-2">
+                                        </div>
+                                    </v-row>
                                 </v-col>
                                 <v-col cols="12" class="px-8" v-if="duplicate_level != 'course'">
 
