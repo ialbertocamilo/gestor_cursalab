@@ -64,7 +64,7 @@ export default {
         comingSoon: false,
         expand: Object,
         simple:{
-            type: String,
+            type: Boolean,
             default: false
         }
     }

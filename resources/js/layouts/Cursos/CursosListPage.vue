@@ -378,7 +378,6 @@ export default {
                         type: 'action',
                         count: 'encuesta_count',
                         method_name: 'encuesta',
-                        show_condition: 'is_course_asynchronous'
                     },
                     {
                         text: "Crear Tarea",

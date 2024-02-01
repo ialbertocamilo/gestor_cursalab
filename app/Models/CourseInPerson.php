@@ -295,20 +295,28 @@ class CourseInPerson extends Model
     protected function getListMenu($topic_id){
         $user = auth()->user();
         $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')
-                    ->with(['course:id,modality_id','course.modality:id,code'])
+                    ->with(['course:id,modality_id','course.modality:id,code','course.polls:id'])
                     ->where('id',$topic_id)
                     ->first();
 
         $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
         $menus = config('course-in-person.'.$rol);
-        if(!$topic->poll_id){
-            $menus = $this->modifyMenus($menus,'poll');
+        $last_session = Topic::select('id')->where('course_id',$topic->course_id)
+                        ->where('active',ACTIVE)
+                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
+                        ->first();
+        //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->course->polls->first() || $last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'poll','unset');
         }
         if(!$topic->type_evaluation_id){
             $menus = $this->modifyMenus($menus,'evaluation');
         }
         if($rol == 'host' && $topic->course->modality->code == 'take-assistance'){
             $menus = $this->modifyMenus($menus,'evaluation');
+        }
+        if($last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'certificate','unset');
         }
         return $menus;
     }

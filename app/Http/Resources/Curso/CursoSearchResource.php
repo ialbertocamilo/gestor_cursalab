@@ -105,7 +105,6 @@ class CursoSearchResource extends JsonResource
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
             'is_super_user'=>auth()->user()->isAn('super-user'),
-            'is_course_asynchronous'=> $this->modality->code == 'asynchronous'
         ];
         if($request->hasHabilityToShowProjectButtons){
             //relation projects

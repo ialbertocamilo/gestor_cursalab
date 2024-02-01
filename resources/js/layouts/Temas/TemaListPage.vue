@@ -58,14 +58,7 @@
                         `Logs del tema - ${$event.nombre}`
                     )
                 "
-                @encuesta="
-                    openFormModal(
-                        modalCursoEncuesta,
-                        $event,
-                        'encuesta',
-                        `Encuesta del tema - ${$event.nombre}`
-                    )
-                "
+                
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
@@ -221,14 +214,14 @@ export default {
                     },
                 ],
                 more_actions: [
-                    {
-                        text: "Encuesta",
-                        icon: 'mdi mdi-poll',
-                        type: 'action',
-                        count: 'encuesta_count',
-                        method_name: 'encuesta',
-                        show_condition: 'is_poll_available'
-                    },
+                    // {
+                    //     text: "Encuesta",
+                    //     icon: 'mdi mdi-poll',
+                    //     type: 'action',
+                    //     count: 'encuesta_count',
+                    //     method_name: 'encuesta',
+                    //     show_condition: 'is_poll_available'
+                    // },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',

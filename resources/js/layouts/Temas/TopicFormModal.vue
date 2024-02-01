@@ -202,7 +202,7 @@
                             <DefaultInput
                                 class="time-input"
                                 type="time"
-                                label="Hora"
+                                label="Hora de inicio"
                                 dense
                                 v-model="resource.modality_in_person_properties.start_time"
                                 :disabled="!resource.modality_in_person_properties.start_date"
@@ -228,7 +228,7 @@
                                 <DefaultInput
                                     class="time-input"
                                     type="time"
-                                    label="Hora"
+                                    label="Hora de fin"
                                     v-model="resource.modality_in_person_properties.finish_time"
                                     :disabled="!resource.modality_in_person_properties.start_time"
                                     :min="resource.modality_in_person_properties.start_time"
