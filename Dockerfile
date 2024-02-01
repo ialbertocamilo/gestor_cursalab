@@ -6,11 +6,10 @@ FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.11 as composer_ba
 
 USER composer
 
-#COPY --chown=composer . .
-COPY --chown=composer composer.json ./
+COPY --chown=composer . .
 
-#RUN composer install --no-dev --prefer-dist
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN composer install --no-dev --prefer-dist
+
 
 # -------------------------------------------------------------------------------------------------------
 # FRONTEND
