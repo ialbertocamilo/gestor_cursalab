@@ -212,7 +212,7 @@ export default {
                         modulesIds: this.selectedModules ? this.selectedModules : [],
                         schoolsIds: this.selectedSchools,
                         coursesIds: selectedCourses,
-                        format: this.format
+                        ext: this.format
                     }
                 })
 
