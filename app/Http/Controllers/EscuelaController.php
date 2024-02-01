@@ -164,9 +164,9 @@ class EscuelaController extends Controller
         $prefix = '';
         // $prefix = '[DUPLICADO] ';
 
-        foreach ($schools as $school) {
+        foreach ($schools as $school_row) {
 
-            Workspace::setCoursesDuplication($data['courses'], $_courses, $_topics, $school, $workspace, $prefix);
+            Workspace::setCoursesDuplication($data['courses'], $_courses, $_topics, $school_row, $workspace, $prefix);
         }
 
         return $this->success(['msg' => 'Contenido duplicado correctamente.']);

@@ -106,6 +106,16 @@
                         `Segmentación del curso - ${$event.name}`
                     )
                 "
+                
+                @duplicate="
+                    openFormModal(
+                        duplicateFormModalOptions,
+                        $event,
+                        'duplicate',
+                        `Duplicar curso - ${$event.name}`
+                    )
+                "
+
                 @compatibility="
                     openFormModal(
                         modalFormCompatibilityOptions,
@@ -230,6 +240,16 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+
+            <DuplicateForm
+                :options="duplicateFormModalOptions"
+                width="50vw"
+                duplicate_level="course"
+                :ref="duplicateFormModalOptions.ref"
+                @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(duplicateFormModalOptions)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -245,6 +265,7 @@ import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
+import DuplicateForm from "../Escuelas/DuplicateForm";
 
 export default {
     components: {
@@ -258,7 +279,8 @@ export default {
         CompatibilityFormModal,
         LogsModal,
         CourseFormModal,
-        PreviewMediaTopicsModal
+        PreviewMediaTopicsModal,
+        DuplicateForm
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -355,6 +377,12 @@ export default {
                 ],
                 more_actions: [
                     {
+                        text: "Duplicar curso",
+                        icon: 'mdi mdi-content-copy',
+                        type: 'action',
+                        method_name: 'duplicate'
+                    },
+                    {
                         text: "Compatibles",
                         icon: 'fa fa-square',
                         type: 'action',
@@ -439,6 +467,15 @@ export default {
 
             delete_model: null,
             update_model: null,
+
+            duplicateFormModalOptions: {
+                ref: 'DuplicateForm',
+                open: false,
+                action: 'duplicate',
+                base_endpoint: 'cursos',
+                showCloseIcon: true,
+                confirmLabel: 'Copiar contenidos'
+            },
 
             modalCursoEncuesta: {
                 ref: 'CursoEncuestaModal',

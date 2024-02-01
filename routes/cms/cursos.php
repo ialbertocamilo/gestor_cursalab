@@ -11,6 +11,8 @@ Route::controller(CursosController::class)->group(function() {
 	Route::view('/create', 'cursos.create_edit')->name('cursos.createCurso');
 	// ->middleware('permission:cursos.create');
 	Route::view('/edit/{course}', 'cursos.create_edit')->name('cursos.editCurso');
+	Route::get('/copy/{course}', 'copy')->name('cursos.copyCurso');
+	Route::post('/{course}/copy-content', 'copyContent')->name('cursos.copyContent');
 	// ->middleware('permission:cursos.edit');
 
 	Route::get('/search/{course}', 'searchCurso')->name('cursos.search');

@@ -541,8 +541,85 @@ class CursosController extends Controller
 
         return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
-    public function listMediaTopics(Course $course){
+    
+    public function listMediaTopics(Course $course)
+    {
         $topics = $course->listMediaTopics();
         return $this->success(compact('topics'));
+    }
+
+    public function copy(School $school, Course $course)
+    {
+        $items = Course::getTopicsForTree($course);
+
+        $items_destination = [];
+
+        return $this->success(compact('school', 'items', 'items_destination'));
+    }
+
+    public function copyContent(Request $request, School $school, Course $course)
+    {
+        $selections = $request->selection_source;
+        $workspace = get_current_workspace();
+
+        // dd($selections, $school, $course);
+
+        $data = $this->buildSourceTreeSelection($course, $selections);
+
+        $_courses = Course::whereIn('id', [$course->id])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        $prefix = '[COPIA] - ';
+
+        Workspace::setCoursesDuplication($data['courses'], $_courses, $_topics, $school, $workspace, $prefix, true);
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($course, $selections)
+    {
+        $courses = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        $prefix = 'course_' . $course->id . '-';
+
+        foreach ($selections as $selection) {
+
+            $sections = explode('-',  $prefix . $selection);
+            $data = [];
+
+            foreach ($sections as $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+            }
+
+            // $course_id = $data[0]['id'];
+            $topic_id = $data[1]['id'] ?? NULL;
+
+            if ($topic_id) {
+
+                $courses[$course->id]['topics'][] = $topic_id;
+
+            } else {
+                
+                $courses[$course->id]['topics'] = [];
+            }
+
+        }
+
+        return compact('course_ids', 'topic_ids', 'courses');
     }
 }

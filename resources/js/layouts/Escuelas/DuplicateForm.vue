@@ -55,7 +55,8 @@
                         </v-stepper-step>
                         <v-divider></v-divider>
                         <v-stepper-step step="2" :complete="stepper_box > 2">
-                             Selecciona el destino
+                            <span v-if="duplicate_level != 'course'">Selecciona el destino</span>
+                            <span v-if="duplicate_level == 'course'">Confirmar</span>
                             <small>Paso 2</small>
                         </v-stepper-step>
                     </v-stepper-header>
@@ -69,7 +70,7 @@
                                 <v-col cols="12" class="px-8">
                                     <span v-if="duplicate_level == 'module'">Selecciona los temas, cursos y escuelas que deseas copiar a otros módulos.</span>
                                     <span v-if="duplicate_level == 'school'">Selecciona los temas y cursos que deseas copiar a otras escuelas.</span>
-                                    <!-- <span v-if="duplicate_level == 'course'">Selecciona los temas que deseas se dupliquen con el curso.</span> -->
+                                    <span v-if="duplicate_level == 'course'">Selecciona los temas que deseas se dupliquen con el curso.</span>
                                 </v-col>
                                 <v-col cols="12" class="px-8">
 
@@ -105,17 +106,8 @@
                                     <span v-if="duplicate_level == 'school'">Selecciona las escuelas donde copiarás el contenido seleccionado.</span>
                                     <!-- <span v-if="duplicate_level == 'course'">Selecciona los módulos donde copiarás el contenido seleccionado.</span> -->
                                 </v-col>
-                                <v-col cols="12" class="px-8">
+                                <v-col cols="12" class="px-8" v-if="duplicate_level != 'course'">
 
-                                    <!-- <div class="mx-5 mb-3">
-                                        <v-text-field
-                                            v-model="search"
-                                            label="Buscar destino..."
-                                            hide-details
-                                            filled
-                                            dense
-                                        ></v-text-field>
-                                    </div> -->
                                     <div class="mb-3">
                                         <DefaultInput
                                             clearable dense
@@ -209,19 +201,15 @@ export default {
                 items: {},
                 items_destination: {},
             },
-            limit_allowed_users: null,
             resource: {
             },
-            functionalities: [],
-            rules: {
-                // name: this.getRules(['required', 'max:255']),
-                // logo: this.getRules(['required']),
-            },
+
             selectionType: 'leaf',
             selection: [],
             selection_schools: [],
             items: [],
             items_destination: [],
+
             cancelLabel: 'Cancelar',
             confirmLabel: 'Continuar',
             disabled_btn_next: true,
@@ -277,9 +265,17 @@ export default {
 
                 vue.disabled_btn_next = true;
 
-                if (vue.selection.length > 0 && vue.selection_schools.length > 0) {
+                if (vue.duplicate_level == 'course') {
 
                     vue.disabled_btn_next = false;
+
+                } else {
+
+                    if (vue.selection.length > 0 && vue.selection_schools.length > 0) {
+
+                        vue.disabled_btn_next = false;
+                    }
+
                 }
             }
         },
@@ -290,7 +286,7 @@ export default {
                
                 vue.stepper_box++
                 vue.cancelLabel = "Atrás";
-                vue.confirmLabel = "Copiar contenido";
+                vue.confirmLabel = vue.duplicate_level == 'course' ? "Duplicar contenido" : "Copiar contenido";
 
             } else {
 
@@ -321,6 +317,12 @@ export default {
         },
         resetForm() {
             let vue = this
+
+            vue.search = null;
+            vue.selection = [];
+            vue.selection_schools = [];
+            vue.items = [];
+            vue.items_destination = [];
 
             vue.stepper_box = 1
             vue.cancelLabel = "Cancelar";

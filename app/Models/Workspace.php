@@ -1042,13 +1042,18 @@ class Workspace extends BaseModel
         return $data;
     }
 
-    protected function setCoursesDuplication($course_ids, $_courses, $_topics, $school, $workspace, $prefix = '')
+    protected function setCoursesDuplication($course_ids, $_courses, $_topics, $school, $workspace, $prefix = '', $force_course_creation = false)
     {
         foreach ($course_ids as $course_id => $topic_ids) {
 
             $_course = $_courses->where('id', $course_id)->first();
 
-            $course = $school->courses()->where('name', $_course)->first();
+            $course = null;
+
+            if (!$force_course_creation) {
+
+                $course = $school->courses()->where('name', $_course->name)->first();
+            }
 
             if (!$course) {
 
