@@ -9,7 +9,7 @@ USER composer
 COPY --chown=composer . .
 
 #RUN composer install --no-dev --prefer-dist
-RUN composer install --no-dev --no-autoloader --prefer-dist -v
+RUN composer install
 
 # -------------------------------------------------------------------------------------------------------
 # FRONTEND
