@@ -1958,6 +1958,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->where('criterion_id', $criterionId)
             ->first();
 
+        if (!$criterionValue) return null;
 
         return $criterionValue->id ?: null;
     }
