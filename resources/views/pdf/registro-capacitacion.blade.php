@@ -268,7 +268,7 @@
                 Fecha de capacitación
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
 
@@ -277,7 +277,7 @@
                 Fecha de registro
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
     </tr>
