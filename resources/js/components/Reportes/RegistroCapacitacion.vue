@@ -191,6 +191,7 @@ export default {
 
             this.$emit('reportStarted', {})
             let selectedCourses = [this.selectedCourses];
+
             const filtersDescriptions = {
                 'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
                 Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
