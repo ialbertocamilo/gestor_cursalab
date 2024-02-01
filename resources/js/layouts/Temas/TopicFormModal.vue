@@ -50,7 +50,6 @@
                             label="Descripción"
                             :rules="rules.content"
                             :ignoreHTMLinLengthCalculation="true"
-                            height="290px"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
                             :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
