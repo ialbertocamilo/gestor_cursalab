@@ -29,6 +29,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WorkspaceController extends Controller
 {
@@ -323,65 +324,99 @@ class WorkspaceController extends Controller
     public function destroy(Workspace $workspace)
     {
         // \File::delete(public_path().'/'.$workspace->plantilla_diploma);
-        $workspace->delete();
 
-        $workspace->functionalities()->sync([]);
-        $workspace->criterionWorkspace()->sync([]);
+        DB::beginTransaction();
 
-        $workspace->criteriaValue()->sync([]);
-        // $workspace->criteriaValue()->delete();
+        try {
+            // Rename record to avoid duplicated names
 
-        $workspace->videotecas()->delete();
-        $workspace->meetings()->delete();
-        $workspace->push_notifications()->delete();
-        // $workspace->medias()->delete(); // don't delete
+            $workspace->name = substr('deleted ' . Str::random(5) . ' ' . $workspace->name, 0, 255);
+            $workspace->slug = substr('deleted-' . Str::random(5) . '-' . $workspace->slug, 0, 255);
+            $workspace->active = 0;
+            $workspace->save();
 
-        foreach ($workspace->subworkspaces as $subworkspace) {
+            $workspace->delete();
 
-            foreach ($subworkspace->schools as $school) {
+            $workspace->functionalities()->sync([]);
+            $workspace->criterionWorkspace()->sync([]);
 
-                foreach ($school->courses as $course) {
+            $workspace->criteriaValue()->sync([]);
+            // $workspace->criteriaValue()->delete();
 
-                    foreach ($course->topics as $topic) {
+            $workspace->videotecas()->delete();
+            $workspace->meetings()->delete();
+            $workspace->push_notifications()->delete();
+            // $workspace->medias()->delete(); // don't delete
 
-                        $topic->questions()->delete();
-                        $topic->medias()->delete();
-                        $topic->requirements()->delete();
+            foreach ($workspace->subworkspaces as $subworkspace) {
+
+                // Rename record to avoid duplicated names
+
+                $subworkspace->name = substr('deleted ' . Str::random(5) . ' ' . $subworkspace->name, 0, 255);
+                $subworkspace->slug = substr('deleted-' . Str::random(5) . '-' . $subworkspace->slug, 0, 255);
+                $subworkspace->active = 0;
+                $subworkspace->save();
+
+                // Rename and delete record to avoid duplicated names
+
+                $moduleCriterionValue = CriterionValue::query()
+                    ->where('id', $subworkspace->criterion_value_id)
+                    ->first();
+                $moduleCriterionValue->value_text = $subworkspace->name;
+                $moduleCriterionValue->save();
+                $moduleCriterionValue->delete();
+
+                foreach ($subworkspace->schools as $school) {
+
+                    foreach ($school->courses as $course) {
+
+                        foreach ($course->topics as $topic) {
+
+                            $topic->questions()->delete();
+                            $topic->medias()->delete();
+                            $topic->requirements()->delete();
+                        }
+
+                        $course->requirements()->delete();
+                        $course->topics()->delete();
                     }
 
-                    $course->requirements()->delete();
-                    $course->topics()->delete();
+                    $school->courses()->delete();
                 }
 
-                $school->courses()->delete();
+                $subworkspace->schools()->delete();
+
+                foreach ($subworkspace->users as $user) {
+
+                    $user->summary()->delete();
+                    $user->summary_courses()->delete();
+                    $user->summary_topics()->delete();
+                    $user->benefits()->delete();
+                    $user->segments()->delete();
+                    $user->course_data()->delete();
+                    $user->criterion_values()->sync([]);
+                }
+
+                $subworkspace->users()->delete();
             }
 
-            $subworkspace->schools()->delete();
+            $workspace->subworkspaces()->delete();
 
-            foreach ($subworkspace->users as $user) {
+            foreach ($workspace->polls as $poll) {
 
-                $user->summary()->delete();
-                $user->summary_courses()->delete();
-                $user->summary_topics()->delete();
-                $user->benefits()->delete();
-                $user->segments()->delete();
-                $user->course_data()->delete();
-                $user->criterion_values()->sync([]);
+                $poll->questions()->delete();
             }
 
-            $subworkspace->users()->delete();
+            $workspace->polls()->delete();
+
+            DB::commit();
+
+            return $this->success(['msg' => 'Workspace eliminado correctamente.']);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
         }
-
-        $workspace->subworkspaces()->delete();
-
-        foreach ($workspace->polls as $poll) {
-
-            $poll->questions()->delete();
-        }
-
-        $workspace->polls()->delete();
-
-        return $this->success(['msg' => 'Workspace eliminado correctamente.']);
     }
 
     public function editSubWorkspace(Workspace $subworkspace)
