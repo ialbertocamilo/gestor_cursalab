@@ -397,16 +397,15 @@
                                                     dense
                                                     label="Competencias"
                                                     placeholder="Busca tu etiqueta"
-                                                    v-model="resource.tags"
+                                                    v-model="tags.compentencies"
                                                     :items="selects.compentencies"
-                                                    custom-items
                                                     item-text="name"
                                                     item-value="id"
                                                     multiple
                                                     small-chips
-                                                    :maxValuesSelected="3 - resource.tags.length"
+                                                    :maxValuesSelected="2"
                                                     :showSelectAll="false"
-                                                    :countShowValues="3"
+                                                    :countShowValues="4"
                                                     :deleteChips="true"
                                                     attach
                                                 >
@@ -435,14 +434,13 @@
                                                     dense
                                                     label="Habilidades"
                                                     placeholder="Busca tu etiqueta"
-                                                    v-model="resource.tags"
+                                                    v-model="tags.habilities"
                                                     :items="selects.habilities"
-                                                    custom-items
                                                     item-text="name"
                                                     item-value="id"
                                                     multiple
                                                     small-chips
-                                                    :maxValuesSelected="3 - resource.tags.length"
+                                                    :maxValuesSelected="2"
                                                     :showSelectAll="false"
                                                     :countShowValues="3"
                                                     :deleteChips="true"
@@ -454,14 +452,13 @@
                                                     dense
                                                     label="Nivel"
                                                     placeholder="Busca tu etiqueta"
-                                                    v-model="resource.tags"
+                                                    v-model="tags.levels"
                                                     :items="selects.levels"
-                                                    custom-items
+                                                    :maxValuesSelected="1"
                                                     item-text="name"
                                                     item-value="id"
                                                     multiple
                                                     small-chips
-                                                    :maxValuesSelected="3 - resource.tags.length"
                                                     :showSelectAll="false"
                                                     :countShowValues="3"
                                                     :deleteChips="true"
@@ -698,6 +695,11 @@ export default {
                 //     { header: '🌟Dificultad:' },
                 // ],
             },
+            tags:{
+                compentencies:[],
+                habilities:[],
+                levels:[],
+            },
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 // assessable: this.getRules(['required']),
@@ -883,6 +885,7 @@ export default {
         },
         sendForm(data, validateForm = true) {
             let vue = this
+            vue.resource.tags = vue.tags.compentencies.concat(vue.tags.habilities, vue.tags.levels);
             if(vue.selects.course_code_modality = 'in-person' && vue.ubicacion_mapa){
                 vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
                 vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
@@ -932,7 +935,6 @@ export default {
             vue.addMedias(formData)
             if (data.checkbox)
                 formData.append('check_tipo_ev', data.checkbox)
-
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
                     this.hideLoader()
@@ -1018,11 +1020,10 @@ export default {
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
                     vue.workspace_id = data.data.workspace_id;
                     // vue.selects.polls = data.data.polls;
-                    vue.selects.tags = data.data.tags;
-                    vue.selects.tags.compentencies = data.data.tags.filter((t) => t.type == 'competency');
-                    vue.selects.tags.habilities = data.data.tags.filter((t) =>  t.type == 'hability');
-                    vue.selects.tags.levels = data.data.tags.filter((t) => t.type == 'level');
-
+                    // vue.selects.tags = data.data.tags;
+                    vue.selects.compentencies = data.data.tags.filter((t) => t.type == 'competency');
+                    vue.selects.habilities = data.data.tags.filter((t) =>  t.type == 'hability');
+                    vue.selects.levels = data.data.tags.filter((t) => t.type == 'level');
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -1040,6 +1041,12 @@ export default {
                         }
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
+                        const compentencies_id = vue.selects.compentencies.map(c => c.id);
+                        const habilities_id = vue.selects.habilities.map(c => c.id);
+                        const levels_id = vue.selects.levels.map(c => c.id);
+                        vue.tags.compentencies = vue.resource.tags.filter(t => compentencies_id.includes(t));
+                        vue.tags.habilities = vue.resource.tags.filter(t => habilities_id.includes(t));
+                        vue.tags.levels =vue.resource.tags.filter(t => levels_id.includes(t));
                     } else {
                         vue.resource.qualification_type = data.data.qualification_type
                         vue.resource.position = data.data.default_position
