@@ -320,7 +320,7 @@ class CourseInPerson extends Model
         }
         $required_signature = false;
         if($topic->course->modality_in_person_properties?->required_signature){
-            $hasSignature = TopicAssistanceUser::where('user',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
+            $hasSignature = TopicAssistanceUser::where('user_id',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
             $required_signature = boolval($hasSignature);
         }
         return ['menus'=> $menus , 'required_signature'=>$required_signature];

@@ -32,8 +32,9 @@
                             item-text="name"
                         />
                     </v-col>
-                    <v-col cols="6" v-if="selects.course_code_modality != 'asynchronous'">
+                    <v-col cols="6" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
                         <DefaultAutocomplete
+                            style="width: 100%;"
                             dense
                             label="Ponente *"
                             placeholder="Seleccione un ponente"
@@ -42,10 +43,17 @@
                             clearable
                             item-text="name"
                         />
+                        <DefaultModalButton
+                            label=""
+                            icon_name="fas fa-plus"
+                            text
+                            @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id,show_criteria_segmentation:false }, 'segmentation', `Segmentación de Ponentes`)"
+                        />
                     </v-col>
                     <v-col cols="6">
                         <DefaultRichText
                             clearable
+                            :height="300"
                             v-model="resource.content"
                             label="Descripción"
                             :rules="rules.content"
@@ -384,28 +392,26 @@
                                 <DefaultSimpleSection title="Gestión de etiquetas" v-if="hasPermissionToUseTags">
                                     <template slot="content">
                                         <v-row>
-                                            <v-col cols="6">
+                                            <v-col cols="4">
                                                 <DefaultAutocomplete
                                                     dense
-                                                    label="Selección de etiquetas "
-                                                    placeholder="Busca tu tag"
+                                                    label="Competencias"
+                                                    placeholder="Busca tu etiqueta"
                                                     v-model="resource.tags"
-                                                    :items="selects.tags"
+                                                    :items="selects.compentencies"
                                                     custom-items
                                                     item-text="name"
                                                     item-value="id"
                                                     multiple
                                                     small-chips
-                                                    :maxValuesSelected="3"
+                                                    :maxValuesSelected="3 - resource.tags.length"
                                                     :showSelectAll="false"
                                                     :countShowValues="3"
                                                     :deleteChips="true"
                                                     attach
                                                 >
-                                                    <template v-slot:customItems="{item}">
+                                                    <!-- <template v-slot:customItems="{item}">
                                                         <div class="d-flex">
-                                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
-                                                            </v-checkbox> -->
                                                             <div class="py-1">
                                                                 <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
                                                                 <v-tooltip bottom>
@@ -419,11 +425,48 @@
                                                                     </template>
                                                                     <span>{{item.description}}</span>
                                                                 </v-tooltip>
-                                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
                                                             </div>
                                                         </div>
-                                                    </template>
+                                                    </template> -->
                                                 </DefaultAutocomplete>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Habilidades"
+                                                    placeholder="Busca tu etiqueta"
+                                                    v-model="resource.tags"
+                                                    :items="selects.habilities"
+                                                    custom-items
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :maxValuesSelected="3 - resource.tags.length"
+                                                    :showSelectAll="false"
+                                                    :countShowValues="3"
+                                                    :deleteChips="true"
+                                                    attach
+                                                />
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Nivel"
+                                                    placeholder="Busca tu etiqueta"
+                                                    v-model="resource.tags"
+                                                    :items="selects.levels"
+                                                    custom-items
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :maxValuesSelected="3 - resource.tags.length"
+                                                    :showSelectAll="false"
+                                                    :countShowValues="3"
+                                                    :deleteChips="true"
+                                                    attach
+                                                />
                                             </v-col>
                                             <v-col cols="6">
                                                 <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
@@ -502,6 +545,17 @@
                 @onConfirm="tagcreated"
                 @onDelete="tagDeleted"
             />
+
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                for_section="aulas_virtuales"
+                model_type="App\Models\Workspace"
+                :model_id="null"
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeSimpleModal(modalFormSegmentationOptions),loadHosts()"
+            />
         </template>
     </DefaultDialog>
 </template>
@@ -518,6 +572,7 @@ import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
 import GmapMap from 'vue2-google-maps/dist/components/map'
 import TagModal  from "../../components/basicos/TagModal";
+import SegmentFormModal from "./../Blocks/SegmentFormModal";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',
@@ -526,7 +581,10 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 
 export default {
-    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal,TagModal},
+    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, 
+        draggable, TemaValidacionesModal, DialogConfirm, 
+        DefaultRichText,ConvertMediaToIaModal,TagModal,SegmentFormModal
+    },
     props: {
         options: {
             type: Object,
@@ -543,6 +601,7 @@ export default {
     // props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
+            workspace_id:null,
             drag: false,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             media_url: null,
@@ -611,7 +670,10 @@ export default {
                 hosts:[],
                 course_code_modality:null,
                 // polls:[],
-                tags:[]
+                tags:[],
+                compentencies:[],
+                habilities:[],
+                levels:[]
             },
             resource: {
                 modality_in_person_properties:{
@@ -627,13 +689,14 @@ export default {
                     finish_time:null,
                     show_medias_since_start_course:0
                 },
-                tags: [
-                    { header: '💚 Competencias:' },
-                    {divider:true},
-                    {header:'💡 Habilidades prácticas:'},
-                    { divider: true },
-                    { header: '🌟Dificultad:' },
-                ],
+                tags:[],
+                // tags: [
+                //     { header: '💚 Competencias:' },
+                //     {divider:true},
+                //     {header:'💡 Habilidades prácticas:'},
+                //     { divider: true },
+                //     { header: '🌟Dificultad:' },
+                // ],
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -676,6 +739,14 @@ export default {
                     }
                 },
             },
+            modalFormSegmentationOptions: {
+                ref: "SegmentFormModal",
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
+            },
             limits_ia_convert:{},
             limits_descriptions_generate_ia:{
                 ia_descriptions_generated:0,
@@ -709,6 +780,7 @@ export default {
                 action:'Retroceder',
                 create_from_course_list:false,
             }
+            
         }
     },
     async mounted() {
@@ -932,7 +1004,7 @@ export default {
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.formatTags(data.data.tags);
+                    // vue.formatTags(data.data.tags);
 
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
@@ -944,8 +1016,13 @@ export default {
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
                     vue.selects.course_code_modality = data.data.course_code_modality;
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
+                    vue.workspace_id = data.data.workspace_id;
                     // vue.selects.polls = data.data.polls;
                     vue.selects.tags = data.data.tags;
+                    vue.selects.tags.compentencies = data.data.tags.filter((t) => t.type == 'competency');
+                    vue.selects.tags.habilities = data.data.tags.filter((t) =>  t.type == 'hability');
+                    vue.selects.tags.levels = data.data.tags.filter((t) => t.type == 'level');
+
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -1212,6 +1289,13 @@ export default {
                 return result.toISOString().substr(0, 10);
             }
             return new Date().toISOString().substr(0, 10)
+        },
+        async loadHosts(){
+            let vue = this;
+            let url = `${vue.base_endpoint}/hosts`;
+            await axios.get(url).then(({data})=>{
+                vue.selects.hosts = data.data.hosts
+            })
         }
     }
 }

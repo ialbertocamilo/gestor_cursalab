@@ -27,8 +27,9 @@ Route::controller(TemaController::class)->group(function() {
 
 	Route::get('/{topic}/medias', 'listMedias');
 
-	Route::get('/{topic}/encuesta', 'getEncuesta');
-	Route::post('/{topic}/encuesta', 'storeUpdateEncuesta');
+	// Route::get('/{topic}/encuesta', 'getEncuesta');
+	// Route::post('/{topic}/encuesta', 'storeUpdateEncuesta');
+	Route::get('/hosts', 'getHosts');
 });
 //encuestas
 // PREGUNTAS
