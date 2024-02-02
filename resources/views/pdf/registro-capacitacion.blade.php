@@ -86,6 +86,7 @@
         display: inline-block;
     }
 
+
 </style>
 
 <h4 class="main-title">
@@ -95,13 +96,13 @@
 <table class="table-form">
 
     <tr class="title-wrapper">
-        <td colspan="12" class="table-title">
+        <td colspan="3" class="table-title">
             DATOS DE "LA EMPRESA"
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="12">
+        <td class="cell" colspan="3">
             <div class="cell-label">
                 Razón social
             </div>
@@ -112,7 +113,7 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="4">
+        <td class="cell" style="width: 45%">
             <div class="cell-label">
                 RUC
             </div>
@@ -123,7 +124,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell">
             <div class="cell-label">
                 Actividad económica
             </div>
@@ -132,7 +133,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="2">
+        <td class="cell">
             <div class="cell-label">
                 Con código CIIU Nº
             </div>
@@ -145,7 +146,7 @@
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="12">
+        <td class="cell" colspan="3">
             <div class="cell-label">
                 Dirección de la sede
             </div>
@@ -156,7 +157,7 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell">
             <div class="cell-label">
                 Número de trabajadores del centro laboral
             </div>
@@ -165,7 +166,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell"  colspan="2">
             <div class="cell-label">
                 Capacitador y encargado del registro
             </div>
@@ -179,13 +180,13 @@
 <table class="table-form margin-top">
 
     <tr class="title-wrapper">
-        <td colspan="12" class="table-title">
+        <td colspan="2" class="table-title">
             DATOS DEL “TRABAJADOR
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Nombre completo
             </div>
@@ -194,7 +195,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Documento de identificación
             </div>
@@ -207,21 +208,21 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Cargo
             </div>
             <div class="cell-value">
-
+                {{ $job_position }}
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Área
             </div>
             <div class="cell-value">
-
+                {{ $area }}
             </div>
         </td>
     </tr>
@@ -242,7 +243,7 @@
 <table class="table-form">
 
     <tr class="row">
-        <td class="cell" colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Nombre del curso
             </div>
@@ -251,7 +252,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Horas lectivas
             </div>
@@ -262,21 +263,21 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Fecha de capacitación
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Fecha de registro
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
     </tr>

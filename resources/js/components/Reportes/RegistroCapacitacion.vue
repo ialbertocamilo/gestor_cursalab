@@ -6,7 +6,7 @@
                 Descarga los registros de capacitación generados sobre los cursos completados.
             </template>
         </ResumenExpand>
-        <!-- Formulario del reporte -->
+
         <form @submit.prevent="generateReport" class="row">
             <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
@@ -23,7 +23,7 @@
                     :maxValuesSelected="maxValuesSelected.modules"
                 />
             </div>
-            <!-- Escuela -->
+
             <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
                     dense
@@ -40,7 +40,7 @@
                     :showSelectAll="maxValuesSelected.show_select_all"
                 />
             </div>
-            <!-- Curso -->
+
             <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
                     dense
@@ -53,6 +53,19 @@
                     placeholder="Seleccione los cursos"
                 />
             </div>
+
+            <div class="col-lg-6 col-xl-4 mb-3">
+                <DefaultAutocomplete
+                    dense
+                    v-model="format"
+                    :items="formats"
+                    label="Formato"
+                    item-text="description"
+                    item-value="id"
+                    placeholder="Formato"
+                />
+            </div>
+
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
                         :disabled="selectedCourses.length === 0"
@@ -86,6 +99,16 @@ export default {
     data() {
         return {
             reportType: 'registro_capacitacion',
+            format: 'xlsx',
+            formats: [
+                {
+                    id:'xlsx',
+                    description: 'Archivo Excel con el listado de usuarios con registro de capacitación'
+                },
+                {
+                    id:'zip',
+                    description: 'Archivo ZIP conteniendo los registros de capacitación'
+                }],
             filteredSchools: [],
             schools: [],
             courses: [],
@@ -168,6 +191,7 @@ export default {
 
             this.$emit('reportStarted', {})
             let selectedCourses = [this.selectedCourses];
+
             const filtersDescriptions = {
                 'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
                 Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
@@ -189,9 +213,10 @@ export default {
                         modulesIds: this.selectedModules ? this.selectedModules : [],
                         schoolsIds: this.selectedSchools,
                         coursesIds: selectedCourses,
-                        ext:'zip'
+                        ext: this.format
                     }
                 })
+
                 const vue = this
                 setTimeout(() => {
                     vue.queryStatus("reportes", "descargar_reporte_registro_capacitacion");
