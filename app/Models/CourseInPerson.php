@@ -295,7 +295,7 @@ class CourseInPerson extends Model
     protected function getListMenu($topic_id){
         $user = auth()->user();
         $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')
-                    ->with(['course:id,modality_id','course.modality:id,code','course.polls:id'])
+                    ->with(['course:id,modality_id,modality_in_person_properties','course.modality:id,code','course.polls:id'])
                     ->where('id',$topic_id)
                     ->first();
 
@@ -318,7 +318,12 @@ class CourseInPerson extends Model
         if($last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'certificate','unset');
         }
-        return $menus;
+        $required_signature = false;
+        if($topic->course->modality_in_person_properties?->required_signature){
+            $hasSignature = TopicAssistanceUser::where('user',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
+            $required_signature = boolval($hasSignature);
+        }
+        return ['menus'=> $menus , 'required_signature'=>$required_signature];
     }
 
     

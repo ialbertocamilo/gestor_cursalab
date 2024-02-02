@@ -137,115 +137,6 @@
                         </v-row>
                     </template>
                 </DefaultSimpleSection>
-                <DefaultSimpleSection title="Ubicación" v-if="selects.course_code_modality == 'in-person'">
-                    <template slot="content">
-                        <v-row justify="center" class="align-items-center">
-                            <v-col cols="12">
-                                <div class="box_search_direction_map">
-                                    <span class="lbl_search_direction">Dirección</span>
-                                    <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
-                                </div>
-                            </v-col>
-                            <v-col cols="12">
-                                <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
-                                    <GmapMap
-                                        :center="center"
-                                        :zoom="zoom"
-                                        :options="{
-                                            zoomControl: false,
-                                            mapTypeControl: false,
-                                            scaleControl: false,
-                                            streetViewControl: false,
-                                            rotateControl: false,
-                                            fullscreenControl: false,
-                                            disableDefaultUi: false
-                                            }"
-                                        style="height: 300px"
-                                        >
-                                        <GmapMarker
-                                            :key="index"
-                                            v-for="(m, index) in markers"
-                                            :position="m.position"
-                                            @click="center = m.position"
-                                            :draggable="true"
-                                            @drag="updateCoordinates"
-                                        />
-                                    </GmapMap>
-                                </div>
-                            </v-col>
-                            <v-col cols="12">
-                                <DefaultTextArea
-                                    label="Referencia"
-                                    placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
-                                    v-model="resource.modality_in_person_properties.reference"
-                                />
-                            </v-col>
-                        </v-row>
-                    </template>
-                </DefaultSimpleSection>
-                <DefaultSimpleSection title="Programación" v-if="selects.course_code_modality != 'asynchronous'">
-                    <template slot="content">
-                        <v-row justify="center">
-                            <v-col cols="6" class="d-flex justify-content-center align-items-center">
-                                <DefaultInputDate
-                                    clearable
-                                    :referenceComponent="'modalDateFilter1'"
-                                    :options="modalDateFilter1"
-                                    v-model="resource.modality_in_person_properties.start_date"
-                                    label="Fecha de inicio"
-                                    :min="new Date().toISOString().substr(0, 10)"
-                                    dense
-                                />
-                            </v-col>
-                            <v-col cols="3">
-                            <DefaultInput
-                                class="time-input"
-                                type="time"
-                                label="Hora de inicio"
-                                dense
-                                v-model="resource.modality_in_person_properties.start_time"
-                                :disabled="!resource.modality_in_person_properties.start_date"
-                                :rules="rules.time"
-                                step="60"
-                            />
-                            </v-col>
-
-                            <!-- <v-col cols="3" class="d-flex justify-content-center align-items-center">
-                            <DefaultInputDate
-                                clearable
-                                :referenceComponent="'modalDateFilter1'"
-                                :options="modalDateFilter2"
-                                v-model="resource.modality_in_person_properties.finish_date"
-                                :disabled="!resource.modality_in_person_properties.start_date"
-                                :min="resource.modality_in_person_properties.start_date"
-                                label="Fecha de fin"
-                                dense
-                            />
-                            </v-col> -->
-
-                            <v-col cols="3">
-                                <DefaultInput
-                                    class="time-input"
-                                    type="time"
-                                    label="Hora de fin"
-                                    v-model="resource.modality_in_person_properties.finish_time"
-                                    :disabled="!resource.modality_in_person_properties.start_time"
-                                    :min="resource.modality_in_person_properties.start_time"
-                                    :rules="rules.time"
-                                    step="60"
-                                    dense
-                                />
-                            </v-col>
-
-                            <v-col cols="12" class="py-1">
-                                <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
-                                <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
-                                    ** Se creara una reunión en ZOOM.
-                                </p>
-                            </v-col>
-                        </v-row>
-                    </template>
-                </DefaultSimpleSection>
                 <DefaultSimpleSection title="Recursos multimedia" v-if="selects.course_code_modality != 'asynchronous'">
                     <template slot="content">
                         <v-row justify="center">
@@ -349,13 +240,10 @@
                             </v-col>
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
-                            <v-col cols="12">
-                                
-                            </v-col>
                         </v-row>
                     </template>
                 </DefaultSimpleSection>
-                <DefaultSimpleSection title="Validación de contenido" >
+                <DefaultSimpleSection title="Visualización de recursos multimedia" >
                     <template slot="content">
                         <v-row>
                             <v-col cols="12" v-if="selects.course_code_modality == 'asynchronous'">
@@ -380,8 +268,116 @@
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
+                            title="Configuraciones de la sesión presencial"
+                            :expand="sections.showSectionCourseInPerson"
+                            :simple="true"
+                        >
+                            <template slot="content">
+                                <DefaultSimpleSection title="Programación" v-if="selects.course_code_modality != 'asynchronous'">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                                <DefaultInputDate
+                                                    clearable
+                                                    :referenceComponent="'modalDateFilter1'"
+                                                    :options="modalDateFilter1"
+                                                    v-model="resource.modality_in_person_properties.start_date"
+                                                    label="Fecha de inicio"
+                                                    :min="new Date().toISOString().substr(0, 10)"
+                                                    dense
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora de inicio"
+                                                dense
+                                                v-model="resource.modality_in_person_properties.start_time"
+                                                :disabled="!resource.modality_in_person_properties.start_date"
+                                                :rules="rules.time"
+                                                step="60"
+                                            />
+                                            </v-col>
+
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    class="time-input"
+                                                    type="time"
+                                                    label="Hora de fin"
+                                                    v-model="resource.modality_in_person_properties.finish_time"
+                                                    :disabled="!resource.modality_in_person_properties.start_time"
+                                                    :min="resource.modality_in_person_properties.start_time"
+                                                    :rules="rules.time"
+                                                    step="60"
+                                                    dense
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="12" class="py-1">
+                                                <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
+                                                <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
+                                                    ** Se creara una reunión en ZOOM.
+                                                </p>
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Ubicación" v-if="selects.course_code_modality == 'in-person'">
+                                    <template slot="content">
+                                        <v-row justify="center" class="align-items-center">
+                                            <v-col cols="12">
+                                                <div class="box_search_direction_map">
+                                                    <span class="lbl_search_direction">Dirección</span>
+                                                    <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
+                                                    <GmapMap
+                                                        :center="center"
+                                                        :zoom="zoom"
+                                                        :options="{
+                                                            zoomControl: false,
+                                                            mapTypeControl: false,
+                                                            scaleControl: false,
+                                                            streetViewControl: false,
+                                                            rotateControl: false,
+                                                            fullscreenControl: false,
+                                                            disableDefaultUi: false
+                                                            }"
+                                                        style="height: 300px"
+                                                        >
+                                                        <GmapMarker
+                                                            :key="index"
+                                                            v-for="(m, index) in markers"
+                                                            :position="m.position"
+                                                            @click="center = m.position"
+                                                            :draggable="true"
+                                                            @drag="updateCoordinates"
+                                                        />
+                                                    </GmapMap>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <DefaultTextArea
+                                                    label="Referencia"
+                                                    placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
+                                                    v-model="resource.modality_in_person_properties.reference"
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
                             title="Configuración avanzada"
-                            :expand="sections.shosSectionAdvancedconfiguration"
+                            :expand="sections.showSectionAdvancedconfiguration"
                             :simple="true"
                         >
                             <template slot="content">
@@ -556,7 +552,8 @@ export default {
                 showSectionPosition:{status:true},
                 showSectionTopicDates:{status:true},
                 showSectionTags:{status:true},
-                shosSectionAdvancedconfiguration:{status:false}
+                showSectionAdvancedconfiguration:{status:false},
+                showSectionCourseInPerson:{status:true}
             },
             modalDateFilter1: {
                 open: false

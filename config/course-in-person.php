@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'host'=>collect([
+    'host'=>[
         [
             'title'=>'Tomar asitencia',
             'code'=>'take-assistance',
@@ -26,7 +26,7 @@ return [
             'description'=> 'Inicia el feedback de parte de tus colaboradores.',
             'show'=>true
         ],
-    ]),
+    ],
     'user' =>[
         [
             'title'=>'Material del curso',

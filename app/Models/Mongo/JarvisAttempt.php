@@ -9,7 +9,8 @@ class JarvisAttempt extends Model
     protected $fillable = [
         'workspace_id', 
         'type',
-        'attempts'
+        'attempts',
+        'historics'
     ];
     public static function getAttempt($workspace_id,$type='evaluations'){
         $attempt_workspace = self::where('workspace_id',$workspace_id)->where('type',$type)->select('attempts')->first();

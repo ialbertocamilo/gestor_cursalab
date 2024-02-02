@@ -8,7 +8,6 @@
         "php": "^8.0.2",
         "altek/accountant": "^3.0",
         "altek/eventually": "^2.0",
-        "barryvdh/laravel-dompdf": "^2.0",
         "cviebrock/eloquent-sluggable": "^9.0",
         "genealabs/laravel-model-caching": "^0.12.4",
         "guzzlehttp/guzzle": "^7.2",

@@ -823,6 +823,7 @@ class Workspace extends BaseModel
                         $course_data = $_course->toArray();
                         $course_data['external_id'] = $_course->id;
                         $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                        $course_data['registro_capacitacion'] = json_encode($course_data['registro_capacitacion'] ?? []);
                         $course = $school->courses()->create($course_data);
                         foreach ($_course->topics as $_topic) {
 

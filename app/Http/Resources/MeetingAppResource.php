@@ -41,7 +41,8 @@ class MeetingAppResource extends JsonResource
             ],
 
             'description' => $this->description,
-
+            'session_code'=> 'live',
+            'description_code'=>'Sesión virtual por zoom.',
             'date' => [
                 'title' => get_title_date($this->starts_at),
                 // 'title' => ucfirst($this->starts_at->formatLocalized('%A, %d de %B')),

@@ -32,10 +32,15 @@ class TopicInPersonAppResource extends JsonResource
             $duration = $duration .' ('.round($diff_in_minutes / 1440,1).' días)';
             $format_day =  Carbon::parse($this->modality_in_person_properties->start_date)->format('l, j \d\e F');
         }
+        $is_today = $start_datetime->isToday();
+        $is_ontime = now()->between($start_datetime, $finish_datetime);
+
         return [
             'key' => $this->modality_in_person_properties->start_date,
             'image' => get_media_url($this->course->imagen,'s3'),
             'name' => $this->name,
+            'session_code'=> 'in-person',
+            'description_code' => 'Cursos de la empresa realizadas por un expositor.',
             'course_id' => $this->course_id,
             'topic_id' => $this->id,
             'reference' => $this->modality_in_person_properties->reference,
@@ -44,6 +49,8 @@ class TopicInPersonAppResource extends JsonResource
             'is_host' => $user->id == $this->modality_in_person_properties->host_id,
             'duration' => $duration,
             'url_maps' => $this->modality_in_person_properties->url,
+            'is_today'=> $is_today,
+            'is_ontime'=> $is_ontime,
             'format_day' => fechaCastellanoV2($format_day),
             'required_signature'=>$this->course->modality_in_person_properties->required_signature
         ];

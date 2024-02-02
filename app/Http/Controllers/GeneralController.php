@@ -55,7 +55,7 @@ class GeneralController extends Controller
 
         // Generates totals array
 
-        $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
+        $data = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_DATA,
             function () use ($workspaceId, $subworkspace_id,$current_workspace) {
             $count_active_users = DashboardService::countActiveUsers($subworkspace_id);
             if(!$subworkspace_id){

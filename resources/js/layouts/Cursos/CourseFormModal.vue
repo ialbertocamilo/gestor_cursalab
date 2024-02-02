@@ -213,74 +213,6 @@
                             v-model="resource.investment"
                         />
                     </v-col>
-                    <DefaultSimpleSection title="Configuración de evaluaciones">
-                        <template slot="content">
-                            <v-row justify="center">
-                                <v-col cols="6">
-
-                                    <DefaultSelect
-                                        dense
-                                        :items="selects.qualification_types"
-                                        item-text="name"
-                                        return-object
-                                        show-required
-                                        v-model="resource.qualification_type"
-                                        label="Sistema de calificación"
-                                        :rules="rules.qualification_type_id"
-                                    />
-                                </v-col>
-                                <v-col cols="3">
-                                    <DefaultInput
-                                        label="Nota mínima aprobatoria"
-                                        v-model="resource.nota_aprobatoria"
-                                        :rules="rules.nota_aprobatoria"
-                                        type="number"
-                                        :min="0"
-                                        :max="resource.qualification_type ? resource.qualification_type.position : 0"
-                                        show-required
-                                        dense
-                                        @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
-                                    />
-                                </v-col>
-                                <v-col cols="3">
-                                    <DefaultInput
-                                        label="Cantidad de intentos"
-                                        v-model="resource.nro_intentos"
-                                        :rules="rules.nro_intentos"
-                                        type="number"
-                                        show-required
-                                        dense
-                                    />
-                                </v-col>
-
-                                <v-col cols="12" class="py-1">
-                                    <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
-                                </v-col>
-                            </v-row>
-                        </template>
-                    </DefaultSimpleSection>
-                    <DefaultSimpleSection title="Configuración de diplomas">
-                        <template slot="content">
-                            <v-row class="px-8">
-                                <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
-                                <v-col cols="12">
-                                    <DefaultDivider class="my-1"/>
-                                </v-col>
-                                <div class="col-6">
-                                    <DefaultToggle dense
-                                    :active-label="'Mostrar diploma al usuario'"
-                                    :inactive-label="'Mostrar diploma al usuario'"
-                                    v-model="resource.show_certification_to_user" />
-                                </div>
-                                <div class="col-6">
-                                    <DefaultToggle dense
-                                    :active-label="'Habilitar aceptación de diploma al usuario'"
-                                    :inactive-label="'Habilitar aceptación de diploma al usuario'"
-                                    v-model="resource.user_confirms_certificate" />
-                                </div>
-                            </v-row>
-                        </template>
-                    </DefaultSimpleSection>
                     
                 </v-row>
                 <v-row justify="space-around" class="menuable">
@@ -463,7 +395,74 @@
                                         </v-row>
                                     </template>
                                 </DefaultSimpleSection>
-                                
+                                <DefaultSimpleSection title="Configuración de evaluaciones">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="6">
+
+                                                <DefaultSelect
+                                                    dense
+                                                    :items="selects.qualification_types"
+                                                    item-text="name"
+                                                    return-object
+                                                    show-required
+                                                    v-model="resource.qualification_type"
+                                                    label="Sistema de calificación"
+                                                    :rules="rules.qualification_type_id"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Nota mínima aprobatoria"
+                                                    v-model="resource.nota_aprobatoria"
+                                                    :rules="rules.nota_aprobatoria"
+                                                    type="number"
+                                                    :min="0"
+                                                    :max="resource.qualification_type ? resource.qualification_type.position : 0"
+                                                    show-required
+                                                    dense
+                                                    @onFocus="resource.id && conf_focus ? alertNotaMinima() : null"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    label="Cantidad de intentos"
+                                                    v-model="resource.nro_intentos"
+                                                    :rules="rules.nro_intentos"
+                                                    type="number"
+                                                    show-required
+                                                    dense
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="12" class="py-1">
+                                                <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Configuración de diplomas">
+                                    <template slot="content">
+                                        <v-row class="px-8">
+                                            <DiplomaSelector v-model="resource.certificate_template_id" :old-preview="resource.plantilla_diploma"/>
+                                            <v-col cols="12">
+                                                <DefaultDivider class="my-1"/>
+                                            </v-col>
+                                            <div class="col-6">
+                                                <DefaultToggle dense
+                                                :active-label="'Mostrar diploma al usuario'"
+                                                :inactive-label="'Mostrar diploma al usuario'"
+                                                v-model="resource.show_certification_to_user" />
+                                            </div>
+                                            <div class="col-6">
+                                                <DefaultToggle dense
+                                                :active-label="'Habilitar aceptación de diploma al usuario'"
+                                                :inactive-label="'Habilitar aceptación de diploma al usuario'"
+                                                v-model="resource.user_confirms_certificate" />
+                                            </div>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
                                 <DefaultSimpleSection title="Programación de reinicios de evaluaciones">
                                     <template slot="content">
                                         <v-row justify="center">

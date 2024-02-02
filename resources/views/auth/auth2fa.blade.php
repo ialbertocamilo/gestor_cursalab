@@ -6,7 +6,7 @@
     color:#007aff;
   }
   .text-lg{
-    font-size: 1.3rem; 
+    font-size: 1.3rem;
     letter-spacing: 2px;
   }
 </style>
@@ -23,9 +23,9 @@
         <p>
           <span class="{{ session('resend') ? 'font-weight-bold' : ''}}">
             {{ session('resend') ? session('resend') : 'Hemos enviado' }}
-          </span> 
-          un código al correo 
-          <span class="text-primary">{{ auth()->user()->email_gestor }}</span>, 
+          </span>
+          un código al correo
+          <span class="text-primary">{{ auth()->user()->email_gestor }}</span>,
           por favor revise su bandeja de entrada.
         </p>
       </div>
@@ -33,16 +33,16 @@
         <form method="POST" class="form-validate" action="{{ route('login_auth2fa') }}">
           @csrf
           <div class="form-group">
-            <input id="login-code" type="text" name="code" 
-                  required 
-                  data-msg="Por favor ingrese su código" 
-                  class="input-material text-lg text-center form-control{{ $errors->has('code') ? ' is-invalid' : '' }}" 
+            <input id="login-code" type="text" name="code"
+                  required
+                  data-msg="Por favor ingrese su código"
+                  class="input-material text-lg text-center form-control{{ $errors->has('code') ? ' is-invalid' : '' }}"
                   autocomplete="off"
                   maxlength="{{ $maxlength }}"
                   autofocus >
-            
+
             <label for="login-code" class="label-material active">Código</label>
-            
+
             @if ($errors->has('code'))
             <span class="invalid-feedback" role="alert">
               <strong>{{ $errors->first('code') }}</strong>
@@ -74,7 +74,8 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
-        <img src="img/poweredByCursalab.png" alt="..." class="img-fluid" width="120">
+
+        <img src="img/poweredByCursalab_v2.png" alt="..." class="img-fluid" width="120">
       </a>
     </div>
   </div>

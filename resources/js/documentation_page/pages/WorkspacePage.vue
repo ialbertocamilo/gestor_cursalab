@@ -5,7 +5,7 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Los Workspaces son espacios que agrupan Módulos. Ejemplo: Workspace: Intercorp Retail , Módulos dentro del workspace: Agora,InDigital XP,Intercorp Retail 
+                Los Workspaces son espacios que agrupan Módulos. {{ is_inretail ? 'Ejemplo: Workspace: Intercorp Retail , Módulos dentro del workspace: Agora,InDigital XP,Intercorp Retail.' : '' }} 
             </p>
             <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
@@ -14,10 +14,12 @@
 <script>
 import descriptionApi from '../components/description_api.vue';
 let base_url = window.location.origin;
+const is_inretail =  base_url.includes('inretail');
 export default {
     components: {descriptionApi},
     data() {
         return{
+            is_inretail : is_inretail,
             api_description_options:{
                 title:'Listar los workspaces',
                 type:'GET',
