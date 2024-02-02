@@ -52,7 +52,7 @@
             <div class="col-sm-12 mb-3 mt-4">
                 <div class="col-sm-8 pl-0">
                     <button
-                        :disabled="selectedModules.length === 0 || !atLeastOneCriteriaIsSelected()"
+                        :disabled="selectedModules.length === 0"
                         type="submit"
                         class="btn btn-md btn-primary btn-block text-light">
                         <i class="fas fa-download"></i>
@@ -131,23 +131,23 @@ export default {
         }
         ,
         async fetchFilters () {
-            let url = `${this.$props.reportsBaseUrl}/filtros/segmented-criteria/${this.workspaceId}`
-            try {
-                let response = await axios({
-                    url: url,
-                    method: 'get'
-                })
-
-                this.criteriaInSegmentation = response.data
-                if (this.selectedCriteria.length === 0) {
-                    this.criteriaInSegmentation.forEach(() => {
-                        this.selectedCriteria.push(true);
-                    })
-                }
-
-            } catch (ex) {
-                console.log(ex)
-            }
+            // let url = `${this.$props.reportsBaseUrl}/filtros/segmented-criteria/${this.workspaceId}`
+            // try {
+            //     let response = await axios({
+            //         url: url,
+            //         method: 'get'
+            //     })
+            //
+            //     this.criteriaInSegmentation = response.data
+            //     if (this.selectedCriteria.length === 0) {
+            //         this.criteriaInSegmentation.forEach(() => {
+            //             this.selectedCriteria.push(true);
+            //         })
+            //     }
+            //
+            // } catch (ex) {
+            //     console.log(ex)
+            // }
         }
         ,
         atLeastOneCriteriaIsSelected () {

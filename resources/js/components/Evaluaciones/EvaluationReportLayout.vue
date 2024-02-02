@@ -46,6 +46,7 @@
                       item-value="id"
                       dense
                       multiple
+                      :show-select-all="false"
                       :count-show-values="3"
                       :max-values-selected="1"
                       :loading="schools_loader"
