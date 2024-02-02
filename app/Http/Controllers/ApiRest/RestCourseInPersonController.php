@@ -55,8 +55,8 @@ class RestCourseInPersonController extends Controller
         if(!isset($topic_id)){
             return $this->error('Es necesario el topic_id.');
         }
-        $result = CourseInPerson::getListMenu($topic_id);
-        return $this->success(['result'=>$result]);
+        $data = CourseInPerson::getListMenu($topic_id);
+        return $this->success($data);
     }
 
     public function takeAssistance(Request $request,$topic_id){
