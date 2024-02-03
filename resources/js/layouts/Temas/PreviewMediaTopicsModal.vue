@@ -22,7 +22,7 @@
                     </div>
                 </v-card-title>
                 <div style="position: absolute; right: -18px; top: -19px;">
-                    <v-btn 
+                    <v-btn
                         color="#7D80EF"
                         fab
                         small
@@ -74,13 +74,21 @@
                                         <v-list-item-title style="font-size: 0.8rem !important;" >{{ topic.name }}</v-list-item-title>
                                     </v-list-item-content>
                                 </template>
-        
-                                <v-list-item v-for="media in topic.medias" :key="media.id">
-                                    <v-list-item-content @click="changeMedia(media)" class="v-list-item-custom">
-                                        <v-list-item-title style="font-size: 0.8rem !important;" :style="currentMedia.id == media.id ? 'color:#2E36CE' : null">
-                                            <i
-                                                :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'" />
-                                            {{ media.name }}</v-list-item-title>
+
+                                <v-list-item v-for="(media, index) in topic.medias" :key="index">
+                                    <v-list-item-content
+                                        @click="changeMedia(media)"
+                                        class="v-list-item-custom">
+
+                                        <v-list-item-title
+                                            style="font-size: 0.8rem !important;"
+                                            :style="currentMedia
+                                            ? currentMedia.id == media.id ? 'color:#2E36CE' : null
+                                            : null">
+
+                                            <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'" />
+                                            {{ media.name }}
+                                        </v-list-item-title>
                                     </v-list-item-content>
                                 </v-list-item>
                             </v-list-group>
@@ -219,7 +227,7 @@ export default {
 }
 .not-show-arrow{
     padding-top: 0px !important;
-} 
+}
 .not-show-arrow .v-list-item__icon {
     display: none !important;
 }
