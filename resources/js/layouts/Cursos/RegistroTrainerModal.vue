@@ -38,7 +38,7 @@
                 <v-row justify="space-around">
                     <v-col cols="12" class="d-flex-- justify-content-center">
                         Esta firma se utilizará únicamente para el de registro de este curso.<br>
-                        No se guardar para ningún otro propósito.
+                        No se guardará para ningún otro propósito.
                     </v-col>
                 </v-row>
             </v-form>
@@ -104,12 +104,12 @@ export default {
 
             vue.errors = []
 
-            this.showLoader()
-
             const validateForm = vue.validateForm('trainerForm')
             let url = `/registrotrainer/store`;
             let method = 'POST';
             if (validateForm && vue.isValid()) {
+
+                this.showLoader()
 
                 let formData = vue.getMultipartFormData(
                     method, vue.resource, fields, file_fields

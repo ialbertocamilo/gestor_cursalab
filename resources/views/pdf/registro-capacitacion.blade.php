@@ -57,7 +57,12 @@
         font-weight: 700;
         font-size: 16px;
         padding-left: 10px;
-        height: 21px;
+        min-height: 21px;
+    }
+
+    .cell-number {
+        position: relative;
+        vertical-align: bottom;
     }
 
     .topics {
@@ -76,16 +81,25 @@
         text-align: center;
     }
 
-    .number {
+    .number-wrapper span {
+        display: block;
+        float: left;
+        padding-left: 3px;
+        padding-top: 5px;
+        font-weight: inherit;
+        font-size: inherit;
+    }
+
+    .number-separator {
         border-right: 2px solid black;
-        width: 15px;
-        height: 20px;
+        width: 1px;
+        height: inherit;
         margin-top: 8px;
         padding-right: 3px;
         text-align: center;
-        display: inline-block;
+        float: left;
+        display: none;
     }
-
 
 </style>
 
@@ -117,9 +131,10 @@
             <div class="cell-label">
                 RUC
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($company->businessNumber ?? '') as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator "></div>
                 @endforeach
             </div>
         </td>
@@ -137,9 +152,10 @@
             <div class="cell-label">
                 Con código CIIU Nº
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($company->CIIU ?? '') as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator "></div>
                 @endforeach
             </div>
         </td>
@@ -151,7 +167,7 @@
                 Dirección de la sede
             </div>
             <div class="cell-value">
-                {{ $company->address ?? '' }}
+                {{ $address }}
             </div>
         </td>
     </tr>
@@ -199,9 +215,10 @@
             <div class="cell-label">
                 Documento de identificación
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($user['document']) as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator"></div>
                 @endforeach
             </div>
         </td>
@@ -300,7 +317,7 @@
 </p>
 
 <div class="comment margin-bottom">
-    {{ $course['certificationComment'] }}
+    {{ $course['registro_capacitacion']->comment }}
 </div>
 
 <table class="table-form margin-bottom">

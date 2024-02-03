@@ -1964,11 +1964,44 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
 
     /**
+     * Get user's criterion value id from specific criterion, if value is not
+     * found, try searching assuming is a value with a parent criterion
+     */
+    public static function getCriterionValueIdWithChildren($userId, $criterionId) {
+
+        $criterionValueId = self::getCriterionValueId($userId, $criterionId);
+
+        if ($criterionValueId) {
+            return $criterionValueId;
+        }
+
+        $childCriterion = Criterion::find($criterionId);
+        if ($childCriterion) {
+
+            $parentCriterionValueId = self::getCriterionValueId(
+                $userId, $childCriterion->parent_id
+            );
+
+            $criterionValue = CriterionValue::query()
+                ->where('parent_id', $parentCriterionValueId)
+                ->first();
+
+            if (!$criterionValue) return null;
+
+            return $criterionValue->id ?: null;
+
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Counts how many users exist with a specific criterion value
      */
     public static function countWithCriteria($subworkspaceId, $criterionValueId) {
 
         return User::query()
+            ->where('active', 1)
             ->where('subworkspace_id', $subworkspaceId)
             ->whereHas('criterion_user', function($q) use ($criterionValueId) {
                 $q->where('criterion_value_id', $criterionValueId);

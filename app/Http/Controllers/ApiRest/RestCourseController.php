@@ -341,6 +341,17 @@ class RestCourseController extends Controller
             $workersCount = User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting);
         }
 
+        // Get company address
+        $address = '';
+        if ($subworkspace->registro_capacitacion->company->address) {
+            $address = $subworkspace->registro_capacitacion->company->address;
+        } else if ($subworkspace->registro_capacitacion->criteriaAddress) {
+            $addressCriteriaId = $subworkspace->registro_capacitacion->criteriaAddress->id;
+            $criterionValueIdForAddress = User::getCriterionValueIdWithChildren($user->id, $addressCriteriaId);
+            $addressCriterionValue = CriterionValue::find($criterionValueIdForAddress);
+            $address = $addressCriterionValue ? $addressCriterionValue->value_text : '-';
+        }
+
         // Get trainer and summary data
 
         $trainer = RegistroCapacitacionTrainer::find($course->registro_capacitacion->trainerAndRegistrar);
@@ -365,9 +376,10 @@ class RestCourseController extends Controller
             'company'=> $subworkspace->registro_capacitacion->company,
             'workersCount' => $workersCount ?? '-',
             'course' => $course,
-            'summaryCourse' => $summary
+            'summaryCourse' => $summary,
+            'address' => $address
         ];
-
+        return View('pdf.registro-capacitacion', $data);
         // Render template and store generated file
 
         $fullname = "$user->name $user->lastname $user->surname";
