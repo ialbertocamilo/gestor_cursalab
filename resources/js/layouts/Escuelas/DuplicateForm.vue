@@ -101,13 +101,16 @@
                         </v-stepper-content>
                         <v-stepper-content step="2" class="p-0">
                            <v-row justify="space-around">
-                                <v-col cols="12" class="px-8">
+                                <v-col cols="12" class="px-8 py-0">
                                     <span v-if="duplicate_level == 'module'">Selecciona los módulos donde copiarás el contenido seleccionado.</span>
                                     <span v-if="duplicate_level == 'school'">Selecciona las escuelas donde copiarás el contenido seleccionado.</span>
                                     <v-row justify="space-around" v-if="duplicate_level == 'course'" class="text-center">
-                                        <div class="col col-12">El contenido seleccionado será duplicado en la escuela actual.</div>
                                         <div class="col col-12">
                                             <img src="/svg/duplicate-content.svg" width="120" class="--my-2">
+                                        </div>
+                                        <div class="col col-12">
+                                            El contenido seleccionado será duplicado en la escuela actual.
+                                            <p class="mb-0" v-if="source_name"><strong>{{ source_name }}</strong></p>
                                         </div>
                                     </v-row>
                                 </v-col>
@@ -193,6 +196,10 @@ export default {
         duplicate_level: {
             type: String,
             default: 'module'
+        },
+        source_name: {
+            type: String,
+            required: false
         },
     },
     data() {

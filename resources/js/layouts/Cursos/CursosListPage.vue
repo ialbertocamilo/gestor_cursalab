@@ -245,6 +245,7 @@
                 :options="duplicateFormModalOptions"
                 width="50vw"
                 duplicate_level="course"
+                :source_name="escuela_name"
                 :ref="duplicateFormModalOptions.ref"
                 @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
                 @onCancel="closeFormModal(duplicateFormModalOptions)"
