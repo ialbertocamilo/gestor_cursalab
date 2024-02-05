@@ -84,7 +84,7 @@
     .number-wrapper span {
         display: block;
         float: left;
-        padding-left: 3px;
+        padding-left: 0px;
         padding-top: 5px;
         font-weight: inherit;
         font-size: inherit;
