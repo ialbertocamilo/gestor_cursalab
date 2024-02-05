@@ -151,7 +151,7 @@ class CourseInPerson extends Model
                             ->values()->all();
                 break;
             case 'present':
-                $users = $_users_with_status->whereIn('status',['attended','late'])->values()->all();
+                $users = $_users_with_status->whereIn('status',['attended','late','absent'])->values()->all();
                 $codes = $codes_taxonomy
                             ->whereIn('code',['attended','late','absent'])
                             ->values()->all();
