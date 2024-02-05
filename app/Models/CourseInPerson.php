@@ -145,13 +145,13 @@ class CourseInPerson extends Model
                 $users = $_users_with_status;
                 break;
             case 'pending':
-                $users = $_users_with_status->where('status','absent')->values()->all();
+                $users = $_users_with_status->whereIn('status',['absent',null])->values()->all();
                 $codes = $codes_taxonomy
                             ->whereIn('code',['attended','late'])
                             ->values()->all();
                 break;
             case 'present':
-                $users = $_users_with_status->where('status','<>','absent')->values()->all();
+                $users = $_users_with_status->where('status','!=','absent')->values()->all();
                 $codes = $codes_taxonomy
                             ->whereIn('code',['attended','late','absent'])
                             ->values()->all();
