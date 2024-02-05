@@ -379,7 +379,7 @@ class RestCourseController extends Controller
             'summaryCourse' => $summary,
             'address' => $address
         ];
-        return View('pdf.registro-capacitacion', $data);
+
         // Render template and store generated file
 
         $fullname = "$user->name $user->lastname $user->surname";

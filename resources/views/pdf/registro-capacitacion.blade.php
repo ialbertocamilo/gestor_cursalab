@@ -317,7 +317,7 @@
 </p>
 
 <div class="comment margin-bottom">
-    {{ $course['registro_capacitacion']->comment }}
+    {{ $course['registro_capacitacion']->comment ?? '' }}
 </div>
 
 <table class="table-form margin-bottom">
