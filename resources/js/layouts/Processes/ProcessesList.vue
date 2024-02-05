@@ -138,6 +138,13 @@
             @onConfirm="saveEditProcessModal"
             :process="modalEditProcess.process"
         />
+        <ModalSelectConfigProcess
+                :ref="modalSelectConfigProcess.ref"
+                v-model="modalSelectConfigProcess.open"
+                width="800px"
+                @onCancel="closeFormModal(modalSelectConfigProcess)"
+            />
+
     </section>
 </template>
 
@@ -145,6 +152,7 @@
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectTemplate from "../../components/Induction/Process/ModalSelectTemplate";
+import ModalSelectConfigProcess from "../../components/Induction/Process/ModalSelectConfigProcess";
 import ModalCreateProcess from "../../components/Induction/Process/ModalCreateProcess";
 import ModalEditProcess from "../../components/Induction/Process/ModalEditProcess";
 
@@ -158,6 +166,7 @@ export default {
     ModalCreateProcess,
     ModalEditProcess,
     ModalSegment,
+    ModalSelectConfigProcess
 },
     mounted() {
         let vue = this
@@ -309,6 +318,12 @@ export default {
 
             modalSelectTemplate: {
                 ref: 'ModalSelectTemplate',
+                open: false,
+                endpoint: '',
+            },
+
+            modalSelectConfigProcess: {
+                ref: 'ModalSelectConfigProcess',
                 open: false,
                 endpoint: '',
             },
@@ -509,10 +524,8 @@ export default {
                         })
             }
         },
-        saveEditProcessModal( item ) {
-
-            console.log(item);
-            console.log(item.title);
+        saveEditProcessModal( item )
+        {
             let vue = this
 
             vue.showLoader()
@@ -599,6 +612,9 @@ export default {
                             console.log(vue.$refs);
                             vue.$refs.ModalEditProcess.closeModal()
                             vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                            console.log(data);
+                            console.log(item);
+                            vue.openFormModal(vue.modalSelectConfigProcess, item);
                         })
                         .catch(error => {
                             if (error && error.errors){

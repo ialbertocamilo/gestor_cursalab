@@ -9,7 +9,7 @@
         :class="{}"
         content-class="br-dialog"
     >
-        <v-card>
+        <v-card class="card_modal_select_template">
             <div class="bx_close_modal_activity">
                 <v-btn icon :ripple="false" @click="closeModal">
                     <v-icon v-text="'mdi-close'"/>
@@ -66,54 +66,53 @@ export default {
 </script>
 
 <style lang="scss">
-.br-dialog, .br-dialog .v-sheet.v-card{
-    border-radius: 16px !important;
-}
-.bx_close_modal_activity {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-}
-.bx_items_activitys {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: 40px 0 20px;
-}
-.bx_item_activity {
-    padding: 26px;
-    border-radius: 10px;
-    width: 218px;
-    margin: 5px;
-    cursor: pointer;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-}
-.bx_item_activity:hover {
-    box-shadow: 0px 4px 15px rgba(194,194,194,1);
-}
-.bx_item_activity h5 {
-    color: #2A3649;
-    font-size: 16px;
-    line-height: 20px;
-    font-family: "Nunito", sans-serif;
-    font-weight: bold;
-    margin: 14px 0;
-    min-height: 40px;
-    display: inline-flex;
-    align-items: center;
-}
-.bx_item_activity p {
-    color: #2A3649;
-    font-size: 13px;
-    line-height: 17px;
-    font-family: "Nunito", sans-serif;
-}
-.title_act {
-    color: #2A3649;
-    font-size: 19px;
-    line-height: 21px;
-    font-family: "Nunito", sans-serif;
-    font-weight: bold;
-    margin: 14px 0 25px;
+.card_modal_select_template {
+    .bx_close_modal_activity {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+    .bx_items_activitys {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 40px 0 20px;
+    }
+    .bx_item_activity {
+        padding: 26px;
+        border-radius: 10px;
+        width: 218px;
+        margin: 5px;
+        cursor: pointer;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    .bx_item_activity:hover {
+        box-shadow: 0px 4px 15px rgba(194,194,194,1);
+    }
+    .bx_item_activity h5 {
+        color: #2A3649;
+        font-size: 16px;
+        line-height: 20px;
+        font-family: "Nunito", sans-serif;
+        font-weight: bold;
+        margin: 14px 0;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .bx_item_activity p {
+        color: #2A3649;
+        font-size: 13px;
+        line-height: 17px;
+        font-family: "Nunito", sans-serif;
+    }
+    .title_act {
+        color: #2A3649;
+        font-size: 19px;
+        line-height: 21px;
+        font-family: "Nunito", sans-serif;
+        font-weight: bold;
+        margin: 14px 0 25px;
+    }
 }
 </style>

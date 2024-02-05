@@ -2,7 +2,7 @@
     <div class="modalAsignacionXDni">
         <v-row>
             <v-col cols="12">
-                <p class="text-h7 mb-0" v-text="description"></p>
+                <p class="text-h7 mb-0 text_default" v-text="description"></p>
             </v-col>
             <v-col class="d-flex justify-content-between" cols="12" md="6" lg="6">
                 <DefaultInput

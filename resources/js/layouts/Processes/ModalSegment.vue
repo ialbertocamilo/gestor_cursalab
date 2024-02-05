@@ -116,19 +116,81 @@
                                 />
                             </v-stepper-content>
                             <v-stepper-content step="2" class="p-0">
-                                <v-row justify="space-around">
-                                    <v-col cols="12">
-                                        <AsignacionXDni
-                                            description='Elige a los supervisores.'
-                                            apiSearchUser="/supervisores/search-instructors"
-                                            apiUploadPlantilla="/supervisores/subir-excel-usuarios"
-                                            :showSubidaMasiva="false"
-                                            ref="AsignacionSupervisores"
-                                            :load_data_default="true"
-                                        >
-                                        </AsignacionXDni>
-                                    </v-col>
-                                </v-row>
+                                <div v-if="stepper_box == 2">
+                                    <v-tabs
+                                        v-model="tabs_sup"
+                                        fixed-tabs
+                                        slider-color="primary"
+
+                                        class="col-10 offset-1"
+                                    >
+                                        <v-tab>
+                                            Vincular por criterios
+                                        </v-tab>
+                                        <v-tab>
+                                            Elegir supervisor(es)
+                                        </v-tab>
+                                    </v-tabs>
+                                    <v-tabs-items v-model="tabs_sup">
+                                        <v-tab-item>
+                                            <v-row justify="space-around">
+                                                <v-col cols="11">
+                                                    <span class="text_default lbl_tit">Define los criterios que se aplicarán para hacer la relación entre los supervisores y los colaboradores.</span>
+                                                </v-col>
+                                                <v-col cols="11" v-if="stepper_box == 2">
+                                                    <DefaultAutocompleteOrder
+                                                        dense
+                                                        label="Criterios"
+                                                        v-model="list_criteria_selected"
+                                                        :items="list_criteria"
+                                                        multiple
+                                                        item-text="name"
+                                                        item-id="id"
+                                                        return-object
+                                                        :showSelectAll="true"
+                                                        :loading-state="true"
+                                                        placeholder="Indicar criterios aquí"
+                                                    />
+                                                    <div class="bx_criteria_selected">
+                                                        <div class="d-flex align-items-center justify-content-center" style="height: 100%;" v-if="list_criteria_selected == 0">
+                                                            <span class="text_default text-center">Aquí se listaran tus criterios<br>de vinculación a tus<br>administadores</span>
+                                                        </div>
+                                                        <div v-else>
+                                                            <span v-for="(itemc, indexc) in list_criteria_selected " :key="indexc">
+                                                                <v-chip
+                                                                class="ma-2"
+                                                                close
+                                                                close-icon="mdi-minus-circle"
+                                                                @click:close="list_criteria_selected.splice(indexc, 1)"
+                                                                >
+                                                                {{ itemc.name }}
+                                                                </v-chip>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="text-center mt-3">
+                                                        <span class="text_default c-default fw-bold cursor-pointer" @click="openModalUserSupervisors()">Ver listado de los supervisores</span>
+                                                    </div> -->
+                                                </v-col>
+                                            </v-row>
+                                        </v-tab-item>
+                                        <v-tab-item>
+                                            <v-row justify="space-around">
+                                                <v-col cols="11" class="step_modalAsignacionXDni">
+                                                    <AsignacionXDni
+                                                        description='Selecciona los supervisores que estarán dentro del proceso de inducción'
+                                                        apiSearchUser="/supervisores/search-instructors"
+                                                        apiUploadPlantilla="/supervisores/subir-excel-usuarios"
+                                                        :showSubidaMasiva="true"
+                                                        ref="AsignacionSupervisores"
+                                                        :load_data_default="true"
+                                                    >
+                                                    </AsignacionXDni>
+                                                </v-col>
+                                            </v-row>
+                                        </v-tab-item>
+                                    </v-tabs-items>
+                                </div>
                             </v-stepper-content>
                         </v-stepper-items>
                         <v-stepper-header class="stepper_dots">
@@ -235,6 +297,7 @@ export default {
 
             // steps
             tabs: null,
+            tabs_sup: null,
             steps: 0,
             // total: 0,
             total: [],
@@ -529,23 +592,28 @@ console.log(vue.segments);
                 }
 
                 vue.stepper_box = 2;
-                vue.options.title = "Segmentación de usuarios > <b>Supervisores</b>";
+                vue.options.title = "Segmentación de usuarios > <b>Vinculación por criterios</b>";
                 vue.options.cancelLabel = "Retroceder";
                 vue.options.confirmLabel = "Guardar";
             }
             else if(vue.stepper_box == 2) {
                 vue.errors = [];
+                console.log(vue.$refs);
+                console.log(vue.$refs.AsignacionSupervisores);
+                let segments_supervisors_direct = vue.$refs.AsignacionSupervisores ? vue.$refs.AsignacionSupervisores.usuarios_ok : [];
+                console.log(segments_supervisors_direct);
 
-                if(vue.$refs.AsignacionSupervisores.usuarios_ok.length==0)
-                {
-                    vue.$notification.warning('Tienes que seleccionar al menos 1 usuario para continuar.', {
-                        timer: 8,
-                        showLeftIcn: false,
-                        showCloseIcn: true,
-                    });
-                }
-                else
-                {
+
+                // if(vue.$refs.AsignacionSupervisores.usuarios_ok.length==0)
+                // {
+                //     vue.$notification.warning('Tienes que seleccionar al menos 1 usuario para continuar.', {
+                //         timer: 8,
+                //         showLeftIcn: false,
+                //         showCloseIcn: true,
+                //     });
+                // }
+                // else
+                // {
 
                     this.showLoader();
 
@@ -575,7 +643,8 @@ console.log(vue.segments);
                             code: vue.code,
                             segments: vue.segments,
                             segment_by_document: vue.segment_by_document,
-                            segments_supervisors: vue.$refs.AsignacionSupervisores.usuarios_ok,
+                            segments_supervisors_direct: segments_supervisors_direct,
+                            segments_supervisors_criteria: vue.list_criteria_selected
                         });
 
                         vue.$http
@@ -593,12 +662,13 @@ console.log(vue.segments);
                                 vue.hideLoader();
                             });
                     }
-                }
+                // }
             }
         },
         resetSelects() {
             let vue = this;
             vue.tabs = null;
+            vue.tabs_sup = null
 
             //reset selects at blocks
             for(const segment of vue.segments) {
@@ -739,6 +809,14 @@ console.log(vue.segments);
 };
 </script>
 <style lang="scss">
+.step_modalAsignacionXDni {
+    .modalAsignacionXDni .box-usuarios_ok {
+        border-color: #edf1f4;
+    }
+    .modalAsignacionXDni > .row {
+        border: none !important;
+    }
+}
 .dialog_segment_process {
     .v-stepper, .v-stepper__header {
         box-shadow: none !important;

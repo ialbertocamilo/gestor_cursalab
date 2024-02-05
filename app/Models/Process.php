@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Http\Resources\Multimedia\MultimediaSearchResource;
 use App\Models\BaseModel;
 use App\Services\FileService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class Process extends BaseModel
@@ -31,7 +33,8 @@ class Process extends BaseModel
         'finishes_at',
         'color_map_even',
         'color_map_odd',
-        'image_guia'
+        'image_guia',
+        'supervisor_criteria'
     ];
 
     protected $casts = [
@@ -65,6 +68,41 @@ class Process extends BaseModel
         return $this->morphMany(Segment::class, 'model');
     }
 
+    public function instructors()
+    {
+        return $this->belongsToMany(User::class, 'process_instructors', 'process_id', 'user_id');
+    }
+
+    protected function getRepositoryMediaProcess() {
+
+        $session = session()->all();
+        $workspace = $session['workspace'];
+
+        $list_icon_final = Media::query()
+                      ->where('workspace_id', $workspace->id)
+                      ->where('type', 'icon_final')
+                      ->get();
+        $list_guide = Media::query()
+                    ->where('workspace_id', $workspace->id)
+                    ->where('type', 'guide')
+                    ->get();
+
+        $list_icon_final->each(function($item){
+            $item->formattedSize = FileService::formatSize($item->size);
+            $item->tipo = $item->getMediaType($item->ext);
+            $item->url = FileService::generateUrl($item->file);
+            $item->image = FileService::generateUrl($item->getPreview());
+        });
+
+        $list_guide->each(function($item){
+            $item->formattedSize = FileService::formatSize($item->size);
+            $item->tipo = $item->getMediaType($item->ext);
+            $item->url = FileService::generateUrl($item->file);
+            $item->image = FileService::generateUrl($item->getPreview());
+        });
+
+        return compact('list_icon_final', 'list_guide');
+    }
 
     protected function getProcessesList( $data )
     {
@@ -73,6 +111,7 @@ class Process extends BaseModel
 
         $workspace = get_current_workspace();
 
+        $repository_media_process = $this->getRepositoryMediaProcess();
         $processes_query = Process::with(['instructions', 'segments', 'stages'])->where('workspace_id', $workspace->id);
 
         if(request()->sortBy){
@@ -126,6 +165,14 @@ class Process extends BaseModel
             $item->logo = $item->logo ? FileService::generateUrl($item->logo) : $item->logo;
             $item->background_mobile = $item->background_mobile ? FileService::generateUrl($item->background_mobile) : $item->background_mobile;
             $item->background_web = $item->background_web ? FileService::generateUrl($item->background_web) : $item->background_web;
+            $item->repository = $repository_media_process;
+
+            $item->config_process = [
+                'edit' => $item->config_completed,
+                'activities' => $item->stages->count() ? true : false,
+                'segments' => $item->segments->count() ? true : false,
+                'certificate' => $item->certificate_template_id ? true : false
+            ];
         }
 
         $response['data'] = $processes->items();
@@ -200,10 +247,12 @@ class Process extends BaseModel
 
         $response['data'] = null;
 
-        $benefits_asigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        // $benefits_asigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+
+        $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
 
         $processes_query = Process::with(['instructions','stages.activities.type'])
-                                    ->whereIn('id', $benefits_asigned);
+                                    ->whereIn('id', $processes_assigned);
 
         $field = 'created_at';
         $sort = 'DESC';

@@ -139,7 +139,7 @@
                                                             <div class="bx_change_img_profile">
                                                                 <div class="bx_img_profile">
                                                                     <img :src="process.img_guia ? process.img_guia : '/img/induccion/personalizacion/perfil-hombre.png'">
-                                                                    <div class="icon_edit" @click="changeAvatarSelected" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
+                                                                    <div class="icon_edit" @click="openFormModal(modalAvatarsRepository, process)" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
                                                                 </div>
                                                                 <span class="text_default">Cambiar guía</span>
                                                             </div>
@@ -296,8 +296,8 @@
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb" v-for="(icon, index) in list_icons_finished_onboarding" :key="index">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="process.icon_finished_selected = icon.logo_cropped">
-                                                                    <img :src="icon.logo_cropped">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="process.icon_finished_selected = icon.url ? icon.url : icon.logo_cropped">
+                                                                    <img :src="icon.url ? icon.url : icon.logo_cropped">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
@@ -1270,6 +1270,9 @@ export default {
                 vue.colorParPicker = resource.color_map_even ? resource.color_map_even : vue.colorParPicker
                 vue.colorImparPicker = resource.color_map_odd ? resource.color_map_odd : vue.colorImparPicker
 
+                if(resource.repository.list_icon_final.length > 0)
+                    vue.list_icons_finished_onboarding = resource.repository.list_icon_final
+
                 if(resource.instructions.length == 0)
                 {
                     const newID = `n-${Date.now()}`;
@@ -1283,8 +1286,19 @@ export default {
                 }
             })
         },
-        loadSelects() {
+        loadSelects(resource) {
             let vue = this
+            console.log(resource);
+            console.log(vue.process);
+
+            // let url = `${vue.options.base_endpoint}/form-selects`
+
+            // vue.$http.get(url)
+            //     .then(({data}) => {
+            //         console.log(data);
+
+            //         vue.selects.requirement_list = data.data.requirements
+            //     })
         },
     }
 };
@@ -1313,9 +1327,9 @@ export default {
     font-weight: bold !important;
 }
 
-.v-input__icon {
-    padding-bottom: 12px;
-}
+//.v-input__icon {
+//    padding-bottom: 12px;
+//}
 
 .v-icon.v-icon.v-icon--link {
     color: #1976d2;

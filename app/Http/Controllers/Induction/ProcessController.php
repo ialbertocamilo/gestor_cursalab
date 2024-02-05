@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Induction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Induction\ProcessStoreUpdateRequest;
 use App\Models\Course;
+use App\Models\Criterion;
+use App\Models\CriterionValue;
 use App\Models\Media;
 use App\Models\Process;
 use App\Models\Segment;
 use App\Models\Supervisor;
+use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\UserRelationship;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProcessController extends Controller
 {
@@ -122,20 +127,49 @@ class ProcessController extends Controller
 
     public function storeSegments(Request $request)
     {
-        $segments_supervisors = $request->segments_supervisors;
+        $segments_supervisors_direct = $request->segments_supervisors_direct;
+        $segments_supervisors_criteria = $request->segments_supervisors_criteria;
+        $save_supervisors = [];
+
+        $process = Process::where('id', $request->model_id)->first();
+        $supervisors = $this->selectedSupervisors($request);
+
+        if(count($segments_supervisors_criteria) > 0) {
+            $selected_supervisors = $supervisors->pluck('id')->toArray();
+            if(count($selected_supervisors) > 0) {
+                $pivotData = array_fill(0, count($selected_supervisors), ['type' => 'criteria']);
+                $syncData  = array_combine($selected_supervisors, $pivotData);
+                $save_supervisors += $syncData;
+            }
+        }
+
+        if(count($segments_supervisors_direct) > 0) {
+            $selected_supervisors = array_column($segments_supervisors_direct, 'id');
+            if(count($selected_supervisors) > 0) {
+                $pivotData = array_fill(0, count($selected_supervisors), ['type' => 'direct']);
+                $syncData  = array_combine($selected_supervisors, $pivotData);
+                $save_supervisors += $syncData;
+            }
+        }
+
+        $process?->instructors()->sync($save_supervisors);
+
+        // $this->saveSegmentInstructors($request, $supervisors);
 
         return Segment::storeRequestData($request);
     }
 
-    public function storeSegmentsBack(Request $request)
-    {
-        $criteria_selected = $request->segments_supervisors;
+    private function criteriaSelected(Request $request) {
+
+        $criteria_selected = $request->segments_supervisors_criteria;
+
         $values = array_column($criteria_selected, 'values');
         $values_selected = array_column($criteria_selected, 'values_selected');
 
         $criteria_list = [];
         $criteria_selected_list = [];
         $criteria_selected_list_data = [];
+
         foreach($values_selected as $val) {
             foreach($val as $item) {
                 array_push($criteria_selected_list, $item);
@@ -158,10 +192,28 @@ class ProcessController extends Controller
                 }
             }
         }
+        return compact('criteria_selected_list_data', 'criteria_selected_id');
+    }
+
+    private function selectedSupervisors(Request $request)
+    {
+        $workspace = get_current_workspace();
+
+        $criterion_module_id = Criterion::with('field_type')->where('code', 'module')->first('id');
+        $criteria_selected_list_data = $this->criteriaSelected($request)['criteria_selected_list_data'];
+        $criteria_selected_id = $this->criteriaSelected($request)['criteria_selected_id'];
+
+        $subworkspace_cv_id = [];
+
+        foreach($criteria_selected_list_data as $csld) {
+            if( $csld['criterion_id'] == $criterion_module_id?->id) {
+                array_push($subworkspace_cv_id, $csld['id']);
+            }
+        }
+
+        $subworkspace = Workspace::whereIn('criterion_value_id', $subworkspace_cv_id)->get()->pluck('id')->toArray() ?? [];
 
         // Obtener los supervisores filtrados
-        $workspace = get_current_workspace();
-        $subworkspace = null;
 
         $supervisors_query = User::query()
             ->whereHas('segments')
@@ -186,15 +238,17 @@ class ProcessController extends Controller
                             ->whereHas('criterion_user', function($q) use ($criteria_selected_id) {
                                 $q->whereIn('criterion_value_id',$criteria_selected_id);
                             });
-        $supervisors = $supervisors_query->get();
-        // Obtener los supervisores filtrados
+
+        return $supervisors_query->get();
+    }
+
+    public function saveSegmentInstructors(Request $request, $supervisors)
+    {
+        $criteria_selected = $request->segments_supervisors_criteria;
+        $criteria_selected_list_data = $this->criteriaSelected($request)['criteria_selected_list_data'];
 
         $supervisors->each(function($sup) use ($supervisors, $criteria_selected_list_data, $criteria_selected) {
             $sup->criterion_user->each(function($cri) use ($supervisors, $criteria_selected_list_data, $sup, $criteria_selected) {
-                // $inArray = in_array($cri->criterion_value_id, $criteria_selected_list);
-
-                // $keys = array_keys(array_column($criteria_selected_list, 'id'), 2);
-                // $new_array = array_map(function($k) use ($criteria_selected_list){return $criteria_selected_list[$k];}, $keys);
 
                 $criterion_value_id = $cri->criterion_value_id;
                 $inArray = array_filter($criteria_selected_list_data, function ($var) use ($criterion_value_id) {
@@ -216,7 +270,6 @@ class ProcessController extends Controller
                     }
                     $sup_segments = new Request();
                     $sup->segments->each(function($seg) use ($criteria_selected_data_save, $sup, $sup_segments){
-                        // $sup_segments->push([
                         $sup_segments->replace([
                             'model_id' => $sup->id,
                             'model_type' => User::class,
@@ -230,8 +283,14 @@ class ProcessController extends Controller
                             ]
                             ]);
                     });
-                    // dd($sup_segments->segments);
-                    Segment::storeRequestData($sup_segments);
+                    // dd($sup_segments);
+
+                    // $segments_id = array_column($sup_segments->segments, 'id');
+                    // Segment::where('model_type', $sup_segments->model_type)->where('model_id', $sup_segments->model_id)
+                    //     ->whereRelation('type', 'code', 'direct-segmentation')
+                    //     ->whereNotIn('id', $segments_id)->delete();
+
+                    $this->segmentStoreRequestData($sup_segments);
                 }
             });
         });
@@ -246,9 +305,63 @@ class ProcessController extends Controller
         //     $checklist->segments = Checklist::getChecklistsWorkspace(checklist_id:$checklist_id, with_segments:true, select : 'id');
         // }
         // $users_assigned = Course::usersSegmented($checklist->segments, $type = 'users_id');
+    }
+
+    private function segmentStoreRequestData($data)
+    {
+        $segment_class = new Segment();
+        try {
+
+            DB::beginTransaction();
+
+            $direct_segmentation = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
+            $code_segmentation = Taxonomy::getFirstData('segment', 'code', $data->code);
 
 
-        return Segment::storeRequestData($request);
+            foreach ($data->segments as $key => $segment_row) {
+                if (count($segment_row['criteria_selected']) == 0) continue;
+
+                $segment_data = [
+                    'type_id' => $direct_segmentation->id,
+                    'code_id' => $code_segmentation?->id,
+                    'model_type' => $data->model_type,
+                    'model_id' => $data->model_id,
+                    'name' => 'Nuevo segmento',
+                    'active' => ACTIVE,
+                ];
+
+                $segment = str_contains($segment_row['id'], "new-segment-") ?
+                    Segment::create($segment_data)
+                    : Segment::find($segment_row['id']);
+
+                $values = [];
+
+                foreach ($segment_row['criteria_selected'] ?? [] as $criterion) {
+
+                    $temp_values = match ($criterion['field_type']['code']) {
+                        'default' => $segment_class->prepareDefaultValues($criterion),
+                        'date' => $segment_class->prepareDateRangeValues($criterion),
+                        default => [],
+                    };
+
+                    $values = array_merge($values, $temp_values);
+                }
+
+                if ($segment)
+                    $segment->values()->sync($values);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            dd($e);
+            DB::rollBack();
+
+            return $this->error($e->getMessage());
+        }
+
+        $message = "Segmentación actualizada correctamente.";
+
+        return $this->success(['msg' => $message], $message);
     }
 
 }

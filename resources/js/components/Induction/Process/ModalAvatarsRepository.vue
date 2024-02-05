@@ -101,7 +101,7 @@ export default {
             list_avatars_empty: [null,null,null,null],
             logo_selected: null,
             logo_cropped: null,
-            img_selected: null
+            img_selected: null,
         };
     },
     watch: {
@@ -156,6 +156,21 @@ export default {
         cancel() {
             let vue = this;
             vue.$emit("onCancel");
+        },
+        loadSelects(resource) {
+        },
+        async loadData(resource) {
+            let vue = this
+            console.log(resource);
+
+            if(resource.repository.list_guide.length > 0)
+                vue.list_avatars = resource.repository.list_guide
+        },
+        resetValidation() {
+            let vue = this;
+            console.log('resetValidation')
+            // vue.search_text = null
+            // vue.results_search = []
         },
     }
 };

@@ -248,6 +248,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
     }
 
+    public function processes()
+    {
+        return $this->belongsToMany(Process::class, 'process_instructors', 'user_id', 'process_id');
+    }
+
     public function getWorkspaces()
     {
         $roles = AssignedRole::getUserAssignedRoles($this->id);
@@ -1924,7 +1929,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
         // No validar usuarios cursalab (todos restringidos)
         if (!$cursalab_exception) {
-            
+
             return $customer->hasServiceAvailable();
         }
 

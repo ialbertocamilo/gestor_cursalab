@@ -11,6 +11,7 @@ Route::controller(ProcessController::class)->group(function() {
 	Route::put('/update/{process}', 'update')->name('process.update');
 
     Route::get('/search', 'search');
+    Route::get('/repository_media', 'getRepositoryMediaProcess');
     Route::post('/supervisors_users', 'supervisorsUsers');
     Route::post('/segments/store', 'storeSegments');
     // Route::get('/search/{process}', 'getData')->name('process.getData');
