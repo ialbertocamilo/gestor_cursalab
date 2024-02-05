@@ -75,10 +75,10 @@ class CourseInPerson extends Model
         $days = config('data.days');
         $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen'])
                     ->select('id', 'name','course_id','modality_in_person_properties')
-                    ->whereHas('course',function($q) use ($user){
+                    ->whereHas('course',function($q){
                         $q->where('active',1);
                     })
-                    ->where(function($q){
+                    ->where(function($q) use($user,$assigned_courses){
                         $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
                     })
                     // ->whereIn('course_id',$assigned_courses)
