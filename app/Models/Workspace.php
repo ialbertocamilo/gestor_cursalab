@@ -1012,7 +1012,23 @@ class Workspace extends BaseModel
 
         return $data;
     }
-
+    public function getModalitiesCourseByWorkspace(){
+        $workspace = $this;
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code','icon','color')->get();
+        return $modalities->map(function($modality)use($workspace){
+            $hasFunctionality = true;
+            if($modality->code == 'in-person' || $modality->code == 'virtual'){
+                $modality_code = 'course-'.$modality->code;
+                $hasFunctionality = $workspace->hasFunctionality($modality_code);
+            }
+            $modality['has_functionality'] = $hasFunctionality;
+            return $modality;
+        });
+    }
+    public function hasFunctionality($functionality_code){
+        $workspace = $this;
+        return boolval($workspace->functionalities()->get()->where('code',$functionality_code)->first());
+    }
     protected function getAvailableForTree($_subworkspace)
     {
         $data = [];

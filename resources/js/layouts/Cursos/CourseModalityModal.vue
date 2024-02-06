@@ -41,8 +41,10 @@
                                         <div>
                                             <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
                                                 {{ modality_virtual.name }}
-                                                <div class="ml-1 tag-premium d-flex align-items-center"><img
-                                                        src="/img/premiun.svg"> Pro</div>
+                                                <div class="ml-1 tag-premium d-flex align-items-center" v-if="!modality_virtual.has_functionality">
+                                                    <img src="/img/premiun.svg"> 
+                                                    Pro
+                                                </div>
                                             </v-card-title>
                                             <v-card-subtitle v-html="modality_virtual.description"></v-card-subtitle>
                                         </div>
@@ -63,8 +65,10 @@
                                         <div>
                                             <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
                                                 {{ modality_in_person.name }}
-                                                <div class="ml-1 tag-premium d-flex align-items-center"><img
-                                                        src="/img/premiun.svg"> Pro</div>
+                                                <div class="ml-1 tag-premium d-flex align-items-center" v-if="!modality_in_person.has_functionality">
+                                                    <img src="/img/premiun.svg"> 
+                                                    Pro
+                                                </div>
                                             </v-card-title>
                                             <v-card-subtitle v-html="modality_in_person.description"></v-card-subtitle>
                                         </div>
@@ -76,12 +80,31 @@
                 </div>
             </template>
         </DefaultDialog>
+        <ModalUpgrade
+            :options="ModalUpgradeOptions"
+            width="55vw"
+            :model_id="null"
+            :ref="ModalUpgradeOptions.ref"
+            @onCancel="closeSimpleModal(ModalUpgradeOptions)"
+            @onConfirm="closeFormModal(ModalUpgradeOptions),openFormModal(modalGeneralStorageEmailSendOptions, null, 'status', 'Solicitud enviada')"
+        />
+        <GeneralStorageEmailSendModal
+            :ref="modalGeneralStorageEmailSendOptions.ref"
+            :options="modalGeneralStorageEmailSendOptions"
+            width="35vw"
+            @onCancel="closeFormModal(modalGeneralStorageEmailSendOptions)"
+            @onConfirm="closeFormModal(modalGeneralStorageEmailSendOptions)"
+        />
     </div>
 </template>
 
 <script>
+import ModalUpgrade from '../ModalUpgrade';
+import GeneralStorageEmailSendModal from '../General/GeneralStorageEmailSendModal';
+const img_rocket = '<img width="20px" class="mx-1" src="/img/rocket.svg">';
 
 export default {
+    components:{ModalUpgrade,GeneralStorageEmailSendModal},
     props: {
         options: {
             type: Object,
@@ -98,6 +121,14 @@ export default {
                 showCloseIcon: true,
                 hideCancelBtn: true,
                 confirmLabel: 'Entendido',
+                persistent: false
+            },
+            modalGeneralStorageEmailSendOptions: {
+                ref: 'GeneralStorageEmailSendModal',
+                open: false,
+                showCloseIcon: true,
+                hideCancelBtn: true,
+                confirmLabel:'Entendido',
                 persistent: false
             },
             modality_asynchronus: {
@@ -121,29 +152,16 @@ export default {
                 icon: '',
                 icon_color: '',
             },
-            // modalities:[
-            //     {
-            //         key:'asynchronous',
-            //         title:'Asincrono',
-            //         description:'Curso con contenido pedagógico que no están integrados en el currículo escolar de los niveles formales de la educación',
-            //         icon:'mdi-book-education',
-            //         icon_color:'#CE98FE',
-            //     },
-            //     {
-            //         key:'in-person',
-            //         title:'Presencial',
-            //         description:'Curso donde los estudiantes acuden a un aula física donde transcurre la enseñanza y gran parte del aprendizaje.',
-            //         icon:'mdi-book-plus',
-            //         icon_color:'#5357E0',
-            //     },
-            //     {
-            //         key:'virtual',
-            //         title:'Virtual',
-            //         description:'Curso con contenido de enseñanza que especifica lo que hay que aprender durante su desarrollo',
-            //         icon:'mdi-human-male-board-poll',
-            //         icon_color:'#57BFE3',
-            //     },
-            // ]
+            ModalUpgradeOptions:{
+                ref: 'ModalUpgradeModal',
+                open: false,
+                base_endpoint: '/upgrade',
+                confirmLabel: 'Solicítalo hoy',
+                resource: 'Upgrade',
+                width:'70vw',
+                title_modal: `${img_rocket}Accede a más soluciones${img_rocket}`,
+                action: null
+            },
         };
     },
 
@@ -161,6 +179,9 @@ export default {
         ,
         async confirmModal(modality_course) {
             let vue = this;
+            if(!modality_course.has_functionality){
+                return vue.openFormModal(vue.ModalUpgradeOptions);
+            }
             vue.$emit('onConfirm', modality_course)
         },
         resetSelects() {

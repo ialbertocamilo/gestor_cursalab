@@ -120,6 +120,9 @@ export default {
 			},
             functionalities:[
                 {id:1,name:'Beneficios',selected:false},
+                {id:2,name:'Cursos Presenciales',selected:false},
+                {id:3,name:'Cursos Virtuales',selected:false},
+                {id:1,name:'Beneficios',selected:false},
                 {id:2,name:'Evaluaciones con Inteligencia Artificial',selected:false },
                 {id:3,name:'Sesiones live', selected:false},
                 {id:4,name:'Reconocimiento',selected:false},

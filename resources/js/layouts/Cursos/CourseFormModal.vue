@@ -463,7 +463,7 @@
                                         </v-row>
                                     </template>
                                 </DefaultSimpleSection>
-                                <DefaultSimpleSection title="Programación de reinicios de evaluaciones">
+                                <DefaultSimpleSection title="Programación de reinicios de evaluaciones" v-if="current_modality.code == 'asynchronous'">
                                     <template slot="content">
                                         <v-row justify="center">
                                             <v-col cols="3" class="d-flex justify-content-center align-items-center">
