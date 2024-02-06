@@ -207,7 +207,7 @@
                 Nombre completo
             </div>
             <div class="cell-value">
-                {{$user['name']}}
+                {{$user['name']}} {{$user['lastname']}} {{$user['surname']}}
             </div>
         </td>
 
