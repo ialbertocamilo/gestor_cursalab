@@ -502,7 +502,7 @@
                                                 <DefaultInput
                                                     clearable
                                                     v-model="resource.registro_capacitacion.certificateCode"
-                                                    label="Código de certificado personalizado"
+                                                    label="Encabezado del registro de capacitación"
                                                     :rules="rules.certificateCode"
                                                     dense
                                                 />

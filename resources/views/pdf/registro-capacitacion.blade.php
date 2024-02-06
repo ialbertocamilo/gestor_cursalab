@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REGISTRO DE CAPACITACIÓN - {{
-        $course['registro_capacitacion']->certificateCode
-    }}</title>
+    <title
+        {{ $course['registro_capacitacion']->certificateCode }}
+    </title>
 </head>
 <body>
 
@@ -69,6 +69,13 @@
         min-height: 50px;
     }
 
+    .topics p,
+    .topics span,
+    .topics li {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 14px !important;
+    }
+
     .margin-top {
         margin-top: 35px
     }
@@ -104,7 +111,7 @@
 </style>
 
 <h4 class="main-title">
-    REGISTRO DE CAPACITACIÓN - {{ $course['registro_capacitacion']->certificateCode }}
+    {{ $course['registro_capacitacion']->certificateCode }}
 </h4>
 
 <table class="table-form">
@@ -197,7 +204,7 @@
 
     <tr class="title-wrapper">
         <td colspan="2" class="table-title">
-            DATOS DEL “TRABAJADOR
+            DATOS DEL “TRABAJADOR"
         </td>
     </tr>
 
