@@ -976,7 +976,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $query->whereIn('id', $byCoursesId);
         }
         if($modality_code){
-            $query->whereRelation('modality','code',$modality_code);
+            // $query->whereRelation('modality','code',$modality_code);
+            $query->whereHas('modality',function($q) use ($modality_code){
+                $q->where('code',$modality_code);
+            });
         }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
         // info('D');

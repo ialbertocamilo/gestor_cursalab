@@ -108,7 +108,7 @@
                 :filters="filters"
                 @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
+                @segmentation="openSegmentationModal($event)"
                 @redirect_to_course_form_page="redirect_to_course_form_page($event)"
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
@@ -743,6 +743,17 @@ export default {
             vue.closeFormModal(vue.modalCourseModality);
             vue.modalCourseOptions.modality = modality;
             vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso ('+ modality.name.toLowerCase()+')');
+        },
+        openSegmentationModal(resource){
+            let vue = this;
+            if(resource.modality_code == 'in-person' || resource.modality_code=='virtual'){
+                resource.show_criteria_segmentation = false;
+            }
+            if(resource.active_topics_count == 0 && resource.modality_code=='virtual'){
+                vue.showAlert('Es necesario crear temas activos para poder segmentar el curso.','warning');
+                return;
+            }
+            vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
         }
     }
 

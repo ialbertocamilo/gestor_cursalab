@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Carbon\Carbon;
+use App\Models\Meeting;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TopicInPersonAppResource extends JsonResource
@@ -34,12 +35,12 @@ class TopicInPersonAppResource extends JsonResource
         }
         $is_today = $start_datetime->isToday();
         $is_ontime = now()->between($start_datetime, $finish_datetime);
-
-        return [
+        $modality_code = $this->course->modality->code;
+        $session_data = [
             'key' => $this->modality_in_person_properties->start_date,
             'image' => get_media_url($this->course->imagen,'s3'),
             'name' => $this->name,
-            'session_code'=> 'in-person',
+            'session_code'=> $modality_code,
             'description_code' => 'Cursos de la empresa realizadas por un expositor.',
             'course_id' => $this->course_id,
             'topic_id' => $this->id,
@@ -54,5 +55,12 @@ class TopicInPersonAppResource extends JsonResource
             'format_day' => fechaCastellanoV2($format_day),
             'required_signature'=>$this->course->modality_in_person_properties->required_signature
         ];
+        if($modality_code == 'virtual'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$this->id)->first();
+            if($meeting){
+                $session_data['zoom'] = MeetingAppResource::collection([$meeting]);
+            }
+        }
+        return $session_data;
     }
 }

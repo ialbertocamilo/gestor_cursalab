@@ -15,7 +15,7 @@ return [
             'show'=>true
         ],
         [
-            'title'=>'Evaluation',
+            'title'=>'Evaluación',
             'code'=>'evaluation',
             'description'=> 'Evalúa a tus colaboradores sobre los temas que se ha presentado.',
             'show'=>true

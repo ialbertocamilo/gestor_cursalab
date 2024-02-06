@@ -18,6 +18,9 @@ const opts = {
 				"main-background": "#f8f8fb",
 				"main-text": "#768598"
 			}
+		},
+		defaultFont: {
+			family: 'Nunito'
 		}
 	}
 };

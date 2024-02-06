@@ -249,7 +249,7 @@ class Meeting extends BaseModel
         $currWorkspaceIndex = get_current_workspace_indexes('id');
         $query->where('workspace_id', $currWorkspaceIndex);
         # meeting segun workspaceid
-
+        $query->where('model_type','<>','App\\Models\\Topic');
         if ($request->usuario_id)
             $query->whereHas('attendants', function ($q) use ($request) {
                 $q->where('usuario_id', $request->usuario_id);
@@ -362,7 +362,7 @@ class Meeting extends BaseModel
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
             $host = Usuario::find($data['host_id']);
-            
+            $data['model_type'] = isset($data['model_type']) ? $data['model_type'] : 'App\\Models\\Meeting';
             if($type->code == 'benefits'){
                 $data['model_type'] = 'App\\Models\\BenefitProperty';
             }
@@ -373,7 +373,6 @@ class Meeting extends BaseModel
             #add workspace id
 
             DB::beginTransaction();
-
             if ($meeting) {
 
                 if ($datesHaveChanged || $meeting->typeHasChanged($type)) {

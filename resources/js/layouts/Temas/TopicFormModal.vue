@@ -70,7 +70,7 @@
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.imagen"
-                            label="Imagen (500x350px)"
+                            label="Imagen de fondo (500x350px)"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
@@ -408,8 +408,9 @@
                                                     :countShowValues="4"
                                                     :deleteChips="true"
                                                     attach
+                                                    custom-items
                                                 >
-                                                    <!-- <template v-slot:customItems="{item}">
+                                                    <template v-slot:customItems="{item}">
                                                         <div class="d-flex">
                                                             <div class="py-1">
                                                                 <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
@@ -426,7 +427,7 @@
                                                                 </v-tooltip>
                                                             </div>
                                                         </div>
-                                                    </template> -->
+                                                    </template>
                                                 </DefaultAutocomplete>
                                             </v-col>
                                             <v-col cols="4">
@@ -445,7 +446,27 @@
                                                     :countShowValues="3"
                                                     :deleteChips="true"
                                                     attach
-                                                />
+                                                    custom-items
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
                                             </v-col>
                                             <v-col cols="4">
                                                 <DefaultAutocomplete
@@ -463,13 +484,33 @@
                                                     :countShowValues="3"
                                                     :deleteChips="true"
                                                     attach
-                                                />
+                                                    custom-items
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
                                             </v-col>
-                                            <v-col cols="6">
+                                            <v-col cols="12">
                                                 <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
                                                 <DefaultButton
                                                     outlined 
-                                                    label="Agregar Tag"
+                                                    label="Agregar Etiqueta"
                                                     @click="openFormModal(modalTagOptions)"
                                                 />
                                             </v-col>

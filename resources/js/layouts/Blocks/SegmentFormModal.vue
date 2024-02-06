@@ -294,7 +294,10 @@ export default {
         checkIfExistCriteria(stackSegments, current) {
             const vue = this;
             let stackMessage = [];
-
+            
+            if(!vue.show_criteria_segmentation){
+                return stackMessage;
+            }
             //local scope function
             const VerifyCodeAndValues = (criterians, current) => {
                 let cri_state = false,
@@ -326,7 +329,6 @@ export default {
 
                 return { state, message, title, detail: { cri_data, cri_state } };
             };
-
             for (let i = 0; i < stackSegments.length; i++) {
                 const { criteria_selected } = stackSegments[i];
 

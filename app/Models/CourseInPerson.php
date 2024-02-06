@@ -26,32 +26,32 @@ class CourseInPerson extends Model
         if ($type_session) {
             switch ($type_session) {
                 case 'in-person':
-                    $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+                    $sessions_in_person = CourseInPerson::listCoursesByTypeCode($request,'in-person');
                     break;
                 case 'live':
                     $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
                     break;
                 case 'online':
+                    $sessions_course_live  = CourseInPerson::listCoursesByTypeCode($request,'virtual');
                     break;
                 case 'all':
-                    $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+                    $sessions_in_person = CourseInPerson::listCoursesByTypeCode($request,'in-person');
                     $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
-                    $sessions_course_live  = [];
+                    $sessions_course_live  = CourseInPerson::listCoursesByTypeCode($request,'virtual');
                     break;
             }
         }else{
-            $sessions_in_person = CourseInPerson::listCoursesInPerson($request);
+            $sessions_in_person = CourseInPerson::listCoursesByTypeCode($request,'in-person');
             $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
-            $sessions_course_live  = [];
+            $sessions_course_live  = CourseInPerson::listCoursesByTypeCode($request,'virtual');
         }
         return compact('sessions_in_person','sessions_live','sessions_course_live');
     }
-    protected function listCoursesInPerson($request){
+    protected function listCoursesByTypeCode($request,$modality_code){
         $code = $request->code;
         $user = $request->user;
         
-        $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:'in-person');
-        
+        $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:$modality_code);
         $operator = '';
         switch ($code) {
             case 'today':
@@ -73,10 +73,10 @@ class CourseInPerson extends Model
         }
         $months = config('data.months');
         $days = config('data.days');
-        $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen'])
+        $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen,modality_id','course.modality:id,code'])
                     ->select('id', 'name','course_id','modality_in_person_properties')
-                    ->whereHas('course',function($q){
-                        $q->where('active',1);
+                    ->whereHas('course',function($q) use ($modality_code){
+                        $q->where('active',1)->whereRelation('modality','code',$modality_code);
                     })
                     ->where(function($q) use($user,$assigned_courses){
                         $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
@@ -224,6 +224,7 @@ class CourseInPerson extends Model
             'imagen' => $topic->imagen,
             'contenido' => $topic->content,
             'media' => $media_embed,
+            'tags' => $topic->tags,
             'media_not_embed' => $media_not_embed,
             'media_topic_progress'=>$media_topic_progress,
             'review_all_duration_media' => boolval($topic->review_all_duration_media),
@@ -520,7 +521,9 @@ class CourseInPerson extends Model
                     ->whereHas('course',function($q){
                         $q->where('active',1);
                     })
-                    ->whereIn('course_id',$assigned_courses)
+                    ->where(function($q) use($user,$assigned_courses){
+                        $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
+                    })
                     ->whereNotNull('modality_in_person_properties')
                     ->where('active',1);
         return [

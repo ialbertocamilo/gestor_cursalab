@@ -368,7 +368,49 @@ class Course extends BaseModel
 
         return $course;
     }
+    //Crear o actualizar meetings para cursos online
+    public function storeUpdateMeeting(){
+        $course = $this;
+        $course->load('topics:id,course_id,active,name,modality_in_person_properties');
+        $active_topics = $course->topics->where('active',1)->values();
+        $type_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first()->id;
+        $user_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','user')->where('code','normal')->first()->id;
+        $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
+        $attendants = Course::usersSegmented($course->segments, type: 'get_records')->map(function($user) use ($user_meeting_id){
+            return [
+                "usuario_id" => $user->id,
+                "type_id" => $user_meeting_id,
+                "id" => null,
+            ];
+        });
 
+        foreach ($active_topics as $topic) {
+            $modality_in_person_properties = $topic->modality_in_person_properties;
+            $host_id = $modality_in_person_properties->host_id;
+            $start_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
+            $finish_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
+            $stars_at = $start_datetime->format('Y-m-d h:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d h:i:s');
+            $duration = $start_datetime->diffInMinutes($finish_datetime);
+            $model_id = $topic->id;
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$model_id)->first();
+            $meeting_data = [
+                "name" => $topic->name,
+                "starts_at" => $stars_at,
+                "finishes_at" =>$finishes_at,
+                "host_id" => $host_id,
+                "type_id" => $type_meeting_id,
+                "duration" => $duration,
+                "embed" => false,
+                "attendants" => $attendants,
+                "description" => null,
+                "model_type" => 'App\\Models\\Topic',
+                "model_id" => $model_id,
+            ];
+            $_meeting = $meeting ?? new Meeting();
+            $_meeting->storeRequest($meeting_data,$meeting);
+        }
+    }
     protected function validateBeforeUpdate(array $data, School $school, Course $course)
     {
         $validations = collect();
