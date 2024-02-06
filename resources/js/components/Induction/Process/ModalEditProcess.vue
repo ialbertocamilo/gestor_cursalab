@@ -4,7 +4,7 @@
     <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
         <v-card class="modal_edit_process">
             <v-card-title class="default-dialog-title">
-                Crear inducción {{ step_title }}
+                {{ process.id ? 'Editar' : 'Crear' }} proceso de inducción {{ step_title }}
                 <v-spacer/>
                 <v-btn icon :ripple="false" color="white"
                        @click="closeModal">
@@ -508,7 +508,7 @@
                                         <v-col cols="4">
                                             <span class="text_default mb-2">Previsualización</span>
                                             <div class="bx_prev_instructions">
-                                                <div class="bx_dialog bxd_right">
+                                                <div class="bx_dialog bxd_right" :style="{'backgroundColor': colorSelected, 'color': colorSelected}">
                                                     <div class="content_dialog" v-html="content_instruction"></div>
                                                 </div>
                                             </div>
@@ -546,9 +546,13 @@
                 <DefaultButtonModalSteps
                     @cancel="prevStep"
                     @confirm="nextStep"
+                    @confirmBtnExtra="confirmAndContinueLater"
                     :cancelLabel="cancelLabel"
-                    confirmLabel="Continuar"
+                    :confirmLabel="confirmLabel"
                     :disabled_next="disabled_btn_next"
+                    :showBtnExtra="showBtnExtra"
+                    :disabled_btn_extra="disabled_btn_next"
+                    labelBtnExtra="Guardar y continuar luego"
                     />
             </v-card-actions>
         </v-card>
@@ -614,7 +618,9 @@ export default {
     data() {
         return {
             list_icons_finished_onboarding: [],
-            process: {},
+            process: {
+                instructions: []
+            },
             modalDateOptions: {
                 ref: 'DateEvent',
                 open: false,
@@ -656,12 +662,14 @@ export default {
             },
             // steps
             disabled_btn_next: true,
+            showBtnExtra: true,
             stepper_box_btn1: true,
             stepper_box_btn2: true,
             stepper_box_btn3: false,
             stepper_box_btn4: false,
             stepper_box: 1,
             cancelLabel: "Cancelar",
+            confirmLabel: "Continuar",
             list_segments:[],
             sections: {
                 showAdvancedOptions: false
@@ -837,12 +845,10 @@ export default {
                 if(vue.stepper_box == 1) {
                     vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
                     vue.disabled_btn_next = vue.stepper_box_btn1;
-                    vue.step_title = ''
                 }
                 else if(vue.stepper_box == 2){
                     vue.disabledBtnModal()
                     vue.disabled_btn_next = vue.stepper_box_btn2;
-                    vue.step_title = '> Instructivo'
                 }
                 else if(vue.stepper_box == 3){
                     vue.disabled_btn_next = vue.stepper_box_btn3;
@@ -853,14 +859,15 @@ export default {
                     vue.disabled_btn_next = vue.stepper_box_btn4;
                 }
                 console.log('process');
-
-                console.log(vue.process)
             },
             deep: true
         },
         stepper_box: {
             handler(n, o) {
                 let vue = this;
+                vue.confirmLabel = "Continuar";
+                vue.cancelLabel = "Retroceder";
+                vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
                     if(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description)) {
@@ -868,23 +875,27 @@ export default {
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                     vue.step_title = ''
+                    vue.cancelLabel = "Cancelar";
                 }
                 else if(vue.stepper_box == 2){
                     vue.disabledBtnModal()
                     vue.disabled_btn_next = vue.stepper_box_btn2;
-                    vue.step_title = '> Instructivo'
+                    vue.step_title = '> Personalización'
                 }
                 else if(vue.stepper_box == 3){
                     vue.disabled_btn_next = vue.stepper_box_btn3;
+                    vue.step_title = '> Personalización'
                 }
                 else if(vue.stepper_box == 4){
                     let errors = vue.showValidateActividades()
                     vue.stepper_box_btn4 = false; //validarr subida de imagenes
                     vue.disabled_btn_next = vue.stepper_box_btn4;
+                    vue.step_title = '> Personalización > Instructivo'
+                    vue.confirmLabel = "Guardar";
+                    vue.showBtnExtra = false
                 }
                 console.log('stepper');
 
-                console.log(vue.process)
                 if(vue.process.instructions != null && vue.process.instructions.length > 0){
                     // vue.process.instructions.forEach(el => {
                     //     vue.instructionSelected(el.instruction)
@@ -981,26 +992,17 @@ export default {
         },
         nextStep(){
             let vue = this;
-            vue.cancelLabel = "Cancelar";
-
 
             if(vue.stepper_box == 1){
-                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 2;
-                vue.step_title = ''
             }
             else if(vue.stepper_box == 2){
-                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 3;
-                vue.step_title = '> Instructivo'
             }
             else if(vue.stepper_box == 3){
-                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 4;
-                vue.step_title = '> Instructivo > Personalización'
             }
             else if(vue.stepper_box == 4){
-                vue.cancelLabel = "Retroceder";
                 vue.confirm();
             }
         },
@@ -1008,20 +1010,20 @@ export default {
             let vue = this;
             if(vue.stepper_box == 1){
                 vue.closeModal();
-                // vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 2){
-                vue.cancelLabel = "Cancelar";
                 vue.stepper_box = 1;
             }
             else if(vue.stepper_box == 3){
-                vue.cancelLabel = "Cancelar";
                 vue.stepper_box = 2;
             }
             else if(vue.stepper_box == 4){
-                vue.cancelLabel = "Retroceder";
                 vue.stepper_box = 3;
             }
+        },
+        confirmAndContinueLater() {
+            let vue = this;
+            vue.confirm();
         },
         disabledBtnModal() {
             let vue = this;
@@ -1047,7 +1049,9 @@ export default {
             vue.fondo_mobile_selected = null
             vue.fondo_web_selected = null
             vue.resource = {}
-            vue.process = {}
+            vue.process = {
+                instructions: []
+            }
 
             vue.colorPicker = '#FE141F'
             vue.colorSelected = '#5458EA'
@@ -1260,29 +1264,29 @@ export default {
 
             vue.$nextTick(() => {
                 vue.process = Object.assign({}, vue.process, resource)
+                console.log(resource);
+                if(resource)
+                {
+                    if(resource.color) {
+                        if(resource.color != vue.colorDefault) {
+                            vue.colorPicker = resource.color
+                            vue.colorSelected = resource.color
+                        }
+                    }
+                    vue.colorParPicker = resource.color_map_even ? resource.color_map_even : vue.colorParPicker
+                    vue.colorImparPicker =  resource.color_map_odd ? resource.color_map_odd : vue.colorImparPicker
 
-                if(resource.color) {
-                    if(resource.color != vue.colorDefault) {
-                        vue.colorPicker = resource.color
-                        vue.colorSelected = resource.color
+                    if(resource.repository.list_icon_final.length > 0)
+                        vue.list_icons_finished_onboarding = resource.repository.list_icon_final
+
+                    if(resource.instructions.length == 0)
+                    {
+                        vue.addInstruction()
                     }
                 }
-                vue.colorParPicker = resource.color_map_even ? resource.color_map_even : vue.colorParPicker
-                vue.colorImparPicker = resource.color_map_odd ? resource.color_map_odd : vue.colorImparPicker
-
-                if(resource.repository.list_icon_final.length > 0)
-                    vue.list_icons_finished_onboarding = resource.repository.list_icon_final
-
-                if(resource.instructions.length == 0)
+                else
                 {
-                    const newID = `n-${Date.now()}`;
-                    const newInstruction = {
-                        id: newID,
-                        description: "",
-                        active: 1,
-                        hasErrors: false
-                    };
-                    vue.process.instructions.push(newInstruction);
+                    vue.addInstruction()
                 }
             })
         },
@@ -1603,6 +1607,7 @@ span.v-stepper__step__step:after {
 
     .txt_desc textarea {
         min-height: auto;
+        font-size: 14px;
     }
 
     .bx_input_inasistencias input {
@@ -1894,7 +1899,7 @@ span.v-stepper__step__step:after {
                 height: 0px;
                 border-style: solid;
                 border-width: 15px 10px 0px 10px;
-                border-color: #57BFE3 transparent;
+                border-color: currentColor transparent;
                 display: inline-block;
                 bottom: -15px;
                 position: absolute;

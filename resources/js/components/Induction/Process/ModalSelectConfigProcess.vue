@@ -66,7 +66,12 @@ export default {
     data() {
         return {
             dialog: false,
-            process : {},
+            process : {
+                activities: false,
+                edit: false,
+                certificate: false,
+                segments: false
+            },
         };
     },
     methods: {
@@ -101,6 +106,12 @@ export default {
         },
         resetValidation() {
             let vue = this
+            vue.process = {
+                activities: false,
+                edit: false,
+                certificate: false,
+                segments: false
+            }
         },
     },
 };
@@ -110,7 +121,7 @@ export default {
 .card_modal_select_config {
     .title_act {
         color: #2A3649;
-        font-size: 18px;
+        font-size: 16px;
         // line-height: 21px;
         font-family: "Nunito", sans-serif;
         margin: 25px 0 25px;

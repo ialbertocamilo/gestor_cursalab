@@ -453,7 +453,8 @@ export default {
             console.log(value);
             if(value == 'new')
             {
-                vue.modalCreateProcess.open = true
+                vue.openFormModal(vue.modalEditProcess)
+                // vue.modalCreateProcess.open = true
                 vue.modalSelectTemplate.open = false
             }
         },
@@ -530,8 +531,8 @@ export default {
 
             vue.showLoader()
 
-            let url = `${vue.base_endpoint}/update/${item.id}`
-            let method = 'PUT';
+            let url = item.id ? `${vue.base_endpoint}/update/${item.id}` : `${vue.base_endpoint}/store`
+            let method = item.id ? 'PUT' : 'POST';
 
             if(item.title != '')
             {

@@ -278,6 +278,10 @@ class Process extends BaseModel
                     $i++;
                 }
             }
+            $item->finishes_at = $item->finishes_at ? date('d-m-Y', strtotime($item->finishes_at)) : null;
+            $item->starts_at = $item->starts_at ? date('d-m-Y', strtotime($item->starts_at)) : null;
+            $item->participants = rand(12,35);
+            $item->percentage = rand(10,80);
         }
 
         $response['data'] = $processes->items();

@@ -44,9 +44,26 @@ class ProcessController extends Controller
         return $this->success($response);
     }
 
-    public function store(ProcessStoreUpdateRequest $request)
+    public function store(Process $process, ProcessStoreUpdateRequest $request)
     {
-        $process = Process::storeRequest($request->validated());
+        $data = $request->validated();
+
+        if(isset($data['file_background_mobile']))
+            $data = Media::requestUploadFile($data, 'background_mobile', false, 'background_mobile', 'png');
+
+        if(isset($data['file_background_web']))
+            $data = Media::requestUploadFile($data, 'background_web', false, 'background_web', 'png');
+
+        if(isset($data['file_logo']))
+            $data = Media::requestUploadFile($data, 'logo', false, 'logo', 'png');
+
+        if(isset($data['file_image_guia']))
+            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png');
+
+        if(isset($data['file_icon_finished']))
+            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png');
+
+        $process = Process::storeRequest($data);
 
         $response = [
             'msg' => 'Proceso creado correctamente.',
