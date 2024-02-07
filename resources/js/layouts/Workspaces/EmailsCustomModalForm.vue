@@ -19,30 +19,32 @@
                             >
                                 <template slot="content">
                                     <div style="width: 100%;">
-                                        <div class="v-row">
-                                            <DefaultInput
-                                                class="mt-4 col-md-8"
-                                                dense
-                                                label="Título"
-                                                show-required
-                                                placeholder="Ingrese un título"
-                                                v-model="email.data_custom.title"
-                                                :rules="rules.name"
-                                                emojiable
-                                            />
-                                            <DefaultToggle 
-                                                class="col-md-4"
-                                                v-model="email.data_custom.show_subworkspace_logo" 
-                                                active-label="Mostrar el logo del módulo"
-                                                inactive-label="Mostrar el logo del módulo"
-                                                dense
-                                            />
-                                        </div>
+                                        <v-row justify="space-around">
+                                            <v-col cols="8">
+                                                <DefaultInput
+                                                    dense
+                                                    label="Título"
+                                                    show-required
+                                                    placeholder="Ingrese un título"
+                                                    v-model="email.data_custom.title"
+                                                    :rules="rules.name"
+                                                    emojiable
+                                                />
+                                            </v-col>
+                                            <v-col cols="4" class="d-flex align-items-center">
+                                                <DefaultToggle 
+                                                    v-model="email.data_custom.show_subworkspace_logo" 
+                                                    active-label="Mostrar el logo del módulo"
+                                                    inactive-label="Mostrar el logo del módulo"
+                                                    dense
+                                                />
+                                            </v-col>
+                                        </v-row>
                                         
                                         <DefaultRichText
                                             label="Contenido"
                                             v-model="email.data_custom.content"
-                                            :height="400"
+                                            :height="300"
                                             :key="`key_description_rich_text-${index}`"
                                             :ref="`ref_description_rich_text-${index}`"
                                             :maxLength="1000"

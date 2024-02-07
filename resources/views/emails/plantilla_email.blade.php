@@ -47,15 +47,17 @@
                                                     style="max-width: 150;height:auto;border:none;">
                                             </a>
                                         </td> 
-                                        <td align="start">
-                                            <a href="https://cursalab.io/" target="_blank"
-                                                style="color: white;text-decoration: none;">
-                                                <img 
-                                                    src="{{ url('/img/logo_cursalab_v2_black.png') }}"
-                                                    alt="Cursalab" width="150"
-                                                    style="max-width: 150;height:auto;border:none;">
-                                            </a>
-                                        </td>
+                                        @if(isset($data['image_subworkspace']))
+                                            <td style="text-align: end">
+                                                <a href="https://cursalab.io/" target="_blank"
+                                                    style="color: white;text-decoration: none;">
+                                                    <img 
+                                                        src="{{ $data['image_subworkspace'] }}"
+                                                        alt="Cursalab" width="120"
+                                                        style="max-width: 150;height:auto;border:none;">
+                                                </a>
+                                            </td>
+                                        @endif
                                       <td style="font-family: 'Poppins', sans-serif; text-align: end; font-size:.8rem; font-weight: 600;">
                                       </td>
                                     </tr>

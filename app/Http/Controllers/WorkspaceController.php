@@ -328,6 +328,12 @@ class WorkspaceController extends Controller
     public function showEmail(Workspace $workspace,Request $request){
         // $data = WorkspaceCustomEmail::search($workspace);
         $data = WorkspaceCustomEmail::search($workspace,$request->email_code);
+        if(isset($data->data_custom['show_subworkspace_logo']) && $data->data_custom['show_subworkspace_logo']){
+            $logo = $workspace->subworkspaces->whereNotNull('logo')->shuffle()->first()?->logo;
+            if($logo){
+                $data['image_subworkspace'] = get_media_url($logo,'s3');
+            }
+        }
         return view('emails.welcome_email',['data'=>$data]);
     }
     public function saveCustomEmail(Workspace $workspace,Request $request){

@@ -692,9 +692,15 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
                        'user_id' => $user->id,
-                       'data_custom' => $email_custom?->data_custom
+                       'data_custom' => $email_custom?->data_custom,
                     ];
 
+        if(isset($email_custom->data_custom['show_subworkspace_logo']) && $email_custom->data_custom['show_subworkspace_logo']){
+            $logo = Workspace::select('logo')->where('id',$user->subworkspace_id)->first()?->logo;
+            if($logo){
+                $mail_data['image_subworkspace'] = get_media_url($logo,'s3');
+            }
+        }
         $email_was_sent = EmailLog::where('user_email',$email)->where('type_email','welcome_email')->first();
         if($email_was_sent){
             return;
@@ -704,9 +710,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             //send email by command
             $status = 'sent';
             Mail::to($email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
-            info('entra');
         }
-        info('llego');
         EmailLog::insertEmail($mail_data,'welcome_email','emails.welcome_email',$email,$status);
     }
     public function syncDocumentCriterionValue($old_document, $new_document)
