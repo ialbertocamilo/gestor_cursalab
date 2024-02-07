@@ -254,7 +254,7 @@
                 <DefaultSimpleSection title="Visualización de recursos multimedia" >
                     <template slot="content">
                         <v-row>
-                            <v-col cols="12" v-if="selects.course_code_modality == 'asynchronous'">
+                            <v-col cols="12">
                                 <DefaultToggle 
                                     v-model="resource.review_all_duration_media"
                                     active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
