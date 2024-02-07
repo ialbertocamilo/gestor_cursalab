@@ -2,7 +2,7 @@
 # To build a specific set of containers with a version,
 # you can use the VERSION as an arg of the docker build command (e.g make docker VERSION=0.0.2)
 
-VERSION_DEP ?= 2.0.7
+VERSION_DEP ?= 2.0.13
 
 VERSION ?= v0.0.1
 
@@ -30,7 +30,7 @@ docker-push:
 	docker push ${REGISTRY}/web_server_gestor:${VERSION}
 
 
-docker-pull: 
+docker-pull:
 	docker pull ${REGISTRY}/composer:${VERSION_DEP}
 	docker pull ${REGISTRY}/php:${VERSION_DEP}
 	docker pull ${REGISTRY}/phpfpm:${VERSION_DEP}
@@ -43,6 +43,12 @@ docker-dependencies-build:
 	docker build -f Dockerfile.composerdep .  -t ${REGISTRY}/composer:${VERSION_DEP}
 	docker build -f Dockerfile.phpdep .  -t ${REGISTRY}/php:${VERSION_DEP}
 	docker build -f Dockerfile.phpfpmdep .  -t ${REGISTRY}/phpfpm:${VERSION_DEP}
+
+# docker buildx build --platform=linux/amd64 -t <IMAGE_NAME>:<IMAGE_VERSION>-amd64 .
+docker-dependencies-build:
+#	docker buildx build --platform=linux/amd64 -f Dockerfile.composerdep .  -t ${REGISTRY}/composer:${VERSION_DEP}-amd64
+#	docker buildx build --platform=linux/amd64 -f Dockerfile.phpdep .  -t ${REGISTRY}/php:${VERSION_DEP}-amd64
+#	docker buildx build --platform=linux/amd64 -f Dockerfile.phpfpmdep .  -t ${REGISTRY}/phpfpm:${VERSION_DEP}-amd64
 
 docker-dependencies-push:
 	docker push ${REGISTRY}/composer:${VERSION_DEP}

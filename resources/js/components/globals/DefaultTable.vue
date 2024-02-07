@@ -356,7 +356,7 @@
                             <br> <span class="table-default-icon-title"
                                        v-text="'No visible'"/>
 
-                            <ul class="fancy-menu position-absolute">
+                            <ul class="fancy-menu">
                                 <li class="red-title">
                                     <i class="fas fa-exclamation-triangle"
                                        style="color: red !important; font-size: 12px"></i>
@@ -1265,7 +1265,7 @@ export default {
                     vue.pagination.toRow = data.data.to || 0;
                     vue.pagination.total_rows = data.data.total;
                     vue.loading = false;
-                    vue.$emit('data-loaded');
+                    vue.$emit('data-loaded', data);
                 })
         },
         changePage(sum) {
@@ -1500,6 +1500,7 @@ span.custom_benefit_type {
     font-size: 14px;
     font-family: "Nunito", sans-serif;
 }
+
 .tbl_perfil_speaker {
     width: 40px;
     height: 40px;

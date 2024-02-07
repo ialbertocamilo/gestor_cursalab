@@ -64,10 +64,10 @@
           <input hidden name="email" value="{{ $email ?? old('email') }}" >
 
           <div class="form-group">
-            <input id="reset-password" type="password" name="password" 
-                required data-msg="Por favor ingrese su nueva contraseña" 
+            <input id="reset-password" type="password" name="password"
+                required data-msg="Por favor ingrese su nueva contraseña"
                 class="input-material form-control{{ $errors->has('password') ? ' is-invalid' : '' }} no-icon one" autocomplete="off" maxlength="100" autofocus>
-            <div class="one toggle-eye text-muted" 
+            <div class="one toggle-eye text-muted"
                 onclick="toggleEyeInputId(this, 'reset-password')">
               <span class="far fa-eye fa-lg"></span>
             </div>
@@ -81,10 +81,10 @@
           </div>
 
           <div class="form-group">
-            <input id="reset-repassword" type="password" name="password_confirmation" 
-                required data-msg="Por favor repita su nueva contraseña" 
+            <input id="reset-repassword" type="password" name="password_confirmation"
+                required data-msg="Por favor repita su nueva contraseña"
                 class="input-material form-control{{ $errors->has('password_confirmation') ? ' is-invalid' : '' }} no-icon two" autocomplete="off" maxlength="100">
-            <div class="two toggle-eye text-muted" 
+            <div class="two toggle-eye text-muted"
                  onclick="toggleEyeInputId(this, 'reset-repassword')">
               <span class="far fa-eye fa-lg"></span>
             </div>
@@ -108,7 +108,7 @@
     </div>
     <div class="mt-4 text-right copy">
       <a href="https://cursalab.io/" target="_blank" class="external">
-        <img src="{{ url('img/poweredByCursalab.png') }}" alt="powerby-cursalab" class="img-fluid" width="120">
+        <img src="{{ url('img/poweredByCursalab_v2.png') }}" alt="powerby-cursalab" class="img-fluid" width="120">
       </a>
     </div>
   </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mongo\CourseInfoUsersM;
+use App\Models\RegistroCapacitacionTrainer;
 use DB;
 use App\Models\Poll;
 use App\Models\Ciclo;
@@ -82,7 +83,7 @@ class CursosController extends Controller
             ->pluck('id')
             ->toArray();
 
-        self::$coursesUsersAssigned = Course::calculateUsersSegmentedCount($coursesIds);
+        self::$coursesUsersAssigned = [];//Course::calculateUsersSegmentedCount($coursesIds);
 
         CursoSearchResource::collection($paginatedCourses);
 
@@ -141,10 +142,24 @@ class CursosController extends Controller
             $legal_representatives = Person::select('id','person_attributes')->where('workspace_id',$workspace->id)->where('type','dc3-legal-representative')->get();
             $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
         }
-        $response = compact('escuelas', 'requisitos', 'types', 'qualification_types',
-                             'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
-                             'instructors','legal_representatives','catalog_denominations'
-                    );
+
+        $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
+        $registro_capacitacion_trainers = [];
+        if ($has_registro_capacitacion_functionality) {
+            $registro_capacitacion_trainers = RegistroCapacitacionTrainer::query()
+                ->where('workspace_id', $workspace->id)
+                ->get();
+        }
+
+
+        $response = compact(
+            'escuelas', 'requisitos', 'types', 'qualification_types',
+            'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
+            'instructors','legal_representatives','catalog_denominations',
+            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers'
+        );
+
+
         return $compactResponse ? $response : $this->success($response);
     }
 
@@ -204,6 +219,8 @@ class CursosController extends Controller
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
             'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
+            'has_registro_capacitacion_functionality' => $form_selects['has_registro_capacitacion_functionality'],
+            'registro_capacitacion_trainers' => $form_selects['registro_capacitacion_trainers'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
             'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate,
             'has_DC3_functionality' => $has_DC3_functionality,
@@ -524,8 +541,85 @@ class CursosController extends Controller
 
         return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
-    public function listMediaTopics(Course $course){
+    
+    public function listMediaTopics(Course $course)
+    {
         $topics = $course->listMediaTopics();
         return $this->success(compact('topics'));
+    }
+
+    public function copy(School $school, Course $course)
+    {
+        $items = Course::getTopicsForTree($course);
+
+        $items_destination = [];
+
+        return $this->success(compact('school', 'items', 'items_destination'));
+    }
+
+    public function copyContent(Request $request, School $school, Course $course)
+    {
+        $selections = $request->selection_source;
+        $workspace = get_current_workspace();
+
+        // dd($selections, $school, $course);
+
+        $data = $this->buildSourceTreeSelection($course, $selections);
+
+        $_courses = Course::whereIn('id', [$course->id])->get();
+        $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
+
+        $prefix = '[COPIA] - ';
+
+        Workspace::setCoursesDuplication($data['courses'], $_courses, $_topics, $school, $workspace, $prefix, true);
+
+        return $this->success(['msg' => 'Contenido duplicado correctamente.']);
+    }
+
+    public function buildSourceTreeSelection($course, $selections)
+    {
+        $courses = [];
+        $course_ids = [];
+        $topic_ids = [];
+
+        $prefix = 'course_' . $course->id . '-';
+
+        foreach ($selections as $selection) {
+
+            $sections = explode('-',  $prefix . $selection);
+            $data = [];
+
+            foreach ($sections as $section) {
+
+                $part = explode('_', $section);
+
+                $model = $part[0];
+                $id = $part[1];
+
+                ${$model.'_ids'}[$id] = $id;
+
+                $row = [
+                    'model' => $model,
+                    'id' => $id,
+                ];
+
+                $data[] = $row; 
+            }
+
+            // $course_id = $data[0]['id'];
+            $topic_id = $data[1]['id'] ?? NULL;
+
+            if ($topic_id) {
+
+                $courses[$course->id]['topics'][] = $topic_id;
+
+            } else {
+                
+                $courses[$course->id]['topics'] = [];
+            }
+
+        }
+
+        return compact('course_ids', 'topic_ids', 'courses');
     }
 }

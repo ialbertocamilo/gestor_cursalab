@@ -144,7 +144,7 @@ class  DashboardService {
 
         $excludedUsersIds = implode(',', []);
         $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS,
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS,
             function () use ($excludedUsersIds, $workspaceId,$module_id,$user_cursalab) {
 
                 $data['time'] = now();
@@ -199,7 +199,7 @@ class  DashboardService {
 
         $excludedUsersIds = implode(',', []);
         $user_cursalab = Taxonomy::getFirstData('user','type','cursalab');
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS,
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS,
             function () use ($excludedUsersIds, $workspaceId,$module_id,$user_cursalab) {
 
             $data['time'] = now();
@@ -256,7 +256,7 @@ class  DashboardService {
         $boticas = Criterion::getValuesForSelect('botica');
         $boticasIds = $boticas->pluck('id')->toArray();
 
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS,
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS,
             function () use ($workspaceId, $excludedUsersIds, $boticasIds) {
 
             $data['time'] = now();

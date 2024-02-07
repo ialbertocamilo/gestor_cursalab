@@ -106,6 +106,16 @@
                         `Segmentación del curso - ${$event.name}`
                     )
                 "
+                
+                @duplicate="
+                    openFormModal(
+                        duplicateFormModalOptions,
+                        $event,
+                        'duplicate',
+                        `Duplicar curso - ${$event.name}`
+                    )
+                "
+
                 @compatibility="
                     openFormModal(
                         modalFormCompatibilityOptions,
@@ -230,6 +240,17 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+
+            <DuplicateForm
+                :options="duplicateFormModalOptions"
+                width="50vw"
+                duplicate_level="course"
+                :source_name="escuela_name"
+                :ref="duplicateFormModalOptions.ref"
+                @onConfirm="closeFormModal(duplicateFormModalOptions, dataTable, filters)"
+                @onCancel="closeFormModal(duplicateFormModalOptions)"
+            />
+
         </v-card>
     </section>
 </template>
@@ -245,6 +266,7 @@ import CompatibilityFormModal from "./CompatibilityFormModal";
 import LogsModal from "../../components/globals/Logs";
 import ProjectFormModal from "../Project/ProjectFormModal.vue";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
+import DuplicateForm from "../Escuelas/DuplicateForm";
 
 export default {
     components: {
@@ -258,7 +280,8 @@ export default {
         CompatibilityFormModal,
         LogsModal,
         CourseFormModal,
-        PreviewMediaTopicsModal
+        PreviewMediaTopicsModal,
+        DuplicateForm
     },
     props: ['modulo_id', 'modulo_name', 'escuela_id', 'escuela_name', 'ruta'],
     data() {
@@ -325,15 +348,15 @@ export default {
                         conditionalBadgeIcon: [{
                             message: 'No tienes colaboradores participantes en el curso',
                             minValue: 0,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: 'red',
                             icon: 'fas fa-exclamation-triangle',
                             iconSize: '12px'
-                        },
+                            },
                             {
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: '#7fbade',
                             icon: 'mdi mdi-check-circle'
                         }]
@@ -354,6 +377,12 @@ export default {
                     // },
                 ],
                 more_actions: [
+                    {
+                        text: "Duplicar curso",
+                        icon: 'mdi mdi-content-copy',
+                        type: 'action',
+                        method_name: 'duplicate'
+                    },
                     {
                         text: "Compatibles",
                         icon: 'fa fa-square',
@@ -439,6 +468,15 @@ export default {
 
             delete_model: null,
             update_model: null,
+
+            duplicateFormModalOptions: {
+                ref: 'DuplicateForm',
+                open: false,
+                action: 'duplicate',
+                base_endpoint: 'cursos',
+                showCloseIcon: true,
+                confirmLabel: 'Copiar contenidos'
+            },
 
             modalCursoEncuesta: {
                 ref: 'CursoEncuestaModal',

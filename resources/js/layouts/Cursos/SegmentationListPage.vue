@@ -321,14 +321,14 @@ export default {
                         conditionalBadgeIcon: [{
                             message: 'No tienes colaboradores participantes en el curso',
                             minValue: 0,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: 'red',
                             icon: 'fas fa-exclamation-triangle',
                             iconSize: '12px'
                         },{
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: '#7fbade',
                             icon: 'mdi mdi-check-circle'
                         }]
@@ -406,12 +406,12 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     },
-                    // {
-                    //     text: "Eliminar",
-                    //     icon: 'far fa-trash-alt',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
+                    },
                 ]
             },
             selects: {

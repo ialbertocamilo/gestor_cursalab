@@ -2,7 +2,7 @@
 # COMPOSER
 # -------------------------------------------------------------------------------------------------------
 
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.7 as composer_base
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/composer:2.0.13 as composer_base
 
 USER composer
 
@@ -45,7 +45,7 @@ RUN npm install && \
 # and just the basic CLI "stuff" in order for us to run commands,
 # be that queues, migrations, tinker etc.
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.7 as cli
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/php:2.0.13 as cli
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
@@ -59,12 +59,12 @@ COPY --from=frontend /opt/apps/laravel-in-kubernetes/public /opt/apps/laravel-in
 # ----------------------------------------------------------------------------------------------------
 
 # We need a stage which contains FPM to actually run and process requests to our PHP application.
-FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.7 as fpm_server
+FROM 505992365906.dkr.ecr.us-east-1.amazonaws.com/phpfpm:2.0.13 as fpm_server
 
 WORKDIR /opt/apps/laravel-in-kubernetes
 
 #######
-  
+
 # As FPM uses the www-data user when running our application,
 # we need to make sure that we also use that user when starting up,
 # so our user "owns" the application when running..

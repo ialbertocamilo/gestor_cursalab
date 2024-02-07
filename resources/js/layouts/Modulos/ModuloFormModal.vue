@@ -7,6 +7,7 @@
     >
         <template v-slot:content>
             <v-form ref="ModuloForm">
+                <DefaultErrors :errors="errors" />
                 <v-row justify="space-around">
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultInput
@@ -103,7 +104,7 @@
                         </draggable>
                     </v-col>
                 </v-row>
-   
+
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
 
@@ -164,10 +165,110 @@
                         </DefaultModalSectionExpand>
                     </v-col>
                 </v-row>
-               
+
+                <v-row v-if="has_registro_capacitacion_functionality && $root.isSuperUser"
+                       justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Información para registro de capacitación"
+                            :expand="sections.showSectionRegistroCapacitacion"
+                            class="my-4"
+                        >
+                            >
+                            <template slot="content">
+                                <div v-if="resource.registro_capacitacion">
+                                    <v-row v-if="resource.registro_capacitacion.company"
+                                           justify="center">
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="Razón Social"
+                                                v-model="resource.registro_capacitacion.company.businessName"
+                                                :rules="rules.businessName"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="RUC"
+                                                v-model="resource.registro_capacitacion.company.businessNumber"
+                                                :rules="rules.businessNumber"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col cols="3">
+                                            <DefaultInput
+                                                label="CIIU"
+                                                v-model="resource.registro_capacitacion.company.CIIU"
+                                                :rules="rules.CIIU"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+
+                                    <v-row v-if="resource.registro_capacitacion.company"
+                                           justify="center">
+                                        <v-col :cols="resource.registro_capacitacion.company.address ? 8 : 4">
+                                            <DefaultInput
+                                                label="Dirección"
+                                                v-model="resource.registro_capacitacion.company.address"
+                                                dense
+                                            />
+                                        </v-col>
+                                        <v-col v-if="!resource.registro_capacitacion.company.address"
+                                               cols="4">
+                                            <DefaultSelect
+                                                dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaAddress"
+                                                label="Criterio para dirección"
+                                            />
+
+                                        </v-col>
+                                        <v-col cols="4">
+                                            <DefaultInput
+                                                label="Actividad económica"
+                                                v-model="resource.registro_capacitacion.company.economicActivity"
+                                                :rules="rules.economicActivity"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+
+                                    <v-row v-if="resource.registro_capacitacion.company"
+                                           justify="left">
+                                        <v-col cols="6">
+                                            <DefaultSelect
+                                                dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaWorkersCount"
+                                                label="Criterio para conteo de trabajadores"
+                                                :rules="rules.criteriaWorkersCount"
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultInput
+                                                label="URL de la app"
+                                                v-model="resource.registro_capacitacion.company.appUrl"
+                                                :rules="rules.appUrl"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </div>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+
                 <v-row>
                     <v-col cols="3">
-                        <DefaultToggle 
+                        <DefaultToggle
                             v-model="resource.active"
                             active-label="Módulo activo"
                             inactive-label="Módulo inactivo"
@@ -198,7 +299,7 @@ import draggable from 'vuedraggable'
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector.vue";
 
 const fields = ['name', 'codigo_matricula', 'active', 'reinicios_programado',
-    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo', 'certificate_template_id', 'show_logo_in_app'];
+    'app_menu', 'mod_evaluaciones', 'plantilla_diploma', 'logo', 'certificate_template_id', 'show_logo_in_app', 'registro_capacitacion'];
 const file_fields = ['logo', 'plantilla_diploma'];
 export default {
     components: {DiplomaSelector, DefaultRichText, draggable},
@@ -214,6 +315,7 @@ export default {
     },
     data() {
         return {
+            errors: [],
             drag: {
                 main_menu: false,
                 side_menu: false,
@@ -221,6 +323,7 @@ export default {
             sections: {
                 showSectionCertificate: {status: true},
                 showSectionSoporte: {status: true},
+                showSectionRegistroCapacitacion: {status: true},
             },
             resourceDefault: {
                 id: null,
@@ -239,7 +342,12 @@ export default {
                 // preg_x_ev: null,
                 nota_aprobatoria: null,
                 nro_intentos: null,
-                certificate_template_id: null
+                certificate_template_id: null,
+                registro_capacitacion: {
+                    company: {
+
+                    }
+                },
             },
             rules: {
                 name: this.getRules(['required']),
@@ -247,13 +355,22 @@ export default {
                 codigo_matricula: this.getRules(['required']),
                 nota_aprobatoria: this.getRules(['required', 'number', 'min_value:1']),
                 // preg_x_ev: this.getRules(['required', 'number', 'min_value:1']),
-                nro_intentos: this.getRules(['required', 'number', 'min_value:1'])
+                nro_intentos: this.getRules(['required', 'number', 'min_value:1']),
+
+                businessName: this.getRules(['required']),
+                businessNumber: this.getRules(['required']),
+                CIIU: this.getRules(['required']),
+                economicActivity: this.getRules(['required']),
+                appUrl: this.getRules(['required']),
+                criteriaWorkersCount: this.getRules(['required'])
             },
             resource: {},
             selects: {
                 main_menu: [],
                 side_menu: [],
+                workspace_criteria: []
             },
+            has_registro_capacitacion_functionality: false,
             error_reinicios: false
         }
     },
@@ -300,12 +417,16 @@ export default {
             this.showLoader()
             const validateForm = vue.validateForm('ModuloForm')
             const validateReinicio = vue.validateReinicio();
-            if (validateForm && validateReinicio) {
+            vue.errors = [];
+
+            if (validateForm && validateReinicio && vue.isValid()) {
                 const edit = vue.options.action === 'edit'
                 let url = `${vue.options.base_endpoint}/${edit ? `${vue.resource.id}/update` : 'store'}`
                 let method = edit ? 'PUT' : 'POST';
 
                 const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                formData.set('registro_capacitacion', JSON.stringify(vue.resource.registro_capacitacion))
+
                 vue.getActiveOnly(formData)
                 vue.getJSONReinicioProgramado(formData)
                 vue.getJSONEvaluaciones(formData)
@@ -398,6 +519,8 @@ export default {
                 .then(({data}) => {
                     vue.selects.main_menu = data.data.main_menu
                     vue.selects.side_menu = data.data.side_menu
+                    vue.selects.workspace_criteria = data.data.workspace_criteria
+                    vue.has_registro_capacitacion_functionality = data.data.has_registro_capacitacion_functionality
                     if (resource) {
                         vue.resource = Object.assign({}, data.data.modulo)
                     }
@@ -408,7 +531,29 @@ export default {
             let vue = this
 
         },
+        isValid() {
 
+            let valid = true;
+            let errors = [];
+
+            // Validation: address or address criteria should be selected
+
+            if (this.has_registro_capacitacion_functionality) {
+                if (!this.resource.registro_capacitacion.company.address &&
+                    !this.resource.registro_capacitacion.criteriaAddress) {
+                    errors.push({
+                        message: 'Debe definir la dirección o criterio para obtener la direccióm'
+                    })
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
+        }
     },
 }
 </script>

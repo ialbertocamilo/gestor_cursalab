@@ -51,7 +51,7 @@ class DashboardController extends Controller
         $cache_name = "dashboard_cards-{$current_workspace->id}-";
         $cache_name .= $subworkspace_id ? "-modulo-{$subworkspace_id}" : '';
 
-        $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
+        $data = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_DATA,
             function () use ($workspaceId, $subworkspace_id, $modulos,$current_workspace) {
                 $count_active_users = DashboardService::countActiveUsers($subworkspace_id);
                 if(!$subworkspace_id){

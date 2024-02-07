@@ -30,7 +30,7 @@ class Project extends BaseModel
         switch ($request->type) {
             case 'module':
                 $current_workspace = get_current_workspace();
-                $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get(); 
+                $data =  Workspace::where('parent_id',$current_workspace->id)->where('active',1)->select('id','name')->get();
                 break;
             case 'school':
                 $data = School::where('active',1)
@@ -50,7 +50,7 @@ class Project extends BaseModel
                 $current_workspace = get_current_workspace();
                 // $data = Course::leftJoin('projects AS p','p.course_id','=','courses.id')
                 $data = Course::
-                when(!$request->q, function($q) use ($request){
+                when($request->q, function($q) use ($request){
                     // $request->q && $request->q != 'undefined'  ? $q->filtroName($request->q) : $q->doesntHave('project');
                     $q->filtroName($request->q) ;
                 })
@@ -65,10 +65,10 @@ class Project extends BaseModel
                     // DB::raw('CASE WHEN p.id IS NULL and p.deleted_at is null THEN 0 courses 1 END AS disabled')
                 )
                 ->paginate(10)->map(function($course){
-                    $course['disabled']  = 0; 
+                    $course['disabled']  = 0;
                     if(Project::where('course_id',$course->id)->select('id')->first()){
                         $course['name'] = $course['name'].' (Ya tiene una tarea asignada)';
-                        $course['disabled']  = 1; 
+                        $course['disabled']  = 1;
                     }
                     return $course;
                 });
@@ -148,8 +148,8 @@ class Project extends BaseModel
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
             $project->save();
             //Verificar espacio del storage:
-            
-            ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);  
+
+            ProjectResources::storeUpdateRequest($request,$project,'media_project_course',true);
             DB::commit();
             return [
                 'msg'=>'La tarea se ha creado correctamente',
