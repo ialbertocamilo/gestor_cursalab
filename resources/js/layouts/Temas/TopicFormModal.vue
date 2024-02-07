@@ -74,7 +74,7 @@
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
-                            select-height="195px"
+                            select-height="auto"
                         />
                     </v-col>
                 </v-row>
@@ -145,7 +145,7 @@
                         </v-row>
                     </template>
                 </DefaultSimpleSection>
-                <DefaultSimpleSection title="Recursos multimedia" v-if="selects.course_code_modality != 'asynchronous'">
+                <DefaultSimpleSection title="Recursos multimedia">
                     <template slot="content">
                         <v-row justify="center">
                             <v-col cols="12">
@@ -254,19 +254,19 @@
                 <DefaultSimpleSection title="Visualización de recursos multimedia" >
                     <template slot="content">
                         <v-row>
-                            <v-col cols="12">
-                                <DefaultToggle 
-                                    v-model="resource.review_all_duration_media"
-                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    dense
-                                />
-                            </v-col>
                             <v-col cols="12" v-if="selects.course_code_modality != 'asynchronous'">
                                 <DefaultToggle 
                                     v-model="resource.modality_in_person_properties.show_medias_since_start_course"
                                     active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
                                     inactive-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
+                                    dense
+                                />
+                            </v-col>
+                            <v-col cols="12">
+                                <DefaultToggle 
+                                    v-model="resource.review_all_duration_media"
+                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     dense
                                 />
                             </v-col>
@@ -279,9 +279,10 @@
                             title="Configuraciones de la sesión presencial"
                             :expand="sections.showSectionCourseInPerson"
                             :simple="true"
+                            v-if="selects.course_code_modality != 'asynchronous'"
                         >
                             <template slot="content">
-                                <DefaultSimpleSection title="Programación" v-if="selects.course_code_modality != 'asynchronous'">
+                                <DefaultSimpleSection title="Programación">
                                     <template slot="content">
                                         <v-row justify="center">
                                             <v-col cols="6" class="d-flex justify-content-center align-items-center">
@@ -293,6 +294,8 @@
                                                     label="Fecha de inicio"
                                                     :min="new Date().toISOString().substr(0, 10)"
                                                     dense
+                                                    showRequired
+                                                    :rules="rules.required"
                                                 />
                                             </v-col>
                                             <v-col cols="3">
@@ -303,7 +306,7 @@
                                                 dense
                                                 v-model="resource.modality_in_person_properties.start_time"
                                                 :disabled="!resource.modality_in_person_properties.start_date"
-                                                :rules="rules.time"
+                                                :rules="rules.required"
                                                 step="60"
                                             />
                                             </v-col>
@@ -316,7 +319,7 @@
                                                     v-model="resource.modality_in_person_properties.finish_time"
                                                     :disabled="!resource.modality_in_person_properties.start_time"
                                                     :min="resource.modality_in_person_properties.start_time"
-                                                    :rules="rules.time"
+                                                    :rules="rules.required"
                                                     step="60"
                                                     dense
                                                 />
