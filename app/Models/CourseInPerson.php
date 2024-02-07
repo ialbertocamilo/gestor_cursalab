@@ -296,8 +296,17 @@ class CourseInPerson extends Model
         return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
     }
     protected function verifyEvaluationTime($topic_id){
+        $user = auth()->user();
         $topic = Topic::select('id','modality_in_person_properties')->where('id',$topic_id)->first();
         $modality_in_person_properties = $topic->modality_in_person_properties;
+
+        $is_host = $user->id == $modality_in_person_properties->host_id;
+
+        if(!$is_host){
+            return [
+                'message' => 'No eres el host de la sesión.'
+            ];
+        }
         $is_evaluation_started = true; 
         if (!isset($modality_in_person_properties->evaluation)) {
             $is_evaluation_started = false;
