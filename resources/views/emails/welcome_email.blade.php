@@ -8,7 +8,11 @@
                         height:5px; 
                         border-radius:4px; 
                         background: #FFCD0C;"></div>
-                Bienvenido a Cursalab              
+                @if (isset($data['data_custom']['title']))
+                    {{ $data['data_custom']['title'] }}
+                @else
+                    Bienvenido a Cursalab              
+                @endif
                 <div style="margin-left: 8%;
                             width: 9px; 
                             height: 9px; 
@@ -16,7 +20,7 @@
                             background: #CC96FC;"></div>       
             </h1>
             <div>
-                @if (isset($data['data_custom']))
+                @if (isset($data['data_custom']['content']))
                     <div style="color:#333D5D;padding: 0px 46px;">{!! $data['data_custom']['content'] !!}</div>
                 @else
                     <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center">

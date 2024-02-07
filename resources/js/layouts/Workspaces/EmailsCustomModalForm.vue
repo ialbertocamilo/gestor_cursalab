@@ -19,6 +19,26 @@
                             >
                                 <template slot="content">
                                     <div style="width: 100%;">
+                                        <div class="v-row">
+                                            <DefaultInput
+                                                class="mt-4 col-md-8"
+                                                dense
+                                                label="Título"
+                                                show-required
+                                                placeholder="Ingrese un título"
+                                                v-model="email.data_custom.title"
+                                                :rules="rules.name"
+                                                emojiable
+                                            />
+                                            <DefaultToggle 
+                                                class="col-md-4"
+                                                v-model="email.data_custom.show_subworkspace_logo" 
+                                                active-label="Mostrar el logo del módulo"
+                                                inactive-label="Mostrar el logo del módulo"
+                                                dense
+                                            />
+                                        </div>
+                                        
                                         <DefaultRichText
                                             label="Contenido"
                                             v-model="email.data_custom.content"
@@ -60,7 +80,10 @@ export default {
     data() {
         return {
             custom_emails:[],
-            workspace:null
+            workspace:null,
+            rules: {
+                name: this.getRules(['required', 'max:120']),
+            },
         };
     },
 

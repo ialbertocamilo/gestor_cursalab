@@ -26,7 +26,7 @@ class WorkspaceCustomEmail extends Model
             $data[] = [
                 'title' => $email['title'],
                 'code_email' => $email['code'],
-                'data_custom' => $workspace_email['data_custom'] ?? ['content'=>''],
+                'data_custom' => $workspace_email['data_custom'] ?? ['content'=>'','title'=>'','show_subworkspace_logo' => false ],
                 'expand' => ['status'=>true]
             ];
         }
