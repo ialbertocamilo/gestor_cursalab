@@ -15,5 +15,10 @@ Route::controller(WorkspaceController::class)->group(function () {
     Route::get('/{workspace}/copy', 'copy');
     Route::put('/{workspace}/status', 'status');
     Route::post('/{workspace}/duplicate', 'duplicate')->middleware('checkrol:super-user');
+
+    Route::get('/{workspace}/custom-emails', 'customEmails')->middleware('checkrol:super-user');
+    Route::get('/{workspace}/show-email/{email_code}', 'showEmail');
+    Route::post('/{workspace}/save-custom-emails', 'saveCustomEmail');
+    
     Route::delete('/{workspace}/destroy', 'destroy')->middleware('checkrol:super-user');
 });

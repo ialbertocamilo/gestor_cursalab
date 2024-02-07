@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Commands\reinicios_programado;
-use App\Http\Requests\WorkspaceRequest;
-use App\Http\Requests\SubWorkspaceRequest;
-use App\Http\Requests\WorkspaceDuplicateRequest;
-use App\Http\Resources\WorkspaceResource;
-use App\Http\Resources\SubWorkspaceResource;
-
-use App\Models\Criterion;
-use App\Models\CriterionValue;
-use App\Models\Media;
-use App\Models\SegmentValue;
 use App\Models\User;
-use App\Models\Workspace;
-use App\Models\Taxonomy;
-use App\Models\Ambiente;
-use App\Models\School;
-use App\Models\Course;
+use App\Models\Media;
 use App\Models\Topic;
+use App\Models\Course;
+use App\Models\School;
+use App\Models\Ambiente;
+
+use App\Models\Taxonomy;
+use App\Models\Criterion;
+use App\Models\Workspace;
 use App\Models\Requirement;
-use App\Models\WorkspaceFunctionality;
-use App\Models\AssignedRole;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\AssignedRole;
+use App\Models\SegmentValue;
+use Illuminate\Http\Request;
+use App\Models\CriterionValue;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\View\View;
+use App\Models\WorkspaceFunctionality;
+use Illuminate\Contracts\View\Factory;
+use App\Http\Requests\WorkspaceRequest;
+use App\Http\Resources\WorkspaceResource;
+use App\Http\Requests\SubWorkspaceRequest;
+use App\Models\Mongo\WorkspaceCustomEmail;
+use App\Http\Resources\SubWorkspaceResource;
+use App\Console\Commands\reinicios_programado;
+use App\Http\Requests\WorkspaceDuplicateRequest;
+use Illuminate\Contracts\Foundation\Application;
 
 class WorkspaceController extends Controller
 {
@@ -320,7 +321,20 @@ class WorkspaceController extends Controller
 
         return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
-
+    public function customEmails(Workspace $workspace){
+        $data = WorkspaceCustomEmail::list($workspace);
+        return $this->success($data);
+    }
+    public function showEmail(Workspace $workspace,Request $request){
+        // $data = WorkspaceCustomEmail::search($workspace);
+        $data = WorkspaceCustomEmail::search($workspace,$request->email_code);
+        return view('emails.welcome_email',['data'=>$data]);
+    }
+    public function saveCustomEmail(Workspace $workspace,Request $request){
+        $data = $request->all();
+        WorkspaceCustomEmail::saveCustomEmail($workspace,$data);
+        return $this->success(['message'=>'Se ha guardado correctamente']);
+    }
     public function destroy(Workspace $workspace)
     {
         // \File::delete(public_path().'/'.$workspace->plantilla_diploma);

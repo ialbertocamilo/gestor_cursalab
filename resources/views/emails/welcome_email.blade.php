@@ -16,13 +16,17 @@
                             background: #CC96FC;"></div>       
             </h1>
             <div>
-                <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center">
-                    Nos emociona darte la bienvenida a la familia de Cursalab. Esperamos que tu tiempo con nosotros esté lleno de oportunidades emocionantes, aprendizaje y crecimiento.
-                    <span style="font-weight: bolder">¡Bienvenido a bordo!</span>
-                </div>
-                <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center;margin-top:12px">
-                    Recuerda que tu ingreso a la plataforma se realizará con tu <span style="font-weight: bolder">número de documento</span> como usuario y contraseña.
-                </div>
+                @if (isset($data['data_custom']))
+                    <div style="color:#333D5D;padding: 0px 46px;">{!! $data['data_custom']['content'] !!}</div>
+                @else
+                    <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center">
+                        Nos emociona darte la bienvenida a la familia de Cursalab. Esperamos que tu tiempo con nosotros esté lleno de oportunidades emocionantes, aprendizaje y crecimiento.
+                        <span style="font-weight: bolder">¡Bienvenido a bordo!</span>
+                    </div>
+                    <div style="color:#333D5D;font-size: .9rem;padding: 0px 46px;text-align: center;margin-top:12px">
+                        Recuerda que tu ingreso a la plataforma se realizará con tu <span style="font-weight: bolder">número de documento</span> como usuario y contraseña.
+                    </div>
+                @endif
             </div>
             <div style="text-align: center;margin-top:30px">
                 <div style="margin-left: 95%;
@@ -51,13 +55,6 @@
                         background: #FFCD0C;"></div>
                       
             </div>
-            {{-- <div style="text-align:center;margin-bottom:15px">
-                <div style="width: 139px;
-                height: 0px;
-                flex-shrink: 0; ">
-                </div>
-                o
-            </div> --}}
             <div style="">
                 <h1 style="text-align:center; color:#2A3649; margin-top:0;font-weight:bold;font-size: 1rem; padding: 0px ;">
                     o
