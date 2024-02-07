@@ -113,4 +113,12 @@ class RestCourseInPersonController extends Controller
         $data = CourseInPerson::loadPoll($topic_id);
         return $this->success($data);
     }
+
+    public function verifyEvaluationTime(){
+        if(!isset($topic_id)){
+            return $this->error('Es necesario el topic_id.');
+        }
+        $data = CourseInPerson::verifyEvaluationTime($topic_id);
+        return $this->success($data);
+    }
 }

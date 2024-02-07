@@ -295,7 +295,23 @@ class CourseInPerson extends Model
         }
         return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
     }
-
+    protected function verifyEvaluationTime($topic_id){
+        $topic = Topic::select('id','modality_in_person_properties')->where('id',$topic_id)->first();
+        $modality_in_person_properties = $topic->modality_in_person_properties;
+        $is_evaluation_started = true; 
+        if (!isset($modality_in_person_properties->evaluation)) {
+            $is_evaluation_started = false;
+            return [
+                'is_evaluation_started' => $is_evaluation_started,
+                'evaluation' => []
+            ];
+        }
+        unset($modality_in_person_properties->evaluation['historic_status']);
+        return [
+            'is_evaluation_started' => $is_evaluation_started,
+            'evaluation' => $modality_in_person_properties->evaluation
+        ]; 
+    }
     protected function getListMenu($topic_id){
         $user = auth()->user();
         $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')

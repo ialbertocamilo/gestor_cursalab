@@ -15,5 +15,6 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     Route::post('/topic/evaluation', 'changeStatusEvaluation'); // HOST
     Route::post('/topic/{topic}/take-assistance', 'takeAssistance'); // HOST
     Route::get('/topic/{topic}/start-poll', 'startPoll'); // HOST
+    Route::get('/topic/{topic}/verify-evaluation-time', 'verifyEvaluationTime'); // HOST
 
 });
