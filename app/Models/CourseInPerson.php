@@ -242,14 +242,15 @@ class CourseInPerson extends Model
         $message = '';
         $now = Carbon::now();
         $modality_in_person_properties = $topic->modality_in_person_properties;
+        // unset($modality_in_person_properties->evaluation);
+        // $topic->modality_in_person_properties = $modality_in_person_properties;
+        // $topic->save();
+        // dd();
         switch ($action) {
             case 'start':
                 $time_evaluation = Carbon::createFromFormat('H:i', $time);
                 $minutes_duration = $time_evaluation->hour * 60 + $time_evaluation->minute;
                 $finish_evaluation = $now->copy()->addMinutes($minutes_duration);
-
-                // Obtener y decodificar las propiedades del tema
-                
                 // Inicializar el campo evaluation si no existe
                 if (!isset($modality_in_person_properties->evaluation)) {
                     $modality_in_person_properties->evaluation = [];
@@ -264,47 +265,36 @@ class CourseInPerson extends Model
                 $modality_in_person_properties->evaluation['time'] = $time;
                 $modality_in_person_properties->evaluation['status'] = 'started';
                 $modality_in_person_properties->evaluation['historic_status'][] = ['time'=>$now,'action'=>$action];
-                // Codificar nuevamente y guardar las propiedades actualizadas
-                $topic->modality_in_person_properties = $modality_in_person_properties;
-                $topic->save();
                 $message = 'Se inició la evaluación.';
             break;
             case 'start-before-finished-time':
                 $topic->modality_in_person_properties->evaluation->status = 'extra-time';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
-                $topic->modality_in_person_properties = $modality_in_person_properties;
-                $topic->save();
                 $message = 'Se activó manualmente la evaluación.';
-            break;
             case 'finish-early':
                 $modality_in_person_properties->evaluation->status = 'finished';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
-                $topic->modality_in_person_properties = $modality_in_person_properties;
-                $topic->save();
                 $message = 'Se finalizó antes de terminar la evaluación.';
             break;
             case 'finish-in-time':
                 $modality_in_person_properties->evaluation->status = 'finished';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>'finish-in-time'];
-                $topic->modality_in_person_properties = $modality_in_person_properties;
-                $topic->save();
                 $message = 'Se terminó a tiempo la evaluación.';
             break;
             case 'finish-manually':
                 $modality_in_person_properties->evaluation->status = 'finished';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
-                $topic->modality_in_person_properties = $modality_in_person_properties;
-                $topic->save();
                 $message = 'Se terminó manualmente la evaluación.';
             break;
         }
+        $topic->modality_in_person_properties = $modality_in_person_properties;
+        $topic->save();
         return ['evaluation' => $topic->modality_in_person_properties->evaluation,'message'=>$message];
     }
     protected function verifyEvaluationTime($topic_id){
         $user = auth()->user();
         $topic = Topic::select('id','modality_in_person_properties')->where('id',$topic_id)->first();
         $modality_in_person_properties = $topic->modality_in_person_properties;
-
         $is_host = $user->id == $modality_in_person_properties->host_id;
 
         if(!$is_host){
@@ -320,7 +310,14 @@ class CourseInPerson extends Model
                 'evaluation' => []
             ];
         }
-        unset($modality_in_person_properties->evaluation['historic_status']);
+        $is_evaluation_started = $modality_in_person_properties->evaluation->status == 'started';
+        unset($modality_in_person_properties->evaluation->historic_status);
+        if($is_evaluation_started){
+            $current_time = Carbon::now();
+            $finish_time = Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->evaluation->date_finish);
+            $diff = $finish_time->diff($current_time);
+            $modality_in_person_properties->evaluation->current_time = sprintf('%02d:%02d', $diff->h, $diff->i);;
+        }
         return [
             'is_evaluation_started' => $is_evaluation_started,
             'evaluation' => $modality_in_person_properties->evaluation

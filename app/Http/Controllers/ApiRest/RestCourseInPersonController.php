@@ -114,7 +114,7 @@ class RestCourseInPersonController extends Controller
         return $this->success($data);
     }
 
-    public function verifyEvaluationTime(){
+    public function verifyEvaluationTime($topic_id){
         if(!isset($topic_id)){
             return $this->error('Es necesario el topic_id.');
         }
