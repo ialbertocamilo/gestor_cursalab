@@ -12,7 +12,7 @@
 			/>
 			<list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
 			<list-item titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+			<list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
 			<list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" />
@@ -79,7 +79,7 @@
 				</select>
 			</div>
 			<v-divider class="col-12 mb-0 p-0"></v-divider>
-			
+
 			<!-- Filtros secundarios -->
 			<div class="col-12 d-flex">
 				<!-- Filtros Checkboxs -->

@@ -12,7 +12,7 @@
 			/>
 			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
 			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+			<list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
 			<list-item
@@ -64,7 +64,7 @@
 					</v-col>
 
 					<v-col cols="12" md="6">
-								<DefaultSelect 
+								<DefaultSelect
 									attach
 									solo
 									chips
@@ -85,11 +85,11 @@
 
 					</v-col>
 				</v-row>
-				
+
 				<v-row class="justify-content-center">
 
 					<v-col cols="12">
-						<DefaultSelect 
+						<DefaultSelect
 							attach
 							solo
 							chips
@@ -139,18 +139,18 @@
 						<v-icon class="mr-2" small>mdi-download</v-icon>
 						Descargar
 					</v-btn>
-					
+
 				</div>
 
 	        	<v-divider class=""></v-divider>
 			</form>
-			
+
 	        <div  class="d-flex justify-content-center py-10">
 				<v-img max-width="350" class="text-center" src="/img/guides/visits.svg"></v-img>
 			</div>
 
         </v-card-text>
-		
+
 	</v-main>
 </template>
 <script>

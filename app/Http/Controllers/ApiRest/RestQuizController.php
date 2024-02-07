@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Models\Poll;
 use App\Models\PollQuestionAnswer;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -179,6 +180,25 @@ class RestQuizController extends Controller
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
+
+        // Change time when user's datetime is different
+        // from server's
+
+        $userDatetimeTimestamp = request()->get('user_datetime');
+        if ($userDatetimeTimestamp) {
+
+            $userDatetime = Carbon::parse($userDatetimeTimestamp);
+            $minutesDifference = now()->diffInMinutes($userDatetime);
+            if ($minutesDifference > 5) {
+                $start = $row->current_quiz_started_at->addMinutes($minutesDifference);
+                $end = $row->current_quiz_finishes_at->addMinutes($minutesDifference);
+                $data['attempt'] = [
+                    'started_at' => $start->format('Y/m/d H:i'),
+                    'finishes_at' => $end->format('Y/m/d H:i'),
+                    'diff_in_minutes' => now()->diffInMinutes($end),
+                ];
+            }
+        }
 
         // Adds 24 hours for Agile
 

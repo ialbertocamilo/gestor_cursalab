@@ -13,7 +13,7 @@
 			/>
 			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
 			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y Nombres, Género" subtitulo="Datos personales" />
+			<list-item titulo="Documento, Apellidos y Nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />
 			<list-item
