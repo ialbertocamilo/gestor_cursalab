@@ -290,8 +290,8 @@ export default {
                     {
                         text: "Asistencia",
                         icon: 'fas fa-user-friends',
-                        type: 'action',
-                        method_name: 'gestion_colab'
+                        type: 'route',
+                        route: 'assistans_route'
                     },
                     // {
                     //     text: "Duplicar",

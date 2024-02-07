@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Induction;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Induction\ProcessStoreUpdateRequest;
+use App\Http\Resources\Induccion\ProcessAssistantsSearchResource;
 use App\Models\Course;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
@@ -381,4 +382,14 @@ class ProcessController extends Controller
         return $this->success(['msg' => $message], $message);
     }
 
+    // Assistants
+
+    public function searchAssistants(Process $process, Request $request)
+    {
+        $workspace = get_current_workspace();
+        $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
+        $assistants = Process::getProcessAssistantsList($process, $request->all());
+        ProcessAssistantsSearchResource::collection($assistants);
+        return $this->success($assistants);
+    }
 }

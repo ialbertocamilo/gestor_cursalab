@@ -149,9 +149,13 @@
                                                         return-object
                                                         :showSelectAll="true"
                                                         :loading-state="true"
+                                                        :count-show-values="Infinity"
                                                         placeholder="Indicar criterios aquí"
                                                     />
-                                                    <div class="bx_criteria_selected">
+                                                    <div class="bx_criteria_img text-center">
+                                                        <img src="/img/induccion/segment_supervisor.png" alt="supervisors">
+                                                    </div>
+                                                    <!-- <div class="bx_criteria_selected">
                                                         <div class="d-flex align-items-center justify-content-center" style="height: 100%;" v-if="list_criteria_selected == 0">
                                                             <span class="text_default text-center">Aquí se listaran tus criterios<br>de vinculación a tus<br>administadores</span>
                                                         </div>
@@ -167,7 +171,7 @@
                                                                 </v-chip>
                                                             </span>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                     <!-- <div class="text-center mt-3">
                                                         <span class="text_default c-default fw-bold cursor-pointer" @click="openModalUserSupervisors()">Ver listado de los supervisores</span>
                                                     </div> -->

@@ -381,7 +381,7 @@
                                 :content="item[action.count]"
                             >
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
-                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                <br> <span class="table-default-icon-title" v-text="action.text ? action.text : (item.active ? 'Activo' : 'Inactivo')"/>
                             </v-badge>
 
                             <!--
@@ -440,7 +440,7 @@
 
                             <template v-else>
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
-                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                <br> <span class="table-default-icon-title" v-text="action.text ? action.text : (item.active ? 'Activo' : 'Inactivo')"/>
                             </template>
                         </button>
                         <!-- <span class="badge table_default_badge-notify"

@@ -144,11 +144,13 @@ class Process extends BaseModel
         foreach($processes_items as $item) {
             $item->title_process = $item->title;
 
+            $assistans_route = route('process.assistants.index', [$item->id]);
             $stages_route = route('stages.index', [$item->id]);
             $certificate_route = ($item->certificate_template_id) ?
                                         route('process.diploma.edit', [$item->id, $item->certificate_template_id]) :
                                         route('process.diploma.create', [$item->id]);
 
+            $item->assistans_route = $assistans_route;
             $item->stages_route = $stages_route;
             $item->certificate_route = $certificate_route;
             $item->assigned_users = $item->segments->count();
@@ -238,6 +240,62 @@ class Process extends BaseModel
         cache_clear_model(Process::class);
 
         return $process;
+    }
+
+    protected function getProcessAssistantsList(Process $process_id, $data)
+    {
+        $course = new Course();
+        $process = Process::with(['segments'])->where('id', $process_id?->id)->first();
+
+        // $users_query = UserBenefit::leftJoin('users', 'users.id','user_benefits.user_id')
+        //             ->with(
+        //                 ['status' => function($q){
+        //                     $q->select('id', 'name', 'code');
+        //                 }],
+        //                 ['type' => function($q){
+        //                     $q->select('id', 'name', 'code');
+        //                 }]
+        //             )
+        //             ->whereHas('status', function($q) {
+        //                 $q->where('type', 'user_status');
+        //                 $q->where(function($t){
+        //                     $t->where('code', 'approved');
+        //                     $t->orWhere('code', 'subscribed');
+        //                 });
+        //             })
+        //             ->where('user_benefits.benefit_id', $benefit_id)
+        //             ->select('users.id','users.surname','users.lastname','users.document','users.name', 'users.fullname','user_benefits.status_id','user_benefits.type_id','user_benefits.id as user_benefits_id');
+
+        // $users_ids = $users_query->pluck('id')->toArray();
+        // $users = $users_query->get();
+
+        $users_ids = [];
+
+        $segmentados_id = $course->usersSegmented($process?->segments, 'users_id');
+        $segmentados_id = array_unique($segmentados_id);
+// dd($segmentados_id);
+        $segmentados = User::with('subworkspace')
+                            ->whereIn('id',$segmentados_id)
+                            // ->whereNotIn('id', $users_ids)
+                            // ->select('id','name','surname','lastname','document')
+                            ->paginate(request('paginate', 15));
+
+
+        // $response['data'] = $segmentados->items();
+        // $response['lastPage'] = $segmentados->lastPage();
+        // $response['current_page'] = $segmentados->currentPage();
+        // $response['first_page_url'] = $segmentados->url(1);
+        // $response['from'] = $segmentados->firstItem();
+        // $response['last_page'] = $segmentados->lastPage();
+        // $response['last_page_url'] = $segmentados->url($segmentados->lastPage());
+        // $response['next_page_url'] = $segmentados->nextPageUrl();
+        // $response['path'] = $segmentados->getOptions()['path'];
+        // $response['per_page'] = $segmentados->perPage();
+        // $response['prev_page_url'] = $segmentados->previousPageUrl();
+        // $response['to'] = $segmentados->lastItem();
+        // $response['total'] = $segmentados->total();
+
+        return $segmentados;
     }
 
     // Api

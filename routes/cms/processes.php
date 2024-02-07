@@ -24,6 +24,10 @@ Route::controller(ProcessController::class)->group(function() {
     Route::put('/{process}/status', 'status');
     Route::delete('/{process}/destroy', 'destroy');
 
+    // Assistants
+    Route::view('{process}/asistentes', 'processes.assistants.index')->name('process.assistants.index');
+    Route::get('{process}/assistants/search', 'searchAssistants');
+
 });
 
 // Stages

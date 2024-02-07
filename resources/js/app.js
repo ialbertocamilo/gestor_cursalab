@@ -234,6 +234,7 @@ Vue.component("guest-layout", require("./layouts/Guest/GuestListPage.vue"));
 
 // Inducción
 Vue.component("processes-layout", require("./layouts/Processes/ProcessesList.vue"));
+Vue.component("processes-assistants-layout", require("./layouts/Processes/Assistants/AssistantsList.vue"));
 Vue.component("stages-layout", require("./layouts/Stages/StagesList.vue"));
 
 
