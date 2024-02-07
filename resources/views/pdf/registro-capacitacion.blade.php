@@ -73,7 +73,7 @@
     .topics span,
     .topics li {
         font-family: Arial, Helvetica, sans-serif !important;
-        font-size: 14px !important;
+        font-size: 11px !important;
     }
 
     .margin-top {
