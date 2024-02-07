@@ -110,6 +110,7 @@
 
 </style>
 
+
 <h4 class="main-title">
     {{ $course['registro_capacitacion']->certificateCode }}
 </h4>
