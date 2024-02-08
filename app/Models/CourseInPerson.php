@@ -460,10 +460,12 @@ class CourseInPerson extends Model
         return ['is_accessible'=>$is_accessible];
     }
     protected function startPoll($topic_id){
-        $topic = Topic::select('id','poll_id','modality_in_person_properties')
+        $topic = Topic::select('id','course_id','modality_in_person_properties')
+                    ->with('course:id')
                     ->where('id',$topic_id)
                     ->first();
-        if(!$topic->poll_id){
+        $poll = $topic->course->polls->first();
+        if(!$poll){
             return ['message'=>'Esta sesión no tiene una encuesta asignada'];
         }          
         $modality_in_person_properties = $topic->modality_in_person_properties;
