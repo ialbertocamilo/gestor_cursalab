@@ -30,6 +30,7 @@ class WorkspaceCustomEmail extends Model
         $emails = $this->customEmails;
         $data = [];
         
+        
         foreach ($emails as $email) {
             $workspace_email = self::where('workspace_id',$workspace->id)->where('code_email',$email['code'])->first();
             $data[] = [
