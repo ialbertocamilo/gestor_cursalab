@@ -297,10 +297,10 @@ class CourseInPerson extends Model
         $topic = Topic::select('id','modality_in_person_properties')->where('id',$topic_id)->first();
         $modality_in_person_properties = $topic->modality_in_person_properties;
         $is_host = $user->id == $modality_in_person_properties->host_id;
-        // unset($modality_in_person_properties->evaluation);
-        // $topic->modality_in_person_properties = $modality_in_person_properties;
-        // $topic->save();
-        // dd();
+        unset($modality_in_person_properties->evaluation);
+        $topic->modality_in_person_properties = $modality_in_person_properties;
+        $topic->save();
+        dd();
         if(!$is_host){
             return [
                 'message' => 'No eres el host de la sesión.'
@@ -321,6 +321,9 @@ class CourseInPerson extends Model
             $finish_time = Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->evaluation->date_finish);
             $diff = $finish_time->diff($current_time);
             $modality_in_person_properties->evaluation->current_time = sprintf('%02d:%02d', $diff->h, $diff->i);;
+        }
+        if( $modality_in_person_properties->evaluation->status == 'extra-time'){
+            $is_evaluation_started = true; 
         }
         return [
             'is_evaluation_started' => $is_evaluation_started,
