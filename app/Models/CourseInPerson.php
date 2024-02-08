@@ -242,10 +242,10 @@ class CourseInPerson extends Model
         $message = '';
         $now = Carbon::now();
         $modality_in_person_properties = $topic->modality_in_person_properties;
-        unset($modality_in_person_properties->evaluation);
-        $topic->modality_in_person_properties = $modality_in_person_properties;
-        $topic->save();
-        dd();
+        // unset($modality_in_person_properties->evaluation);
+        // $topic->modality_in_person_properties = $modality_in_person_properties;
+        // $topic->save();
+        // dd();
         switch ($action) {
             case 'start':
                 $time_evaluation = Carbon::createFromFormat('H:i', $time);
