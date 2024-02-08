@@ -73,6 +73,11 @@ class Process extends BaseModel
         return $this->belongsToMany(User::class, 'process_instructors', 'process_id', 'user_id');
     }
 
+    public function instructors_direct()
+    {
+        return $this->instructors()->where('type','direct');
+    }
+
     protected function getRepositoryMediaProcess() {
 
         $session = session()->all();
@@ -112,7 +117,10 @@ class Process extends BaseModel
         $workspace = get_current_workspace();
 
         $repository_media_process = $this->getRepositoryMediaProcess();
-        $processes_query = Process::with(['instructions', 'segments', 'stages'])->where('workspace_id', $workspace->id);
+        $processes_query = Process::with(['instructions', 'segments', 'stages','instructors_direct' => function($i){
+                                        $i->select('id','fullname','document', 'name', 'lastname', 'surname');
+                                    }])
+                                    ->where('workspace_id', $workspace->id);
 
         if(request()->sortBy){
             if (request()->sortBy == 'title_process')
@@ -175,6 +183,9 @@ class Process extends BaseModel
                 'segments' => $item->segments->count() ? true : false,
                 'certificate' => $item->certificate_template_id ? true : false
             ];
+
+            $item->supervisor_criteria = $item->supervisor_criteria ? json_decode($item->supervisor_criteria) : [];
+            $item->supervisor_assigned_directly = $item->instructors_direct ?? [];
         }
 
         $response['data'] = $processes->items();
@@ -242,58 +253,18 @@ class Process extends BaseModel
         return $process;
     }
 
-    protected function getProcessAssistantsList(Process $process_id, $data)
+    protected function getProcessAssistantsList(Process $process, $data)
     {
         $course = new Course();
-        $process = Process::with(['segments'])->where('id', $process_id?->id)->first();
 
-        // $users_query = UserBenefit::leftJoin('users', 'users.id','user_benefits.user_id')
-        //             ->with(
-        //                 ['status' => function($q){
-        //                     $q->select('id', 'name', 'code');
-        //                 }],
-        //                 ['type' => function($q){
-        //                     $q->select('id', 'name', 'code');
-        //                 }]
-        //             )
-        //             ->whereHas('status', function($q) {
-        //                 $q->where('type', 'user_status');
-        //                 $q->where(function($t){
-        //                     $t->where('code', 'approved');
-        //                     $t->orWhere('code', 'subscribed');
-        //                 });
-        //             })
-        //             ->where('user_benefits.benefit_id', $benefit_id)
-        //             ->select('users.id','users.surname','users.lastname','users.document','users.name', 'users.fullname','user_benefits.status_id','user_benefits.type_id','user_benefits.id as user_benefits_id');
+        $process->load('segments');
 
-        // $users_ids = $users_query->pluck('id')->toArray();
-        // $users = $users_query->get();
-
-        $users_ids = [];
-
-        $segmentados_id = $course->usersSegmented($process?->segments, 'users_id');
+        $segmentados_id = $course->usersSegmented($process->segments, 'users_id');
         $segmentados_id = array_unique($segmentados_id);
-// dd($segmentados_id);
+
         $segmentados = User::with('subworkspace')
                             ->whereIn('id',$segmentados_id)
-                            // ->whereNotIn('id', $users_ids)
-                            // ->select('id','name','surname','lastname','document')
                             ->paginate(request('paginate', 15));
-
-
-        // $response['data'] = $segmentados->items();
-        // $response['lastPage'] = $segmentados->lastPage();
-        // $response['current_page'] = $segmentados->currentPage();
-        // $response['first_page_url'] = $segmentados->url(1);
-        // $response['from'] = $segmentados->firstItem();
-        // $response['last_page'] = $segmentados->lastPage();
-        // $response['last_page_url'] = $segmentados->url($segmentados->lastPage());
-        // $response['next_page_url'] = $segmentados->nextPageUrl();
-        // $response['path'] = $segmentados->getOptions()['path'];
-        // $response['per_page'] = $segmentados->perPage();
-        // $response['prev_page_url'] = $segmentados->previousPageUrl();
-        // $response['to'] = $segmentados->lastItem();
-        // $response['total'] = $segmentados->total();
 
         return $segmentados;
     }

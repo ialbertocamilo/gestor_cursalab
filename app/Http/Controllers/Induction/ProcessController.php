@@ -153,6 +153,9 @@ class ProcessController extends Controller
         $supervisors = $this->selectedSupervisors($request);
 
         if(count($segments_supervisors_criteria) > 0) {
+            $process->supervisor_criteria = json_encode(array_column($segments_supervisors_criteria, 'id'));
+            $process->save();
+
             $selected_supervisors = $supervisors->pluck('id')->toArray();
             if(count($selected_supervisors) > 0) {
                 $pivotData = array_fill(0, count($selected_supervisors), ['type' => 'criteria']);

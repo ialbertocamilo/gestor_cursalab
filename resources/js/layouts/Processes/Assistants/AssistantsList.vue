@@ -45,10 +45,21 @@
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
                         />
                     </v-col>
-                    <v-col cols="5">
+                    <v-col cols="3">
+                        <div class="bx_count_users">
+                            <span class="text_default">Usuarios: 2</span>
+                        </div>
                     </v-col>
-                    <v-col cols="4" class="d-flex justify-end">
-
+                    <v-col cols="6" class="d-flex justify-end align-items-center">
+                        <div class="bx_count_absences">
+                            <div class="bx_icon">
+                                <v-icon class="icon_size" small color="#E01717" style="font-size: 30px !important;">
+                                    mdi-account
+                                </v-icon>
+                                <div class="bx_icon_count_absences">1</div>
+                            </div>
+                            <span class="text_default" style="color: #E01717;">Inasistencias</span>
+                        </div>
                         <DefaultButton
                             text
                             label="Aplicar filtros"
@@ -121,12 +132,6 @@ export default {
                         icon: 'fa fa-circle',
                         type: 'action',
                         method_name: 'status'
-                    },
-                    {
-                        text: "Eliminar",
-                        icon: 'far fa-trash-alt',
-                        type: 'action',
-                        method_name: 'delete'
                     }
                 ]
             },
@@ -173,3 +178,38 @@ certifications: [
 ],
 */
 </script>
+<style lang="scss">
+.bx_count_users span.text_default {
+    color: #5458EA;
+    font-size: 15px;
+}
+.bx_count_absences {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    .bx_icon {
+        position: relative;
+        margin-right: 6px;
+        .bx_icon_count_absences {
+            position: absolute;
+            background-color: #e01717;
+            height: 15px;
+            min-width: 15px;
+            text-align: center;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            color: #fff;
+            bottom: -7px;
+            right: -5px;
+            line-height: 1;
+            font-family: "Nunito", sans-serif;
+        }
+    }
+    span.text_default {
+        font-size: 15px;
+    }
+}
+</style>

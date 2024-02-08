@@ -136,6 +136,10 @@ export default {
         load_data_default: {
             type: Boolean,
             default: false
+        },
+        list_users_selected: {
+            type: Array,
+            default: []
         }
     },
     data() {
@@ -188,6 +192,12 @@ export default {
                     });
             }, 1600);
         },
+    },
+    mounted: function () {
+        this.$nextTick(function () {
+            let vue = this;
+            vue.usuarios_ok = vue.list_users_selected
+        })
     },
     methods: {
         agregarUsuario(usuario, index) {

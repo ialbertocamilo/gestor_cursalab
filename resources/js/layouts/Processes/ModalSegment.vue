@@ -188,6 +188,7 @@
                                                         :showSubidaMasiva="true"
                                                         ref="AsignacionSupervisores"
                                                         :load_data_default="true"
+                                                        :list_users_selected="supervisor_assigned_directly"
                                                     >
                                                     </AsignacionXDni>
                                                 </v-col>
@@ -289,6 +290,7 @@ export default {
             },
             list_criteria: [],
             list_criteria_selected: [],
+            supervisor_assigned_directly: [],
             // steps
                 step_title: '',
                 disabled_btn_next: true,
@@ -685,6 +687,11 @@ console.log(vue.segments);
 
             vue.resource = resource;
 
+            vue.$nextTick(() => {
+                vue.supervisor_assigned_directly = resource.supervisor_assigned_directly;
+                // vue.list_criteria_selected = resource.supervisor_criteria_selected
+            })
+
             let base = `${vue.options.base_endpoint}`;
             let url = resource
                 ? `${base}/${resource.id}/edit`
@@ -737,6 +744,22 @@ console.log(vue.segments);
                         })
                     })
 
+                }
+
+                if(vue.segments.length > 0) {
+                    vue.segments.forEach(element => {
+                        if(element.criteria_selected.length > 0) {
+                            element.criteria_selected.forEach(item => {
+                                resource.supervisor_criteria.forEach(item_sc => {
+                                    if(item_sc == item.id) {
+                                        vue.$nextTick(() => {
+                                            vue.list_criteria_selected.push(item)
+                                        })
+                                    }
+                                });
+                            });
+                        }
+                    });
                 }
             });
 
