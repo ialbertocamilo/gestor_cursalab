@@ -271,6 +271,7 @@ class CourseInPerson extends Model
                 $topic->modality_in_person_properties->evaluation->status = 'extra-time';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
                 $message = 'Se activó manualmente la evaluación.';
+            break;
             case 'finish-early':
                 $modality_in_person_properties->evaluation->status = 'finished';
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
