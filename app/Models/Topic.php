@@ -1272,7 +1272,6 @@ class Topic extends BaseModel
         if(isset($topic->modality_in_person_properties->evaluation->status)){
             $evaluationStatus = $topic->modality_in_person_properties->evaluation->status;
             $evaluationFinishDate = $topic->modality_in_person_properties->evaluation->date_finish;
-
             $is_accessible = $evaluationStatus == 'started';
             if(Carbon::now()->format('Y-m-d H:i') > $evaluationFinishDate){
                 $is_accessible = false;
