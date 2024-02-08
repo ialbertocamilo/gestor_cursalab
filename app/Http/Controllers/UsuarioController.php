@@ -697,7 +697,7 @@ class UsuarioController extends Controller
 
         $user->update(['active' => $status]);
         if ($status) {
-            $user->sendWelcomeEmail(workspace:$current_workspace);
+            $user->sendWelcomeEmail(false,$current_workspace);
         }
         $current_workspace->sendEmailByLimit();
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
