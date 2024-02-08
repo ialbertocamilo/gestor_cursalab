@@ -1276,6 +1276,9 @@ class Topic extends BaseModel
             if(Carbon::now()->format('Y-m-d H:i') > $evaluationFinishDate){
                 $is_accessible = false;
             }
+            if( $evaluationStatus == 'extra-time'){
+                $is_accessible = true;
+            }
         }
         return $is_accessible;
     }
