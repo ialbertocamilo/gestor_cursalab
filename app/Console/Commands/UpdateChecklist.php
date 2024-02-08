@@ -33,14 +33,20 @@ class UpdateChecklist extends Command
     }
 
     private function updateSummayUser(){
-        $trainer_users = EntrenadorUsuario::select('trainer_user.user_id')->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'trainer_user.user_id')
-        ->where(function ($query) {
-            $query->whereNull('suc.id')
-                ->orWhere('suc.assigned', 0);
-        })
+
+        $trainer_users = EntrenadorUsuario::select('trainer_user.user_id')
+            ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'trainer_user.user_id')
+            ->where(function ($query) {
+                $query->whereNull('suc.id')
+                    ->orWhere('suc.assigned', '>', 0);
+            })
         ->where('trainer_user.active', 1)
+        ->whereHas('user', function($q) {
+            $q->where('active', 1);
+        })
         ->with(['user'])
         ->get();
+
         $bar = $this->output->createProgressBar($trainer_users->count());
 
         foreach ($trainer_users as $trainer_user) {
