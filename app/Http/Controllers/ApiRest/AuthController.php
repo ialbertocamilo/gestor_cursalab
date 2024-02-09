@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente};
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente, Process};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -146,7 +146,7 @@ class AuthController extends Controller
                     if($canResetPassWord) {
                         return $this->resetPasswordBuildToken($user);
                     }
-                
+
                 }
                 // === validar si debe reestablecer contraseña ===
 
@@ -258,7 +258,7 @@ class AuthController extends Controller
 
         if ($user->subworkspace->logo) {
             $user->subworkspace->logo = get_media_url($user->subworkspace->logo);
-         
+
             if ($user->subworkspace->show_logo_in_app) {
                 $workspace_data->logo = $user->subworkspace->logo;
             }
@@ -296,6 +296,7 @@ class AuthController extends Controller
             // "sexo" => $user->sexo,
             // "cargo" => $user->cargo,
             'criterios' => $criterios,
+            'processes' => Process::getProcessesAssigned($user) //Inducción
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();

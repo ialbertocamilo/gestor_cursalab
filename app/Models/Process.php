@@ -270,6 +270,16 @@ class Process extends BaseModel
     }
 
     // Api
+    protected function getProcessesAssigned( $user )
+    {
+        $supervisor = $user->isSupervisor();
+        if($supervisor)
+            $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
+        else
+            $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        return $processes_assigned;
+    }
+
     protected function getProcessesApi( $data )
     {
         $user = $data['user'];
@@ -347,6 +357,11 @@ class Process extends BaseModel
                     $activity->status = 'pendiente';
                 }
             }
+
+            $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
+            $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
+            $process->participants = rand(12,35);
+            $process->percentage = rand(10,80);
         }
 
         return ['data'=> $process];
