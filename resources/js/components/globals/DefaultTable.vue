@@ -777,6 +777,7 @@
                             <!-- #{{ segment.id }} -->
                           </v-col>
 
+
                           <v-col cols="3">
 
                                 <!-- v-for="(segment, index) in row.child.segments" -->
