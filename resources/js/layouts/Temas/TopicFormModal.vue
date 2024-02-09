@@ -978,13 +978,9 @@ export default {
             if (data.checkbox){
                 formData.append('check_tipo_ev', data.checkbox)
             }
-            formData.append(
+            formData.set(
                 'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
             );
-            console.log('formData',formData);
-            console.log('vue.resource.modality_in_person_properties',vue.resource.modality_in_person_properties);
-            console.log('vue.resource.modality_in_person_properties',JSON.stringify(vue.resource.modality_in_person_properties));
-
 
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
@@ -1053,7 +1049,7 @@ export default {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
                 vue.resource.media = []
             })
-
+            
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {

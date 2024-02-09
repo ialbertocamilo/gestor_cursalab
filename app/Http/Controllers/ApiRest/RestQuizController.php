@@ -147,7 +147,10 @@ class RestQuizController extends Controller
         if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [A]'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-
+        if(!$row && $code_modality != 'asynchronous'){
+            $user = auth()->user();
+            $row = SummaryTopic::storeData($topic, $user);
+        }
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
 
@@ -181,10 +184,12 @@ class RestQuizController extends Controller
         $status = 'started';
         if($code_modality != 'asynchronous'){
             $modality_in_person_properties = $topic->modality_in_person_properties;
-            $started_at = Carbon::createFromFormat('Y/m/d H:i',$modality_in_person_properties->evaluation->date_init);
-            $finishes_at = Carbon::createFromFormat('Y/m/d H:i',$modality_in_person_properties->evaluation->date_finish);
-            $diff_in_minutes = now()->diffInMinutes($finishes_at);
+            $parse_started_at = Carbon::parse($modality_in_person_properties->evaluation->date_init);
+            $parse_finishes_at = Carbon::parse($modality_in_person_properties->evaluation->date_finish);
+            $diff_in_minutes = now()->diffInMinutes($parse_finishes_at);
             $status = $modality_in_person_properties->evaluation->status;
+            $started_at = $parse_started_at->format('Y/m/d H:i');
+            $finishes_at = $parse_finishes_at->format('Y/m/d H:i');
             // $diff = $finishes_at->diff($current_time);
             // $diff_in_minutes = sprintf('%02d:%02d', $diff->h, $diff->i);
         }
@@ -201,7 +206,6 @@ class RestQuizController extends Controller
                 'status' => $status
             ],
         ];
-
         // Adds 24 hours for Agile
 
         if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
