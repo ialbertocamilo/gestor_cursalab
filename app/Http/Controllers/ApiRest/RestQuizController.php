@@ -174,6 +174,19 @@ class RestQuizController extends Controller
         if (count($questions) == 0)
             return response()->json(['error' => true, 'data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [B]']], 200);
 
+        $started_at = $row->current_quiz_started_at->format('Y/m/d H:i');
+        $finishes_at = $row->current_quiz_finishes_at->format('Y/m/d H:i');
+        $diff_in_minutes = now()->diffInMinutes($row->current_quiz_finishes_at);
+        $status = 'started';
+        if($code_modality != 'asynchronous'){
+            $modality_in_person_properties = $topic->modality_in_person_properties;
+            $started_at = Carbon::createFromFormat('Y/m/d H:i',$modality_in_person_properties->evaluation->date_init);
+            $finishes_at = Carbon::createFromFormat('Y/m/d H:i',$modality_in_person_properties->evaluation->date_finish);
+            $diff_in_minutes = now()->diffInMinutes($finishes_at);
+            $status = $modality_in_person_properties->evaluation->status;
+            // $diff = $finishes_at->diff($current_time);
+            // $diff_in_minutes = sprintf('%02d:%02d', $diff->h, $diff->i);
+        }
         $data = [
             'nombre' => $topic->name,
             'posteo_id' => $topic->id,
@@ -181,9 +194,10 @@ class RestQuizController extends Controller
             'preguntas' => $questions,
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
-                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
-                'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
-                'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
+                'started_at' => $started_at,
+                'finishes_at' => $finishes_at,
+                'diff_in_minutes' => $diff_in_minutes,
+                'status' => $status
             ],
         ];
 
