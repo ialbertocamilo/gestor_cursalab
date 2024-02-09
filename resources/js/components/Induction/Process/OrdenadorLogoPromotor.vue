@@ -29,7 +29,7 @@
                     </div>
                     <div class="subtitle">
                         <h5>Carga del ordenador</h5>
-                        <p>Podras subir una imagen de tu computadora</p>
+                        <p>Podrás subir una imagen de tu computadora</p>
                     </div>
                 </div>
             </div>

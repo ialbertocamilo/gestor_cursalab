@@ -163,7 +163,7 @@ export default {
             let vue = this
             console.log(resource);
 
-            if(resource.repository.list_guide.length > 0)
+            if(resource.repository && resource.repository.list_guide.length > 0)
                 vue.list_avatars = resource.repository.list_guide
         },
         resetValidation() {

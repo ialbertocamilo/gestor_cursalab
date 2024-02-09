@@ -741,7 +741,7 @@ export default {
                         title: '¡Estás por cambiar el tipo de actividad seleccionada!',
                         details: [
                             'Los datos de la actividad no se podrán recuperar',
-                            'Podras seleccionar una actividad nueva de la lista que reemplazara la seleccionada.'
+                            'Podrás seleccionar una actividad nueva de la lista que reemplazara la seleccionada.'
                         ],
                     }
                 },

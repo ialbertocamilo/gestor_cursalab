@@ -21,7 +21,7 @@
                     <div class="bx_item_activity" @click="selectTemplateOrNewProcessModal('template')">
                         <div class="img"><img src="/img/induccion/plantilla.svg"></div>
                         <h5>Con plantilla</h5>
-                        <p>Podras seleccionar un modelo prediseñado de tu proceso de inducción.</p>
+                        <p>Podrás seleccionar un modelo prediseñado de tu proceso de inducción.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectTemplateOrNewProcessModal('new')">
                         <div class="img"><img src="/img/induccion/nuevo.svg"></div>
