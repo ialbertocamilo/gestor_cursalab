@@ -417,12 +417,12 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     },
-                    // {
-                    //     text: "Eliminar",
-                    //     icon: 'far fa-trash-alt',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
+                    },
                 ]
             },
             selects: {

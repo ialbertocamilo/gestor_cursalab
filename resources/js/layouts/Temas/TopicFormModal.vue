@@ -973,12 +973,19 @@ export default {
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
-            formData.set(
+           
+            vue.addMedias(formData)
+            if (data.checkbox){
+                formData.append('check_tipo_ev', data.checkbox)
+            }
+            formData.append(
                 'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
             );
-            vue.addMedias(formData)
-            if (data.checkbox)
-                formData.append('check_tipo_ev', data.checkbox)
+            console.log('formData',formData);
+            console.log('vue.resource.modality_in_person_properties',vue.resource.modality_in_person_properties);
+            console.log('vue.resource.modality_in_person_properties',JSON.stringify(vue.resource.modality_in_person_properties));
+
+
             vue.$http.post(url, formData)
                 .then(async ({data}) => {
                     this.hideLoader()

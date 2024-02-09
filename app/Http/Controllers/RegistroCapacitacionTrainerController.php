@@ -13,4 +13,14 @@ class RegistroCapacitacionTrainerController extends Controller
         $item = RegistroCapacitacionTrainer::storeDataRequest($data);
         return $this->success($item);
     }
+
+    public function deleteTrainer(Request $request) {
+
+        $trainer = RegistroCapacitacionTrainer::find(
+            $request->registro_capacitacion_trainer
+        );
+        $trainer->delete();
+
+        return $this->success(['deleted' => true]);
+    }
 }

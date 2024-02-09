@@ -18,10 +18,10 @@
                                 <v-btn v-bind="attrs" v-on="on" class="py-1"  outlined text
                                     style="border-radius: 15px;border-color: white;height: auto;">
                                     <span style="color:white">{{limits.media_ia_converted}}/{{limits.limit_allowed_media_convert }}</span>
-                                    <img 
-                                        width="22px" 
+                                    <img
+                                        width="22px"
                                         style="filter: grayscale(100%) brightness(0) invert(100%);"
-                                        class="ml-2" 
+                                        class="ml-2"
                                         src="/img/ia_convert.svg"
                                     >
                                 </v-btn>
@@ -110,6 +110,12 @@ export default {
         },
         confirmModal() {
             let vue = this
+
+            if (!vue.multimedia) {
+                vue.showAlert('No ha seleccionado el contenido multimedia', 'warning')
+                return;
+            }
+
             event.preventDefault();
             const validateForm = vue.validateForm('TemaMultimediaTextForm')
             if (validateForm) {

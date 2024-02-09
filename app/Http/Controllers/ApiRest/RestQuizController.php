@@ -130,10 +130,10 @@ class RestQuizController extends Controller
         $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
         $code_modality = $topic->course->modality->code;
         if(($code_modality == 'in-person' || $code_modality=='virtual') && !$topic->isAccessibleEvaluation()){
-            return response()->json(['error' => true, 'data' => [
-                'is_accessible'=>false,
-                'message' => 'La evaluación no esta disponible.'
-            ]], 200);
+            // return response()->json(['error' => true, 'data' => [
+            //     'is_accessible'=>false,
+            //     'message' => 'La evaluación no esta disponible.'
+            // ]], 200);
         }
         // dd($topic->course->modality->code);
         if ($topic->course->hasBeenValidated())

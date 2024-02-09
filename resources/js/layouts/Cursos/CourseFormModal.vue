@@ -337,7 +337,7 @@
                                                         Datos para registro
                                                     </label>
                                                 </v-col>
-
+                                                    
                                                 <v-col cols="6">
                                                     <DefaultAutocomplete
                                                         placeholder=""
@@ -431,10 +431,8 @@
                                                     :rules="rules.nro_intentos"
                                                     type="number"
                                                     show-required
-                                                    dense
-                                                />
+                                                ></DefaultInput>
                                             </v-col>
-
                                             <v-col cols="12" class="py-1">
                                                 <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
                                             </v-col>
@@ -607,6 +605,17 @@
                 @onConfirm="courseUpdateStatusModal.open = false"
                 @onCancel="closeModalStatusEdit"
             />
+
+            <DialogConfirm
+                :ref="trainerDeleteConfirmationDialog.ref"
+                v-model="trainerDeleteConfirmationDialog.open"
+                width="408px"
+                title="Eliminar entrenador"
+                subtitle="¿Está seguro de eliminar el entrenador?"
+                @onConfirm="confirmTrainerDelete"
+                @onCancel="trainerDeleteConfirmationDialog.open = false"
+            />
+
             <DC3PersonModal
                 :ref="modalDC3PersonOptions.ref"
                 v-model="modalDC3PersonOptions.open"
@@ -800,6 +809,13 @@ export default {
                 persistent: false,
                 showCloseIcon: true,
                 type: null
+            },
+            trainerDeleteConfirmationDialog: {
+                ref: 'TrainerDeleteModal',
+                title: 'Eliminar entrenador',
+                contentText: '¿Desea eliminar este registro?',
+                open: false,
+                endpoint: ''
             },
             alertConfirmationDialog: {
                 open: false,
@@ -1240,6 +1256,21 @@ export default {
             this.modalRegistroTrainerOptions.open = false;
             this.registro_capacitacion_trainers.push(item);
             this.resource.registro_capacitacion.trainerAndRegistrar = item.id;
+        },
+        confirmTrainerDelete() {
+
+            const vue = this;
+            this.trainerDeleteConfirmationDialog.open = false
+            const trainerId = this.resource.registro_capacitacion.trainerAndRegistrar;
+
+            let url = `/registrotrainer/${trainerId}/destroy`;
+            vue.$http.delete(url)
+                .then(async ({data}) => {
+
+                    vue.registro_capacitacion_trainers = vue.registro_capacitacion_trainers.filter(t => {
+                        return t.id != trainerId
+                    })
+                })
         }
     }
 }

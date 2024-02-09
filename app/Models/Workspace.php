@@ -1058,4 +1058,81 @@ class Workspace extends BaseModel
         return $data;
     }
 
+    protected function setCoursesDuplication($course_ids, $_courses, $_topics, $school, $workspace, $prefix = '', $force_course_creation = false)
+    {
+        foreach ($course_ids as $course_id => $topic_ids) {
+
+            $_course = $_courses->where('id', $course_id)->first();
+
+            $course = null;
+
+            if (!$force_course_creation) {
+
+                $course = $school->courses()->where('name', $_course->name)->first();
+            }
+
+            if (!$course) {
+
+                $course_data = $_course->toArray();
+                $course_data['external_id'] = $_course->id;
+                $course_data['name'] = $prefix . $_course->name;
+                $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                $course_data['registro_capacitacion'] = json_encode($course_data['registro_capacitacion'] ?? []);
+
+                $course = $school->courses()->create($course_data);
+
+                $workspace->courses()->attach($course);
+            }
+
+            foreach ($topic_ids['topics'] as $topic_id) {
+
+                $_topic = $_topics->where('id', $topic_id)->first();
+
+                $topic = $course->topics()->where('name', $_topic->name)->first();
+
+                if(!$topic) {
+
+                    $topic_data = $_topic->toArray();
+                    $topic_data['external_id'] = $_topic->id;
+
+                    $topic = $course->topics()->create($topic_data);
+
+                    $topic->medias()->createMany($_topic->medias->toArray());
+                    $topic->questions()->createMany($_topic->questions->toArray());
+
+                    $_requirement = $_topic->requirements->first();
+
+                    if ($_requirement) {
+
+                        $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                        if ($requirement) {
+
+                            Requirement::updateOrCreate(
+                                ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                            );
+                        }
+                    }
+                }
+
+            }
+        }
+
+        $_c_requirement = $_course->requirements->first();
+
+        if ($_c_requirement) {
+
+            $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+            if ($c_requirement) {
+
+                Requirement::updateOrCreate(
+                    ['model_type' => Course::class, 'model_id' => $course->id],
+                    ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                );
+            }
+        }
+    }
+
 }

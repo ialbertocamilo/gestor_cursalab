@@ -7,6 +7,7 @@
     >
         <template v-slot:content>
             <v-form ref="ModuloForm">
+                <DefaultErrors :errors="errors" />
                 <v-row justify="space-around">
                     <v-col cols="6" class="d-flex justify-content-center">
                         <DefaultInput
@@ -165,7 +166,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row v-if="has_registro_capacitacion_functionality"
+                <v-row v-if="has_registro_capacitacion_functionality && $root.isSuperUser"
                        justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
@@ -206,13 +207,25 @@
 
                                     <v-row v-if="resource.registro_capacitacion.company"
                                            justify="center">
-                                        <v-col cols="8">
+                                        <v-col :cols="resource.registro_capacitacion.company.address ? 8 : 4">
                                             <DefaultInput
                                                 label="Dirección"
                                                 v-model="resource.registro_capacitacion.company.address"
-                                                :rules="rules.address"
                                                 dense
                                             />
+                                        </v-col>
+                                        <v-col v-if="!resource.registro_capacitacion.company.address"
+                                               cols="4">
+                                            <DefaultSelect
+                                                dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaAddress"
+                                                label="Criterio para dirección"
+                                            />
+
                                         </v-col>
                                         <v-col cols="4">
                                             <DefaultInput
@@ -237,7 +250,6 @@
                                                 label="Criterio para conteo de trabajadores"
                                                 :rules="rules.criteriaWorkersCount"
                                             />
-
                                         </v-col>
                                         <v-col cols="6">
                                             <DefaultInput
@@ -303,6 +315,7 @@ export default {
     },
     data() {
         return {
+            errors: [],
             drag: {
                 main_menu: false,
                 side_menu: false,
@@ -347,7 +360,6 @@ export default {
                 businessName: this.getRules(['required']),
                 businessNumber: this.getRules(['required']),
                 CIIU: this.getRules(['required']),
-                address: this.getRules(['required']),
                 economicActivity: this.getRules(['required']),
                 appUrl: this.getRules(['required']),
                 criteriaWorkersCount: this.getRules(['required'])
@@ -405,7 +417,9 @@ export default {
             this.showLoader()
             const validateForm = vue.validateForm('ModuloForm')
             const validateReinicio = vue.validateReinicio();
-            if (validateForm && validateReinicio) {
+            vue.errors = [];
+
+            if (validateForm && validateReinicio && vue.isValid()) {
                 const edit = vue.options.action === 'edit'
                 let url = `${vue.options.base_endpoint}/${edit ? `${vue.resource.id}/update` : 'store'}`
                 let method = edit ? 'PUT' : 'POST';
@@ -517,7 +531,29 @@ export default {
             let vue = this
 
         },
+        isValid() {
 
+            let valid = true;
+            let errors = [];
+
+            // Validation: address or address criteria should be selected
+
+            if (this.has_registro_capacitacion_functionality) {
+                if (!this.resource.registro_capacitacion.company.address &&
+                    !this.resource.registro_capacitacion.criteriaAddress) {
+                    errors.push({
+                        message: 'Debe definir la dirección o criterio para obtener la direccióm'
+                    })
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                this.errors = errors;
+            }
+
+            return valid;
+        }
     },
 }
 </script>

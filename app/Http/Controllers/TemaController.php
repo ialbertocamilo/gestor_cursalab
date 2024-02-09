@@ -152,7 +152,7 @@ class TemaController extends Controller
         $data = $request->validated();
         $data = Media::requestUploadFile($data, 'imagen');
         // info($data);
-
+        dd($data);
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);
 //            info($validations['list']);

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>REGISTRO DE CAPACITACIÓN - {{
-        $course['registro_capacitacion']->certificateCode
-    }}</title>
+    <title
+        {{ $course['registro_capacitacion']->certificateCode }}
+    </title>
 </head>
 <body>
 
@@ -57,11 +57,23 @@
         font-weight: 700;
         font-size: 16px;
         padding-left: 10px;
-        height: 21px;
+        min-height: 21px;
+    }
+
+    .cell-number {
+        position: relative;
+        vertical-align: bottom;
     }
 
     .topics {
         min-height: 50px;
+    }
+
+    .topics p,
+    .topics span,
+    .topics li {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 11px !important;
     }
 
     .margin-top {
@@ -76,32 +88,43 @@
         text-align: center;
     }
 
-    .number {
+    .number-wrapper span {
+        display: block;
+        float: left;
+        padding-left: 0px;
+        padding-top: 5px;
+        font-weight: inherit;
+        font-size: inherit;
+    }
+
+    .number-separator {
         border-right: 2px solid black;
-        width: 15px;
-        height: 20px;
+        width: 1px;
+        height: inherit;
         margin-top: 8px;
         padding-right: 3px;
         text-align: center;
-        display: inline-block;
+        float: left;
+        display: none;
     }
 
 </style>
 
+
 <h4 class="main-title">
-    REGISTRO DE CAPACITACIÓN - {{ $course['registro_capacitacion']->certificateCode }}
+    {{ $course['registro_capacitacion']->certificateCode }}
 </h4>
 
 <table class="table-form">
 
     <tr class="title-wrapper">
-        <td colspan="12" class="table-title">
+        <td colspan="3" class="table-title">
             DATOS DE "LA EMPRESA"
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="12">
+        <td class="cell" colspan="3">
             <div class="cell-label">
                 Razón social
             </div>
@@ -112,18 +135,19 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="4">
+        <td class="cell" style="width: 45%">
             <div class="cell-label">
                 RUC
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($company->businessNumber ?? '') as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator "></div>
                 @endforeach
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell">
             <div class="cell-label">
                 Actividad económica
             </div>
@@ -132,31 +156,32 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="2">
+        <td class="cell">
             <div class="cell-label">
                 Con código CIIU Nº
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($company->CIIU ?? '') as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator "></div>
                 @endforeach
             </div>
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="12">
+        <td class="cell" colspan="3">
             <div class="cell-label">
                 Dirección de la sede
             </div>
             <div class="cell-value">
-                {{ $company->address ?? '' }}
+                {{ $address }}
             </div>
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell">
             <div class="cell-label">
                 Número de trabajadores del centro laboral
             </div>
@@ -165,7 +190,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell"  colspan="2">
             <div class="cell-label">
                 Capacitador y encargado del registro
             </div>
@@ -179,49 +204,50 @@
 <table class="table-form margin-top">
 
     <tr class="title-wrapper">
-        <td colspan="12" class="table-title">
-            DATOS DEL “TRABAJADOR
+        <td colspan="2" class="table-title">
+            DATOS DEL “TRABAJADOR"
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell" colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Nombre completo
             </div>
             <div class="cell-value">
-                {{$user['name']}}
+                {{$user['name']}} {{$user['lastname']}} {{$user['surname']}}
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Documento de identificación
             </div>
-            <div class="cell-value">
+            <div class="cell-value cell-number">
                 @foreach (str_split($user['document']) as $char)
-                    <div class="number">{{ $char }}</div>
+                    {{ $char }}
+                    <div class="number-separator"></div>
                 @endforeach
             </div>
         </td>
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Cargo
             </div>
             <div class="cell-value">
-
+                {{ $job_position }}
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Área
             </div>
             <div class="cell-value">
-
+                {{ $area }}
             </div>
         </td>
     </tr>
@@ -242,7 +268,7 @@
 <table class="table-form">
 
     <tr class="row">
-        <td class="cell" colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Nombre del curso
             </div>
@@ -251,7 +277,7 @@
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Horas lectivas
             </div>
@@ -262,21 +288,21 @@
     </tr>
 
     <tr class="row">
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Fecha de capacitación
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
 
-        <td class="cell"  colspan="6">
+        <td class="cell" style="width: 50%">
             <div class="cell-label">
                 Fecha de registro
             </div>
             <div class="cell-value">
-                {{ substr($summaryCourse['created_at'], 0, 10) }}
+                {{ substr($summaryCourse['last_time_evaluated_at'] ?? '', 0, 10) }}
             </div>
         </td>
     </tr>
@@ -299,7 +325,7 @@
 </p>
 
 <div class="comment margin-bottom">
-    {{ $course['certificationComment'] }}
+    {{ $course['registro_capacitacion']->comment ?? '' }}
 </div>
 
 <table class="table-form margin-bottom">

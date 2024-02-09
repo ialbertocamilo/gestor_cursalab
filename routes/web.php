@@ -41,7 +41,6 @@ Route::redirect('/', 'login', 301);
 //     return view('emails.email_information_apis',['data'=>$mail_data]);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
-Route::view('welcome_email','emails.welcome_email');
 Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
 Route::get('email_reset',function(){
@@ -254,6 +253,8 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
         ];
         return view('pdf.dc3',$data);
     });
+
+    // Route::get('welcome_email','emails.welcome_email');
 });
 
 

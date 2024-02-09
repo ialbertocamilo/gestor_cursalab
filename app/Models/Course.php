@@ -1821,4 +1821,22 @@ class Course extends BaseModel
             ? $this->registro_capacitacion->active ?? false
             : false;
     }
+
+    protected function getTopicsForTree($course)
+    {
+        $data = [];
+
+        foreach ($course->topics as $topic) {
+
+            $child_key = 'topic_' . $topic->id;
+
+            $data[] = [
+                'id' => $child_key,
+                'name' => '[TEMA] ' . $topic->name,
+                'icon' => 'mdi-bookmark',
+            ];
+        }
+
+        return $data;
+    }
 }

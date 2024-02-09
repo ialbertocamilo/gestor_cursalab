@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App;
+use App\Models\CriterionValue;
 use App\Models\RegistroCapacitacionTrainer;
 use App\Models\Workspace;
 use App\Services\FileService;
@@ -331,8 +332,34 @@ class RestCourseController extends Controller
         $subworkspace = Workspace::find($user->subworkspace_id);
         $course = Course::find($request->course_id);
 
-        $criterionId = $subworkspace->registro_capacitacion->criteriaWorkersCount->id;
-        $criterionValueIdForCounting = User::getCriterionValueId($user->id, $criterionId);
+        // Get user cargo and area
+
+        $positionCriterionValueId = User::getCriterionValueId($user->id, 6); // 6 PUESTO
+        $areaCriterionValueId = User::getCriterionValueId($user->id, 9); // 9 TIENDA/ÁREA
+        $position = CriterionValue::find($positionCriterionValueId);
+        $area = CriterionValue::find($areaCriterionValueId);
+
+        // Count workers
+
+        $workersCount = 0;
+        if (isset($subworkspace->registro_capacitacion->criteriaWorkersCount)) {
+            $criterionId = $subworkspace->registro_capacitacion->criteriaWorkersCount->id;
+            $criterionValueIdForCounting = User::getCriterionValueId($user->id, $criterionId);
+            $workersCount = User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting);
+        }
+
+        // Get company address
+        $address = '';
+        if ($subworkspace->registro_capacitacion->company->address) {
+            $address = $subworkspace->registro_capacitacion->company->address;
+        } else if ($subworkspace->registro_capacitacion->criteriaAddress) {
+            $addressCriteriaId = $subworkspace->registro_capacitacion->criteriaAddress->id;
+            $criterionValueIdForAddress = User::getCriterionValueIdWithChildren($user->id, $addressCriteriaId);
+            $addressCriterionValue = CriterionValue::find($criterionValueIdForAddress);
+            $address = $addressCriterionValue ? $addressCriterionValue->value_text : '-';
+        }
+
+        // Get trainer and summary data
 
         $trainer = RegistroCapacitacionTrainer::find($course->registro_capacitacion->trainerAndRegistrar);
         $summary = SummaryCourse::query()
@@ -340,27 +367,34 @@ class RestCourseController extends Controller
             ->where('course_id', $course->id)
             ->first();
 
-        $trainerSignatureUrl = FileService::generateUrl($trainer->signature->path);
+        // Encode trainer signature to base 64
 
+        $trainerSignatureUrl = FileService::generateUrl($trainer->signature->path);
         $userSignatureData = $request->get('signature');
         $trainerSignatureData = 'data:image/jpg;base64,'.base64_encode(file_get_contents($trainerSignatureUrl));
+
         $data = [
             'userSignatureData' => $userSignatureData,
             'trainerSignatureData' => $trainerSignatureData,
             'trainer' => $trainer,
             'user' => $user,
+            'job_position' => $position ? $position->value_text : '-',
+            'area' => $area ? $area->value_text : '-',
             'company'=> $subworkspace->registro_capacitacion->company,
-            'workersCount' => User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting),
+            'workersCount' => $workersCount ?? '-',
             'course' => $course,
-            'summaryCourse' => $summary
+            'summaryCourse' => $summary,
+            'address' => $address
         ];
 
         // Render template and store generated file
 
+        $fullname = "$user->name $user->lastname $user->surname";
         $filename = 'capacitacion-'.
                     $subworkspace->id . '-' .
                     $course->id .  '-' .
-                    $user->id . '-' .
+                    $user->document . '-' .
+                    Str::slug($fullname, '-') . '-' .
                     Str::random(5) . '.pdf';
         $filepath = Course::generateAndStoreRegistroCapacitacion($filename, $data);
 

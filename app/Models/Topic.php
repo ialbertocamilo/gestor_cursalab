@@ -1234,6 +1234,7 @@ class Topic extends BaseModel
                 }
             }
         }
+        
         return [
             'id' => $last_topic_reviewed,
             'last_media_access' => $last_media_access,
