@@ -131,10 +131,10 @@ class RestQuizController extends Controller
         if(($code_modality == 'in-person' || $code_modality=='virtual') && !$topic->isAccessibleEvaluation()){
             return response()->json(['error' => true, 'data' => [
                 'is_accessible'=>false,
-                'message' => 'La evaluación aún no ha sido iniciada.'
+                'message' => 'La evaluación no esta disponible.'
             ]], 200);
         }
-        dd($topic->course->modality->code);
+        // dd($topic->course->modality->code);
         if ($topic->course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
 
@@ -154,7 +154,7 @@ class RestQuizController extends Controller
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if ($row->isOutOfTimeForQuiz() && $is_qualified)
+        if ($row->isOutOfTimeForQuiz() && $is_qualified && $code_modality == 'asynchronous')
             return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
 
         $limit = NULL;
