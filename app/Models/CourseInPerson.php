@@ -135,13 +135,18 @@ class CourseInPerson extends Model
     }
 
    
-    protected function listGuestsByCourse($course_id,$topic_id,$code){
+    protected function listUsersBySession($course_id,$topic_id,$code,$search_user){
         $topic =    Topic::select('id', 'name','course_id','modality_in_person_properties')
                         ->where('id',$topic_id)
                         ->with(['course.segments','course.segments.values'])
                         ->first();
-        
-        $users_segmented = $topic->course->usersSegmented($topic->course->segments,'get_records',[],['id','name','lastname','surname','document']);
+        $filters = [];
+        if($search_user){
+            $filters = [
+                ['statement'=>'filterText','value'=>$search_user]
+            ];
+        }
+        $users_segmented = $topic->course->usersSegmented($topic->course->segments,'get_records',$filters,['id','name','lastname','surname','document']);
         $users = [];
         $codes = [];
         $codes_taxonomy = Taxonomy::getDataForSelectAttrs(groupName:'course',typeName:'assistance',attributes:['id','code','name','color']);

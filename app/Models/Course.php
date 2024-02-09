@@ -1324,6 +1324,10 @@ class Course extends BaseModel
 
     public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
     {
+        // Example filters: 
+        // $filters = [
+        //      ['statement' => 'where','field'=>'name','operator'=>'=','value'=>'Aldo']
+        // ]
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
             $query = User::select('id')->where('active', 1);
@@ -1354,9 +1358,12 @@ class Course extends BaseModel
                 $field = $filter['field'] ?? null;
                 $value = $filter['value'] ?? null;
                 $operator = $filter['operator'] ?? '=';
-                if($field && $statement){
+                if($field && $operator){
                     /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
                     ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+                }else if($statement && $value){
+                    /*Example: $query->filterText($value)*/
+                    $query->$statement($value);
                 }
             }
             $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());

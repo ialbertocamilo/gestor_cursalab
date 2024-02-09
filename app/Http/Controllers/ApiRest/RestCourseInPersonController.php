@@ -22,12 +22,13 @@ class RestCourseInPersonController extends Controller
         return $this->success(['result'=>$result]);
     }
 
-    public function listGuestsByCourse(Request $request,$course_id,$topic_id){
+    public function listUsersBySession(Request $request,$course_id,$topic_id){
         $code = $request->code;
+        $search_user = $request->search_user;
         if(!$code){
             return $this->error('Es necesario el código.');
         }
-        $data = CourseInPerson::listGuestsByCourse($course_id,$topic_id,$code);
+        $data = CourseInPerson::listUsersBySession($course_id,$topic_id,$code,$search_user);
         return $this->success($data);
     }
 

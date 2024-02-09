@@ -11,7 +11,7 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     Route::get('/get-data', 'getData');// USER
     Route::get('/topic/{topic}/load-poll-questions', 'loadPoll');
 
-    Route::get('/course/{course}/topic/{topic}/assigned', 'listGuestsByCourse');  // HOST
+    Route::get('/course/{course}/topic/{topic}/assigned', 'listUsersBySession');  // HOST
     Route::post('/topic/evaluation', 'changeStatusEvaluation'); // HOST
     Route::post('/topic/{topic}/take-assistance', 'takeAssistance'); // HOST
     Route::get('/topic/{topic}/start-poll', 'startPoll'); // HOST
