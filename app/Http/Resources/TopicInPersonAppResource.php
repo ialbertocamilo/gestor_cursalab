@@ -33,6 +33,7 @@ class TopicInPersonAppResource extends JsonResource
             $duration = $duration .' ('.round($diff_in_minutes / 1440,1).' días)';
             $format_day =  Carbon::parse($this->modality_in_person_properties->start_date)->format('l, j \d\e F');
         }
+        $date_init = $start_datetime->format('Y-m-d H:i') ;
         $is_today = $start_datetime->isToday();
         $is_ontime = now()->between($start_datetime, $finish_datetime);
         $modality_code = $this->course->modality->code;
@@ -52,6 +53,7 @@ class TopicInPersonAppResource extends JsonResource
             'url_maps' => $this->modality_in_person_properties->url,
             'is_today'=> $is_today,
             'is_ontime'=> $is_ontime,
+            'date_init' => $date_init,
             'format_day' => fechaCastellanoV2($format_day),
             'required_signature'=>$this->course->modality_in_person_properties->required_signature
         ];
