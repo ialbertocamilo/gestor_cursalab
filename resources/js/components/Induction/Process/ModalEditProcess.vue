@@ -256,43 +256,43 @@
                                                     <div>
                                                         <div class="box_select_icons">
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/apreton-de-manos.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_1')">
+                                                                    <img src="/img/induccion/personalizacion/apreton-de-manos.png" ref="img_onb_1">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/rascacielos.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_2')">
+                                                                    <img src="/img/induccion/personalizacion/rascacielos.png" ref="img_onb_2">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/fabrica.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_3')">
+                                                                    <img src="/img/induccion/personalizacion/fabrica.png" ref="img_onb_3">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/producto.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_4')">
+                                                                    <img src="/img/induccion/personalizacion/producto.png" ref="img_onb_4">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/tienda-de-comestibles.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_5')">
+                                                                    <img src="/img/induccion/personalizacion/tienda-de-comestibles.png" ref="img_onb_5">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/mercado.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_6')">
+                                                                    <img src="/img/induccion/personalizacion/mercado.png" ref="img_onb_6">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/fabrica-2.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_7')">
+                                                                    <img src="/img/induccion/personalizacion/fabrica-2.png" ref="img_onb_7">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected">
-                                                                    <img src="/img/induccion/personalizacion/detallista.png">
+                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_8')">
+                                                                    <img src="/img/induccion/personalizacion/detallista.png" ref="img_onb_8">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb" v-for="(icon, index) in list_icons_finished_onboarding" :key="index">
@@ -907,6 +907,10 @@ export default {
         }
     },
     methods: {
+        async selectIconOnboarding(ref_image) {
+            let vue = this
+            vue.process.icon_finished_selected = vue.$refs[ref_image].src
+        },
         images_upload_handler(blobInfo, success, failure) {
             console.log(blobInfo.blob());
             let vue = this
