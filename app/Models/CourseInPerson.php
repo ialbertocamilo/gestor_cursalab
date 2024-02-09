@@ -73,7 +73,13 @@ class CourseInPerson extends Model
         }
         $months = config('data.months');
         $days = config('data.days');
-        $sessions_in_person = Topic::with(['course:id,modality_in_person_properties,imagen,modality_id','course.modality:id,code'])
+        $sessions_in_person = Topic::with([
+                        'course:id,modality_in_person_properties,imagen,modality_id',
+                        'course.modality:id,code',
+                        'course.schools' => function ($query) {
+                            $query->select('id')->where('active', ACTIVE);
+                        }
+                    ])
                     ->select('id', 'name','course_id','modality_in_person_properties')
                     ->whereHas('course',function($q) use ($modality_code){
                         $q->where('active',1)->whereRelation('modality','code',$modality_code);

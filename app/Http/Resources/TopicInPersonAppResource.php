@@ -55,7 +55,8 @@ class TopicInPersonAppResource extends JsonResource
             'is_ontime'=> $is_ontime,
             'date_init' => $date_init,
             'format_day' => fechaCastellanoV2($format_day),
-            'required_signature'=>$this->course->modality_in_person_properties->required_signature
+            'required_signature'=>$this->course->modality_in_person_properties->required_signature,
+            'school_id' => $this->course->schools->first()?->id
         ];
         if($modality_code == 'virtual'){
             $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$this->id)->first();
