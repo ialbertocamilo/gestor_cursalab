@@ -112,8 +112,10 @@ class Topic extends BaseModel
         //     ->where('categoria_id', $request->categoria_id)
         //     ->where('course_id', $request->course_id);
 
-        if ($request->q)
-            $q->where('name', 'like', "%$request->q%");
+        if ($request->q) {
+            $q->where('name', 'like', "%$request->q%")
+                ->orWhere('id', $request->q);
+        }
 
         $field = $request->sortBy ?? 'position';
         if ($field == 'orden')
@@ -171,7 +173,7 @@ class Topic extends BaseModel
                 Tag::where('model_type',Topic::class)->where('model_id',$tema->id)->delete();
             }
             //
-            $_medias = collect($tema->medias()->get()); 
+            $_medias = collect($tema->medias()->get());
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -228,12 +230,49 @@ class Topic extends BaseModel
                 $tema->save();
             }
 
+            // Fix topics position
+
+            self::fixTopicsPosition($tema->course_id, $tema->id);
+
             DB::commit();
             return $tema;
         } catch (\Exception $e) {
             DB::rollBack();
             info($e);
             return $e;
+        }
+    }
+
+    /**
+     * Fix position number of topics from the same course
+     */
+    public static function fixTopicsPosition($courseId, $topicIdToIgnore) {
+
+        $topics = Topic::query()
+            ->where('course_id', $courseId)
+            ->where('id', '!=', $topicIdToIgnore)
+            ->orderBy('position')
+            ->get();
+
+        $positionToIgnore = null;
+        $topic = Topic::find($topicIdToIgnore);
+        if ($topic) {
+            $positionToIgnore = $topic->position;
+        }
+
+        $lastPosition = 1;
+        foreach ($topics as $topic) {
+
+            if ($lastPosition === $positionToIgnore) {
+                $lastPosition++;
+            }
+
+            if ($topic->position != $lastPosition) {
+                $topic->position = $lastPosition;
+                $topic->save();
+            }
+
+            $lastPosition++;
         }
     }
 
@@ -631,7 +670,7 @@ class Topic extends BaseModel
                 }
 
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
-                
+
                 $topics_data->push([
                     'id' => $topic->id,
                     'nombre' => $topic->name,
@@ -1212,7 +1251,7 @@ class Topic extends BaseModel
                 }
             }
         }
-        
+
         return [
             'id' => $last_topic_reviewed,
             'last_media_access' => $last_media_access,

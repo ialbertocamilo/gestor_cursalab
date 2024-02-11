@@ -237,7 +237,8 @@ class Course extends BaseModel
         }
 
         if ($request->q)
-            $q->where('name', 'like', "%$request->q%");
+            $q->where('name', 'like', "%$request->q%")
+              ->orWhere('id', $request->q);
 
         if ($request->type)
             $q->where('type_id', $request->type);

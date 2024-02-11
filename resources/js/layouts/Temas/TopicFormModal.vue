@@ -9,6 +9,13 @@
         <template v-slot:content>
 
             <v-form ref="TemaForm">
+                <v-row v-if="$root.isSuperUser">
+                    <v-col cols="12">
+                        <v-chip>
+                            ID: {{ resource.id }}
+                        </v-chip>
+                    </v-col>
+                </v-row>
                 <v-row justify="center">
                     <v-col cols="7">
                         <DefaultInput
@@ -308,7 +315,7 @@
                             <v-col cols="6">
                                 <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
                                 <DefaultButton
-                                    outlined 
+                                    outlined
                                     label="Agregar Tag"
                                     @click="openFormModal(modalTagOptions)"
                                 />
@@ -1061,7 +1068,7 @@ export default {
     font-style: normal !important;
     font-weight: 400 !important;
     line-height: 20px !important;
-    letter-spacing: 0.1px !important; 
+    letter-spacing: 0.1px !important;
 }
 .list-item-description-tag{
     color: #2A3649 !important;
@@ -1079,6 +1086,6 @@ export default {
     font-style: normal !important;
     font-weight: 400 !important;
     line-height: 20px !important; /* 133.333% */
-    letter-spacing: 0.1px !important; 
+    letter-spacing: 0.1px !important;
 }
 </style>
