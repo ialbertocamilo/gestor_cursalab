@@ -54,20 +54,23 @@ class ReminderInactivateCourseCommnand extends Command
                                 ->where('active',1)
                                 ->whereDate('deactivate_at', '=',$diff_day)
                                 ->get();
+            
             $users_to_send_email = [];
             $filters = [
                 ['statement'=>'whereNotNull','field'=>'email'],
                 ['statement'=>'where','field'=>'email','operator'=>'<>','value'=>' ']
             ];
             $reminders_configuration = $workspace->reminders_configuration;
+            
             foreach ($coursesToSentEmail as $course) {
                 $course->load('segments');
                 /* Obtener los usuarios segmentados que tengan correo*/ 
                 $users_segmented = $course->usersSegmented($course->segments,'get_records',$filters,['email','subworkspace_id']);
+                
                 // $users_id_chunked = array_chunk($users_segmented,500);
-                $users_id_chunked = $users_segmented->chunk(500)->all();
+                $users_id_chunked = $users_segmented->chunk(200)->all();
                 $_course =  [ 'id' => $course->id,'name' => $course->name];
-               
+                
                 foreach ($users_id_chunked as $_users) {
                     $users_to_completed_course = SummaryCourse::select('user_id')
                                                 ->whereHas('user',function($q){
@@ -79,9 +82,9 @@ class ReminderInactivateCourseCommnand extends Command
                                                 ->where('advanced_percentage','100')
                                                 ->pluck('user_id')->toArray();
     
-                    
                     $user_not_complete_course = $_users->whereNotIn('id',$users_to_completed_course)->all();
                     foreach ($user_not_complete_course as $diff_user_id) {
+                        
                         $key = array_search($diff_user_id->id, array_column($users_to_send_email, 'user_id'));
                         if ($key !== false) {
                             $users_to_send_email[$key]['courses'][] = $_course;
@@ -98,14 +101,18 @@ class ReminderInactivateCourseCommnand extends Command
                     }
                 }
             }
+           
             if(count($users_to_send_email)){
+                
                 $users_to_send_email = EmailLog::formatToSaveEmail(
                                             users:$users_to_send_email,
                                             subject:'Recordatorio de inactivación',
                                             template:'emails.reminder_inactivate_course',
                                             type_email:'reminder_inactivate_course',
-                                            reminders_configuration:$reminders_configuration
+                                            reminders_configuration:$reminders_configuration,
+                                            status:'programmed',
                                         ); 
+                
                 $chunk_insert = array_chunk($users_to_send_email,10);
                 foreach ($chunk_insert as $key => $insert) {
                     EmailLog::insert($insert);
