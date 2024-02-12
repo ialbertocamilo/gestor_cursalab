@@ -375,6 +375,9 @@ class CourseInPerson extends Model
         $show_modal_signature_registro_capacitación = false;
         //REGISTRO DE CAPACITACIÓN
         $registroCapacitacionIsActive = $topic->course->registroCapacitacionIsActive();
+        $registroCapacitacionPath = null;
+        $registroCapacitacionUrl = null;
+        $summary = null;
         if($rol == 'user' && $registroCapacitacionIsActive){
             $registroCapacitacionPath = null;
             $registroCapacitacionUrl = null;
@@ -387,7 +390,7 @@ class CourseInPerson extends Model
             }
             $show_modal_signature_registro_capacitación = boolval($registroCapacitacionPath);
         }
-        return compact('menus','required_signature','show_modal_signature_registro_capacitación');
+        return compact('summary','menus','required_signature','show_modal_signature_registro_capacitación','registroCapacitacionIsActive','registroCapacitacionPath','registroCapacitacionUrl');
     }
 
     
