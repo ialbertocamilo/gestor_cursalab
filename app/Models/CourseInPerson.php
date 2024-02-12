@@ -341,7 +341,10 @@ class CourseInPerson extends Model
     protected function getListMenu($topic_id){
         $user = auth()->user();
         $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')
-                    ->with(['course:id,modality_id,modality_in_person_properties','course.modality:id,code','course.polls:id'])
+                    ->with([
+                        'course:id,modality_id,modality_in_person_properties,registro_capacitacion',
+                        'course.modality:id,code','course.polls:id'
+                    ])
                     ->where('id',$topic_id)
                     ->first();
 
@@ -369,7 +372,22 @@ class CourseInPerson extends Model
             $hasSignature = TopicAssistanceUser::where('user_id',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
             $required_signature = boolval($hasSignature);
         }
-        return ['menus'=> $menus , 'required_signature'=>$required_signature];
+        $show_modal_signature_registro_capacitación = false;
+        //REGISTRO DE CAPACITACIÓN
+        $registroCapacitacionIsActive = $topic->course->registroCapacitacionIsActive();
+        if($rol == 'user' && $registroCapacitacionIsActive){
+            $registroCapacitacionPath = null;
+            $registroCapacitacionUrl = null;
+            $summary = SummaryCourse::select('registro_capacitacion_path')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
+            if ($summary) {
+                $registroCapacitacionPath = $summary->registro_capacitacion_path;
+                $registroCapacitacionUrl = $registroCapacitacionPath
+                    ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
+                    : null;
+            }
+            $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath);
+        }
+        return compact('menus','required_signature','show_modal_signature_registro_capacitación');
     }
 
     
