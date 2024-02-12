@@ -172,7 +172,7 @@
                     </span> -->
 
                     <v-img
-                        v-for="(row, index) in item.images"
+                        v-for="(row, index) in item.images.slice(0, 3)"
                         max-height="50"
                         max-width="50"
                         :key="index"
@@ -191,6 +191,24 @@
                             </v-row>
                         </template>
                     </v-img>
+
+                    <v-tooltip :left="true">
+                        <!-- Icon -->
+                        <template
+                            v-slot:activator="{ on, attrs }">
+                            <div
+                                v-bind="attrs"
+                                v-on="on"
+                                v-if="item.images.length > 3"
+                                class="mt-3"
+                                style="position: relative; font-size: 18px; font-weight: 700; color: #5458ea">
+                                ...
+                            </div>
+                        </template>
+
+                        <!-- Tooltip message -->
+                        <div v-html="generateImagesNamesList(item.images)" />
+                    </v-tooltip>
                 </div>
             </template>
             <template v-slot:item.tags="{ item, header }">
@@ -941,7 +959,7 @@
                     <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
                     <div class="d-flex justify-content-start modules-images pt-3">
                         <v-img
-                            v-for="(row, index) in item.images"
+                            v-for="(row, index) in item.images.slice(0,3)"
                             max-height="50"
                             max-width="50"
                             :key="index"
@@ -963,6 +981,23 @@
                                 </v-row>
                             </template>
                         </v-img>
+                        <v-tooltip :left="true">
+                            <!-- Icon -->
+                            <template
+                                v-slot:activator="{ on, attrs }">
+                                <div
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    v-if="item.images.length > 3"
+                                    class="mt-3"
+                                    style="position: relative; font-size: 18px; font-weight: 700; color: #5458ea">
+                                    ...
+                                </div>
+                            </template>
+
+                            <!-- Tooltip message -->
+                            <div v-html="generateImagesNamesList(item.images)" />
+                        </v-tooltip>
                     </div>
 
 
@@ -1474,6 +1509,13 @@ export default {
             }
 
             return messages.join('<br>');
+        },
+
+        generateImagesNamesList(images) {
+            let names = [];
+            images.forEach(i => names.push(`<li style="font-size: 12px">${i.name}</li>`))
+
+            return '<ul style="padding-left: 5px; margin: 0">' + names.join('') + '</ul>'
         }
     }
 }

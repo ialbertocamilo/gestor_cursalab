@@ -12,6 +12,7 @@ use App\Traits\CustomAudit;
 use App\Traits\CustomMedia;
 use Illuminate\Support\Str;
 use App\Models\Mongo\EmailLog;
+use App\Models\Master\Customer;
 use Spatie\Image\Manipulations;
 use Khsing\World\Models\Country;
 use Spatie\MediaLibrary\HasMedia;
@@ -19,36 +20,36 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 use Silber\Bouncer\Database\Models;
+
 use Illuminate\Support\Facades\Hash;
 
 use Illuminate\Support\Facades\Mail;
 
 use Clockwork\DataSource\DBALDataSource;
-
 use Illuminate\Notifications\Notifiable;
 use Altek\Accountant\Contracts\Recordable;
-use Lab404\Impersonate\Models\Impersonate;
 
+use App\Models\Mongo\WorkspaceCustomEmail;
+use Lab404\Impersonate\Models\Impersonate;
 use App\Models\UCMigrationData\Migration_1;
+
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Altek\Accountant\Contracts\Identifiable;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Jenssegers\Mongodb\Eloquent\HybridRelations;
-
 use Silber\Bouncer\Database\HasRolesAndAbilities;
-
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
-use App\Models\Master\Customer;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
@@ -472,14 +473,14 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         $user = $this;
         $user->active = $active;
+        $current_workspace = get_current_workspace();
         if ($active) {
             $data['summary_user_update'] = true;
-            $user->sendWelcomeEmail($from_massive);
+            $user->sendWelcomeEmail($from_massive,$current_workspace);
         }
         $user->save();
         if($user->active){
             try {
-                $current_workspace = get_current_workspace();
                 $current_workspace->sendEmailByLimit();
             } catch (\Throwable $th) {
 
@@ -537,6 +538,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
+            $current_workspace_id = get_current_workspace();
+
             if ($user) :
                 if ($from_massive) {
                     $data['summary_user_update'] = true;
@@ -569,7 +572,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
             if($user->active){
-                $user->sendWelcomeEmail($from_massive);
+                $user->sendWelcomeEmail($from_massive,$current_workspace_id);
             }
             $user->subworkspace_id = Workspace::query()
                 ->where('criterion_value_id', $data['criterion_list']['module'])
@@ -584,7 +587,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     if ($id_crit_val){
                         $data['criterion_list'][$key] = $id_crit_val->id;
                     } else {
-                        $current_workspace_id = get_current_workspace();
                         $data_cr['workspace_id'] = $current_workspace_id?->id;
 
                         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($id_criterio);
@@ -663,25 +665,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user;
         // info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
-    public function sendWelcomeEmail($from_massive=false){
+    public function sendWelcomeEmail($from_massive=false,$workspace){
+        $can_send_welcome_email = boolval($workspace->functionalities()->get()->where('code','welcome-email')->first());
+        if(!$can_send_welcome_email){
+            return '';
+        }
+        $email_custom = WorkspaceCustomEmail::search($workspace,'welcome-email');
+        if(!$email_custom){
+            return '';
+        }
         $user = $this;
         $email =  trim($user->email);
         //Solo de 380
-        if($user?->subworkspace_id != 224){
-            return;
-        }
+        // if($user?->subworkspace()->parent_id != 224){
+        //     return;
+        // }
         // if(!$email){
-        $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
-        if(!$taxonomy){
-            return;
-        }
+        // $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
+        // if(!$taxonomy){
+        //     return;
+        // }
         if(!$email){
             return '';
         }
+       
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
                        'user_id' => $user->id,
+                       'data_custom' => $email_custom?->data_custom,
                     ];
+
+        if(isset($email_custom->data_custom['show_subworkspace_logo']) && $email_custom->data_custom['show_subworkspace_logo']){
+            $logo = Workspace::select('logo')->where('id',$user->subworkspace_id)->first()?->logo;
+            if($logo){
+                $mail_data['image_subworkspace'] = get_media_url($logo,'s3');
+            }
+        }
         $email_was_sent = EmailLog::where('user_email',$email)->where('type_email','welcome_email')->first();
         if($email_was_sent){
             return;
@@ -691,9 +710,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             //send email by command
             $status = 'sent';
             Mail::to($email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
-            info('entra');
         }
-        info('llego');
         EmailLog::insertEmail($mail_data,'welcome_email','emails.welcome_email',$email,$status);
     }
     public function syncDocumentCriterionValue($old_document, $new_document)

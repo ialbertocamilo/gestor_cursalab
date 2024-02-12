@@ -5,7 +5,7 @@
         >
             <template v-slot:content>
                 <v-row justify="center">
-                   
+
                 </v-row>
             </template>
         </DefaultFilter> -->
@@ -62,7 +62,7 @@
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
                 @data-loaded="enablePreviewbutton()"
-                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{ 
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{
                     resource_id:$event.id,type:'topic',route:`/${ruta}cursos/${course_id}/temas/${$event.id}/medias`
                 }, 'list', `Listado`)"
             />
@@ -330,8 +330,9 @@ export default {
         // vue.getSelects();
 
         // vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.school_id
-        vue.filters.curso = vue.course_id
+
+        // vue.filters.category = vue.school_id
+        // vue.filters.curso = vue.course_id
     },
     methods: {
         getSelects() {
@@ -432,7 +433,7 @@ export default {
         },
         enablePreviewbutton(){
             let vue = this;
-            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length;
         }
     }
 }

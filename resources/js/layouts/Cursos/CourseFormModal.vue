@@ -9,7 +9,13 @@
 
             <v-form ref="CursoForm">
                 <DefaultErrors :errors="errors"/>
-
+                <v-row v-if="$root.isSuperUser">
+                    <v-col cols="12">
+                        <v-chip>
+                            ID: {{ resource.id }}
+                        </v-chip>
+                    </v-col>
+                </v-row>
                 <v-row>
                     <v-col cols="6" class="pb-0">
                         <DefaultInput
