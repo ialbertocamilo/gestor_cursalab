@@ -385,7 +385,7 @@ class CourseInPerson extends Model
                     ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
                     : null;
             }
-            $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath);
+            $show_modal_signature_registro_capacitación = boolval($registroCapacitacionPath);
         }
         return compact('menus','required_signature','show_modal_signature_registro_capacitación');
     }
