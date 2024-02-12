@@ -381,14 +381,14 @@ class CourseInPerson extends Model
         if($rol == 'user' && $registroCapacitacionIsActive){
             $registroCapacitacionPath = null;
             $registroCapacitacionUrl = null;
-            $summary = SummaryCourse::select('registro_capacitacion_path')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
+            $summary = SummaryCourse::select('registro_capacitacion_path','advanced_percentage')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
             if ($summary) {
                 $registroCapacitacionPath = $summary->registro_capacitacion_path;
                 $registroCapacitacionUrl = $registroCapacitacionPath
                     ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
                     : null;
             }
-            $show_modal_signature_registro_capacitación = boolval($registroCapacitacionPath);
+            $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
         }
         return compact('summary','menus','required_signature','show_modal_signature_registro_capacitación','registroCapacitacionIsActive','registroCapacitacionPath','registroCapacitacionUrl');
     }
