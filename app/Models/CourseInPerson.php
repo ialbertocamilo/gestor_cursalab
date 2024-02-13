@@ -480,7 +480,7 @@ class CourseInPerson extends Model
                 if($resource){
                     $row = SummaryTopic::where('topic_id',$topic_id)->where('user_id',$user->id)->first();
                     $is_qualified = $topic->evaluation_type->code == 'qualified';
-                    $has_attempts_evaluation = $row?->hasNoAttemptsLeft(null,$topic->course) && $is_qualified;
+                    $has_attempts_evaluation = !($row?->hasNoAttemptsLeft(null,$topic->course) && $is_qualified);
                 }
                 break;
             case 'poll':
