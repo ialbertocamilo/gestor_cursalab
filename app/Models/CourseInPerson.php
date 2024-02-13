@@ -254,6 +254,10 @@ class CourseInPerson extends Model
         $now = Carbon::now();
         $modality_in_person_properties = $topic->modality_in_person_properties;
         $modality_in_person_properties = json_decode(json_encode($modality_in_person_properties), false);
+         // unset($modality_in_person_properties->evaluation);
+        // $topic->modality_in_person_properties = $modality_in_person_properties;
+        // $topic->save();
+        // dd();
         switch ($action) {
             case 'start':
                 $time_evaluation = Carbon::createFromFormat('H:i', $time);
@@ -277,6 +281,7 @@ class CourseInPerson extends Model
             break;
             case 'start-before-finished-time':
                 $modality_in_person_properties->evaluation->status = 'extra-time';
+                $modality_in_person_properties->evaluation->time = $now->format('Y-m-d H:i:s');
                 $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
                 $message = 'Se activó manualmente la evaluación.';
             break;
@@ -324,14 +329,17 @@ class CourseInPerson extends Model
         }
         $is_evaluation_started = $modality_in_person_properties->evaluation->status == 'started';
         unset($modality_in_person_properties->evaluation->historic_status);
+        $current_time = Carbon::now();
         if($is_evaluation_started){
-            $current_time = Carbon::now();
             $finish_time = Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->evaluation->date_finish);
             $diff = $finish_time->diff($current_time);
             $modality_in_person_properties->evaluation->current_time = sprintf('%02d:%02d', $diff->h, $diff->i);;
         }
         if( $modality_in_person_properties->evaluation->status == 'extra-time'){
-            $is_evaluation_started = true; 
+            $init_extra_time = Carbon::createFromFormat('Y-m-d H:i:s',$modality_in_person_properties->evaluation->time);
+            $diff = $current_time->diff($init_extra_time);
+            $modality_in_person_properties->evaluation->time = sprintf('%02d:%02d', $diff->i, $diff->s);;
+            $is_evaluation_started = true;
         }
         return [
             'is_evaluation_started' => $is_evaluation_started,
@@ -455,16 +463,18 @@ class CourseInPerson extends Model
     protected function validateResource($type,$topic_id){
         $resource = null;
         $user = auth()->user();
-        $assistance = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
         //Si no tiene la asistencia en late o absent no debería acceder ni a los recursos multimedia ni a la evaluación  ni a la encuesta
-        if(!$assistance){
-            return false;          
-        }
         $is_done = false;
         $has_attempts_evaluation = false;
         switch ($type) {
             case 'assistance':
-                $resource = $assistance;
+                $assistance = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
+                $topic = Topic::select('id','course_id')
+                    ->with(['course:id,modality_id','course.modality:id,code'])
+                    ->where('id',$topic_id)
+                    ->first();
+                // only validate assistance in courses in-person
+                $resource = ($topic->course->modality->code == 'in-person') ? $assistance : true;
                 break;
             case 'multimedias':
                 $resource = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
@@ -473,7 +483,7 @@ class CourseInPerson extends Model
                 break;
             case 'evaluation':
                 $topic = Topic::select('modality_in_person_properties','course_id','type_evaluation_id','id')
-                    ->with('evaluation_type', 'course')
+                    ->with(['evaluation_type', 'course'])
                     ->where('id',$topic_id)
                     ->first();
                 $resource = $topic?->isAccessibleEvaluation();
