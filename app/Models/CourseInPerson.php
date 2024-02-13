@@ -370,7 +370,7 @@ class CourseInPerson extends Model
         $required_signature = false;
         if($topic->course->modality_in_person_properties?->required_signature){
             $hasSignature = TopicAssistanceUser::where('user_id',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
-            $required_signature = boolval($hasSignature);
+            $required_signature = !boolval($hasSignature);
         }
         $show_modal_signature_registro_capacitación = false;
         //REGISTRO DE CAPACITACIÓN
