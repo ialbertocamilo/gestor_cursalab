@@ -276,7 +276,7 @@
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                            title="Configuraciones de la sesión presencial"
+                            :title="`Configuraciones de la sesión ${selects.course_code_modality == 'in-person' ? 'presencial' : 'online'}`" 
                             :expand="sections.showSectionCourseInPerson"
                             :simple="true"
                             v-if="selects.course_code_modality != 'asynchronous'"
@@ -930,7 +930,7 @@ export default {
         sendForm(data, validateForm = true) {
             let vue = this
             vue.resource.tags = vue.tags.compentencies.concat(vue.tags.habilities, vue.tags.levels);
-            if(vue.selects.course_code_modality = 'in-person' && vue.ubicacion_mapa){
+            if(vue.selects.course_code_modality == 'in-person' && vue.ubicacion_mapa){
                 vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
                 vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
                 vue.resource.modality_in_person_properties.url = vue.ubicacion_mapa.url
@@ -957,7 +957,14 @@ export default {
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
-
+            if (vue.selects.course_code_modality == 'in-person') {
+                vue.hideLoader()
+                vue.loadingActionBtn = false;
+                console.log('vue.$refs.autocompleteMap.$refs.input.value',vue.$refs.autocompleteMap.$refs.input.value);
+                if (!vue.$refs.autocompleteMap.$refs.input.value)
+                    vue.showAlert("Es necesario añadir una ubicación", 'warning')
+                return
+            }
             if (vue.topicsValidationModal.action === 'validations-after-update') {
                 // console.log('vue.topicsValidationModal.action')
                 vue.hideLoader();
