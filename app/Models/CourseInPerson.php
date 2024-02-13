@@ -461,6 +461,7 @@ class CourseInPerson extends Model
             return false;          
         }
         $is_done = false;
+        $has_attempts_evaluation = false;
         switch ($type) {
             case 'assistance':
                 $resource = $assistance;
@@ -471,9 +472,16 @@ class CourseInPerson extends Model
                     ->first()?->isAccessibleMultimedia();
                 break;
             case 'evaluation':
-                $resource = Topic::select('modality_in_person_properties')
+                $topic = Topic::select('modality_in_person_properties','course_id','type_evaluation_id','id')
+                    ->with('evaluation_type', 'course')
                     ->where('id',$topic_id)
-                    ->first()?->isAccessibleEvaluation();
+                    ->first();
+                $resource = $topic?->isAccessibleEvaluation();
+                if($resource){
+                    $row = SummaryTopic::where('topic_id',$topic_id)->where('user_id',$user->id)->first();
+                    $is_qualified = $topic->evaluation_type->code == 'qualified';
+                    $has_attempts_evaluation = $row?->hasNoAttemptsLeft(null,$topic->course) && $is_qualified;
+                }
                 break;
             case 'poll':
                 $topic =  Topic::select('course_id','modality_in_person_properties')
@@ -491,7 +499,7 @@ class CourseInPerson extends Model
             break;
         }
         $is_accessible = boolval($resource);
-        return ['is_accessible'=>$is_accessible,'is_done' => $is_done];
+        return ['is_accessible'=>$is_accessible,'is_done' => $is_done,'has_attempts_evaluation'=>$has_attempts_evaluation];
     }
     protected function startPoll($topic_id){
         $topic = Topic::select('id','course_id','modality_in_person_properties')
