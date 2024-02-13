@@ -961,9 +961,10 @@ export default {
                 vue.hideLoader()
                 vue.loadingActionBtn = false;
                 console.log('vue.$refs.autocompleteMap.$refs.input.value',vue.$refs.autocompleteMap.$refs.input.value);
-                if (!vue.$refs.autocompleteMap.$refs.input.value)
+                if (!vue.$refs.autocompleteMap.$refs.input.value){
                     vue.showAlert("Es necesario añadir una ubicación", 'warning')
-                return
+                    return
+                }
             }
             if (vue.topicsValidationModal.action === 'validations-after-update') {
                 // console.log('vue.topicsValidationModal.action')
