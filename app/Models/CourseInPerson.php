@@ -617,7 +617,7 @@ class CourseInPerson extends Model
                     ->where('active',1);
         return [
             'count_today' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->count(),
-            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->count(),
+            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<=', $tomorrow)->count(),
             'count_finished' =>$query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->count(),
         ];
     }
