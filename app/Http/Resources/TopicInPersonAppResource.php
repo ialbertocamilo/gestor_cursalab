@@ -50,7 +50,7 @@ class TopicInPersonAppResource extends JsonResource
             'show_medias_since_start_course'=>  $this->modality_in_person_properties->show_medias_since_start_course,
             'is_host' => $user->id == $this->modality_in_person_properties->host_id,
             'duration' => $duration,
-            'url_maps' => $this->modality_in_person_properties->url || null,
+            'url_maps' => $this->modality_in_person_properties?->url || null,
             'is_today'=> $is_today,
             'is_ontime'=> $is_ontime,
             'date_init' => $date_init,
