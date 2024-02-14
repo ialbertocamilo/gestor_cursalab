@@ -398,7 +398,14 @@ class CourseInPerson extends Model
             }
             $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
         }
-        return compact('menus','required_signature','show_modal_signature_registro_capacitación');
+        $zoom = null;
+        if($rol == 'host' && $topic->course->modality->code != 'in-person'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            if($meeting){
+                $zoom = MeetingAppResource::collection([$meeting]);
+            }
+        }
+        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom');
     }
 
     
