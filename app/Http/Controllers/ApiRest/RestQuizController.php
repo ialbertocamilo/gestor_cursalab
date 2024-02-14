@@ -187,13 +187,13 @@ class RestQuizController extends Controller
             $parse_finishes_at = Carbon::parse($modality_in_person_properties->evaluation->date_finish);
             $diff_in_minutes = now()->diffInMinutes($parse_finishes_at);
             $status = $modality_in_person_properties->evaluation->status;
-            $started_at = $parse_started_at->format('Y/m/d H:i');
-            $finishes_at = $parse_finishes_at->format('Y/m/d H:i');
+            $started_at = $parse_started_at->format('Y/m/d H:i:s');
+            $finishes_at = $parse_finishes_at->format('Y/m/d H:i:s');
             // $diff = $finishes_at->diff($current_time);
             // $diff_in_minutes = sprintf('%02d:%02d', $diff->h, $diff->i);
         }else{
-            $started_at = $row?->current_quiz_started_at->format('Y/m/d H:i');
-            $finishes_at = $row?->current_quiz_finishes_at->format('Y/m/d H:i');
+            $started_at = $row?->current_quiz_started_at->format('Y/m/d H:i:s');
+            $finishes_at = $row?->current_quiz_finishes_at->format('Y/m/d H:i:s');
             $diff_in_minutes = ($started_at && $finishes_at)  ?  now()->diffInMinutes($row->current_quiz_finishes_at) : null;
         }
         $data = [

@@ -272,8 +272,8 @@ class CourseInPerson extends Model
                     break;
                 }
                 // Actualizar las propiedades de evaluación
-                $modality_in_person_properties->evaluation['date_init'] = $now->format('Y-m-d H:i');
-                $modality_in_person_properties->evaluation['date_finish'] = $finish_evaluation->format('Y-m-d H:i');
+                $modality_in_person_properties->evaluation['date_init'] = $now->format('Y-m-d H:i:s');
+                $modality_in_person_properties->evaluation['date_finish'] = $finish_evaluation->format('Y-m-d H:i:s');
                 $modality_in_person_properties->evaluation['duration_in_minutes'] = $minutes_duration;
                 $modality_in_person_properties->evaluation['time'] = $time;
                 $modality_in_person_properties->evaluation['status'] = 'started';
@@ -283,22 +283,22 @@ class CourseInPerson extends Model
             case 'start-before-finished-time':
                 $modality_in_person_properties->evaluation->status = 'extra-time';
                 $modality_in_person_properties->evaluation->time = $now->format('Y-m-d H:i:s');
-                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
+                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i:s'),'action'=>$action];
                 $message = 'Se activó manualmente la evaluación.';
             break;
             case 'finish-early':
                 $modality_in_person_properties->evaluation->status = 'finished';
-                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
+                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i:s'),'action'=>$action];
                 $message = 'Se finalizó antes de terminar la evaluación.';
             break;
             case 'finish-in-time':
                 $modality_in_person_properties->evaluation->status = 'finished';
-                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>'finish-in-time'];
+                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i:s'),'action'=>'finish-in-time'];
                 $message = 'Se terminó a tiempo la evaluación.';
             break;
             case 'finish-manually':
                 $modality_in_person_properties->evaluation->status = 'finished';
-                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i'),'action'=>$action];
+                $modality_in_person_properties->evaluation->historic_status[] = ['time'=>$now->format('Y-m-d H:i:s'),'action'=>$action];
                 $message = 'Se terminó manualmente la evaluación.';
             break;
         }
