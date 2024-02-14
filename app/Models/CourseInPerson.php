@@ -400,7 +400,7 @@ class CourseInPerson extends Model
             $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
         }
         $zoom = null;
-        if($rol == 'host' && $topic->course->modality->code != 'in-person'){
+        if($topic->course->modality->code != 'in-person'){
             $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
             if($meeting){
                 $zoom = MeetingAppResource::collection([$meeting]);
