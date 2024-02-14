@@ -620,7 +620,7 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
     'review_all_duration_media','modality_in_person_properties'];
 
 const file_fields = ['imagen'];
-
+import QRCode from "qrcode";
 export default {
     components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, 
         draggable, TemaValidacionesModal, DialogConfirm, 
@@ -714,7 +714,8 @@ export default {
                 tags:[],
                 compentencies:[],
                 habilities:[],
-                levels:[]
+                levels:[],
+                dinamyc_link:''
             },
             resource: {
                 modality_in_person_properties:{
@@ -1079,6 +1080,7 @@ export default {
                     vue.selects.compentencies = data.data.tags.filter((t) => t.type == 'competency');
                     vue.selects.habilities = data.data.tags.filter((t) =>  t.type == 'hability');
                     vue.selects.levels = data.data.tags.filter((t) => t.type == 'level');
+                    vue.selects.dinamyc_link = data.data.dinamyc_link;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -1358,7 +1360,28 @@ export default {
             await axios.get(url).then(({data})=>{
                 vue.selects.hosts = data.data.hosts
             })
-        }
+        },
+        // generateQR(){
+        //     let vue =this;
+        //     const opts = {
+        //         errorCorrectionLevel: 'H',
+        //         type: 'image/png',
+        //         quality: 1,
+        //         margin: 1,
+        //         width : '250',
+        //         color: {
+        //             dark:"#000000",
+        //             light:"#ffffff"
+        //         }
+        //     }
+        //     QRCode.toDataURL(vue.dinamyc_link, opts, function (err, qrCodeUrl) {
+        //         if (err) throw err
+        //         if(vue.resource.qr_){
+
+        //         }
+        //         qrCodeUrl
+        //     })
+        // }
     }
 }
 </script>

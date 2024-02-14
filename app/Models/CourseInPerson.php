@@ -551,6 +551,36 @@ class CourseInPerson extends Model
         }
         return ['is_accessible'=>$is_accessible,'poll'=>$topic->poll];
     }
+    protected function usersInitData($topic_id){
+        $topic = Topic::select('id','course_id','modality_in_person_properties')
+                    ->where('id',$topic_id)
+                    ->with([
+                        'course:id,modality_in_person_properties',
+                    ])
+                    ->where('active', ACTIVE)
+                    ->first();
+
+        $required_signature = $topic->course->modality_in_person_properties?->required_signature;
+        $show_modal_double_assistance = false;
+        if($topic->course->modality_in_person_properties?->assistance_type == 'assistance-by-day'){
+            $today = Carbon::today()->format('Y-m-d');
+            $first_session_of_day = Topic::select('id')
+                                    ->where('course_id',$topic->course_id)
+                                    ->where('active',ACTIVE)
+                                    ->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)
+                                    ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'ASC')
+                                    ->first();
+            if($first_session_of_day){
+                $show_modal_double_assistance = $first_session_of_day?->id != $topic->id;
+            }
+        }
+        return [
+            'qr'=>'https://media.istockphoto.com/id/828088276/vector/qr-code-illustration.jpg?s=612x612&w=0&k=20&c=FnA7agr57XpFi081ZT5sEmxhLytMBlK4vzdQxt8A70M=',
+            'link'=>config('app.web_url').'/sesiones',
+            'show_modal_double_assistance' => $show_modal_double_assistance, 
+            'nota'=> $required_signature ? 'Ingresa al QR recuerda firmar; esta firma se colocará en el reporte de asistencias.' : '',
+        ];
+    }
     //SUBFUNCTIONS
     private function modifyMenus($menus,$code,$action='change_status'){
         $pollIndex = array_search($code, array_column($menus, 'code'));

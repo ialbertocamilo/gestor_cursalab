@@ -10,7 +10,7 @@ class Topic extends BaseModel
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
-        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','poll_id',
+        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','path_qr',
         'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties'
     ];
 
@@ -47,10 +47,10 @@ class Topic extends BaseModel
     {
         return $this->hasMany(Question::class);
     }
-    public function poll()
-    {
-        return $this->belongsTo(Poll::class,'poll_id');
-    }
+    // public function poll()
+    // {
+    //     return $this->belongsTo(Poll::class,'poll_id');
+    // }
     public function requirement()
     {
         return $this->belongsTo(Topic::class, 'topic_requirement_id');
