@@ -178,9 +178,7 @@ class RestQuizController extends Controller
         if (count($questions) == 0)
             return response()->json(['error' => true, 'data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [B]']], 200);
 
-        $started_at = $row?->current_quiz_started_at->format('Y/m/d H:i');
-        $finishes_at = $row?->current_quiz_finishes_at->format('Y/m/d H:i');
-        $diff_in_minutes = ($started_at && $finishes_at)  ?  now()->diffInMinutes($row->current_quiz_finishes_at) : null;
+        
         $status = 'started';
         if($code_modality != 'asynchronous'){
             $modality_in_person_properties = $topic->modality_in_person_properties;
@@ -192,6 +190,10 @@ class RestQuizController extends Controller
             $finishes_at = $parse_finishes_at->format('Y/m/d H:i');
             // $diff = $finishes_at->diff($current_time);
             // $diff_in_minutes = sprintf('%02d:%02d', $diff->h, $diff->i);
+        }else{
+            $started_at = $row?->current_quiz_started_at->format('Y/m/d H:i');
+            $finishes_at = $row?->current_quiz_finishes_at->format('Y/m/d H:i');
+            $diff_in_minutes = ($started_at && $finishes_at)  ?  now()->diffInMinutes($row->current_quiz_finishes_at) : null;
         }
         $data = [
             'nombre' => $topic->name,
