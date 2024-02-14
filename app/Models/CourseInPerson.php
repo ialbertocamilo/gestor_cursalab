@@ -5,12 +5,13 @@ namespace App\Models;
 use stdClass;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\MeetingAppResource;
 use App\Http\Resources\TopicInPersonAppResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Http\Request;
 
 class CourseInPerson extends Model
 {
