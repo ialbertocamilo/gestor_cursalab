@@ -334,12 +334,12 @@ class CourseInPerson extends Model
         if($is_evaluation_started){
             $finish_time = Carbon::createFromFormat('Y-m-d H:i:s',$modality_in_person_properties->evaluation->date_finish);
             $diff = $finish_time->diff($current_time);
-            $modality_in_person_properties->evaluation->current_time = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);;
+            $modality_in_person_properties->evaluation->current_time = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
         }
         if( $modality_in_person_properties->evaluation->status == 'extra-time'){
             $init_extra_time = Carbon::createFromFormat('Y-m-d H:i:s',$modality_in_person_properties->evaluation->time);
             $diff = $current_time->diff($init_extra_time);
-            $modality_in_person_properties->evaluation->time = sprintf('%02d:%02d', $diff->i, $diff->s);
+            $modality_in_person_properties->evaluation->time = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
             $is_evaluation_started = true;
         }
         return [
