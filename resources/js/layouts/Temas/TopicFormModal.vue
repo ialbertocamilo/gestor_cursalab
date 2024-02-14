@@ -41,6 +41,7 @@
                             v-model="resource.modality_in_person_properties.host_id"
                             :items="selects.hosts"
                             clearable
+                            :rules="rules.required"
                             item-text="name"
                         />
                         <DefaultModalButton

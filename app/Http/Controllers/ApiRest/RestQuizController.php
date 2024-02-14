@@ -150,6 +150,7 @@ class RestQuizController extends Controller
         if(!$row && $code_modality != 'asynchronous'){
             $user = auth()->user();
             $row = SummaryTopic::storeData($topic, $user);
+            SummaryCourse::storeData($topic->course, $user);
         }
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
