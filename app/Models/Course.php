@@ -389,8 +389,8 @@ class Course extends BaseModel
             $host_id = $modality_in_person_properties->host_id;
             $start_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
             $finish_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
-            $stars_at = $start_datetime->format('Y-m-d h:i:s');
-            $finishes_at = $finish_datetime->format('Y-m-d h:i:s');
+            $stars_at = $start_datetime->format('Y-m-d H:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
             $duration = $start_datetime->diffInMinutes($finish_datetime);
             $model_id = $topic->id;
             $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$model_id)->first();
