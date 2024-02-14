@@ -647,8 +647,8 @@ class CourseInPerson extends Model
     }
     private function getCountCourseInPerson($user){
         $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:'in-person');
-        $today = Carbon::today()->format('Y-m-d');
-        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+        $today = Carbon::today()->format('Y-m-d h:i');
+        $tomorrow = Carbon::tomorrow()->format('Y-m-d h:i');
         $query = Topic::select('id', 'name','course_id','modality_in_person_properties')
                     ->whereHas('course',function($q){
                         $q->where('active',1);
@@ -660,8 +660,8 @@ class CourseInPerson extends Model
                     ->where('active',1);
         return [
             'count_today' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->count(),
-            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<=', $tomorrow)->count(),
-            'count_finished' =>$query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->count(),
+            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->count(),
+            'count_finished' =>$query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<=', $today)->count(),
         ];
     }
 }
