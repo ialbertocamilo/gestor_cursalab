@@ -502,7 +502,7 @@ class CourseInPerson extends Model
                 $resource = $topic?->isAccessibleEvaluation();
                 if($resource){
                     $row = SummaryTopic::where('topic_id',$topic_id)->where('user_id',$user->id)->first();
-                    $is_done = !is_null($row->last_time_evaluated_at);
+                    $is_done = !is_null($row?->last_time_evaluated_at);
                     $is_qualified = $topic->evaluation_type->code == 'qualified';
                     $has_attempts_evaluation = !($row?->hasNoAttemptsLeft(null,$topic->course) && $is_qualified);
                 }
