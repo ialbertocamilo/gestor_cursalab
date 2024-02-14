@@ -1361,27 +1361,24 @@ export default {
                 vue.selects.hosts = data.data.hosts
             })
         },
-        // generateQR(){
-        //     let vue =this;
-        //     const opts = {
-        //         errorCorrectionLevel: 'H',
-        //         type: 'image/png',
-        //         quality: 1,
-        //         margin: 1,
-        //         width : '250',
-        //         color: {
-        //             dark:"#000000",
-        //             light:"#ffffff"
-        //         }
-        //     }
-        //     QRCode.toDataURL(vue.dinamyc_link, opts, function (err, qrCodeUrl) {
-        //         if (err) throw err
-        //         if(vue.resource.qr_){
-
-        //         }
-        //         qrCodeUrl
-        //     })
-        // }
+        generateQR(){
+            let vue =this;
+            const opts = {
+                errorCorrectionLevel: 'H',
+                type: 'image/png',
+                quality: 1,
+                margin: 1,
+                width : '250',
+                color: {
+                    dark:"#000000",
+                    light:"#ffffff"
+                }
+            }
+            QRCode.toDataURL(vue.dinamyc_link, opts, function (err, qrCodeUrl) {
+                if (err) throw err
+                qrCodeUrl
+            })
+        }
     }
 }
 </script>

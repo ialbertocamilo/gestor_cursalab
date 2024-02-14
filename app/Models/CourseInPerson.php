@@ -348,7 +348,7 @@ class CourseInPerson extends Model
     }
     protected function getListMenu($topic_id){
         $user = auth()->user();
-        $topic = Topic::select('id','poll_id','course_id','type_evaluation_id','modality_in_person_properties')
+        $topic = Topic::select('id','course_id','type_evaluation_id','modality_in_person_properties')
                     ->with([
                         'course:id,modality_id,modality_in_person_properties,registro_capacitacion',
                         'course.modality:id,code','course.polls:id'
@@ -366,8 +366,13 @@ class CourseInPerson extends Model
         if(!$topic->course->polls->first() || $last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'poll','unset');
         }
-        if(!$topic->type_evaluation_id){
+        //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->type_evaluation_id && $last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'evaluation');
+        }
+        //Si es un curso virtual no debe ver el card de asistencia
+        if($rol == 'host' && $topic->course->modality->code != 'in-person'){
+            $menus = $this->modifyMenus($menus,'take-assistance','unset');
         }
         if($rol == 'host' && $topic->course->modality->code == 'take-assistance'){
             $menus = $this->modifyMenus($menus,'evaluation');
@@ -531,7 +536,7 @@ class CourseInPerson extends Model
         return ['message'=>'Se inició la encuesta.'];
     }
     protected function loadPoll($topic_id){
-        $topic = Topic::select('id','poll_id','modality_in_person_properties')
+        $topic = Topic::select('id','modality_in_person_properties')
                     ->where('id',$topic_id)
                     ->with([
                         'poll:id,titulo,imagen,anonima',
@@ -576,7 +581,7 @@ class CourseInPerson extends Model
         }
         return [
             'qr'=>'https://media.istockphoto.com/id/828088276/vector/qr-code-illustration.jpg?s=612x612&w=0&k=20&c=FnA7agr57XpFi081ZT5sEmxhLytMBlK4vzdQxt8A70M=',
-            'link'=>config('app.web_url').'/sesiones',
+            // 'link'=>config('app.web_url').'/sesiones',
             'show_modal_double_assistance' => $show_modal_double_assistance, 
             'nota'=> $required_signature ? 'Ingresa al QR recuerda firmar; esta firma se colocará en el reporte de asistencias.' : '',
         ];
