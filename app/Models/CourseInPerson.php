@@ -557,7 +557,7 @@ class CourseInPerson extends Model
         return ['is_accessible'=>$is_accessible,'poll'=>$topic->poll];
     }
     protected function usersInitData($topic_id){
-        $topic = Topic::select('id','course_id','modality_in_person_properties')
+        $topic = Topic::select('id','course_id','modality_in_person_properties','path_qr')
                     ->where('id',$topic_id)
                     ->with([
                         'course:id,modality_in_person_properties',
@@ -580,7 +580,7 @@ class CourseInPerson extends Model
             }
         }
         return [
-            'qr'=>'https://media.istockphoto.com/id/828088276/vector/qr-code-illustration.jpg?s=612x612&w=0&k=20&c=FnA7agr57XpFi081ZT5sEmxhLytMBlK4vzdQxt8A70M=',
+            'qr'=>$topic->path_qr,
             // 'link'=>config('app.web_url').'/sesiones',
             'show_modal_double_assistance' => $show_modal_double_assistance, 
             'nota'=> $required_signature ? 'Ingresa al QR recuerda firmar; esta firma se colocará en el reporte de asistencias.' : '',

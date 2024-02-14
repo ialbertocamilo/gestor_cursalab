@@ -44,7 +44,7 @@ class TemaStoreUpdateRequest extends FormRequest
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
             'validate' => 'required',
-
+            'path_qr' => 'nullable',
             'qualification_type_id' => 'nullable',
             'modality_in_person_properties' => 'nullable',
             'tags' => 'nullable',

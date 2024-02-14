@@ -22,6 +22,7 @@ use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\MediaTema;
 use App\Models\Workspace;
+use Illuminate\Support\Str;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
@@ -133,6 +134,7 @@ class TemaController extends Controller
     public function store(School $school, Course $course, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
 
         $tema = Topic::storeRequest($data);
@@ -153,6 +155,7 @@ class TemaController extends Controller
     public function update(School $school, Course $course, Topic $topic, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
         // info($data);
         if ($data['validate']):
@@ -172,7 +175,16 @@ class TemaController extends Controller
 
         return $this->success($response);
     }
-
+    private function uploadQRTopic($data){
+        if(str_contains($data['path_qr'], 'base64')){
+            $name =  'qr/'.Str::slug($data['name']).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
+            $name = Str::of($name)->limit(100);
+            $path = $name.'.png';
+            $media = Media::uploadMediaBase64('', $path, $data['path_qr'],false);
+            $data['path_qr'] = get_media_url($path,'s3');
+        }
+        return $data;
+    }
     public function destroy(School $school, Course $course, Topic $topic, Request $request)
     {
         $data = $request->all();

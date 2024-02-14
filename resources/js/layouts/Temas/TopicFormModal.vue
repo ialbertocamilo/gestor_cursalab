@@ -617,7 +617,7 @@ import SegmentFormModal from "./../Blocks/SegmentFormModal";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
     'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',
-    'review_all_duration_media','modality_in_person_properties'];
+    'review_all_duration_media','modality_in_person_properties','path_qr'];
 
 const file_fields = ['imagen'];
 import QRCode from "qrcode";
@@ -943,8 +943,7 @@ export default {
                     }
                 }
             }
-
-
+            vue.generateQR();
             vue.topicsValidationModal.open = false
             vue.loadingActionBtn = true
             vue.showLoader()
@@ -1361,7 +1360,7 @@ export default {
                 vue.selects.hosts = data.data.hosts
             })
         },
-        generateQR(){
+        async generateQR(){
             let vue =this;
             const opts = {
                 errorCorrectionLevel: 'H',
@@ -1374,9 +1373,20 @@ export default {
                     light:"#ffffff"
                 }
             }
-            QRCode.toDataURL(vue.dinamyc_link, opts, function (err, qrCodeUrl) {
-                if (err) throw err
-                qrCodeUrl
+            if(vue.resource.path_qr){
+                return;
+            }
+            // let QRbase64 = await new Promise((resolve, reject) => {
+            //     QRCode.toDataURL(vue.dinamyc_link, function (err, code) {
+            //         if (err) {
+            //             reject(reject);
+            //             return;
+            //         }
+            //         resolve(code);
+            //     });
+            // });
+            QRCode.toDataURL(vue.selects.dinamyc_link, opts, function (err, qrCodeUrl) {
+                vue.resource.path_qr = qrCodeUrl,vue.dinamyc_link; 
             })
         }
     }
