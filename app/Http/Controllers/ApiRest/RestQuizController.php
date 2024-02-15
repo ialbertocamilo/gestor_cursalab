@@ -188,6 +188,7 @@ class RestQuizController extends Controller
         if ($userDatetimeTimestamp) {
 
             $userDatetime = Carbon::parse($userDatetimeTimestamp);
+            info('User datetime', $userDatetime);
             $minutesDifference = now()->diffInMinutes($userDatetime);
             if ($minutesDifference > 5) {
                 $start = $row->current_quiz_started_at->addMinutes($minutesDifference);
