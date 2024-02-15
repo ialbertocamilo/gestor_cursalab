@@ -189,8 +189,8 @@ class RestQuizController extends Controller
 
         if ($userDatetimeTimestamp) {
 
-            $userDatetime = Carbon::parse((int)$userDatetimeTimestamp);
-            $userDatetime->setTimezone('America\Lima');
+            $userDatetime = new Carbon((int)$userDatetimeTimestamp, 'America/Lima');
+            //$userDatetime->setTimezone('America\Lima');
             info('user_datetime: ' . $userDatetime->format('Y/m/d H:i'));
             $minutesDifference = now()->diffInMinutes($userDatetime);
 
