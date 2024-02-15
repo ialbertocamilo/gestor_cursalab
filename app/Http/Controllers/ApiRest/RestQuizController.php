@@ -189,7 +189,14 @@ class RestQuizController extends Controller
 
             $userDatetime = Carbon::parse((int)$userDatetimeTimestamp);
             $minutesDifference = now()->diffInMinutes($userDatetime);
+
+            // When time difference between client and server is more
+            // than 5 minutes, adjust the datetime to match clients datetime
+
             if ($minutesDifference > 5) {
+
+                // The differece is negative when server datetime is greater
+                // than client's datetime
 
                 if (now()->gte($userDatetime)) {
                     $minutesDifference *= -1;
