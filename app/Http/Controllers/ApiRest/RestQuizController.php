@@ -193,7 +193,7 @@ class RestQuizController extends Controller
             //$userDatetime->setTimezone('America\Lima');
             info('user_datetime: ' . $userDatetime->format('Y/m/d H:i'));
             $minutesDifference = now()->diffInMinutes($userDatetime);
-
+info('difference: ' . $minutesDifference);
             // When time difference between client and server is more
             // than 5 minutes, adjust the datetime to match clients datetime
 
