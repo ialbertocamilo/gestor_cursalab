@@ -647,8 +647,8 @@ class CourseInPerson extends Model
     }
     private function getCountCourseInPerson($user){
         $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:'in-person');
-        $today = Carbon::today()->format('Y-m-d h:i');
-        $tomorrow = Carbon::tomorrow()->format('Y-m-d h:i');
+        $today = Carbon::today()->toDateTimeString();
+        $tomorrow = Carbon::tomorrow()->toDateTimeString();
         $query = Topic::select('id', 'name','course_id','modality_in_person_properties')
                     ->whereHas('course',function($q){
                         $q->where('active',1);
