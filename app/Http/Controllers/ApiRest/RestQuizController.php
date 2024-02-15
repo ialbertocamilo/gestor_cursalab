@@ -175,6 +175,7 @@ class RestQuizController extends Controller
             'preguntas' => $questions,
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
+                'server' => now()->format('Y/m/d H:i'),
                 'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
                 'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
@@ -205,6 +206,7 @@ class RestQuizController extends Controller
                 $start = $row->current_quiz_started_at->addMinutes($minutesDifference);
                 $end = $row->current_quiz_finishes_at->addMinutes($minutesDifference);
                 $data['attempt'] = [
+                    'server_fixed' => now()->addMinutes($minutesDifference)->format('Y/m/d H:i'),
                     'started_at' => $start->format('Y/m/d H:i'),
                     'finishes_at' => $end->format('Y/m/d H:i'),
                     'diff_in_minutes' => now()->addMinutes($minutesDifference)->diffInMinutes($end),
