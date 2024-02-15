@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar 
+    <v-app-bar
         app
         color="white"
         elevate-on-scroll
@@ -106,12 +106,12 @@ export default {
                             show:true,
                             link:'/documentation-api/workspace',
                         },
-                        {
-                            icon:'mdi-account-convert',
-                            title:'Alta de usuarios',
-                            show:true,
-                            link:'/documentation-api/update-create-users',
-                        },
+                        // {
+                        //     icon:'mdi-account-convert',
+                        //     title:'Alta de usuarios',
+                        //     show:true,
+                        //     link:'/documentation-api/update-create-users',
+                        // },
                         {
                             icon:'mdi-account-multiple-plus',
                             title:'Crear usuarios',
@@ -174,7 +174,7 @@ export default {
 </script>
 <style scoped>
 .v-icon{
-    color:white !important;   
+    color:white !important;
 }
 .v-list{
     background: #5458ea;
