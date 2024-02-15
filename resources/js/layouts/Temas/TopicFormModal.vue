@@ -292,11 +292,11 @@
                                                     :referenceComponent="'modalDateFilter1'"
                                                     :options="modalDateFilter1"
                                                     v-model="resource.modality_in_person_properties.start_date"
-                                                    :min="new Date().toISOString().substr(0, 10)"
                                                     label="Fecha de inicio"
                                                     dense
                                                     showRequired
                                                     :rules="rules.required"
+                                                    :min="new Date().toISOString().substr(0, 10)"
                                                 />
                                             </v-col>
                                             <v-col cols="3">
@@ -1058,7 +1058,12 @@ export default {
             let vue = this
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-                vue.resource.media = []
+                vue.resource.media = [];
+                vue.resource.tags = [];
+                vue.resource.modality_in_person_properties = vue.resourceDefault.modality_in_person_properties;
+                if(vue.$refs.autocompleteMap){
+                    vue.$refs.autocompleteMap.$refs.input.value = '';
+                }
             })
             
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`

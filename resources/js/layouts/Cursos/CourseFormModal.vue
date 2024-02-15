@@ -286,7 +286,7 @@
                                                     @onFocus="resource.id && conf_focus ? alertNotaMinima() : null" />
                                             </v-col>
                                             <v-col cols="3">
-                                                <DefaultInput label="Cantidad de intentos" v-model="resource.nro_intentos"
+                                                <DefaultInput label="Cantidad de intentos" v-model="resource.nro_intentos" dense
                                                     :rules="rules.nro_intentos" type="number" show-required></DefaultInput>
                                             </v-col>
                                             <v-col cols="12" class="py-1">
