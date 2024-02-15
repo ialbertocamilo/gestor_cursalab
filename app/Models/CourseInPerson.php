@@ -662,7 +662,7 @@ class CourseInPerson extends Model
         $count_today =  $this->returnQuery($query,'=',$today);
         $count_scheduled = $this->returnQuery($query,'>=',$tomorrow);
         $count_finished = $this->returnQuery($query,'<',$today);
-        dd(compact('count_today','count_scheduled','count_finished'));
+        dd($count_today);
         return compact('count_today','count_scheduled','count_finished');
     }
     private function returnQuery($query,$operator,$date){
