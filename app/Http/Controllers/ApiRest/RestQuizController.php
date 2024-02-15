@@ -196,7 +196,7 @@ class RestQuizController extends Controller
                 $data['attempt'] = [
                     'started_at' => $start->format('Y/m/d H:i'),
                     'finishes_at' => $end->format('Y/m/d H:i'),
-                    'diff_in_minutes' => now()->diffInMinutes($end),
+                    'diff_in_minutes' => now()->addMinutes($minutesDifference)->diffInMinutes($end),
                 ];
             }
         }
