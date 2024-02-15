@@ -666,6 +666,6 @@ class CourseInPerson extends Model
         return compact('count_today','count_scheduled','count_finished');
     }
     private function returnQuery($query,$operator,$date){
-        return $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->toSql();
+        return $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->get();
     }
 }
