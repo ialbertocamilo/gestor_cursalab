@@ -391,6 +391,7 @@ class CourseInPerson extends Model
         $registroCapacitacionIsActive = $topic->course->registroCapacitacionIsActive();
         if($rol == 'user' && $registroCapacitacionIsActive){
             $summary = SummaryCourse::select('registro_capacitacion_path','advanced_percentage')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
+            $registroCapacitacionPath = null;
             if ($summary) {
                 $registroCapacitacionPath = $summary->registro_capacitacion_path;
                 $registroCapacitacionUrl = $registroCapacitacionPath
