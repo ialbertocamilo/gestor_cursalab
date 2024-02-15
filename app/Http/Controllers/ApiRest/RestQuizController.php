@@ -189,10 +189,11 @@ class RestQuizController extends Controller
 
         if ($userDatetimeTimestamp) {
 
+            $serverTime = now('America/Lima');
             $userDatetime = new Carbon((int)$userDatetimeTimestamp, 'America/Lima');
             //$userDatetime->setTimezone('America\Lima');
             info('user_datetime: ' . $userDatetime->format('Y/m/d H:i'));
-            $minutesDifference = now()->diffInMinutes($userDatetime);
+            $minutesDifference = $serverTime->diffInMinutes($userDatetime);
 info('difference: ' . $minutesDifference);
             // When time difference between client and server is more
             // than 5 minutes, adjust the datetime to match clients datetime
@@ -202,17 +203,17 @@ info('difference: ' . $minutesDifference);
                 // The differece is negative when server datetime is greater
                 // than client's datetime
 
-                if (now()->gte($userDatetime)) {
+                if ($serverTime->gte($userDatetime)) {
                     $minutesDifference *= -1;
                 }
 
                 $start = $row->current_quiz_started_at->addMinutes($minutesDifference);
                 $end = $row->current_quiz_finishes_at->addMinutes($minutesDifference);
                 $data['attempt'] = [
-                    'server_fixed' => now()->addMinutes($minutesDifference)->format('Y/m/d H:i'),
+                    'server_fixed' => $serverTime->addMinutes($minutesDifference)->format('Y/m/d H:i'),
                     'started_at' => $start->format('Y/m/d H:i'),
                     'finishes_at' => $end->format('Y/m/d H:i'),
-                    'diff_in_minutes' => now()->addMinutes($minutesDifference)->diffInMinutes($end),
+                    'diff_in_minutes' => $serverTime->addMinutes($minutesDifference)->diffInMinutes($end),
                 ];
             }
         }
