@@ -646,9 +646,29 @@ class CourseInPerson extends Model
         ];
     }
     private function getCountCourseInPerson($user){
+        // Topic::with([
+        //     'course:id,modality_in_person_properties,imagen,modality_id',
+        //     'course.modality:id,code',
+        //     'course.schools' => function ($query) {
+        //         $query->select('id')->where('active', ACTIVE);
+        //     }
+        // ])
+        // ->select('id', 'name','course_id','modality_in_person_properties')
+        // ->whereHas('course',function($q) use ($modality_code){
+        //     $q->where('active',1)->whereRelation('modality','code',$modality_code);
+        // })
+        // ->where(function($q) use($user,$assigned_courses){
+        //     $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
+        // })
+        // // ->whereIn('course_id',$assigned_courses)
+        // ->whereNotNull('modality_in_person_properties')
+        // ->where('active',1)
+        // ->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)
+        // ->get();
+
         $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true);
-        $today = Carbon::today()->toDateTimeString();
-        $tomorrow = Carbon::tomorrow()->toDateTimeString();
+        $today = Carbon::today()->format('Y-m-d');
+        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
 
         $query = Topic::select('id', 'name','course_id','modality_in_person_properties')
                     ->whereHas('course',function($q){
