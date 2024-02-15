@@ -649,6 +649,7 @@ class CourseInPerson extends Model
         $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true);
         $today = Carbon::today()->toDateTimeString();
         $tomorrow = Carbon::tomorrow()->toDateTimeString();
+
         $query = Topic::select('id', 'name','course_id','modality_in_person_properties')
                     ->whereHas('course',function($q){
                         $q->where('active',1);
@@ -658,10 +659,12 @@ class CourseInPerson extends Model
                     })
                     ->whereNotNull('modality_in_person_properties')
                     ->where('active',1);
-        $count_today =  $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->count();
-        $count_scheduled = $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->count();
-        $count_finished = $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->count();
-        dd($count_today,$count_scheduled,$count_finished);
+        $count_today =  $this->returnQuery($query,'=',$today);
+        $count_scheduled = $this->returnQuery($query,'>=',$tomorrow);
+        $count_finished = $this->returnQuery($query,'<',$today);
         return compact('count_today','count_scheduled','count_finished');
+    }
+    private function returnQuery($query,$date){
+        return $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->count();
     }
 }
