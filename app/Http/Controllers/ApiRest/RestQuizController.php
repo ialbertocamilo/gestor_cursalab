@@ -206,14 +206,15 @@ class RestQuizController extends Controller
         }
 
         // Adds 24 hours for Agile
-
-        if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
-            $data['attempt'] = [
-                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
-                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),
-                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))
-            ];
-        }
+// This part is no longer necessary since user device time is now fixed
+// when is different from the one in server
+//        if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
+//            $data['attempt'] = [
+//                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
+//                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),
+//                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))
+//            ];
+//        }
 
         // SummaryTopic::setUserLastTimeEvaluation($topic);
         // SummaryCourse::setUserLastTimeEvaluation($topic->course);
