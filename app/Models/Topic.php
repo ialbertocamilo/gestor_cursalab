@@ -1283,7 +1283,27 @@ class Topic extends BaseModel
         }
         return $is_accessible;
     }
-
+    protected function validateAvaiableAccount($course,$data,$topic=null){
+        $is_avaiable = true;
+        if($course->modality->code == 'virtual'){
+            $type = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first();
+            $modality_in_person_properties = $data['modality_in_person_properties'];
+            $start_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['start_time']);
+            $finish_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['finish_time']);
+            $starts_at = $start_datetime->format('Y-m-d H:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
+            $meeting = null;
+            if($topic){
+                $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+                if($meeting and !$meeting->datesHaveChanged(compact('starts_at','finishes_at'))){
+                   return true;
+                }
+            }
+            $account = Account::getOneAvailableForMeeting($type, compact('starts_at','finishes_at'),$meeting);
+            $is_avaiable = boolval($account);
+        }
+        return $is_avaiable;
+    }
     public function isAccessibleMultimedia(){
         $topic = $this;
         $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;

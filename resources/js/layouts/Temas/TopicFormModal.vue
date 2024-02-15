@@ -292,8 +292,8 @@
                                                     :referenceComponent="'modalDateFilter1'"
                                                     :options="modalDateFilter1"
                                                     v-model="resource.modality_in_person_properties.start_date"
-                                                    label="Fecha de inicio"
                                                     :min="new Date().toISOString().substr(0, 10)"
+                                                    label="Fecha de inicio"
                                                     dense
                                                     showRequired
                                                     :rules="rules.required"
@@ -1011,8 +1011,10 @@ export default {
                 })
                 .catch(async (error) => {
                     const res = await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
-                    // console.log('handleValidationsBeforeUpdate:',res)
                     vue.loadingActionBtn = false
+                    if(error.response.data.message){
+                        vue.showAlert(error.response.data.message,'error')
+                    }
                 })
         },
         images_upload_handler(blobInfo, success, failure) {

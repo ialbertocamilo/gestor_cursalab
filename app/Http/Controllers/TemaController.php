@@ -134,11 +134,15 @@ class TemaController extends Controller
     public function store(School $school, Course $course, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        //Validación para temas de un curso virtual: Valida si es que existe una cuenta disponible en el horario especificado
+        if(!Topic::validateAvaiableAccount($course,$data)){
+            return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
+        }
         $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
 
         $tema = Topic::storeRequest($data);
-
+        $course->storeUpdateMeeting();
         $response = [
             'tema' => $tema,
             'msg' => ' Tema creado correctamente.',
@@ -155,8 +159,12 @@ class TemaController extends Controller
     public function update(School $school, Course $course, Topic $topic, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        if(!Topic::validateAvaiableAccount($course,$data,$topic)){
+            return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
+        }
         $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
+        
         // info($data);
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);
@@ -166,7 +174,7 @@ class TemaController extends Controller
         endif;
 
         $topic = Topic::storeRequest($data, $topic);
-
+        $course->storeUpdateMeeting();
         $response = [
             'tema' => $topic,
             'msg' => ' Tema actualizado correctamente.',
