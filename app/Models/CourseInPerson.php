@@ -658,10 +658,10 @@ class CourseInPerson extends Model
                     })
                     ->whereNotNull('modality_in_person_properties')
                     ->where('active',1);
-        return [
-            'count_today' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->get()->count(),
-            'count_scheduled' => $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->get()->count(),
-            'count_finished' =>$query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->get()->count(),
-        ];
+        $count_today =  $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '=', $today)->count();
+        $count_scheduled = $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '>=', $tomorrow)->count();
+        $count_finished = $query->where(DB::raw("modality_in_person_properties->'$.start_date'"), '<', $today)->count();
+        dd($count_today,$count_scheduled,$count_finished);
+        return compact('count_today','count_scheduled','count_finished');
     }
 }
