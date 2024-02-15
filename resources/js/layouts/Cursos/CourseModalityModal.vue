@@ -40,7 +40,7 @@
                                         </div>
                                         <div>
                                             <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
-                                                {{ modality_virtual.name }}
+                                                Online
                                                 <div class="ml-1 tag-premium d-flex align-items-center" v-if="!modality_virtual.has_functionality">
                                                     <img src="/img/premiun.svg"> 
                                                     Pro
@@ -67,7 +67,7 @@
                                                 {{ modality_in_person.name }}
                                                 <div class="ml-1 tag-premium d-flex align-items-center" v-if="!modality_in_person.has_functionality">
                                                     <img src="/img/premiun.svg"> 
-                                                    Pro
+                                                    Premiun
                                                 </div>
                                             </v-card-title>
                                             <v-card-subtitle v-html="modality_in_person.description"></v-card-subtitle>
