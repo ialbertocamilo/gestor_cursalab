@@ -66,6 +66,7 @@
                 @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{ 
                     resource_id:$event.id,type:'topic',route:`/${ruta}cursos/${course_id}/temas/${$event.id}/medias`
                 }, 'list', `Listado`)"
+                @download_report_assistance="download_report_assistance"
             />
 
             <DialogConfirm
@@ -222,6 +223,13 @@ export default {
                     //     method_name: 'encuesta',
                     //     show_condition: 'is_poll_available'
                     // },
+                    {
+                        text: "Reporte de asistencia",
+                        icon: 'mdi mdi-file-chart',
+                        type: 'action',
+                        method_name: 'download_report_assistance',
+                        show_condition: "is_session_in_person",
+                    },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
@@ -456,6 +464,11 @@ export default {
         enablePreviewbutton(){
             let vue = this;
             vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+        },
+        download_report_assistance(topic){
+            let vue =this;
+            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${topic.id}/download-report-assistance`;
+            window.open(url).attr("href");
         }
     }
 }

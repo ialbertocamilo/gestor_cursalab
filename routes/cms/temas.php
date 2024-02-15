@@ -29,6 +29,8 @@ Route::controller(TemaController::class)->group(function() {
 
 	// Route::get('/{topic}/encuesta', 'getEncuesta');
 	// Route::post('/{topic}/encuesta', 'storeUpdateEncuesta');
+	Route::get('/{topic}/download-report-assistance', 'downloadReportAssistance');
+
 	Route::get('/hosts', 'getHosts');
 });
 //encuestas

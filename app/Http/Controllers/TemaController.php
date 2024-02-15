@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
+use App\Models\TopicAssistanceUser;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
@@ -40,10 +41,10 @@ class TemaController extends Controller
     {
         $request->school_id = $school->id;
         $request->course_id = $course->id;
+        $request->course_code = $course->modality->code;
         $temas = Topic::search($request);
 
         PosteoSearchResource::collection($temas);
-
         return $this->success($temas);
     }
 
@@ -460,5 +461,9 @@ class TemaController extends Controller
             return $media;
         });
         return $this->success(['topics'=>[$topic]]);
+    }
+
+    public function downloadReportAssistance($school_id,$course_id,$topic_id){
+        return TopicAssistanceUser::generatePDFDownload($course_id,$topic_id);
     }
 }

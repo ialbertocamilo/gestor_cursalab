@@ -136,7 +136,7 @@ class CourseInPerson extends Model
     }
 
    
-    protected function listUsersBySession($course_id,$topic_id,$code,$search_user){
+    protected function listUsersBySession($course_id,$topic_id,$code,$search_user,$maskDocument=true,$signature=false){
         $topic =    Topic::select('id', 'name','course_id','modality_in_person_properties')
                         ->where('id',$topic_id)
                         ->with(['course.segments','course.segments.values'])
@@ -151,7 +151,7 @@ class CourseInPerson extends Model
         $users = [];
         $codes = [];
         $codes_taxonomy = Taxonomy::getDataForSelectAttrs(groupName:'course',typeName:'assistance',attributes:['id','code','name','color']);
-        $_users_with_status = TopicAssistanceUser::listUserWithAssistance($users_segmented,$topic_id,$codes_taxonomy);
+        $_users_with_status = TopicAssistanceUser::listUserWithAssistance($users_segmented,$topic_id,$codes_taxonomy,$maskDocument,$signature);
         switch ($code) {
             case 'all':
                 $users = $_users_with_status;
