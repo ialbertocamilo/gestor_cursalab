@@ -186,6 +186,7 @@ class RestQuizController extends Controller
         // from server's
 
         $userDatetimeTimestamp = request()->get('user_datetime');
+        info('user_datetime: ' .$userDatetimeTimestamp);
         if ($userDatetimeTimestamp) {
 
             $userDatetime = Carbon::parse((int)$userDatetimeTimestamp);
