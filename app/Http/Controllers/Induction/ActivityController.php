@@ -20,10 +20,12 @@ use App\Models\Process;
 use App\Models\Project;
 use App\Models\Question;
 use App\Models\School;
+use App\Models\Segment;
 use App\Models\Stage;
 use App\Models\Taxonomy;
 use App\Models\Topic;
 use App\Models\Usuario;
+use Exception;
 use Illuminate\Http\Request;
 
 class ActivityController extends Controller
@@ -146,13 +148,6 @@ class ActivityController extends Controller
     public function TemasStore(Process $process, Stage $stage,  ActivityTemaStoreUpdateRequest $request)
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'temas');
-        // $data = $request->validated();
-        // $data = Media::requestUploadFile($data, 'imagen');
-
-        // $request->request->add([
-        //     'type_id' => $type_meeting?->id ?? null
-        // ]);
-        // $meeting = Meeting::storeRequest($request->all());
 
         $data_course = [
             'name' => $request['name'],
@@ -163,7 +158,6 @@ class ActivityController extends Controller
         ];
 
         $course = Course::storeRequest($data_course);
-
         $request->request->add([
             'course_id' => $course?->id ?? null
         ]);
@@ -257,20 +251,20 @@ class ActivityController extends Controller
         //actividades
         if($data['checklist_actividades'])
         {
-            $data['checklist_actividades'] = json_encode($data['checklist_actividades']);
+            $data['checklist_actividades'] = json_decode($data['checklist_actividades']);
             if(is_array($data['checklist_actividades']))
             {
                 foreach ($data['checklist_actividades'] as $key => $checklist_actividad) {
                     $type = Taxonomy::where('group', 'checklist')
                         ->where('type', 'type')
-                        ->where('code', $checklist_actividad['type_name'])
+                        ->where('code', $checklist_actividad->type_name)
                         ->first();
                     CheckListItem::updateOrCreate(
                         ['id' => is_null($data['id']) ? null : $checklist_actividad['id']],
                         [
-                            'activity' => $checklist_actividad['activity'],
+                            'activity' => $checklist_actividad->activity,
                             'type_id' => !is_null($type) ? $type->id : null,
-                            'active' => $checklist_actividad['active'],
+                            'active' => $checklist_actividad->active,
                             'checklist_id' => $checklist->id,
                             'position' => $key + 1,
                         ]
@@ -286,6 +280,58 @@ class ActivityController extends Controller
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'checklist');
 
         $checklist = $this->guardarChecklist($request);
+
+        if($process && $checklist) {
+
+            $criteria = Segment::getCriteriaByWorkspace(get_current_workspace());
+            $segments = Segment::getSegmentsByModel($criteria, Process::class, $process->id);
+
+            $data['segments'] = $segments->toArray();
+
+            if (is_array($segments)) {
+                $segments = collect($segments);
+            }
+
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $data['segment_by_document'] = ['criteria_selected'=> $segmentation_by_document_list];
+            $data['model_type'] = Checklist::class;
+            $data['model_id'] = $checklist->id;
+            $data['code'] = null;
+
+            // Segmentación directa
+            if(isset($data['segments']) && count($data['segments']) > 0)
+            {
+                $list_segments_temp = [];
+                foreach($data['segments'] as $seg) {
+                    $seg['id'] = 'new-segment-'.strtotime(date('Y-m-d'));
+                    unset($seg['model_type']);
+                    unset($seg['model_id']);
+                    if($seg['type_code'] === 'direct-segmentation')
+                        array_push($list_segments_temp, $seg);
+                }
+                $data['segments'] = $list_segments_temp;
+
+                $list_segments = (object) $data;
+
+                (new Segment)->storeDirectSegmentation($list_segments);
+            }
+            // Segmentación por documento
+            if(isset($data['segment_by_document']) && isset($data['segment_by_document']['criteria_selected']))
+            {
+                $list_segments = $data;
+
+                (new Segment)->storeSegmentationByDocument($list_segments);
+            }
+        }
 
         $data_activity = [
             'title' => $request->title,

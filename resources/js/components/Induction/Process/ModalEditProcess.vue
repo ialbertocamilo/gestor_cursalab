@@ -19,13 +19,13 @@
                             <v-card style="box-shadow:none !important;" class="bx_steps bx_step1">
                                 <v-card-text>
                                     <v-row>
-                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                            <span class="text_default lbl_tit">Indica la información que tendrá la inducción</span>
+                                        <v-col cols="12" md="12" lg="12" class="pb-0 pt-0 mb-3">
+                                            <span class="text_default lbl_tit">Indica la información que tendrá este proceso de inducción</span>
                                         </v-col>
                                         <v-col cols="12" md="12" lg="12" class="pb-0">
                                             <DefaultInput clearable
                                                         v-model="process.title"
-                                                        label="Título"
+                                                        label="Ingresa el nombre del proceso"
                                             />
                                         </v-col>
                                     </v-row>
@@ -78,12 +78,13 @@
                                         </v-col>
                                     </v-row>
                                     <v-row>
-                                        <v-col cols="12">
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <span class="text_default me-2">Inasistencias</span>
                                             <div class="bx_switch_attendance">
                                                 <v-switch
                                                     class="default-toggle"
                                                     inset
-                                                    label="Deseas contabilizar las inasistencias de los colaboradores"
+                                                    label="¿Deseas agregar límite de inasistencia a este proceso de inducción?"
                                                     hide-details="auto"
                                                     v-model="process.count_absences"
                                                     dense
@@ -93,9 +94,9 @@
                                     </v-row>
                                     <transition name="fade">
                                         <v-row v-if="process.count_absences">
-                                            <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
+                                            <!-- <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                 <span class="text_default lbl_tit">¿Deseas agregar límite de inasistencia a este proceso de inducción?</span>
-                                            </v-col>
+                                            </v-col> -->
                                             <v-col cols="12" md="12" lg="12">
                                                 <div class="d-flex">
                                                     <div>
@@ -251,7 +252,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="mt-4 mb-2">
-                                                        <span class="text_default">Iconos al terminar el onboarding</span>
+                                                        <span class="text_default">Íconos al terminar el proceso</span>
                                                     </div>
                                                     <div>
                                                         <div class="box_select_icons">

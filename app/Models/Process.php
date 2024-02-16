@@ -253,7 +253,7 @@ class Process extends BaseModel
         return $process;
     }
 
-    protected function getProcessAssistantsList(Process $process, $data)
+    protected function getProcessAssistantsList(Process $process, bool $is_paginated = true)
     {
         $course = new Course();
 
@@ -263,8 +263,12 @@ class Process extends BaseModel
         $segmentados_id = array_unique($segmentados_id);
 
         $segmentados = User::with('subworkspace')
-                            ->whereIn('id',$segmentados_id)
-                            ->paginate(request('paginate', 15));
+                            ->whereIn('id',$segmentados_id);
+
+        if($is_paginated)
+            $segmentados = $segmentados->paginate(request('paginate', 15));
+        else
+            $segmentados = $segmentados->get();
 
         return $segmentados;
     }
@@ -343,18 +347,37 @@ class Process extends BaseModel
     protected function getProcessApi( $data )
     {
         $response['data'] = null;
-        $user_id = $data['user'];
+        $user = $data['user'];
+
         $process_id = $data['process'];
+
+        // $summary_user_activities = ProcessSummaryActivity::whereHas('topic.course', function ($q) use ($user_courses) {
+        //     $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
+        // })
+        // ->with('status:id,code')
+        // ->where('user_id', $user->id)
+        // ->get();
 
         $process = Process::with(['instructions','stages.activities.type','stages.activities.requirement'])
                     ->where('id', $process_id)
                     ->first();
+        // if($process)
+        // {
+        //     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where()->first();
+        // }
+
         if($process)
         {
             foreach ($process->stages as $stage) {
                 $stage->status = 'pendiente';
                 foreach ($stage->activities as $activity) {
+                    $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
                     $activity->status = 'pendiente';
+                    $activity->progress = '0';
+                    if($exist) {
+                        $activity->status = 'completo';
+                        $activity->progress = '100';
+                    }
                 }
             }
 

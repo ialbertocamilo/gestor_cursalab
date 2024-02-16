@@ -29,7 +29,7 @@
                                 </v-col>
                             </v-row>
                             <v-row class="align-center">
-                                <v-col cols="5">
+                                <v-col cols="7">
                                     <div class="txt_duration">
                                         <v-text-field
                                             outlined

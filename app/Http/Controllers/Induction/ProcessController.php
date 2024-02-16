@@ -8,6 +8,7 @@ use App\Http\Resources\Induccion\ProcessAssistantsSearchResource;
 use App\Models\Course;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
+use App\Models\EntrenadorUsuario;
 use App\Models\Media;
 use App\Models\Process;
 use App\Models\Segment;
@@ -177,9 +178,39 @@ class ProcessController extends Controller
 
         // $this->saveSegmentInstructors($request, $supervisors);
 
-        return Segment::storeRequestData($request);
+        $save_segmented = Segment::storeRequestData($request);
+
+        $users_segmented = Process::getProcessAssistantsList($process, false)->pluck('id')->toArray();
+        $supervisors_segmented = array_keys($save_supervisors);
+
+        if(count($users_segmented) > 0 && count($supervisors_segmented) > 0 ) {
+            foreach ($users_segmented as $uss) {
+                $this->asignar($uss, array_keys($save_supervisors));
+            }
+        }
+
+        return $save_segmented;
     }
 
+    public function asignar($user, $trainers)
+    {
+        $errors = [];
+        foreach ($trainers as $key => $trainer) {
+            $temp = [
+                'trainer_id' => $trainer,
+                'user_id' => $user,
+                'active' => 1
+            ];
+            $asignar_msg = EntrenadorUsuario::asignar($temp, false);
+            if($asignar_msg['error'])
+                array_push($errors, $asignar_msg['msg']);
+        }
+        $apiResponse['errors'] = $errors;
+        cache_clear_model(EntrenadorUsuario::class);
+        cache_clear_model(User::class);
+
+        return $apiResponse;
+    }
     private function criteriaSelected(Request $request) {
 
         $criteria_selected = $request->segments_supervisors_criteria;
@@ -390,8 +421,8 @@ class ProcessController extends Controller
     public function searchAssistants(Process $process, Request $request)
     {
         $workspace = get_current_workspace();
-        $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
-        $assistants = Process::getProcessAssistantsList($process, $request->all());
+        // $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
+        $assistants = Process::getProcessAssistantsList($process);
         ProcessAssistantsSearchResource::collection($assistants);
         return $this->success($assistants);
     }

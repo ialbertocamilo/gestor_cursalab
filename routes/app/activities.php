@@ -9,5 +9,6 @@ Route::controller(RestActivityController::class)->group(function () {
     Route::get('/poll/{poll}', 'ActivityPoll');
     Route::get('/checklist/{checklist}', 'ActivityChecklist');
     Route::get('/questions/{topic}', 'ActivityAssessment');
+    Route::post('/register', 'RegisterActivity');
 
 });

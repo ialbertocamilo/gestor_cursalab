@@ -201,14 +201,15 @@
                                                                         </div>
                                                                     </v-col>
                                                                     <v-col cols="3" class="d-flex align-items-center justify-content-around bx_actions_activities">
-                                                                        <div>
+                                                                        <div style="width: 56px;"></div>
+                                                                        <!-- <div>
                                                                             <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     fas fa-exchange-alt
                                                                                 </v-icon>
                                                                                 <span class="text_default">Actividad</span>
                                                                             </div>
-                                                                        </div>
+                                                                        </div> -->
                                                                         <div>
                                                                             <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
@@ -257,14 +258,15 @@
                                                                         </div>
                                                                     </v-col>
                                                                     <v-col cols="3" class="d-flex align-items-center justify-content-around bx_actions_activities">
-                                                                        <div>
+                                                                        <div style="width: 56px;"></div>
+                                                                        <!-- <div>
                                                                             <div class="btn_action disabled">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     fas fa-exchange-alt
                                                                                 </v-icon>
                                                                                 <span class="text_default">{{ typeActivity('') }}</span>
                                                                             </div>
-                                                                        </div>
+                                                                        </div> -->
                                                                         <div>
                                                                             <div class="btn_action disabled">
                                                                                 <v-icon class="ml-0 icon_size">
@@ -423,7 +425,7 @@
             :options="modalEditStage"
             :ref="modalEditStage.ref"
             v-model="modalEditStage.open"
-            width="868px"
+            width="500px"
             :process_id="process_id"
             @onCancel="modalEditStage.open = false"
             @onConfirm="saveEditStage(true)"
