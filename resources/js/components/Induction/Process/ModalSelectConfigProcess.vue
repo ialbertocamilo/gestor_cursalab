@@ -20,7 +20,7 @@
                 <p class="title_act mt-0">¿Qué deseas configurar ahora?</p>
                 <div class="bx_items_config">
                     <div class="bxic_col_large">
-                        <div class="bx_item_config" @click="selectTemplateOrNewProcessModal('template')">
+                        <div class="bx_item_config" @click="selectNextConfigProcess('activity')">
                             <div class="bx_star"><v-icon color="#5458EA">mdi-star</v-icon></div>
                             <div class="img">
                                 <img src="/img/induccion/config/activities.svg">
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="bxic_col">
-                        <div class="bx_item_config" @click="selectTemplateOrNewProcessModal('template')">
+                        <div class="bx_item_config" @click="selectNextConfigProcess('segment')">
                             <div class="img">
                                 <img src="/img/induccion/config/segments.svg">
                                 <v-icon color="#039855" v-if="process.segments">mdi-check-circle</v-icon>
@@ -42,7 +42,7 @@
                                 <p>Selecciona criterios que filtraran a los colaboradores que realizaran la inducción</p>
                             </div>
                         </div>
-                        <div class="bx_item_config" @click="selectTemplateOrNewProcessModal('new')">
+                        <div class="bx_item_config" @click="selectNextConfigProcess('certificate')">
                             <div class="img">
                                 <img src="/img/induccion/config/certificate.svg">
                                 <v-icon color="#039855" v-if="process.certificate">mdi-check-circle</v-icon>
@@ -72,6 +72,7 @@ export default {
                 certificate: false,
                 segments: false
             },
+            item: {}
         };
     },
     methods: {
@@ -88,20 +89,18 @@ export default {
             let vue = this
             vue.$emit('onCancel')
         },
-        selectTemplateOrNewProcessModal(value) {
+        selectNextConfigProcess(value) {
             let vue = this
-            vue.$emit('selectTemplateOrNewProcessModal', value)
+            vue.$emit('selectNextConfigProcess', value, vue.item)
         },
         loadSelects(resource) {
             let vue = this
-            console.log(resource);
-            console.log(vue.process);
         },
         async loadData(resource) {
             let vue = this
-            console.log(resource);
             vue.$nextTick(() => {
-                vue.process = resource.config_process
+                vue.item = resource
+                // vue.process = resource.config_process
             });
         },
         resetValidation() {

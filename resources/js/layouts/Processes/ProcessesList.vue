@@ -143,6 +143,7 @@
                 v-model="modalSelectConfigProcess.open"
                 width="800px"
                 @onCancel="closeFormModal(modalSelectConfigProcess)"
+                @selectNextConfigProcess="selectNextConfigProcess"
             />
 
     </section>
@@ -456,6 +457,28 @@ export default {
                 vue.openFormModal(vue.modalEditProcess)
                 // vue.modalCreateProcess.open = true
                 vue.modalSelectTemplate.open = false
+            }
+        },
+        selectNextConfigProcess( value, item ) {
+            let vue = this
+            vue.closeFormModal(vue.modalSelectConfigProcess)
+
+            if(value == 'activity')
+            {
+                window.location.href = item.stages_route
+            }
+            else if(value == 'segment')
+            {
+                vue.openFormModal(
+                        vue.modalFormSegmentationOptions,
+                        item,
+                        'segmentation',
+                        `Segmentación de usuarios`
+                    )
+            }
+            else if(value == 'certificate')
+            {
+                window.location.href = item.certificate_route
             }
         },
         async openModalEditProcess(process, edit = false) {
