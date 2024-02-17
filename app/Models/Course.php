@@ -378,6 +378,8 @@ class Course extends BaseModel
         $active_topics = $course->topics->where('active',1)->values();
         $type_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first()->id;
         $user_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','user')->where('code','normal')->first()->id;
+        $user_cohost__id = Taxonomy::select('id')->where('group','meeting')->where('type','user')->where('code','cohost')->first()->id;
+
         $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
         $attendants = Course::usersSegmented($course->segments, type: 'get_records')->map(function($user) use ($user_meeting_id){
             return [
@@ -392,6 +394,14 @@ class Course extends BaseModel
         foreach ($active_topics as $topic) {
             $modality_in_person_properties = $topic->modality_in_person_properties;
             $host_id = $modality_in_person_properties->host_id;
+            $cohost_id = $modality_in_person_properties->cohost_id ?? null;
+            if($cohost_id){
+                $attendants->push([
+                    "usuario_id" => $cohost_id,
+                    "type_id" => $user_cohost__id,
+                    "id" => null,
+                ]);
+            }
             $start_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
             $finish_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
             $starts_at = $start_datetime->format('Y-m-d H:i:s');

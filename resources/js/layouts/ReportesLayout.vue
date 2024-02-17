@@ -311,6 +311,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -324,6 +325,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -337,6 +339,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -710,6 +713,7 @@ export default {
             generateReportCallback: () => {},
 
             modules: [],
+            modalities:[],
             admins: [],
             reportTypes: [],
             reportsBaseUrl: '',
@@ -802,6 +806,7 @@ export default {
                 adminId,
                 workspaceId,
                 modules,
+                modalities,
                 admins,
                 VademecumList
             } = await vue.fetchDataReport();
@@ -813,9 +818,7 @@ export default {
             this.modules = modules
             this.admins = admins
             this.VademecumList = VademecumList
-
-
-
+            this.modalities= modalities
             vue.isSuperUser = vue.isSuper();
         },
         async crearReporte(res) {

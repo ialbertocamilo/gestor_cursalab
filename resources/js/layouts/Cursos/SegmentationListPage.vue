@@ -742,7 +742,7 @@ export default {
             let vue = this;
             vue.closeFormModal(vue.modalCourseModality);
             vue.modalCourseOptions.modality = modality;
-            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear curso ('+ modality.name.toLowerCase()+')');
+            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear '+ modality.name.toLowerCase());
         },
         openSegmentationModal(resource){
             let vue = this;

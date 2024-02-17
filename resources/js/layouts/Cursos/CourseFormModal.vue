@@ -146,7 +146,7 @@
                         <DefaultModalSectionExpand title="Configuración avanzada"
                             :expand="sections.shosSectionAdvancedconfiguration" :simple="true">
                             <template slot="content">
-                                <DefaultSimpleSection v-if="has_DC3_functionality" title="DC3-DC4">
+                                <DefaultSimpleSection v-if="has_DC3_functionality" title="DC3-DC4 (México)">
                                     <template slot="content">
                                         <v-row justify="center">
                                             <v-col cols="12">
@@ -201,7 +201,7 @@
                                     </template>
                                 </DefaultSimpleSection>
                                 <DefaultSimpleSection v-if="has_registro_capacitacion_functionality"
-                                    title="Registro de capacitación">
+                                    title="Registro de capacitación (Perú)">
                                     <template slot="content">
                                         <div>
                                             <v-row>

@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
+use Illuminate\Support\Facades\DB;
 use App\Models\TopicAssistanceUser;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
@@ -73,7 +74,7 @@ class TemaController extends Controller
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
-        $hosts = Usuario::getCurrentHosts();
+        $hosts = Usuario::getCurrentHosts(false,null,'get_records',[DB::raw("CONCAT(document,' - ',CONCAT_WS(' ',name,lastname,surname)) as 'document_fullname'")]);
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         $workspace_id = get_current_workspace()->id;
         $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
@@ -113,7 +114,6 @@ class TemaController extends Controller
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
-        
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
@@ -244,7 +244,7 @@ class TemaController extends Controller
         return $this->success($response);
     }
     public function getHosts(){
-        $hosts = Usuario::getCurrentHosts();
+        $hosts = Usuario::getCurrentHosts(false,null,'get_records',[DB::raw("CONCAT(document,CONCAT_WS(' ',name,lastname,surname)) as 'document_fullname'")]);
         return $this->success(['hosts'=>$hosts]);
     }
     ////////////////////// Tema ENCUESTA ////////////////////////////

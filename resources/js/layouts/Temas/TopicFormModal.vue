@@ -10,7 +10,7 @@
 
             <v-form ref="TemaForm">
                 <v-row>
-                    <v-col cols="6">
+                    <v-col :cols="selects.course_code_modality != 'asynchronous' ? 4 : 6">
                         <DefaultInput
                             dense
                             label="Nombre del tema"
@@ -32,7 +32,7 @@
                             item-text="name"
                         />
                     </v-col>
-                    <v-col cols="6" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
+                    <v-col cols="4" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
                         <DefaultAutocomplete
                             style="width: 100%;"
                             dense
@@ -42,7 +42,19 @@
                             :items="selects.hosts"
                             clearable
                             :rules="rules.required"
-                            item-text="name"
+                            item-text="document_fullname"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
+                        <DefaultAutocomplete
+                            style="width: 100%;"
+                            dense
+                            label="Co host"
+                            placeholder="Seleccione un co-host"
+                            v-model="resource.modality_in_person_properties.cohost_id"
+                            :items="selects.hosts"
+                            clearable
+                            item-text="document_fullname"
                         />
                         <DefaultModalButton
                             label=""
@@ -258,6 +270,7 @@
                             <v-col cols="12" v-if="selects.course_code_modality != 'asynchronous'">
                                 <DefaultToggle 
                                     v-model="resource.modality_in_person_properties.show_medias_since_start_course"
+                                    :disabled="resource.media.length === 0"
                                     active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
                                     inactive-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
                                     dense
@@ -266,6 +279,7 @@
                             <v-col cols="12">
                                 <DefaultToggle 
                                     v-model="resource.review_all_duration_media"
+                                    :disabled="resource.media.length === 0"
                                     active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     dense
@@ -873,10 +887,10 @@ export default {
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
 
-            if (!validForm || !hasMultimedia) {
+            if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
-                if (!hasMultimedia)
+                if (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
@@ -929,7 +943,7 @@ export default {
             }
             return vue.sendForm({checkbox: false})
         },
-        sendForm(data, validateForm = true) {
+        async sendForm(data, validateForm = true) {
             let vue = this
             vue.resource.tags = vue.tags.compentencies.concat(vue.tags.habilities, vue.tags.levels);
             if(vue.selects.course_code_modality == 'in-person' && vue.ubicacion_mapa){
@@ -951,10 +965,10 @@ export default {
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
 
-            if (!validForm || !hasMultimedia) {
+            if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
-                if (!hasMultimedia)
+                if (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
@@ -991,7 +1005,7 @@ export default {
                 'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
             );
 
-            vue.$http.post(url, formData)
+            await vue.$http.post(url, formData)
                 .then(async ({data}) => {
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
@@ -1165,6 +1179,9 @@ export default {
         },
         verifyDisabledMediaEmbed() {
             let vue = this;
+            if(vue.selects.course_code_modality != 'asynchronous'){
+                return 
+            }
             const f = vue.resource.media.filter((e) => e.embed == true);
             if (f.length == 1) {
                 const idx = vue.resource.media.findIndex((e) => e.embed == true);
@@ -1197,7 +1214,7 @@ export default {
         },
         async confirmDeleteMedia(){
             let vue = this
-            if(vue.resource.media.filter((media, index) => index != vue.mediaDeleteModal.media_index && media.embed).length == 0){
+            if(vue.selects.course_code_modality == 'asynchronous' && vue.resource.media.filter((media, index) => index != vue.mediaDeleteModal.media_index && media.embed).length == 0){
                 vue.mediaDeleteModal.open = false
                 vue.showAlert("Debe haber almenos un multimedia embebido.", 'warning')
                 return;

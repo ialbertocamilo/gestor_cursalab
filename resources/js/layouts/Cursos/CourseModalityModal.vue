@@ -40,7 +40,7 @@
                                         </div>
                                         <div>
                                             <v-card-title class="d-flex justify-content-between mb-3" style="width: 100%;">
-                                                Online
+                                                {{ modality_virtual.name}}
                                                 <div class="ml-1 tag-premium d-flex align-items-center" v-if="!modality_virtual.has_functionality">
                                                     <img src="/img/premiun.svg"> 
                                                     Pro

@@ -84,9 +84,21 @@
                             item-value="id"
                             multiple
                             placeholder="Seleccione las escuelas"
-                            @onChange="escuelaChange"
+                            @onChange="loadCourses"
                             :maxValuesSelected="maxValuesSelected.schools"
                             :showSelectAll="maxValuesSelected.show_select_all"
+                        />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modality"
+                            :items="modalities"
+                            label="Modalidades"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione una modalidad"
+                            @onChange="loadCourses"
                         />
                     </div>
                     <!-- Curso -->
@@ -314,6 +326,7 @@ export default {
     props: {
         workspaceId: 0,
         adminId: 0,
+        modalities:Array,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -328,6 +341,7 @@ export default {
 
             modulo: [],
             escuela: [],
+            modality:null,
             curso: [],
             tema: [],
             area: [],
@@ -349,6 +363,7 @@ export default {
     mounted() {
         this.fetchFiltersData();
         this.changeConstraints();
+        this.modality = this.modalities.find((m) => m.code =='asynchronous').id;
     },
     methods: {
         /**
@@ -422,6 +437,7 @@ export default {
                         filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
+                        modality_id:this.modality,
                         cursos: this.curso,
                         temas: this.tema,
 
@@ -476,7 +492,7 @@ export default {
          * Fetch courses
          * @returns {Promise<boolean>}
          */
-        async escuelaChange() {
+        async loadCourses() {
             this.curso = [];
             this.tema = [];
             this.courses = [];
@@ -485,7 +501,7 @@ export default {
             if (this.escuela.length === 0) return false;
 
             this.cursos_libres = false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}?modality_id=${this.modality}`
             let res = await axios({
                 url,
                 method: 'get'
