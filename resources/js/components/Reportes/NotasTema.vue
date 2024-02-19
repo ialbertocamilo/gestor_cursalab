@@ -101,6 +101,17 @@
                             @onChange="loadCourses"
                         />
                     </div>
+                    <div class="col-sm-6 mb-3" v-if="modalities.find(m => m.id == modality  && (m.code=='in-person' || m.code =='virtual'))">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="reportType"
+                            :items="types_report"
+                            label="Tipo de reporte"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione un tipo de reporte"
+                        />
+                    </div>
                     <!-- Curso -->
                     <div class="col-lg-6 col-xl-4 mb-3">
                         <DefaultAutocomplete
@@ -334,6 +345,10 @@ export default {
         return {
             filteredSchools: [],
             reportType: 'consolidado_temas',
+            types_report:[
+                {id:'consolidado_temas',name:'Consolidado'},
+                {id:'asistencias',name:'Asistencia'},
+            ],
             schools: [],
             courses: [],
             topics: [],
@@ -424,7 +439,6 @@ export default {
             }
 
             // Perform request to generate report
-
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
@@ -456,7 +470,8 @@ export default {
                         aprobados: this.aprobados,
                         desaprobados: this.desaprobados,
                         realizados : this.realizados,
-                        porIniciar: this.porIniciar
+                        porIniciar: this.porIniciar,
+                        ext:this.reportType=='asistencias' ? 'zip' : 'xlsx'
                     }
                 })
                 const vue = this
