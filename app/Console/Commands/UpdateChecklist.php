@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\EntrenadorUsuario;
 use App\Models\SummaryUserChecklist;
+use Illuminate\Support\Str;
 
 class UpdateChecklist extends Command
 {
@@ -34,6 +35,9 @@ class UpdateChecklist extends Command
 
     private function updateSummayUser(){
 
+        $cronId = Str::random(5);
+        $this->info('START ' . $this->signature . ': ' . $cronId);
+
         $trainer_users = EntrenadorUsuario::select('trainer_user.user_id')
             ->leftJoin('summary_user_checklist as suc', 'suc.user_id', '=', 'trainer_user.user_id')
             ->where(function ($query) {
@@ -54,5 +58,7 @@ class UpdateChecklist extends Command
             $bar->advance();
         }
         $bar->finish();
+
+        $this->info('END ' . $this->signature . ': ' . $cronId);
     }
 }

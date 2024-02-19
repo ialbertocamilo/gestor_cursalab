@@ -288,7 +288,6 @@ class RestCourseController extends Controller
 
         $registros = $registrosQuery->get();
 
-
         $certificates = $certificates->merge($registros);
 
         foreach ($certificates as $certificate) {
