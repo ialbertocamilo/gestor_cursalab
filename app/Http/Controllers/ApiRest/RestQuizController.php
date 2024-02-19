@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApiRest;
 use App\Http\Controllers\Controller;
 use App\Models\Poll;
 use App\Models\PollQuestionAnswer;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -174,21 +175,55 @@ class RestQuizController extends Controller
             'preguntas' => $questions,
             'tipo_evaluacion' => $topic->evaluation_type->code ?? NULL,
             'attempt' => [
+                'server' => now()->format('Y/m/d H:i'),
                 'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
                 'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
             ],
         ];
 
-        // Adds 24 hours for Agile
+        // Change time when user's datetime is different
+        // from server's
 
-        if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
-            $data['attempt'] = [
-                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
-                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),
-                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))
-            ];
+        $userDatetimeTimestamp = request()->get('user_datetime');
+
+        if ($userDatetimeTimestamp) {
+
+            $userDatetime = Carbon::parse($userDatetimeTimestamp);
+            $minutesDifference = now()->diffInMinutes($userDatetime);
+
+            // When time difference between client and server is more
+            // than 5 minutes, adjust the datetime to match clients datetime
+
+            if ($minutesDifference > 5) {
+
+                // The differece is negative when server datetime is greater
+                // than client's datetime
+
+                if (now()->gte($userDatetime)) {
+                    $minutesDifference *= -1;
+                }
+
+                $start = $row->current_quiz_started_at->addMinutes($minutesDifference);
+                $end = $row->current_quiz_finishes_at->addMinutes($minutesDifference);
+                $data['attempt'] = [
+                    'started_at' => $start->format('Y/m/d H:i'),
+                    'finishes_at' => $end->format('Y/m/d H:i'),
+                    'diff_in_minutes' => now()->addMinutes($minutesDifference)->diffInMinutes($end),
+                ];
+            }
         }
+
+        // Adds 24 hours for Agile
+// This part is no longer necessary since user device time is now fixed
+// when is different from the one in server
+//        if ((env('MULTIMARCA') == 'true' && env('CUSTOMER_ID') == '3')) {
+//            $data['attempt'] = [
+//                'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
+//                'finishes_at' => now()->addHours(24)->format('Y/m/d H:i'),
+//                'diff_in_minutes' => now()->diffInMinutes(now()->addHours(24))
+//            ];
+//        }
 
         // SummaryTopic::setUserLastTimeEvaluation($topic);
         // SummaryCourse::setUserLastTimeEvaluation($topic->course);
