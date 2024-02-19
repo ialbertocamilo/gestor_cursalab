@@ -272,7 +272,7 @@ class RestCourseController extends Controller
 
         $registrosQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
             ->whereHas('course', function($q) use ($qs) {
-                $q->whereRaw('json_extract(registro_capacitacion, "$.active") = 1');
+                $q->whereRaw('json_extract(registro_capacitacion, "$.active") in (1, true)');
 
                 if ($qs) {
                     $q->where('name', 'like', "%{$qs}%");
