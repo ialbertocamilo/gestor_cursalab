@@ -235,6 +235,16 @@
                 @onCancel="modalCourseModality.open = false"
                 :modalities="selects.modalities"
             />
+            <direct-segmentation-form
+                :ref="modalDirectSegmentationOptions.ref"
+                v-model="modalDirectSegmentationOptions.open"
+                :options="modalDirectSegmentationOptions"
+                model_type="App\Models\Course"
+                width="55vw"
+                @onConfirm="modalDirectSegmentationOptions.open=true"
+                @onCancel="modalDirectSegmentationOptions.open = false"
+                :modalities="selects.modalities"
+            />
         </v-card>
     </section>
 </template>
@@ -247,10 +257,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
-import ProjectFormModal from "../Project/ProjectFormModal.vue";
+import ProjectFormModal from "../Project/ProjectFormModal";
 import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
 import CourseModalityModal from "./CourseModalityModal";
+import DirectSegmentationForm from "./DirectSegmentationForm";
 
 export default {
     components: {
@@ -265,7 +276,8 @@ export default {
         CourseFormModal,
         LogsModal,
         PreviewMediaTopicsModal,
-        CourseModalityModal
+        CourseModalityModal,
+        DirectSegmentationForm
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -498,6 +510,17 @@ export default {
                 confirmLabel: 'Guardar',
                 resource: 'course',
                 title: 'Selecciona qué modalidad de curso deseas crear',
+                action: null,
+                persistent: true,
+            },
+            modalDirectSegmentationOptions:{
+                open:false,
+                ref: 'CourseTypeModal',
+                open: false,
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'course',
+                title: '',
                 action: null,
                 persistent: true,
             },
@@ -746,11 +769,13 @@ export default {
         },
         openSegmentationModal(resource){
             let vue = this;
-            if(resource.modality_code == 'in-person' || resource.modality_code=='virtual'){
-                resource.show_criteria_segmentation = false;
-            }
             if(resource.active_topics_count == 0 && resource.modality_code=='virtual'){
                 vue.showAlert('Es necesario crear temas activos para poder segmentar el curso.','warning');
+                return;
+            }
+            if(resource.modality_code == 'in-person' || resource.modality_code=='virtual'){
+                vue.openFormModal(vue.modalDirectSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
+                resource.show_criteria_segmentation = false;
                 return;
             }
             vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
