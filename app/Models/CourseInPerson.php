@@ -407,7 +407,8 @@ class CourseInPerson extends Model
                 $zoom = MeetingAppResource::collection([$meeting]);
             }
         }
-        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom');
+        $has_media = boolval($topic->medias()->first());
+        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media');
     }
 
     

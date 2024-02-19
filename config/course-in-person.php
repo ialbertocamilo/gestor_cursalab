@@ -8,12 +8,12 @@ return [
             'description' => 'Toma nota de los colaboradores presentes en este evento.',
             'show' => true
         ],
-        [
-            'title' => 'Presentación',
-            'code' => 'presentation',
-            'description' => 'Aquí podrás observar tus archivos para presentar a tus colaboradores.',
-            'show' => true
-        ],
+        // [
+        //     'title' => 'Presentación',
+        //     'code' => 'presentation',
+        //     'description' => 'Aquí podrás observar tus archivos para presentar a tus colaboradores.',
+        //     'show' => true
+        // ],
         [
             'title' => 'Evaluación',
             'code' => 'evaluation',
@@ -28,12 +28,12 @@ return [
         ]
     ],
     'user' => [
-        [
-            'title' => 'Material del curso',
-            'code' => 'multimedias',
-            'description' => 'Descarga archivos complementarios de tu evento.',
-            'show' => true
-        ],
+        // [
+        //     'title' => 'Material del curso',
+        //     'code' => 'multimedias',
+        //     'description' => 'Descarga archivos complementarios de tu evento.',
+        //     'show' => true
+        // ],
         [
             'title' => 'Evaluación',
             'code' => 'evaluation',
