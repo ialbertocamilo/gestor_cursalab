@@ -361,67 +361,16 @@ class CourseInPerson extends Model
         $data = [];
         switch ($rol) {
             case 'user':
-                $data = $this->listUserMenu($rol,$topic,$user);
+                $data = $this->listUserMenu($topic,$user);
                 break;
             case 'host':
-                $data = $this->listHostMenu($rol,$topic,$user);
+                $data = $this->listHostMenu($topic,$user);
                 break;
             case 'cohost':
-                $data = $this->listHostMenu($rol,$topic,$user);
+                $data = $this->listHostMenu($topic,$user);
                 break;
         }
         return $data;
-        $menus = config('course-in-person.'.$rol);
-        $last_session = Topic::select('id')->where('course_id',$topic->course_id)
-                        ->where('active',ACTIVE)
-                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
-                        ->first();
-        //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
-        if(!$topic->course->polls->first() || $last_session->id != $topic->id){
-            $menus = $this->modifyMenus($menus,'poll','unset');
-        }
-        //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
-        if(!$topic->type_evaluation_id && $last_session->id != $topic->id){
-            $menus = $this->modifyMenus($menus,'evaluation');
-        }
-        //Si es un curso virtual no debe ver el card de asistencia
-        if($rol == 'host' && $topic->course->modality->code != 'in-person'){
-            $menus = $this->modifyMenus($menus,'take-assistance','unset');
-        }
-        if($rol == 'host' && $topic->course->modality->code == 'take-assistance'){
-            $menus = $this->modifyMenus($menus,'evaluation');
-        }
-        if($last_session->id != $topic->id){
-            $menus = $this->modifyMenus($menus,'certificate','unset');
-        }
-        $required_signature = false;
-        if($topic->course->modality_in_person_properties?->required_signature){
-            $hasSignature = TopicAssistanceUser::where('user_id',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
-            $required_signature = !boolval($hasSignature);
-        }
-        $show_modal_signature_registro_capacitación = false;
-        //REGISTRO DE CAPACITACIÓN
-        $registroCapacitacionIsActive = $topic->course->registroCapacitacionIsActive();
-        if($rol == 'user' && $registroCapacitacionIsActive){
-            $summary = SummaryCourse::select('registro_capacitacion_path','advanced_percentage')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
-            $registroCapacitacionPath = null;
-            if ($summary) {
-                $registroCapacitacionPath = $summary->registro_capacitacion_path;
-                $registroCapacitacionUrl = $registroCapacitacionPath
-                    ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
-                    : null;
-            }
-            $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
-        }
-        $zoom = null;
-        if($topic->course->modality->code != 'in-person'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
-            if($meeting){
-                $zoom = MeetingAppResource::collection([$meeting]);
-            }
-        }
-        $has_media = boolval($topic->medias()->first());
-        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media');
     }
 
     
@@ -684,7 +633,7 @@ class CourseInPerson extends Model
         ->whereNotNull('modality_in_person_properties')
         ->where('active',1)->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->count();
     }
-    private function listUserMenu($rol,$topic,$user){
+    private function listUserMenu($topic,$user){
         $menus = config('course-in-person.user');
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
@@ -704,8 +653,6 @@ class CourseInPerson extends Model
         }
         //Obtener 
         $action_button = null;
-        
-        
         //Si tiene evaluación, verificar el estado
         // $is_accessible_evaluation = $topic->isAccessibleEvaluation();
         if($topic->type_evaluation_id){
@@ -803,6 +750,103 @@ class CourseInPerson extends Model
                 $zoom = MeetingAppResource::collection([$meeting]);
             }
             $menus = $this->modifyMenus($menus,'assistance','unset');
+        }
+        $has_media = boolval($topic->medias()->first());
+        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
+    }
+
+    private function listHostMenu($topic,$user){
+        $menus = config('course-in-person.host');
+        $last_session = Topic::select('id')->where('course_id',$topic->course_id)
+                        ->where('active',ACTIVE)
+                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
+                        ->first();
+        //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->course->polls->first() || $last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'poll','unset');
+        }
+        //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'evaluation','unset');
+        }
+        //Si es un curso virtual no debe ver el card de asistencia
+        if($topic->course->modality->code != 'in-person'){
+            $menus = $this->modifyMenus($menus,'take-assistance','unset');
+        }
+        /*************************************************************VERIFICAR LOS ESTADOS*****************************/
+        $action_button = null;
+        if($topic->course->modality->code == 'in-person'){
+            $has_one_assistance = TopicAssistanceUser::select('id')->where('topic_id',$topic->id)->first();
+            if($has_one_assistance){
+                $menus = $this->modifyMenus(
+                    $menus,
+                    'take-assistance',
+                    'change_status_code',
+                    [
+                        'code'=> 'realizado',
+                        'name'=> 'Realizado',
+                    ]
+                );
+            }else{
+                $action_button = [
+                    'code' => 'take-assitance',
+                    'name' => 'Tomar asistencia'
+                ];
+            }
+
+        }
+        if(is_null($action_button) && !isset($topic->modality_in_person_properties->evaluation)){
+            $action_button = [
+                'code' => 'evaluation',
+                'name' => 'Iniciar evaluación'
+            ];
+        }
+        if($topic->type_evaluation_id && isset($topic->modality_in_person_properties->evaluation)){
+            $status_evaluation = $topic->modality_in_person_properties?->evaluation?->status;
+            $menus = $this->modifyMenus(
+                $menus,
+                'evaluation',
+                'change_status_code',
+                [
+                    'code'=> $status_evaluation,
+                    'name'=> $status_evaluation == 'finished' ? 'Finalizado' : 'Iniciado',
+                ]
+            );
+            if(in_array($status_evaluation,['extra-time','started'])){
+                $action_button = [
+                    'code' => 'evaluation',
+                    'name' => 'Continuar evaluación'
+                ];
+            }
+        }
+        
+        if($topic->course->polls->first() && $last_session->id == $topic->id){
+            $is_accessible_poll = $topic->isAccessiblePoll();
+            $menus = $this->modifyMenus(
+                $menus,
+                'poll',
+                'change_status_code',
+                [
+                    'code'=> $is_accessible_poll ? 'realizado' : 'pending',
+                    'name'=> $is_accessible_poll ? 'Realizado' : 'Pendiente',
+                ]
+            );
+            if(is_null($action_button) && !$is_accessible_poll){
+                $action_button = [
+                    'code' => 'poll',
+                    'name' => 'Iniciar encuesta'
+                ];
+            }
+        }
+        /*-------------------------------------------------------------------FINALIZAR CAMBIAR ESTADO----------------------------------------------- */
+        $show_modal_signature_registro_capacitación = false;
+        $required_signature = false;
+        $zoom = null;
+        if($topic->course->modality->code != 'in-person'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            if($meeting){
+                $zoom = MeetingAppResource::collection([$meeting]);
+            }
         }
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');

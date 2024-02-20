@@ -6,7 +6,8 @@ return [
             'title' => 'Tomar asistencia',
             'code' => 'take-assistance',
             'description' => 'Toma nota de los colaboradores presentes en este evento.',
-            'show' => true
+            'show' => true,
+            'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         // [
         //     'title' => 'Presentación',
@@ -18,13 +19,15 @@ return [
             'title' => 'Evaluación',
             'code' => 'evaluation',
             'description' => 'Evalúa a tus colaboradores sobre los temas que se han presentado.',
-            'show' => true
+            'show' => true,
+            'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         [
             'title' => 'Encuesta',
             'code' => 'poll',
             'description' => 'Inicia el feedback de parte de tus colaboradores.',
-            'show' => true
+            'show' => true,
+            'status' => ['name'=>'Pendiente','code'=>'pending']
         ]
     ],
     'user' => [
