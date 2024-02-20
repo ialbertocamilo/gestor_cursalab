@@ -351,13 +351,26 @@ class CourseInPerson extends Model
         $user = auth()->user();
         $topic = Topic::select('id','course_id','type_evaluation_id','modality_in_person_properties')
                     ->with([
-                        'course:id,modality_id,modality_in_person_properties,registro_capacitacion',
+                        'course:id,modality_id,modality_in_person_properties,registro_capacitacion,mod_evaluaciones',
                         'course.modality:id,code','course.polls:id'
                     ])
                     ->where('id',$topic_id)
                     ->first();
 
         $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
+        $data = [];
+        switch ($rol) {
+            case 'user':
+                $data = $this->listUserMenu($rol,$topic,$user);
+                break;
+            case 'host':
+                $data = $this->listHostMenu($rol,$topic,$user);
+                break;
+            case 'cohost':
+                $data = $this->listHostMenu($rol,$topic,$user);
+                break;
+        }
+        return $data;
         $menus = config('course-in-person.'.$rol);
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
@@ -597,7 +610,7 @@ class CourseInPerson extends Model
         ];
     }
     //SUBFUNCTIONS
-    private function modifyMenus($menus,$code,$action='change_status'){
+    private function modifyMenus($menus,$code,$action='change_status',$value=null){
         $pollIndex = array_search($code, array_column($menus, 'code'));
         if ($pollIndex !== false) {
             switch ($action) {
@@ -606,6 +619,9 @@ class CourseInPerson extends Model
                     break;
                 case 'unset':
                     unset($menus[$pollIndex]);
+                    break;
+                case 'change_status_code':
+                    $menus[$pollIndex]['status'] = $value;
                     break;
                 default:
                     throw new InvalidArgumentException('Acción no válida especificada');
@@ -667,5 +683,127 @@ class CourseInPerson extends Model
         })
         ->whereNotNull('modality_in_person_properties')
         ->where('active',1)->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->count();
+    }
+    private function listUserMenu($rol,$topic,$user){
+        $menus = config('course-in-person.user');
+        $last_session = Topic::select('id')->where('course_id',$topic->course_id)
+                        ->where('active',ACTIVE)
+                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
+                        ->first();
+        //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->course->polls->first() || $last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'poll','unset');
+        }
+        //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'evaluation','unset');
+        }
+         //Si no es el último tema, no se muestra el certificado
+        if($last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'certificate','unset');
+        }
+        //Obtener la última acción
+        $action_button = null;
+        
+        //Si tiene encuesta, verificar el estado
+        if($topic->isAccessiblePoll()){
+            $hasPoll = PollQuestionAnswer::select('id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
+            if($hasPoll){
+                $menus = $this->modifyMenus(
+                    $menus,
+                    'poll',
+                    'change_status_code',
+                    [
+                        'code'=> 'realizado',
+                        'name'=> 'Realizado',
+                    ]
+                );
+            }else{
+                $action_button = [
+                    'code' => 'poll',
+                    'name' => 'Realizar encuesta'
+                ];
+            }
+        }
+        //Si tiene evaluación, verificar el estado
+        $is_accessible_evaluation = $topic->isAccessibleEvaluation();
+        if($topic->type_evaluation_id && $is_accessible_evaluation){
+            $summary = SummaryTopic::with('status:id,name,code')->select('attempts','passed','status_id')->where('user_id',$user->id)->where('topic_id',$topic->id)->first();
+            $attemps_limit = $topic->course->getAttemptsLimit();
+            if($summary){
+                $evaluation_status_name = $summary?->status?->name.' ('.$summary->attempts.'/'.$attemps_limit.')';
+                $menus = $this->modifyMenus(
+                            $menus,
+                            'evaluation',
+                            'change_status_code',
+                            [
+                                'code'=> $summary?->status?->code,
+                                'name'=> $evaluation_status_name,
+                            ]
+                        );
+            }
+            if(
+                $is_accessible_evaluation && 
+                (!$summary || (in_array($summary?->status?->code,['desaprobado','por-iniciar']) && $summary->attempts < $attemps_limit) )
+            ){
+                $action_button = [
+                    'code' => 'evaluation',
+                    'name' => 'Realizar evaluación'
+                ];
+            }
+        }
+        if(is_null($action_button)){
+            $action_button = [
+                'code' => 'multimedias',
+                'name' => 'Consulta el material del curso'
+            ];
+        }
+        //Si es presencial mandar el estado de la asistencia
+        if($topic->course->modality->code == 'in-person'){
+            $has_assistance = TopicAssistanceUser::select('id','status_id')->with('status:id,code,name')->where('user_id',$user->id)->where('topic_id',$topic_id)->first();
+            if($has_assistance){
+                $menus = $this->modifyMenus(
+                    $menus,
+                    'assistance',
+                    'change_status_code',
+                    [
+                        'code'=> $has_assistance->status->code,
+                        'name'=> $has_assistance->status->name,
+                    ]
+                );
+            }
+        }
+        if($last_session->id != $topic->id){
+            $menus = $this->modifyMenus($menus,'certificate','unset');
+        }
+        $required_signature = false;
+        if($topic->course->modality_in_person_properties?->required_signature){
+            $hasSignature = TopicAssistanceUser::where('user_id',$user->id)->where('topic_id',$topic_id)->whereNotNull('signature')->first();
+            $required_signature = !boolval($hasSignature);
+        }
+        $show_modal_signature_registro_capacitación = false;
+        //REGISTRO DE CAPACITACIÓN
+        $registroCapacitacionIsActive = $topic->course->registroCapacitacionIsActive();
+        if($registroCapacitacionIsActive){
+            $summary = SummaryCourse::select('registro_capacitacion_path','advanced_percentage')->where('user_id',$user->id)->where('course_id', $topic->course_id)->first();
+            $registroCapacitacionPath = null;
+            if ($summary) {
+                $registroCapacitacionPath = $summary->registro_capacitacion_path;
+                $registroCapacitacionUrl = $registroCapacitacionPath
+                    ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
+                    : null;
+            }
+            $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
+        }
+        $zoom = null;
+        if($topic->course->modality->code == 'virtual'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            if($meeting){
+                $zoom = MeetingAppResource::collection([$meeting]);
+            }
+            $menus = $this->modifyMenus($menus,'assistance','unset');
+        }
+        $has_media = boolval($topic->medias()->first());
+        return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
     }
 }

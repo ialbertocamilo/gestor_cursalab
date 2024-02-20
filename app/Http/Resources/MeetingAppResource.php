@@ -21,7 +21,7 @@ class MeetingAppResource extends JsonResource
 
         $was_present = ($attendant AND $attendant->first_login_at);
         $url = ($attendant AND $attendant->link) ? $attendant->link : $this->url;
-        $isHostOrCohost = in_array($attendant->type?->code, ['host', 'cohost']);
+        $isHostOrCohost = in_array($attendant?->type?->code, ['host', 'cohost']);
 
         return [
             'key' => $this->starts_at->format('Y-m-d'),

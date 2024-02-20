@@ -3,10 +3,19 @@
         <template v-slot:content>
             <v-row class="modal_gestor_colab">
                 <v-col cols="12" md="12" lg="12" class="pb-0">
-                    <span class="text_default lbl_tit">Lista de valores asignados.</span>
+                    <span class="text_default lbl_tit" v-text="show_section_criteria ? 'Selecciona los criterios sobres los que seleccionaras a los participantes de este curso.' : 'Lista de valores asignados.'"></span>
+
                     <!-- <span class="text_default lbl_tit fw-bold"><i class="fas fa-exclamation-triangle" style="color: #FF9800;"></i> Una vez confirmados, no se podrán retirar del beneficio.</span> -->
                 </v-col>
-                <v-col cols="12" class="pb-0 pt-0">
+                <v-col cols="12" v-if="!show_section_criteria">
+                    <DefaultButton 
+                        style="width: 100% !important;"
+                        label="Deseo filtrar por criterios"
+                        :outlined="true"
+                        @click="showSectionCriteria()"
+                    />
+                </v-col>
+                <v-col v-if="!show_section_criteria" cols="12" class="pb-0 pt-0">
                     <v-row>
                         <v-col cols="5" class="d-flex flex-row bx_search_by_document">
                             <DefaultInput
@@ -122,15 +131,24 @@
                         </v-col>
                     </v-row>
                 </v-col>
+                <v-col v-else cols="12"  class="d-flex justify-content-center pt-0 pb-0">
+                    <UsuarioCriteriaSection
+                        ref="CriteriaSection"
+                        :options="options"
+                        :user="resource"
+                        :criterion_list="criterion_list"
+                    />
+                </v-col>
             </v-row>
         </template>
     </DefaultDialog>
 </template>
 
 <script>
+import UsuarioCriteriaSection from "../Usuario/UsuarioCriteriaSection";
 
 export default {
-    components: {  },
+    components: { UsuarioCriteriaSection },
     props: {
         options: {
             type: Object,
@@ -143,11 +161,11 @@ export default {
         return {
             isLoading: false,
             resourceDefault: {
-                id: null,
-                name: null,
-                type_checklist: null
+                criterion_list:{}
             },
-            resource: {},
+            resource: {
+                criterion_list:{}
+            },
             search: null,
             autocomplete_loading: false,
             file: null,
@@ -163,7 +181,9 @@ export default {
             arrayCriteriaSelected:[],
             select_all:false,
             modulesIds:[],
-            modulesSchools:[]
+            modulesSchools:[],
+            show_section_criteria : false,
+            criterion_list:[]
         };
     },
     computed: {
@@ -259,6 +279,10 @@ export default {
     methods: {
         closeModal() {
             let vue = this
+            if(vue.show_section_criteria){
+                vue.show_section_criteria = false;
+                return;
+            }
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
@@ -295,7 +319,23 @@ export default {
 
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
-
+                vue.criterion_list = _data.criteria;
+                let resource= {
+                    criterion_list:{}
+                }
+                console.log(resource,'resource');
+                for (const criterion of _data.criteria) {
+                    console.log(resource,'resource');
+                    let criterion_default_value = criterion.multiple ? [] : null;
+                    console.log(resource,'resource');
+                    resource.criterion_list[criterion.code] = criterion_default_value;
+                }
+                // _data.criteria.forEach(criterion => {
+                    
+                //     // Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
+                // })
+                vue.resource = resource;
+                console.log(resource,vue.resource,'vue.resource');
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
                 vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
                 vue.hideLoader();
@@ -423,6 +463,10 @@ export default {
                 vue.segment_by_document.segmentation_by_document.splice(index, 1);
             }
             vue.filter_result.push(user)
+        },
+        showSectionCriteria(){
+            let vue = this;
+            vue.show_section_criteria = true;
         }
     }
 }

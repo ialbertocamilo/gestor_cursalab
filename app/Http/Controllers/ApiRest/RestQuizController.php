@@ -130,10 +130,10 @@ class RestQuizController extends Controller
         $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
         $code_modality = $topic->course->modality->code;
         if(($code_modality == 'in-person' || $code_modality=='virtual') && !$topic->isAccessibleEvaluation()){
-            // return response()->json(['error' => true, 'data' => [
-            //     'is_accessible'=>false,
-            //     'message' => 'La evaluación no esta disponible.'
-            // ]], 200);
+            return response()->json(['error' => true, 'data' => [
+                'is_accessible'=>false,
+                'message' => 'La evaluación no esta disponible.'
+            ]], 200);
         }
         // dd($topic->course->modality->code);
         if ($topic->course->hasBeenValidated())
@@ -183,10 +183,10 @@ class RestQuizController extends Controller
         $status = 'started';
         if($code_modality != 'asynchronous'){
             $modality_in_person_properties = $topic->modality_in_person_properties;
-            $parse_started_at = Carbon::parse($modality_in_person_properties->evaluation->date_init);
-            $parse_finishes_at = Carbon::parse($modality_in_person_properties->evaluation->date_finish);
+            $parse_started_at = Carbon::parse($modality_in_person_properties?->evaluation->date_init);
+            $parse_finishes_at = Carbon::parse($modality_in_person_properties?->evaluation->date_finish);
             $diff_in_minutes = now()->diffInMinutes($parse_finishes_at);
-            $status = $modality_in_person_properties->evaluation->status;
+            $status = $modality_in_person_properties?->evaluation->status;
             $started_at = $parse_started_at->format('Y/m/d H:i:s');
             $finishes_at = $parse_finishes_at->format('Y/m/d H:i:s');
             // $diff = $finishes_at->diff($current_time);

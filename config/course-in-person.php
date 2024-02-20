@@ -28,6 +28,13 @@ return [
         ]
     ],
     'user' => [
+        [
+            'title' => 'Asistencia',
+            'code' => 'assistance',
+            'description' => 'Visualiza el estado de su asistencia.',
+            'show' => true,
+            'status' => ['name'=>'attended','code'=>'Asistió']
+        ],
         // [
         //     'title' => 'Material del curso',
         //     'code' => 'multimedias',
@@ -38,13 +45,15 @@ return [
             'title' => 'Evaluación',
             'code' => 'evaluation',
             'description' => 'Aquí podrás demostrar lo aprendido en este evento.',
-            'show' => true
+            'show' => true,
+            'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         [
             'title' => 'Encuesta',
             'code' => 'poll',
             'description' => 'Queremos saber tu opinión sobre este evento.',
-            'show' => true
+            'show' => true,
+            'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         [
             'title' => 'Certificado',
