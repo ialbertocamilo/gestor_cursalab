@@ -363,8 +363,8 @@ class CourseInPerson extends Model
                     ->first();
 
         $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
-        if(isset($topic->modality_in_person_properties->cohost_id )){
-            $rol = $user->id == $topic->modality_in_person_properties->cohost_id ? 'host' : 'user';
+        if(isset($topic->modality_in_person_properties->cohost_id ) && $user->id == $topic->modality_in_person_properties->cohost_id){
+            $rol = 'host';
         }
         $data = [];
         switch ($rol) {
