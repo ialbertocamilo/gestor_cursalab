@@ -86,7 +86,9 @@ class CourseInPerson extends Model
                         $q->where('active',1)->whereRelation('modality','code',$modality_code);
                     })
                     ->where(function($q) use($user,$assigned_courses){
-                        $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
+                        $q->whereIn('course_id',$assigned_courses)
+                        ->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id)
+                        ->orWhere(DB::raw("modality_in_person_properties->'$.cohost_id'"), '=', $user->id);
                     })
                     // ->whereIn('course_id',$assigned_courses)
                     ->whereNotNull('modality_in_person_properties')
@@ -224,7 +226,7 @@ class CourseInPerson extends Model
                                     'last_media_access' => $last_media_access,
                                     'last_media_duration' => $last_media_duration);
 
-        $is_host = $user->id == $topic->modality_in_person_properties->host_id;
+        $is_host = $user->id == $topic->modality_in_person_properties->host_id || $user->id == $topic->modality_in_person_properties?->cohost_id;
         $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
         if(!$avaiable_to_show_resources){
             $current_time = Carbon::now();
@@ -310,7 +312,7 @@ class CourseInPerson extends Model
         $user = auth()->user();
         $topic = Topic::select('id','modality_in_person_properties')->where('id',$topic_id)->first();
         $modality_in_person_properties = $topic->modality_in_person_properties;
-        $is_host = $user->id == $modality_in_person_properties->host_id;
+        $is_host = $user->id == $modality_in_person_properties->host_id || $user->id == $modality_in_person_properties?->cohost_id;
         // unset($modality_in_person_properties->evaluation);
         // $topic->modality_in_person_properties = $modality_in_person_properties;
         // $topic->save();
@@ -357,7 +359,7 @@ class CourseInPerson extends Model
                     ->where('id',$topic_id)
                     ->first();
 
-        $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
+        $rol = $user->id == $topic->modality_in_person_properties->host_id || $user->id == $topic->modality_in_person_properties?->cohost_id ? 'host' : 'user';
         $data = [];
         switch ($rol) {
             case 'user':
@@ -628,7 +630,9 @@ class CourseInPerson extends Model
             $q->where('active',1);
         })
         ->where(function($q) use($user,$assigned_courses){
-            $q->whereIn('course_id',$assigned_courses)->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id);
+            $q->whereIn('course_id',$assigned_courses)
+            ->orWhere(DB::raw("modality_in_person_properties->'$.host_id'"), '=', $user->id)
+            ->orWhere(DB::raw("modality_in_person_properties->'$.cohost_id'"), '=', $user->id);
         })
         ->whereNotNull('modality_in_person_properties')
         ->where('active',1)->where(DB::raw("modality_in_person_properties->'$.start_date'"), $operator, $date)->count();
