@@ -731,8 +731,8 @@ class CourseInPerson extends Model
                     'take-assistance',
                     'change_status_code',
                     [
-                        'code'=> $has_assistance->status->name,
-                        'name'=> $has_assistance->status->code,
+                        'code'=> $has_assistance->status->code,
+                        'name'=> $has_assistance->status->name,
                     ]
                 );
             }
