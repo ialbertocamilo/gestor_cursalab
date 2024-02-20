@@ -23,6 +23,9 @@ return [
     'announcements' => [
         'new-announcement' => 'Tienes un nuevo anuncio dentro de la plataforma.'
     ],
+    'meetings' => [
+        'new-meeting' => 'Se ha agendado una nuevo sesión'
+    ],
     'default' => [
         'from-push' => '{content}'
     ]

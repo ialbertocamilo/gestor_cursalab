@@ -24,6 +24,7 @@ class UserNotification extends Model
     public const NEW_ANNOUNCEMENT = 'new-announcement';
     public const NEW_VIDEO = 'new-video';
     public const FROM_PUSH = 'from-push';
+    public const NEW_MEETING = 'new-meeting';
 
     protected $collection = 'user_notifications';
 

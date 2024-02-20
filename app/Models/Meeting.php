@@ -305,7 +305,7 @@ class Meeting extends BaseModel
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
             $host = Usuario::find($data['host_id']);
-            
+
             if($type->code == 'benefits'){
                 $data['model_type'] = 'App\\Models\\BenefitProperty';
             }
@@ -367,6 +367,7 @@ class Meeting extends BaseModel
 
             DB::commit();
 
+            $meeting->notifyMeetingViaApp($attendants);
             $meeting->sendMeetingPushNotifications($attendants);
             $meeting->sendMeetingEmails();
 
@@ -382,6 +383,25 @@ class Meeting extends BaseModel
         return $meeting;
     }
 
+    protected function notifyMeetingViaApp($attendantsIds) {
+
+        // Get attendant's user ids
+
+        $attendants = Attendant::query()
+            ->whereIn('id', $attendantsIds['created'][0])
+            ->get();
+
+        $userIds = $attendants->pluck('usuario_id');
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            $userIds,
+            UserNotification::NEW_MEETING,
+            [],
+            'lista-reuniones'
+        );
+    }
+
     protected function addAttendantFromUser(Meeting $meeting,array $users ){
         $users_in_meeting = $meeting->attendants()->get();
         $user_type = Taxonomy::getFirstData('meeting', 'user','normal');
@@ -391,7 +411,7 @@ class Meeting extends BaseModel
             if(!$user_in_meeting){
                 $attendants[] = [
                     'usuario_id' => $user['id'],
-                    'type_id' => $user_type?->id, 
+                    'type_id' => $user_type?->id,
                     'id' => null
                 ];
             }
