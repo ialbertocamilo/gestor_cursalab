@@ -36,7 +36,7 @@ return [
             'code' => 'take-assistance',
             'description' => 'Visualiza el estado de su asistencia.',
             'show' => true,
-            'status' => ['name'=>'attended','code'=>'Asistió']
+            'status' => ['name'=>'Asistió','code'=>'attended']
         ],
         // [
         //     'title' => 'Material del curso',

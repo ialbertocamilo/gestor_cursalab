@@ -724,7 +724,10 @@ class CourseInPerson extends Model
         // }
         //Si es presencial mandar el estado de la asistencia
         if($topic->course->modality->code == 'in-person'){
-            $has_assistance = TopicAssistanceUser::select('id','status_id')->with('status:id,code,name')->where('user_id',$user->id)->where('topic_id',$topic->id)->first();
+            $has_assistance = TopicAssistanceUser::select('id','status_id')->with('status:id,code,name')
+                                ->where('user_id',$user->id)
+                                ->where('topic_id',$topic->id)
+                                ->first();
             if($has_assistance){
                 $menus = $this->modifyMenus(
                     $menus,
