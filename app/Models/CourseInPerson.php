@@ -702,7 +702,7 @@ class CourseInPerson extends Model
         if($last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'certificate','unset');
         }
-        //Obtener la última acción
+        //Obtener 
         $action_button = null;
         
         //Si tiene encuesta, verificar el estado
@@ -718,12 +718,11 @@ class CourseInPerson extends Model
                         'name'=> 'Realizado',
                     ]
                 );
-            }else{
-                $action_button = [
-                    'code' => 'poll',
-                    'name' => 'Realizar encuesta'
-                ];
             }
+            $action_button = [
+                'code' => 'poll',
+                'name' => 'Realizar encuesta'
+            ];
         }
         //Si tiene evaluación, verificar el estado
         $is_accessible_evaluation = $topic->isAccessibleEvaluation();
@@ -743,8 +742,7 @@ class CourseInPerson extends Model
                         );
             }
             if(
-                $is_accessible_evaluation && 
-                (!$summary || (in_array($summary?->status?->code,['desaprobado','por-iniciar']) && $summary->attempts < $attemps_limit) )
+                !$summary || (in_array($summary?->status?->code,['desaprobado','por-iniciar']) && $summary->attempts < $attemps_limit)
             ){
                 $action_button = [
                     'code' => 'evaluation',
@@ -752,12 +750,12 @@ class CourseInPerson extends Model
                 ];
             }
         }
-        if(is_null($action_button)){
-            $action_button = [
-                'code' => 'multimedias',
-                'name' => 'Consulta el material del curso'
-            ];
-        }
+        // if(is_null($action_button)){
+        //     $action_button = [
+        //         'code' => 'multimedias',
+        //         'name' => 'Consulta el material del curso'
+        //     ];
+        // }
         //Si es presencial mandar el estado de la asistencia
         if($topic->course->modality->code == 'in-person'){
             $has_assistance = TopicAssistanceUser::select('id','status_id')->with('status:id,code,name')->where('user_id',$user->id)->where('topic_id',$topic_id)->first();
