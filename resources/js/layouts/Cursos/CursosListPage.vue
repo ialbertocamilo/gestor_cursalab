@@ -261,7 +261,7 @@
                 model_type="App\Models\Course"
                 width="55vw"
                 @onConfirm="modalDirectSegmentationOptions.open=false"
-                @onCancel="modalDirectSegmentationOptions.open = false"
+                @onCancel="closeFormModal(modalDirectSegmentationOptions)"
                 :modalities="selects.modalities"
             />
         </v-card>

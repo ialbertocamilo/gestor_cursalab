@@ -728,7 +728,7 @@ class CourseInPerson extends Model
             if($has_assistance){
                 $menus = $this->modifyMenus(
                     $menus,
-                    'assistance',
+                    'take-assistance',
                     'change_status_code',
                     [
                         'code'=> $has_assistance->status->code,
@@ -765,7 +765,7 @@ class CourseInPerson extends Model
             if($meeting){
                 $zoom = MeetingAppResource::collection([$meeting]);
             }
-            $menus = $this->modifyMenus($menus,'assistance','unset');
+            $menus = $this->modifyMenus($menus,'take-assistance','unset');
         }
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');

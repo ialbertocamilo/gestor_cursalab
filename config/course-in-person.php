@@ -33,7 +33,7 @@ return [
     'user' => [
         [
             'title' => 'Asistencia',
-            'code' => 'assistance',
+            'code' => 'take-assistance',
             'description' => 'Visualiza el estado de su asistencia.',
             'show' => true,
             'status' => ['name'=>'attended','code'=>'Asistió']

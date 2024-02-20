@@ -364,7 +364,6 @@ export default {
                 let resource= {
                     criterion_list:{}
                 }
-                console.log(resource,'resource');
                 for (const criterion of _data.criteria) {
                     console.log(resource,'resource');
                     let criterion_default_value = criterion.multiple ? [] : null;
@@ -376,11 +375,12 @@ export default {
                 //     // Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
                 // })
                 vue.resource.criterion_list = resource.criterion_list;
-                console.log(resource,vue.resource,'vue.resource');
+                console.log(vue.segments, _data.segments);
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
+                console.log(vue.segments, _data.segments);
                 vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
+                
                 vue.hideLoader();
-                console.log(vue.segment_by_document);
                 // if (vue.segments.length === 0) this.addSegmentation();
                 // if (vue.segment_by_document === undefined) {
                 //     vue.segment_by_document = {
