@@ -391,7 +391,7 @@ class Meeting extends BaseModel
             ->whereIn('id', $attendantsIds['created'][0])
             ->get();
 
-        $userIds = $attendants->pluck('usuario_id');
+        $userIds = $attendants->pluck('usuario_id')->toArray();
 
         UserNotification::createNotifications(
             get_current_workspace()->id,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserNotification;
 use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
@@ -272,7 +273,7 @@ class UsuarioController extends Controller
             $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
         }
         $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
-        
+
         return $compactResponse ? $response : $this->success($response);
     }
 
@@ -897,6 +898,13 @@ class UsuarioController extends Controller
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $curso->name ]
+            );
+
         } else {
 
             $topic = Posteo::where('id', $topicId)->first();
@@ -904,6 +912,13 @@ class UsuarioController extends Controller
                 $topicId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
         }
 
         return response()->json([

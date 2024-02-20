@@ -26,8 +26,11 @@ return [
     'meetings' => [
         'new-meeting' => 'Se ha agendado una nuevo sesión'
     ],
+    'attemtps' => [
+        'course-attempts-reset' => 'Se reiniciaron los intentos para el curso <b>{courseName}</b>',
+        'topic-attempts-reset' => 'Se reiniciaron los intentos para el tema <b>{topicName}</b>'
+    ],
     'default' => [
         'from-push' => '{content}'
     ]
-
 ];
