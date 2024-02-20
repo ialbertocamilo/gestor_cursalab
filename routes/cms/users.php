@@ -24,4 +24,6 @@ Route::controller(UserController::class)->group(function () {
     
     Route::put('/{user}/status', 'status')->name('users.status');
     Route::delete('/{user}/destroy', 'destroy')->name('users.destroy');
+
+    Route::post('/list-users-by-criteria', 'listUsersByCriteria');
 });

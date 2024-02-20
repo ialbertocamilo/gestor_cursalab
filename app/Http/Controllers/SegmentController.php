@@ -96,7 +96,6 @@ class SegmentController extends Controller
     {
         // return ($request->all());
         $data = $request->all();
-       
         $response = Segment::storeRequestData($request);
         if($data['model_type'] == 'App\\Models\\Course'){
             $course = Course::select('id','modality_id')->where('id',$data['model_id'])->with('modality:id,code')->first();

@@ -40,6 +40,7 @@ class TopicInPersonAppResource extends JsonResource
         $session_data = [
             'key' => $this->modality_in_person_properties->start_date,
             'image' => get_media_url($this->course->imagen,'s3'),
+            'course_name' => $this->course->name,
             'name' => $this->name,
             'session_code'=> $modality_code,
             'description_code' => 'Cursos de la empresa realizadas por un expositor.',

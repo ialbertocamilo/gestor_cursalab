@@ -144,4 +144,10 @@ class UserController extends Controller
         }
         return $this->success(['courses_id' => $courses_id]);
     }
+
+    public function listUsersByCriteria(Request $request){
+        $data = $request->all();
+        $users = User::listUsersByCriteria($data);
+        return $this->success(['users' => $users]);
+    }
 }

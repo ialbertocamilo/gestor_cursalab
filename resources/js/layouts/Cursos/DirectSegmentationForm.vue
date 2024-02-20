@@ -9,7 +9,7 @@
                 </v-col>
                 <v-col cols="12" v-if="!show_section_criteria">
                     <DefaultButton 
-                        style="width: 100% !important;"
+                        :min_content="false"
                         label="Deseo filtrar por criterios"
                         :outlined="true"
                         @click="showSectionCriteria()"
@@ -293,7 +293,45 @@ export default {
         }
         ,
         async confirmModal() {
+            let vue = this;
+            if(vue.show_section_criteria){
+                vue.showLoader();
+                if(!vue.resource.criterion_list.module){
+                    vue.showAlert(`Es necesario seleccionar algún valor para el módulo.`,'warning');
+                }
+                await axios.post('/users/list-users-by-criteria',{
+                    criterion_list: vue.resource.criterion_list
+                }).then(({data})=>{
+                    vue.filter_result = data.data.users;
+                    vue.hideLoader();
+                    vue.showAlert(`Se han encontrado ${vue.filter_result.length} usuarios.`);
+                    vue.show_section_criteria = false;
+                }).catch(()=>{
+                    vue.hideLoader();
 
+                })
+                vue.hideLoader();
+                return;
+            }
+            let base = `${vue.options.base_endpoint}`;
+            let url = `${base}/store`;
+            let formData = JSON.stringify({
+                    model_type: vue.model_type,
+                    model_id: vue.resource.id,
+                    code: 'segmentation-by-document',
+                    segments: vue.segments,
+                    segment_by_document: vue.segment_by_document
+                });
+                vue.$http.post(url, formData).then(({data}) => {
+                    vue.$emit("onConfirm");
+                    vue.closeModal();
+                    vue.showAlert(data.data.msg);
+                    vue.hideLoader();
+                })
+                .catch(error => {
+                    if (error && error.errors) vue.errors = error.errors;
+                    vue.hideLoader();
+                });
             vue.$emit('onConfirm')
         }
         ,
@@ -334,7 +372,7 @@ export default {
                     
                 //     // Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
                 // })
-                vue.resource = resource;
+                vue.resource.criterion_list = resource.criterion_list;
                 console.log(resource,vue.resource,'vue.resource');
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
                 vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
@@ -439,6 +477,7 @@ export default {
 
             const already_added = vue.segment_by_document.segmentation_by_document.filter(el => el.document == user.document).length > 0;
             if (!already_added) {
+                vue.segment_by_document.criteria_selected.push(user);
                 vue.segment_by_document.segmentation_by_document.push(user)
                 vue.addOrRemoveFromFilterResult(user, 'remove');
             }
