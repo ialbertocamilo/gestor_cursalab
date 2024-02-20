@@ -515,7 +515,7 @@ export default {
             },
             modalDirectSegmentationOptions:{
                 open:false,
-                ref: 'CourseTypeModal',
+                ref: 'CourseDirectSegmentation',
                 open: false,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
