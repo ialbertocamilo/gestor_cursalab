@@ -260,7 +260,7 @@
                 :options="modalDirectSegmentationOptions"
                 model_type="App\Models\Course"
                 width="55vw"
-                @onConfirm="modalDirectSegmentationOptions.open=true"
+                @onConfirm="modalDirectSegmentationOptions.open=false"
                 @onCancel="modalDirectSegmentationOptions.open = false"
                 :modalities="selects.modalities"
             />
@@ -807,6 +807,9 @@ export default {
         },
         openSegmentationModal(resource){
             let vue = this;
+            if(!resource){
+                return;
+            }
             if(resource.active_topics_count == 0 && resource.modality_code=='virtual'){
                 vue.showAlert('Es necesario crear temas activos para poder segmentar el curso.','warning');
                 return;
