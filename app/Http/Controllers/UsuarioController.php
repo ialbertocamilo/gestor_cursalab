@@ -169,14 +169,14 @@ class UsuarioController extends Controller
 
         $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
-        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
-        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
-        $usersWithEmptyCriteria = count($users);
+//        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
+//        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
+//        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
             'criteria_template' => $criteria_template,
-            'users_with_empty_criteria' => $usersWithEmptyCriteria
+            'users_with_empty_criteria' => 0//$usersWithEmptyCriteria
         ]);
     }
 
@@ -272,7 +272,7 @@ class UsuarioController extends Controller
             $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
         }
         $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
-        
+
         return $compactResponse ? $response : $this->success($response);
     }
 
