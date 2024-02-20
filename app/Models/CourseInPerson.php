@@ -679,6 +679,12 @@ class CourseInPerson extends Model
                                 'name'=> $evaluation_status_name,
                             ]
                         );
+                if($summary?->attempts == $attemps_limit || !$topic->isAccessibleEvaluation()){
+                    $menus = $this->modifyMenus(
+                        $menus,
+                        'evaluation'
+                    );
+                }
             }
             if(
                 !$summary || (in_array($summary?->status?->code,['desaprobado','por-iniciar']) && $summary->attempts < $attemps_limit)
