@@ -425,6 +425,13 @@ class UsuarioController extends Controller
 
             SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
+
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
 
@@ -448,6 +455,13 @@ class UsuarioController extends Controller
             $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
 
             $course->increment('restarts', 1, ['restarter_id' => $admin->id]);
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $course->name ]
+            );
 
             return $this->success(['msg' => 'Reinicio por curso exitoso']);
         }
