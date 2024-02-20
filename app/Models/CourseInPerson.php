@@ -705,28 +705,10 @@ class CourseInPerson extends Model
         //Obtener 
         $action_button = null;
         
-        //Si tiene encuesta, verificar el estado
-        if($topic->isAccessiblePoll()){
-            $hasPoll = PollQuestionAnswer::select('id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
-            if($hasPoll){
-                $menus = $this->modifyMenus(
-                    $menus,
-                    'poll',
-                    'change_status_code',
-                    [
-                        'code'=> 'realizado',
-                        'name'=> 'Realizado',
-                    ]
-                );
-            }
-            $action_button = [
-                'code' => 'poll',
-                'name' => 'Realizar encuesta'
-            ];
-        }
+        
         //Si tiene evaluación, verificar el estado
-        $is_accessible_evaluation = $topic->isAccessibleEvaluation();
-        if($topic->type_evaluation_id && $is_accessible_evaluation){
+        // $is_accessible_evaluation = $topic->isAccessibleEvaluation();
+        if($topic->type_evaluation_id){
             $summary = SummaryTopic::with('status:id,name,code')->select('attempts','passed','status_id')->where('user_id',$user->id)->where('topic_id',$topic->id)->first();
             $attemps_limit = $topic->course->getAttemptsLimit();
             if($summary){
@@ -749,6 +731,27 @@ class CourseInPerson extends Model
                     'name' => 'Realizar evaluación'
                 ];
             }
+        }
+        //Si tiene encuesta, verificar el estado
+        if($topic->isAccessiblePoll()){
+            $hasPoll = PollQuestionAnswer::select('id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
+            if($hasPoll){
+                $menus = $this->modifyMenus(
+                    $menus,
+                    'poll',
+                    'change_status_code',
+                    [
+                        'code'=> 'realizado',
+                        'name'=> 'Realizado',
+                    ]
+                );
+            }
+        }
+        if(is_null($action_button) && $topic->course->polls->first()){
+            $action_button = [
+                'code' => 'poll',
+                'name' => 'Realizar encuesta'
+            ];
         }
         // if(is_null($action_button)){
         //     $action_button = [
