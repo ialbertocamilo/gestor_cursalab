@@ -65,7 +65,7 @@ if (isset($fullScreen)) {
         <div class="d-flex align-items-stretch bg-red text-center">
 
             <div class="col text-center">
-                ¡Tienes un pago vencido! En {{ $customer->getDaysToCuttoff() }} días tu plataforma se suspenderá. Comunícate con nuestro equipo para regularizar tus pagos.
+                ¡Tienes un pago vencido! Fecha de corte programado {{ $customer->platform_cutoff_date?->diffForHumans() ?? '--' }}. Comunícate con nuestro equipo para regularizar tus pagos.
             </div>
 
         </div>
