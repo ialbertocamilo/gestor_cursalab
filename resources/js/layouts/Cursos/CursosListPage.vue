@@ -520,7 +520,6 @@ export default {
             modalDirectSegmentationOptions:{
                 open:false,
                 ref: 'CourseTypeModal',
-                open: false,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'course',
@@ -801,6 +800,7 @@ export default {
         },
         openCourseModal(modality){
             let vue = this;
+            console.log(modality);
             vue.closeFormModal(vue.modalCourseModality);
             vue.modalCourseOptions.modality = modality;
             vue.openFormModal(vue.modalCourseOptions, null, null,'Crear '+ modality.name.toLowerCase());

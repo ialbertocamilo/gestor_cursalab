@@ -189,6 +189,7 @@ export default {
         },
         async loadData(resource) {
             let vue = this
+            console.log('modalites',vue.modalities);
             vue.modality_asynchronus = vue.modalities.find(m => m.code == 'asynchronous');
             vue.modality_asynchronus.description = `
                 <ul>

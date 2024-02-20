@@ -340,6 +340,9 @@ export default {
         },
         async loadData(resource) {
             let vue = this;
+            if(!resource){
+                return;
+            }
             vue.errors = [];
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)

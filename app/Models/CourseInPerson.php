@@ -226,7 +226,10 @@ class CourseInPerson extends Model
                                     'last_media_access' => $last_media_access,
                                     'last_media_duration' => $last_media_duration);
 
-        $is_host = $user->id == $topic->modality_in_person_properties->host_id || $user->id == $topic->modality_in_person_properties?->cohost_id;
+        $is_host = $user->id == $topic->modality_in_person_properties->host_id;
+        if(isset($topic->modality_in_person_properties?->cohost_id)){
+            $is_host = $user->id == $topic->modality_in_person_properties?->cohost_id;
+        }
         $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
         if(!$avaiable_to_show_resources){
             $current_time = Carbon::now();
@@ -359,7 +362,10 @@ class CourseInPerson extends Model
                     ->where('id',$topic_id)
                     ->first();
 
-        $rol = $user->id == $topic->modality_in_person_properties->host_id || $user->id == $topic->modality_in_person_properties?->cohost_id ? 'host' : 'user';
+        $rol = $user->id == $topic->modality_in_person_properties->host_id ? 'host' : 'user';
+        if(isset($topic->modality_in_person_properties->cohost_id )){
+            $rol = $user->id == $topic->modality_in_person_properties->cohost_id ? 'host' : 'user';
+        }
         $data = [];
         switch ($rol) {
             case 'user':
