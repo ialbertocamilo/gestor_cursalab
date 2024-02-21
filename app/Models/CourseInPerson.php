@@ -875,6 +875,14 @@ class CourseInPerson extends Model
                         'code' => 'take-assistance',
                         'name' => 'Tomar asistencia'
                     ];
+                    $menus = $this->modifyMenus(
+                        $menus,
+                        'evaluation'
+                    );
+                    $menus = $this->modifyMenus(
+                        $menus,
+                        'poll'
+                    );
                 }
             }
 
