@@ -1303,8 +1303,8 @@ class Topic extends BaseModel
                    return true;
                 }
             }
-            dd($topic);
             $account = Account::getOneAvailableForMeeting($type, compact('starts_at','finishes_at'),$meeting);
+            dd($account);
             $is_avaiable = boolval($account);
         }
         return $is_avaiable;
