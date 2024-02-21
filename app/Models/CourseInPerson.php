@@ -651,24 +651,30 @@ class CourseInPerson extends Model
                         ->first();
         //Si es virtual añade el card de zoom
         $zoom = null;
+        $zoom_status = ['name'=>'Agendado','code'=>'scheduled'];
+        $meeting = null;
         $is_on_time = false;
         if($topic->course->modality->code == 'virtual'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status')->where('model_id',$topic->id)->first();
             if($meeting){
+                $is_on_time = $meeting->isOnTime();
+                $zoom_status = ['name'=>$meeting->status->name,'code'=>$meeting->status->code];
                 $zoom = MeetingAppResource::collection([$meeting]);
             }
             $menus = $this->modifyMenus($menus,'assistance','unset');
-        }
-        if($topic->course->modality->code == 'virtual'){
-            // $is_on_time = ($zoom) ? $zoom['date']['is_ontime']  : false;
+            //Si es virtual añade el card de zoom
+            if(in_array($zoom_status['code'],['scheduled','reserved']) && $meeting){
+                $zoom_status['name'] = $zoom_status['name'].': '.$meeting->starts_at;
+            }
             array_unshift($menus,  [
-                'title' => 'Iniciar reunión zoom',
+                'title' => 'Iniciar sesión zoom',
                 'code' => 'zoom',
-                'description' => 'Ingresa a la reunión zoom asignada a este tema.',
+                'description' => 'Ingresa a la sesión zoom asignada a este tema.',
                 'show' => $is_on_time,
-                // 'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+                'status' => $zoom_status
             ]);
         }
+
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         $unset_poll = false;
         if(!$topic->course->polls->first() || $last_session->id !== $topic->id){
@@ -807,21 +813,29 @@ class CourseInPerson extends Model
                         ->first();
         $zoom = null;
         $is_on_time = false;
-        if($topic->course->modality->code == 'in-person'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+        $zoom_status = ['name'=>'Agendado','code'=>'scheduled'];
+        $meeting = null;
+        $unset_take_assistance = false;
+        if($topic->course->modality->code == 'virtual'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status')->where('model_id',4119)->first();
             if($meeting){
+                $is_on_time = $meeting->isOnTime();
+                $zoom_status = ['name'=>$meeting->status->name,'code'=>$meeting->status->code];
                 $zoom = MeetingAppResource::collection([$meeting]);
             }
-        }
-        //Si es virtual añade el card de zoom
-        if($topic->course->modality->code == 'virtual'){
-            // $is_on_time = ($zoom) ? $zoom['date']['is_ontime'] : false;
+            //Si es virtual se quita el card de tomar asistencia, la asistencia la toma zoom
+            $menus = $this->modifyMenus($menus,'take-assistance','unset');
+            $unset_take_assistance = true;
+            //Si es virtual añade el card de zoom
+            if(in_array($zoom_status['code'],['scheduled','reserved']) && $meeting){
+                $zoom_status['name'] = $zoom_status['name'].': '.$meeting->starts_at;
+            }
             array_unshift($menus,  [
                 'title' => 'Iniciar sesión zoom',
                 'code' => 'zoom',
                 'description' => 'Ingresa a la sesión zoom asignada a este tema.',
                 'show' => $is_on_time,
-                // 'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+                'status' => $zoom_status
             ]);
         }
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
@@ -835,12 +849,6 @@ class CourseInPerson extends Model
         if(!$topic->type_evaluation_id){
             $menus = $this->modifyMenus($menus,'evaluation','unset');
             $unset_evaluation = true;
-        }
-        //Si es un curso virtual no debe ver el card de asistencia
-        $unset_take_assistance = false;
-        if($topic->course->modality->code != 'in-person'){
-            $menus = $this->modifyMenus($menus,'take-assistance','unset');
-            $unset_take_assistance = true;
         }
         
         /*************************************************************VERIFICAR LOS ESTADOS*****************************/
