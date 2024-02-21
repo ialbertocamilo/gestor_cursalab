@@ -808,7 +808,7 @@ class CourseInPerson extends Model
                 );
             }else{
                 $action_button = [
-                    'code' => 'take-assitance',
+                    'code' => 'take-assistance',
                     'name' => 'Tomar asistencia'
                 ];
             }
