@@ -666,7 +666,7 @@ class CourseInPerson extends Model
                 'code' => 'zoom',
                 'description' => 'Ingresa a la reunión zoom asignada a este tema.',
                 'show' => $is_on_time,
-                'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+                // 'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
             ]);
         }
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
@@ -821,7 +821,7 @@ class CourseInPerson extends Model
                 'code' => 'zoom',
                 'description' => 'Ingresa a la sesión zoom asignada a este tema.',
                 'show' => $is_on_time,
-                'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+                // 'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
             ]);
         }
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
