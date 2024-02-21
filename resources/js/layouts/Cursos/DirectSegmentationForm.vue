@@ -8,6 +8,27 @@
                     <!-- <span class="text_default lbl_tit fw-bold"><i class="fas fa-exclamation-triangle" style="color: #FF9800;"></i> Una vez confirmados, no se podrán retirar del beneficio.</span> -->
                 </v-col>
                 <v-col cols="12" v-if="!show_section_criteria">
+                    <v-sheet
+                        class="mx-auto"
+                        max-width="100%"
+                    >
+                        <v-slide-group
+                            multiple
+                            show-arrows
+                        >
+                        <v-slide-item
+                            v-for="(criterion,index) in criterion_values_selected"
+                            :key="index"
+                        >
+                            <v-chip
+                                class="ma-2"
+                                color="primary"
+                            >
+                                {{ criterion.value_text }}
+                            </v-chip>
+                        </v-slide-item>
+                        </v-slide-group>
+                    </v-sheet>
                     <DefaultButton 
                         :min_content="false"
                         label="Deseo filtrar por criterios"
@@ -183,38 +204,9 @@ export default {
             modulesIds:[],
             modulesSchools:[],
             show_section_criteria : false,
-            criterion_list:[]
+            criterion_list:[],
+            criterion_values_selected:[]
         };
-    },
-    computed: {
-        // list_filter_segmentados() {
-        //     const vue = this;
-
-        //     if (vue.search === null) {
-        //         return vue.$props.segmentados;
-        //     }
-        //     return vue.$props.segmentados.filter((user) => {
-        //         if(user.fullname != '' && user.fullname != null && user.document != '' && user.document != null)
-        //         return (
-        //             user.fullname.toLowerCase().includes(vue.search.toLowerCase()) ||
-        //             user.document.toLowerCase().includes(vue.search.toLowerCase())
-        //         );
-        //     });
-        // },
-        // list_filter_users() {
-        //     const vue = this;
-
-        //     // if (vue.search === null) {
-        //     // }
-        //     return vue.segment_by_document.segmentation_by_document;
-        //     return vue.segment_by_document.segmentation_by_document.filter((user) => {
-        //         if(user.fullname != '' && user.fullname != null && user.document != '' && user.document != null)
-        //         return (
-        //             user.fullname.toLowerCase().includes(vue.search.toLowerCase()) ||
-        //             user.document.toLowerCase().includes(vue.search.toLowerCase())
-        //         );
-        //     });
-        // }
     },
     watch: {
         segmentados: {
@@ -283,9 +275,10 @@ export default {
                 vue.show_section_criteria = false;
                 return;
             }
-            vue.resetSelects()
-            vue.resetValidation()
-            vue.$emit('onCancel')
+            console.log('onCancel');
+            vue.resetSelects();
+            vue.resetValidation();
+            vue.$emit('onCancel');
         }
         ,
         resetValidation() {
@@ -298,11 +291,14 @@ export default {
                 vue.showLoader();
                 if(!vue.resource.criterion_list.module){
                     vue.showAlert(`Es necesario seleccionar algún valor para el módulo.`,'warning');
+                    return;
                 }
                 await axios.post('/users/list-users-by-criteria',{
                     criterion_list: vue.resource.criterion_list
                 }).then(({data})=>{
                     vue.filter_result = data.data.users;
+                    vue.criterion_values_selected = Object.values(data.data.criterion_values_selected);
+                    console.log(vue.criterion_values_selected);
                     vue.hideLoader();
                     vue.showAlert(`Se han encontrado ${vue.filter_result.length} usuarios.`);
                     vue.show_section_criteria = false;
@@ -378,7 +374,11 @@ export default {
                 console.log(vue.segments, _data.segments);
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
                 console.log(vue.segments, _data.segments);
-                vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
+                console.log(vue.segment_by_document, 'segment_by_document');
+                if(_data.segments.length >0){
+                    vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
+                }
+                console.log(vue.segment_by_document,'segment_by_document');
                 
                 vue.hideLoader();
                 // if (vue.segments.length === 0) this.addSegmentation();

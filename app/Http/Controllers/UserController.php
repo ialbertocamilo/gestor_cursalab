@@ -146,8 +146,7 @@ class UserController extends Controller
     }
 
     public function listUsersByCriteria(Request $request){
-        $data = $request->all();
-        $users = User::listUsersByCriteria($data);
-        return $this->success(['users' => $users]);
+        $data = User::listUsersByCriteria($request->all());
+        return $this->success($data);
     }
 }

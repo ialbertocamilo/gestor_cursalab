@@ -872,31 +872,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         //
         $query = User::select('id','name','lastname','surname',DB::raw('CONCAT_WS(" ",name,lastname,surname) as fullname'),'document')->where('active', 1);
         $idx = 1;
+        $criterion_values = [];
         foreach ($criterion_list as $criterion => $value) {
             if(!$value){
                 continue;
             }
-            // $criterion = Criterion::where('code',$criterion)->first();
-            // if ($criterion->field_type->code == 'date') {
-            //     $select_date = CriterionValue::select('id')->where(function ($q) use ($values) {
-            //         foreach ($values as $value) {
-            //             $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
-            //             $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
-            //             $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
-            //         }
-            //     })->where('criterion_id', $idx)->get();
-            //     $ids = $select_date->pluck('id');
-            // } else {
-            //     $ids = $values->pluck('criterion_value_id');
-            // }
             $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($value, $idx) {
                 $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                     ->where("cvu{$idx}" . '.criterion_value_id', $value);
             });
             $idx++;
+            $criterion_values[] = $value;
         }
+        $criterion_values_selected = CriterionValue::select('value_text')->whereIn('id',$criterion_values)->get();
         $users = $query->get();
-        return $users;
+        return compact('criterion_values_selected','users');
     }
     public function getSegmentedByModelType(
         $model,
