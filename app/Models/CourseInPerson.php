@@ -664,7 +664,7 @@ class CourseInPerson extends Model
             $menus = $this->modifyMenus($menus,'assistance','unset');
             //Si es virtual añade el card de zoom
             if(in_array($zoom_status['code'],['scheduled','reserved']) && $meeting){
-                $zoom_status['name'] = $zoom_status['name'].': '.$meeting->starts_at;
+                $zoom_status['name'] = $zoom_status['name'].': '.Carbon::parse($meeting->starts_at)->format('Y-m-d H:i');
             }
             array_unshift($menus,  [
                 'title' => 'Iniciar sesión zoom',
