@@ -650,12 +650,16 @@ class CourseInPerson extends Model
                         ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
                         ->first();
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        $unset_poll = false;
         if(!$topic->course->polls->first() || $last_session->id !== $topic->id){
             $menus = $this->modifyMenus($menus,'poll','unset');
+            $unset_poll = true;
         }
         //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        $unset_evaluation = false;
         if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'evaluation','unset');
+            $unset_evaluation = true;
         }
          //Si no es el último tema, no se muestra el certificado
         if($last_session->id != $topic->id){
@@ -688,6 +692,7 @@ class CourseInPerson extends Model
             }
             if(
                 !$summary || (in_array($summary?->status?->code,['desaprobado','por-iniciar']) && $summary->attempts < $attemps_limit)
+                && !$unset_evaluation
             ){
                 $action_button = [
                     'code' => 'evaluation',
@@ -710,7 +715,7 @@ class CourseInPerson extends Model
                 );
             }
         }
-        if(is_null($action_button) && $topic->course->polls->first()){
+        if(is_null($action_button) && $topic->course->polls->first() && !$unset_poll){
             $action_button = [
                 'code' => 'poll',
                 'name' => 'Realizar encuesta'
@@ -813,10 +818,12 @@ class CourseInPerson extends Model
                     ]
                 );
             }else{
-                $action_button = [
-                    'code' => 'take-assistance',
-                    'name' => 'Tomar asistencia'
-                ];
+                if(!$unset_take_assistance){
+                    $action_button = [
+                        'code' => 'take-assistance',
+                        'name' => 'Tomar asistencia'
+                    ];
+                }
             }
 
         }
