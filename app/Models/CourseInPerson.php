@@ -817,7 +817,7 @@ class CourseInPerson extends Model
         $meeting = null;
         $unset_take_assistance = false;
         if($topic->course->modality->code == 'virtual'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status')->where('model_id',4119)->first();
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status')->where('model_id',$topic->id)->first();
             if($meeting){
                 $is_on_time = $meeting->isOnTime();
                 $zoom_status = ['name'=>$meeting->status->name,'code'=>$meeting->status->code];
