@@ -1283,9 +1283,10 @@ class Topic extends BaseModel
         }
         return $is_accessible;
     }
-    protected function validateAvaiableAccount($course,$data,$topic=null){
+    protected function validateAvaiableAccount($course,$data,$topic=null,$validate_before_create=false){
         $is_avaiable = true;
         if($course->modality->code == 'virtual'){
+            
             $type = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first();
             $modality_in_person_properties = $data['modality_in_person_properties'];
             $start_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['start_time']);
@@ -1293,6 +1294,9 @@ class Topic extends BaseModel
             $starts_at = $start_datetime->format('Y-m-d H:i:s');
             $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
             $meeting = null;
+            // if($validate_before_create){
+            //     Topic::where('starts_at', '<=', $dates['finishes_at'])->where('finishes_at', '>=', $dates['starts_at']);
+            // }
             if($topic){
                 $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
                 if($meeting and !$meeting->datesHaveChanged(compact('starts_at','finishes_at'))){

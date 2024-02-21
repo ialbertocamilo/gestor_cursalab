@@ -649,6 +649,26 @@ class CourseInPerson extends Model
                         ->where('active',ACTIVE)
                         ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
                         ->first();
+        //Si es virtual añade el card de zoom
+        $zoom = null;
+        $is_on_time = false;
+        if($topic->course->modality->code == 'virtual'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            if($meeting){
+                $zoom = MeetingAppResource::collection([$meeting]);
+            }
+            $menus = $this->modifyMenus($menus,'assistance','unset');
+        }
+        if($topic->course->modality->code == 'virtual'){
+            $is_on_time = ($zoom) ? $zoom->date->is_ontime : false;
+            array_unshift($menus,  [
+                'title' => 'Iniciar reunión zoom',
+                'code' => 'zoom',
+                'description' => 'Ingresa a la reunión zoom asignada a este tema.',
+                'show' => $is_on_time,
+                'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+            ]);
+        }
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         $unset_poll = false;
         if(!$topic->course->polls->first() || $last_session->id !== $topic->id){
@@ -721,6 +741,12 @@ class CourseInPerson extends Model
                 'name' => 'Realizar encuesta'
             ];
         }
+        if(is_null($action_button) && $zoom && $is_on_time){
+            $action_button = [
+                'code' => 'zoom',
+                'name' => 'Iniciar reunión zoom'
+            ];
+        }
         // if(is_null($action_button)){
         //     $action_button = [
         //         'code' => 'multimedias',
@@ -767,24 +793,37 @@ class CourseInPerson extends Model
             }
             $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
         }
-        $zoom = null;
-        if($topic->course->modality->code == 'virtual'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
-            if($meeting){
-                $zoom = MeetingAppResource::collection([$meeting]);
-            }
-            $menus = $this->modifyMenus($menus,'assistance','unset');
-        }
+        
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
     }
 
     private function listHostMenu($topic,$user){
         $menus = config('course-in-person.host');
+        
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
                         ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
                         ->first();
+        $zoom = null;
+        $is_on_time = false;
+        if($topic->course->modality->code == 'in-person'){
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+            if($meeting){
+                $zoom = MeetingAppResource::collection([$meeting]);
+            }
+        }
+        //Si es virtual añade el card de zoom
+        if($topic->course->modality->code == 'virtual'){
+            $is_on_time = ($zoom) ? $zoom->date->is_ontime : false;
+            array_unshift($menus,  [
+                'title' => 'Iniciar sesión zoom',
+                'code' => 'zoom',
+                'description' => 'Ingresa a la sesión zoom asignada a este tema.',
+                'show' => $is_on_time,
+                'status' => ($zoom) ? ['name' => $zoom?->status?->name, 'code' => $zoom?->status?->code] : ['name'=>'Pendiente','code'=>'pending']
+            ]);
+        }
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         $unset_poll = false;
         if(!$topic->course->polls->first() || $last_session->id != $topic->id){
@@ -803,6 +842,7 @@ class CourseInPerson extends Model
             $menus = $this->modifyMenus($menus,'take-assistance','unset');
             $unset_take_assistance = true;
         }
+        
         /*************************************************************VERIFICAR LOS ESTADOS*****************************/
         $action_button = null;
         if($topic->course->modality->code == 'in-person'){
@@ -870,16 +910,16 @@ class CourseInPerson extends Model
                 ];
             }
         }
+        if(is_null($action_button) && $zoom && $is_on_time){
+            $action_button = [
+                'code' => 'zoom',
+                'name' => 'Iniciar reunión zoom'
+            ];
+        }
         /*-------------------------------------------------------------------FINALIZAR CAMBIAR ESTADO----------------------------------------------- */
         $show_modal_signature_registro_capacitación = false;
         $required_signature = false;
-        $zoom = null;
-        if($topic->course->modality->code != 'in-person'){
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
-            if($meeting){
-                $zoom = MeetingAppResource::collection([$meeting]);
-            }
-        }
+        
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
     }
