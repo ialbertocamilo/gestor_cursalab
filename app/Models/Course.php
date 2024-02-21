@@ -408,27 +408,25 @@ class Course extends BaseModel
             $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
             $duration = $start_datetime->diffInMinutes($finish_datetime);
             $model_id = $topic->id;
-            $meeting = Meeting::where('model_type','App\\Models\\Topic')
-            ->whereHas('status',function($q){
-                $q->whereIn('code',['reserved','scheduled','in-progress']);
-            })->where('model_id',$model_id)->first();
-            if($meeting){
-                $meeting_data = [
-                    "name" => $topic->name,
-                    "starts_at" => $starts_at,
-                    "finishes_at" =>$finishes_at,
-                    "host_id" => $host_id,
-                    "type_id" => $type_meeting_id,
-                    "duration" => $duration,
-                    "embed" => false,
-                    "attendants" => $attendants,
-                    "description" => null,
-                    "model_type" => 'App\\Models\\Topic',
-                    "model_id" => $model_id,
-                ];
-                $_meeting = $meeting ?? new Meeting();
-                $_meeting->storeRequest($meeting_data,$meeting);
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status:id,name,code')->where('model_id',$model_id)->first();
+            if(in_array($meeting?->status?->code,['finished','cancelled','overdue'])){
+                continue;
             }
+            $meeting_data = [
+                "name" => $topic->name,
+                "starts_at" => $starts_at,
+                "finishes_at" =>$finishes_at,
+                "host_id" => $host_id,
+                "type_id" => $type_meeting_id,
+                "duration" => $duration,
+                "embed" => false,
+                "attendants" => $attendants,
+                "description" => null,
+                "model_type" => 'App\\Models\\Topic',
+                "model_id" => $model_id,
+            ];
+            $_meeting = $meeting ?? new Meeting();
+            $_meeting->storeRequest($meeting_data,$meeting);
         }
     }
     protected function validateBeforeUpdate(array $data, School $school, Course $course)
