@@ -657,7 +657,7 @@ class CourseInPerson extends Model
         }
         //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         $unset_evaluation = false;
-        if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
+        if(!$topic->type_evaluation_id){
             $menus = $this->modifyMenus($menus,'evaluation','unset');
             $unset_evaluation = true;
         }
@@ -793,7 +793,7 @@ class CourseInPerson extends Model
         }
         //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         $unset_evaluation = false;
-        if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
+        if(!$topic->type_evaluation_id){
             $menus = $this->modifyMenus($menus,'evaluation','unset');
             $unset_evaluation = true;
         }
