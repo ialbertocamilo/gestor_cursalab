@@ -781,16 +781,22 @@ class CourseInPerson extends Model
                         ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
                         ->first();
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        $unset_poll = false;
         if(!$topic->course->polls->first() || $last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'poll','unset');
+            $unset_poll = true;
         }
         //Si no tiene evaluación y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
+        $unset_evaluation = false;
         if(!$topic->type_evaluation_id || $last_session->id != $topic->id){
             $menus = $this->modifyMenus($menus,'evaluation','unset');
+            $unset_evaluation = true;
         }
         //Si es un curso virtual no debe ver el card de asistencia
+        $unset_take_assistance = false;
         if($topic->course->modality->code != 'in-person'){
             $menus = $this->modifyMenus($menus,'take-assistance','unset');
+            $unset_take_assistance = true;
         }
         /*************************************************************VERIFICAR LOS ESTADOS*****************************/
         $action_button = null;
@@ -814,7 +820,7 @@ class CourseInPerson extends Model
             }
 
         }
-        if(is_null($action_button) && !isset($topic->modality_in_person_properties->evaluation)){
+        if(is_null($action_button) && !isset($topic->modality_in_person_properties->evaluation) && !$unset_evaluation){
             $action_button = [
                 'code' => 'evaluation',
                 'name' => 'Iniciar evaluación'
@@ -831,7 +837,7 @@ class CourseInPerson extends Model
                     'name'=> $status_evaluation == 'finished' ? 'Finalizado' : 'Iniciado',
                 ]
             );
-            if(in_array($status_evaluation,['extra-time','started'])){
+            if(in_array($status_evaluation,['extra-time','started']) && !$unset_evaluation){
                 $action_button = [
                     'code' => 'evaluation',
                     'name' => 'Continuar evaluación'
@@ -850,7 +856,7 @@ class CourseInPerson extends Model
                     'name'=> $is_accessible_poll ? 'Realizado' : 'Pendiente',
                 ]
             );
-            if(is_null($action_button) && !$is_accessible_poll){
+            if(is_null($action_button) && !$is_accessible_poll && !$unset_poll){
                 $action_button = [
                     'code' => 'poll',
                     'name' => 'Iniciar encuesta'
