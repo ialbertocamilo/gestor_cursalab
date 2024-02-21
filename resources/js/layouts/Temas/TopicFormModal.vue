@@ -869,7 +869,7 @@ export default {
         resetSelects() {
             let vue = this
             // Limpiar inputs file
-            vue.resource. modality_in_person_properties = {
+            vue.resource.modality_in_person_properties = {
                 reference:'',
                 geometry:'',
                 formatted_address:'',

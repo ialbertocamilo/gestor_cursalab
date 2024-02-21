@@ -878,17 +878,18 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 })->where('active', 1);
         $idx = 1;
         $criterion_values = [];
-        foreach ($criterion_list as $criterion => $value) {
-            if(!$value){
+        foreach ($criterion_list as $criterion => $values) {
+            if(count($values)==0){
                 continue;
             }
-            $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($value, $idx) {
+            $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
                 $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
-                    ->where("cvu{$idx}" . '.criterion_value_id', $value);
+                    ->whereIn("cvu{$idx}" . '.criterion_value_id', $values);
             });
             $idx++;
-            $criterion_values[] = $value;
+            $criterion_values = array_merge($criterion_values,$values);
         }
+        // dd($query->toSql());
         $criterion_values_selected = CriterionValue::select('value_text')->whereIn('id',$criterion_values)->get();
         $users = $query->get()->map(function($user){
             $user->criterion_value_id = $user->criterion_values?->first()?->id;

@@ -348,6 +348,9 @@ export default {
                 criterion_list: vue.resource.criterion_list
             }).then(({data})=>{
                 const users = data.data.users;
+                if(users.length){
+                    vue.segment_by_document.segmentation_by_document = [];
+                }
                 users.forEach(user => {
                     const index = vue.segment_by_document.segmentation_by_document.findIndex(el => el.document == user.document);
                     if (index == -1) {
@@ -405,7 +408,7 @@ export default {
 
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
-                const criteria = _data.criteria.forEach(c => {
+                const criteria = _data.criteria.map(c => {
                     c.multiple = 1;
                     return c;
                 });

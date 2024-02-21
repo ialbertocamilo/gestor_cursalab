@@ -37,6 +37,10 @@ class TopicInPersonAppResource extends JsonResource
         $is_today = $start_datetime->isToday();
         $is_ontime = now()->between($start_datetime, $finish_datetime);
         $modality_code = $this->course->modality->code;
+        $is_host = $user->id == $this->modality_in_person_properties->host_id;
+        if(isset($this->modality_in_person_properties->cohost_id ) && $user->id == $this->modality_in_person_properties->cohost_id){
+            $is_host = true;
+        }
         $session_data = [
             'key' => $this->modality_in_person_properties->start_date,
             'image' => get_media_url($this->course->imagen,'s3'),
@@ -49,7 +53,7 @@ class TopicInPersonAppResource extends JsonResource
             'reference' => $this->modality_in_person_properties->reference,
             'location'=> $this->modality_in_person_properties->ubicacion,
             'show_medias_since_start_course'=>  $this->modality_in_person_properties->show_medias_since_start_course,
-            'is_host' => $user->id == $this->modality_in_person_properties->host_id,
+            'is_host' => $is_host,
             'duration' => $duration,
             'url_maps' => isset($this->modality_in_person_properties?->url) ? $this->modality_in_person_properties?->url : '',
             'is_today'=> $is_today,
