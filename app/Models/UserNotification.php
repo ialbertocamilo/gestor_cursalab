@@ -78,9 +78,8 @@ class UserNotification extends Model
             ->where('group', 'user-notifications')
             ->where('code', $notficationType)
             ->first();
+        if (!$taxonomy) return;
         $type = $taxonomy->type;
-
-        if (!$type) return;
 
         $content = config("notifications.$type.$notficationType");
         foreach ($contentValues as $key => $value) {
