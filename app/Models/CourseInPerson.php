@@ -858,7 +858,7 @@ class CourseInPerson extends Model
         /*************************************************************VERIFICAR LOS ESTADOS*****************************/
         $action_button = null;
         if($topic->course->modality->code == 'in-person'){
-            $has_one_assistance = TopicAssistanceUser::select('id')->where('topic_id',$topic->id)->first();
+            $has_one_assistance = TopicAssistanceUser::select('id')->whereNotNull('status_id')->where('topic_id',$topic->id)->first();
             if($has_one_assistance){
                 $menus = $this->modifyMenus(
                     $menus,
