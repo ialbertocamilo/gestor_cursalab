@@ -301,21 +301,23 @@ class Campaign extends Model
     }
 
 
-    protected function saveConfigGeneral($data, $currGeneralConfig, $campaign_id = NULL) {
+    protected function saveConfigGeneral($data, $currGeneralConfig, $campaign_id = NULL, $initializeStages = true) {
         ['value' => $stage_value] = $data;
 
         $arrayData = ['stage_content', 'stage_postulate', 'stage_votation'];
         $arrayStages = [];
         $initFlag = false;
 
-//        foreach($stage_value as $value) {
-//            $currKey = $arrayData[$value];
-//
-//            if(!$initFlag) {
-//                $initFlag = true;
-//                $arrayStages[$currKey] = true;
-//            } else $arrayStages[$currKey] = false;
-//        }
+        if ($initializeStages) {
+            foreach($stage_value as $value) {
+                $currKey = $arrayData[$value];
+
+                if(!$initFlag) {
+                    $initFlag = true;
+                    $arrayStages[$currKey] = true;
+                } else $arrayStages[$currKey] = false;
+            }
+        }
 
         $stagesAttr = array_merge(['stage_id' => $data['id']], $arrayStages);
         $data_config = array_merge($currGeneralConfig, $stagesAttr);

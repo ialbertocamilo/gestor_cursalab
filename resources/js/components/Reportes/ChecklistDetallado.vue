@@ -18,7 +18,7 @@
                     subtitulo="Área al que pertenece el usuario" />
             </div>
 
-            <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
             <list-item titulo="Estado" subtitulo="Estado del usuario (Activo - Inactivo)" />
             <list-item
                 titulo="Módulo"

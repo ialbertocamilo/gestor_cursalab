@@ -17,7 +17,7 @@
                 <list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
             </div>
 
-            <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
             <div v-if="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />

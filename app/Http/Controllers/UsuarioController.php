@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserNotification;
 use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
@@ -424,6 +425,13 @@ class UsuarioController extends Controller
 
             SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
+
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
 
@@ -447,6 +455,13 @@ class UsuarioController extends Controller
             $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
 
             $course->increment('restarts', 1, ['restarter_id' => $admin->id]);
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $course->name ]
+            );
 
             return $this->success(['msg' => 'Reinicio por curso exitoso']);
         }
@@ -897,6 +912,13 @@ class UsuarioController extends Controller
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $curso->name ]
+            );
+
         } else {
 
             $topic = Posteo::where('id', $topicId)->first();
@@ -904,6 +926,13 @@ class UsuarioController extends Controller
                 $topicId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
         }
 
         return response()->json([
