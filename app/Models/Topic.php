@@ -166,7 +166,7 @@ class Topic extends BaseModel
 
     protected function storeRequest($data, $tema = null)
     {
-        // try {
+        try {
             DB::beginTransaction();
 
             if ($tema) :
@@ -252,11 +252,11 @@ class Topic extends BaseModel
 
             DB::commit();
             return $tema;
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     info($e);
-        //     return $e;
-        // }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            info($e);
+            return $e;
+        }
     }
 
     protected function validateBeforeUpdate(School $school, Topic $topic, $data)
@@ -1303,6 +1303,7 @@ class Topic extends BaseModel
                    return true;
                 }
             }
+            dd($topic);
             $account = Account::getOneAvailableForMeeting($type, compact('starts_at','finishes_at'),$meeting);
             $is_avaiable = boolval($account);
         }
