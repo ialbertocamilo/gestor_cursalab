@@ -869,6 +869,21 @@ export default {
         resetSelects() {
             let vue = this
             // Limpiar inputs file
+            vue.resource. modality_in_person_properties = {
+                reference:'',
+                geometry:'',
+                formatted_address:'',
+                url:'',
+                ubicacion:'',
+                host_id:null,
+                cohost_id:null,
+                start_date:null,
+                start_time:null,
+                finish_date:null,
+                finish_time:null,
+                show_medias_since_start_course:0
+            };
+            vue.resource.tags = [];
             vue.removeFileFromDropzone(vue.resource.imagen, 'inputLogo')
             // Selects independientes
             // Selects dependientes
@@ -1020,6 +1035,7 @@ export default {
                         vue.queryStatus("tema", "crear_tema");
                         vue.showAlert(data.data.msg)
                         vue.closeModal()
+                        vue.resetSelects();
                         vue.$emit('onConfirm')
                     }
                 })
