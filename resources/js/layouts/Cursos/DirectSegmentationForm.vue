@@ -4,32 +4,46 @@
             <v-row class="modal_gestor_colab">
                 <v-col cols="12" md="12" lg="12" class="pb-0">
                     <span class="text_default lbl_tit" v-text="show_section_criteria ? 'Selecciona los criterios sobres los que seleccionaras a los participantes de este curso.' : 'Lista de valores asignados.'"></span>
-
                     <!-- <span class="text_default lbl_tit fw-bold"><i class="fas fa-exclamation-triangle" style="color: #FF9800;"></i> Una vez confirmados, no se podrán retirar del beneficio.</span> -->
                 </v-col>
                 <v-col cols="12" v-if="!show_section_criteria">
-                    <v-sheet
-                        class="mx-auto"
-                        max-width="100%"
-                    >
-                        <v-slide-group
-                            multiple
-                            show-arrows
+                    <div v-if="criterion_values_selected.length>0" class="d-flex align-items-center">
+                        <!-- class="mx-auto" -->
+                        <v-sheet
+                            max-width="90%"
                         >
-                        <v-slide-item
-                            v-for="(criterion,index) in criterion_values_selected"
-                            :key="index"
-                        >
-                            <v-chip
-                                class="ma-2"
-                                color="primary"
+                            <v-slide-group
+                                multiple
+                                show-arrows
                             >
-                                {{ criterion.value_text }}
-                            </v-chip>
-                        </v-slide-item>
-                        </v-slide-group>
-                    </v-sheet>
+                                <v-slide-item
+                                    v-for="(criterion,index) in criterion_values_selected"
+                                    :key="index"
+                                >
+                                    <v-chip
+                                        class="ma-2"
+                                        color="primary"
+                                    >
+                                        {{ criterion.value_text }}
+                                    </v-chip>
+                                </v-slide-item>
+                            </v-slide-group>
+                        </v-sheet>
+                        <v-btn small icon :ripple="false" @click="showSectionCriteria()">
+                            <v-icon color="primary">
+                                mdi-pencil
+                            </v-icon>
+                        </v-btn>
+                    </div>
+                    <!-- <DefaultButton 
+                        v-else
+                        :min_content="false"
+                        label="Deseo filtrar por criterios"
+                        :outlined="true"
+                        @click="showSectionCriteria()"
+                    /> -->
                     <DefaultButton 
+                        v-else
                         :min_content="false"
                         label="Deseo filtrar por criterios"
                         :outlined="true"
@@ -198,7 +212,10 @@ export default {
                 required: this.getRules(['required']),
             },
             segments:[],
-            segment_by_document:[],
+            segment_by_document:{
+                segmentation_by_document:[],
+                criteria_selected:[]
+            },
             arrayCriteriaSelected:[],
             select_all:false,
             modulesIds:[],
@@ -262,6 +279,7 @@ export default {
                         });
                     })
                     .catch(err => {
+                        vue.showAlert('No se ha podido buscar al usuario','warning');
                         vue.autocomplete_loading = false;
                     })
 
@@ -271,6 +289,7 @@ export default {
     methods: {
         closeModal() {
             let vue = this
+            vue.options.confirmLabel = 'Guardar';
             if(vue.show_section_criteria){
                 vue.show_section_criteria = false;
                 return;
@@ -288,54 +307,79 @@ export default {
         async confirmModal() {
             let vue = this;
             if(vue.show_section_criteria){
-                vue.showLoader();
-                if(!vue.resource.criterion_list.module){
-                    vue.showAlert(`Es necesario seleccionar algún valor para el módulo.`,'warning');
-                    return;
-                }
-                await axios.post('/users/list-users-by-criteria',{
-                    criterion_list: vue.resource.criterion_list
-                }).then(({data})=>{
-                    vue.filter_result = data.data.users;
-                    vue.criterion_values_selected = Object.values(data.data.criterion_values_selected);
-                    console.log(vue.criterion_values_selected);
-                    vue.hideLoader();
-                    vue.showAlert(`Se han encontrado ${vue.filter_result.length} usuarios.`);
-                    vue.show_section_criteria = false;
-                }).catch(()=>{
-                    vue.hideLoader();
-
-                })
-                vue.hideLoader();
+                vue.options.confirmLabel = 'Guardar';
+                await vue.getListUsersByCriteria();  
                 return;
             }
+            await vue.saveSegments();
+        },
+        async saveSegments(){
+            let vue = this;
             let base = `${vue.options.base_endpoint}`;
             let url = `${base}/store`;
             let formData = JSON.stringify({
-                    model_type: vue.model_type,
-                    model_id: vue.resource.id,
-                    code: 'segmentation-by-document',
-                    segments: vue.segments,
-                    segment_by_document: vue.segment_by_document
-                });
-                vue.$http.post(url, formData).then(({data}) => {
-                    vue.$emit("onConfirm");
-                    vue.closeModal();
-                    vue.showAlert(data.data.msg);
-                    vue.hideLoader();
-                })
-                .catch(error => {
-                    if (error && error.errors) vue.errors = error.errors;
-                    vue.hideLoader();
-                });
-            vue.$emit('onConfirm')
-        }
-        ,
+                model_type: vue.model_type,
+                model_id: vue.resource.id,
+                code: 'segmentation-by-document',
+                segments: vue.segments,
+                segment_by_document: vue.segment_by_document
+            });
+            await vue.$http.post(url, formData).then(({data}) => {
+                vue.$emit("onConfirm");
+                vue.closeModal();
+                vue.showAlert(data.data.msg);
+                vue.hideLoader();
+                vue.$emit('onConfirm')
+            })
+            .catch(error => {
+                if (error && error.errors) vue.errors = error.errors;
+                vue.hideLoader();
+                vue.showAlert('No se ha podido guardar la segmentación','warning');
+            });
+        },
+        async getListUsersByCriteria(){
+            let vue = this;
+            vue.showLoader();
+            if(!vue.resource.criterion_list.module){
+                vue.showAlert(`Es necesario seleccionar algún valor para el módulo.`,'warning');
+                return;
+            }
+            await axios.post('/users/list-users-by-criteria',{
+                criterion_list: vue.resource.criterion_list
+            }).then(({data})=>{
+                vue.filter_result = data.data.users;
+                vue.criterion_values_selected = Object.values(data.data.criterion_values_selected);
+                console.log(vue.criterion_values_selected);
+                vue.hideLoader();
+                vue.showAlert(`Se han encontrado ${vue.filter_result.length} usuarios.`);
+                vue.show_section_criteria = false;
+            }).catch(()=>{
+                vue.hideLoader();
+
+            })
+            vue.hideLoader();
+            return;
+        },
         resetSelects() {
-            let vue = this
+            let vue = this;
+            vue.segment_by_document = {
+                segmentation_by_document:[],
+                criteria_selected:[]
+            }
+            vue.filter_result = [];
+            vue.usersearch =  null;
+            vue.filtrados =  [];
+            vue.segments = [];
+            vue.select_all = false;
+            vue.modulesIds = [];
+            vue.modulesSchools = []
+            vue.show_section_criteria  = false;  
+            vue.criterion_list = [];
+            vue.criterion_values_selected = [];
         },
         async loadData(resource) {
             let vue = this;
+            this.resetSelects();
             if(!resource){
                 return;
             }
@@ -443,7 +487,8 @@ export default {
                     vue.hideLoader();
                 })
                 .catch(error => {
-                    vue.hideLoader();
+                    vue.showAlert('No se ha podido procesar el excel','warning');
+                    console.log('error');
                 })
         },
         selectAll() {
@@ -509,6 +554,7 @@ export default {
         showSectionCriteria(){
             let vue = this;
             vue.show_section_criteria = true;
+            vue.options.confirmLabel = 'Continuar';
         }
     }
 }

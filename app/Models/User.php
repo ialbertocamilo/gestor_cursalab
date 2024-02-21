@@ -870,7 +870,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $criterion_list = $data['criterion_list'];
         // $criteria = Criterion::select('id','code','field_id')->with('field_type:id,name,code')->where('code',array_keys($criterion_list))->get();
         //
-        $query = User::select('id','name','lastname','surname',DB::raw('CONCAT_WS(" ",name,lastname,surname) as fullname'),'document')->where('active', 1);
+        $query = User::select('id','name','lastname','surname',DB::raw('CONCAT_WS(" ",name,lastname,surname) as fullname'),'document')
+                ->withWhereHas('criterion_values', function ($q) use ($data) {
+                    $q->select('id', 'value_text')
+                        // ->where('value_text', 'like', "%{$data['filter_text']}%")
+                        ->whereRelation('criterion', 'code', 'document');
+                })->where('active', 1);
         $idx = 1;
         $criterion_values = [];
         foreach ($criterion_list as $criterion => $value) {
@@ -885,7 +890,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $criterion_values[] = $value;
         }
         $criterion_values_selected = CriterionValue::select('value_text')->whereIn('id',$criterion_values)->get();
-        $users = $query->get();
+        $users = $query->get()->map(function($user){
+            $user->criterion_value_id = $user->criterion_values?->first()?->id;
+            return $user;
+        });
         return compact('criterion_values_selected','users');
     }
     public function getSegmentedByModelType(
