@@ -5,27 +5,27 @@ return [
         [
             'title' => 'Tomar asistencia',
             'code' => 'take-assistance',
-            'description' => 'Toma nota de los colaboradores presentes en este evento.',
+            'description' => 'Toma nota de los usuarios presentes en este evento.',
             'show' => true,
             'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         // [
         //     'title' => 'Presentación',
         //     'code' => 'presentation',
-        //     'description' => 'Aquí podrás observar tus archivos para presentar a tus colaboradores.',
+        //     'description' => 'Aquí podrás observar tus archivos para presentar a tus usuarios.',
         //     'show' => true
         // ],
         [
             'title' => 'Evaluación',
             'code' => 'evaluation',
-            'description' => 'Evalúa a tus colaboradores sobre los temas que se han presentado.',
+            'description' => 'Evalúa a tus usuarios sobre los temas que se han presentado.',
             'show' => true,
             'status' => ['name'=>'Pendiente','code'=>'pending']
         ],
         [
             'title' => 'Encuesta',
             'code' => 'poll',
-            'description' => 'Inicia el feedback de parte de tus colaboradores.',
+            'description' => 'Inicia el feedback de parte de tus usuarios.',
             'show' => true,
             'status' => ['name'=>'Pendiente','code'=>'pending']
         ]

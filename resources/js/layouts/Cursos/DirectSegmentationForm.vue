@@ -347,9 +347,14 @@ export default {
             await axios.post('/users/list-users-by-criteria',{
                 criterion_list: vue.resource.criterion_list
             }).then(({data})=>{
-                vue.filter_result = data.data.users;
+                const users = data.data.users;
+                users.forEach(user => {
+                    const index = vue.segment_by_document.segmentation_by_document.findIndex(el => el.document == user.document);
+                    if (index == -1) {
+                        vue.filter_result.push(user);
+                    }
+                });
                 vue.criterion_values_selected = Object.values(data.data.criterion_values_selected);
-                console.log(vue.criterion_values_selected);
                 vue.hideLoader();
                 vue.showAlert(`Se han encontrado ${vue.filter_result.length} usuarios.`);
                 vue.show_section_criteria = false;
@@ -405,9 +410,7 @@ export default {
                     criterion_list:{}
                 }
                 for (const criterion of _data.criteria) {
-                    console.log(resource,'resource');
                     let criterion_default_value = criterion.multiple ? [] : null;
-                    console.log(resource,'resource');
                     resource.criterion_list[criterion.code] = criterion_default_value;
                 }
                 // _data.criteria.forEach(criterion => {
@@ -415,15 +418,10 @@ export default {
                 //     // Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
                 // })
                 vue.resource.criterion_list = resource.criterion_list;
-                console.log(vue.segments, _data.segments);
                 vue.segments = _data.segments.filter(segment => segment.type.code === 'direct-segmentation');
-                console.log(vue.segments, _data.segments);
-                console.log(vue.segment_by_document, 'segment_by_document');
                 if(_data.segments.length >0){
                     vue.segment_by_document = _data.segments.find(segment => segment.type.code === 'segmentation-by-document');
                 }
-                console.log(vue.segment_by_document,'segment_by_document');
-                
                 vue.hideLoader();
                 // if (vue.segments.length === 0) this.addSegmentation();
                 // if (vue.segment_by_document === undefined) {
@@ -493,19 +491,23 @@ export default {
         },
         selectAll() {
             let vue = this
+            console.log(vue.filter_result,'vue.filter_result.length');
+            console.log(vue.arrayCriteriaSelected,'vue.filter_result.length');
             if(vue.filter_result.length > 0) {
                 vue.filter_result.forEach((element, index) => {
-                    this.addUserAll(element)
+                    vue.addUser(element)
                 });
-                if(vue.arrayCriteriaSelected.length >= vue.filter_result.length)
-                    vue.filter_result = []
+                if(vue.arrayCriteriaSelected.length >= vue.filter_result.length){
+                    vue.filter_result = [];
+                    console.log(vue.arrayCriteriaSelected,'vue.filter_result.length');
+                }
             }
             else {
                 if(vue.arrayCriteriaSelected.length > 0) {
                     vue.arrayCriteriaSelected.forEach((element, index) => {
                         vue.filter_result.push(element)
                     });
-                    this.deleteUserAll()
+                    vue.deleteUser()
                 }
             }
         },
