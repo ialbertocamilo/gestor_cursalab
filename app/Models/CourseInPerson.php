@@ -647,7 +647,7 @@ class CourseInPerson extends Model
         $menus = config('course-in-person.user');
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
-                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
+                        ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
                         ->first();
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         if(!$topic->course->polls->first() || $last_session->id != $topic->id){
@@ -778,7 +778,7 @@ class CourseInPerson extends Model
         $menus = config('course-in-person.host');
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
-                        ->orderBy(DB::raw("modality_in_person_properties->'$.start_date'"),'DESC')
+                        ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"))
                         ->first();
         //Si no tiene encuesta y ademas la última sesión es diferente a la sesión consultada. Se oculta el menú
         if(!$topic->course->polls->first() || $last_session->id != $topic->id){

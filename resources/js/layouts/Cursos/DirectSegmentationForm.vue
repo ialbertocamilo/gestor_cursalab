@@ -405,7 +405,11 @@ export default {
 
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
-                vue.criterion_list = _data.criteria;
+                const criteria = _data.criteria.forEach(c => {
+                    c.multiple = 1;
+                    return c;
+                });
+                vue.criterion_list = criteria;
                 let resource= {
                     criterion_list:{}
                 }
