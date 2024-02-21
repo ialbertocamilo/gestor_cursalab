@@ -378,6 +378,10 @@ class CourseInPerson extends Model
                 $data = $this->listHostMenu($topic,$user);
                 break;
         }
+        $data['current_server_time'] = [
+            'timestamp' => (int) (now()->timestamp . '000'),
+            'value' => now(),
+        ];
         return $data;
     }
 
