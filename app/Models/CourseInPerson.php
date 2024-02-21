@@ -660,7 +660,7 @@ class CourseInPerson extends Model
             $menus = $this->modifyMenus($menus,'assistance','unset');
         }
         if($topic->course->modality->code == 'virtual'){
-            $is_on_time = ($zoom) ? $zoom['date']['is_ontime']  : false;
+            // $is_on_time = ($zoom) ? $zoom['date']['is_ontime']  : false;
             array_unshift($menus,  [
                 'title' => 'Iniciar reunión zoom',
                 'code' => 'zoom',
@@ -815,7 +815,7 @@ class CourseInPerson extends Model
         }
         //Si es virtual añade el card de zoom
         if($topic->course->modality->code == 'virtual'){
-            $is_on_time = ($zoom) ? $zoom['date']['is_ontime'] : false;
+            // $is_on_time = ($zoom) ? $zoom['date']['is_ontime'] : false;
             array_unshift($menus,  [
                 'title' => 'Iniciar sesión zoom',
                 'code' => 'zoom',
