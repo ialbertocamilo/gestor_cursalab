@@ -1797,15 +1797,41 @@ class Course extends BaseModel
 
     protected function getSegmentationDataByWorkspace($workspace)
     {
-        $courses = Course::with([
-                    'segments' => [
-                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'],
-                        'type:id,name',
-                    ]
-                ])
-                ->select('id', 'name', 'active')
-                ->whereRelationIn('workspaces', 'id', [$workspace->id])
-                ->get();
+//        $courses = Course::with([
+//                    'segments' => [
+//                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'],
+//                        'type:id,name',
+//                    ]
+//                ])
+//                ->select('id', 'name', 'active')
+//                ->whereRelationIn('workspaces', 'id', [$workspace->id])
+//                ->get();
+
+        $courses = DB::select(DB::raw("
+            select
+                c.id, c.name, c.active, t.name segmentation_type,
+                s.id segment_id, criteria.name criteria_name, cv.value_text
+
+            from courses c
+                inner join segments s on s.model_id = c.id
+                inner join segments_values sv on sv.segment_id = s.id
+                inner join criteria on criteria.id = sv.criterion_id
+                inner join criterion_values cv on cv.id = sv.criterion_value_id
+                inner join taxonomies t on t.id = s.type_id
+            where
+                s.model_type = 'App\\\Models\\\Course'
+                and s.deleted_at is null
+                and sv.deleted_at is null
+                and exists (
+                        select *
+                        from workspaces
+                            inner join course_workspace on workspaces.id = course_workspace.workspace_id
+                            where c.id = course_workspace.course_id and id in (:workspaceId)
+                                and workspaces.deleted_at is null
+
+                ) and c.deleted_at is null
+            order by c.id, s.id
+        "), [ 'workspaceId' => $workspace->id ]);
 
         return $courses;
     }
