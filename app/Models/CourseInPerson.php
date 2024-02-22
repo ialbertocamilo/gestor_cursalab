@@ -30,6 +30,7 @@ class CourseInPerson extends Model
                     $sessions_in_person = CourseInPerson::listCoursesByTypeCode($request,'in-person');
                     break;
                 case 'live':
+                    $request->include_topic_meetings = false;
                     $sessions_live = Meeting::getListMeetingsByUser($request,'in-array');
                     break;
                 case 'online':
