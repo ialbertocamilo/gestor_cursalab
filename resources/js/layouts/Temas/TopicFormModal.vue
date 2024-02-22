@@ -1034,8 +1034,8 @@ export default {
                     else {
                         vue.queryStatus("tema", "crear_tema");
                         vue.showAlert(data.data.msg)
-                        vue.closeModal()
                         vue.resetSelects();
+                        vue.closeModal()
                         vue.$emit('onConfirm')
                     }
                 })
