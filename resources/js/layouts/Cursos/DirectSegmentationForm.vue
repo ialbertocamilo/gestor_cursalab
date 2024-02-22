@@ -493,7 +493,7 @@ export default {
                 })
                 .catch(error => {
                     vue.showAlert('No se ha podido procesar el excel','warning');
-                    console.log('error');
+                    console.log('error',error);
                 })
         },
         selectAll() {
