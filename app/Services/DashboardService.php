@@ -286,8 +286,10 @@ class  DashboardService {
     public static function withCountUsers($q, $user_cursalab, $active = null, $alias = null) 
     {
         $user_alias = is_null($alias) ? 'users' : 'users as '.$alias ;
+        $platform = session('platform');
+        $data['type_id'] = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
 
-        $q->withCount([$user_alias => function ($q) use($user_cursalab, $active) {
+        $q->where('type_id',$data['type_id'])->withCount([$user_alias => function ($q) use($user_cursalab, $active) {
             if (is_null($active)) {
                 $q->where('type_id','<>',$user_cursalab->id); // todos los usuarios
             }else{
