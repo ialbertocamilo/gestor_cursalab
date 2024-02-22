@@ -491,10 +491,10 @@ export default {
 
                     vue.hideLoader();
                 })
-                .catch(error => {
-                    vue.showAlert('No se ha podido procesar el excel','warning');
-                    console.log('error',error);
-                })
+                // .catch(error => {
+                //     vue.showAlert('No se ha podido procesar el excel','warning');
+                //     console.log('error',error);
+                // })
         },
         selectAll() {
             let vue = this
