@@ -665,6 +665,7 @@ class CourseInPerson extends Model
         $zoom_status = ['name'=>'Agendado','code'=>'scheduled'];
         $meeting = null;
         $is_on_time = false;
+        $is_session_finished = now() > Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
         if($topic->course->modality->code == 'virtual'){
             $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status')->where('model_id',$topic->id)->first();
             if($meeting){
@@ -788,6 +789,18 @@ class CourseInPerson extends Model
                         'name'=> $has_assistance->status->name,
                     ]
                 );
+            }else{
+                if($is_session_finished){
+                    $menus = $this->modifyMenus(
+                        $menus,
+                        'assistance',
+                        'change_status_code',
+                        [
+                            'code'=> 'absent',
+                            'name'=> 'No asistió',
+                        ]
+                    );
+                }
             }
         }
         if($last_session->id != $topic->id){
