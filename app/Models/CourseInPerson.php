@@ -456,6 +456,7 @@ class CourseInPerson extends Model
         //Si no tiene la asistencia en late o absent no debería acceder ni a los recursos multimedia ni a la evaluación  ni a la encuesta
         $is_done = false;
         $has_attempts_evaluation = false;
+        $is_session_finished = false;
         switch ($type) {
             case 'assistance':
                 $assistance = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
@@ -506,7 +507,8 @@ class CourseInPerson extends Model
             break;
         }
         $is_accessible = boolval($resource);
-        return ['is_accessible'=>$is_accessible,'is_done' => $is_done,'has_attempts_evaluation'=>$has_attempts_evaluation];
+        return compact('is_accessible','is_done','has_attempts_evaluation','is_session_finished');
+        // return ['is_accessible'=>$is_accessible,'is_done' => $is_done,'has_attempts_evaluation'=>$has_attempts_evaluation];
     }
     protected function startPoll($topic_id){
         $topic = Topic::select('id','course_id','modality_in_person_properties')
