@@ -660,7 +660,10 @@ class Workspace extends BaseModel
     public function verifyLimitAllowedUsers($sub_workspace_id = null): bool
     {
         $workspace = $this;
-
+        $platform = session('platform');
+        if($platform && $platform == 'induccion'){
+            return true;
+        }
         $workspace_constraint = $workspace->getSettingsLimitAllowedUser();
 
         if (!$workspace_constraint) return true;
