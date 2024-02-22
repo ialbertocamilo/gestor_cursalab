@@ -29,7 +29,7 @@
                         <span class="text">Cambiar a:</span>
                     </div>
                 </button>
-                <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session">
+                <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session" style="width: fit-content">
 
                     <button class="dropdown-item py-2 dropdown-item-custom text-body" type="button" onclick="switchPlatform('capacitacion')">
                         <div class="dropdown-icon-width">
