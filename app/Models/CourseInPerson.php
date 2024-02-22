@@ -356,7 +356,7 @@ class CourseInPerson extends Model
         $user = auth()->user();
         $topic = Topic::select('id','course_id','type_evaluation_id','modality_in_person_properties')
                     ->with([
-                        'course:id,modality_id,modality_in_person_properties,registro_capacitacion,mod_evaluaciones',
+                        'course:id,modality_id,modality_in_person_properties,registro_capacitacion,mod_evaluaciones,show_certification_to_user',
                         'course.modality:id,code','course.polls:id'
                     ])
                     ->where('id',$topic_id)
@@ -691,8 +691,9 @@ class CourseInPerson extends Model
             $menus = $this->modifyMenus($menus,'evaluation','unset');
             $unset_evaluation = true;
         }
-         //Si no es el último tema, no se muestra el certificado
-        if($last_session->id != $topic->id){
+         //Si no es el último tema o no tiene activa mostrar el ceritificado, no se muestra el certificado
+        $show_certification_to_user = $topic->course->show_certification_to_user;
+        if($last_session->id != $topic->id || !$show_certification_to_user){
             $menus = $this->modifyMenus($menus,'certificate','unset');
         }
         //Obtener 
