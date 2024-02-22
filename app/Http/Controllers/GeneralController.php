@@ -284,13 +284,15 @@ class GeneralController extends Controller
 
         $total_current_storage = $users_count_inactives + 1;
         $user_storage_check = $workspace_storage->limit_allowed_users['quantity'] < $total_current_storage;
+        $limit_allowed_users_quantity = $workspace_storage->limit_allowed_users['quantity'];
         //No hay limite de usuarios para inducción
         if($platform && $platform == 'induccion'){
             $user_storage_check = true;
+            $total_current_storage = 1;
         }
 
         $workspace_data = [
-            'workspace_storage' => $workspace_storage->limit_allowed_users['quantity'], // gb
+            'workspace_storage' => $limit_allowed_users_quantity, // gb
             'workspace_current_storage' => $total_current_storage, // kb
             'user_storage_check' => $user_storage_check,
         ];
