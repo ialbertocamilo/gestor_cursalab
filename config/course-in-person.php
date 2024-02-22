@@ -79,7 +79,7 @@ return [
             'code'=>'in-person',
         ],
         [
-            'title'=>'Cursos virtuales',
+            'title'=>'Cursos síncronos',
             'code'=>'online',
         ]
     ]
