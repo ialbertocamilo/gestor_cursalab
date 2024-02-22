@@ -742,6 +742,7 @@ class CourseInPerson extends Model
             }
         }
         //Si tiene encuesta, verificar el estado
+        $hasPoll = false;
         if($topic->isAccessiblePoll()){
             $hasPoll = PollQuestionAnswer::select('id')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
             if($hasPoll){
@@ -756,7 +757,7 @@ class CourseInPerson extends Model
                 );
             }
         }
-        if(is_null($action_button) && $topic->course->polls->first() && !$unset_poll){
+        if(is_null($action_button) && $topic->course->polls->first() && !$unset_poll && !$hasPoll){
             $action_button = [
                 'code' => 'poll',
                 'name' => 'Realizar encuesta'
