@@ -280,12 +280,14 @@ class GeneralController extends Controller
         $workspace_storage = DashboardService::loadCountUsersWorkspaces();
         $platform = session('platform');
         $users_count_inactives = $workspace_storage->subworkspaces->sum('users_count_actives');
-        if($platform && $platform == 'induccion'){
-            $users_count_inactives = 10000;
-        }
+        
 
         $total_current_storage = $users_count_inactives + 1;
         $user_storage_check = $workspace_storage->limit_allowed_users['quantity'] < $total_current_storage;
+        //No hay limite de usuarios para inducción
+        if($platform && $platform == 'induccion'){
+            $user_storage_check = true;
+        }
 
         $workspace_data = [
             'workspace_storage' => $workspace_storage->limit_allowed_users['quantity'], // gb
