@@ -95,9 +95,8 @@
                     <v-col cols="4" class="d-flex justify-end">
 
                         <div
-                            v-if="usersWithEmptyCriteria"
                             class="user-count-wrapper">
-                            <a href="/exportar/node?tab=new-report&section=19">
+
                                 <v-tooltip
                                     :top="true"
                                     attach
@@ -111,12 +110,30 @@
                                             mdi-account
                                         </v-icon>
                                     </template>
-                                    <span v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
+                                    <span
+                                        v-if="emptyCriteriaHasBeenCounted"
+                                        v-html="`Tienes ${usersWithEmptyCriteria} usuarios con criterios vacíos.`"/>
                                 </v-tooltip>
 
-                                <span class="count">{{ usersWithEmptyCriteria }}</span>
-                                <span class="description">Criterios vacíos</span>
-                            </a>
+                                <span class="count" v-if="emptyCriteriaHasBeenCounted">
+                                    {{ usersWithEmptyCriteria }}
+                                </span>
+
+                            <span class="description cursor-pointer"
+                                  data-toggle="dropdown">
+                                    Criterios vacíos
+                            </span>
+
+                            <div class="dropdown-menu dropdown-header-menu shadow-md">
+                                <a class="dropdown-item py-2 dropdown-item-custom text-body"
+                                   href="javascript:" @click="fetchUsersWithEmptyCriteria()">
+                                    <span>Contar usuarios con criterios vacios</span>
+                                </a>
+                                <a class="dropdown-item py-2 dropdown-item-custom text-body" href="/exportar/node?tab=new-report&section=19">
+                                    <span>Ir a la sección de reportes</span>
+                                </a>
+                            </div>
+
                         </div>
 
                         <DefaultButton
@@ -256,6 +273,7 @@ export default {
         return {
             usersWithEmptyCriteria: 0,
             filtersValuesHasBeenLoaded : false,
+            emptyCriteriaHasBeenCounted: false,
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
@@ -437,7 +455,6 @@ export default {
             vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
         // === check localstorage anuncio ===
         }
-        //vue.getSelects();
     },
     methods: {
         getSelects() {
@@ -463,7 +480,7 @@ export default {
 
                     vue.selects.sub_workspaces = data.data.sub_workspaces;
                     vue.criteria_template = data.data.criteria_template;
-                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
+                    //vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
 
                     data.data.criteria_workspace.forEach(criteria => {
 
@@ -484,6 +501,20 @@ export default {
                 })
 
         },
+        fetchUsersWithEmptyCriteria() {
+
+            const vue = this
+
+            this.showLoader()
+            const url = `/usuarios/users-empty-criteria`
+            vue.$http.get(url)
+                .then(({data}) => {
+
+                    vue.usersWithEmptyCriteria = data.data.users_with_empty_criteria
+                    vue.emptyCriteriaHasBeenCounted = true;
+                    this.hideLoader()
+                })
+        },
         reset(user) {
             let vue = this
             vue.consoleObjectTable(user, 'User to Reset')
@@ -500,6 +531,9 @@ export default {
 
             if (!this.filtersValuesHasBeenLoaded)
                 this.getSelects()
+        },
+        goToReports() {
+            window.location.href = '/exportar/node?tab=new-report&section=19';
         }
     }
 }
@@ -580,4 +614,13 @@ button.btn_add_user .v-btn__content i {
     font-size: 16px;
     margin: 0 !important;
 }
+
+.dropdown-menu {
+    width: 300px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
 </style>

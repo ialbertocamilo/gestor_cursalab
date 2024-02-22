@@ -170,14 +170,19 @@ class UsuarioController extends Controller
 
         $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
-//        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
-//        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
-//        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
-            'criteria_template' => $criteria_template,
-            'users_with_empty_criteria' => 0//$usersWithEmptyCriteria
+            'criteria_template' => $criteria_template
+        ]);
+    }
+
+    public function countUsersWithEmptyCriteria() {
+
+        return $this->success([
+            'users_with_empty_criteria' => Criterion::countUsersWithEmptyCriteria(
+                get_current_workspace()->id
+            )
         ]);
     }
 
