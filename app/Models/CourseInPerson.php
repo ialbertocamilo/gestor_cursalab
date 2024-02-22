@@ -705,6 +705,12 @@ class CourseInPerson extends Model
         $show_certification_to_user = $topic->course->show_certification_to_user;
         if($last_session->id != $topic->id || !$show_certification_to_user){
             $menus = $this->modifyMenus($menus,'certificate','unset');
+        }else{
+            //Verificar el estado del curso, si no tiene certificado le aparece bloqueado
+            $summary_course = SummaryCourse::select('certification_issued_at')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
+            if(!$summary_course->certification_issued_at){
+                $menus = $this->modifyMenus($menus,'certificate');
+            }
         }
         //Obtener 
         $action_button = null;
