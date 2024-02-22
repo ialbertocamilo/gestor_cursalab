@@ -755,6 +755,10 @@ class CourseInPerson extends Model
                         'name'=> 'Realizado',
                     ]
                 );
+                $menus = $this->modifyMenus(
+                    $menus,
+                    'poll'
+                );
             }
         }
         if(is_null($action_button) && $topic->course->polls->first() && !$unset_poll && !$hasPoll){
