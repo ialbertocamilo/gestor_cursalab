@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente, Process};
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente, Process, Taxonomy};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -232,7 +232,20 @@ class AuthController extends Controller
         // $carrera = ($matricula_actual) ? Carrera::select('id', 'nombre')->where('id', $matricula_actual->carrera_id)->first() : null;
         // $ciclo = ($matricula_actual) ? Ciclo::select('id', 'nombre')->where('id', $matricula_actual->ciclo_id)->first() : null;
 
-        $supervisor = $user->isSupervisor();
+        $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
+
+        if($user->type_id == $type_employee_onboarding?->id) {
+            $onboarding = true;
+            $supervisor_induccion = count($user->processes) ? true : false;
+            $supervisor = false;
+            $processes = Process::getProcessesAssigned($user);
+        }
+        else {
+            $onboarding = false;
+            $supervisor_induccion = false;
+            $supervisor = $user->isSupervisor();
+            $processes = [];
+        }
         // $can_be_host = $user->belongsToSegmentation($workspace);
 
         $workSpaceIndex = $user->subworkspace->parent_id;
@@ -296,7 +309,9 @@ class AuthController extends Controller
             // "sexo" => $user->sexo,
             // "cargo" => $user->cargo,
             'criterios' => $criterios,
-            'processes' => Process::getProcessesAssigned($user) //Inducción
+            'supervisor_induccion' => $supervisor_induccion,
+            'processes' => $processes,
+            'onboarding' => $onboarding
         ];
 
         $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
