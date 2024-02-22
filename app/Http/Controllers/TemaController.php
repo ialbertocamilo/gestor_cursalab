@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
+use App\Models\Poll;
 use App\Models\Post;
 use App\Models\Curso;
 use App\Models\Media;
@@ -10,19 +11,23 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
 use App\Models\School;
+
 use App\Models\Ability;
 
+use App\Models\Usuario;
 use App\Models\Abconfig;
-
 use App\Models\Pregunta;
 use App\Models\Question;
 use App\Models\Taxonomy;
 use App\Models\Categoria;
 use App\Models\MediaTema;
 use App\Models\Workspace;
+use Illuminate\Support\Str;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
+use Illuminate\Support\Facades\DB;
+use App\Models\TopicAssistanceUser;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
@@ -37,10 +42,10 @@ class TemaController extends Controller
     {
         $request->school_id = $school->id;
         $request->course_id = $course->id;
+        $request->course_code = $course->modality->code;
         $temas = Topic::search($request);
 
         PosteoSearchResource::collection($temas);
-
         return $this->success($temas);
     }
 
@@ -62,16 +67,22 @@ class TemaController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $course->qualification_type;
+        $course_code_modality = $course->modality->code;
+
         $media_url = get_media_root_url();
 
         $limits_ia_convert = Workspace::getLimitAIConvert($topic);
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
+        $hosts = Usuario::getCurrentHosts(false,null,'get_records',[DB::raw("CONCAT(document,' - ',CONCAT_WS(' ',name,lastname,surname)) as 'document_fullname'")]);
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
+        $workspace_id = get_current_workspace()->id;
+        $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
 
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
-                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags');
+                             'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
+                             'hosts','course_code_modality','workspace_id','dinamyc_link');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -103,13 +114,16 @@ class TemaController extends Controller
         $has_permission_to_use_ia_evaluation = Ability::hasAbility('course','jarvis-evaluations');
         $has_permission_to_use_ia_description = Ability::hasAbility('course','jarvis-descriptions');
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
-        
         return $this->success([
             'tema' => $topic,
             'tags' => $form_selects['tags'],
             'requisitos' => $form_selects['requisitos'],
+            'workspace_id' => $form_selects['workspace_id'],
+            'hosts' =>  $form_selects['hosts'],
+            'course_code_modality' => $form_selects['course_code_modality'],
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
+            'dinamyc_link' => $form_selects['dinamyc_link'],
             'media_url' => $media_url,
             'limits_ia_convert'=>$limits_ia_convert,
             'has_permission_to_use_ia_evaluation'=>$has_permission_to_use_ia_evaluation,
@@ -121,10 +135,15 @@ class TemaController extends Controller
     public function store(School $school, Course $course, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        //Validación para temas de un curso virtual: Valida si es que existe una cuenta disponible en el horario especificado
+        if(!Topic::validateAvaiableAccount($course,$data)){
+            return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
+        }
+        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
 
         $tema = Topic::storeRequest($data);
-
+        $course->storeUpdateMeeting();
         $response = [
             'tema' => $tema,
             'msg' => ' Tema creado correctamente.',
@@ -141,9 +160,13 @@ class TemaController extends Controller
     public function update(School $school, Course $course, Topic $topic, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        if(!Topic::validateAvaiableAccount($course,$data,$topic)){
+            return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
+        }
+        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
+        
         // info($data);
-
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);
 //            info($validations['list']);
@@ -152,7 +175,7 @@ class TemaController extends Controller
         endif;
 
         $topic = Topic::storeRequest($data, $topic);
-
+        $course->storeUpdateMeeting();
         $response = [
             'tema' => $topic,
             'msg' => ' Tema actualizado correctamente.',
@@ -161,7 +184,16 @@ class TemaController extends Controller
 
         return $this->success($response);
     }
-
+    private function uploadQRTopic($data){
+        if(str_contains($data['path_qr'], 'base64')){
+            $name =  'qr/'.Str::slug($data['name']).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
+            $name = Str::of($name)->limit(100);
+            $path = $name.'.png';
+            $media = Media::uploadMediaBase64('', $path, $data['path_qr'],false);
+            $data['path_qr'] = get_media_url($path,'s3');
+        }
+        return $data;
+    }
     public function destroy(School $school, Course $course, Topic $topic, Request $request)
     {
         $data = $request->all();
@@ -211,7 +243,32 @@ class TemaController extends Controller
 
         return $this->success($response);
     }
+    public function getHosts(){
+        $hosts = Usuario::getCurrentHosts(false,null,'get_records',[DB::raw("CONCAT(document,CONCAT_WS(' ',name,lastname,surname)) as 'document_fullname'")]);
+        return $this->success(['hosts'=>$hosts]);
+    }
+    ////////////////////// Tema ENCUESTA ////////////////////////////
 
+    public function getEncuesta(School $school, Course $course,Topic $topic)
+    {
+        $workspace = get_current_workspace();
+
+        $encuestas = Poll::select('titulo as nombre', 'id')->whereRelation('type','code','xtema')->where('workspace_id', $workspace->id)->get();
+        $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
+        $topic->encuesta_id = $topic->poll_id ?? "ninguno";
+        return $this->success(['encuestas'=>$encuestas,'course'=>$topic]);
+    }
+
+    public function storeUpdateEncuesta(School $school, Course $course, Topic $topic,Request $request)
+    {
+        $data = $request->all();
+        $poll_id = $data['encuesta_id'] === "ninguno" ? null : $data['encuesta_id'];
+        $topic->poll_id = $poll_id;
+        $topic->save();
+        cache_clear_model(Topic::class);
+
+        return $this->success(['msg' => 'Encuesta de curso actualizada.']);
+    }
     // ========================================== EVALUACIONES TEMAS ===================================================
     public function preguntas_list(School $school, Course $course, Topic $topic, Request $request)
     {
@@ -404,5 +461,9 @@ class TemaController extends Controller
             return $media;
         });
         return $this->success(['topics'=>[$topic]]);
+    }
+
+    public function downloadReportAssistance($school_id,$course_id,$topic_id){
+        return TopicAssistanceUser::generatePDFDownload($course_id,$topic_id);
     }
 }

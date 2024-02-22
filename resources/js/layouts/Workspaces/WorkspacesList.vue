@@ -97,6 +97,11 @@
             </v-col>
 
             <v-col cols="5" class="d-flex justify-end">
+                <DefaultModalButton
+                    icon_name="fas fa-cog"
+                    :label="'Configurar espacio'"
+                    @click="openFormModal(modalConfigAmbienteOptions, null, null, 'Configurar espacio')"
+                />
                 <v-btn
                     elevation="0"
                     small
@@ -116,7 +121,7 @@
                     color="primary"
                     title="Cambiar vista"
                     :fab="true"
-                    @click="view = !view">
+                    @click="view = !view,setPreference()">
                     <v-icon v-text="view ? 'mdi-grid' : 'mdi-format-list-bulleted' "/>
                 </v-btn>
             </v-col>
@@ -210,7 +215,16 @@
                                             <br> <span class="table-default-icon-title" v-text="'Editar'"/>
                                         </span>
                                     </button>
-
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="openFormModal(emailsCustomFormModalOptions,workspace,null,'Customizar correos')"
+                                        v-show="!view && workspace.is_cursalab_super_user"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-email</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Correos'"/>
+                                        </span>
+                                    </button>
                                     <button
                                         type="button" class="btn btn-md"
                                         @click="openFormModal(
@@ -460,6 +474,13 @@
             @onCancel="closeSimpleModal(workspaceDuplicateFormModalOptions)"
             @onConfirm="loadData()"
         />
+        <EmailsCustomModalForm
+            :options="emailsCustomFormModalOptions"
+            width="60vw"
+            :ref="emailsCustomFormModalOptions.ref"
+            @onCancel="closeSimpleModal(emailsCustomFormModalOptions)"
+            @onConfirm="closeSimpleModal(emailsCustomFormModalOptions)"
+        />
 
 <!--         <DialogConfirm
             :ref="modalStatusOptions.ref"
@@ -477,18 +498,26 @@
             @onConfirm="closeFormModal(modalStatusOptions); loadData();"
             @onCancel="closeFormModal(modalStatusOptions)"
         />
-
+        <ConfigAmbiente
+            :options="modalConfigAmbienteOptions"
+            :ref="modalConfigAmbienteOptions.ref"
+            @onConfirm="closeFormModal(modalConfigAmbienteOptions)"
+            @onCancel="closeFormModal(modalConfigAmbienteOptions)"
+        />
     </div>
 </template>
 
 <script>
 
 import WorkspacesForm from "./WorkspacesForm";
+import ConfigAmbiente from './ConfigAmbiente';
 import WorkspacesDuplicateForm from "./WorkspacesDuplicateForm";
 import LogsModal from "../../components/globals/Logs";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 // import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
+import EmailsCustomModalForm from "./EmailsCustomModalForm";
+
 
 export default {
     // props: [ 'header'],
@@ -500,8 +529,8 @@ export default {
         },
     },
     components: {
-        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal, DefaultStatusModal
-
+        WorkspacesForm, LogsModal, WorkspacesDuplicateForm, DefaultDeleteModal, DefaultStatusModal,ConfigAmbiente,
+        EmailsCustomModalForm
     },
     data: () => ({
         config: {
@@ -539,6 +568,13 @@ export default {
             base_endpoint: 'workspaces',
             showCloseIcon: true,
             confirmLabel: 'Duplicar'
+        },
+        emailsCustomFormModalOptions:{
+            ref: ' emailsCustomForm',
+            open: false,
+            action: '',
+            base_endpoint: 'workspaces',
+            showCloseIcon: true,
         },
         view: true,
         loading: true,
@@ -613,6 +649,16 @@ export default {
                 },
             }
         },
+        modalConfigAmbienteOptions:{
+            ref: 'ConfigAmbienteModal',
+            open: false,
+            base_endpoint: '/ambiente',
+            confirmLabel: 'Guardar',
+            resource: 'Ambiente',
+            title: 'Configurar Ambiente',
+            action: null,
+            persistent: true,
+        }
     })
     ,
     mounted() {
@@ -620,6 +666,7 @@ export default {
         this.loadData();
         this.initializeHeaderTemplate();
         this.loadDataStorage();
+        this.loadPreference();
     },
     watch: {
         selectedWorkspaceId () {
@@ -849,6 +896,28 @@ export default {
 
                     vue.hideLoader();
                 })
+            
+        },
+        loadPreference(){
+            //Preferencia al cargar los datos listado o grilla
+            let preferencesJSON = localStorage.getItem('preferences');
+            let preferences = {};
+            if (!preferencesJSON) {
+                preferences = {
+                    workspace_list_diplay_format: 'grilla' // Valor predeterminado para mostrar en formato de grilla
+                };
+                this.view = true;
+                localStorage.setItem('preferences', JSON.stringify(preferences));
+            } else {
+                preferences = JSON.parse(preferencesJSON);
+                this.view = preferences.workspace_list_diplay_format === 'grilla';
+            }
+        },
+        setPreference(){
+            let preferencesJSON = localStorage.getItem('preferences');
+            let preferences = JSON.parse(preferencesJSON);
+            preferences.workspace_list_diplay_format = this.view ? 'grilla' : 'lista';
+            localStorage.setItem('preferences', JSON.stringify(preferences));
         }
     }
 }

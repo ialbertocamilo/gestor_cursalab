@@ -104,7 +104,7 @@ class Curso extends Model
         $cache_name = 'cursos_id_por_modulo';
         $cache_name .= $modulo_id ? "-{$modulo_id}" : '';
 
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS, function () use ($modulo_id) {
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS, function () use ($modulo_id) {
 
             return Curso::where('config_id', $modulo_id)->pluck('id')->toArray();
         });

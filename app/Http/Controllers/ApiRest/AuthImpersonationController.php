@@ -103,6 +103,8 @@ class AuthImpersonationController extends Controller
         $current_hosts = Usuario::getCurrentHosts(true, $workSpaceIndex);
         $can_be_host = in_array($user->id, $current_hosts);
 
+        //CUSTOM DESIGN BY WORKSPACE
+        $custom_ambiente = Ambiente::getCustomAmbienteByWorkspace($workspace->parent_id);
         $workspace_data = ($workspace->parent_id) ? Workspace::select('share_diplomas_social_media', 'show_logo_in_app', 'logo', 'slug', 'name', 'id')->where('id', $workspace->parent_id)->first() : null;
         
         if ($workspace_data) {
@@ -159,7 +161,7 @@ class AuthImpersonationController extends Controller
         $config_data->filters = config('data.filters');
         $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
         $api_url = config('app.url');
-
+        
         return [
             'url_workspace'=>[
                 'api_url'=> $api_url .'/api',
@@ -170,7 +172,8 @@ class AuthImpersonationController extends Controller
             'access_token' => $token,
             'bucket_base_url' => get_media_root_url(),
             'config_data' => $config_data,
-            'usuario' => $user_data
+            'usuario' => $user_data,
+            'custom_ambiente'=> $custom_ambiente
         ];
     }
 

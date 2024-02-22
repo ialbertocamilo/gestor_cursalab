@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserNotification;
 use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
@@ -170,14 +171,14 @@ class UsuarioController extends Controller
 
         $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
-        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
-        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
-        $usersWithEmptyCriteria = count($users);
+//        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
+//        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
+//        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
             'criteria_template' => $criteria_template,
-            'users_with_empty_criteria' => $usersWithEmptyCriteria
+            'users_with_empty_criteria' => 0//$usersWithEmptyCriteria
         ]);
     }
 
@@ -425,6 +426,13 @@ class UsuarioController extends Controller
 
             SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
+
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
 
@@ -448,6 +456,13 @@ class UsuarioController extends Controller
             $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
 
             $course->increment('restarts', 1, ['restarter_id' => $admin->id]);
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $course->name ]
+            );
 
             return $this->success(['msg' => 'Reinicio por curso exitoso']);
         }
@@ -698,7 +713,7 @@ class UsuarioController extends Controller
 
         $user->update(['active' => $status]);
         if ($status) {
-            $user->sendWelcomeEmail();
+            $user->sendWelcomeEmail(false,$current_workspace);
         }
         $current_workspace->sendEmailByLimit();
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
@@ -898,6 +913,13 @@ class UsuarioController extends Controller
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $curso->name ]
+            );
+
         } else {
 
             $topic = Posteo::where('id', $topicId)->first();
@@ -905,6 +927,13 @@ class UsuarioController extends Controller
                 $topicId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
         }
 
         return response()->json([

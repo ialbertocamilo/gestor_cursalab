@@ -32,7 +32,7 @@ class SubWorkspaceResource extends JsonResource
             // 'escuelas_count' => (string)$sub_workspace->categorias_count,
             'users_count' => (string)thousandsFormat($sub_workspace->users_count),
             'active_users' => "$active_users / $total_users",
-
+            'registro_capacitacion' => $this->registro_capacitacion,
             'schools_count' => $this->schools_count,
             // 'carreras_count' => (string)thousandsFormat($sub_workspace->carreras_count),
 

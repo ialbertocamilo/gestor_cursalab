@@ -14,6 +14,8 @@ class AmbienteRequest extends FormRequest
     public function rules()
     {
         return [
+            'subworkspace_id' => 'nullable',
+            'type' => 'required',
             //gestor
             'link_genially' => 'nullable',
             'color_primario' => 'nullable', 

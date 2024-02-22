@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use stdClass;
 // use function foo\func;
+use Carbon\Carbon;
 use App\Services\ZoomService;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\MeetingAppResource;
+use Illuminate\Http\Request;
 
 class Meeting extends BaseModel
 {
@@ -246,7 +249,9 @@ class Meeting extends BaseModel
         $currWorkspaceIndex = get_current_workspace_indexes('id');
         $query->where('workspace_id', $currWorkspaceIndex);
         # meeting segun workspaceid
-
+        if(!$request->include_topic_meetings){
+            $query->where('model_type','<>','App\\Models\\Topic');
+        }
         if ($request->usuario_id)
             $query->whereHas('attendants', function ($q) use ($request) {
                 $q->where('usuario_id', $request->usuario_id);
@@ -294,6 +299,60 @@ class Meeting extends BaseModel
         return $query->$method();
     }
 
+    protected function getAppData(){
+        $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
+        $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
+        $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
+        $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
+        $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
+
+        $subworkspace = auth()->user()->subworkspace;
+        $request->merge(['workspace_id' => $subworkspace->parent_id]);
+
+        $filters_today = new Request([
+            'usuario_id' => auth()->user()->id,
+            'statuses' => [$scheduled->id, $started->id],
+            'date' => Carbon::today(),
+        ]);
+
+        $filters_scheduled = new Request([
+            'usuario_id' => auth()->user()->id,
+            'statuses' => [$scheduled->id],
+            'date_start' => Carbon::tomorrow(),
+        ]);
+
+        $filters_finished = new Request([
+            'usuario_id' => auth()->user()->id,
+            'statuses' => [$finished->id, $overdue->id, $cancelled->id],
+        ]);
+
+        $data = [
+            'today' => [
+                'code' => 'today',
+                'title' => 'Hoy',
+                'total' => Meeting::search($filters_today, 'count'),
+            ],
+            'scheduled' => [
+                'code' => 'scheduled',
+                'title' => 'Próximas',
+                'total' => Meeting::search($filters_scheduled, 'count'),
+            ],
+            'finished' => [
+                'code' => 'finished',
+                'title' => 'Historial',
+                'total' => Meeting::search($filters_finished, 'count'),
+            ],
+
+            'current_server_time' => [
+                'timestamp' => (int) (now()->timestamp . '000'),
+                'value' => now(),
+            ],
+
+            'recommendations' => config('meetings.recommendations'),
+        ];
+        return $data;
+    }
+
     protected function storeRequest($data, $meeting = null, $files = [])
     {
         try {
@@ -305,7 +364,8 @@ class Meeting extends BaseModel
             $status = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
             $type = Taxonomy::find($data['type_id']);
             $host = Usuario::find($data['host_id']);
-            
+
+            $data['model_type'] = isset($data['model_type']) ? $data['model_type'] : 'App\\Models\\Meeting';
             if($type->code == 'benefits'){
                 $data['model_type'] = 'App\\Models\\BenefitProperty';
             }
@@ -316,7 +376,6 @@ class Meeting extends BaseModel
             #add workspace id
 
             DB::beginTransaction();
-
             if ($meeting) {
 
                 if ($datesHaveChanged || $meeting->typeHasChanged($type)) {
@@ -367,6 +426,7 @@ class Meeting extends BaseModel
 
             DB::commit();
 
+            $meeting->notifyMeetingViaApp($attendants);
             $meeting->sendMeetingPushNotifications($attendants);
             $meeting->sendMeetingEmails();
 
@@ -382,6 +442,25 @@ class Meeting extends BaseModel
         return $meeting;
     }
 
+    protected function notifyMeetingViaApp($attendantsIds) {
+
+        // Get attendant's user ids
+
+        $attendants = Attendant::query()
+            ->whereIn('id', $attendantsIds['created'][0])
+            ->get();
+
+        $userIds = $attendants->pluck('usuario_id')->toArray();
+
+        UserNotification::createNotifications(
+            get_current_workspace()->id,
+            $userIds,
+            UserNotification::NEW_MEETING,
+            [],
+            'lista-reuniones'
+        );
+    }
+
     protected function addAttendantFromUser(Meeting $meeting,array $users ){
         $users_in_meeting = $meeting->attendants()->get();
         $user_type = Taxonomy::getFirstData('meeting', 'user','normal');
@@ -391,7 +470,7 @@ class Meeting extends BaseModel
             if(!$user_in_meeting){
                 $attendants[] = [
                     'usuario_id' => $user['id'],
-                    'type_id' => $user_type?->id, 
+                    'type_id' => $user_type?->id,
                     'id' => null
                 ];
             }
@@ -670,7 +749,55 @@ class Meeting extends BaseModel
 
         return true;
     }
+    protected function getListMeetingsByUser($request,$format_response = 'data'){
+        $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
+        $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
+        $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
+        $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
+        $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
 
+        $subworkspace = auth()->user()->subworkspace;
+
+        $request->merge(['usuario_id' => auth()->user()->id, 'workspace_id' => $subworkspace->parent_id]);
+
+        if ($request->code) {
+            if ($request->code == 'today')
+                $request->merge([
+                    'statuses' => [$scheduled->id, $started->id],
+                    'date' => Carbon::today(),
+                ]);
+
+            if ($request->code == 'scheduled')
+                $request->merge([
+                    'statuses' => [$scheduled->id],
+                    'date_start' => Carbon::tomorrow(),
+                ]);
+
+            if ($request->code == 'finished')
+                $request->merge([
+                    'statuses' => [$finished->id, $overdue->id, $cancelled->id],
+                    'sortDesc' => 'true',
+                ]);
+        }
+
+        $meetings = Meeting::search($request);
+        $meetings = MeetingAppResource::collection($meetings);
+        if(count($meetings) == 0){
+            return [];
+        }
+        // info(__function__);
+        $result = json_decode($meetings->toJson(), true);
+        if($format_response == 'data'){
+            $result['data'] = collect($result)->groupBy('key')->all();
+            if (count($result['data']) === 0) $result['data'] = new stdClass();
+        }else{
+            $sessions_group_by_date = $result;
+            $sessions_group_by_date = collect($sessions_group_by_date)->groupBy('key')->all();
+            if (count($sessions_group_by_date) === 0) $sessions_group_by_date = new stdClass();
+            return $sessions_group_by_date;
+        }
+        return $result;
+    }
     public function getDatesFormatted()
     {
         $meeting = $this;

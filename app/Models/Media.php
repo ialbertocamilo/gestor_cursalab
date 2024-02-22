@@ -336,7 +336,30 @@ class Media extends BaseModel
 
         return $path;
     }
+    protected function uploadMediaBase64($name, $path, $base64,$save_in_media=true,$status='public')
+    {
+        $exploded = explode(',', $base64, 2);
+        $s3 = Storage::disk('s3')->put($path, base64_decode($exploded[1]), $status);
+        $size = Storage::disk('s3')->size($path);
 
+        try {
+            $save_size = round(($size / 1024) / 1024);
+        } catch (\Exception $exception) {
+            $save_size = 0;
+        }
+        if(!$save_in_media){
+            return $path;
+        }
+        $media = new Media;
+        $media->title = $name;
+        $media->file = $path;
+        $media->ext = 'jpg';
+        $media->size = $size;
+        $media->workspace_id = session('workspace')['id'] ?? NULL;
+        $media->save();
+
+        return $media;
+    }
     protected function validateStorageByWorkspace($files){
         $workspace = get_current_workspace();
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();

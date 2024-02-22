@@ -211,7 +211,7 @@
                                                                             </div>
                                                                         </div> -->
                                                                         <div>
-                                                                            <div class="btn_action" @click="deleteInstruction(stage, i)" :class="{'disabled': activity.new || !activity.active}">
+                                                                            <div class="btn_action" @click="()=>{}" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     mdi mdi-pencil
                                                                                 </v-icon>

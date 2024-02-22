@@ -41,7 +41,6 @@ Route::redirect('/', 'login', 301);
 //     return view('emails.email_information_apis',['data'=>$mail_data]);
 // });
 // Route::view('email_limite','emails.email_limite_usuarios');
-Route::view('welcome_email','emails.welcome_email');
 Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
 Route::post('switch_platform', [GestorController::class, 'switchPlatform']);
@@ -166,6 +165,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
 
     Route::prefix('usuarios')->middleware('hasHability:users')->group(base_path('routes/cms/usuarios.php'));
     Route::prefix('person')->middleware('hasHability:users')->group(base_path('routes/cms/person.php'));
+    Route::prefix('registrotrainer')->middleware('hasHability:users')->group(base_path('routes/cms/registrotrainer.php'));
     // Route::prefix('cargos')->middleware('checkrol:admin')->group(base_path('routes/cms/cargos.php'));
     // Route::prefix('boticas')->middleware('checkrol:admin')->group(base_path('routes/cms/boticas.php'));
     Route::prefix('criterios')->middleware('hasHability:criteria')->group(base_path('routes/cms/criteria.php'));
@@ -218,45 +218,71 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));
 
     Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDFDownload']);
-    Route::get('/generate-pdf-blade', function(){
-        $national_occupations_catalog = App\Models\NationalOccupationCatalog::select('code','name')->get()->toArray();
-        $catalog_denominations = App\Models\Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
+    // Route::get('/generate-pdf-blade', function(){
+    //     $national_occupations_catalog = App\Models\NationalOccupationCatalog::select('code','name')->get()->toArray();
+    //     $catalog_denominations = App\Models\Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
+    //     $data = [
+    //         'national_occupations_catalog'=>$national_occupations_catalog,
+    //         'catalog_denominations'=>$catalog_denominations,
+    //         "title"=>'74130119-sostenibilidad',
+    //         "user" => [
+    //           "name" => \Str::title("Marisol CABRERA CABRERA"),
+    //           "curp" => '145L0789asd',
+    //           "document" => "74130119",
+    //           "occupation" => '01.2',
+    //           "position" => "Asistente de Talento y Desarrollo"
+    //         ],
+    //         "subworkspace" => [
+    //           "id" => 4,
+    //           "name_or_social_reason" => "Intercorp IRC",
+    //           "shcp" => "IMF1-70223A702",
+    //           "subworkspace_logo" => get_media_url("images/wrkspc-1-logo-corporativo-1-02-20220829130652-iSA1RxfF31iv2fD.png",'s3')
+    //         ],
+    //         "course" =>  [
+    //           "id" => 112,
+    //           "name" => "Sostenibilidad",
+    //           "duration" => "0.35",
+    //           "instructor" => "Aldo Ramirez",
+    //           "instructor_signature" => get_media_url("images/wrkspc-1-1-20231205170625-dapwpNAKnyK4lPL.png","s3"),
+    //           "legal_representative" => "Representante 3",
+    //           "legal_representative_signature" => get_media_url("images/wrkspc-1-1-20231205173447-5s3MNfRDbDb8HFB.png","s3"),
+    //           "catalog_denomination_dc3" => "8000",
+    //           "init_date_course_year" => 2023,
+    //             "init_date_course_month" => 12,
+    //             "init_date_course_day" => 5,
+    //             "final_date_course_year" => 2023,
+    //             "final_date_course_month" => 12,
+    //             "final_date_course_day" => 5
+    //         ]
+    //     ];
+    //     return view('pdf.dc3',$data);
+    // });
+    Route::get('/generate-report-assistance', function(){
+        $course_id = 1492;
+        $topic_id = 4113;
+
+        $assigned = \App\Models\CourseInPerson::listUsersBySession($course_id, $topic_id, 'all',null,false,true);
+        $required_signature = \App\Models\Course::where('id',$course_id)->select('modality_in_person_properties')->first()
+                                ?->modality_in_person_properties?->required_signature;
+        $topic =  \App\Models\Topic::where('id',$topic_id)->select('name','modality_in_person_properties')->first();
+        $modality_in_person_properties = $topic->modality_in_person_properties;
+        $host = App\Models\User::select('name','lastname','surname')->where('id',$modality_in_person_properties->host_id)->first();
+        $start_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
+        $finish_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
+        $diff = $finish_datetime->diff($start_datetime);
+        $duration = sprintf('%02d:%02d', $diff->h, $diff->i);
         $data = [
-            'national_occupations_catalog'=>$national_occupations_catalog,
-            'catalog_denominations'=>$catalog_denominations,
-            "title"=>'74130119-sostenibilidad',
-            "user" => [
-              "name" => \Str::title("Marisol CABRERA CABRERA"),
-              "curp" => '145L0789asd',
-              "document" => "74130119",
-              "occupation" => '01.2',
-              "position" => "Asistente de Talento y Desarrollo"
-            ],
-            "subworkspace" => [
-              "id" => 4,
-              "name_or_social_reason" => "Intercorp IRC",
-              "shcp" => "IMF1-70223A702",
-              "subworkspace_logo" => get_media_url("images/wrkspc-1-logo-corporativo-1-02-20220829130652-iSA1RxfF31iv2fD.png",'s3')
-            ],
-            "course" =>  [
-              "id" => 112,
-              "name" => "Sostenibilidad",
-              "duration" => "0.35",
-              "instructor" => "Aldo Ramirez",
-              "instructor_signature" => get_media_url("images/wrkspc-1-1-20231205170625-dapwpNAKnyK4lPL.png","s3"),
-              "legal_representative" => "Representante 3",
-              "legal_representative_signature" => get_media_url("images/wrkspc-1-1-20231205173447-5s3MNfRDbDb8HFB.png","s3"),
-              "catalog_denomination_dc3" => "8000",
-              "init_date_course_year" => 2023,
-                "init_date_course_month" => 12,
-                "init_date_course_day" => 5,
-                "final_date_course_year" => 2023,
-                "final_date_course_month" => 12,
-                "final_date_course_day" => 5
-            ]
+            'users' => $assigned['users'],
+            'required_signature' => $required_signature,
+            'colspan' => $required_signature ? '4' : '3',
+            'name_session'=>$topic->name,
+            'datetime'=>$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time,
+            'host' => $host->name.' '.$host->lastname.' '.$host->surname,
+            'duration'=>$duration
         ];
-        return view('pdf.dc3',$data);
+        return view('pdf.report-assistance',$data);
     });
+    // Route::get('welcome_email','emails.welcome_email');
 });
 
 

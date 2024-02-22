@@ -30,11 +30,11 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; ">
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                El enlace para para recuperar contraseña expirará en  {{ $data['minutes'] }} minutos.
+                El enlace para recuperar contraseña expirará en  {{ $data['minutes'] }} minutos.
                 Si no solicitaste la recuperación de contraseña, no es necesario realizar ninguna acción. <br>
             </p>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px; margin-bottom:25px">
-                ¿No reconoces esta actividad? Contáctate inmediatamente con el equipo de Customer Experience.<br>
+                ¿No reconoces esta actividad? Comunicate inmediatamente con tu ejecutivo(a) de Customer Success.<br>
                 Este es un mensaje automático, por favor no responder.
             </p>
         </td>

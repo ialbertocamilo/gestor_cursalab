@@ -12,19 +12,18 @@
 
                 <v-tabs fixed-tabs v-model="tabs">
 
-                    <v-tab href="#tab-1" :key="1" class="primary--text">
+                   <!--  <v-tab href="#tab-1" :key="1" class="primary--text">
                         <v-icon>mdi-account</v-icon>
                         <span class="ml-3">Perfil de usuario</span>
-                    </v-tab>
+                    </v-tab> -->
 
                     <v-tab
                         href="#tab-2"
                         :key="2"
                         class="primary--text"
-                        v-if="$root.isSuperUser"
                     >
                         <v-icon>mdi-chart-areaspline-variant</v-icon>
-                        <span class="ml-3">Progreso</span>
+                        <span class="ml-3">Progreso de usuario</span>
                     </v-tab>
 
                    <!--  <v-tab
@@ -41,7 +40,7 @@
 
                 <v-tabs-items v-model="tabs" class="w-90">
 
-                    <v-tab-item :key="1" :value="'tab-1'">
+                <!--     <v-tab-item :key="1" :value="'tab-1'">
                         <v-row class="--justify-content-center pt-4">
                             <v-col cols="12">
 
@@ -87,9 +86,9 @@
                             </v-col>
                         </v-row>
 
-                    </v-tab-item>
+                    </v-tab-item> -->
 
-                    <v-tab-item :key="2" :value="'tab-2'" v-if="$root.isSuperUser" class="---w-90">
+                    <v-tab-item :key="2" :value="'tab-2'" class="---w-90">
 
                         <div v-if="courses.regular_schools" class="mt-3"> 
                             <DefaultSection :title-default="false" v-for="(school, s_idx) in courses.regular_schools" :key="'block-school-' + s_idx">
@@ -285,7 +284,7 @@ export default {
     },
     data() {
         return {
-            tabs: 1,
+            tabs: 2,
             current_topic: [],
             profile: {
                 user: [],

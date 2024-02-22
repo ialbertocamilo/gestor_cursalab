@@ -45,9 +45,11 @@ Vue.use(VueNotification, {
     }
 });
 import * as VueGoogleMaps from 'vue2-google-maps'
+// test: 
+// prod: AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE
 Vue.use(VueGoogleMaps , {
     load: {
-        key: 'AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE',
+        key: 'AIzaSyAutlRxqIv1gr3J3RcPdKOfprDRluJdmNg',
         libraries: 'places',
     },
 })

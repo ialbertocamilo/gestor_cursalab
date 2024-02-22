@@ -14,7 +14,7 @@ class SummaryCourse extends Summary
         'last_time_evaluated_at', 'user_id', 'course_id', 'status_id', 'assigned', 'attempts',
         'views', 'advanced_percentage', 'grade_average', 'passed', 'taken', 'reviewed', 'failed',
         'old_admin_id',
-        'completed', 'restarts', 'restarter_id', 'certification_issued_at', 'certification_accepted_at','dc3_path'
+        'completed', 'restarts', 'restarter_id', 'certification_issued_at', 'certification_accepted_at','dc3_path', 'registro_capacitacion_path'
     ];
 
     protected $casts = [

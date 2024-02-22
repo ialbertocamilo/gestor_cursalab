@@ -8,21 +8,50 @@
                 Este proceso permite únicamente crear usuarios mediante el envió de sus datos personales y sus criterios correspondientes. <br>
                 La validación de creación de usuario se hace mediante el valor del documento, en caso el documento ya se encuentre registrado no se creará ni actualizará los datos la api lo retornará dentro del listado de errores.
             </p>
-            <descriptionApi :options="api_description_options" :set_responses="true" />
+            <descriptionApi
+                v-if="initialized"
+                :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>
 <script>
 import descriptionApi from '../components/description_api.vue';
+import axios from 'axios'
 let base_url = window.location.origin;
+const is_inretail =  base_url.includes('inretail');
+
+const userFields = is_inretail
+        ?
+`
+            "active": boolean,
+            "document": text,
+            "person_number": text,
+            "fullname": text,
+            "name": text,
+            "lastname": text,
+            "surname": text,
+            "username": text (Optional),
+            "phone_number": text,
+            "email": text,`
+
+        :
+`
+            "active": boolean,
+            "document": text,
+            "name": text,
+            "lastname": text,
+            "surname": text,
+            "email": text (Optional),`
 export default {
     components: {descriptionApi},
     data() {
         return{
+            is_inretail:is_inretail,
+            initialized: false,
             api_description_options:{
                 title:'Crear usuarios',
                 type:'POST',
-                route:'/integrations/create-users',
+                route:'/integrations/update-create-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -40,65 +69,13 @@ export default {
     {
         "workspace_id":"Identificador del workspace",
         "users": [
-            {
-                "active": boolean,
-                "document": text,
-                "person_number": text,
-                "fullname": text,
-                "name": text,
-                "lastname": text,
-                "surname": text,
-                "username": text (Optional),
-                "phone_number": text,
-                "email": text,
+            {  ${userFields}
                 "criterions": {
-                    "module":text,
-                    "user_action_id":text,
-                    "document_type_id":text,
-                    "business_unit_id":text,
-                    "business_unit_name":text,
-                    "gender":text,
-                    "position_name":text,
-                    "position_code":text,
-                    "date_start":text,
-                    "termination_date":date,
-                    "seniority_date":date,
-                    "birthday_date":date,
-                    "phone_type_id":text,
-                    "aplica_a_bono":text,
-                    "tipo_de_bono":text,
-                    "grupo_ocupacional":text,
-                    "location_code":text,
-                    "location_name":text,
-                    "department_name":text,
-                    "department_code":text,
-                    "modalidad_de_trabajo":text,
-                    "department_name_nivel_1":text,
-                    "department_name_nivel_2":text,
-                    "department_name_nivel_3":text,
-                    "department_name_nivel_4":text,
-                    "department_name_nivel_5":text,
-                    "department_name_nivel_6":text,
-                    "email_type":text,
-                    "national_identifier_number_manager":text,
-                    "nombre_de_jefe":text,
-                    "posicion_jefe":text,
-                    "clasificacion_de_evd":text,
-                    "gor_gerente_de_área":text,
-                    "botica":text,
-                    "grupo":text,
-                    "zonal":text,
-                    "correo_zonal":text,
-                    "tipo_de_publico":text,
-                    "division":text,
-                    "area":text,
-                    "region":text,
-                    "region_de_tienda":text,
-                    "correo_jefe":text,
-                    "grupos_de_supervision_supply":text,
-                    "gerente_de_area_o_mall":text,
+                  "module": text,
+                  "gender": text,
+
+CRITERION_LIST
                 }
-                
             }
         ]
     }
@@ -138,81 +115,39 @@ export default {
 {
 type:'language-js',
 code:
-`   
+`
 const base_url = '${base_url}';
 let axios = require('axios');
 let data = JSON.stringify({
     "users":
         [
-                    {
-            "active": boolean,
-            "document": text,
-            "person_number": text,
-            "fullname": text,
-            "name": text,
-            "lastname": text,
-            "surname": text,
-            "username": text,
-            "phone_number": number,
-            "email": text,
-            "criterions": {
-                "module":text,
-                "user_action_id":text,
-                "document_type_id":text,
-                "business_unit_id":text,
-                "business_unit_name":text,
-                "gender":text,
-                "position_name":text,
-                "position_code":text,
-                "date_start":text,
-                "termination_date":date,
-                "seniority_date":date,
-                "birthday_date":date,
-                "phone_type_id":text,
-                "aplica_a_bono":text,
-                "tipo_de_bono":text,
-                "grupo_ocupacional":text,
-                "location_code":text,
-                "location_name":text,
-                "department_name":text,
-                "department_code":text,
-                "modalidad_de_trabajo":text,
-                "department_name_nivel_1":text,
-                "department_name_nivel_2":text,
-                "department_name_nivel_3":text,
-                "department_name_nivel_4":text,
-                "department_name_nivel_5":text,
-                "department_name_nivel_6":text,
-                "email_type":text,
-                "national_identifier_number_manager":text,
-                "nombre_de_jefe":text,
-                "posicion_jefe":text,
-                "clasificacion_de_evd":text,
-                "gor_gerente_de_área":text,
-                "botica":text,
-                "grupo":text,
-                "zonal":text,
-                "correo_zonal":text,
-                "tipo_de_publico":text,
-                "division":text,
-                "area":text,
-                "region":text,
-                "region_de_tienda":text,
-                "correo_jefe":text,
-                "grupos_de_supervision_supply":text,
-                "gerente_de_area_o_mall":text,
+            {
+                "active": boolean,
+                "document": text,
+                "person_number": text,
+                "fullname": text,
+                "name": text,
+                "lastname": text,
+                "surname": text,
+                "username": text,
+                "phone_number": number,
+                "email": text,
+                "criterions": {
+                    "module": text,
+                    "gender": text,
+
+CRITERION_LIST
+                }
             }
-            
-        }
         ]
     }
 );
 var config = {
     method: 'post',
     url: base_url+'/integrations/update-create-users',
-    headers: { 
-        'secretKey': 'f*hdj[!GbdZQ4{#zKlot', 
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...', 
+    headers: {
+        'secretKey': 'f*hdj[!GbdZQ4{#zKlot',
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...',
         'Content-Type': 'application/json'
     },
     data : data
@@ -233,12 +168,48 @@ code:
         "amount_errors":"Cantidad de errores encontrados."
         "processed_data": "Cantidad de data recibida.",
         "inserted_users": "Documento y identificador del workspace de los usuarios insertados."
-        "errors": "Listado de errores encontrados en la api." 
+        "errors": "Listado de errores encontrados en la api."
     }
 }`
 }],
                 }
             },
+        }
+    },
+    mounted() {
+      this.loadData()
+    },
+    methods: {
+        async loadData() {
+
+            let url = '../criterios/workspace'
+            try {
+
+                let response = await axios({
+                    method: 'get',
+                    url: url
+                })
+
+                // Generate workspace criterions list
+
+                let criterionsList = [];
+                response.data.forEach(c => {
+                    if (c.code !== 'module' && c.code !== 'gender')
+                        criterionsList.push(`                    "${c.code}": text (Optional)`);
+                })
+
+                // Replace criteria in documentation code
+
+                this.api_description_options.example_code.content_tabs[0].code = this.api_description_options.example_code.content_tabs[0].code.replace('CRITERION_LIST', criterionsList.join(',\n'))
+
+                this.api_description_options.parameters_type[0].parameters[0].description = this.api_description_options.parameters_type[0].parameters[0].description.replace('CRITERION_LIST', criterionsList.join(',\n'))
+
+                this.initialized = true
+
+
+            } catch (e) {
+                console.log(e)
+            }
         }
     }
 }

@@ -95,8 +95,15 @@ class SegmentController extends Controller
     public function store(Request $request)
     {
         // return ($request->all());
-
-        return Segment::storeRequestData($request);
+        $data = $request->all();
+        $response = Segment::storeRequestData($request);
+        if($data['model_type'] == 'App\\Models\\Course'){
+            $course = Course::select('id','modality_id')->where('id',$data['model_id'])->with('modality:id,code')->first();
+            if($course?->modality?->code == 'virtual'){
+                $course->storeUpdateMeeting();
+            }
+        }
+        return $response;
     }
 
     public function searchUsers(Request $request)
@@ -114,7 +121,7 @@ class SegmentController extends Controller
             $documents = $import->getProccesedData();
         }
 
-        $query = User::query()
+        $query = User::query()->FilterByPlatform()
             ->whereIn('subworkspace_id', $sub_workspaces_id)
             ->withWhereHas('criterion_values', function ($q) use ($data) {
                 $q->select('id', 'value_text')

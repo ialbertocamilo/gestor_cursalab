@@ -270,7 +270,16 @@ class Poll extends BaseModel
         //     return [];
         // }
     }
+    protected function loadPollsByType($type){
+        $workspace = get_current_workspace();
+        $polls = Poll::where('active', 1)
+            ->whereRelation('type','code',$type)
+            ->with('type:id,code')
+            ->where('workspace_id', $workspace->id)
+            ->get();
 
+        return $polls;
+    }
 
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {

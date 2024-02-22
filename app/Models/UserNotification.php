@@ -24,6 +24,9 @@ class UserNotification extends Model
     public const NEW_ANNOUNCEMENT = 'new-announcement';
     public const NEW_VIDEO = 'new-video';
     public const FROM_PUSH = 'from-push';
+    public const NEW_MEETING = 'new-meeting';
+    public const COURSE_ATTEMPTS_RESET = 'course-attempts-reset';
+    public const TOPIC_ATTEMPTS_RESET = 'topic-attempts-reset';
 
     protected $collection = 'user_notifications';
 
@@ -75,8 +78,8 @@ class UserNotification extends Model
             ->where('group', 'user-notifications')
             ->where('code', $notficationType)
             ->first();
+        if (!$taxonomy) return;
         $type = $taxonomy->type;
-
 
         $content = config("notifications.$type.$notficationType");
         foreach ($contentValues as $key => $value) {

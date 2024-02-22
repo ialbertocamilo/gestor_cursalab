@@ -72,7 +72,7 @@
             </div>
             <div class="mt-4 text-right copy">
                 <a href="https://cursalab.io/" target="_blank" class="external">
-                    <img src="{{ url('/img/poweredByCursalab.png') }}" alt="..." class="img-fluid" width="120">
+                    <img src="{{ url('/img/poweredByCursalab_v2.png') }}" alt="..." class="img-fluid" width="120">
                 </a>
             </div>
         </div>

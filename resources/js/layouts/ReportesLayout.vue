@@ -104,10 +104,16 @@
                        Notas por curso
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' v-if="permissions.hasPermissionToShowDc3Report">
+                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' >
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        DC3 - DC4
+                   </span>
+                </v-tab>
+                <v-tab class="justify-content-start py-7" key='registro-capacitacion' >
+                    <v-icon left>mdi-book-open-page-variant-outline</v-icon>
+                    <span class="pt-2">
+                       Registro de capacitación
                    </span>
                 </v-tab>
                 <v-tab class="justify-content-start py-7" key='segmentacion'>
@@ -305,6 +311,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -318,6 +325,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -331,15 +339,28 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :modalities="modalities"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item v-if="permissions.hasPermissionToShowDc3Report">
+                <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <Dc3Dc4
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <RegistroCapacitacion
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
@@ -647,9 +668,12 @@ import BenefitsReport from "../components/Reportes/BenefitsReport.vue";
 import UsersBenefitReport from "../components/Reportes/UsersBenefitReport.vue";
 import Votaciones from "../components/Reportes/Votaciones.vue";
 import Dc3Dc4 from '../components/Reportes/Dc3Dc4'
+import RegistroCapacitacion
+    from "../components/Reportes/RegistroCapacitacion.vue";
 
 export default {
     components: {
+        RegistroCapacitacion,
         Votaciones,
         UsersHistory,
         EmptyCriteria,
@@ -689,6 +713,7 @@ export default {
             generateReportCallback: () => {},
 
             modules: [],
+            modalities:[],
             admins: [],
             reportTypes: [],
             reportsBaseUrl: '',
@@ -781,6 +806,7 @@ export default {
                 adminId,
                 workspaceId,
                 modules,
+                modalities,
                 admins,
                 VademecumList
             } = await vue.fetchDataReport();
@@ -792,9 +818,7 @@ export default {
             this.modules = modules
             this.admins = admins
             this.VademecumList = VademecumList
-
-            
-
+            this.modalities= modalities
             vue.isSuperUser = vue.isSuper();
         },
         async crearReporte(res) {

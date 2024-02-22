@@ -12,6 +12,7 @@ use App\Traits\CustomAudit;
 use App\Traits\CustomMedia;
 use Illuminate\Support\Str;
 use App\Models\Mongo\EmailLog;
+use App\Models\Master\Customer;
 use Spatie\Image\Manipulations;
 use Khsing\World\Models\Country;
 use Spatie\MediaLibrary\HasMedia;
@@ -19,36 +20,36 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 use Silber\Bouncer\Database\Models;
+
 use Illuminate\Support\Facades\Hash;
 
 use Illuminate\Support\Facades\Mail;
 
 use Clockwork\DataSource\DBALDataSource;
-
 use Illuminate\Notifications\Notifiable;
 use Altek\Accountant\Contracts\Recordable;
-use Lab404\Impersonate\Models\Impersonate;
 
+use App\Models\Mongo\WorkspaceCustomEmail;
+use Lab404\Impersonate\Models\Impersonate;
 use App\Models\UCMigrationData\Migration_1;
+
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Altek\Accountant\Contracts\Identifiable;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Jenssegers\Mongodb\Eloquent\HybridRelations;
-
 use Silber\Bouncer\Database\HasRolesAndAbilities;
-
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
-use App\Models\Master\Customer;
 
 class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 {
@@ -291,7 +292,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
 //            ->whereNotNull('subworkspace_id');
     }
-
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion' ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id;
+        $q->where('type_id',$type_id);
+    }
     public function scopeFilterText($q, $filter)
     {
         $q->where(function ($q) use ($filter) {
@@ -477,19 +482,19 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return null;
         }
     }
-
+   
     public function updateStatusUser($active = null, $termination_date = null,$from_massive=false)
     {
         $user = $this;
         $user->active = $active;
+        $current_workspace = get_current_workspace();
         if ($active) {
             $data['summary_user_update'] = true;
-            $user->sendWelcomeEmail($from_massive);
+            $user->sendWelcomeEmail($from_massive,$current_workspace);
         }
         $user->save();
         if($user->active){
             try {
-                $current_workspace = get_current_workspace();
                 $current_workspace->sendEmailByLimit();
             } catch (\Throwable $th) {
 
@@ -547,6 +552,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
+            $current_workspace_id = get_current_workspace();
+
             if ($user) :
                 if ($from_massive) {
                     $data['summary_user_update'] = true;
@@ -582,7 +589,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
             if($user->active){
-                $user->sendWelcomeEmail($from_massive);
+                $user->sendWelcomeEmail($from_massive,$current_workspace_id);
             }
             $user->subworkspace_id = Workspace::query()
                 ->where('criterion_value_id', $data['criterion_list']['module'])
@@ -597,7 +604,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                     if ($id_crit_val){
                         $data['criterion_list'][$key] = $id_crit_val->id;
                     } else {
-                        $current_workspace_id = get_current_workspace();
                         $data_cr['workspace_id'] = $current_workspace_id?->id;
 
                         $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($id_criterio);
@@ -676,25 +682,42 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $user;
         // info(['recordable_finish' => $this->isRecordingEnabled() ]);
     }
-    public function sendWelcomeEmail($from_massive=false){
+    public function sendWelcomeEmail($from_massive=false,$workspace){
+        $can_send_welcome_email = boolval($workspace->functionalities()->get()->where('code','welcome-email')->first());
+        if(!$can_send_welcome_email){
+            return '';
+        }
+        $email_custom = WorkspaceCustomEmail::search($workspace,'welcome-email');
+        if(!$email_custom){
+            return '';
+        }
         $user = $this;
         $email =  trim($user->email);
         //Solo de 380
-        if($user?->subworkspace_id != 224){
-            return;
-        }
+        // if($user?->subworkspace()->parent_id != 224){
+        //     return;
+        // }
         // if(!$email){
-        $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
-        if(!$taxonomy){
-            return;
-        }
+        // $taxonomy = Taxonomy::where('group','gestor')->where('type','env')->where('code','DEMO')->where('active',1)->first();
+        // if(!$taxonomy){
+        //     return;
+        // }
         if(!$email){
             return '';
         }
+       
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
                        'user_id' => $user->id,
+                       'data_custom' => $email_custom?->data_custom,
                     ];
+
+        if(isset($email_custom->data_custom['show_subworkspace_logo']) && $email_custom->data_custom['show_subworkspace_logo']){
+            $logo = Workspace::select('logo')->where('id',$user->subworkspace_id)->first()?->logo;
+            if($logo){
+                $mail_data['image_subworkspace'] = get_media_url($logo,'s3');
+            }
+        }
         $email_was_sent = EmailLog::where('user_email',$email)->where('type_email','welcome_email')->first();
         if($email_was_sent){
             return;
@@ -704,9 +727,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             //send email by command
             $status = 'sent';
             Mail::to($email)->send(new EmailTemplate('emails.welcome_email', $mail_data));
-            info('entra');
         }
-        info('llego');
         EmailLog::insertEmail($mail_data,'welcome_email','emails.welcome_email',$email,$status);
     }
     public function syncDocumentCriterionValue($old_document, $new_document)
@@ -764,10 +785,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request, $withAdvancedFilters = false)
     {
         // $query = self::onlyClientUsers();
-        $platform = session('platform');
-        $data['type_id'] = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
-        
-        $query = self::where('type_id',$data['type_id']);
+        $query = self::FilterByPlatform();
         if (auth()->user()->isA('super-user')) {
             $query = self::query();
         }
@@ -866,6 +884,37 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //            ? array_unique(array_column($all_courses, 'id'))
 //            : collect($all_courses)->unique()->values();
 //    }
+    protected function listUsersByCriteria($data){
+        $criterion_list = $data['criterion_list'];
+        // $criteria = Criterion::select('id','code','field_id')->with('field_type:id,name,code')->where('code',array_keys($criterion_list))->get();
+        //
+        $query = User::select('id','name','lastname','surname',DB::raw('CONCAT_WS(" ",name,lastname,surname) as fullname'),'document')
+                ->withWhereHas('criterion_values', function ($q) use ($data) {
+                    $q->select('id', 'value_text')
+                        // ->where('value_text', 'like', "%{$data['filter_text']}%")
+                        ->whereRelation('criterion', 'code', 'document');
+                })->where('active', 1);
+        $idx = 1;
+        $criterion_values = [];
+        foreach ($criterion_list as $criterion => $values) {
+            if(count($values)==0){
+                continue;
+            }
+            $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+                $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                    ->whereIn("cvu{$idx}" . '.criterion_value_id', $values);
+            });
+            $idx++;
+            $criterion_values = array_merge($criterion_values,$values);
+        }
+        // dd($query->toSql());
+        $criterion_values_selected = CriterionValue::select('value_text')->whereIn('id',$criterion_values)->get();
+        $users = $query->get()->map(function($user){
+            $user->criterion_value_id = $user->criterion_values?->first()?->id;
+            return $user;
+        });
+        return compact('criterion_values_selected','users');
+    }
     public function getSegmentedByModelType(
         $model,
         $select=false,
@@ -942,6 +991,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $response_type = 'courses-separated',
         $byCoursesId = [],
         $bySchoolsId = [],
+        $modality_code = null,
+        $only_ids_courses=null
     )
     {
         $user = $this;
@@ -990,10 +1041,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if(count($byCoursesId)>0){
             $query->whereIn('id', $byCoursesId);
         }
-
+        if($modality_code){
+            // $query->whereRelation('modality','code',$modality_code);
+            $query->whereHas('modality',function($q) use ($modality_code){
+                $q->where('code',$modality_code);
+            });
+        }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
         // info('D');
-
+        if($only_ids_courses){
+            return $courses->pluck('id');
+        }
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
         $isUserUcfp = $user->subworkspace->parent_id === 25;
@@ -1963,4 +2021,65 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return ($email_has_domain && $is_cursalab_type);
     }
 
+    /**
+     * Get user's criterion value id from specific criterion
+     */
+    public static function getCriterionValueId($userId, $criterionId) {
+
+        $user = User::find($userId);
+        $criterionValuesIds = $user->criterion_user->pluck('criterion_value_id');
+        $criterionValue = CriterionValue::query()
+            ->whereIn('id', $criterionValuesIds)
+            ->where('criterion_id', $criterionId)
+            ->first();
+
+        if (!$criterionValue) return null;
+
+        return $criterionValue->id ?: null;
+    }
+
+    /**
+     * Get user's criterion value id from specific criterion, if value is not
+     * found, try searching assuming is a value with a parent criterion
+     */
+    public static function getCriterionValueIdWithChildren($userId, $criterionId) {
+
+        $criterionValueId = self::getCriterionValueId($userId, $criterionId);
+
+        if ($criterionValueId) {
+            return $criterionValueId;
+        }
+
+        $childCriterion = Criterion::find($criterionId);
+        if ($childCriterion) {
+
+            $parentCriterionValueId = self::getCriterionValueId(
+                $userId, $childCriterion->parent_id
+            );
+
+            $criterionValue = CriterionValue::query()
+                ->where('parent_id', $parentCriterionValueId)
+                ->first();
+
+            if (!$criterionValue) return null;
+
+            return $criterionValue->id ?: null;
+
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Counts how many users exist with a specific criterion value
+     */
+    public static function countWithCriteria($subworkspaceId, $criterionValueId) {
+
+        return User::query()
+            ->where('active', 1)
+            ->where('subworkspace_id', $subworkspaceId)
+            ->whereHas('criterion_user', function($q) use ($criterionValueId) {
+                $q->where('criterion_value_id', $criterionValueId);
+            })->count();
+    }
 }

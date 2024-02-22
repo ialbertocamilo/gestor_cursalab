@@ -40,7 +40,8 @@ class Workspace extends BaseModel
         'show_logo_in_app',
         'share_diplomas_social_media',
         'certificate_template_id',
-        'dc3_configuration'
+        'dc3_configuration',
+        'registro_capacitacion'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -102,9 +103,19 @@ class Workspace extends BaseModel
         'limit_allowed_users' => 'array',
         'limits' => 'json',
         'jarvis_configuration' => 'json',
-        'dc3_configuration'=>'array'
+        'dc3_configuration'=>'array',
+        'registro_capacitacion' => 'json'
     ];
 
+    public function setRegistroCapacitacionAttribute($value)
+    {
+        $this->attributes['registro_capacitacion'] = json_encode($value);
+    }
+
+    public function getRegistroCapacitacionAttribute($value)
+    {
+        return $value ? json_decode($value) : json_decode('{"company":{}}');
+    }
 
     public function medias() {
         return $this->hasMany(Media::class, 'workspace_id');
@@ -243,7 +254,7 @@ class Workspace extends BaseModel
             }
             return $data;
         }
-        $data =json_decode($value); 
+        $data =json_decode($value);
         return $data;
     }
     protected static function search($request)
@@ -814,7 +825,8 @@ class Workspace extends BaseModel
 
                         $course_data = $_course->toArray();
                         $course_data['external_id'] = $_course->id;
-                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration']);
+                        $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                        $course_data['registro_capacitacion'] = json_encode($course_data['registro_capacitacion'] ?? []);
                         $course = $school->courses()->create($course_data);
                         foreach ($_course->topics as $_topic) {
 
@@ -954,7 +966,7 @@ class Workspace extends BaseModel
                     'ia_descriptions_generated' => JarvisAttempt::getAttempt($workspace->id,'descriptions'),
                 ];
         }
-        return $data;        
+        return $data;
     }
     protected function getSchoolsForTree($schools)
     {
@@ -976,14 +988,14 @@ class Workspace extends BaseModel
 
                     $children[] = [
                         'id' => $course_parent_key . '-' . $child_key,
-                        'name' => $topic->name,
+                        'name' => '[TEMA] ' . $topic->name,
                         'icon' => 'mdi-bookmark',
                     ];
                 }
 
                 $course_parent = [
                     'id' => $course_parent_key,
-                    'name' => $course->name,
+                    'name' => '[CURSO] ' . $course->name,
                     'icon' => 'mdi-book',
                     'children' => $children,
                 ];
@@ -993,7 +1005,7 @@ class Workspace extends BaseModel
 
             $parent = [
                 'id' => $school_parent_key,
-                'name' => $school->name,
+                'name' => '[ESCUELA] ' . $school->name,
                 'icon' => 'mdi-school',
                 'children' => $school_children,
             ];
@@ -1003,7 +1015,23 @@ class Workspace extends BaseModel
 
         return $data;
     }
-
+    public function getModalitiesCourseByWorkspace(){
+        $workspace = $this;
+        $modalities = Taxonomy::where('group','course')->where('type','modality')->select('id','name','code','icon','color')->get();
+        return $modalities->map(function($modality)use($workspace){
+            $hasFunctionality = true;
+            if($modality->code == 'in-person' || $modality->code == 'virtual'){
+                $modality_code = 'course-'.$modality->code;
+                $hasFunctionality = $workspace->hasFunctionality($modality_code);
+            }
+            $modality['has_functionality'] = $hasFunctionality;
+            return $modality;
+        });
+    }
+    public function hasFunctionality($functionality_code){
+        $workspace = $this;
+        return boolval($workspace->functionalities()->get()->where('code',$functionality_code)->first());
+    }
     protected function getAvailableForTree($_subworkspace)
     {
         $data = [];
@@ -1021,7 +1049,7 @@ class Workspace extends BaseModel
 
             $parent = [
                 'id' => $parent_key,
-                'name' => $subworkspace->name,
+                'name' => '[MÓDULO] ' . $subworkspace->name,
                 'avatar' => '',
                 'icon' => 'mdi-view-grid',
                 'children' => $children,
@@ -1031,6 +1059,83 @@ class Workspace extends BaseModel
         }
 
         return $data;
+    }
+
+    protected function setCoursesDuplication($course_ids, $_courses, $_topics, $school, $workspace, $prefix = '', $force_course_creation = false)
+    {
+        foreach ($course_ids as $course_id => $topic_ids) {
+
+            $_course = $_courses->where('id', $course_id)->first();
+
+            $course = null;
+
+            if (!$force_course_creation) {
+
+                $course = $school->courses()->where('name', $_course->name)->first();
+            }
+
+            if (!$course) {
+
+                $course_data = $_course->toArray();
+                $course_data['external_id'] = $_course->id;
+                $course_data['name'] = $prefix . $_course->name;
+                $course_data['dc3_configuration'] = json_encode($course_data['dc3_configuration'] ?? []);
+                $course_data['registro_capacitacion'] = json_encode($course_data['registro_capacitacion'] ?? []);
+
+                $course = $school->courses()->create($course_data);
+
+                $workspace->courses()->attach($course);
+            }
+
+            foreach ($topic_ids['topics'] as $topic_id) {
+
+                $_topic = $_topics->where('id', $topic_id)->first();
+
+                $topic = $course->topics()->where('name', $_topic->name)->first();
+
+                if(!$topic) {
+
+                    $topic_data = $_topic->toArray();
+                    $topic_data['external_id'] = $_topic->id;
+
+                    $topic = $course->topics()->create($topic_data);
+
+                    $topic->medias()->createMany($_topic->medias->toArray());
+                    $topic->questions()->createMany($_topic->questions->toArray());
+
+                    $_requirement = $_topic->requirements->first();
+
+                    if ($_requirement) {
+
+                        $requirement = $course->topics()->where('external_id', $_requirement->requirement_id)->first();
+
+                        if ($requirement) {
+
+                            Requirement::updateOrCreate(
+                                ['model_type' => Topic::class, 'model_id' => $topic->id],
+                                ['requirement_type' => Topic::class, 'requirement_id' => $requirement->id]
+                            );
+                        }
+                    }
+                }
+
+            }
+        }
+
+        $_c_requirement = $_course->requirements->first();
+
+        if ($_c_requirement) {
+
+            $c_requirement = $workspace->courses()->where('external_id', $_c_requirement->requirement_id)->first();
+
+            if ($c_requirement) {
+
+                Requirement::updateOrCreate(
+                    ['model_type' => Course::class, 'model_id' => $course->id],
+                    ['requirement_type' => Course::class, 'requirement_id' => $c_requirement->id]
+                );
+            }
+        }
     }
 
 }

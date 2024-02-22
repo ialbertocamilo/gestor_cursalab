@@ -202,6 +202,8 @@ class UserProgress extends Model
             ->where('value_text', '<>', 'Ciclo 0')
             ->orderBy('position')->get();
         }
+        $modalities = Taxonomy::where('group', 'course')->where('type', 'modality')->select('id','code')->get();
+
         foreach ($courses as $course) {
             $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
 
@@ -279,9 +281,10 @@ class UserProgress extends Model
 
                 continue;
             endif;
-
+            $modality = $modalities->where('id',$course->modality_id)->first();
             $school_courses->push([
                 'id' => $course->id,
+                'modality_code' => $modality?->code,
                 'image' => get_media_url($course->imagen),
                 'show_topics' => false,
                 'name' => $course_name,

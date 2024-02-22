@@ -45,7 +45,7 @@
                         modalLogsOptions,
                         $event,
                         'logs',
-                        `Logs de Modulo - ${$event.name}`
+                        `Logs de módulo - ${$event.name}`
                     )
                 "
                 @edit="openFormModal(modalOptions, $event, 'edit', `Editar módulo - ${$event.name}`)"
@@ -147,8 +147,8 @@ export default {
                         icon: 'mdi mdi-content-copy',
                         type: 'action',
                         method_name: 'duplicate',
-                        show_condition: "is_cursalab_super_user"
                     },
+                        // show_condition: "is_cursalab_super_user"
                     {
                         text: "Logs",
                         icon: "mdi mdi-database",
@@ -189,7 +189,7 @@ export default {
             },
             modalDeleteOptions: {
                 ref: "ModuloDeleteModal",
-                title: "Eliminar Módulo",
+                title: "Eliminar módulo",
                 contentText: "¿Desea eliminar este registro?",
                 open: false,
                 endpoint: ""

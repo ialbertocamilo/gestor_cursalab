@@ -16,6 +16,6 @@
     </div>
     <script src="{{ asset('js/manifest.js') }}"></script>
     <script src="{{ asset('js/vendor.js') }}"></script>
-    <script src="{{ asset('js/documentation_page.js') }}"></script>
+    <script src="{{ asset('js/documentation_page.js?v=3') }}"></script>
 </body>
 </html>

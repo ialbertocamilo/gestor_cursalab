@@ -44,9 +44,11 @@ class TemaStoreUpdateRequest extends FormRequest
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
             'validate' => 'required',
-
+            'path_qr' => 'nullable',
             'qualification_type_id' => 'nullable',
+            'modality_in_person_properties' => 'nullable',
             'tags' => 'nullable',
+            'review_all_duration_media' => 'nullable',
         ];
     }
 
@@ -62,12 +64,14 @@ class TemaStoreUpdateRequest extends FormRequest
 
         $active_results = ($this->active_results === 'true' or $this->active_results === true or $this->active_results === 1 or $this->active_results === '1');
         $data['active_results'] = $active_results;
-//
+       
+         $data['review_all_duration_media'] = ($this->review_all_duration_media === 'true' or $this->review_all_duration_media === true or $this->review_all_duration_media === 1 or $this->review_all_duration_media === '1');
+
        if ( ! $this->has('assessable') )
             $data['assessable'] = 0;
 
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
-
+        $data['modality_in_person_properties'] = $this->modality_in_person_properties ? json_decode($this->modality_in_person_properties, true) : [];
         return $this->merge($data)->all();
     }
 }
