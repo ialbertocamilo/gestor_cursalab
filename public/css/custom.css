@@ -756,8 +756,16 @@ div.children label {
 }
 /*FORM DE EDICTION POSTEO*/
 .card_border {
-	box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 1);
+	/* box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 1); */
 	padding-top: 15px;
+	border-radius: 4px;
+	border: 1px solid #D9D9D9; 
+}
+.title-card-border{
+	top: -17px;
+	position: absolute; 
+	background: white; 
+	font-size: 12px;
 }
 /* Style switch */
 .button-switch {

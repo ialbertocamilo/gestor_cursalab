@@ -95,8 +95,15 @@ class SegmentController extends Controller
     public function store(Request $request)
     {
         // return ($request->all());
-
-        return Segment::storeRequestData($request);
+        $data = $request->all();
+        $response = Segment::storeRequestData($request);
+        if($data['model_type'] == 'App\\Models\\Course'){
+            $course = Course::select('id','modality_id')->where('id',$data['model_id'])->with('modality:id,code')->first();
+            if($course?->modality?->code == 'virtual'){
+                $course->storeUpdateMeeting();
+            }
+        }
+        return $response;
     }
 
     public function searchUsers(Request $request)

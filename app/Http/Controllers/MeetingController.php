@@ -31,6 +31,7 @@ class MeetingController extends Controller
     public function search(Request $request)
     {
         // $request->merge(['usuario_id' => 436]);
+        $request->include_topic_meetings = true;
         $meetings = Meeting::search($request);
         MeetingResource::collection($meetings);
 

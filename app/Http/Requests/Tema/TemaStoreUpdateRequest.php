@@ -44,8 +44,9 @@ class TemaStoreUpdateRequest extends FormRequest
             'imagen' => 'nullable',
             'file_imagen' => 'nullable',
             'validate' => 'required',
-
+            'path_qr' => 'nullable',
             'qualification_type_id' => 'nullable',
+            'modality_in_person_properties' => 'nullable',
             'tags' => 'nullable',
             'review_all_duration_media' => 'nullable',
         ];
@@ -70,7 +71,7 @@ class TemaStoreUpdateRequest extends FormRequest
             $data['assessable'] = 0;
 
         $data['qualification_type_id'] = $this->has('qualification_type') ? $this->qualification_type : null;
-
+        $data['modality_in_person_properties'] = $this->modality_in_person_properties ? json_decode($this->modality_in_person_properties, true) : [];
         return $this->merge($data)->all();
     }
 }

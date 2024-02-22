@@ -143,6 +143,8 @@ class CursosController extends Controller
             $catalog_denominations = Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('id',DB::raw("CONCAT(code,' - ',name) as name"))->get();
         }
 
+        $modalities = $workspace->getModalitiesCourseByWorkspace();
+       
         $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
         $registro_capacitacion_trainers = [];
         if ($has_registro_capacitacion_functionality) {
@@ -155,7 +157,7 @@ class CursosController extends Controller
         $response = compact(
             'escuelas', 'requisitos', 'types', 'qualification_types',
             'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
-            'instructors','legal_representatives','catalog_denominations',
+            'instructors','legal_representatives','catalog_denominations','modalities',
             'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers'
         );
 
@@ -218,6 +220,7 @@ class CursosController extends Controller
             'requisitos' => $form_selects['requisitos'],
             'escuelas' => $form_selects['escuelas'],
             'types' => $form_selects['types'],
+            'modalities' => $form_selects['modalities'],
             'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
             'has_registro_capacitacion_functionality' => $form_selects['has_registro_capacitacion_functionality'],
             'registro_capacitacion_trainers' => $form_selects['registro_capacitacion_trainers'],
@@ -339,7 +342,7 @@ class CursosController extends Controller
     {
         $workspace = get_current_workspace();
 
-        $encuestas = Poll::select('titulo as nombre', 'id')->where('workspace_id', $workspace->id)->get();
+        $encuestas = Poll::select('titulo as nombre', 'id')->whereRelation('type','code','xcurso')->where('workspace_id', $workspace->id)->get();
         $encuestas->prepend(['nombre' => 'Ninguno', 'id' => "ninguno"]);
         $course->encuesta_id = $course->polls->first()->id ?? "ninguno";
 
@@ -460,8 +463,9 @@ class CursosController extends Controller
         $workspace = get_current_workspace();
 
         $types = Taxonomy::getSelectData('course', 'type');
+        $modalities = $workspace->getModalitiesCourseByWorkspace();
 
-        return $this->success(compact('types'));
+        return $this->success(compact('types','modalities'));
     }
 
 
@@ -483,8 +487,8 @@ class CursosController extends Controller
             });
 
         $schools = [];
-
-        return $this->success(compact('modules', 'schools'));
+        $modalities = $workspace->getModalitiesCourseByWorkspace();
+        return $this->success(compact('modules', 'schools','modalities'));
     }
 
     public function getEncuestaSegmentation(Course $course)

@@ -69,8 +69,31 @@
                             multiple
                             :showSelectAll="false"
                             placeholder="Seleccione las escuelas"
-                            @onChange="escuelaChange"
+                            @onChange="loadCourses"
                             :maxValuesSelected="10"
+                        />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modality"
+                            :items="modalities"
+                            label="Modalidades"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione una modalidad"
+                            @onChange="loadCourses"
+                        />
+                    </div>
+                    <div class="col-sm-6 mb-3" v-if="modalities.find(m => m.id == modality  && (m.code=='in-person' || m.code =='virtual'))">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="reportType"
+                            :items="types_report"
+                            label="Tipo de reporte"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione un tipo de reporte"
                         />
                     </div>
                     <!-- Curso -->
@@ -207,6 +230,7 @@ export default {
     props: {
         workspaceId: 0,
         adminId: 0,
+        modalities:Array,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -214,7 +238,12 @@ export default {
         return {
             filteredSchools: [],
             reportType: 'temas_no_evaluables',
+            types_report:[
+                {id:'consolidado_temas',name:'Consolidado'},
+                {id:'asistencias',name:'Asistencia'},
+            ],
             schools: [],
+            modality:null,
             courses: [],
             topics: [],
             areas: [],
@@ -241,6 +270,7 @@ export default {
         };
     },
     mounted() {
+        this.modality = this.modalities.find((m) => m.code =='asynchronous').id;
         this.fetchFiltersData()
     }
     ,
@@ -302,6 +332,7 @@ export default {
                         filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
+                        modality_id:this.modality,
                         cursos: this.curso,
                         temas: this.tema,
                         areas: this.area,
@@ -313,7 +344,8 @@ export default {
                         start: fechaFiltro.start,
                         end: fechaFiltro.end,
                         activeTopics: topicStatusFilter.UsuariosActivos,
-                        inactiveTopics: topicStatusFilter.UsuariosInactivos
+                        inactiveTopics: topicStatusFilter.UsuariosInactivos,
+                        ext:this.reportType=='asistencias' ? 'zip' : 'xlsx'
                     }
                 })
                 const vue = this
@@ -349,7 +381,7 @@ export default {
          * Fetch courses
          * @returns {Promise<boolean>}
          */
-        async escuelaChange() {
+        async loadCourses() {
             this.curso = [];
             this.tema = [];
             this.courses = [];
@@ -358,7 +390,7 @@ export default {
             if (this.escuela.length === 0) return false;
 
             this.cursos_libres =false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}?modality_id=${this.modality}`
             let res = await axios({
                 url,
                 method: 'get'

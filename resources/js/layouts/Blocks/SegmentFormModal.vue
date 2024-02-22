@@ -49,15 +49,15 @@
                 <!--
                 Tabs
                 ======================================== -->
-
                 <v-tabs
                     v-model="tabs"
                     fixed-tabs
                     slider-color="primary"
 
                     class="col-10 offset-1"
+                    
                 >
-                    <v-tab>
+                    <v-tab v-if="show_criteria_segmentation">
                         {{ tabs_title }} Directa
                     </v-tab>
                     <v-tab>
@@ -67,7 +67,7 @@
 
                 <v-tabs-items v-model="tabs">
 
-                    <v-tab-item>
+                    <v-tab-item v-if="show_criteria_segmentation">
 
                         <v-row justify="space-around" v-if="!limitOne">
                             <v-col cols="10" class="d-flex justify-content-end">
@@ -213,7 +213,7 @@ export default {
             steps: 0,
             // total: 0,
             total: [],
-
+            show_criteria_segmentation:true,
             errors: [],
             showConfigTokens: false,
             resourceDefault: {
@@ -294,7 +294,10 @@ export default {
         checkIfExistCriteria(stackSegments, current) {
             const vue = this;
             let stackMessage = [];
-
+            
+            if(!vue.show_criteria_segmentation){
+                return stackMessage;
+            }
             //local scope function
             const VerifyCodeAndValues = (criterians, current) => {
                 let cri_state = false,
@@ -326,7 +329,6 @@ export default {
 
                 return { state, message, title, detail: { cri_data, cri_state } };
             };
-
             for (let i = 0; i < stackSegments.length; i++) {
                 const { criteria_selected } = stackSegments[i];
 
@@ -483,7 +485,7 @@ export default {
         async loadData(resource) {
             let vue = this;
             vue.errors = [];
-
+            
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -550,7 +552,10 @@ export default {
             if (resource.id && vue.isCourseSegmentation()) {
                 await vue.loadModulesFromCourseSchools(resource.id)
             }
-
+            if (typeof resource.show_criteria_segmentation !== 'undefined' && resource.show_criteria_segmentation !== null) {
+                vue.show_criteria_segmentation = resource.show_criteria_segmentation;
+                vue.tabs = 0;
+            }
             return 0;
         },
         /**

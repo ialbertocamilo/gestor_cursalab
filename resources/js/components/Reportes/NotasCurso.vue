@@ -62,7 +62,7 @@
             <div class="col-12">
                 <div class="row px-3">
                     <!-- Modulo -->
-                    <div class="col-sm-4 mb-3">
+                    <div class="col-sm-6 mb-3">
 
                         <DefaultAutocomplete
                             dense
@@ -75,12 +75,12 @@
                             :showSelectAll="false"
                             placeholder="Seleccione los módulos"
                             @onBlur="fetchFiltersAreaData"
-                            @onChange="moduloChange"
                             :maxValuesSelected="maxValuesSelected.modules"
+                            @onChange="moduloChange"
                         />
                     </div>
                     <!-- Escuela -->
-                    <div class="col-sm-4 mb-3">
+                    <div class="col-sm-6 mb-3">
                         <DefaultAutocomplete
                             dense
                             v-model="escuela"
@@ -91,13 +91,26 @@
                             item-value="id"
                             multiple
                             placeholder="Seleccione las escuelas"
-                            @onChange="escuelaChange"
                             :maxValuesSelected="maxValuesSelected.schools"
                             :showSelectAll="maxValuesSelected.show_select_all"
+                            @onChange="loadCourses"
+                        />
+                    </div>
+                    <!-- Modalidad -->
+                    <div class="col-sm-6 mb-3">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modality"
+                            :items="modalities"
+                            label="Modalidades"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione una modalidad"
+                            @onChange="loadCourses"
                         />
                     </div>
                     <!-- Curso -->
-                    <div class="col-sm-4 mb-3">
+                    <div class="col-sm-6 mb-3">
                         <DefaultAutocomplete
                             dense
                             v-model="curso"
@@ -274,6 +287,7 @@ export default {
         workspaceId: 0,
         adminId: 0,
         modules: Array,
+        modalities: Array,
         reportsBaseUrl: ''
     },
     data() {
@@ -288,6 +302,7 @@ export default {
             escuela: [],
             curso: [],
             area: [],
+            modality:null,
             //
             aprobados: true,
             tipocurso: false,
@@ -413,7 +428,7 @@ export default {
                 }
             })
         },
-        async escuelaChange() {
+        async loadCourses() {
             this.curso = [];
             this.tema = [];
             this.courses = [];
@@ -422,7 +437,7 @@ export default {
             if (this.escuela.length === 0) return false;
 
             this.cursos_libres = false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}/all`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}/all?modality_id=${this.modality}`
             let res = await axios({
                 url,
                 method: 'get'
@@ -434,6 +449,7 @@ export default {
         this.fetchFiltersData();
         const domainsToExcludeConstraint = ['gestiona.potenciandotutalentongr.pe','gestiona.agile.cursalab.io','gestiona.capacitacioncorporativagruposanpablo.com'];
         const currentDomain = new URL(window.location.href).hostname;
+        this.modality = this.modalities.find((m) => m.code =='asynchronous').id;
         domainsToExcludeConstraint.forEach(domain => {
             if(domain.includes(currentDomain)){
                 this.maxValuesSelected.modules = 0;

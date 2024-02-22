@@ -46,11 +46,18 @@ class RestCourseController extends Controller
         return $this->successApp(['data' => $data]);
     }
 
-    public function loadPoll(Course $course)
+    public function loadPoll(Request $request,Course $course)
     {
         if ($course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
-
+        if($request->topic_id){
+            $is_accesible =  Topic::select('poll_id','modality_in_person_properties')
+                ->where('id',$topic_id)
+                ->first()?->isAccessiblePoll();
+            if(!$is_accesible){
+                return ['error' => 0, 'data' => null,'message'=>'La encuesta aún no ha sido iniciada'];
+            }
+        }
         $poll = $course->polls()->with([
             'questions' => function ($q) {
                 $q->with('type:id,code')

@@ -16,18 +16,19 @@
                         </v-chip>
                     </v-col>
                 </v-row>
-                <v-row justify="center">
-                    <v-col cols="7">
+                <v-row>
+                    <v-col :cols="selects.course_code_modality != 'asynchronous' ? 4 : 6">
                         <DefaultInput
                             dense
-                            label="Nombre"
+                            label="Nombre del tema"
                             show-required
                             placeholder="Ingrese un nombre"
                             v-model="resource.name"
                             :rules="rules.name"
                             emojiable
                         />
-                            <!-- counter="120" -->
+                    </v-col>
+                    <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
                         <DefaultAutocomplete
                             dense
                             label="Requisito"
@@ -36,17 +37,47 @@
                             :items="selects.requisitos"
                             clearable
                             item-text="name"
-                            class="mt-4"
                         />
-
+                    </v-col>
+                    <v-col cols="4" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
+                        <DefaultAutocomplete
+                            style="width: 100%;"
+                            dense
+                            label="Ponente *"
+                            placeholder="Seleccione un ponente"
+                            v-model="resource.modality_in_person_properties.host_id"
+                            :items="selects.hosts"
+                            clearable
+                            :rules="rules.required"
+                            item-text="document_fullname"
+                        />
+                    </v-col>
+                    <v-col cols="4" class="d-flex" v-if="selects.course_code_modality != 'asynchronous'">
+                        <DefaultAutocomplete
+                            style="width: 100%;"
+                            dense
+                            label="Co host"
+                            placeholder="Seleccione un co-host"
+                            v-model="resource.modality_in_person_properties.cohost_id"
+                            :items="selects.hosts"
+                            clearable
+                            item-text="document_fullname"
+                        />
+                        <DefaultModalButton
+                            label=""
+                            icon_name="fas fa-plus"
+                            text
+                            @click="openFormModal(modalFormSegmentationOptions, { id: workspace_id,show_criteria_segmentation:false }, 'segmentation', `Segmentación de Ponentes`)"
+                        />
+                    </v-col>
+                    <v-col cols="6">
                         <DefaultRichText
                             clearable
+                            :height="300"
                             v-model="resource.content"
                             label="Descripción"
                             :rules="rules.content"
-                            class="mt-2"
                             :ignoreHTMLinLengthCalculation="true"
-                            :height="195"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
                             :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
@@ -55,27 +86,20 @@
                             @generateIaDescription="generateIaDescription"
                         />
                     </v-col>
-                    <v-col cols="5">
+                    <v-col cols="6">
                         <DefaultSelectOrUploadMultimedia
                             ref="inputLogo"
                             v-model="resource.imagen"
-                            label="Imagen (500x350px)"
+                            label="Imagen de fondo (500x350px)"
                             :file-types="['image']"
                             @onSelect="setFile($event, resource,'imagen')"
                             select-width="60vw"
-                            select-height="75vh"
+                            select-height="auto"
                         />
                     </v-col>
                 </v-row>
-
-                    <!-- class="my-5" -->
-                <DefaultModalSectionExpand
-                    title="Método de evaluación"
-                    :expand="sections.showSectionEvaluation"
-                    class="my-4"
-                >
+                <DefaultSimpleSection title="Método de evaluación">
                     <template slot="content">
-
                         <v-row justify="center">
                             <v-col cols="4" class="d-flex align-items-center">
                                 <DefaultToggle v-model="resource.assessable"
@@ -139,18 +163,10 @@
                                 </template>
                             </DefaultSection>
                         </v-row>
-
                     </template>
-                </DefaultModalSectionExpand>
-
-                    <!-- class="my-5" -->
-                <DefaultModalSectionExpand
-                    title="Recursos multimedia"
-                    :expand="sections.showSectionResources"
-                    class="my-4"
-                >
+                </DefaultSimpleSection>
+                <DefaultSimpleSection title="Recursos multimedia">
                     <template slot="content">
-
                         <v-row justify="center">
                             <v-col cols="12">
 
@@ -252,79 +268,286 @@
                             </v-col>
 
                             <TemaMultimediaTypes :limits="hasPermissionToUseIaEvaluation ? limits_ia_convert : {}" @addMultimedia="addMultimedia($event)"/>
-                            <v-col cols="12">
-                                <DefaultToggle v-model="resource.review_all_duration_media"
-                                    active-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    inactive-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    dense
-                                />
-                            </v-col>
                         </v-row>
-
                     </template>
-                </DefaultModalSectionExpand>
-                <DefaultModalSectionExpand
-                    title="Gestión de etiquetas"
-                    :expand="sections.showSectionTags"
-                    class="my-4"
-                    v-if="hasPermissionToUseTags"
-                >
+                </DefaultSimpleSection>
+                <DefaultSimpleSection title="Visualización de recursos multimedia" >
                     <template slot="content">
                         <v-row>
-                            <v-col cols="6">
-                                <DefaultAutocomplete
+                            <v-col cols="12" v-if="selects.course_code_modality != 'asynchronous'">
+                                <DefaultToggle 
+                                    v-model="resource.modality_in_person_properties.show_medias_since_start_course"
+                                    :disabled="resource.media.length === 0"
+                                    active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
+                                    inactive-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
                                     dense
-                                    label="Selección de etiquetas "
-                                    placeholder="Busca tu tag"
-                                    v-model="resource.tags"
-                                    :items="selects.tags"
-                                    custom-items
-                                    item-text="name"
-                                    item-value="id"
-                                    multiple
-                                    small-chips
-                                    :maxValuesSelected="3"
-                                    :showSelectAll="false"
-                                    :countShowValues="3"
-                                    :deleteChips="true"
-                                    attach
-                                >
-                                    <template v-slot:customItems="{item}">
-                                        <div class="d-flex">
-                                            <!-- <v-checkbox dense  :disabled="selectedItems.length >= 3 && !item.selected">
-                                            </v-checkbox> -->
-                                            <div class="py-1">
-                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
-                                                <v-tooltip bottom>
-                                                    <template v-slot:activator="{ on, attrs }">
-                                                        <v-list-item-subtitle
-                                                            v-if="item.description"
-                                                            class="list-item-description-tag"
-                                                            v-bind="attrs"
-                                                            v-on="on"
-                                                        >{{ item.description }}</v-list-item-subtitle>
-                                                    </template>
-                                                    <span>{{item.description}}</span>
-                                                </v-tooltip>
-                                                <!-- <v-list-item-subtitle v-if="item.description" class="list-item-description-tag"  v-text="item.description"></v-list-item-subtitle> -->
-                                            </div>
-                                        </div>
-                                    </template>
-                                </DefaultAutocomplete>
+                                />
                             </v-col>
-                            <v-col cols="6">
-                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
-                                <DefaultButton
-                                    outlined
-                                    label="Agregar Tag"
-                                    @click="openFormModal(modalTagOptions)"
+                            <v-col cols="12">
+                                <DefaultToggle 
+                                    v-model="resource.review_all_duration_media"
+                                    :disabled="resource.media.length === 0"
+                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    dense
                                 />
                             </v-col>
                         </v-row>
                     </template>
-                </DefaultModalSectionExpand>
+                </DefaultSimpleSection>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            :title="`Configuraciones de la sesión ${selects.course_code_modality == 'in-person' ? 'presencial' : 'online'}`" 
+                            :expand="sections.showSectionCourseInPerson"
+                            :simple="true"
+                            v-if="selects.course_code_modality != 'asynchronous'"
+                        >
+                            <template slot="content">
+                                <DefaultSimpleSection title="Programación">
+                                    <template slot="content">
+                                        <v-row justify="center">
+                                            <v-col cols="6" class="d-flex justify-content-center align-items-center">
+                                                <DefaultInputDate
+                                                    clearable
+                                                    :referenceComponent="'modalDateFilter1'"
+                                                    :options="modalDateFilter1"
+                                                    v-model="resource.modality_in_person_properties.start_date"
+                                                    label="Fecha de inicio"
+                                                    dense
+                                                    showRequired
+                                                    :rules="rules.required"
+                                                    :min="new Date().toISOString().substr(0, 10)"
+                                                />
+                                            </v-col>
+                                            <v-col cols="3">
+                                            <DefaultInput
+                                                class="time-input"
+                                                type="time"
+                                                label="Hora de inicio"
+                                                dense
+                                                v-model="resource.modality_in_person_properties.start_time"
+                                                :disabled="!resource.modality_in_person_properties.start_date"
+                                                :rules="rules.required"
+                                                step="60"
+                                            />
+                                            </v-col>
+
+                                            <v-col cols="3">
+                                                <DefaultInput
+                                                    class="time-input"
+                                                    type="time"
+                                                    label="Hora de fin"
+                                                    v-model="resource.modality_in_person_properties.finish_time"
+                                                    :disabled="!resource.modality_in_person_properties.start_time"
+                                                    :min="resource.modality_in_person_properties.start_time"
+                                                    :rules="rules.required"
+                                                    step="60"
+                                                    dense
+                                                />
+                                            </v-col>
+
+                                            <v-col cols="12" class="py-1">
+                                                <p class="mb-0 p-small-instruction">** Configura la fecha de inicio y fin de la sesión.</p>
+                                                <p class="mb-0 p-small-instruction" v-if="selects.course_code_modality == 'virtual'">
+                                                    ** Se creara una reunión en ZOOM.
+                                                </p>
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection title="Ubicación" v-if="selects.course_code_modality == 'in-person'">
+                                    <template slot="content">
+                                        <v-row justify="center" class="align-items-center">
+                                            <v-col cols="12">
+                                                <div class="box_search_direction_map">
+                                                    <span class="lbl_search_direction">Dirección</span>
+                                                    <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <div class="bx_maps_benefit" id="bx_maps_benefit" ref="bx_maps_benefit">
+                                                    <GmapMap
+                                                        :center="center"
+                                                        :zoom="zoom"
+                                                        :options="{
+                                                            zoomControl: false,
+                                                            mapTypeControl: false,
+                                                            scaleControl: false,
+                                                            streetViewControl: false,
+                                                            rotateControl: false,
+                                                            fullscreenControl: false,
+                                                            disableDefaultUi: false
+                                                            }"
+                                                        style="height: 300px"
+                                                        >
+                                                        <GmapMarker
+                                                            :key="index"
+                                                            v-for="(m, index) in markers"
+                                                            :position="m.position"
+                                                            @click="center = m.position"
+                                                            :draggable="true"
+                                                            @drag="updateCoordinates"
+                                                        />
+                                                    </GmapMap>
+                                                </div>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <DefaultTextArea
+                                                    label="Referencia"
+                                                    placeholder="Ingresa una referencia de como llegar al lugar donde se realizará el curso"
+                                                    v-model="resource.modality_in_person_properties.reference"
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+                <v-row justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            title="Configuración avanzada"
+                            :expand="sections.showSectionAdvancedconfiguration"
+                            :simple="true"
+                        >
+                            <template slot="content">
+                                <DefaultSimpleSection title="Gestión de etiquetas" v-if="hasPermissionToUseTags">
+                                    <template slot="content">
+                                        <v-row>
+                                            <v-col cols="4">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Competencias"
+                                                    placeholder="Busca tu etiqueta"
+                                                    v-model="tags.compentencies"
+                                                    :items="selects.compentencies"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :maxValuesSelected="2"
+                                                    :showSelectAll="false"
+                                                    :countShowValues="4"
+                                                    :deleteChips="true"
+                                                    attach
+                                                    custom-items
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Habilidades"
+                                                    placeholder="Busca tu etiqueta"
+                                                    v-model="tags.habilities"
+                                                    :items="selects.habilities"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :maxValuesSelected="2"
+                                                    :showSelectAll="false"
+                                                    :countShowValues="3"
+                                                    :deleteChips="true"
+                                                    attach
+                                                    custom-items
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
+                                            </v-col>
+                                            <v-col cols="4">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Nivel"
+                                                    placeholder="Busca tu etiqueta"
+                                                    v-model="tags.levels"
+                                                    :items="selects.levels"
+                                                    :maxValuesSelected="1"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    multiple
+                                                    small-chips
+                                                    :showSelectAll="false"
+                                                    :countShowValues="3"
+                                                    :deleteChips="true"
+                                                    attach
+                                                    custom-items
+                                                >
+                                                    <template v-slot:customItems="{item}">
+                                                        <div class="d-flex">
+                                                            <div class="py-1">
+                                                                <v-list-item-title class="list-item-name-tag">{{ item.name }}</v-list-item-title>
+                                                                <v-tooltip bottom>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-list-item-subtitle
+                                                                            v-if="item.description"
+                                                                            class="list-item-description-tag"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                        >{{ item.description }}</v-list-item-subtitle>
+                                                                    </template>
+                                                                    <span>{{item.description}}</span>
+                                                                </v-tooltip>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </DefaultAutocomplete>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
+                                                <DefaultButton
+                                                    outlined 
+                                                    label="Agregar Etiqueta"
+                                                    @click="openFormModal(modalTagOptions)"
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
                 <v-row>
-                    <v-col cols="2">
+                    <v-col cols="2" v-if="selects.course_code_modality == 'asynchronous'">
                         <DefaultInput
                             dense
                             type="number"
@@ -338,7 +561,6 @@
                     </v-col>
                     <v-col cols="6">
                         <div class="mt-2">
-
                             <DefaultToggle v-model="resource.active" :disabled="resource.disabled_estado_toggle"
                                 active-label="Tema activo"
                                 inactive-label="Tema inactivo"
@@ -386,6 +608,17 @@
                 @onConfirm="tagcreated"
                 @onDelete="tagDeleted"
             />
+
+            <SegmentFormModal
+                :options="modalFormSegmentationOptions"
+                width="55vw"
+                for_section="aulas_virtuales"
+                model_type="App\Models\Workspace"
+                :model_id="null"
+                :ref="modalFormSegmentationOptions.ref"
+                @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+                @onConfirm="closeSimpleModal(modalFormSegmentationOptions),loadHosts()"
+            />
         </template>
     </DefaultDialog>
 </template>
@@ -400,15 +633,21 @@ import Editor from "@tinymce/tinymce-vue";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ConvertMediaToIaModal from "./ConvertMediaToIaModal";
+import GmapMap from 'vue2-google-maps/dist/components/map'
 import TagModal  from "../../components/basicos/TagModal";
+import SegmentFormModal from "./../Blocks/SegmentFormModal";
+
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type','review_all_duration_media'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',
+    'review_all_duration_media','modality_in_person_properties','path_qr'];
 
 const file_fields = ['imagen'];
-
+import QRCode from "qrcode";
 export default {
-    components: {editor: Editor, TemaMultimediaTypes, MultimediaBox, draggable, TemaValidacionesModal, DialogConfirm, DefaultRichText,ConvertMediaToIaModal,TagModal},
-
+    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, 
+        draggable, TemaValidacionesModal, DialogConfirm, 
+        DefaultRichText,ConvertMediaToIaModal,TagModal,SegmentFormModal
+    },
     props: {
         options: {
             type: Object,
@@ -425,13 +664,24 @@ export default {
     // props: ["modulo_id", 'school_id', 'course_id', 'topic_id'],
     data() {
         return {
+            workspace_id:null,
             drag: false,
             base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             media_url: null,
             sections: {
                 showSectionEvaluation: {status: true},
                 showSectionResources: {status: true},
-                showSectionTags:{status:true}
+                showSectionPosition:{status:true},
+                showSectionTopicDates:{status:true},
+                showSectionTags:{status:true},
+                showSectionAdvancedconfiguration:{status:false},
+                showSectionCourseInPerson:{status:true}
+            },
+            modalDateFilter1: {
+                open: false
+            },
+            modalDateFilter2: {
+                open: false
             },
             resourceDefault: {
                 id: null,
@@ -456,6 +706,20 @@ export default {
                 max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
+                modality_in_person_properties:{
+                    reference:'',
+                    geometry:'',
+                    formatted_address:'',
+                    url:'',
+                    ubicacion:'',
+                    host_id:null,
+                    poll_id:null,
+                    start_date:null,
+                    start_time:null,
+                    finish_date:null,
+                    finish_time:null,
+                    show_medias_since_start_course:0
+                },
                 review_all_duration_media:0
             },
             selects: {
@@ -466,20 +730,49 @@ export default {
                 evaluation_types: [],
                 requisitos: [],
                 qualification_types: [],
-                tags: [
-                    { header: '💚 Competencias:' },
-                    {divider:true},
-                    {header:'💡 Habilidades prácticas:'},
-                    { divider: true },
-                    { header: '🌟Dificultad:' },
-                ],
+                hosts:[],
+                course_code_modality:null,
+                // polls:[],
+                tags:[],
+                compentencies:[],
+                habilities:[],
+                levels:[],
+                dinamyc_link:''
             },
-            resource: {},
+            resource: {
+                modality_in_person_properties:{
+                    reference:'',
+                    geometry:'',
+                    formatted_address:'',
+                    url:'',
+                    ubicacion:'',
+                    host_id:null,
+                    start_date:null,
+                    start_time:null,
+                    finish_date:null,
+                    finish_time:null,
+                    show_medias_since_start_course:0
+                },
+                tags:[],
+                // tags: [
+                //     { header: '💚 Competencias:' },
+                //     {divider:true},
+                //     {header:'💡 Habilidades prácticas:'},
+                //     { divider: true },
+                //     { header: '🌟Dificultad:' },
+                // ],
+            },
+            tags:{
+                compentencies:[],
+                habilities:[],
+                levels:[],
+            },
             rules: {
                 name: this.getRules(['required', 'max:120']),
                 // assessable: this.getRules(['required']),
                 tipo_ev: this.getRules(['required']),
                 position: this.getRules(['required', 'number']),
+                required: this.getRules(['required'])
             },
             loadingActionBtn: false,
             topicsValidationModal: {
@@ -515,6 +808,14 @@ export default {
                     }
                 },
             },
+            modalFormSegmentationOptions: {
+                ref: "SegmentFormModal",
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
+            },
             limits_ia_convert:{},
             limits_descriptions_generate_ia:{
                 ia_descriptions_generated:0,
@@ -529,6 +830,15 @@ export default {
             },
             hasPermissionToUseIaDescription:false,
             hasPermissionToUseIaEvaluation:false,
+            //Courses in person
+            center: { lat: -12.0529046, lng: -77.0253457 },
+            zoom: 16,
+            currentPlace: null,
+            markers: [{
+                position: { lat: -12.0529046, lng: -77.0253457 }
+            }],
+            ubicacion_mapa: null,
+            //TAGS
             hasPermissionToUseTags:false,
             modalTagOptions:{
                 ref: 'TagFormModal',
@@ -539,6 +849,7 @@ export default {
                 action:'Retroceder',
                 create_from_course_list:false,
             }
+            
         }
     },
     async mounted() {
@@ -565,6 +876,21 @@ export default {
         resetSelects() {
             let vue = this
             // Limpiar inputs file
+            vue.resource.modality_in_person_properties = {
+                reference:'',
+                geometry:'',
+                formatted_address:'',
+                url:'',
+                ubicacion:'',
+                host_id:null,
+                cohost_id:null,
+                start_date:null,
+                start_time:null,
+                finish_date:null,
+                finish_time:null,
+                show_medias_since_start_course:0
+            };
+            vue.resource.tags = [];
             vue.removeFileFromDropzone(vue.resource.imagen, 'inputLogo')
             // Selects independientes
             // Selects dependientes
@@ -583,10 +909,10 @@ export default {
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
 
-            if (!validForm || !hasMultimedia) {
+            if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
-                if (!hasMultimedia)
+                if (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
@@ -639,28 +965,44 @@ export default {
             }
             return vue.sendForm({checkbox: false})
         },
-        sendForm(data, validateForm = true) {
+        async sendForm(data, validateForm = true) {
             let vue = this
+            vue.resource.tags = vue.tags.compentencies.concat(vue.tags.habilities, vue.tags.levels);
+            if(vue.selects.course_code_modality == 'in-person' && vue.ubicacion_mapa){
+                vue.resource.modality_in_person_properties.geometry = vue.ubicacion_mapa.geometry
+                vue.resource.modality_in_person_properties.formatted_address = vue.ubicacion_mapa.formatted_address
+                vue.resource.modality_in_person_properties.url = vue.ubicacion_mapa.url
 
-            // if (data.confirmMethod === 'messagesActions') {
-            //     vue.closeModal()
-            //     return
-            // }
-
+                for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
+                    if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
+                        vue.resource.modality_in_person_properties.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
+                        break;
+                    }
+                }
+            }
+            vue.generateQR();
             vue.topicsValidationModal.open = false
             vue.loadingActionBtn = true
             vue.showLoader()
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
 
-            if (!validForm || !hasMultimedia) {
+            if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
-                if (!hasMultimedia)
+                if (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
-
+            if (vue.selects.course_code_modality == 'in-person') {
+                vue.hideLoader()
+                vue.loadingActionBtn = false;
+                console.log('vue.$refs.autocompleteMap.$refs.input.value',vue.$refs.autocompleteMap.$refs.input.value);
+                if (!vue.$refs.autocompleteMap.$refs.input.value){
+                    vue.showAlert("Es necesario añadir una ubicación", 'warning')
+                    return
+                }
+            }
             if (vue.topicsValidationModal.action === 'validations-after-update') {
                 // console.log('vue.topicsValidationModal.action')
                 vue.hideLoader();
@@ -676,11 +1018,16 @@ export default {
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
+           
             vue.addMedias(formData)
-            if (data.checkbox)
+            if (data.checkbox){
                 formData.append('check_tipo_ev', data.checkbox)
+            }
+            formData.set(
+                'modality_in_person_properties', JSON.stringify(vue.resource.modality_in_person_properties)
+            );
 
-            vue.$http.post(url, formData)
+            await vue.$http.post(url, formData)
                 .then(async ({data}) => {
                     this.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
@@ -694,14 +1041,17 @@ export default {
                     else {
                         vue.queryStatus("tema", "crear_tema");
                         vue.showAlert(data.data.msg)
+                        vue.resetSelects();
                         vue.closeModal()
                         vue.$emit('onConfirm')
                     }
                 })
                 .catch(async (error) => {
                     const res = await vue.handleValidationsBeforeUpdate(error, vue.topicsValidationModal, vue.topicsValidationModalDefault);
-                    // console.log('handleValidationsBeforeUpdate:',res)
                     vue.loadingActionBtn = false
+                    if(error.response.data.message){
+                        vue.showAlert(error.response.data.message,'error')
+                    }
                 })
         },
         images_upload_handler(blobInfo, success, failure) {
@@ -745,34 +1095,59 @@ export default {
             let vue = this
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
-                vue.resource.media = []
+                vue.resource.media = [];
+                vue.resource.tags = [];
+                vue.resource.modality_in_person_properties = vue.resourceDefault.modality_in_person_properties;
+                if(vue.$refs.autocompleteMap){
+                    vue.$refs.autocompleteMap.$refs.input.value = '';
+                }
             })
-
+            
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.formatTags(data.data.tags);
+                    // vue.formatTags(data.data.tags);
 
                     vue.media_url = data.data.media_url
                     vue.selects.requisitos = data.data.requisitos
+                    vue.selects.hosts = data.data.hosts
                     vue.selects.evaluation_types = data.data.evaluation_types
                     vue.selects.qualification_types = data.data.qualification_types
                     vue.limits_ia_convert = data.data.limits_ia_convert;
                     vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    vue.selects.course_code_modality = data.data.course_code_modality;
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
+                    vue.workspace_id = data.data.workspace_id;
+                    // vue.selects.polls = data.data.polls;
+                    // vue.selects.tags = data.data.tags;
+                    vue.selects.compentencies = data.data.tags.filter((t) => t.type == 'competency');
+                    vue.selects.habilities = data.data.tags.filter((t) =>  t.type == 'hability');
+                    vue.selects.levels = data.data.tags.filter((t) => t.type == 'level');
+                    vue.selects.dinamyc_link = data.data.dinamyc_link;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
                             let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
                             ia_descriptions_generated.textContent = parseInt(vue.limits_descriptions_generate_ia.ia_descriptions_generated);
                             limit_descriptions_jarvis.textContent = parseInt(vue.limits_descriptions_generate_ia.limit_descriptions_jarvis);
-                            console.log('ia_descriptions_generated',ia_descriptions_generated,limit_descriptions_jarvis,limits_descriptions_generate_ia);
                         }, 200);
                     }
                     if (resource && resource.id) {
+                        const formatted_address  = data.data.tema.modality_in_person_properties.formatted_address || null;
+                        if( formatted_address != null && formatted_address != null) {
+                            setTimeout(() => {
+                                vue.$refs.autocompleteMap.$refs.input.value = formatted_address
+                            }, 2000);
+                        }
                         vue.resource = Object.assign({}, data.data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
+                        const compentencies_id = vue.selects.compentencies.map(c => c.id);
+                        const habilities_id = vue.selects.habilities.map(c => c.id);
+                        const levels_id = vue.selects.levels.map(c => c.id);
+                        vue.tags.compentencies = vue.resource.tags.filter(t => compentencies_id.includes(t));
+                        vue.tags.habilities = vue.resource.tags.filter(t => habilities_id.includes(t));
+                        vue.tags.levels =vue.resource.tags.filter(t => levels_id.includes(t));
                     } else {
                         vue.resource.qualification_type = data.data.qualification_type
                         vue.resource.position = data.data.default_position
@@ -827,6 +1202,9 @@ export default {
         },
         verifyDisabledMediaEmbed() {
             let vue = this;
+            if(vue.selects.course_code_modality != 'asynchronous'){
+                return 
+            }
             const f = vue.resource.media.filter((e) => e.embed == true);
             if (f.length == 1) {
                 const idx = vue.resource.media.findIndex((e) => e.embed == true);
@@ -859,7 +1237,7 @@ export default {
         },
         async confirmDeleteMedia(){
             let vue = this
-            if(vue.resource.media.filter((media, index) => index != vue.mediaDeleteModal.media_index && media.embed).length == 0){
+            if(vue.selects.course_code_modality == 'asynchronous' && vue.resource.media.filter((media, index) => index != vue.mediaDeleteModal.media_index && media.embed).length == 0){
                 vue.mediaDeleteModal.open = false
                 vue.showAlert("Debe haber almenos un multimedia embebido.", 'warning')
                 return;
@@ -961,6 +1339,28 @@ export default {
                 vue.limits_descriptions_generate_ia = data.data;
             })
         },
+        updateCoordinates(location) {
+            let geocoder = new google.maps.Geocoder()
+            geocoder.geocode({ 'latLng': location.latLng }, (result, status) => {
+                if (status ===google.maps.GeocoderStatus.OK) {
+                    this.$refs.autocompleteMap.$refs.input.value = result[0].formatted_address
+                    this.ubicacion_mapa = {...result[0]}
+                }
+            })
+        },
+        setPlace(place) {
+            this.currentPlace = place;
+            if (this.currentPlace) {
+                this.ubicacion_mapa = {...this.currentPlace}
+                const marker = {
+                lat: this.currentPlace.geometry.location.lat(),
+                lng: this.currentPlace.geometry.location.lng(),
+                };
+                this.markers = [{ position: marker }];
+                this.center = marker;
+                this.currentPlace = null;
+            }
+        },
         tagcreated(tag){
             let vue = this;
             vue.modalTagOptions.open =false;
@@ -991,6 +1391,51 @@ export default {
             if (index !== -1) {
                 this.selects.tags.splice(index + 1, 0, ...tags.filter(t => t.type === type));
             }
+        },
+        minDate( date = null ){
+            if(date != null)
+            {
+                let result = new Date(date);
+                result.setDate(result.getDate() + 1);
+                return result.toISOString().substr(0, 10);
+            }
+            return new Date().toISOString().substr(0, 10)
+        },
+        async loadHosts(){
+            let vue = this;
+            let url = `${vue.base_endpoint}/hosts`;
+            await axios.get(url).then(({data})=>{
+                vue.selects.hosts = data.data.hosts
+            })
+        },
+        async generateQR(){
+            let vue =this;
+            const opts = {
+                errorCorrectionLevel: 'H',
+                type: 'image/png',
+                quality: 1,
+                margin: 1,
+                width : '250',
+                color: {
+                    dark:"#000000",
+                    light:"#ffffff"
+                }
+            }
+            if(vue.resource.path_qr){
+                return;
+            }
+            // let QRbase64 = await new Promise((resolve, reject) => {
+            //     QRCode.toDataURL(vue.dinamyc_link, function (err, code) {
+            //         if (err) {
+            //             reject(reject);
+            //             return;
+            //         }
+            //         resolve(code);
+            //     });
+            // });
+            QRCode.toDataURL(vue.selects.dinamyc_link, opts, function (err, qrCodeUrl) {
+                vue.resource.path_qr = qrCodeUrl,vue.dinamyc_link; 
+            })
         }
     }
 }
@@ -1060,6 +1505,24 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+.box_search_direction_map {
+    border: 1px solid #D9D9D9 !important;
+    border-radius: 5px !important;
+    position: relative !important;
+}
+.box_search_direction_map span.lbl_search_direction {
+    position: absolute !important;
+    top: -8px !important;
+    left: 9px !important;
+    font-size: 11.5px !important;
+    line-height: 1 !important;
+    background: #fff !important;
+    padding: 0 2px !important;
+}
+.box_search_direction_map input {
+    width: 100% !important;
+    padding: 10px 15px !important;
 }
 .list-item-name-tag{
     color: #2A3649  !important;

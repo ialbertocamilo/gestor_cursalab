@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\ApiRest;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Models\Poll;
 use App\Models\PollQuestionAnswer;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\Topic;
+use App\Models\Question;
+use App\Models\Taxonomy;
 
-use App\Http\Requests\QuizzAnswerStoreRequest;
+use App\Models\SummaryUser;
 
-use App\Models\SummaryCourse;
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
-use App\Models\SummaryUser;
-use App\Models\Taxonomy;
-use App\Models\Question;
-use App\Models\Topic;
+use App\Models\SummaryCourse;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\QuizzAnswerStoreRequest;
 
 
 class RestQuizController extends Controller
@@ -127,8 +127,15 @@ class RestQuizController extends Controller
 
     public function cargar_preguntas($topic_id)
     {
-        $topic = Topic::with('evaluation_type', 'course')->find($topic_id);
-
+        $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
+        $code_modality = $topic->course->modality->code;
+        if(($code_modality == 'in-person' || $code_modality=='virtual') && !$topic->isAccessibleEvaluation()){
+            return response()->json(['error' => true, 'data' => [
+                'is_accessible'=>false,
+                'message' => 'La evaluación no esta disponible.'
+            ]], 200);
+        }
+        // dd($topic->course->modality->code);
         if ($topic->course->hasBeenValidated())
             return ['error' => 0, 'data' => null];
 
@@ -140,7 +147,11 @@ class RestQuizController extends Controller
         if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [A]'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-
+        if(!$row && $code_modality != 'asynchronous'){
+            $user = auth()->user();
+            $row = SummaryTopic::storeData($topic, $user);
+            SummaryCourse::storeData($topic->course, $user);
+        }
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
 
@@ -148,7 +159,7 @@ class RestQuizController extends Controller
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if ($row->isOutOfTimeForQuiz() && $is_qualified)
+        if ($row->isOutOfTimeForQuiz() && $is_qualified && $code_modality == 'asynchronous')
             return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
 
         $limit = NULL;
@@ -168,6 +179,23 @@ class RestQuizController extends Controller
         if (count($questions) == 0)
             return response()->json(['error' => true, 'data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [B]']], 200);
 
+        
+        $status = 'started';
+        if($code_modality != 'asynchronous'){
+            $modality_in_person_properties = $topic->modality_in_person_properties;
+            $parse_started_at = Carbon::parse($modality_in_person_properties?->evaluation->date_init);
+            $parse_finishes_at = Carbon::parse($modality_in_person_properties?->evaluation->date_finish);
+            $diff_in_minutes = now()->diffInMinutes($parse_finishes_at);
+            $status = $modality_in_person_properties?->evaluation->status;
+            $started_at = $parse_started_at->format('Y/m/d H:i:s');
+            $finishes_at = $parse_finishes_at->format('Y/m/d H:i:s');
+            // $diff = $finishes_at->diff($current_time);
+            // $diff_in_minutes = sprintf('%02d:%02d', $diff->h, $diff->i);
+        }else{
+            $started_at = $row?->current_quiz_started_at->format('Y/m/d H:i:s');
+            $finishes_at = $row?->current_quiz_finishes_at->format('Y/m/d H:i:s');
+            $diff_in_minutes = ($started_at && $finishes_at)  ?  now()->diffInMinutes($row->current_quiz_finishes_at) : null;
+        }
         $data = [
             'nombre' => $topic->name,
             'posteo_id' => $topic->id,
@@ -179,15 +207,13 @@ class RestQuizController extends Controller
                 'started_at' => $row->current_quiz_started_at->format('Y/m/d H:i'),
                 'finishes_at' => $row->current_quiz_finishes_at->format('Y/m/d H:i'),
                 'diff_in_minutes' => now()->diffInMinutes($row->current_quiz_finishes_at),
+                'status' => $status
             ],
         ];
 
-        // Change time when user's datetime is different
-        // from server's
-
         $userDatetimeTimestamp = request()->get('user_datetime');
 
-        if ($userDatetimeTimestamp) {
+        if ($userDatetimeTimestamp && $code_modality == 'asynchronous') {
 
             $userDatetime = Carbon::parse($userDatetimeTimestamp);
             $minutesDifference = now()->diffInMinutes($userDatetime);
