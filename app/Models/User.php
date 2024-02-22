@@ -291,7 +291,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
 //            ->whereNotNull('subworkspace_id');
     }
-
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion' ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id;
+        $q->where('type_id',$type_id);
+    }
     public function scopeFilterText($q, $filter)
     {
         $q->where(function ($q) use ($filter) {
@@ -764,10 +768,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request, $withAdvancedFilters = false)
     {
         // $query = self::onlyClientUsers();
-        $platform = session('platform');
-        $data['type_id'] = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
-        
-        $query = self::where('type_id',$data['type_id']);
+        $query = self::FilterByPlatform();
         if (auth()->user()->isA('super-user')) {
             $query = self::query();
         }
