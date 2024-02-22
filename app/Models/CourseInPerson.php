@@ -459,12 +459,18 @@ class CourseInPerson extends Model
         switch ($type) {
             case 'assistance':
                 $assistance = TopicAssistanceUser::userIsPresent($user->id,$topic_id);
-                $topic = Topic::select('id','course_id')
-                    ->with(['course:id,modality_id','course.modality:id,code'])
+                $topic = Topic::select('id','course_id','modality_in_person_properties')
+                    ->with(['course:id,modality_id,modality_in_person_properties','course.modality:id,code'])
                     ->where('id',$topic_id)
                     ->first();
                 // only validate assistance in courses in-person
                 $resource = ($topic->course->modality->code == 'in-person') ? $assistance : true;
+                if($topic->course->modality->code == 'in-person'){
+                    $is_session_finished = now() > Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+                    if($is_session_finished && $topic->course->modality_in_person_properties->visualization_type =='all-users'){
+                        $resource = true;
+                    }
+                }
                 break;
             case 'multimedias':
                 $resource = Topic::select('id','name','assessable','type_evaluation_id','modality_in_person_properties')
