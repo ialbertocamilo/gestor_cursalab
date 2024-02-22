@@ -482,19 +482,18 @@ export default {
                         }
                     });
 
-                    vue.deleteConfirmationDialog.open = true
-                    setTimeout(() => {
-                        vue.deleteConfirmationDialog.open = false
-                    }, 5500);
+                    // vue.deleteConfirmationDialog.open = true
+                    // setTimeout(() => {
+                    //     vue.deleteConfirmationDialog.open = false
+                    // }, 5500);
 
                     vue.file = null;
 
                     vue.hideLoader();
+                }).catch(error => {
+                    vue.showAlert('No se ha podido procesar el excel','warning');
+                    console.log('error',error);
                 })
-                // .catch(error => {
-                //     vue.showAlert('No se ha podido procesar el excel','warning');
-                //     console.log('error',error);
-                // })
         },
         selectAll() {
             let vue = this
