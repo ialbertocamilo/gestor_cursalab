@@ -467,7 +467,7 @@ class CourseInPerson extends Model
                 $resource = ($topic->course->modality->code == 'in-person') ? $assistance : true;
                 if($topic->course->modality->code == 'in-person'){
                     $is_session_finished = now() > Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
-                    if($is_session_finished && $topic->course->modality_in_person_properties->visualization_type =='all-users'){
+                    if($is_session_finished && $topic->course->modality_in_person_properties->visualization_type =='scheduled-users'){
                         $resource = true;
                     }
                 }
