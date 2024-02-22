@@ -764,6 +764,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     protected function search($request, $withAdvancedFilters = false)
     {
         // $query = self::onlyClientUsers();
+        $platform = session('platform');
         $data['type_id'] = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
         
         $query = self::where('type_id',$data['type_id']);
