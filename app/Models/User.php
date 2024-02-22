@@ -574,7 +574,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $this->setPasswordData($data, $update_password, $user);
 
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
-
+                $platform = session('platform');
+                if($platform && $platform == 'induccion') {
+                    $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id;
+                }
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
@@ -760,7 +763,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request, $withAdvancedFilters = false)
     {
-        $query = self::onlyClientUsers();
+        // $query = self::onlyClientUsers();
+        $data['type_id'] = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
+        
+        $query = self::where('type_id',$data['type_id']);
         if (auth()->user()->isA('super-user')) {
             $query = self::query();
         }
