@@ -78,7 +78,8 @@ class UsuarioController extends Controller
             $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
-            $menus = Menu::getMenuByUser($user);
+            $platform = session('platform');
+            $menus = Menu::getMenuByUser($user, $platform);
             return [
                 'user' => [
                     'id' => $user->id,
@@ -272,7 +273,7 @@ class UsuarioController extends Controller
             $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
         }
         $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
-        
+
         return $compactResponse ? $response : $this->success($response);
     }
 

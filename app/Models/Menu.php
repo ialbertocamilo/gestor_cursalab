@@ -11,7 +11,7 @@ class Menu extends Model
     private $group_taxonomy = 'gestor';
     private $type_taxonomy = 'menu';
     private $subtype_taxonomy = 'menu';
-    
+
     protected function list(){
         // return cache()->remember('list-menus', 1440,function () {
         //     return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
@@ -44,8 +44,20 @@ class Menu extends Model
                 return $menu;
             });
     }
-    protected function getMenuByUser($user){
-        $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
+    protected function getMenuByUser($user,$platform){
+
+        if($platform && $platform == 'induccion') {
+            $abilities_x_rol = $user->roles()->with('abilities')
+                                            ->where('name', $platform)
+                                            ->whereHas('abilities', function ($ability) {
+                                                    $ability->where('name', 'show');
+                                                })->first();
+            $submenus_id = $abilities_x_rol ? $abilities_x_rol->abilities->pluck('entity_id')->toArray() : [];
+        }
+        else {
+            $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
+        }
+
         return Menu::list()->map(function($menu) use ($submenus_id){
             //Dar formato para front
             $items = [];
@@ -62,7 +74,7 @@ class Menu extends Model
                     'is_beta'=> $submenu->is_beta,
                     'show_upgrade'=> $show_upgrade,
                 ];
-            } 
+            }
             if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
                 $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;

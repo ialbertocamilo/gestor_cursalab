@@ -19,6 +19,7 @@ use App\Services\FileService;
 use App\Models\Usuario_vigencia;
 use App\Exports\EncuestaxgypExport;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
@@ -435,5 +436,10 @@ class GestorController extends Controller
         return $original_course;
     }
 
+    public function switchPlatform( Request $request) {
+        $platform = $request->platform ?? 'capacitacion';
+        session()->put('platform', $platform);
+        return $this->success(['platform' => $platform]);
+    }
 
 }

@@ -221,7 +221,7 @@ if (isset($fullScreen)) {
                                             </div>
                                         </div>
                                     @endfor
-                                   
+
                                 </div>
                             </div>
                         </div>
@@ -404,6 +404,22 @@ if (isset($fullScreen)) {
         // });
 
         $('.collapse').collapse()
+    </script>
+    <script>
+        function switchPlatform( platform ) {
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "post",
+                url: "switch_platform",
+                data: { "platform": platform },
+                dataType: "json",
+                success: function (response) {
+                    window.location.reload()
+                }
+            });
+        }
     </script>
     <style>
         .list-unstyled {

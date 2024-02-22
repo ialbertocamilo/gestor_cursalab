@@ -44,6 +44,8 @@ Route::redirect('/', 'login', 301);
 Route::view('welcome_email','emails.welcome_email');
 Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
+Route::post('switch_platform', [GestorController::class, 'switchPlatform']);
+
 Route::get('email_reset',function(){
     $mail_data=[
         'user'=>'Aldo López',
