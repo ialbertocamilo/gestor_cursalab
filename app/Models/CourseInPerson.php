@@ -766,6 +766,9 @@ class CourseInPerson extends Model
                 'name' => 'Iniciar reunión zoom'
             ];
         }
+        if($is_session_finished){
+            $action_button = null;
+        }
         // if(is_null($action_button)){
         //     $action_button = [
         //         'code' => 'multimedias',
