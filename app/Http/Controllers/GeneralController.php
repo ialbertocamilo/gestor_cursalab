@@ -291,7 +291,7 @@ class GeneralController extends Controller
             $total_current_storage = 1;
             $limit_allowed_users_quantity = 10000;
         }
-
+        dd($user_storage_check,$total_current_storage,$limit_allowed_users_quantity);
         $workspace_data = [
             'workspace_storage' => $limit_allowed_users_quantity, // gb
             'workspace_current_storage' => $total_current_storage, // kb
