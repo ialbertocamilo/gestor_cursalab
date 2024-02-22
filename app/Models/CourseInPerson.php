@@ -775,6 +775,7 @@ class CourseInPerson extends Model
         if($topic->course->modality->code == 'in-person'){
             $has_assistance = TopicAssistanceUser::select('id','status_id')->with('status:id,code,name')
                                 ->where('user_id',$user->id)
+                                ->whereNotNull('status_id')
                                 ->where('topic_id',$topic->id)
                                 ->first();
             if($has_assistance){
