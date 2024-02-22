@@ -27,6 +27,7 @@ Route::controller(ProcessController::class)->group(function() {
     // Assistants
     Route::view('{process}/asistentes', 'processes.assistants.index')->name('process.assistants.index');
     Route::get('{process}/assistants/search', 'searchAssistants');
+    Route::get('{process}/assistants/info', 'loadInfoAssistants');
 
 });
 

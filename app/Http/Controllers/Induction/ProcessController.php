@@ -183,9 +183,13 @@ class ProcessController extends Controller
         $users_segmented = Process::getProcessAssistantsList($process, false)->pluck('id')->toArray();
         $supervisors_segmented = array_keys($save_supervisors);
 
-        if(count($users_segmented) > 0 && count($supervisors_segmented) > 0 ) {
-            foreach ($users_segmented as $uss) {
-                $this->asignar($uss, array_keys($save_supervisors));
+        $key_save_supervisors = array_keys($save_supervisors);
+        $users_segmented_filter = array_diff_key($users_segmented, $key_save_supervisors);
+
+        $asigned_errors = [];
+        if(count($users_segmented_filter) > 0 && count($supervisors_segmented) > 0 ) {
+            foreach ($users_segmented_filter as $uss) {
+                $asigned_errors[] = $this->asignar($uss, $key_save_supervisors);
             }
         }
 
@@ -418,12 +422,20 @@ class ProcessController extends Controller
 
     // Assistants
 
+    public function loadInfoAssistants(Process $process)
+    {
+        $response['users'] = Process::getProcessAssistantsList($process)->count() ?? 0;
+        $response['absences'] = Process::getProcessAssistantsList($process, true, true)->count() ?? 0;
+        return $this->success($response);
+    }
     public function searchAssistants(Process $process, Request $request)
     {
-        $workspace = get_current_workspace();
-        // $request->mergeIfMissing(['workspace_id' => $workspace?->id]);
         $assistants = Process::getProcessAssistantsList($process);
-        ProcessAssistantsSearchResource::collection($assistants);
+        ProcessAssistantsSearchResource::collection($assistants)
+                                        ->map(function($i) use ($process) {
+                                            $i->process = $process?->id;
+                                            $i->limit_absences = $process?->absences ?? 0;
+                                        });
         return $this->success($assistants);
     }
 }

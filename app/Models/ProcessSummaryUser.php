@@ -6,12 +6,12 @@ use Carbon\Carbon;
 use App\Models\Course;
 use DB;
 
-class ProcessSummaryActivity extends BaseModel
+class ProcessSummaryUser extends BaseModel
 {
-    protected $table = 'process_summary_users_activities';
+    protected $table = 'process_summary_users';
 
     protected $fillable = [
-        'user_id', 'activity_id', 'status_id',
+        'user_id', 'process_id', 'status_id', 'absences'
     ];
 
     // protected $casts = [
@@ -19,7 +19,7 @@ class ProcessSummaryActivity extends BaseModel
     // ];
 
     public $defaultRelationships = [
-        'activity_id' => 'activity',
+        'process_id' => 'activity',
         'user_id' => 'user'
     ];
 
@@ -33,12 +33,12 @@ class ProcessSummaryActivity extends BaseModel
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function activity()
+    public function process()
     {
-        return $this->belongsTo(Activity::class);
+        return $this->belongsTo(Process::class, 'process_id');
     }
 
     public function status()

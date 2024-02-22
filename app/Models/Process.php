@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\Induccion\ProcessAssistantsSearchResource;
 use App\Http\Resources\Multimedia\MultimediaSearchResource;
 use App\Models\BaseModel;
 use App\Services\FileService;
@@ -253,7 +254,7 @@ class Process extends BaseModel
         return $process;
     }
 
-    protected function getProcessAssistantsList(Process $process, bool $is_paginated = true)
+    protected function getProcessAssistantsList(Process $process, bool $is_paginated = true, bool $absences = false)
     {
         $course = new Course();
 
@@ -262,8 +263,12 @@ class Process extends BaseModel
         $segmentados_id = $course->usersSegmented($process->segments, 'users_id');
         $segmentados_id = array_unique($segmentados_id);
 
-        $segmentados = User::with('subworkspace')
+        $segmentados = User::with(['subworkspace', 'summary_process'])
                             ->whereIn('id',$segmentados_id);
+        if($absences)
+            $segmentados = $segmentados->whereHas('summary_process', function($s) {
+                $s->where('absences','>',0);
+            });
 
         if($is_paginated)
             $segmentados = $segmentados->paginate(request('paginate', 15));
@@ -383,8 +388,11 @@ class Process extends BaseModel
 
             $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
             $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
-            $process->participants = rand(12,35);
-            $process->percentage = rand(10,80);
+            $participants = $this->getProcessAssistantsList($process);
+            $process->participants = $participants->count() ?? 0;
+            $process->percentage = 0;
+            $process->students = $participants;
+            ProcessAssistantsSearchResource::collection($process->students);
         }
 
         return ['data'=> $process];

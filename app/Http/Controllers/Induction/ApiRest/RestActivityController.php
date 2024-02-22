@@ -190,6 +190,13 @@ class RestActivityController extends Controller
 
         return response()->json($response, 200);
     }
+    public function ActivityChecklistUserByTrainer(Process $process, Checklist $checklist, User $user, Request $request)
+    {
+        $trainer = Auth::user();
+        $response = CheckList::getStudentChecklistInfoById($checklist?->id, $user?->id, $trainer?->id);
+
+        return response()->json($response, 200);
+    }
 
 
     public function ActivityAssessment(Process $process, Topic $topic)

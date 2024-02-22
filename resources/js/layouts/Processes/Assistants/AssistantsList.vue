@@ -47,7 +47,7 @@
                     </v-col>
                     <v-col cols="3">
                         <div class="bx_count_users">
-                            <span class="text_default">Usuarios: 2</span>
+                            <span class="text_default">Usuarios: {{users}}</span>
                         </div>
                     </v-col>
                     <v-col cols="6" class="d-flex justify-end align-items-center">
@@ -56,7 +56,7 @@
                                 <v-icon class="icon_size" small color="#E01717" style="font-size: 30px !important;">
                                     mdi-account
                                 </v-icon>
-                                <div class="bx_icon_count_absences">1</div>
+                                <div class="bx_icon_count_absences">{{absences}}</div>
                             </div>
                             <span class="text_default" style="color: #E01717;">Inasistencias</span>
                         </div>
@@ -165,9 +165,28 @@ export default {
                 base_endpoint: '/diplomas',
                 contentText: '¿Desea cambiar de estado a este registro?',
                 endpoint: '',
-            }
+            },
+            users: 0,
+            absences: 0
         }
-    }
+    },
+    mounted() {
+        let vue = this
+        vue.loadInfo();
+    },
+    methods: {
+        loadInfo() {
+            let vue = this
+            console.log("....");
+            const url = `/procesos/${this.process_id}/assistants/info`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    console.log(data.data);
+                    vue.users = data.data.users
+                    vue.absences = data.data.absences
+                })
+        },
+    },
 }
 
 /*

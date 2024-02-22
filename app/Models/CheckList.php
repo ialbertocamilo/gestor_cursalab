@@ -682,12 +682,18 @@ class CheckList extends BaseModel
         ];
     }
 
-    protected function getStudentChecklistInfoById($checklist_id){
-        $alumno_id = Auth::user()?->id;
+    protected function getStudentChecklistInfoById($checklist_id, $student_id = null, $trainer_id = null){
+        $alumno_id = $student_id ? $student_id : Auth::user()?->id;
 
         $user = User::where('id', $alumno_id)->first();
-        $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
-        $entrenador_id = !is_null($entrenador) ? $entrenador->trainer_id : null;
+        if($trainer_id) {
+            $entrenador = null;
+            $entrenador_id = $trainer_id;
+        }
+        else {
+            $entrenador = EntrenadorUsuario::where('user_id', $alumno_id)->where('active', 1)->first();
+            $entrenador_id = !is_null($entrenador) ? $entrenador->trainer_id : null;
+        }
         $checklists_pendientes = collect();
         $checklists_realizados = collect();
         $checklists_response = collect();

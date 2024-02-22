@@ -124,12 +124,12 @@ class RestChecklistController extends Controller
         $tipo = $request->tipo;
         $feedback_entrador = $request->feedback_entrador ?? null;
         $message = [];
-        
-        $entrenador_id = ($tipo =='entrenador_alumno') 
-                        ? Auth::user()->id 
+
+        $entrenador_id = ($tipo =='entrenador_alumno')
+                        ? Auth::user()->id
                         : EntrenadorUsuario::where('user_id', $alumnos_id[0])->where('active', 1)->first()?->trainer_id;
 
-        $query_entrenador_usuario =  EntrenadorUsuario::select('user_id')->with(['user:id,subworkspace_id','user.subworkspace:id,parent_id','user.subworkspace.parent:id']);   
+        $query_entrenador_usuario =  EntrenadorUsuario::select('user_id')->with(['user:id,subworkspace_id','user.subworkspace:id,parent_id','user.subworkspace.parent:id']);
         if($alumnos_todos){
             if($checklist->type->code == 'curso'){
                 $courses_id = $checklist->courses()->get()->pluck('id');
@@ -187,7 +187,7 @@ class RestChecklistController extends Controller
         if($tipo == 'alumno_entrenador'){
             $message = [
                 'title'=> 'Se ha realizado la evaluación',
-                'body'=>'Se ha realizado la evaluación del checklist: <b>'.$checklist->title.'</b>'            
+                'body'=>'Se ha realizado la evaluación del checklist: <b>'.$checklist->title.'</b>'
             ];
         }else{
             $actividades = collect($actividades);
@@ -196,12 +196,12 @@ class RestChecklistController extends Controller
             if( $actividades_cumple + $actividades_no_cumple  == $checklist->actividades->where('type.code','trainer_user')->where('active',1)->count()){
                 $message = [
                     "titulo" => "Checklist finalizado",
-                    "mensaje" => 'Se han calificado todas las actividades del checklist: <b>'.$checklist->title.'</b>'            
+                    "mensaje" => 'Se han calificado todas las actividades del checklist: <b>'.$checklist->title.'</b>'
                 ];
             }else{
                 $message = [
                     "titulo" => "Cambios guardados",
-                    "mensaje" => 'Se han guardado las calificaciones del checklist: <b>'.$checklist->title.'</b>'            
+                    "mensaje" => 'Se han guardado las calificaciones del checklist: <b>'.$checklist->title.'</b>'
                 ];
             }
         }

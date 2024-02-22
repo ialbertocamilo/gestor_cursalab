@@ -253,6 +253,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Process::class, 'process_instructors', 'user_id', 'process_id');
     }
 
+    public function summary_process()
+    {
+        return $this->hasMany(ProcessSummaryUser::class);
+    }
+
     public function getWorkspaces()
     {
         $roles = AssignedRole::getUserAssignedRoles($this->id);
