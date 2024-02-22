@@ -287,6 +287,9 @@ class  DashboardService {
     {
         $user_alias = is_null($alias) ? 'users' : 'users as '.$alias ;
         $platform = session('platform');
+        if($platform && $platform == 'induccion'){
+            return 5000;
+        }
         $type_id = ($platform && $platform == 'induccion') ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id : Taxonomy::getFirstData('user', 'type', 'employee')->id ;
         $q->withCount([$user_alias => function ($q) use($user_cursalab, $active,$type_id) {
             $q->where('type_id',$type_id);
