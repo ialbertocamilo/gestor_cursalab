@@ -10,13 +10,13 @@ class Topic extends BaseModel
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
-        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active', 'active_results', 'position'
+        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','path_qr',
+        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties'
     ];
 
-    //    protected $casts = [
-    //        'assessable' => 'string'
-    //    ];
+       protected $casts = [
+           'modality_in_person_properties' => 'object'
+       ];
 
     public $defaultRelationships = [
         'type_evaluation_id' => 'evaluation_type',
@@ -47,7 +47,10 @@ class Topic extends BaseModel
     {
         return $this->hasMany(Question::class);
     }
-
+    // public function poll()
+    // {
+    //     return $this->belongsTo(Poll::class,'poll_id');
+    // }
     public function requirement()
     {
         return $this->belongsTo(Topic::class, 'topic_requirement_id');
@@ -86,6 +89,25 @@ class Topic extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
+    // public function getModalityInPersonPropertiesAttribute($value){
+    //     if(is_null($value) || $value=='undefined'){
+    //         $data = [];
+    //         $data['reference'] = '';
+    //         $data['geometry'] = '';
+    //         $data['formatted_address'] = '';
+    //         $data['url'] = '';
+    //         $data['ubicacion'] = '';
+    //         $data['host_id'] = null;
+    //         // $data['poll_id'] = null;
+    //         $data['start_date'] = null;
+    //         $data['start_time'] = null;
+    //         // $data['finish_date'] = null;
+    //         $data['finish_time'] = null;
+    //         $data['show_medias_since_start_course'] = 0;
+    //         return $data;
+    //     }
+    //     return json_decode($value);
+    // }
     public function countQuestionsByTypeEvaluation($code)
     {
         return $this->questions()
@@ -112,8 +134,10 @@ class Topic extends BaseModel
         //     ->where('categoria_id', $request->categoria_id)
         //     ->where('course_id', $request->course_id);
 
-        if ($request->q)
-            $q->where('name', 'like', "%$request->q%");
+        if ($request->q) {
+            $q->where('name', 'like', "%$request->q%")
+                ->orWhere('id', $request->q);
+        }
 
         $field = $request->sortBy ?? 'position';
         if ($field == 'orden')
@@ -171,7 +195,7 @@ class Topic extends BaseModel
                 Tag::where('model_type',Topic::class)->where('model_id',$tema->id)->delete();
             }
             //
-            $_medias = collect($tema->medias()->get()); 
+            $_medias = collect($tema->medias()->get());
             $tema->medias()->delete();
             if (!empty($data['medias'])) :
                 $medias = array();
@@ -228,12 +252,49 @@ class Topic extends BaseModel
                 $tema->save();
             }
 
+            // Fix topics position
+
+            self::fixTopicsPosition($tema->course_id, $tema->id);
+
             DB::commit();
             return $tema;
         } catch (\Exception $e) {
             DB::rollBack();
             info($e);
             return $e;
+        }
+    }
+
+    /**
+     * Fix position number of topics from the same course
+     */
+    public static function fixTopicsPosition($courseId, $topicIdToIgnore) {
+
+        $topics = Topic::query()
+            ->where('course_id', $courseId)
+            ->where('id', '!=', $topicIdToIgnore)
+            ->orderBy('position')
+            ->get();
+
+        $positionToIgnore = null;
+        $topic = Topic::find($topicIdToIgnore);
+        if ($topic) {
+            $positionToIgnore = $topic->position;
+        }
+
+        $lastPosition = 1;
+        foreach ($topics as $topic) {
+
+            if ($lastPosition === $positionToIgnore) {
+                $lastPosition++;
+            }
+
+            if ($topic->position != $lastPosition) {
+                $topic->position = $lastPosition;
+                $topic->save();
+            }
+
+            $lastPosition++;
         }
     }
 
@@ -464,7 +525,7 @@ class Topic extends BaseModel
             'type' => 'validations-after-update'
         ];
     }
-    
+
     protected function getDataToTopicsViewAppByUser($user, $user_courses, $school_id)
     {
         if ($user_courses->count() === 0) return [];
@@ -485,6 +546,10 @@ class Topic extends BaseModel
                     ->where('school_id',$school_id)
                     ->whereIn('course_id',$courses_id)
                     ->get();
+        $summaryCourses = SummaryCourse::query()
+            ->whereIn('course_id', $courses_id)
+            ->where('user_id', $user->id)
+            ->get();
 
         $projects = Project::whereIn('course_id',$user_courses->pluck('id'))->where('active',1)->select('id','course_id')->get();
         $status_projects = collect();
@@ -627,7 +692,7 @@ class Topic extends BaseModel
                 }
 
                 $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
-                
+
                 $topics_data->push([
                     'id' => $topic->id,
                     'nombre' => $topic->name,
@@ -650,9 +715,10 @@ class Topic extends BaseModel
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                     'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                     'tags' => $topic->tags->map( fn($t) => $t->taxonomy),
+                    'review_all_duration_media' => boolval($topic->review_all_duration_media)
                 ]);
             }
-    
+
             $project = $projects->where('course_id',$course->id)->first();
             if($project){
                 $status_project = $status_projects->where('project_id',$project->id)->where('user_id',$user->id)->first();
@@ -692,7 +758,7 @@ class Topic extends BaseModel
                         if($requirement_course?->requirement_id){
                             $req = $req_course;
                             // $req = Course::where('id',$requirement_course?->requirement_id)->first();
-    
+
                             $available_course_req = true;
 
                             // if ($requirement_course_req) {
@@ -844,6 +910,23 @@ class Topic extends BaseModel
                 continue;
             }
 
+            // Check whether 'registro capacitacion' is enabled for course
+
+            $registroCapacitacionIsActive = $course->registroCapacitacionIsActive();
+
+            // Get 'registro capacitacion' file
+
+            $registroCapacitacionPath = null;
+            $registroCapacitacionUrl = null;
+            $summary = $summaryCourses->where('course_id', $course->id)->first();
+            if ($summary) {
+                $registroCapacitacionPath = $summary->registro_capacitacion_path;
+                $registroCapacitacionUrl = $registroCapacitacionPath
+                    ? Course::generateRegistroCapacitacionURL($registroCapacitacionPath)
+                    : null;
+            }
+
+
             $schools_courses->push([
                 'id' => $course->id,
                 'orden' => $course_position,
@@ -858,6 +941,9 @@ class Topic extends BaseModel
                 'status' => $course_status['status'],
                 'encuesta' => $course_status['available_poll'],
                 'encuesta_habilitada' => $course_status['enabled_poll'],
+                'registro_capacitacion_is_active' => $registroCapacitacionIsActive,
+                'registro_capacitacion_path' => $registroCapacitacionPath,
+                'registro_capacitacion_url' => $registroCapacitacionUrl,
                 'encuesta_resuelta' => $course_status['solved_poll'],
                 'encuesta_id' => $course_status['poll_id'],
                 'temas_asignados' => $course_status['exists_summary_course'] ?
@@ -869,7 +955,7 @@ class Topic extends BaseModel
                 'mod_evaluaciones' => $course->getModEvaluacionesConverted(),
                 'tarea' => $project,
                 'scheduled_activation' => [
-                    'message' => $course->deactivate_at ? 
+                    'message' => $course->deactivate_at ?
                                     'Disponible hasta el ' . Carbon::parse($course->deactivate_at)->format('d-m-Y')
                                     : null,
                 ],
@@ -1000,24 +1086,24 @@ class Topic extends BaseModel
 
     protected function evaluateAnswers2($respuestas, $topic) {
         $questions = Question::select('id', 'rptas_json', 'pregunta','rpta_ok', 'score')->where('topic_id', $topic->id)->get();
-        
+
         $question_results = [];
 
         foreach ($respuestas as $key => $respuesta) {
 
             $question = $questions->where('id', $respuesta['preg_id'])->first();
-            $esCorrecto = ($question->rpta_ok == $respuesta['opc']); 
+            $esCorrecto = ($question->rpta_ok == $respuesta['opc']);
 
             if ($question) {
                 $question_results[] = [
-                    'pregunta' => $question->pregunta, 
+                    'pregunta' => $question->pregunta,
                     'esCorrecto' => $esCorrecto,
-                    'opcion_usuario' => ($respuesta['opc']) ? 
-                                        $question->rptas_json[$respuesta['opc']] : '' 
+                    'opcion_usuario' => ($respuesta['opc']) ?
+                                        $question->rptas_json[$respuesta['opc']] : ''
                 ];
                 /*
                 info([
-                    'pregunta' => $question->pregunta, 
+                    'pregunta' => $question->pregunta,
                     'esCorrecto' => $esCorrecto,
                     'opcion_usuario' => $question->rptas_json
                 ]);*/
@@ -1187,6 +1273,7 @@ class Topic extends BaseModel
                 }
             }
         }
+
         return [
             'id' => $last_topic_reviewed,
             'last_media_access' => $last_media_access,
@@ -1208,5 +1295,66 @@ class Topic extends BaseModel
             default:
                 return $value;
         }
+    }
+
+    public function isAccessiblePoll(){
+        $topic = $this;
+        $is_accessible = false;
+        if($topic && isset($topic->modality_in_person_properties->poll_started)){
+            $is_accessible = $topic->modality_in_person_properties->poll_started;
+        }
+        return $is_accessible;
+    }
+
+    public function isAccessibleEvaluation(){
+        $topic = $this;
+        $is_accessible = false;
+        if(isset($topic->modality_in_person_properties->evaluation->status)){
+            $evaluationStatus = $topic->modality_in_person_properties->evaluation->status;
+            $evaluationFinishDate = $topic->modality_in_person_properties->evaluation->date_finish;
+            $is_accessible = $evaluationStatus == 'started';
+            if(Carbon::now()->format('Y-m-d H:i:s') >= $evaluationFinishDate){
+                $is_accessible = false;
+            }
+            if( $evaluationStatus == 'extra-time'){
+                $is_accessible = true;
+            }
+        }
+        return $is_accessible;
+    }
+    protected function validateAvaiableAccount($course,$data,$topic=null,$validate_before_create=false){
+        $is_avaiable = true;
+        if($course->modality->code == 'virtual'){
+            
+            $type = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first();
+            $modality_in_person_properties = $data['modality_in_person_properties'];
+            $start_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['start_time']);
+            $finish_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['finish_time']);
+            $starts_at = $start_datetime->format('Y-m-d H:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
+            $meeting = null;
+            // if($validate_before_create){
+            //     Topic::where('starts_at', '<=', $dates['finishes_at'])->where('finishes_at', '>=', $dates['starts_at']);
+            // }
+            if($topic){
+                $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+                if($meeting and !$meeting->datesHaveChanged(compact('starts_at','finishes_at'))){
+                   return true;
+                }
+            }
+            $account = Account::getOneAvailableForMeeting($type, compact('starts_at','finishes_at'),$meeting);
+            $is_avaiable = boolval($account);
+        }
+        return $is_avaiable;
+    }
+    public function isAccessibleMultimedia(){
+        $topic = $this;
+        $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
+        if(!$avaiable_to_show_resources){
+            $current_time = Carbon::now();
+            $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+            $avaiable_to_show_resources = $current_time>=$datetime;
+        }
+        return $avaiable_to_show_resources;
     }
 }

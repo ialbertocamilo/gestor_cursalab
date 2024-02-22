@@ -166,7 +166,7 @@ class SortingModel extends Model
                 $this->updatePositionInPivotTable($model,$request,$field,$action);
                 return $this->success(['msg' => 'Orden actualizado correctamente.']);
             }
-            
+
             $resource = $model::find($request->id);
             // if ($resource->$field === 1)
             // {
@@ -191,6 +191,10 @@ class SortingModel extends Model
 
             $resource->position = $new_orden;
             $resource->save();
+
+            if ($request->model === 'Topic') {
+                Topic::fixTopicsPosition($resource->course_id, $resource->id);
+            }
 
             DB::commit();
 

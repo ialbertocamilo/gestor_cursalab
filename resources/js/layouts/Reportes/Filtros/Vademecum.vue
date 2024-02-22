@@ -12,7 +12,7 @@
 			/>
 			<list-item titulo="Grupo" subtitulo="Grupo al que pertenece el usuario" />
 			<list-item titulo="Botica" subtitulo="Botica en la que se ubica el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+			<list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Documento" subtitulo="Nombre del documento (SCORM)" />
 			<list-item

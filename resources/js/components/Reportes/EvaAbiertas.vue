@@ -16,7 +16,7 @@
                 <list-item titulo="Área" subtitulo="Área al que pertenece el usuario" />
             </div>
             <list-item v-show="workspaceId === 25" titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-            <list-item titulo="DNI, Apellidos y Nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Documento, Apellidos y Nombres, Género" subtitulo="Datos personales" />
             <div v-show="workspaceId === 25">
                 <list-item titulo="Carrera" subtitulo="Carrera actual en la que se encuentra" />
                 <list-item titulo="Ciclo" subtitulo="Ciclo actual en la que se encuentra" />

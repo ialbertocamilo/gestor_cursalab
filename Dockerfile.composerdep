@@ -31,4 +31,5 @@ COPY --chown=composer composer.json ./
 
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
-RUN composer require barryvdh/laravel-dompdf
+# Esto no debería ser necesario porque arriba se deben instalar todos
+# RUN composer require barryvdh/laravel-dompdf

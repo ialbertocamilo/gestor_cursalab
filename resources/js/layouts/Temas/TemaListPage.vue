@@ -5,7 +5,7 @@
         >
             <template v-slot:content>
                 <v-row justify="center">
-                   
+
                 </v-row>
             </template>
         </DefaultFilter> -->
@@ -58,13 +58,15 @@
                         `Logs del tema - ${$event.nombre}`
                     )
                 "
+                
                 @delete="deleteTema($event)"
                 @status="updateTopicStatus($event)"
                 @edit="openFormModal(modalTopicOptions, $event, 'edit', `Editar tema - ${$event.nombre} | Curso: ${course_name}`)"
                 @data-loaded="enablePreviewbutton()"
-                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{ 
+                @preview_medias="openFormModal(modalPreviewMediaTopicsOptions,{
                     resource_id:$event.id,type:'topic',route:`/${ruta}cursos/${course_id}/temas/${$event.id}/medias`
                 }, 'list', `Listado`)"
+                @download_report_assistance="download_report_assistance"
             />
 
             <DialogConfirm
@@ -127,6 +129,13 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+            <CursosEncuestaModal
+                width="50vw"
+                :ref="modalCursoEncuesta.ref"
+                :options="modalCursoEncuesta"
+                @onCancel="closeFormModal(modalCursoEncuesta)"
+                @onConfirm="refreshDefaultTable(dataTable, filters, 1)"
+            />
         </v-card>
     </section>
 </template>
@@ -137,6 +146,7 @@ import TemaValidacionesModal from "./TemaValidacionesModal";
 import TopicFormModal from "./TopicFormModal";
 import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "./PreviewMediaTopicsModal";
+import CursosEncuestaModal from "../Cursos/CursosEncuestaModal";
 
 export default {
     components: {
@@ -145,7 +155,8 @@ export default {
     TopicFormModal,
     'TopicValidationsDelete': TemaValidacionesModal,
     'TopicValidationsUpdateStatus': TemaValidacionesModal,
-    PreviewMediaTopicsModal
+    PreviewMediaTopicsModal,
+    CursosEncuestaModal
 },
     props: ['school_id', 'school_name', 'course_id', 'course_name', 'ruta'],
     data() {
@@ -204,6 +215,21 @@ export default {
                     },
                 ],
                 more_actions: [
+                    // {
+                    //     text: "Encuesta",
+                    //     icon: 'mdi mdi-poll',
+                    //     type: 'action',
+                    //     count: 'encuesta_count',
+                    //     method_name: 'encuesta',
+                    //     show_condition: 'is_poll_available'
+                    // },
+                    {
+                        text: "Reporte de asistencia",
+                        icon: 'mdi mdi-file-chart',
+                        type: 'action',
+                        method_name: 'download_report_assistance',
+                        show_condition: "is_session_in_person",
+                    },
                     {
                         text: "Previsualización",
                         icon: 'mdi-cellphone',
@@ -322,6 +348,11 @@ export default {
                 action: null,
                 persistent: true,
             },
+            modalCursoEncuesta: {
+                ref: 'CursoEncuestaModal',
+                open: false,
+                base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
+            },
             showPreviewButton:false
         }
     },
@@ -330,8 +361,9 @@ export default {
         // vue.getSelects();
 
         // vue.filters.module = vue.modulo_id
-        vue.filters.category = vue.school_id
-        vue.filters.curso = vue.course_id
+
+        // vue.filters.category = vue.school_id
+        // vue.filters.curso = vue.course_id
     },
     methods: {
         getSelects() {
@@ -432,7 +464,12 @@ export default {
         },
         enablePreviewbutton(){
             let vue = this;
-            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length; 
+            vue.showPreviewButton = vue.$refs[vue.dataTable.ref].rows.length;
+        },
+        download_report_assistance(topic){
+            let vue =this;
+            let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${topic.id}/download-report-assistance`;
+            window.open(url).attr("href");
         }
     }
 }

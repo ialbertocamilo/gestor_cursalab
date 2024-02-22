@@ -18,6 +18,7 @@ Route::controller(CriterionController::class)->group(function () {
     Route::get('/{criterion}/edit', 'edit');
     Route::put('/{criterion}/update', 'update');
 
+    Route::get('/workspace', 'getWorkspaceCriteria');
 });
 
 // Route::get('{anuncio}/usuarios', 'usuarios')->name('modulos.usuarios');

@@ -159,7 +159,7 @@
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
                     <v-img
-                        v-for="(row, index) in item.images"
+                        v-for="(row, index) in item.images.slice(0, 3)"
                         max-height="50"
                         max-width="50"
                         :key="index"
@@ -178,6 +178,24 @@
                             </v-row>
                         </template>
                     </v-img>
+
+                    <v-tooltip :left="true">
+                        <!-- Icon -->
+                        <template
+                            v-slot:activator="{ on, attrs }">
+                            <div
+                                v-bind="attrs"
+                                v-on="on"
+                                v-if="item.images.length > 3"
+                                class="mt-3"
+                                style="position: relative; font-size: 18px; font-weight: 700; color: #5458ea">
+                                ...
+                            </div>
+                        </template>
+
+                        <!-- Tooltip message -->
+                        <div v-html="generateImagesNamesList(item.images)" />
+                    </v-tooltip>
                 </div>
             </template>
             <template v-slot:item.tags="{ item, header }">
@@ -343,7 +361,7 @@
                             <br> <span class="table-default-icon-title"
                                        v-text="'No visible'"/>
 
-                            <ul class="fancy-menu position-absolute">
+                            <ul class="fancy-menu">
                                 <li class="red-title">
                                     <i class="fas fa-exclamation-triangle"
                                        style="color: red !important; font-size: 12px"></i>
@@ -982,7 +1000,7 @@
                     <p class="my-0" v-text="item.custom_curso_nombre.nombre"/>
                     <div class="d-flex justify-content-start modules-images pt-3">
                         <v-img
-                            v-for="(row, index) in item.images"
+                            v-for="(row, index) in item.images.slice(0,3)"
                             max-height="50"
                             max-width="50"
                             :key="index"
@@ -1004,6 +1022,23 @@
                                 </v-row>
                             </template>
                         </v-img>
+                        <v-tooltip :left="true">
+                            <!-- Icon -->
+                            <template
+                                v-slot:activator="{ on, attrs }">
+                                <div
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    v-if="item.images.length > 3"
+                                    class="mt-3"
+                                    style="position: relative; font-size: 18px; font-weight: 700; color: #5458ea">
+                                    ...
+                                </div>
+                            </template>
+
+                            <!-- Tooltip message -->
+                            <div v-html="generateImagesNamesList(item.images)" />
+                        </v-tooltip>
                     </div>
 
 
@@ -1334,7 +1369,7 @@ export default {
                     vue.pagination.toRow = data.data.to || 0;
                     vue.pagination.total_rows = data.data.total;
                     vue.loading = false;
-                    vue.$emit('data-loaded');
+                    vue.$emit('data-loaded', data);
                 })
         },
         changePage(sum) {
@@ -1563,6 +1598,12 @@ export default {
             let vue = this
             item.edit_inline = false
             vue.$emit('saveNewProcessInline', item)
+        },
+        generateImagesNamesList(images) {
+            let names = [];
+            images.forEach(i => names.push(`<li style="font-size: 12px">${i.name}</li>`))
+
+            return '<ul style="padding-left: 5px; margin: 0">' + names.join('') + '</ul>'
         }
     }
 }
@@ -1589,6 +1630,7 @@ span.custom_benefit_type {
     font-size: 14px;
     font-family: "Nunito", sans-serif;
 }
+
 .tbl_perfil_speaker {
     width: 40px;
     height: 40px;

@@ -55,12 +55,14 @@ class GeneralController extends Controller
 
         // Generates totals array
 
-        $data = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_DATA,
+        $data = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_DATA,
             function () use ($workspaceId, $subworkspace_id,$current_workspace) {
             $count_active_users = DashboardService::countActiveUsers($subworkspace_id);
             if(!$subworkspace_id){
                 $limit_allowed_users = $current_workspace->getLimitAllowedUsers();
-                ($limit_allowed_users) && $count_active_users .= '/'.$limit_allowed_users;
+                $count_active_users = ($limit_allowed_users)
+                    ? $count_active_users .'/'. $limit_allowed_users
+                    : $count_active_users;
             }
             $data['time'] = now();
 
@@ -201,7 +203,7 @@ class GeneralController extends Controller
         return view('powerbi.index', compact('pbi_url'));
     }
 
-    public function workspaces_status(Request $request) 
+    public function workspaces_status(Request $request)
     {
         $workspaces_status = DashboardService::loadWorkspacesStatus();
 
@@ -219,9 +221,9 @@ class GeneralController extends Controller
         });
 
         // === storage y usuarios total ===
-        $workspaces_total = [ 
+        $workspaces_total = [
             'workspaces_total_storage' => formatSize($workspaces_status->sum('size_medias')),
-            'workspaces_total_users' => $workspaces_status->sum('users_count_actives') 
+            'workspaces_total_users' => $workspaces_status->sum('users_count_actives')
         ];
 
         $workspaces_status_total = ResourceListGeneralWorkspacesStatus::collection($workspaces_status);
@@ -229,14 +231,14 @@ class GeneralController extends Controller
         return $this->success(compact('workspaces_total', 'workspaces_status_total'));
     }
 
-    public function workspace_current_status(Request $request) 
+    public function workspace_current_status(Request $request)
     {
         $workspace_status = DashboardService::loadCurrentWorkspaceStatus();
-        
+
         return $this->success(new ResourceGeneralWorkspaceStatus($workspace_status));
     }
 
-    public function subworkspace_status(Request $request, string $subworkspace_id = NULL) 
+    public function subworkspace_status(Request $request, string $subworkspace_id = NULL)
     {
         $subworkspace_status = $subworkspace_id;
 
@@ -249,7 +251,7 @@ class GeneralController extends Controller
         return $this->success($subworkspace_status);
     }
 
-    public function workspace_storage(Request $request) 
+    public function workspace_storage(Request $request)
     {
         $workspace = get_current_workspace();
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
@@ -261,8 +263,8 @@ class GeneralController extends Controller
         // === workspace storage actual ===
 
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
-        $file_storage_check  = ($total_current_storage['size_unit'] == 'Gb' && 
-                                $total_storage_limit <= $total_current_storage['size']); 
+        $file_storage_check  = ($total_current_storage['size_unit'] == 'Gb' &&
+                                $total_storage_limit <= $total_current_storage['size']);
 
         $workspace_data = [
             'workspace_storage' => $total_storage_limit.' Gb', // gb
@@ -275,7 +277,7 @@ class GeneralController extends Controller
         return $this->success($workspace_data);
     }
 
-    public function workspace_users(Request $request) 
+    public function workspace_users(Request $request)
     {
         $workspace_storage = DashboardService::loadCountUsersWorkspaces();
         $platform = session('platform');
@@ -299,15 +301,15 @@ class GeneralController extends Controller
 
         return $this->success($workspace_data);
     }
-    
-    public function workspace_plan(GeneralStorageRequest $request) 
+
+    public function workspace_plan(GeneralStorageRequest $request)
     {
         /*paola@cursalab.io|juanjose@cursalab.io|juan@cursalab.io*/
 
         $workspace = get_current_workspace();
         $user = Auth::user();
         $functionalities_name  = implode(', ',collect($request->functionalities)->pluck('name')->toArray());
-        $storage_mail = [ 
+        $storage_mail = [
                     'subject' => 'Solicitud de Almacenamiento',
                     'user_admin' => $user->getFullnameAttribute(),
                     'user_admin_email' => $user->email_gestor,
@@ -329,7 +331,8 @@ class GeneralController extends Controller
     public function executeCommandJarvis(){
         // try {
             //code...
-            sleep(70);
+            // sleep(70);
+
             Artisan::call('convert:multimedia-text');
             return 'Se ejecutó correctamente';
         // } catch (\Throwable $th) {

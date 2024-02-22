@@ -80,7 +80,7 @@
             </div>
         </v-col>
 
-        <DiplomaPreviewModal 
+        <DiplomaPreviewModal
             width="50vh"
             :ref="modalDiplomaPreviewOptions.ref"
             :options="modalDiplomaPreviewOptions"
@@ -96,9 +96,9 @@
 import DiplomaPreviewModal from '../../layouts/Diplomas/DiplomaPreviewModal.vue';
 
 export default {
-    components:{ 
-        DiplomaPreviewModal, 
-        // DiplomaFormSave,  
+    components:{
+        DiplomaPreviewModal,
+        // DiplomaFormSave,
     },
     props: {
         value: null,
@@ -126,9 +126,7 @@ export default {
     ,
     watch : {
         value (newId, oldId) {
-            this.activeTemplate = this.certificateTemplates.find(i => i.id === newId)
-
-            this.modalDiplomaPreviewOptions.resource.preview = this.activeTemplate ? this.activeTemplate.image : null;
+            this.selectTemplate(newId)
         },
         activeTemplate (newId, oldId) {
             if (newId) {
@@ -166,6 +164,12 @@ export default {
                         d_objects: c.d_objects
                     })
                 })
+
+                // When template id has been set,
+                // select that template
+
+                if (this.value)
+                    this.selectTemplate(this.value)
 
             } catch (ex) {
                 console.log(ex)
@@ -214,6 +218,11 @@ export default {
             })
 
             return itHasFeature;
+        },
+        selectTemplate(templateId) {
+            this.activeTemplate = this.certificateTemplates.find(i => i.id === templateId)
+
+            this.modalDiplomaPreviewOptions.resource.preview = this.activeTemplate ? this.activeTemplate.image : null;
         }
 
     }

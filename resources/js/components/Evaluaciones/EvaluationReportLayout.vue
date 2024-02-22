@@ -3,11 +3,11 @@
       <v-card flat class="elevation-0 mb-4">
           <v-card-title>
             <div class="d-flex">
-              <a href class="text-decoration-none" 
+              <a href class="text-decoration-none"
                     :class="showTableDataDetail ? 'text-muted' : 'text-body'"
                     @click.prevent="showTableDataDetail = false">
                   Resumen de evaluaciones
-              </a> 
+              </a>
               <div v-show="showTableDataDetail">
                 <span class="mdi mdi-chevron-right fa-lg"></span>
                 <span>Tema</span>
@@ -15,7 +15,7 @@
             </div>
           </v-card-title>
       </v-card>
-      
+
       <!-- EVALUACIONES LISTADO-->
       <v-card v-show="!showTableDataDetail" flat class="elevation-0 mb-4">
           <v-card-text>
@@ -29,6 +29,7 @@
                     item-value="id"
                     dense
                     multiple
+                    :show-select-all="false"
                     :count-show-values="3"
                     :max-values-selected="1"
                     :loading="modules_loader"
@@ -45,6 +46,7 @@
                       item-value="id"
                       dense
                       multiple
+                      :show-select-all="false"
                       :count-show-values="3"
                       :max-values-selected="1"
                       :loading="schools_loader"
@@ -105,10 +107,10 @@
 
               <div class="row col-sm-12 mt-4 m-0 p-0 justify-center">
                 <div class="col-sm-4">
-                  <b-button 
-                    :disabled="modulo.length === 0 || curso.length === 0" 
-                    block 
-                    variant="primary" 
+                  <b-button
+                    :disabled="modulo.length === 0 || curso.length === 0"
+                    block
+                    variant="primary"
                     @click="searchEvaluations"
                     >
                     Consultar
@@ -123,17 +125,17 @@
                 <div>
                   <v-card>
                     <v-card-title class="default-dialog-title text-bold">Resumen de evaluaciones</v-card-title>
-                    
-                    <InfoTable 
-                      :addClass="'py-5 px-10'" 
-                      :headers="headersTableData" 
+
+                    <InfoTable
+                      :addClass="'py-5 px-10'"
+                      :headers="headersTableData"
                       class="mb-4"
                       >
 
                       <template slot="content">
-                        <div 
-                            class="row text-center border-bottom align-items-center" 
-                            v-for="eva of evaluations" 
+                        <div
+                            class="row text-center border-bottom align-items-center"
+                            v-for="eva of evaluations"
                             :key="eva.topic_id"
                           >
                           <div class="col text-left">
@@ -154,15 +156,15 @@
                         </div>
 
                         <!-- no-data -->
-                        <div 
-                          v-show="!evaluations.length" 
+                        <div
+                          v-show="!evaluations.length"
                           class="row justify-content-center mt-4">
                           No se encontraron resultados.
                         </div>
                         <!-- no-data -->
 
                       </template>
-                    
+
                     </InfoTable>
 
                   </v-card>
@@ -171,9 +173,9 @@
                 <!-- DOWNLOAD BUTTONS -->
                 <div class="row justify-content-between">
                   <div class="col-4">
-                    <v-btn class="px-3" 
-                        color="primary" 
-                        dense 
+                    <v-btn class="px-3"
+                        color="primary"
+                        dense
                         @click="downloadReportEvaluations">
 
                       <span class="fas fa-download mr-1"></span>
@@ -182,16 +184,16 @@
                   </div>
 
                   <div class="col-4 text-center">
-                    <v-btn class="px-3" 
-                      color="primary" 
+                    <v-btn class="px-3"
+                      color="primary"
                       dense
                       @click="downloadReportEvaluationsDetails">
                       <span class="fas fa-download mr-1"></span>
                       Descargar detalle
                     </v-btn>
 
-                    <v-btn class="px-3" 
-                      color="primary" 
+                    <v-btn class="px-3"
+                      color="primary"
                       dense
                       @click="searchEvaluationDetailTopics">
                       <v-icon class="mr-1">
@@ -213,23 +215,23 @@
 
       </v-card>
       <!-- EVALUACIONES LISTADO-->
-      
+
       <!-- EVALUACIONES DETALLE-->
       <v-card v-show="showTableDataDetail" flat class="elevation-0 mb-4">
         <div class="container-fluid">
             <v-card>
               <v-card-title class="default-dialog-title text-bold">Resumen de evaluaciones tema</v-card-title>
-              
-              <InfoTable 
-                :addClass="'py-5 px-10'" 
-                :headers="headersTableDetailData" 
+
+              <InfoTable
+                :addClass="'py-5 px-10'"
+                :headers="headersTableDetailData"
                 class="mb-4"
                 >
 
                 <template slot="content">
-                  <div 
-                      class="row text-center border-bottom align-items-center" 
-                      v-for="eva of evaluations_details" 
+                  <div
+                      class="row text-center border-bottom align-items-center"
+                      v-for="eva of evaluations_details"
                       :key="eva.question_id"
                     >
                     <div class="col text-left">
@@ -253,7 +255,7 @@
                   </div>
 
                   <!-- no-data -->
-                  <div v-show="!evaluations_details.length" 
+                  <div v-show="!evaluations_details.length"
                        class="row justify-content-center mt-4">
                      No se encontraron resultados.
                    </div>
@@ -263,7 +265,7 @@
 
               </InfoTable>
             </v-card>
-        </div> 
+        </div>
       </v-card>
       <!-- EVALUACIONES DETALLE-->
 
@@ -295,14 +297,14 @@ export default {
 
       // === tables ===
       headersTableData:[
-        { label:'Curso', align:'left' }, { label:'Tema', align:'left' }, 
-        { label:'Correctas'}, { label:'Incorrectas' }, 
-        { label:'Total evaluaciones' } 
+        { label:'Curso', align:'left' }, { label:'Tema', align:'left' },
+        { label:'Correctas'}, { label:'Incorrectas' },
+        { label:'Total evaluaciones' }
       ],
       headersTableDetailData: [
-        { label:'Curso', align:'left' }, { label:'Tema', align:'left', cols:3 }, { label:'Pregunta', align:'left', cols:3 }, 
-        { label:'Correctas' }, { label:'Incorrectas' }, 
-        { label:'Total evaluaciones' } 
+        { label:'Curso', align:'left' }, { label:'Tema', align:'left', cols:3 }, { label:'Pregunta', align:'left', cols:3 },
+        { label:'Correctas' }, { label:'Incorrectas' },
+        { label:'Total evaluaciones' }
       ],
       // === tables ===
 

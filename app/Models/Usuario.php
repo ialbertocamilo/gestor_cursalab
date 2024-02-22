@@ -239,7 +239,7 @@ class Usuario extends Model
     {
         $cache_name = 'usuarios_excluidos_graficos';
 
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS, function () {
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS, function () {
 
             $carreras = Carrera::select('id')
                                 ->where('contar_en_graficos', 0)
@@ -299,10 +299,10 @@ class Usuario extends Model
 
     protected function getCurrentHostsIds() {
 
-        return $this->getCurrentHosts(true);
+        return $this->getCurrentHosts(true,null,);
     }
 
-    protected function getCurrentHosts($indexOnly = false, $workSpaceIdx = null)
+    protected function getCurrentHosts($indexOnly = false, $workSpaceIdx = null,$type = 'users_full',$selects='')
     {
         $workSpaceIndex = $workSpaceIdx ?? get_current_workspace_indexes('id');
 
@@ -311,7 +311,7 @@ class Usuario extends Model
 
         # ==== usuarios bajo criterio ====
         $course = new Course;
-        $currUsers = $course->usersSegmented($currSegment, 'users_full');
+        $currUsers = $course->usersSegmented($currSegment, $type,[],$selects);
 
         return $indexOnly ? $currUsers->pluck('id')->toArray() : $currUsers;
     }

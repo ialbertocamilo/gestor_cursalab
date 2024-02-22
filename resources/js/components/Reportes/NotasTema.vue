@@ -84,9 +84,32 @@
                             item-value="id"
                             multiple
                             placeholder="Seleccione las escuelas"
-                            @onChange="escuelaChange"
+                            @onChange="loadCourses"
                             :maxValuesSelected="maxValuesSelected.schools"
                             :showSelectAll="maxValuesSelected.show_select_all"
+                        />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="modality"
+                            :items="modalities"
+                            label="Modalidades"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione una modalidad"
+                            @onChange="loadCourses"
+                        />
+                    </div>
+                    <div class="col-sm-6 mb-3" v-if="modalities.find(m => m.id == modality  && (m.code=='in-person' || m.code =='virtual'))">
+                        <DefaultAutocomplete
+                            dense
+                            v-model="reportType"
+                            :items="types_report"
+                            label="Tipo de reporte"
+                            item-text="name"
+                            item-value="id"
+                            placeholder="Seleccione un tipo de reporte"
                         />
                     </div>
                     <!-- Curso -->
@@ -314,6 +337,7 @@ export default {
     props: {
         workspaceId: 0,
         adminId: 0,
+        modalities:Array,
         modules: Array,
         reportsBaseUrl: ''
     },
@@ -321,6 +345,10 @@ export default {
         return {
             filteredSchools: [],
             reportType: 'consolidado_temas',
+            types_report:[
+                {id:'consolidado_temas',name:'Consolidado'},
+                {id:'asistencias',name:'Asistencia'},
+            ],
             schools: [],
             courses: [],
             topics: [],
@@ -328,6 +356,7 @@ export default {
 
             modulo: [],
             escuela: [],
+            modality:null,
             curso: [],
             tema: [],
             area: [],
@@ -349,6 +378,7 @@ export default {
     mounted() {
         this.fetchFiltersData();
         this.changeConstraints();
+        this.modality = this.modalities.find((m) => m.code =='asynchronous').id;
     },
     methods: {
         /**
@@ -409,7 +439,6 @@ export default {
             }
 
             // Perform request to generate report
-
             let urlReport = `${this.$props.reportsBaseUrl}/exportar/${this.reportType}`
             try {
                 let response = await axios({
@@ -422,6 +451,7 @@ export default {
                         filtersDescriptions,
                         modulos: this.modulo,
                         escuelas: this.escuela,
+                        modality_id:this.modality,
                         cursos: this.curso,
                         temas: this.tema,
 
@@ -440,7 +470,8 @@ export default {
                         aprobados: this.aprobados,
                         desaprobados: this.desaprobados,
                         realizados : this.realizados,
-                        porIniciar: this.porIniciar
+                        porIniciar: this.porIniciar,
+                        ext:this.reportType=='asistencias' ? 'zip' : 'xlsx'
                     }
                 })
                 const vue = this
@@ -476,7 +507,7 @@ export default {
          * Fetch courses
          * @returns {Promise<boolean>}
          */
-        async escuelaChange() {
+        async loadCourses() {
             this.curso = [];
             this.tema = [];
             this.courses = [];
@@ -485,7 +516,7 @@ export default {
             if (this.escuela.length === 0) return false;
 
             this.cursos_libres = false;
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.escuela.join()}?modality_id=${this.modality}`
             let res = await axios({
                 url,
                 method: 'get'

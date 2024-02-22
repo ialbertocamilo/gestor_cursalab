@@ -55,7 +55,7 @@ class Project extends BaseModel
                 $current_workspace = get_current_workspace();
                 // $data = Course::leftJoin('projects AS p','p.course_id','=','courses.id')
                 $data = Course::
-                when(!$request->q, function($q) use ($request){
+                when($request->q, function($q) use ($request){
                     // $request->q && $request->q != 'undefined'  ? $q->filtroName($request->q) : $q->doesntHave('project');
                     $q->filtroName($request->q) ;
                 })

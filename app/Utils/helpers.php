@@ -21,7 +21,10 @@ const COURSE_STATUS_DESAPROBADO = 4570;
 const COURSE_STATUS_ENC_PENDIENTE = 4571;
 
 const CACHE_MINUTES_DASHBOARD_GRAPHICS = 30;
+const CACHE_SECONDS_DASHBOARD_GRAPHICS = 1800;
+
 const CACHE_MINUTES_DASHBOARD_DATA = 60;
+const CACHE_SECONDS_DASHBOARD_DATA = 3600;
 
 const SECRET_PASS = '';
 
@@ -615,6 +618,18 @@ function fechaCastellano($fecha)
     $nombreMes = str_replace($meses_EN, $meses_ES, $mes);
     // return "Lima, ".$numeroDia." de ".$nombreMes." de ".$anio;
     return $numeroDia . " de " . $nombreMes . " del " . $anio;
+}
+function fechaCastellanoV2($date_string)
+{
+    // $date_string = 'Lunes, 5 Agosto';
+    $dias_ES = array("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
+    $dias_EN = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+    $date_string = str_replace($dias_EN, $dias_ES, $date_string);
+    $meses_ES = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
+    $meses_EN = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+    $date_string = str_replace($meses_EN, $meses_ES, $date_string);
+    // return "Lima, ".$numeroDia." de ".$nombreMes." de ".$anio;
+    return $date_string;
 }
 
 function getCriterionValue($id, $criteria) {

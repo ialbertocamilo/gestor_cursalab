@@ -7,21 +7,38 @@
             <p>
                 Este proceso permite actualizar usuarios usando como identificador el número de documento.
             </p>
-            <descriptionApi :options="api_description_options" :set_responses="true" />
+            <descriptionApi
+                v-if="initialized"
+                :options="api_description_options" :set_responses="true" />
         </v-card-text>
     </v-card>
 </template>
 <script>
 import descriptionApi from '../components/description_api.vue';
+import axios from "axios";
 let base_url = window.location.origin;
+const is_inretail =  base_url.includes('inretail');
+const criterions = is_inretail ?
+`
+                    "module":text,
+                    "email_type":text,
+                    "national_identifier_number_manager":text,
+                    "nombre_de_jefe":text,
+                    "posicion_jefe":text,`
+:
+`
+                    "module":text,
+                    "gender":text,
+                    "area":text`
 export default {
     components: {descriptionApi},
     data() {
         return{
+            initialized: false,
             api_description_options:{
                 title:'Actualizar usuarios',
                 type:'POST',
-                route:'/integrations/update-users',
+                route:'/integrations/update-create-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',
@@ -43,11 +60,7 @@ export default {
             {
                 "document": text,
                 "criterions": {
-                    "module":text,
-                    "email_type":text,
-                    "national_identifier_number_manager":text,
-                    "nombre_de_jefe":text,
-                    "posicion_jefe":text,
+CRITERION_LIST
                 }
             }
         ]
@@ -88,33 +101,27 @@ export default {
 {
 type:'language-js',
 code:
-`   
+`
 const base_url = '${base_url}';
 let axios = require('axios');
 let data = JSON.stringify({
     "users":
         [
-                    {
-            "document": text,
-            "email": text,
-            "criterions": {
-                "module":text,
-                "email_type":text,
-                "national_identifier_number_manager":text,
-                "nombre_de_jefe":text,
-                "posicion_jefe":text,
+            {
+                "document": text,
+                "criterions": {
+CRITERION_LIST
+                }
             }
-            
-        }
         ]
     }
 );
 var config = {
     method: 'post',
     url: base_url+'/integrations/update-create-users',
-    headers: { 
-        'secretKey': 'f*hdj[!GbdZQ4{#zKlot', 
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...', 
+    headers: {
+        'secretKey': 'f*hdj[!GbdZQ4{#zKlot',
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ...',
         'Content-Type': 'application/json'
     },
     data : data
@@ -135,12 +142,47 @@ code:
         "amount_errors":"Cantidad de errores encontrados."
         "processed_data": "Cantidad de data recibida.",
         "updated_users": "Documento y identificador del workspace de los usuarios actualizados."
-        "errors": "Listado de errores encontrados en la api." 
+        "errors": "Listado de errores encontrados en la api."
     }
 }`
 }],
                 }
             },
+        }
+    },
+    mounted() {
+        this.loadData()
+    },
+    methods: {
+        async loadData() {
+
+            let url = '../criterios/workspace'
+            try {
+
+                let response = await axios({
+                    method: 'get',
+                    url: url
+                })
+
+                // Generate workspace criterions list
+
+                let criterionsList = [];
+                response.data.forEach(c => {
+                    criterionsList.push(`                    "${c.code}": text (Optional)`);
+                })
+
+                // Replace criteria in documentation code
+
+                this.api_description_options.example_code.content_tabs[0].code = this.api_description_options.example_code.content_tabs[0].code.replace('CRITERION_LIST', criterionsList.join(',\n'))
+
+                this.api_description_options.parameters_type[0].parameters[0].description = this.api_description_options.parameters_type[0].parameters[0].description.replace('CRITERION_LIST', criterionsList.join(',\n'))
+
+                this.initialized = true
+
+
+            } catch (e) {
+                console.log(e)
+            }
         }
     }
 }

@@ -36,7 +36,7 @@
 
                 <DefaultModalButton
                     :label="'Crear curso'"
-                    @click="openFormModal(modalCourseOptions, null, 'create')"
+                    @click="openFormModal(modalCourseModality, null, null,'Selecciona qué modalidad de curso deseas crear')"
                 />
 
             </v-card-title>
@@ -108,7 +108,7 @@
                 :filters="filters"
                 @encuesta="openFormModal(modalCursoEncuesta, $event, 'encuesta', `Encuesta del curso - ${$event.name}`)"
                 @mover_curso="openFormModal(modalMoverCurso, $event, 'mover_curso', 'Mover curso')"
-                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del curso - ${$event.name}`)"
+                @segmentation="openSegmentationModal($event)"
                 @redirect_to_course_form_page="redirect_to_course_form_page($event)"
                 @compatibility="openFormModal(modalFormCompatibilityOptions, $event, 'compatibility', `Compatibilidad del curso - ${$event.name}`)"
                 @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
@@ -226,6 +226,25 @@
                 @onConfirm="closeFormModal(modalPreviewMediaTopicsOptions)"
                 @onCancel="closeFormModal(modalPreviewMediaTopicsOptions)"
             />
+            <course-Modality-modal
+                :ref="modalCourseModality.ref"
+                v-model="modalCourseModality.open"
+                :options="modalCourseModality"
+                width="900px"
+                @onConfirm="openCourseModal"
+                @onCancel="modalCourseModality.open = false"
+                :modalities="selects.modalities"
+            />
+            <direct-segmentation-form
+                :ref="modalDirectSegmentationOptions.ref"
+                v-model="modalDirectSegmentationOptions.open"
+                :options="modalDirectSegmentationOptions"
+                model_type="App\Models\Course"
+                width="55vw"
+                @onConfirm="modalDirectSegmentationOptions.open=false"
+                @onCancel="modalDirectSegmentationOptions.open = false"
+                :modalities="selects.modalities"
+            />
         </v-card>
     </section>
 </template>
@@ -238,9 +257,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import CursoValidacionesModal from "./CursoValidacionesModal";
 import SegmentCoursesFormModal from "../Blocks/SegmentCoursesFormModal";
 import CompatibilityFormModal from "./CompatibilityFormModal";
-import ProjectFormModal from "../Project/ProjectFormModal.vue";
+import ProjectFormModal from "../Project/ProjectFormModal";
 import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
+import CourseModalityModal from "./CourseModalityModal";
+import DirectSegmentationForm from "./DirectSegmentationForm";
 
 export default {
     components: {
@@ -254,7 +275,9 @@ export default {
         CompatibilityFormModal,
         CourseFormModal,
         LogsModal,
-        PreviewMediaTopicsModal
+        PreviewMediaTopicsModal,
+        CourseModalityModal,
+        DirectSegmentationForm
     },
     props: ['modulo_id', 'modulo_name',],
     data() {
@@ -321,14 +344,14 @@ export default {
                         conditionalBadgeIcon: [{
                             message: 'No tienes colaboradores participantes en el curso',
                             minValue: 0,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: 'red',
                             icon: 'fas fa-exclamation-triangle',
                             iconSize: '12px'
                         },{
                             message: 'Selecciona a los colaboradores que participarán en el curso',
                             minValue: 1,
-                            propertyCond: 'assigned_users',
+                            propertyCond: 'segments_count',
                             color: '#7fbade',
                             icon: 'mdi mdi-check-circle'
                         }]
@@ -360,7 +383,7 @@ export default {
                         icon: 'mdi mdi-poll',
                         type: 'action',
                         count: 'encuesta_count',
-                        method_name: 'encuesta'
+                        method_name: 'encuesta',
                     },
                     {
                         text: "Crear tarea",
@@ -406,12 +429,12 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     },
-                    // {
-                    //     text: "Eliminar",
-                    //     icon: 'far fa-trash-alt',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
+                    {
+                        text: "Eliminar",
+                        icon: 'far fa-trash-alt',
+                        type: 'action',
+                        method_name: 'delete'
+                    },
                 ]
             },
             selects: {
@@ -423,6 +446,7 @@ export default {
                     {id: 1, name: 'Activos'},
                     {id: 2, name: 'Inactivos'},
                 ],
+                modalities:[],
             },
             filters: {
                 q: '',
@@ -477,6 +501,28 @@ export default {
                 resource: 'Tarea',
                 confirmLabel: 'Guardar',
                 action:'create'
+            },
+            modalCourseModality:{
+                open:false,
+                ref: 'CourseTypeModal',
+                open: false,
+                base_endpoint: '/course',
+                confirmLabel: 'Guardar',
+                resource: 'course',
+                title: 'Selecciona qué modalidad de curso deseas crear',
+                action: null,
+                persistent: true,
+            },
+            modalDirectSegmentationOptions:{
+                open:false,
+                ref: 'CourseDirectSegmentation',
+                open: false,
+                base_endpoint: '/segments',
+                confirmLabel: 'Guardar',
+                resource: 'course',
+                title: '',
+                action: null,
+                persistent: true,
             },
             courseUpdateStatusModal: {
                 ref: 'CourseUpdateStatusModal',
@@ -593,7 +639,7 @@ export default {
                 .then(({data}) => {
                     vue.selects.schools = data.data.schools;
                     vue.selects.modules = data.data.modules;
-
+                    vue.selects.modalities = data.data.modalities;
                     // vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
                 })
         },
@@ -714,6 +760,28 @@ export default {
 
             // const win = window.open(course.edit_route, '_blank');
             // win.focus();
+        },
+        openCourseModal(modality){
+            let vue = this;
+            vue.closeFormModal(vue.modalCourseModality);
+            vue.modalCourseOptions.modality = modality;
+            vue.openFormModal(vue.modalCourseOptions, null, null,'Crear '+ modality.name.toLowerCase());
+        },
+        openSegmentationModal(resource){
+            let vue = this;
+            if(!resource){
+                return;
+            }
+            if(resource.active_topics_count == 0 && resource.modality_code=='virtual'){
+                vue.showAlert('Es necesario crear temas activos para poder segmentar el curso.','warning');
+                return;
+            }
+            if(resource.modality_code == 'in-person' || resource.modality_code=='virtual'){
+                vue.openFormModal(vue.modalDirectSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
+                resource.show_criteria_segmentation = false;
+                return;
+            }
+            vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
         }
     }
 

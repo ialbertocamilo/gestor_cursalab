@@ -31,7 +31,6 @@ class PosteoSearchResource extends JsonResource
         if ($topic->assessable && $evaluation_type) {
             $assessable_title .= " [{$evaluation_type}]"; 
         }
-
         return [
             'id' => $topic->id,
             'nombre' => $topic->name,
@@ -56,6 +55,8 @@ class PosteoSearchResource extends JsonResource
             'evaluacion_route' => route('temas.preguntas_list', [$request->school_id, $request->course_id, $topic->id]),
             'is_super_user'=>auth()->user()->isAn('super-user'),
             'is_cursalab_super_user'=> is_cursalab_superuser(),
+            'is_poll_available' => true,
+            'is_session_in_person'=> $request->course_code == 'in-person'
             // 'is_super_user'=> true
 
         ];

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Media;
 use App\Models\School;
+use App\Models\Course;
+use App\Models\Topic;
 use App\Models\Abconfig;
 use App\Models\Categoria;
 use App\Models\Workspace;
@@ -138,65 +140,34 @@ class EscuelaController extends Controller
 
         $subworkspace_ids = [];
 
-        foreach ($destinations as $destination) {
+        foreach ($destinations as $row) {
 
-            $part = explode('_', $destination);
-            $subworkspace_ids[] = $part[1]; 
+            $parts = explode('-', $row);
+
+            $subworkspace_tag = $parts[0];
+            $school_tag = $parts[1];
+
+            $subworkspace_ids[] = explode('_', $subworkspace_tag)[1]; 
+            $school_ids[] = explode('_', $school_tag)[1]; 
         }
 
         $data = $this->buildSourceTreeSelection($selections);
 
-        return $data;
+        // dd($data, $destinations, $school_ids);
 
         $subworkspaces = Workspace::whereIn('id', $subworkspace_ids)->get();
-        // $_schools = School::whereIn('id', $data['school_ids'])->get();
+        $schools = School::whereIn('id', $school_ids)->get();
+
         $_courses = Course::whereIn('id', $data['course_ids'])->get();
         $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
 
-        // foreach ($data['courses'] as $course_id => $course_ids) {
+        $prefix = '';
+        // $prefix = '[DUPLICADO] ';
 
-        //     $_course = $_courses->where('id', $course_id)->first();
+        foreach ($schools as $school_row) {
 
-        //     $course_data = $_course->toArray();
-        //     $course_data['external_id'] = $_course->id;
-
-        //     foreach ($subworkspaces as $subworkspace) {
-
-        //         $school = $subworkspace->schools()->where('name', $_school->name)->first();
-
-        //         if ( ! $school ) {
-
-        //             $school_position = ['position' => $subworkspace->schools()->count() + 1];
-
-        //             $school = $subworkspace->schools()->create($school_data, $school_position);
-        //         }
-
-        //         foreach ($course_ids['courses'] as $course_id => $topic_ids) {
-
-        //             $_course = $_courses->where('id', $course_id)->first();
-
-        //             $course_data = $_course->toArray();
-        //             $course_data['external_id'] = $_course->id;
-
-        //             $course = $school->courses()->create($course_data);
-
-        //             $workspace->courses()->attach($course);
-
-        //             foreach ($topic_ids['topics'] as $topic_id) {
-
-        //                 $_topic = $_topics->where('id', $topic_id)->first();
-
-        //                 $topic_data = $_topic->toArray();
-        //                 $topic_data['external_id'] = $_topic->id;
-
-        //                 $topic = $course->topics()->create($topic_data);
-
-        //                 $topic->medias()->createMany($_topic->medias->toArray());
-        //                 $topic->questions()->createMany($_topic->questions->toArray());
-        //             }
-        //         }
-        //     }
-        // }
+            Workspace::setCoursesDuplication($data['courses'], $_courses, $_topics, $school_row, $workspace, $prefix);
+        }
 
         return $this->success(['msg' => 'Contenido duplicado correctamente.']);
     }

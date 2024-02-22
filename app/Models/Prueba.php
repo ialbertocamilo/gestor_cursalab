@@ -34,7 +34,7 @@ class Prueba extends Model
 
         $excluir_usuarios = Usuario::getUsuariosExcluidosDeGraficos();
 
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS, function () use ($modulo_id, $excluir_usuarios) {
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS, function () use ($modulo_id, $excluir_usuarios) {
 
             $data['time'] = now();
 
@@ -77,7 +77,7 @@ class Prueba extends Model
             $cache_name .= $modulo_id ? "-{$modulo_id}" : '';
         }
 
-        $result = cache()->remember($cache_name, CACHE_MINUTES_DASHBOARD_GRAPHICS, function () use ($usuarios_id, $condition) {
+        $result = cache()->remember($cache_name, CACHE_SECONDS_DASHBOARD_GRAPHICS, function () use ($usuarios_id, $condition) {
 
             $data['time'] = now();
 

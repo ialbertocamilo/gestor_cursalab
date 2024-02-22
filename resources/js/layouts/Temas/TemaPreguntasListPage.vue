@@ -10,7 +10,7 @@
                     <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '3'">
                         <div class="d-flex justify-content-end">
                             <span v-if="limits_ai_convert.has_permission_to_use_ia_evaluation">
-                                <v-badge small class="_badge mr-4" overlap color="#57BFE3"> 
+                                <v-badge small class="_badge mr-4" overlap color="#57BFE3">
                                         <template v-slot:badge>
                                             <span v-text="`${limits_ai_convert.ia_evaluations_generated}/${limits_ai_convert.limit_allowed_ia_evaluations}`"></span>
                                         </template>
@@ -19,18 +19,18 @@
                                             color="primary"
                                             @click="openFormModal(modalCreateQuestionsOptions, null,null, 'Creación de evaluación')"
                                             :disabled="
-                                                limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations 
+                                                limits_ai_convert.ia_evaluations_generated >= limits_ai_convert.limit_allowed_ia_evaluations
                                                 || !limits_ai_convert.is_ready_to_create_AIQuestions"
                                         >
-                                            <img width="22px" 
+                                            <img width="22px"
                                                 v-if="limits_ai_convert.is_ready_to_create_AIQuestions"
-                                                class="mr-2" 
+                                                class="mr-2"
                                                 style="filter: brightness(3);"
                                                 src="/img/ia_convert.svg"
                                             >
-                                            <img else width="22px" 
+                                            <img else width="22px"
                                                 v-else
-                                                class="loader-jarvis img-rotate mr-2" 
+                                                class="loader-jarvis img-rotate mr-2"
                                                 style="filter: brightness(3);"
                                                 src="/img/loader-jarvis.svg"
                                             >
@@ -111,9 +111,19 @@
                     </v-col>
 
                     <v-col cols="8" v-if="evaluation_type == 'qualified'" class="text-center">
-                        <div class="alert alert-success pa-1 pt-2" role="alert" v-show="validation.status == true">
+                        <div class="alert alert-success pa-1 pt-2" role="alert" v-show="validation.status == true && !questionsError.length">
                           <h6>La evaluación es correcta.</h6>
                         </div>
+
+                        <div class="alert alert-danger pa-1 pt-2" role="alert"
+                             v-show="questionsError.length">
+                            <ul>
+                            <li v-for="error in questionsError" class="text-left">
+                                {{ error }}
+                            </li>
+                            </ul>
+                        </div>
+
                         <div class="alert alert-danger pa-1" role="alert" v-show="validation.status == false && validation.missing_score != 0">
                           <h6>Es necesario asignar {{ validation.missing_score }} punto(s) más para completar la evaluación.</h6>
                         </div>
@@ -132,6 +142,7 @@
                         'logs',
                         `Logs de la pregunta - ${$event.custom_tema_preguntas_pregunta}`
                     )"
+                @data-loaded="dataLoaded($event)"
                 @edit="openFormModal(modalOptions, $event, 'edit')"
                 @delete="deleteTemaPregunta($event);"
             />
@@ -181,7 +192,7 @@
                 @onCancel="closeFormModal(modalCreateQuestionsOptions) "
                 :number_socket="number_socket"
             />
-            <DefaultAlertDialog 
+            <DefaultAlertDialog
                 :options="modalInfoCreateQuestion"
                 :hideCancelBtn="modalInfoCreateQuestion.hideCancelBtn"
                 :confirmLabel="modalInfoCreateQuestion.confirmLabel"
@@ -371,6 +382,7 @@ export default {
                 ia_evaluations_generated:0,
                 limit_allowed_ia_evaluations:0
             },
+            questionsError : []
         }
     },
     mounted() {
@@ -460,7 +472,7 @@ export default {
         },
         openConfirmCreateQuestion(){
             let vue = this;
-            vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1; 
+            vue.limits_ai_convert.ia_evaluations_generated = vue.limits_ai_convert.ia_evaluations_generated + 1;
             vue.openSimpleModal(vue.modalInfoCreateQuestion);
         },
         async loadLimitsGenerateIaDescriptions(){
@@ -469,6 +481,17 @@ export default {
                 this.hideLoader();
                 this.limits_ai_convert = data.data;
             })
+        },
+        dataLoaded(data) {
+
+            this.questionsError = [];
+
+            const rows = data.data.data;
+            rows.forEach(r => {
+                if (!r.answers_are_valid) {
+                    this.questionsError.push(`No hay definida una respuesta correcta: ${r.custom_tema_preguntas_pregunta} .`)
+                }
+            });
         }
     }
 

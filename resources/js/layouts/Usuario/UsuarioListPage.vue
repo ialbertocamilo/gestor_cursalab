@@ -123,7 +123,7 @@
                             text
                             label="Aplicar filtros"
                             icon="mdi-filter"
-                            @click="open_advanced_filter = !open_advanced_filter"
+                            @click="openFiltersModal()"
                             class="btn_filter"
                             />
                     </v-col>
@@ -139,7 +139,7 @@
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de <b>usuario</b>')"
                 @delete="openFormModal(modalDeleteOptions, $event, 'delete', 'Confirmación de cambio de estado')"
                 @cursos="openFormModal(modalCursosOptions, $event, 'cursos', `Cursos de ${$event.nombre} - ${$event.document}`)"
-                @profile="openFormModal(modalProfileOptions, $event, 'profile', `Perfil de ${$event.nombre} - ${$event.document}`)"
+                @profile="openFormModal(modalProfileOptions, $event, 'profile', `Progreso de ${$event.nombre} - ${$event.document}`)"
                 @reset="openFormModal(modalReiniciosOptions, $event, 'cursos', `Reiniciar avance de ${$event.nombre}`)"
                 @reset_password="openFormModal(modalResetPasswordOptions, $event, 'user', `Restaurar contraseña de ${$event.nombre} - ${$event.document}`)"
                 @impersonate_user="openFormModal(modalImpersonateUserOptions, $event, 'user', `Acceder como ${$event.nombre} - ${$event.document}` )"
@@ -255,6 +255,7 @@ export default {
 
         return {
             usersWithEmptyCriteria: 0,
+            filtersValuesHasBeenLoaded : false,
             dataTable: {
                 endpoint: '/usuarios/search',
                 ref: 'UsuarioTable',
@@ -313,7 +314,12 @@ export default {
                         show_condition: "is_super_user",
                         method_name: "logs"
                     },
-                    {text: "Perfil", icon: 'mdi mdi-account-box', type: 'action', method_name: 'profile', show_condition: "is_cursalab_super_user",},
+                    {   text: "Progreso",
+                        icon: 'mdi mdi-account-box',
+                        type: 'action',
+                        method_name: 'profile',
+                        // show_condition: "is_cursalab_super_user",
+                    },
 
                 ]
             },
@@ -421,20 +427,22 @@ export default {
     },
     mounted() {
         let vue = this
-        
+
           // === check localstorage multimedia ===
         const { status, storage: usuarioStorage } = vue.getStorageUrl('usuarios', 'module_data');
         // console.log('created_usuarios:', {status, usuarioStorage});
-        
+
         if(status) {
             vue.filters.active = usuarioStorage.active;
             vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
         // === check localstorage anuncio ===
         }
-        vue.getSelects();
+        //vue.getSelects();
     },
     methods: {
         getSelects() {
+            this.showLoader()
+
             let vue = this
 
             let params = vue.getAllUrlParams(window.location.search);
@@ -471,6 +479,8 @@ export default {
                     // if (param_subworkspace)
                     //     vue.filters.subworkspace_id = param_subworkspace
 
+                    this.filtersValuesHasBeenLoaded = true;
+                    this.hideLoader()
                 })
 
         },
@@ -484,6 +494,13 @@ export default {
         activity() {
             console.log('activity')
         },
+        openFiltersModal() {
+
+            this.open_advanced_filter = !this.open_advanced_filter;
+
+            if (!this.filtersValuesHasBeenLoaded)
+                this.getSelects()
+        }
     }
 }
 </script>

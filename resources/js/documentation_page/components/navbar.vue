@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar 
+    <v-app-bar
         app
         color="white"
         elevate-on-scroll
@@ -37,7 +37,7 @@
                         <v-list-item-title class="grupo_title">{{ item.title }}</v-list-item-title>
                     </template>
                     <div v-for="(item,index) in item.subItems" :key="index" class="my-1" style="margin-left: 1rem;">
-                        <v-list-item  dark dense :to="item.link" >
+                        <v-list-item  dark dense :to="item.link" v-if="item.show">
                             <v-list-item-icon >
                                 <v-icon class="item_icon">{{item.icon}}</v-icon>
                             </v-list-item-icon>
@@ -56,6 +56,8 @@
   </div>
 </template>
 <script>
+const base_url = window.location.origin;
+const is_inretail =  base_url.includes('inretail');
 export default {
     data () {
       return {
@@ -69,11 +71,13 @@ export default {
                         {
                             icon:'mdi-key',
                             title:'Clave secreta',
+                            show:true,
                             link:'/documentation-api/secret-key',
                         },
                         {
                             icon:'mdi-fingerprint',
                             title:'Token',
+                            show:true,
                             link:'/documentation-api/token',
                         },
                   ]
@@ -87,61 +91,73 @@ export default {
                         {
                             icon:'mdi-format-list-bulleted',
                             title:'Criterios',
+                            show:true,
                             link:'/documentation-api/criterions',
                         },
                         {
                             icon:'mdi-playlist-plus',
                             title:'Valores por criterio',
+                            show:true,
                             link:'/documentation-api/criterion-values',
                         },
                         {
                             icon:'mdi-hexagon',
                             title:'Workspaces',
+                            show:true,
                             link:'/documentation-api/workspace',
                         },
-                        {
-                            icon:'mdi-account-convert',
-                            title:'Alta de usuarios',
-                            link:'/documentation-api/update-create-users',
-                        },
+                        // {
+                        //     icon:'mdi-account-convert',
+                        //     title:'Alta de usuarios',
+                        //     show:true,
+                        //     link:'/documentation-api/update-create-users',
+                        // },
                         {
                             icon:'mdi-account-multiple-plus',
                             title:'Crear usuarios',
+                            show:true,
                             link:'/documentation-api/create-users',
                         },
                         {
                             icon:'mdi-account-edit',
                             title:'Actualizar usuarios',
+                            show:true,
                             link:'/documentation-api/update-users',
                         },
                         {
                             icon:'mdi-account-check',
                             title:'Activar usuarios',
+                            show:true,
                             link:'/documentation-api/activate-users',
                         },
                         {
                             icon:'mdi-account-off',
                             title:'Inactivar usuarios',
+                            show:true,
                             link:'/documentation-api/inactivate-users',
                         },
                         {
                             icon:'mdi-chart-areaspline',
                             title:'Avance de usuarios',
+                            show: is_inretail,
                             link:'/documentation-api/progress',
                         },
                         {
                             icon:'mdi-account',
                             title:'Listado de usuarios',
+                            show:is_inretail,
                             link:'/documentation-api/users',
                         },
                         {
                             icon:'mdi-book',
                             title:'Listado de cursos',
+                            show:is_inretail,
                             link:'/documentation-api/courses',
                         },
                         {
                             icon:'mdi-book-open-variant',
                             title:'Progreso de un Curso',
+                            show:is_inretail,
                             link:'/documentation-api/course-progress',
                         }
                   ]
@@ -158,7 +174,7 @@ export default {
 </script>
 <style scoped>
 .v-icon{
-    color:white !important;   
+    color:white !important;
 }
 .v-list{
     background: #5458ea;

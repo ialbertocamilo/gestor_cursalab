@@ -55,6 +55,9 @@ class CursosStoreUpdateRequest extends FormRequest
             'user_confirms_certificate' => 'nullable',
             'can_create_certificate_dc3_dc4' => 'nullable',
             'dc3_configuration' => 'nullable',
+            'modality_in_person_properties' => 'nullable',
+            'modality_id' => 'nullable',
+            'registro_capacitacion' => 'nullable',
         ];
     }
 
@@ -80,12 +83,15 @@ class CursosStoreUpdateRequest extends FormRequest
             $mod_evaluaciones['nota_aprobatoria'] = calculateValueForQualification($mod_evaluaciones['nota_aprobatoria'], 20, $qualification_type->position);
         }
 
+
         $data['active'] = $active;
         $data['show_certification_date'] = $show_certification_date;
         $data['show_certification_to_user'] = $show_certification_to_user;
         $data['user_confirms_certificate'] = $user_confirms_certificate;
         $data['validateForm'] = !!$this->validateForm;
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
+        $data['modality_in_person_properties'] = $this->modality_in_person_properties ? json_decode($this->modality_in_person_properties, true) : [];
+
         $data['mod_evaluaciones'] = $mod_evaluaciones;
         $data['qualification_type_id'] = $qualification_type_id;
         $data['can_create_certificate_dc3_dc4'] = $can_create_certificate_dc3_dc4;

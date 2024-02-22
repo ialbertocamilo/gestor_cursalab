@@ -5,7 +5,7 @@
                  Descarga todas las diplomas de los usuarios.
              </template>
              <list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-             <list-item titulo="Apellidos y nombres, DNI" subtitulo="Datos personales" />
+             <list-item titulo="Apellidos y nombres, Documento" subtitulo="Datos personales" />
              <list-item titulo="Estado(Usuario)" subtitulo="Estado del usuario (Activo - Inactivo)" />
 
              <!--list-item titulo="Modalidad" subtitulo="Modalidad de cada escuela: regular, extra(extracurricular), libre" /-->

@@ -2,28 +2,50 @@
 
 namespace App\Models;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Course extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_code', 'slug', 'external_id',
-        'assessable', 'freely_eligible', 'type_id', 'qualification_type_id',
+        'assessable', 'freely_eligible', 'type_id','modality_id', 'qualification_type_id',
         'scheduled_restarts', 'active',
         'duration', 'investment', 'mod_evaluaciones',
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4','dc3_configuration'
+        'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion','modality_in_person_properties'
     ];
 
     protected $casts = [
         'mod_evaluaciones' => 'array',
         'scheduled_restarts' => 'array',
         'show_certification_date' => 'boolean',
+        'modality_in_person_properties' => 'json'
     ];
+
+    //
+    // Mutators and accesors
+    // ========================================
+
+//    public function setRegistroCapacitacionAttribute($value)
+//    {
+//        $this->attributes['registro_capacitacion'] = json_encode($value);
+//    }
+
+    public function getRegistroCapacitacionAttribute($value)
+    {
+        return $value ? json_decode($value) : json_decode('{"active":false}');
+    }
+
+    //
+    // Relationships
+    // ========================================
 
     public function schools()
     {
@@ -99,6 +121,10 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
+    public function modality()
+    {
+        return $this->belongsTo(Taxonomy::class, 'modality_id');
+    }
     public function compatibilities_a()
     {
         return $this->belongsToMany(Course::class, 'compatibilities', 'course_a_id', 'course_b_id');
@@ -130,9 +156,21 @@ class Course extends BaseModel
             $data['range_date'] = null;
             return $data;
         }
-        $data =json_decode($value); 
+        $data =json_decode($value);
         return $data;
     }
+
+    public function getModalityInPersonPropertiesAttribute($value){
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['assistance_type'] = 'assistance-course';
+            $data['required_signature'] = false;
+            $data['visualization_type'] = 'only-assistence';
+            return $data;
+        }
+        return json_decode($value);
+    }
+ 
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
@@ -167,7 +205,7 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
-            ->with(['schools.subworkspaces','project:id,course_id'])
+            ->with(['schools.subworkspaces','project:id,course_id','modality:id,code'])
             // ->with('segments.values', function ($q) {
             //     $q
             //         ->withWhereHas('criterion_value', function ($q) {
@@ -216,7 +254,8 @@ class Course extends BaseModel
         }
 
         if ($request->q)
-            $q->where('name', 'like', "%$request->q%");
+            $q->where('name', 'like', "%$request->q%")
+              ->orWhere('id', $request->q);
 
         if ($request->type)
             $q->where('type_id', $request->type);
@@ -330,7 +369,67 @@ class Course extends BaseModel
 
         return $course;
     }
+    //Crear o actualizar meetings para cursos online
+    public function storeUpdateMeeting(){
+        $course = $this;
+        if($course->modality->code != 'virtual'){
+            return '';
+        }
+        $course->load('topics:id,course_id,active,name,modality_in_person_properties');
+        $active_topics = $course->topics->where('active',1)->values();
+        $type_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first()->id;
+        $user_meeting_id = Taxonomy::select('id')->where('group','meeting')->where('type','user')->where('code','normal')->first()->id;
+        $user_cohost__id = Taxonomy::select('id')->where('group','meeting')->where('type','user')->where('code','cohost')->first()->id;
 
+        $users_segmented = Course::usersSegmented($course->segments, type: 'users_id');
+        $attendants = Course::usersSegmented($course->segments, type: 'get_records')->map(function($user) use ($user_meeting_id){
+            return [
+                "usuario_id" => $user->id,
+                "type_id" => $user_meeting_id,
+                "id" => null,
+            ];
+        });
+        if(count($attendants) == 0){
+            return '';
+        }
+        foreach ($active_topics as $topic) {
+            $modality_in_person_properties = $topic->modality_in_person_properties;
+            $host_id = $modality_in_person_properties->host_id;
+            $cohost_id = $modality_in_person_properties->cohost_id ?? null;
+            if($cohost_id){
+                $attendants->push([
+                    "usuario_id" => $cohost_id,
+                    "type_id" => $user_cohost__id,
+                    "id" => null,
+                ]);
+            }
+            $start_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
+            $finish_datetime = Carbon::parse($modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
+            $starts_at = $start_datetime->format('Y-m-d H:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
+            $duration = $start_datetime->diffInMinutes($finish_datetime);
+            $model_id = $topic->id;
+            $meeting = Meeting::where('model_type','App\\Models\\Topic')->with('status:id,name,code')->where('model_id',$model_id)->first();
+            if(in_array($meeting?->status?->code,['finished','cancelled','overdue'])){
+                continue;
+            }
+            $meeting_data = [
+                "name" => $topic->name,
+                "starts_at" => $starts_at,
+                "finishes_at" =>$finishes_at,
+                "host_id" => $host_id,
+                "type_id" => $type_meeting_id,
+                "duration" => $duration,
+                "embed" => false,
+                "attendants" => $attendants,
+                "description" => null,
+                "model_type" => 'App\\Models\\Topic',
+                "model_id" => $model_id,
+            ];
+            $_meeting = $meeting ?? new Meeting();
+            $_meeting->storeRequest($meeting_data,$meeting);
+        }
+    }
     protected function validateBeforeUpdate(array $data, School $school, Course $course)
     {
         $validations = collect();
@@ -534,6 +633,8 @@ class Course extends BaseModel
 
         $statuses = Taxonomy::where('group', 'course')->where('type', 'user-status')->get();
 
+        $modalities = Taxonomy::where('group', 'course')->where('type', 'modality')->select('id','code')->get();
+
 
         foreach ($schools as $school_id => $courses) {
             $school_workspace = $positions_schools->where('school_id', $school_id)->first();
@@ -565,6 +666,7 @@ class Course extends BaseModel
 
             foreach ($courses as $course) {
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
+                $modality = $modalities->where('id',$course->modality_id)->first();
 
                 $course->poll_question_answers_count = $polls_questions_answers->where('course_id', $course->id)->first()?->count;
                 $school_assigned++;
@@ -667,6 +769,7 @@ class Course extends BaseModel
                 if (is_null($last_course_reviewed) && $course_status['status'] != 'completado') {
                     $last_course_reviewed = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -677,6 +780,7 @@ class Course extends BaseModel
                 if ($course_status['status'] != 'completado' && $course_status['status'] != 'bloqueado') {
                     $last_school_courses[] = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -722,6 +826,7 @@ class Course extends BaseModel
                 {
                     $school_courses[] = [
                         'id' => $course->id,
+                        'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'descripcion' => $course->description,
                         'orden' => $course_position,
@@ -1236,8 +1341,12 @@ class Course extends BaseModel
         print_r($fun_2);
     }
 
-    public function usersSegmented($course_segments, $type = 'get_records')
+    public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
     {
+        // Example filters: 
+        // $filters = [
+        //      ['statement' => 'where','field'=>'name','operator'=>'=','value'=>'Aldo']
+        // ]
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
             $query = User::select('id')->where('active', 1);
@@ -1263,6 +1372,19 @@ class Course extends BaseModel
             }
             // $counts[$key] = $query->count();
 //            dd($query->toSql());
+            foreach ($filters as $filter) {
+                $statement = $filter['statement'] ?? null;
+                $field = $filter['field'] ?? null;
+                $value = $filter['value'] ?? null;
+                $operator = $filter['operator'] ?? '=';
+                if($field && $operator){
+                    /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
+                    ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+                }else if($statement && $value){
+                    /*Example: $query->filterText($value)*/
+                    $query->$statement($value);
+                }
+            }
             $users_id_course = array_merge($users_id_course, $query->pluck('id')->toArray());
             // $users = DB::table('criterion_value_user')->join('criterion_values','criterion_values.id','=','criterion_value_user.criterion_value_id');
             // $criteria = $segment->values->groupBy('criterion_id');
@@ -1288,147 +1410,10 @@ class Course extends BaseModel
         }
 
         $users_have_course = User::where('active', 1)->whereIn('id', $users_id_course)->select('id');
+        if($addSelect){
+            $users_have_course->addSelect($addSelect);
+        }
         return ($type == 'get_records') ? $users_have_course->get() : $users_have_course->count();
-    }
-
-    public function getUsersBySegmentation($type = 'count')
-    {
-        $this->load('segments.values');
-
-        if (!$this->hasBeenSegmented()) return [];
-
-        // $users = collect();
-        $users = [];
-
-        $counts = [];
-
-        foreach ($this->segments as $key => $segment) {
-
-            $query = User::select('id')->where('active', 1);
-            // $clause = $key == 0 ? 'where' : 'orWhere';
-
-            $grouped = $segment->values->groupBy('criterion_id');
-
-            foreach ($grouped as $idx => $values) {
-
-                $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
-
-                    $ids = $values->pluck('criterion_value_id');
-
-                    $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
-                        ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
-                });
-            }
-
-
-            // info($query->toSql());
-            $counts[$key] = $query->count();
-
-            // $result = $query->get()->pluck('id')->toArray();
-            // $users[$key] = $result;
-            // $counts[$key] = count($result);
-        }
-
-        // info($users);
-        // info($counts);
-
-        return $counts;
-        // return $query->$type();
-    }
-
-    public function getUsersBySegmentations($type = 'count')
-    {
-        $this->load('segments.values');
-
-        if (!$this->hasBeenSegmented()) return [];
-
-        // $users = collect();
-        $users = [];
-
-        $counts = [];
-
-        $query = User::select('id');
-
-        foreach ($this->segments as $key => $segment) {
-
-            $clause = $key == 0 ? 'where' : 'orWhere';
-            $query->$clause(function ($q) use ($segment, $key) {
-
-                $grouped = $segment->values->groupBy('criterion_id');
-
-                foreach ($grouped as $i => $values) {
-
-
-                    // info($idx);
-
-                    $q->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
-
-                        $ids = $values->pluck('criterion_value_id');
-
-                        // info($ids);
-
-                        $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
-                            ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
-                    });
-                }
-            });
-        }
-
-        // info($counts);
-        $a = $query->$type();
-
-        // info($query->toSql());
-        return $a;
-    }
-
-    public function getCourseTagsToUCByUser($course, $user,$valid_segment,$cycles)
-    {
-        $tags = [];
-
-        $user_active_cycle = $user->getActiveCycle(true);
-
-        if (!$user_active_cycle) return $tags;
-
-        if ($user_active_cycle->value_text === 'Ciclo 0') {
-
-            $tags = ['Ciclo 0'];
-
-        } else {
-
-            // $temp_segment = null;
-            // $user_criteria = $user->criterion_values->groupBy('criterion_id');
-            // // $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
-
-            // foreach ($course->segments as $segment) {
-
-            //     $course_segment_criteria = $segment->values->groupBy('criterion_id');
-
-            //     $valid_segment = Segment::validateSegmentByUserCriteria($user_criteria, $course_segment_criteria);
-
-            //     if ($valid_segment) :
-            //         $temp_segment = $segment;
-            //         break;
-            //     endif;
-
-            // }
-
-//            $ciclos_values = $temp_segment->values()->whereRelation('criterion', 'code', 'cycle')->pluck('criterion_value_id');
-//            $ciclos = CriterionValue::whereIn('id', $ciclos_values)->where('value_text', '<>', 'Ciclo 0')->get();
-
-            $ciclo = null;
-            if ($valid_segment)
-                $ciclo = $cycles->whereIn('id', $valid_segment->values->pluck('criterion_value_id'))->first();
-                // $ciclo = CriterionValue::whereIn('id', $temp_segment->values->pluck('criterion_value_id'))
-                //     ->whereRelation('criterion', 'code', 'cycle')
-                //     ->where('value_text', '<>', 'Ciclo 0')
-                //     ->orderBy('position')
-                //     ->first();
-
-            if ($ciclo)
-                $tags = [$ciclo->value_text];
-        }
-
-        return $tags;
     }
 
     public function updateOnModifyingCompatibility()
@@ -1775,15 +1760,41 @@ class Course extends BaseModel
 
     protected function getSegmentationDataByWorkspace($workspace)
     {
-        $courses = Course::with([
-                    'segments' => [
-                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'],
-                        'type:id,name',
-                    ]
-                ])
-                ->select('id', 'name', 'active')
-                ->whereRelationIn('workspaces', 'id', [$workspace->id])
-                ->get();
+//        $courses = Course::with([
+//                    'segments' => [
+//                        'values' => ['criterion_value:id,value_text', 'criterion:id,name'],
+//                        'type:id,name',
+//                    ]
+//                ])
+//                ->select('id', 'name', 'active')
+//                ->whereRelationIn('workspaces', 'id', [$workspace->id])
+//                ->get();
+
+        $courses = DB::select(DB::raw("
+            select
+                c.id, c.name, c.active, t.name segmentation_type,
+                s.id segment_id, criteria.name criteria_name, cv.value_text
+
+            from courses c
+                inner join segments s on s.model_id = c.id
+                inner join segments_values sv on sv.segment_id = s.id
+                inner join criteria on criteria.id = sv.criterion_id
+                inner join criterion_values cv on cv.id = sv.criterion_value_id
+                inner join taxonomies t on t.id = s.type_id
+            where
+                s.model_type = 'App\\\Models\\\Course'
+                and s.deleted_at is null
+                and sv.deleted_at is null
+                and exists (
+                        select *
+                        from workspaces
+                            inner join course_workspace on workspaces.id = course_workspace.workspace_id
+                            where c.id = course_workspace.course_id and id in (:workspaceId)
+                                and workspaces.deleted_at is null
+
+                ) and c.deleted_at is null
+            order by c.id, s.id
+        "), [ 'workspaceId' => $workspace->id ]);
 
         return $courses;
     }
@@ -1826,5 +1837,58 @@ class Course extends BaseModel
             });
 
         return $count;
+    }
+
+    public static function generateAndStoreRegistroCapacitacion($filename, $data) {
+
+        $filePath = '/registro-capacitacion/' . $filename;
+        $pdf = PDF::loadView('pdf.registro-capacitacion', $data);
+
+        Storage::disk('s3')->put($filePath, $pdf->output(), 'public');
+
+        return $filePath;
+    }
+
+    /**
+     * Generate URL for 'registro de capacitación' file
+     * @param $filepath
+     * @return string
+     */
+    public static function generateRegistroCapacitacionURL($filepath) {
+
+        return
+            env('AWS_ENDPOINT') . '/' .
+            env('AWS_BUCKET') . '/' .
+            env('AWS_CURSALAB_CLIENT_NAME_FOLDER') .
+            $filepath;
+    }
+
+    /**
+     * Check whether current course has registro capacitacion enabled or not
+     * @return false
+     */
+    public function registroCapacitacionIsActive() {
+
+        return  $this->registro_capacitacion
+            ? $this->registro_capacitacion->active ?? false
+            : false;
+    }
+
+    protected function getTopicsForTree($course)
+    {
+        $data = [];
+
+        foreach ($course->topics as $topic) {
+
+            $child_key = 'topic_' . $topic->id;
+
+            $data[] = [
+                'id' => $child_key,
+                'name' => '[TEMA] ' . $topic->name,
+                'icon' => 'mdi-bookmark',
+            ];
+        }
+
+        return $data;
     }
 }

@@ -10,6 +10,7 @@ use App\Models\MediaTema;
 use App\Models\Requirement;
 use App\Models\SummaryUser;
 use App\Models\SummaryTopic;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
 use App\Http\Controllers\Controller;
@@ -186,7 +187,7 @@ class RestTopicController extends Controller
                 'estado_tema' => $topic_status?->code,
                 'estado_tema_str' => $topic_status?->name,
                 'habilitar_requisitos' => $avaible_requirements_topic,
-                'requirements' => ($avaible_requirements_topic) 
+                'requirements' => ($avaible_requirements_topic)
                     ?   Requirement::where('model_type','App\\Models\\Topic')->where('requirement_id',$topic->id)->select('model_id')->pluck('model_id')
                     :   []
                 // 'requirements' => $topic->requirements()->pluck('id')
@@ -195,8 +196,8 @@ class RestTopicController extends Controller
                 'id'=> $topic->course_id,
                 'status' => $course_status?->code,
                 'habilitar_requisitos' => $avaible_requirements_course,
-                'requirements' => ($avaible_requirements_course) 
-                    ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id') 
+                'requirements' => ($avaible_requirements_course)
+                    ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id')
                     : [],
                 'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first()
                 // 'requirements' => $topic->course->requirements()->pluck('id')

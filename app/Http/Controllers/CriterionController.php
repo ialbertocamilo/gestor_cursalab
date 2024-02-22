@@ -35,6 +35,12 @@ class CriterionController extends Controller
         return $this->success($criteria);
     }
 
+    public function getWorkspaceCriteria() {
+
+        $workspace = get_current_workspace();
+        return Criterion::getListForSelectWorskpace($workspace->id);
+    }
+
     public function getFormSelects($compactResponse = false)
     {
         $data_types = Taxonomy::getDataForSelect('criterion', 'type');
@@ -42,7 +48,7 @@ class CriterionController extends Controller
         $response = compact('data_types', 'default_position');
         if(!$compactResponse){
             $criteria = Criterion::select('id','name')->where('active',1)->get();
-            $response['criteria'] = $criteria; 
+            $response['criteria'] = $criteria;
         }
         return $compactResponse ? $data_types : $this->success($response);
     }

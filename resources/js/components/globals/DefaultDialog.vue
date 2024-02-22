@@ -7,6 +7,7 @@
         scrollable
         @click:outside="closeModalOutside"
         :content-class="contentClass"
+        :fullscreen="fullscreen"
     >
         <v-card :height="height">
             <div v-if="customTitle">
@@ -140,6 +141,10 @@ export default {
         contentClass: {
             type: String,
             default: ''
+        },
+        fullscreen:{
+            type: Boolean,
+            default: false
         }
     },
     methods: {

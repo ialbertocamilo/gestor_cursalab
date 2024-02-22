@@ -436,7 +436,7 @@
                                         <v-col cols="8">
                                             <div class="box_search_direction_map">
                                                 <span class="lbl_search_direction">Dirección</span>
-                                                <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                                <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input  my-2 pl-2" placeholder="Ingresa la dirección donde se realizara el curso"/>
                                             </div>
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-content-center align-items-center bx_benefit_accesible">

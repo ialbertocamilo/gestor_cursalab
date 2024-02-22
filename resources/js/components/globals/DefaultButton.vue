@@ -10,7 +10,7 @@
         :disabled="disabled"
         :outlined="outlined"
         :text="text"
-        style="max-width: min-content"
+        :style="`${min_content ? 'max-width: min-content;' : 'width:100%;'}`"
     >
         <v-icon :small="smallIcon" class="mr-1" v-text="icon" v-if="icon"/>
         {{ label }}
@@ -59,6 +59,10 @@ export default {
         smallIcon: {
             type: Boolean,
             default: false
+        },
+        min_content:{
+            type:Boolean,
+            default:true,
         }
     },
     methods: {

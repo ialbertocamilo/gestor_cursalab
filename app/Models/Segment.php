@@ -403,15 +403,18 @@ class Segment extends BaseModel{
 
         $temp = [];
         foreach ($criteria_selected as $user) {
-            $criterion_value_id = $user->criterion_values->first()->id;
 
-            $temp[] = [
-                // 'segment_value_id' => $segment->values->where('criterion_value_id', $criterion_value_id)->first()?->id,
-                'segment_value_id' => $segment_values_id[$criterion_value_id] ?? null,
-                'document' => $user->document,
-                'fullname' => $user->fullname,
-                'criterion_value_id' => $criterion_value_id
-            ];
+            if ($user->criterion_values->first()) {
+
+                $criterion_value_id = $user->criterion_values->first()->id;
+                $temp[] = [
+                    // 'segment_value_id' => $segment->values->where('criterion_value_id', $criterion_value_id)->first()?->id,
+                    'segment_value_id' => $segment_values_id[$criterion_value_id] ?? null,
+                    'document' => $user->document,
+                    'fullname' => $user->fullname,
+                    'criterion_value_id' => $criterion_value_id
+                ];
+            }
         }
 
         return $temp;

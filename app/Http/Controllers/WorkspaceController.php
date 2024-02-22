@@ -2,32 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Commands\reinicios_programado;
-use App\Http\Requests\WorkspaceRequest;
-use App\Http\Requests\SubWorkspaceRequest;
-use App\Http\Requests\WorkspaceDuplicateRequest;
-use App\Http\Resources\WorkspaceResource;
-use App\Http\Resources\SubWorkspaceResource;
-
-use App\Models\Criterion;
-use App\Models\CriterionValue;
-use App\Models\Media;
-use App\Models\SegmentValue;
 use App\Models\User;
-use App\Models\Workspace;
-use App\Models\Taxonomy;
-use App\Models\Ambiente;
-use App\Models\School;
-use App\Models\Course;
+use App\Models\Media;
 use App\Models\Topic;
-use App\Models\WorkspaceFunctionality;
+use App\Models\Course;
+use App\Models\School;
+use App\Models\Ambiente;
+
+use App\Models\Taxonomy;
+use App\Models\Criterion;
+use App\Models\Workspace;
+use App\Models\Requirement;
+use Illuminate\Support\Str;
 use App\Models\AssignedRole;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
+use App\Models\SegmentValue;
 use Illuminate\Http\Request;
+use App\Models\CriterionValue;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\View\View;
+use App\Models\WorkspaceFunctionality;
+use Illuminate\Contracts\View\Factory;
+use App\Http\Requests\WorkspaceRequest;
+use App\Http\Resources\WorkspaceResource;
+use App\Http\Requests\SubWorkspaceRequest;
+use App\Models\Mongo\WorkspaceCustomEmail;
+use App\Http\Resources\SubWorkspaceResource;
+use App\Console\Commands\reinicios_programado;
+use App\Http\Requests\WorkspaceDuplicateRequest;
+use Illuminate\Contracts\Foundation\Application;
 
 class WorkspaceController extends Controller
 {
@@ -105,7 +108,7 @@ class WorkspaceController extends Controller
         $data = $request->validated();
 
         // Upload files
-        
+
         $data = Media::requestUploadFile($data, 'logo');
         $data = Media::requestUploadFile($data, 'logo_negativo');
 
@@ -318,69 +321,122 @@ class WorkspaceController extends Controller
 
         return $this->success(compact('active_users_count', 'limit_allowed_users'));
     }
-
+    public function customEmails(Workspace $workspace){
+        $data = WorkspaceCustomEmail::list($workspace);
+        return $this->success($data);
+    }
+    public function showEmail(Workspace $workspace,Request $request){
+        // $data = WorkspaceCustomEmail::search($workspace);
+        $data = WorkspaceCustomEmail::search($workspace,$request->email_code);
+        if(isset($data->data_custom['show_subworkspace_logo']) && $data->data_custom['show_subworkspace_logo']){
+            $logo = $workspace->subworkspaces->whereNotNull('logo')->shuffle()->first()?->logo;
+            if($logo){
+                $data['image_subworkspace'] = get_media_url($logo,'s3');
+            }
+        }
+        return view('emails.welcome_email',['data'=>$data]);
+    }
+    public function saveCustomEmail(Workspace $workspace,Request $request){
+        $data = $request->all();
+        WorkspaceCustomEmail::saveCustomEmail($workspace,$data);
+        return $this->success(['message'=>'Se ha guardado correctamente']);
+    }
     public function destroy(Workspace $workspace)
     {
         // \File::delete(public_path().'/'.$workspace->plantilla_diploma);
-        $workspace->delete();
 
-        $workspace->functionalities()->sync([]);
-        $workspace->criterionWorkspace()->sync([]);
+        DB::beginTransaction();
 
-        $workspace->criteriaValue()->sync([]);
-        // $workspace->criteriaValue()->delete();
+        try {
+            // Rename record to avoid duplicated names
 
-        $workspace->videotecas()->delete();
-        $workspace->meetings()->delete();
-        $workspace->push_notifications()->delete();
-        // $workspace->medias()->delete(); // don't delete
+            $workspace->name = substr('deleted ' . Str::random(5) . ' ' . $workspace->name, 0, 255);
+            $workspace->slug = substr('deleted-' . Str::random(5) . '-' . $workspace->slug, 0, 255);
+            $workspace->active = 0;
+            $workspace->save();
 
-        foreach ($workspace->subworkspaces as $subworkspace) {
+            $workspace->delete();
 
-            foreach ($subworkspace->schools as $school) {
+            $workspace->functionalities()->sync([]);
+            $workspace->criterionWorkspace()->sync([]);
 
-                foreach ($school->courses as $course) {
+            $workspace->criteriaValue()->sync([]);
+            // $workspace->criteriaValue()->delete();
 
-                    foreach ($course->topics as $topic) {
+            $workspace->videotecas()->delete();
+            $workspace->meetings()->delete();
+            $workspace->push_notifications()->delete();
+            // $workspace->medias()->delete(); // don't delete
 
-                        $topic->questions()->delete();
-                        $topic->medias()->delete();
-                        $topic->requirements()->delete();
+            foreach ($workspace->subworkspaces as $subworkspace) {
+
+                // Rename record to avoid duplicated names
+
+                $subworkspace->name = substr('deleted ' . Str::random(5) . ' ' . $subworkspace->name, 0, 255);
+                $subworkspace->slug = substr('deleted-' . Str::random(5) . '-' . $subworkspace->slug, 0, 255);
+                $subworkspace->active = 0;
+                $subworkspace->save();
+
+                // Rename and delete record to avoid duplicated names
+
+                $moduleCriterionValue = CriterionValue::query()
+                    ->where('id', $subworkspace->criterion_value_id)
+                    ->first();
+                $moduleCriterionValue->value_text = $subworkspace->name;
+                $moduleCriterionValue->save();
+                $moduleCriterionValue->delete();
+
+                foreach ($subworkspace->schools as $school) {
+
+                    foreach ($school->courses as $course) {
+
+                        foreach ($course->topics as $topic) {
+
+                            $topic->questions()->delete();
+                            $topic->medias()->delete();
+                            $topic->requirements()->delete();
+                        }
+
+                        $course->requirements()->delete();
+                        $course->topics()->delete();
                     }
 
-                    $course->requirements()->delete();
-                    $course->topics()->delete();
+                    $school->courses()->delete();
                 }
 
-                $school->courses()->delete();
+                $subworkspace->schools()->delete();
+
+                foreach ($subworkspace->users as $user) {
+
+                    $user->summary()->delete();
+                    $user->summary_courses()->delete();
+                    $user->summary_topics()->delete();
+                    $user->benefits()->delete();
+                    $user->segments()->delete();
+                    $user->course_data()->delete();
+                    $user->criterion_values()->sync([]);
+                }
+
+                $subworkspace->users()->delete();
             }
 
-            $subworkspace->schools()->delete();
+            $workspace->subworkspaces()->delete();
 
-            foreach ($subworkspace->users as $user) {
+            foreach ($workspace->polls as $poll) {
 
-                $user->summary()->delete();
-                $user->summary_courses()->delete();
-                $user->summary_topics()->delete();
-                $user->benefits()->delete();
-                $user->segments()->delete();
-                $user->course_data()->delete();
-                $user->criterion_values()->sync([]);
+                $poll->questions()->delete();
             }
 
-            $subworkspace->users()->delete();
+            $workspace->polls()->delete();
+
+            DB::commit();
+
+            return $this->success(['msg' => 'Workspace eliminado correctamente.']);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
         }
-
-        $workspace->subworkspaces()->delete();
-
-        foreach ($workspace->polls as $poll) {
-
-            $poll->questions()->delete();
-        }
-
-        $workspace->polls()->delete();
-
-        return $this->success(['msg' => 'Workspace eliminado correctamente.']);
     }
 
     public function editSubWorkspace(Workspace $subworkspace)
@@ -418,11 +474,19 @@ class WorkspaceController extends Controller
         $subworkspace->contact_schedule = $contact_support['contact_schedule'] ?? NULL;
 
         $subworkspace->plantilla_diploma = $subworkspace->plantilla_diploma ? get_media_url($subworkspace->plantilla_diploma) : null;
-        
+
+        $functionality = Taxonomy::getFirstData('system', 'functionality', 'registro-capacitacion');
+        $registroCapacitacionFunctionality = WorkspaceFunctionality::query()
+            ->where('workspace_id', $subworkspace->parent_id)
+            ->where('functionality_id', $functionality->id)
+            ->first();
+
         return $this->success([
             'modulo' => $subworkspace,
+            'has_registro_capacitacion_functionality' => $registroCapacitacionFunctionality ? true : false,
             'main_menu' => $formSelects['main_menu'],
             'side_menu' => $formSelects['side_menu'],
+            'workspace_criteria' => $formSelects['workspace_criteria']
         ]);
     }
 
@@ -460,7 +524,19 @@ class WorkspaceController extends Controller
         //     $item->active = false;
         // });
 
-        $response = compact('main_menu', 'side_menu', 'qualification_types');
+
+
+        $has_registro_capacitacion_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
+        $workspace_criteria = get_current_workspace()->criterionWorkspace->map(function ($item){
+            return collect($item)->only(['id', 'name']);
+        });
+
+        $response = compact(
+            'main_menu',
+            'side_menu',
+            'qualification_types',
+            'workspace_criteria',
+            'has_registro_capacitacion_functionality');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -544,12 +620,16 @@ class WorkspaceController extends Controller
         $_courses = Course::whereIn('id', $data['course_ids'])->get();
         $_topics = Topic::with('questions', 'medias')->whereIn('id', $data['topic_ids'])->get();
 
+        $prefix = '';
+        // $prefix = '[DUPLICADO] ';
+
         foreach ($data['schools'] as $school_id => $course_ids) {
 
             $_school = $_schools->where('id', $school_id)->first();
 
             $school_data = $_school->toArray();
             $school_data['external_id'] = $_school->id;
+            $school_data['name'] = $prefix . $_school->name;
 
             foreach ($subworkspaces as $subworkspace) {
 
@@ -562,30 +642,7 @@ class WorkspaceController extends Controller
                     $school = $subworkspace->schools()->create($school_data, $school_position);
                 }
 
-                foreach ($course_ids['courses'] as $course_id => $topic_ids) {
-
-                    $_course = $_courses->where('id', $course_id)->first();
-
-                    $course_data = $_course->toArray();
-                    $course_data['external_id'] = $_course->id;
-
-                    $course = $school->courses()->create($course_data);
-
-                    $workspace->courses()->attach($course);
-
-                    foreach ($topic_ids['topics'] as $topic_id) {
-
-                        $_topic = $_topics->where('id', $topic_id)->first();
-
-                        $topic_data = $_topic->toArray();
-                        $topic_data['external_id'] = $_topic->id;
-
-                        $topic = $course->topics()->create($topic_data);
-
-                        $topic->medias()->createMany($_topic->medias->toArray());
-                        $topic->questions()->createMany($_topic->questions->toArray());
-                    }
-                }
+                Workspace::setCoursesDuplication($course_ids['courses'], $_courses, $_topics, $school, $workspace, $prefix);
             }
         }
 
