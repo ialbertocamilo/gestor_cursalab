@@ -289,6 +289,7 @@ class GeneralController extends Controller
         if($platform && $platform == 'induccion'){
             $user_storage_check = true;
             $total_current_storage = 1;
+            $limit_allowed_users_quantity = 10000;
         }
 
         $workspace_data = [
