@@ -708,7 +708,7 @@ class CourseInPerson extends Model
         }else{
             //Verificar el estado del curso, si no tiene certificado le aparece bloqueado
             $summary_course = SummaryCourse::select('certification_issued_at')->where('user_id',$user->id)->where('course_id',$topic->course_id)->first();
-            if(!$summary_course->certification_issued_at){
+            if(!$summary_course?->certification_issued_at){
                 $menus = $this->modifyMenus($menus,'certificate');
             }
         }
