@@ -319,11 +319,60 @@ class AuthController extends Controller
             'onboarding' => $onboarding
         ];
 
-        $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
-        $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
-
-        $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
-        $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+        if($user->type_id == $type_employee_onboarding?->id) {
+            if($supervisor_induccion) {
+                $config_data->app_side_menu = [
+                    'ind_asistencia',
+                    'ind_procesos',
+                    'ind_faq'
+                ];
+                $config_data->app_main_menu = [
+                    'ind_home_sup',
+                    'ind_asistencia',
+                    'ind_procesos'
+                ];
+                $config_data->full_app_main_menu = [
+                    'ind_home_sup' => true,
+                    'ind_asistencia' => true,
+                    'ind_procesos' => true
+                ];
+                $config_data->full_app_side_menu = [
+                    'ind_asistencia' => true,
+                    'ind_procesos' => true,
+                    'ind_faq' => true,
+                ];
+            }
+            else {
+                $config_data->app_side_menu = [
+                    'ind_avance',
+                    'ind_ruta',
+                    'ind_certificado',
+                    'ind_faq'
+                ];
+                $config_data->app_main_menu = [
+                    'ind_home',
+                    'ind_ruta',
+                    'ind_faq'
+                ];
+                $config_data->full_app_main_menu = [
+                    'ind_home' => true,
+                    'ind_ruta' => true,
+                    'ind_faq' => true
+                ];
+                $config_data->full_app_side_menu = [
+                    'ind_avance' => true,
+                    'ind_ruta' => true,
+                    'ind_certificado' => true,
+                    'ind_faq' => true,
+                ];
+            }
+        }
+        else{
+            $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+            $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+            $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+            $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+        }
         $config_data->filters = config('data.filters');
         $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
 
