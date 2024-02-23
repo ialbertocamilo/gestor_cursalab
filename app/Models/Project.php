@@ -149,7 +149,7 @@ class Project extends BaseModel
                 $project = new Project();
                 $project->course_id = isset($request_project['course_id']) ? $request_project['course_id'] : null; //crusbel - revisar cambio se puede cruzar con induccion con capa
                 $project->model_id = isset($request_project['model_id']) ? $request_project['model_id'] : null;
-                $project->model_type = $request_project['model_type'];
+                $project->model_type = isset($request_project['model_type']) ? $request_project['model_type'] : null;
                 $project->workspace_id  = get_current_workspace()->id;
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
