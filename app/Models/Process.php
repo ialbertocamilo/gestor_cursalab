@@ -265,17 +265,17 @@ class Process extends BaseModel
 
         $segmentados = User::FilterByPlatform()->with(['subworkspace', 'summary_process'])
                             ->whereIn('id',$segmentados_id);
-        dd($segmentados);
-        if($absences)
+        if($absences){
             $segmentados = $segmentados->whereHas('summary_process', function($s) {
                 $s->where('absences','>',0);
             });
+        }
 
         if($is_paginated)
             $segmentados = $segmentados->paginate(request('paginate', 15));
         else
             $segmentados = $segmentados->get();
-
+        dd($segmentados);
         return $segmentados;
     }
 
