@@ -45,7 +45,7 @@ class Menu extends Model
             });
     }
     protected function getMenuByUser($user,$platform){
-
+        info($platform);
         if($platform && $platform == 'induccion') {
             $abilities_x_rol = $user->roles()->with('abilities')
                                             ->where('name', $platform)
@@ -57,8 +57,10 @@ class Menu extends Model
         else {
             $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
         }
-
-        return Menu::list()->map(function($menu) use ($submenus_id){
+        if(is_null($platform) || empty($platform)){
+            $platform = 'capacitacion';
+        }
+        return Menu::list()->map(function($menu) use ($submenus_id,$platform){
             //Dar formato para front
             $items = [];
             $submenus = $menu->children->whereIn('id',$submenus_id);
@@ -74,6 +76,12 @@ class Menu extends Model
                     'is_beta'=> $submenu->is_beta,
                     'show_upgrade'=> $show_upgrade,
                 ];
+            }
+            if($platform == 'induccion'){
+                $menu->show_upgrade = false;
+            }
+            if($platform == 'capacitacion' && $menu->name == 'INDUCCIÓN'){
+                return [];
             }
             if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
