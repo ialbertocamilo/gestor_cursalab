@@ -261,6 +261,7 @@ class Process extends BaseModel
         $process->load('segments');
 
         $segmentados_id = $course->usersSegmented($process->segments, 'users_id');
+        dd($segmentados_id);
         $segmentados_id = array_unique($segmentados_id);
 
         $segmentados = User::FilterByPlatform()->with(['subworkspace', 'summary_process'])
