@@ -274,7 +274,7 @@ class RestCourseController extends Controller
 
         $certificates = $certificatesQuery->get();
 
-        // Registros
+        // Registros de capacitacion
         // ----------------------------------------
 
         $registrosQuery = SummaryCourse::with('course:id,name,user_confirms_certificate')
@@ -314,10 +314,12 @@ class RestCourseController extends Controller
                 'registro_capacitacion_path' => $certificate->registro_capacitacion_path,
                 'name' => $certificate->course->name,
                 'accepted' => $certificate->certification_accepted_at ? true : false,
-                'issued_at' => $certificate->certification_issued_at->format('d/m/Y'),
+                'issued_at' => $certificate->certification_issued_at
+                    ? $certificate->certification_issued_at->format('d/m/Y') : '',
                 'ruta_ver' => "tools/ver_diploma/{$user->id}/{$certificate->course_id}",
                 'ruta_descarga' => "tools/dnc/{$user->id}/{$certificate->course_id}",
-                'user_confirms_certificate' => $certificate->course->user_confirms_certificate,
+                'user_confirms_certificate' => $course->user_confirms_certificate,
+                'show_certification_to_user' => $course->show_certification_to_user,
                 'compatible' => null,
             ];
         }

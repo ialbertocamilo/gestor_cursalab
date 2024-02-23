@@ -184,6 +184,32 @@ class UserMassive extends Massive implements ToCollection
                 $user[$dt['code']] = (mb_strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
 
+            // No module defined
+
+            if (!isset($dt['module'])) {
+                $has_error = true;
+                $errors_index[] = [
+                    'index' => $dt['index'],
+                    'message' => 'El módulo es obligatorio'
+                ];
+                continue;
+            }
+
+            // Module is defined but without a value
+
+            if (isset($dt['module'])) {
+
+                if (!$dt['module']) {
+                    $has_error = true;
+                    $errors_index[] = [
+                        'index' => $dt['index'],
+                        'message' => 'El módulo es obligatorio'
+                    ];
+                    continue;
+                }
+            }
+
+
             //DC3
             if($dt['code'] == 'national_occupation_id'){
                 $occupation =  NationalOccupationCatalog::searchByCodeOrName(trim($dt['value_excel']))->first();
