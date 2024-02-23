@@ -20,7 +20,7 @@
         <div class="d-flex">
 
 
-            @if(auth()->user()->isAn('induccion'))
+            @if(auth()->user()->isAn('induccion') || auth()->user()->isAn('super-user'))
             <div class="btn-group">
                 <button class="d-flex align-items-center btn btn-outline-primary dropdown-toggle"
                         type="button" data-toggle="dropdown" aria-expanded="false">
