@@ -791,9 +791,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         // $query = self::onlyClientUsers();
         $query = self::FilterByPlatform();
-        if (auth()->user()->isA('super-user')) {
-            $query = self::query();
-        }
 
         $with = ['subworkspace'];
 
