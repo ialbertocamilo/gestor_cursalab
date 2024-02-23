@@ -67,6 +67,19 @@ class ProcessController extends Controller
 
         $process = Process::storeRequest($data);
 
+        if( $process )
+        {
+            $assistans_route = route('process.assistants.index', [$process->id]);
+            $stages_route = route('stages.index', [$process->id]);
+            $certificate_route = ($process->certificate_template_id) ?
+                                        route('process.diploma.edit', [$process->id, $process->certificate_template_id]) :
+                                        route('process.diploma.create', [$process->id]);
+
+            $process->assistans_route = $assistans_route;
+            $process->stages_route = $stages_route;
+            $process->certificate_route = $certificate_route;
+        }
+
         $response = [
             'msg' => 'Proceso creado correctamente.',
             'process' => $process,

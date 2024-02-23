@@ -417,7 +417,6 @@ export default {
                 width: '408px'
             },
             file: null,
-            max_benefits_x_users: 0,
         }
     },
     methods: {
@@ -437,12 +436,6 @@ export default {
                     )
         },
         loadInfo() {
-            let vue = this
-            const url = `/beneficios/max_benefits_x_users`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.max_benefits_x_users = data.data.max_benefits_x_users
-                })
         },
         async openModalSelectActivitys() {
             let vue = this
@@ -630,14 +623,19 @@ export default {
 
                 vue.$http.post(url, formData)
                         .then(async ({data}) => {
-                            // this.hideLoader()
+
                             vue.showAlert(data.data.msg)
-                            // vue.modalEditProcess.open = false
-                            console.log(vue.$refs);
+
                             vue.$refs.ModalEditProcess.closeModal()
                             vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                            console.log(data);
-                            console.log(item);
+
+                            if(!item.assistans_route)
+                                item.assistans_route = data.data.process.assistans_route
+                            if(!item.certificate_route)
+                                item.certificate_route = data.data.process.certificate_route
+                            if(!item.stages_route)
+                                item.stages_route = data.data.process.stages_route
+
                             vue.openFormModal(vue.modalSelectConfigProcess, item);
                         })
                         .catch(error => {
