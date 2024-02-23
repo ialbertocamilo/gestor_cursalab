@@ -681,7 +681,7 @@ class CourseInPerson extends Model
                 $zoom_status['name'] = $zoom_status['name'].': '.Carbon::parse($meeting->starts_at)->format('Y-m-d H:i');
             }
             array_unshift($menus,  [
-                'title' => 'Iniciar sesión zoom',
+                'title' => 'Ingresar sesión a zoom',
                 'code' => 'zoom',
                 'description' => 'Ingresa a la sesión zoom asignada a este tema.',
                 'show' => $is_on_time,
