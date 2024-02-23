@@ -153,13 +153,14 @@ export default {
                     //     method_name: 'asignarUsuarios',
                     //     count: 'users_count'
                     // },
-                    // {
-                    //     text: "Segmentación",
-                    //     icon: 'fa fa-square',
-                    //     type: 'action',
-                    //     count: 'segments_count',
-                    //     method_name: 'segmentation'
-                    // },
+                    {
+                        text: "Segmentación",
+                        icon: 'fa fa-square',
+                        type: 'action',
+                        count: 'segments_count',
+                        method_name: 'segmentation',
+                        show_condition: "show_segmentation",
+                    },
                     {
                         text: "Eliminar",
                         icon: 'fas fa-trash-alt',
