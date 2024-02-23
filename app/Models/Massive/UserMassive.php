@@ -186,28 +186,28 @@ class UserMassive extends Massive implements ToCollection
 
             // No module defined
 
-            if (!isset($dt['module'])) {
-                $has_error = true;
-                $errors_index[] = [
-                    'index' => $dt['index'],
-                    'message' => 'El módulo es obligatorio'
-                ];
-                continue;
-            }
+//            if (!isset($dt['module'])) {
+//                $has_error = true;
+//                $errors_index[] = [
+//                    'index' => $dt['index'],
+//                    'message' => 'El módulo es obligatorio'
+//                ];
+//                continue;
+//            }
 
             // Module is defined but without a value
 
-            if (isset($dt['module'])) {
-
-                if (!$dt['module']) {
-                    $has_error = true;
-                    $errors_index[] = [
-                        'index' => $dt['index'],
-                        'message' => 'El módulo es obligatorio'
-                    ];
-                    continue;
-                }
-            }
+//            if (isset($dt['module'])) {
+//
+//                if (!$dt['module']) {
+//                    $has_error = true;
+//                    $errors_index[] = [
+//                        'index' => $dt['index'],
+//                        'message' => 'El módulo es obligatorio'
+//                    ];
+//                    continue;
+//                }
+//            }
 
 
             //DC3
