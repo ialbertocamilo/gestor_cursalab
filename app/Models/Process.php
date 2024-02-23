@@ -275,7 +275,6 @@ class Process extends BaseModel
             $segmentados = $segmentados->paginate(request('paginate', 15));
         else
             $segmentados = $segmentados->get();
-        dd($segmentados);
         return $segmentados;
     }
 

@@ -198,7 +198,7 @@ class ProcessController extends Controller
 
         $key_save_supervisors = array_keys($save_supervisors);
         $users_segmented_filter = array_diff_key($users_segmented, $key_save_supervisors);
-        dd($users_segmented_filter,$supervisors_segmented);
+        dd($users_segmented,$users_segmented_filter,$key_save_supervisors);
         $asigned_errors = [];
         if(count($users_segmented_filter) > 0 && count($supervisors_segmented) > 0 ) {
             foreach ($users_segmented_filter as $uss) {
