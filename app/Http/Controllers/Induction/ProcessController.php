@@ -285,6 +285,7 @@ class ProcessController extends Controller
         // Obtener los supervisores filtrados
 
         $supervisors_query = User::query()
+            ->FilterByPlatform()
             ->whereHas('segments')
             ->withCount([
                 'segments' => function ($q) {
