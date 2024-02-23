@@ -417,7 +417,6 @@ export default {
                 width: '408px'
             },
             file: null,
-            max_benefits_x_users: 0,
         }
     },
     methods: {
@@ -437,12 +436,6 @@ export default {
                     )
         },
         loadInfo() {
-            let vue = this
-            const url = `/beneficios/max_benefits_x_users`
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.max_benefits_x_users = data.data.max_benefits_x_users
-                })
         },
         async openModalSelectActivitys() {
             let vue = this

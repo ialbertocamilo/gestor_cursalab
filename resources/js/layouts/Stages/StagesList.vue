@@ -841,7 +841,6 @@ export default {
                 width: '408px'
             },
             file: null,
-            max_benefits_x_users: 0,
         }
     },
     methods: {
@@ -1199,31 +1198,6 @@ export default {
                     this.hideLoader()
                 });
             console.log(vue.stages);
-        },
-        confirmModalMaxColaborador(value = null) {
-            let vue = this;
-            if(value != null)
-            {
-                this.showLoader()
-                vue.$http.post(`/beneficios/max_benefits_x_users/update`, {'value': value})
-                    .then((res) => {
-                        vue.max_benefits_x_users = res.data.data.max_benefits;
-                        if (res.data.type == "success") {
-                            vue.$notification.success(`${res.data.data.msg}`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-                        }
-                        this.hideLoader()
-                        vue.modalMaxColaborador.open = false
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                        vue.modalMaxColaborador.open = false
-                    });
-            }
         },
         closeModalSegment() {
             let vue = this
