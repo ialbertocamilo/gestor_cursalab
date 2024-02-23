@@ -57,8 +57,10 @@ class Menu extends Model
         else {
             $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
         }
-
-        return Menu::list()->map(function($menu) use ($submenus_id){
+        if(is_null($platform) || empty($platform)){
+            $platform = 'capacitacion';
+        }
+        return Menu::list()->map(function($menu) use ($submenus_id,$platform){
             //Dar formato para front
             $items = [];
             $submenus = $menu->children->whereIn('id',$submenus_id);
@@ -75,7 +77,7 @@ class Menu extends Model
                     'show_upgrade'=> $show_upgrade,
                 ];
             }
-            if(count($menu->children)>0 || $menu->show_upgrade){
+            if((count($menu->children)>0 || $menu->show_upgrade) && $platform != 'induccion'){
                 // return $menu;
                 $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;
                 return [
