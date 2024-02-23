@@ -80,6 +80,9 @@ class Menu extends Model
             if($platform == 'induccion'){
                 $menu->show_upgrade = false;
             }
+            if($platform == 'capacitacion' && $menu->name = 'INDUCCIÓN'){
+                return [];
+            }
             if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
                 $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;
