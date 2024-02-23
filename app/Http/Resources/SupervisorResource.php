@@ -16,7 +16,8 @@ class SupervisorResource extends JsonResource
     {
         $supervisor = $this;
         $platform = session('platform');
-        $show_segmentation = !boolval(!$platform || $platform == 'induccion');
+        // $show_segmentation = !boolval(!$platform || $platform == 'induccion');
+        $show_segmentation = false;
         return [
             'id' => $supervisor->id,
             'nombre' => $supervisor->fullname,
