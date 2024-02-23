@@ -77,7 +77,10 @@ class Menu extends Model
                     'show_upgrade'=> $show_upgrade,
                 ];
             }
-            if((count($menu->children)>0 || $menu->show_upgrade) && $platform != 'induccion'){
+            if($platform == 'induccion'){
+                $menu->show_upgrade = false;
+            }
+            if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
                 $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;
                 return [
