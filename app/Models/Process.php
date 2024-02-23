@@ -263,7 +263,7 @@ class Process extends BaseModel
         $segmentados_id = $course->usersSegmented($process->segments, 'users_id');
         $segmentados_id = array_unique($segmentados_id);
 
-        $segmentados = User::with(['subworkspace', 'summary_process'])
+        $segmentados = User::FilterByPlatform()->with(['subworkspace', 'summary_process'])
                             ->whereIn('id',$segmentados_id);
         if($absences)
             $segmentados = $segmentados->whereHas('summary_process', function($s) {

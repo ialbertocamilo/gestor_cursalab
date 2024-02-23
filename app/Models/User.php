@@ -297,9 +297,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $type_id = $platform && $platform == 'induccion' 
                     ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id 
                     : Taxonomy::getFirstData('user', 'type', 'employee')->id;
-        info('search user');
-        info($platform);
-        info($type_id);
         $q->where('type_id',$type_id);
     }
     public function scopeFilterText($q, $filter)
