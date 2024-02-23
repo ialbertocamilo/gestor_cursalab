@@ -1855,7 +1855,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     {
         // $query = self::whereIs('config', 'admin', 'content-manager', 'trainer', 'reports', 'only-reports');
         $query = self::whereRelation('roles', function ($query) {
-            $query->where('name', '<>', 'super-user');
+            if(!auth()->user()->isA('super-user')){
+                return $query->where('name', '<>', 'super-user');
+            }
+            return $query;
         });
 
         // $with = ['subworkspace'];
@@ -1890,7 +1893,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $field = $request->sortBy ?? 'created_at';
         $sort = $request->descending == 'true' ? 'DESC' : 'ASC';
 
-        $query->orderBy($field, $sort)->orderBy('id', $sort);
+        $query->whereNotNull('email_gestor')->orderBy($field, $sort)->orderBy('id', $sort);
 
         return $query->paginate($request->paginate);
         // return $query->paginate($request->rowsPerPage);

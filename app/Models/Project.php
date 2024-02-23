@@ -147,8 +147,8 @@ class Project extends BaseModel
             DB::beginTransaction();
             if (!$project) {
                 $project = new Project();
-                $project->course_id = $request_project['course_id']; //crusbel - revisar cambio se puede cruzar con induccion con capa
-                $project->model_id = $request_project['model_id'];
+                $project->course_id = $request_project['course_id'] ?? null; //crusbel - revisar cambio se puede cruzar con induccion con capa
+                $project->model_id = $request_project['model_id'] ?? null;
                 $project->model_type = $request_project['model_type'];
                 $project->workspace_id  = get_current_workspace()->id;
             }
