@@ -165,7 +165,6 @@ class ProcessController extends Controller
 
         $process = Process::where('id', $request->model_id)->first();
         $supervisors = $this->selectedSupervisors($request);
-        dd($supervisors);
         if(count($segments_supervisors_criteria) > 0) {
             $process->supervisor_criteria = json_encode(array_column($segments_supervisors_criteria, 'id'));
             $process->save();
