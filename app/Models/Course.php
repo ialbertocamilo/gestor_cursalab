@@ -1349,7 +1349,7 @@ class Course extends BaseModel
         // ]
         $users_id_course = [];
         foreach ($course_segments as $key => $segment) {
-            $query = User::select('id')->where('active', 1);
+            $query = User::FilterByPlatform()->select('id')->where('active', 1);
             $grouped = $segment->values->groupBy('criterion_id');
             foreach ($grouped as $idx => $values) {
                 $segment_type = Criterion::find($idx);
