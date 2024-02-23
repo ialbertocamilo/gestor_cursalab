@@ -1154,7 +1154,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if ($valid_segment) :
                     $tags = [];
                     if($user->subworkspace->parent_id === 25){
-                        $tags = $course->getCourseTagsToUCByUser($course, $user,$segment,$cycles);
+                        $tags = $course->tags;
+                        // $tags = $course->getCourseTagsToUCByUser($course, $user,$segment,$cycles);
                     }
                     // COMPATIBLE VALIDATION
 
