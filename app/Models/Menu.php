@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Role;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,13 +46,20 @@ class Menu extends Model
             });
     }
     protected function getMenuByUser($user,$platform){
-        info($platform);
         if($platform && $platform == 'induccion') {
-            $abilities_x_rol = $user->roles()->with('abilities')
-                                            ->where('name', $platform)
-                                            ->whereHas('abilities', function ($ability) {
-                                                    $ability->where('name', 'show');
-                                                })->first();
+            if($user->isAn('super-user')){
+                $abilities_x_rol = Role::with('abilities')
+                ->where('name', $platform)
+                ->whereHas('abilities', function ($ability) {
+                        $ability->where('name', 'show');
+                    })->first();
+            }else{
+                $abilities_x_rol = $user->roles()->with('abilities')
+                                                ->where('name', $platform)
+                                                ->whereHas('abilities', function ($ability) {
+                                                        $ability->where('name', 'show');
+                                                    })->first();
+            }
             $submenus_id = $abilities_x_rol ? $abilities_x_rol->abilities->pluck('entity_id')->toArray() : [];
         }
         else {
