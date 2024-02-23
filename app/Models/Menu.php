@@ -45,7 +45,7 @@ class Menu extends Model
             });
     }
     protected function getMenuByUser($user,$platform){
-
+        info($platform);
         if($platform && $platform == 'induccion') {
             $abilities_x_rol = $user->roles()->with('abilities')
                                             ->where('name', $platform)
