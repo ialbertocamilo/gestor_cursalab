@@ -17,6 +17,7 @@ class CheckList extends BaseModel
         'type_id',
         'starts_at',
         'finishes_at',
+        'platform_id'
     ];
 
     protected $casts = [
@@ -58,6 +59,14 @@ class CheckList extends BaseModel
         return $q->where('active', $estado);
     }
 
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
+
     /*=================================================================================================================================== */
 
     protected function gridCheckList($data)
@@ -67,7 +76,7 @@ class CheckList extends BaseModel
 
         $workspace = get_current_workspace();
 
-        $queryChecklist = CheckList::where('workspace_id', $workspace->id);
+        $queryChecklist = CheckList::FilterByPlatform()->where('workspace_id', $workspace->id);
 
         $field = 'created_at';
         $sort = 'DESC';

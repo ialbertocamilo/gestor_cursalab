@@ -19,7 +19,8 @@ class Course extends BaseModel
         'show_certification_date', 'show_certification_to_user',
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
-        'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion','modality_in_person_properties'
+        'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion','modality_in_person_properties',
+        'platform_id'
     ];
 
     protected $casts = [
@@ -170,7 +171,7 @@ class Course extends BaseModel
         }
         return json_decode($value);
     }
- 
+
     public function qualification_type()
     {
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
@@ -191,6 +192,14 @@ class Course extends BaseModel
         return $q->where('name', 'like', "%$filtro%");
     }
 
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
+
     public function summaryByUser($user_id, array $withRelations = null)
     {
         return $this->summaries()
@@ -205,6 +214,7 @@ class Course extends BaseModel
         $workspace = get_current_workspace();
 
         $q = Course::query()
+            ->FilterByPlatform()
             ->with(['schools.subworkspaces','project:id,course_id','modality:id,code'])
             // ->with('segments.values', function ($q) {
             //     $q
@@ -299,12 +309,15 @@ class Course extends BaseModel
 
     protected function storeRequest($data, $course = null)
     {
+        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+
         try {
             $workspace = get_current_workspace();
 
             DB::beginTransaction();
 
             $data['scheduled_restarts'] = $data['reinicios_programado'];
+            $data['platform_id'] = $data['platform_id'] ?? $platform_training?->id;
 
             if ($course) :
 
@@ -1343,7 +1356,7 @@ class Course extends BaseModel
 
     public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
     {
-        // Example filters: 
+        // Example filters:
         // $filters = [
         //      ['statement' => 'where','field'=>'name','operator'=>'=','value'=>'Aldo']
         // ]

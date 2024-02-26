@@ -25,7 +25,7 @@ class Meeting extends BaseModel
         'starts_at', 'finishes_at', 'duration', 'started_at', 'finished_at', 'report_generated_at',
         'url_start_generated_at',
         'attendance_call_first_at', 'attendance_call_middle_at', 'attendance_call_last_at',
-        'status_id', 'account_id', 'type_id', 'host_id', 'user_id','model_id','model_type'
+        'status_id', 'account_id', 'type_id', 'host_id', 'user_id','model_id','model_type', 'platform_id'
     ];
 
     protected $hidden = ['raw_data_response'];
@@ -123,6 +123,14 @@ class Meeting extends BaseModel
         return $query->when($meeting_id, function ($q) use ($meeting_id) {
             $q->where('meetings.id', '<>', $meeting_id);
         });
+    }
+
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
     }
 
     /*
@@ -243,7 +251,7 @@ class Meeting extends BaseModel
 
     protected function search($request, $method = 'paginate')
     {
-        $query = self::with('type', 'status', 'account.service', 'workspace', 'host', 'attendants.type')->withCount('attendants');
+        $query = self::with('type', 'status', 'account.service', 'workspace', 'host', 'attendants.type')->withCount('attendants')->FilterByPlatform();
 
         # meeting segun workspaceid
         $currWorkspaceIndex = get_current_workspace_indexes('id');
@@ -374,6 +382,9 @@ class Meeting extends BaseModel
             #add workspace id
             $data['workspace_id'] = $data['workspace_id'] ?? get_current_workspace_indexes('id');
             #add workspace id
+
+            $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+            $data['platform_id'] = $data['platform_id'] ?? $platform_training?->id;
 
             DB::beginTransaction();
             if ($meeting) {

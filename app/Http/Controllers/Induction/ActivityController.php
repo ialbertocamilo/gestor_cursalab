@@ -46,11 +46,15 @@ class ActivityController extends Controller
     public function TareasStore(Process $process, Stage $stage, ProjectStoreRequest $request)
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'tareas');
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
         // $new_request = [];
         // foreach ($request->request as $req) {
         //     $req['ss'] ='aa';
         // }
         // $request->request->add(['project.key' =>'value']);
+        $request->request->add([
+            'platform_id' => $platform_onboarding?->id
+        ]);
         $data = Project::storeUpdateRequest($request);
 
         // // $request->request->project['model_id'] = $stage?->id ?? null;
@@ -93,8 +97,11 @@ class ActivityController extends Controller
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'sesion_online');
         $type_meeting = Taxonomy::getFirstData('meeting', 'type', 'room');
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+
         $request->request->add([
-            'type_id' => $type_meeting?->id ?? null
+            'type_id' => $type_meeting?->id ?? null,
+            'platform_id' => $platform_onboarding?->id
         ]);
         $meeting = Meeting::storeRequest($request->all());
 
@@ -148,13 +155,15 @@ class ActivityController extends Controller
     public function TemasStore(Process $process, Stage $stage,  ActivityTemaStoreUpdateRequest $request)
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'temas');
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
 
         $data_course = [
             'name' => $request['name'],
             'active' => 1,
             'escuelas' => $request['school_id'] ? [ School::where('id', $request['school_id'])->first()?->id] : [],
             'reinicios_programado' => null,
-            'requisito_id' => null
+            'requisito_id' => null,
+            'platform_id' => $platform_onboarding?->id
         ];
 
         $course = Course::storeRequest($data_course);
@@ -233,6 +242,7 @@ class ActivityController extends Controller
         $type_checklist = Taxonomy::getFirstData('checklist', 'type_checklist', 'libre');
         $starts_at = (isset($data['starts_at']) && $data['starts_at']) ? $data['starts_at'] : null;
         $finishes_at = (isset($data['finishes_at']) && $data['finishes_at']) ? $data['finishes_at'] : null;
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
 
         //checklist
         $checklist = CheckList::updateOrCreate(
@@ -244,7 +254,8 @@ class ActivityController extends Controller
                 'workspace_id' => $workspace->id,
                 'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
                 'starts_at' => $starts_at,
-                'finishes_at' => $finishes_at
+                'finishes_at' => $finishes_at,
+                'platform_id' => $platform_onboarding?->id
             ]
         );
 
@@ -365,6 +376,9 @@ class ActivityController extends Controller
 
         $type_poll = Taxonomy::getFirstData('poll', 'tipo', 'activity');
         $data['type_id'] = $type_poll?->id ?? null;
+
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+        $data['platform_id'] = $platform_onboarding?->id;
 
         $session = $request->session()->all();
         $workspace = $session['workspace'];

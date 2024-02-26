@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Project extends BaseModel
 {
     use HasFactory;
-    protected $fillable = ['workspace_id','course_id','indications','active', 'model_id', 'model_type'];
+    protected $fillable = ['workspace_id','course_id','indications','active', 'model_id', 'model_type','platform_id'];
     use SoftDeletes;
     public function course()
     {
@@ -30,6 +30,15 @@ class Project extends BaseModel
     public function users(){
         return $this->hasMany(ProjectUser::class, 'project_id');
     }
+
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
+
     protected function getListSelectByType($request){
         $data = [];
         switch ($request->type) {
@@ -88,7 +97,7 @@ class Project extends BaseModel
         $query = self::with([
             'course:id,name','course.schools:id,name',
             'course.schools.subworkspaces:id,name,logo'
-        ])->select('id','course_id','indications','active')->withCount(['users' => function ($query) {
+        ])->FilterByPlatform()->select('id','course_id','indications','active')->withCount(['users' => function ($query) {
             $query->whereHas('status', function ($q) {
                 $q->where('code', 'in_review');
             });
@@ -153,6 +162,9 @@ class Project extends BaseModel
                 $project->workspace_id  = get_current_workspace()->id;
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
+
+            $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+            $project->platform_id = isset($request->platform_id) ? $request->platform_id : $platform_training?->id;
             $project->save();
             //Verificar espacio del storage:
 

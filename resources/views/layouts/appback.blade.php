@@ -412,11 +412,14 @@ if (isset($fullScreen)) {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 type: "post",
-                url: "switch_platform",
+                url: "/switch_platform",
                 data: { "platform": platform },
                 dataType: "json",
                 success: function (response) {
-                    window.location.reload()
+                    if(response.data.platform == 'induccion')
+                        window.location = '/procesos'
+                    else
+                        window.location = '/'
                 }
             });
         }

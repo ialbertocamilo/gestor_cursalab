@@ -191,7 +191,7 @@ class EntrenamientoController extends Controller
         ->with('trainer:id,document')
         ->where('user_id', $alumno->id)
         ->select('id','trainer_id')
-        ->first(); 
+        ->first();
         if($hasTrainer){
             return response()->json(['error' => true, 'msg' => 'Este usuario esta asignado al entrenador con documento: '.$hasTrainer->trainer->document], 200);
         }
@@ -318,6 +318,7 @@ class EntrenamientoController extends Controller
                         ->first();
         $starts_at = (isset($data['starts_at']) && $data['starts_at']) ? $data['starts_at'] : null;
         $finishes_at = (isset($data['finishes_at']) && $data['finishes_at']) ? $data['finishes_at'] : null;
+        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
 
         //checklist
         $checklist = CheckList::updateOrCreate(
@@ -329,7 +330,8 @@ class EntrenamientoController extends Controller
                 'workspace_id' => $workspace->id,
                 'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
                 'starts_at' => $starts_at,
-                'finishes_at' => $finishes_at
+                'finishes_at' => $finishes_at,
+                'platform_id' => $platform_training?->id
             ]
         );
 
