@@ -1288,6 +1288,7 @@ class Topic extends BaseModel
                 return "https://player.vimeo.com/video/{$value}";
             case 'video':
             case 'audio':
+            case 'h5p':
             case 'pdf':
             case 'office':
                 return get_media_url($value, 's3');
