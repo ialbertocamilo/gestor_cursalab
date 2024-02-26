@@ -242,7 +242,7 @@ class Media extends BaseModel
         // Generate filename
 
         // rand(1000, 9999) old random
-        $str_random = Str::random(15);
+        $str_random = Str::random(10);
         $workspace_id = session('workspace')['id'] ?? NULL;
 
         // workspace creation reference
@@ -271,7 +271,7 @@ class Media extends BaseModel
         $valid_ext4 = ['pdf'];
         $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
         $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
-
+        $valid_ext7 = ['h5p'];
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext2)) {
@@ -305,6 +305,8 @@ class Media extends BaseModel
 
                 $uploaded = true;
             }
+        }else if (in_array(strtolower($ext), $valid_ext7)) {
+            $path = 'h5p/' . $fileName;
         }
         // Upload to remote storage
 
