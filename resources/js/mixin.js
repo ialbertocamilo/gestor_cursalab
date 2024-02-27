@@ -38,6 +38,7 @@ export default {
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
                 {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
+                {label: 'Imagen', icon: 'mdi mdi-image-area', type: 'image'},
                 // {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
