@@ -629,9 +629,9 @@ class Topic extends BaseModel
                 $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
                 foreach ($media_topics as $media) {
                     unset($media->created_at, $media->updated_at, $media->deleted_at);
-                    $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
-                        ? route('media.download.media_topic', [$media->id]) : null;
-
+                    // $media->full_path = !in_array($media->type_id, ['youtube', 'vimeo', 'scorm', 'link'])
+                    //     ? route('media.download.media_topic', [$media->id]) : null;
+                    $media->full_path = get_media_url($media->value, 's3'); //Temporary fi
                     $media->status_progress = 'por-iniciar';
                     $media->last_media_duration = null;
 
