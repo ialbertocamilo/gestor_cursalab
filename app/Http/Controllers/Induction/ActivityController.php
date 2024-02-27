@@ -47,18 +47,23 @@ class ActivityController extends Controller
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'tareas');
         $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
-        // $new_request = [];
-        // foreach ($request->request as $req) {
-        //     $req['ss'] ='aa';
-        // }
-        // $request->request->add(['project.key' =>'value']);
-        $request->request->add([
+
+        $data_course = [
+            'name' => 'Inducción - Tareas - '. $request->project['title'],
+            'active' => 1,
+            'escuelas' => $request['school_id'] ? [ School::where('id', $request['school_id'])->first()?->id] : [],
+            'reinicios_programado' => null,
+            'requisito_id' => null,
             'platform_id' => $platform_onboarding?->id
+        ];
+
+        $course = Course::storeRequest($data_course);
+
+        $request->request->add([
+            'platform_id' => $platform_onboarding?->id,
+            'course_id' => $course?->id
         ]);
         $data = Project::storeUpdateRequest($request);
-
-        // // $request->request->project['model_id'] = $stage?->id ?? null;
-        // // $request->model_type = Activity::class;
 
         cache_clear_model(Project::class);
 

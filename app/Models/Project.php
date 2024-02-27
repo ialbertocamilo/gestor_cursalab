@@ -152,19 +152,24 @@ class Project extends BaseModel
                     ];
                 }
             }
+            $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+
             $request_project = $request->project;
             DB::beginTransaction();
             if (!$project) {
                 $project = new Project();
-                $project->course_id = isset($request_project['course_id']) ? $request_project['course_id'] : null; //crusbel - revisar cambio se puede cruzar con induccion con capa
+
+                $project_course_id = $request->course_id ?? null;
+                $project_platform_id = $request->platform_id ?? $platform_training?->id;
+
+                $project->course_id = isset($request_project['course_id']) ? $request_project['course_id'] : $project_course_id;
+                $project->platform_id = isset($request_project['platform_id']) ? $request_project['platform_id'] : $project_platform_id;
                 $project->model_id = isset($request_project['model_id']) ? $request_project['model_id'] : null;
                 $project->model_type = isset($request_project['model_type']) ? $request_project['model_type'] : null;
                 $project->workspace_id  = get_current_workspace()->id;
             }
             $project->indications = isset($request_project['indications']) ? $request_project['indications'] : '';
 
-            $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
-            $project->platform_id = isset($request->platform_id) ? $request->platform_id : $platform_training?->id;
             $project->save();
             //Verificar espacio del storage:
 
