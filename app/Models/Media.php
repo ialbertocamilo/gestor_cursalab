@@ -238,9 +238,11 @@ class Media extends BaseModel
         }
 
         $name = Str::of($name)->limit(200);
-
+        $is_h5p = $ext == 'h5p';
         // Generate filename
-
+        // if($ext == 'h5p'){
+        //     $ext = 'zip';
+        // }
         // rand(1000, 9999) old random
         $str_random = Str::random(10);
         $workspace_id = session('workspace')['id'] ?? NULL;
@@ -248,7 +250,7 @@ class Media extends BaseModel
         // workspace creation reference
         $workspace_code = 'wrkspc-' . ($workspace_id ?? 'x');
         $name = $workspace_code . '-' . $name . '-' . date('YmdHis') . '-' . $str_random;
-        $fileName = $name . '.' . $ext;
+        $fileName = $is_h5p ? $name . '.zip' : $name . '.' . $ext;
 
         // Get file size, Laravel returns the value in bytes,
         // so converts the value to Kilobytes (as an integer)
@@ -269,9 +271,9 @@ class Media extends BaseModel
         $valid_ext2 = ['mp4', 'webm', 'mov'];
         $valid_ext3 = ['mp3'];
         $valid_ext4 = ['pdf'];
-        $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
+        $valid_ext5 = ['zip', 'scorm','h5p']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
         $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
-        $valid_ext7 = ['h5p'];
+        // $valid_ext7 = ['sdasd'];
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext2)) {
@@ -283,31 +285,30 @@ class Media extends BaseModel
         } else if (in_array(strtolower($ext), $valid_ext6)) {
             $path = 'office-files/' . $fileName;
         } else if (in_array(strtolower($ext), $valid_ext5)) {
-
-            $name_scorm = $this->verify_scorm($file,$name);
+            $name_scorm = $is_h5p ? ['nombre'=>$name] : $this->verify_scorm($file,$name);
 
             $temp_path = 'uploads-temp/scorm/' . $name;
-            $extracted = Media::extractZipToTempFolder($file, $temp_path);
 
+            $extracted = Media::extractZipToTempFolder($file, $temp_path);
             if ($extracted) {
 
                 // $new_folder = 'scorm/' . $name;
                 $new_folder = $name;
-                Media::uploadUnzippedFolderToBucket($temp_path, $new_folder);
+                Media::uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p);
 
                 $name = $new_folder . '/' . $name_scorm['nombre'];
-                $path = get_media_url($name, 'cdn_scorm');
-                $ext = 'scorm';
-
+                $path = $is_h5p ? $path = 'h5p/' . $new_folder : get_media_url($name, 'cdn_scorm');
+                $ext =  $is_h5p ? 'h5p' : 'scorm';
                 // Delete temporal folder
                 File::deleteDirectory(public_path($temp_path));
 
 
                 $uploaded = true;
             }
-        }else if (in_array(strtolower($ext), $valid_ext7)) {
-            $path = 'h5p/' . $fileName;
         }
+        // else if (in_array(strtolower($ext), $valid_ext7)) {
+        //     $path = 'h5p/' . $fileName;
+        // }
         // Upload to remote storage
 
         if (!$uploaded) {
@@ -396,7 +397,7 @@ class Media extends BaseModel
         return false;
     }
 
-    protected function uploadUnzippedFolderToBucket($temp_path, $new_folder)
+    protected function uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p=false)
     {
         $config = config('filesystems.disks.s3');
 
@@ -411,8 +412,8 @@ class Media extends BaseModel
             ]
         ]);
 
-        $bucket = $config['scorm']['bucket'];
-        $keyPrefix = $config['scorm']['root'] . '/' . $new_folder . '/';
+        $bucket = $is_h5p ? $config['bucket'] : $config['scorm']['bucket'] ;
+        $keyPrefix = $is_h5p ? $config['root'].'/h5p/'.$new_folder . '/' : $config['scorm']['root'] . '/' . $new_folder . '/';
         $options =  array(
             'concurrency' => 20,
             'before' => function (\Aws\Command $command) {
@@ -420,7 +421,6 @@ class Media extends BaseModel
                 ? 'public-read'
                 : 'private';
         });
-
         $client->uploadDirectory($temp_path, $bucket, $keyPrefix, $options);
 
 
