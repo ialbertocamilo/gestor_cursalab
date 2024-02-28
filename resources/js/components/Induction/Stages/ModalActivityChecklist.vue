@@ -445,6 +445,9 @@ export default {
         },
         closeModal() {
             let vue = this
+
+            vue.stepper_box = 1
+
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
@@ -452,6 +455,7 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
+            vue.$refs.projectForm.reset()
         },
         resetSelects() {
             let vue = this

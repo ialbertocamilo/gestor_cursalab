@@ -64,9 +64,8 @@
                                 >
                                     <template slot="content">
                                         <v-row justify="center">
-                                            <v-col cols="4">
+                                            <v-col cols="6">
                                                 <DefaultSelect
-                                                    clearable
                                                     dense
                                                     :items="selects.qualification_types"
                                                     item-text="name"
@@ -78,7 +77,7 @@
                                                 />
                                             </v-col>
 
-                                            <v-col cols="4">
+                                            <v-col cols="3">
                                                 <DefaultInput
                                                     label="Nota mínima aprobatoria"
                                                     v-model="resource.nota_aprobatoria"
@@ -92,7 +91,7 @@
                                                 />
                                             </v-col>
 
-                                            <v-col cols="4">
+                                            <v-col cols="3">
                                                 <DefaultInput
                                                     label="Número de intentos"
                                                     v-model="resource.nro_intentos"
@@ -186,20 +185,24 @@
                                 <v-row>
                                     <v-col cols="12" v-if="loadStep2">
                                         <tema-preguntas-layout
-                                            :modulo_id="options.school_id" modulo_name="escruela_name"
-                                            :categoria_id="options.school_id" categoria_name="escruela_name"
-                                            :curso_id="course_id" curso_name="curso_name"
-                                            :tema_id="resource.topic" tema_name=""
-                                            evaluable="4578"
+                                            :modulo_id="options.school_id"
+                                            modulo_name="escruela_name"
+                                            :categoria_id="options.school_id"
+                                            categoria_name="escruela_name"
+                                            :curso_id="course_id"
+                                            curso_name="curso_name"
+                                            :tema_id="resource.topic"
+                                            tema_name=""
+                                            :evaluable="'' + resource.topic_data.type_evaluation_id"
                                             :status="false"
-                                            missing_score="20"
-                                            qualification_type="vigesimal"
-                                            qualification_type_value="20"
-                                            qualification_type_name="Sistema vigesimal (0-20)"
-                                            evaluation_type="qualified"
-                                            evaluation_data_sum="0"
-                                            evaluation_data_sum_required="0"
-                                            evaluation_data_sum_not_required="0"
+                                            :missing_score="resource.topic_data.verify_evaluation.score_missing"
+                                            :qualification_type="resource.qualification_type ? resource.qualification_type.type : ''"
+                                            :qualification_type_value="resource.qualification_type ? resource.qualification_type.position : 0"
+                                            :qualification_type_name="resource.qualification_type ? resource.qualification_type.name : ''"
+                                            :evaluation_type="resource.topic_data.evaluation_type"
+                                            :evaluation_data_sum="resource.topic_data.verify_evaluation.sum"
+                                            :evaluation_data_sum_required="resource.topic_data.verify_evaluation.sum_required"
+                                            :evaluation_data_sum_not_required="resource.topic_data.verify_evaluation.sum_not_required"
                                             :custom_breadcrumbs="breadcrumbs"
                                             :show_breadcrumbs="false"
                                             >
@@ -290,15 +293,44 @@ export default {
                 scheduled_restarts_dias: null,
                 scheduled_restarts_horas: null,
                 scheduled_restarts_minutos: 1,
+                qualification_type: {
+                    position: 0,
+                    name: '',
+                    type: ''
+                },
+                topic_data: {
+                    type_evaluation_id: null,
+                    evaluation_type: null,
+                    verify_evaluation: {
+                        score_missing: 0,
+                        sum_not_required: 0,
+                        sum: 0,
+                        sum_required: 0
+                    }
+                }
             },
             resource: {
-                qualification_type: {position: 0},
+                qualification_type: {
+                    position: 0,
+                    name: '',
+                    type: ''
+                },
                 requirement: {position: 0},
+                topic_data: {
+                    type_evaluation_id: null,
+                    evaluation_type: null,
+                    verify_evaluation: {
+                        score_missing: 0,
+                        sum_not_required: 0,
+                        sum: 0,
+                        sum_required: 0
+                    }
+                }
             },
             sections: {
                 showSectionAdvanced: {status: false},
                 showSectionReinicios: {status: false},
-                showSectionCalificacion: {status: false},
+                showSectionCalificacion: {status: true},
             },
             selects: {
                 requirement_list: [{'code':'none', 'name': 'Sin requisito'}],
@@ -319,6 +351,7 @@ export default {
             file: null,
             edit_resource: false,
             fileSelected: null,
+            new_value: 0,
         };
     },
     computed: {
@@ -353,12 +386,44 @@ export default {
                 vue.options.confirmDisabled = !vue.validateForm('projectForm')
             },
             deep: true
-        }
+        },
+        'resource.qualification_type': function (newValue, oldValue) {
+            let vue = this
+            let value = vue.resource.nota_aprobatoria
+
+            if (newValue) {
+                if (value && newValue.position && oldValue.position) {
+
+                    vue.new_value = value * newValue.position / oldValue.position
+                    vue.resource.nota_aprobatoria = parseFloat(vue.new_value.toFixed(2))
+                }
+            }
+        },
+        'resource.topic': function (newValue, oldValue) {
+            let vue = this
+
+            if (newValue) {
+                let vue = this;
+                let url = `${vue.options.base_endpoint}/topic/${newValue}`
+
+                vue.$http.get(url)
+                    .then(({data}) => {
+                        let topic = data.data.topic
+                        if(topic) {
+                            vue.resource.topic_data.type_evaluation_id = topic.type_evaluation_id
+                            vue.resource.topic_data.evaluation_type = topic.evaluation_type
+                        }
+                    })
+            }
+        },
     },
     methods: {
         closeModal()
         {
             let vue = this;
+
+            vue.stepper_box = 1
+
             vue.resetSelects()
             vue.resetValidation()
             vue.$emit('onCancel')
@@ -366,6 +431,7 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
+            vue.$refs.projectForm.reset()
         },
         prevStep()
         {
@@ -410,8 +476,22 @@ export default {
                     await vue.$http
                         .post(url, formData)
                         .then(({ data }) => {
-                            console.log(data.data.course);
                             vue.course_id = data.data.course
+                            let verify_evaluation = data.data.verify_evaluation.data
+                            let topic_info = data.data.topic
+                            if(topic_info) {
+                                vue.resource.topic_data.type_evaluation_id = topic_info.type_evaluation_id
+                                vue.resource.topic_data.evaluation_type = topic_info.evaluation_type
+                            }
+                            if(verify_evaluation) {
+                                vue.resource.topic_data.verify_evaluation = {
+                                    score_missing: verify_evaluation.score_missing,
+                                    sum_not_required: verify_evaluation.sum_not_required,
+                                    sum: verify_evaluation.sum,
+                                    sum_required: verify_evaluation.sum_required
+                                }
+                            }
+
                             this.hideLoader()
                             vue.stepper_box = 2;
                             vue.width = '1280px';
@@ -490,6 +570,7 @@ export default {
                     vue.selects.requirement_list = data.data.requirements
                     vue.selects.topic_list = data.data.topics
                     vue.selects.qualification_types = data.data.qualification_types
+                    vue.resource.qualification_type = data.data.qualification_type
                 })
         },
         createFormData(method, validateForm)

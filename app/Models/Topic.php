@@ -1324,7 +1324,7 @@ class Topic extends BaseModel
     protected function validateAvaiableAccount($course,$data,$topic=null,$validate_before_create=false){
         $is_avaiable = true;
         if($course->modality->code == 'virtual'){
-            
+
             $type = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first();
             $modality_in_person_properties = $data['modality_in_person_properties'];
             $start_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['start_time']);

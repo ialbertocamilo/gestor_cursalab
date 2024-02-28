@@ -337,6 +337,7 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.TemaForm.resetValidation()
+            vue.$refs.TemaForm.reset()
         },
         resetSelects() {
             let vue = this
