@@ -4,7 +4,6 @@ use App\Http\Controllers\VideotecaController;
 
 Route::controller(VideotecaController::class)->group(function() {
 
-
     // Route::prefix('/videoteca')->group(function () {
     Route::get('/fake-data', 'fakeData');
     Route::view('/list', 'videoteca.index')->name('videoteca.list');
