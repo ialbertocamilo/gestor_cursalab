@@ -250,7 +250,7 @@ class VideotecaController extends Controller
         } else {
 
             return response()->json([
-                'msg' => 'Has superado la capacidad de almacenamiento dentro de la plataforma.'
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
             ], 403);
         }
     }
@@ -341,7 +341,7 @@ class VideotecaController extends Controller
         } else {
 
             return response()->json([
-                'msg' => 'Has superado la capacidad de almacenamiento dentro de la plataforma.'
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
             ], 403);
         }
     }

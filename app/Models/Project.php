@@ -147,7 +147,7 @@ class Project extends BaseModel
                 $still_has_storage = Media::validateStorageByWorkspace($request->file('files'));
                 if(!$still_has_storage){
                     return [
-                        'msg'=>' Has superado la capacidad de almacenamiento dentro de la plataforma.',
+                        'msg'=> config('errors.limit-errors.limit-storage-allowed'),
                         'still_has_storage'=>false
                     ];
                 }

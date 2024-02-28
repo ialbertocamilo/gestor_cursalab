@@ -859,14 +859,14 @@ export default {
             let url = `/jarvis/generate-description-jarvis` ;
             if(vue.loading_description || !vue.resource.name){
                 const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
-                vue.showAlert(message, 'warning', '') 
+                vue.showAlert(message, 'warning', '')
                 return ''
             }
             if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
-                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '') 
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
                 return ''
             }
-            vue.loading_description = true; 
+            vue.loading_description = true;
             await axios.post(url,{
                 name : vue.resource.name,
                 type:'course'
@@ -881,12 +881,12 @@ export default {
                             updateDescription(index + 1);
                         }, 10);
                     }else{
-                        vue.loading_description = false; 
+                        vue.loading_description = false;
                     }
                 }
                 updateDescription(0);
             }).catch(()=>{
-                vue.loading_description = false; 
+                vue.loading_description = false;
             })
         },
         async loadLimitsGenerateIaDescriptions(){

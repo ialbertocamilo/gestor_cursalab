@@ -880,6 +880,10 @@ export default {
                     }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
+
+                    if (e.response.data.msg) {
+                        vue.showAlert(e.response.data.msg, 'warning')
+                    }
                 })
         },
         setJSONReinicioProgramado(formData) {
