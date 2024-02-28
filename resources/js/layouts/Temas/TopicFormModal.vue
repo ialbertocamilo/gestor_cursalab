@@ -275,7 +275,7 @@
                     <template slot="content">
                         <v-row>
                             <v-col cols="12" v-if="selects.course_code_modality != 'asynchronous'">
-                                <DefaultToggle 
+                                <DefaultToggle
                                     v-model="resource.modality_in_person_properties.show_medias_since_start_course"
                                     :disabled="resource.media.length === 0"
                                     active-label="El usuario puede tener acceso para visualizar el contenido multimedia desde el inicio de la sesión"
@@ -284,11 +284,11 @@
                                 />
                             </v-col>
                             <v-col cols="12">
-                                <DefaultToggle 
+                                <DefaultToggle
                                     v-model="resource.review_all_duration_media"
                                     :disabled="resource.media.length === 0"
-                                    active-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
-                                    inactive-label="El usuario debe terminar terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    active-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
+                                    inactive-label="El usuario debe terminar de visualizar los videos para continuar con el siguiente recurso multimedia"
                                     dense
                                 />
                             </v-col>
@@ -298,7 +298,7 @@
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
                         <DefaultModalSectionExpand
-                            :title="`Configuraciones de la sesión ${selects.course_code_modality == 'in-person' ? 'presencial' : 'online'}`" 
+                            :title="`Configuraciones de la sesión ${selects.course_code_modality == 'in-person' ? 'presencial' : 'online'}`"
                             :expand="sections.showSectionCourseInPerson"
                             :simple="true"
                             v-if="selects.course_code_modality != 'asynchronous'"
@@ -534,7 +534,7 @@
                                             <v-col cols="12">
                                                 <span class="pr-3">¿No ves la etiqueta que necesitas? Crea una aquí</span>
                                                 <DefaultButton
-                                                    outlined 
+                                                    outlined
                                                     label="Agregar Etiqueta"
                                                     @click="openFormModal(modalTagOptions)"
                                                 />
@@ -644,8 +644,8 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 const file_fields = ['imagen'];
 import QRCode from "qrcode";
 export default {
-    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox, 
-        draggable, TemaValidacionesModal, DialogConfirm, 
+    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox,
+        draggable, TemaValidacionesModal, DialogConfirm,
         DefaultRichText,ConvertMediaToIaModal,TagModal,SegmentFormModal
     },
     props: {
@@ -849,7 +849,7 @@ export default {
                 action:'Retroceder',
                 create_from_course_list:false,
             }
-            
+
         }
     },
     async mounted() {
@@ -1018,7 +1018,7 @@ export default {
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
-           
+
             vue.addMedias(formData)
             if (data.checkbox){
                 formData.append('check_tipo_ev', data.checkbox)
@@ -1102,7 +1102,7 @@ export default {
                     vue.$refs.autocompleteMap.$refs.input.value = '';
                 }
             })
-            
+
             let url = `${vue.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
             await vue.$http.get(url)
                 .then(({data}) => {
@@ -1203,7 +1203,7 @@ export default {
         verifyDisabledMediaEmbed() {
             let vue = this;
             if(vue.selects.course_code_modality != 'asynchronous'){
-                return 
+                return
             }
             const f = vue.resource.media.filter((e) => e.embed == true);
             if (f.length == 1) {
@@ -1434,7 +1434,7 @@ export default {
             //     });
             // });
             QRCode.toDataURL(vue.selects.dinamyc_link, opts, function (err, qrCodeUrl) {
-                vue.resource.path_qr = qrCodeUrl,vue.dinamyc_link; 
+                vue.resource.path_qr = qrCodeUrl,vue.dinamyc_link;
             })
         }
     }
