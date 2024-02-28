@@ -41,6 +41,7 @@ Route::controller(ActivityController::class)->group(function() {
     // Evaluaciones
     Route::post('/evaluaciones/store','EvaluacionesStore');
     Route::get('/evaluaciones/form-selects', 'EvaluacionesGetFormSelects');
+    Route::get('/evaluaciones/topic/{topic}', 'getDataTopicByAssessmentsActivity');
 	Route::get('/evaluaciones/temas/{topic}/preguntas/search', 'TemasSearchPreguntas');
 
 });

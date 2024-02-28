@@ -156,6 +156,7 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
+            vue.$refs.projectForm.reset()
         },
         prevStep()
         {

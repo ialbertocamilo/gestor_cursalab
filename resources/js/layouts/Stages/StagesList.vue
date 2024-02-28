@@ -583,7 +583,8 @@ export default {
                 title_modal: 'Crear una subida de datos',
                 confirmLabel: 'Guardar',
                 create_from_course_list:false,
-                model_id: 0
+                model_id: 0,
+                persistent: true,
             },
 
             modalActivitySesiones: {
@@ -592,7 +593,8 @@ export default {
                 base_endpoint: '/procesos',
                 title_modal: 'Crear una sesión',
                 confirmLabel: 'Guardar',
-                create_from_course_list:false,
+                create_from_course_list: false,
+                persistent: true,
             },
 
             modalActivityTemas: {
@@ -613,7 +615,8 @@ export default {
                 title_modal: 'Crear checklist empresa',
                 confirmLabel: 'Continuar',
                 checklist: null,
-                model_id: 0
+                model_id: 0,
+                persistent: true,
             },
 
             modalActivityEncuestas: {
@@ -622,7 +625,8 @@ export default {
                 base_endpoint: '/procesos',
                 title_modal: 'Crear encuestas',
                 confirmLabel: 'Continuar',
-                model_id: 0
+                model_id: 0,
+                persistent: true,
             },
 
             modalActivityEvaluaciones: {
@@ -631,7 +635,8 @@ export default {
                 base_endpoint: '/procesos',
                 title_modal: 'Crear evaluación',
                 confirmLabel: 'Continuar',
-                model_id: 0
+                model_id: 0,
+                persistent: true,
             },
 
             // confirmationUpdateTitleModal: {

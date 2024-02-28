@@ -163,7 +163,7 @@ class ActivityController extends Controller
         $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
 
         $data_course = [
-            'name' => $request['name'],
+            'name' => 'Inducción - Temas - '. $request['name'],
             'active' => 1,
             'escuelas' => $request['school_id'] ? [ School::where('id', $request['school_id'])->first()?->id] : [],
             'reinicios_programado' => null,
@@ -456,10 +456,14 @@ class ActivityController extends Controller
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
 
+        $tax_evaluation_type = Taxonomy::find($topic->type_evaluation_id);
+
         $response = [
             'msg' => 'Actividad creada correctamente.',
             'activity' => $activity,
             'course' => $course_update?->id ?? null,
+            'topic' => ['type_evaluation_id' => $topic?->type_evaluation_id, 'evaluation_type' => $tax_evaluation_type?->code],
+            'verify_evaluation' => $verify_evaluation,
             'messages' => ['list' => []]
         ];
 
@@ -481,13 +485,14 @@ class ActivityController extends Controller
 
     public function EvaluacionesGetFormSelects(Process $process, Stage $stage)
     {
-        $q_requisitos = Activity::select('id as code', 'title as name')->where('stage_id', $stage?->id);
-        // if ($topic)
-        //     $q_requisitos->whereNotIn('id', [$topic->id]);
-
-        $requirements = $q_requisitos->orderBy('position')->get();
+        $workspace = get_current_workspace();
 
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'temas');
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
+
+        $q_requisitos = Activity::select('id as code', 'title as name')->where('stage_id', $stage?->id);
+        $requirements = $q_requisitos->orderBy('position')->get();
+
 
         $topics = Activity::select('model_id as code', 'title as name')
                             ->where('stage_id', $stage?->id)
@@ -495,10 +500,20 @@ class ActivityController extends Controller
                             ->orderBy('position')
                             ->get();
 
-        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
+        $qualification_type = $workspace->qualification_type;
 
-        $response = compact('requirements', 'topics', 'qualification_types');
+        $response = compact('requirements', 'topics', 'qualification_types', 'qualification_type');
 
+        return $this->success($response);
+    }
+
+    public function getDataTopicByAssessmentsActivity( Process $process, Stage $stage, Topic $topic )
+    {
+        $taxonomy = Taxonomy::find($topic->type_evaluation_id);
+
+        $topic->evaluation_type = $taxonomy->code ?? '';
+
+        $response = compact('topic');
         return $this->success($response);
     }
 

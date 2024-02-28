@@ -53,11 +53,13 @@ class StageController extends Controller
     public function store(Process $process, StageStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
 
         $data_school = [
-            'name' => $data['title'],
-            'active' => $data['active'],
-            'subworkspaces' => current_subworkspaces_id()
+            'name' => 'Inducción - Etapa - '. $data['title'],
+            'active' => 1,
+            'subworkspaces' => current_subworkspaces_id(),
+            'platform_id' => $platform_onboarding?->id
         ];
 
         $school = School::storeRequest($data_school);
@@ -79,10 +81,13 @@ class StageController extends Controller
     public function update(Process $process, Stage $stage, StageStoreUpdateRequest $request)
     {
         $data = $request->validated();
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+
         $data_school = [
-            'name' => $data['title'],
-            'active' => $data['active'],
-            'subworkspaces' => current_subworkspaces_id()
+            'name' => str_contains($data['title'], 'Inducción - Etapa - ') ? $data['title'] : 'Inducción - Etapa - '. $data['title'],
+            'active' => 1,
+            'subworkspaces' => current_subworkspaces_id(),
+            'platform_id' => $platform_onboarding?->id
         ];
         $school = School::where('id', $stage?->school_id)->first() ?? null;
         $school = School::storeRequest($data_school, $school);
