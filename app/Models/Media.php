@@ -294,7 +294,7 @@ class Media extends BaseModel
 
                 // $new_folder = 'scorm/' . $name;
                 $new_folder = $name;
-                Media::uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p);
+                Media::uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p,$is_h5p);
 
                 $name = $new_folder . '/' . $name_scorm['nombre'];
                 $path = $is_h5p ? $path = 'h5p/' . $new_folder : get_media_url($name, 'cdn_scorm');
@@ -397,7 +397,7 @@ class Media extends BaseModel
         return false;
     }
 
-    protected function uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p=false)
+    protected function uploadUnzippedFolderToBucket($temp_path, $new_folder,$is_h5p=false,$public=false)
     {
         $config = config('filesystems.disks.s3');
 
@@ -416,10 +416,14 @@ class Media extends BaseModel
         $keyPrefix = $is_h5p ? $config['root'].'/h5p/'.$new_folder . '/' : $config['scorm']['root'] . '/' . $new_folder . '/';
         $options =  array(
             'concurrency' => 20,
-            'before' => function (\Aws\Command $command) {
-            $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
-                ? 'public-read'
-                : 'private';
+            'before' => function (\Aws\Command $command) use($public) {
+                if($public){
+                    $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
+                        ? 'public-read'
+                        : 'private';
+                }else{
+                    $command['ACL'] =  'public-read';
+                }
         });
         $client->uploadDirectory($temp_path, $bucket, $keyPrefix, $options);
 
