@@ -322,7 +322,7 @@ class GeneralController extends Controller
         // info(['storage_mail' => $storage_mail]);
         // Mail::to('juan@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
         // info(['storage_mail' => $storage_mail]);
-        Mail::to(['gabriel@cursalab.io','aldo@cursalab.io','luis@cursalab.io','janella@cursalab.io','juanjose@cursalab.io'])->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
+        Mail::to(['gabriel@cursalab.io','sol@cursalab.io','ursula@cursalab.io','christian@cursalab.io','luis@cursalab.io','janella@cursalab.io','juanjose@cursalab.io'])->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
         // Mail::to('aldo@cursalab.io')->send(new EmailTemplate('emails.enviar_almacenamiento_notificacion', $storage_mail));
 
         return $this->success(true);
