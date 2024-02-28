@@ -121,7 +121,7 @@
                             @click="open_advanced_filter = !open_advanced_filter"/>
                     </v-col>
                 </v-row>
-               
+
             </v-card-text>
             <transition name="fade" mode="out-in">
                 <component

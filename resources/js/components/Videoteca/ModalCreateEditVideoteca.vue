@@ -304,9 +304,13 @@ export default {
                         vue.$emit('onConfirm')
                         this.hideLoader()
                     })
-                    .catch(err => {
+                    .catch(e => {
                         this.hideLoader()
-                        console.log(err)
+                        console.log(e)
+
+                        if (e.response.data.msg) {
+                            vue.showAlert(e.response.data.msg, 'warning')
+                        }
                     })
 
             } else {

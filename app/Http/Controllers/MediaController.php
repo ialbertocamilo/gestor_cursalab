@@ -11,8 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Services\FileService;
@@ -165,15 +163,26 @@ class MediaController extends Controller
     {
         $data = $request->validated();
 
+        $hasStorageAvailable = Media::validateStorageByWorkspace($data['file']);
+
         // Upload files one by one
 
-        foreach ($data['file'] as $file) {
-            Media::uploadFile($file);
-        }
+        if ($hasStorageAvailable) {
 
-        return $this->success([
-            'msg' => 'Archivo(s) subido(s) correctamente.'
-        ]);
+            foreach ($data['file'] as $file) {
+                Media::uploadFile($file);
+            }
+
+            return $this->success([
+                'msg' => 'Archivo(s) subido(s) correctamente.'
+            ]);
+
+        } else {
+
+            return response()->json([
+                'msg' => 'Has superado la capacidad de almacenamiento dentro de la plataforma.'
+            ], 403);
+        }
     }
 
     /**
