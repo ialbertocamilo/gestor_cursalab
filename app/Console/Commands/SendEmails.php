@@ -31,7 +31,7 @@ class SendEmails extends Command
      */
     public function handle()
     {
-        // $this->sendQueueEmails();
+        $this->sendQueueEmails();
         $this->sendProgrammedEmails();
     }
 
