@@ -118,7 +118,8 @@
 
 <script>
 import DocPreview from '../Project/DocPreview';
-import { H5P } from 'h5p-standalone';
+// import { H5P } from 'h5p-standalone';
+import H5PStandalone from 'h5p-standalone';
 export default {
     components: { DocPreview },
     props: {
@@ -182,13 +183,15 @@ export default {
         setH5P(media){
             setTimeout(() => {
                 const el = document.getElementById('h5p-container');
-                console.log(el);
                 const options = {
                     h5pJsonPath: media.url,
                     frameJs: '/assets/frame.bundle.js',
                     frameCss: '/assets/styles/h5p.css',
                 };
-                new H5P(el, options);
+                // new H5PStandalone(el, options);
+                new H5PStandalone.H5P(el, options);
+                // const h5pStandalone = new H5PStandalone(options, el);
+                // h5pStandalone.run();
             }, 2500);
         },
         setCurrentTime() {
