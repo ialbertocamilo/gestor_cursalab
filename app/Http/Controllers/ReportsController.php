@@ -78,11 +78,25 @@ class ReportsController extends Controller
      */
     public function loadRepotsTypes(): JsonResponse
     {
-        $hasPermissionToShowDc3Report =  boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());;
+        $functionalities = get_current_workspace()->functionalities()->get();
+        $show_report_dc3 =  boolval($functionalities->where('code','dc3-dc4')->first());
+        $show_report_registro_capacitacion =  boolval($functionalities->where('code','registro-capacitacion')->first());
+        $show_report_checklist =  boolval($functionalities->where('code','checklist')->first());
+        $show_report_benefit =  boolval($functionalities->where('code','benefits')->first());
+        $show_report_reconocimiento=  boolval($functionalities->where('code','benefits')->first());
+        $show_report_sessions_live = boolval($functionalities->where('code','sesiones-live')->first());
+        
         return $this->success([
-            'types'=>Taxonomy::getDataByGroupAndType('reports', 'report')
-            ,'hasPermissionToShowDc3Report'=>$hasPermissionToShowDc3Report]
-        );
+            'types'=>Taxonomy::getDataByGroupAndType('reports', 'report'),
+            'permissions'=> [
+                'show_report_dc3'=>$show_report_dc3,
+                'show_report_registro_capacitacion' => $show_report_registro_capacitacion,
+                'show_report_checklist' => $show_report_checklist,
+                'show_report_benefit' => $show_report_benefit,
+                'show_report_reconocimiento' => $show_report_reconocimiento,
+                'show_report_sessions_live' => $show_report_sessions_live
+            ]
+        ]);
     }
 
     public function saveAudits(Request $request, GeneratedReport $report)
