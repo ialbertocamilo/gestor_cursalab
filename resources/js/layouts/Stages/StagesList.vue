@@ -495,6 +495,8 @@
             @onCancel="closeFormModal(modalActivityEvaluaciones)"
             @onConfirm="saveEditStage(false)"
             :options="modalActivityEvaluaciones"
+            :proceso_text="modalActivityEvaluaciones.proceso_text"
+            :etapa_text="modalActivityEvaluaciones.etapa_text"
         />
     </section>
 </template>
@@ -637,6 +639,8 @@ export default {
                 confirmLabel: 'Continuar',
                 model_id: 0,
                 persistent: true,
+                proceso_text: this.process_name,
+                etapa_text: ''
             },
 
             // confirmationUpdateTitleModal: {
@@ -1275,6 +1279,7 @@ export default {
                 vue.modalActivityEvaluaciones.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage_id}/activity/evaluaciones`
                 vue.modalActivityEvaluaciones.model_id = stage_id
                 vue.modalActivityEvaluaciones.school_id = school_id
+                vue.modalActivityEvaluaciones.etapa_text = 'etapa_text'
 
                 vue.openFormModal(this.modalActivityEvaluaciones)
                 // vue.modalCreateProcess.open = true

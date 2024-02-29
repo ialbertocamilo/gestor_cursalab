@@ -12,6 +12,7 @@ use App\Models\EntrenadorUsuario;
 use App\Models\Media;
 use App\Models\Process;
 use App\Models\Segment;
+use App\Models\Stage;
 use App\Models\Supervisor;
 use App\Models\Taxonomy;
 use App\Models\User;
@@ -113,6 +114,30 @@ class ProcessController extends Controller
         $response = [
             'msg' => 'Proceso creado correctamente.',
             'process' => $process,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
+    public function updateQualificationStages( Process $process, Request $request )
+    {
+        $stages = json_decode($request->stages_json);
+        $qualification_type = $request->qualification_type;
+
+        $process->qualification_type_id = $qualification_type;
+        $process->save();
+        if(is_array($stages) && count($stages)>0) {
+            foreach ($stages as $st) {
+                $stage = Stage::where('id', $st->id)->first();
+                if($stage) {
+                    $stage->qualification_percentage = $st->qualification_percentage;
+                    $stage->qualification_equivalent = $st->qualification_equivalent;
+                    $stage->save();
+                }
+            }
+        }
+        $response = [
+            'msg' => 'Sistema de calificación actualizado',
             'messages' => ['list' => []]
         ];
         return $this->success($response);

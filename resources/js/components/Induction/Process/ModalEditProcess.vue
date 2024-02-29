@@ -551,7 +551,7 @@
                     :cancelLabel="cancelLabel"
                     :confirmLabel="confirmLabel"
                     :disabled_next="disabled_btn_next"
-                    :showBtnExtra="showBtnExtra"
+                    :showBtnExtra="showBtnExtra && !process.config_completed"
                     :disabled_btn_extra="disabled_btn_next"
                     labelBtnExtra="Guardar y continuar luego"
                     />
@@ -813,8 +813,6 @@ export default {
         logo_cropped: {
             handler(n, o) {
                 let vue = this;
-                console.log(n);
-                console.log(o);
             },
             deep: true
         },
@@ -859,7 +857,6 @@ export default {
                     vue.stepper_box_btn4 = false; //validarr subida de imagenes
                     vue.disabled_btn_next = vue.stepper_box_btn4;
                 }
-                console.log('process');
             },
             deep: true
         },
@@ -895,7 +892,6 @@ export default {
                     vue.confirmLabel = "Guardar";
                     vue.showBtnExtra = false
                 }
-                console.log('stepper');
 
                 if(vue.process.instructions != null && vue.process.instructions.length > 0){
                     // vue.process.instructions.forEach(el => {
@@ -913,7 +909,6 @@ export default {
             vue.process.icon_finished_selected = vue.$refs[ref_image].src
         },
         images_upload_handler(blobInfo, success, failure) {
-            console.log(blobInfo.blob());
             let vue = this
             let formdata = new FormData();
             formdata.append("image", blobInfo.blob(), blobInfo.filename());
@@ -930,7 +925,6 @@ export default {
                 });
         },
         addIconFinishedOnboarding(data) {
-            console.log(data);
             let vue = this
             if(data.logo_cropped)
                 vue.list_icons_finished_onboarding.push(data)
@@ -938,15 +932,12 @@ export default {
             vue.closeFormModal(vue.modalUploadImageResize)
         },
         changeImgGuia(data) {
-            console.log(data);
             let vue = this
             if(data.logo_cropped) {
                 vue.$nextTick(() => {
                     vue.process.img_guia = data.logo_cropped
                 })
             }
-            console.log(vue.process, vue.process.img_guia);
-
             vue.closeFormModal(vue.modalAvatarsRepository)
         },
 
@@ -964,7 +955,6 @@ export default {
         },
         changeLogoSelected($event) {
             let vue = this
-            console.log($event);
             if($event)
             {
                 vue.logo_selected = $event
@@ -1008,6 +998,7 @@ export default {
                 vue.stepper_box = 4;
             }
             else if(vue.stepper_box == 4){
+                vue.process.config_completed = true
                 vue.confirm();
             }
         },
@@ -1069,7 +1060,6 @@ export default {
         },
         resetValidation() {
             let vue = this;
-            console.log('resetValidation')
             // vue.search_text = null
             // vue.results_search = []
         },
@@ -1192,7 +1182,6 @@ export default {
                 axios
                     .post(`/entrenamiento/checklists/buscar_curso`, data)
                     .then((res) => {
-                        console.log(vue.results_search);
                         vue.results_search = res.data.data;
                         // vue.$nextTick(() => {
                         //     vue.$refs.resultSearch.focus()
@@ -1255,12 +1244,9 @@ export default {
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
         },
-        async changeTypeChecklist() {
-
+        async changeTypeChecklist()
+        {
             let vue = this;
-
-            console.log(vue.resource.type_checklist);
-            console.log(vue.type_checklist);
             vue.type_checklist = vue.resource.type_checklist;
         },
 
@@ -1269,7 +1255,6 @@ export default {
 
             vue.$nextTick(() => {
                 vue.process = Object.assign({}, vue.process, resource)
-                console.log(resource);
                 if(resource)
                 {
                     if(resource.color) {
@@ -1297,9 +1282,6 @@ export default {
         },
         loadSelects(resource) {
             let vue = this
-            console.log(resource);
-            console.log(vue.process);
-
             // let url = `${vue.options.base_endpoint}/form-selects`
 
             // vue.$http.get(url)

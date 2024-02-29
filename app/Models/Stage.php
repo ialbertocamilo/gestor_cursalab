@@ -14,7 +14,9 @@ class Stage extends BaseModel
         'duration',
         'position',
         'active',
-        'certificate_template_id'
+        'certificate_template_id',
+        'qualification_percentage',
+        'qualification_equivalent'
     ];
 
     protected $hidden = [

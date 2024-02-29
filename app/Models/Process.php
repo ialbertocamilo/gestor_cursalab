@@ -35,7 +35,8 @@ class Process extends BaseModel
         'color_map_even',
         'color_map_odd',
         'image_guia',
-        'supervisor_criteria'
+        'supervisor_criteria',
+        'qualification_type_id'
     ];
 
     protected $casts = [
@@ -210,12 +211,12 @@ class Process extends BaseModel
         try {
             $workspace = get_current_workspace();
             $data['workspace_id'] = $workspace?->id;
+            $data['config_completed'] = isset($data['config_completed']) && $data['config_completed'] ? $data['config_completed'] : false;
 
             DB::beginTransaction();
 
 
             if ($process) :
-                $data['config_completed'] = true;
                 $process->update($data);
             else:
                 $process = self::create($data);
@@ -223,7 +224,7 @@ class Process extends BaseModel
 
 
             //instructions
-            if($data['instructions'])
+            if(isset($data['instructions']) && $data['instructions'])
             {
                 $instructions = json_decode($data['instructions']);
                 if(is_array($instructions))
@@ -245,7 +246,7 @@ class Process extends BaseModel
         } catch (\Exception $e) {
             info($e);
             DB::rollBack();
-            // Error::storeAndNotificateException($e, request());
+            Error::storeAndNotificateException($e, request());
             abort(errorExceptionServer());
         }
 

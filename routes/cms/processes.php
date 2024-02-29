@@ -21,6 +21,7 @@ Route::controller(ProcessController::class)->group(function() {
     // Route::post('/segments/enviar_correo', 'sendEmailSegments');
 	// Route::get('/form-selects', 'getFormSelects');
 
+    Route::put('/{process}/update_qualifications','updateQualificationStages');
     Route::put('/{process}/status', 'status');
     Route::delete('/{process}/destroy', 'destroy');
 

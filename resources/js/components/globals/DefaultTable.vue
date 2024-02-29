@@ -389,7 +389,7 @@
                         <button
                             type="button" class="btn btn-md position-relative"
                             :title="action.text"
-                            @click="doAction(action, item)"
+                            @click="item.disabled_btns_actions ? null : doAction(action, item)"
                             v-if="!action.show_condition || (action.show_condition && item[action.show_condition])"
                             :class="{'default-table-disable-action-btn' : action.disable_btn || (action.disable_btn && item[action.disable_btn])}"
                         >
@@ -1581,14 +1581,17 @@ export default {
         },
         addNewProcessInline() {
             let vue = this;
-            console.log(vue.rows);
             let new_item = {
                 title: '',
-                edit_inline: true
+                edit_inline: true,
+                assigned_users: 0,
+                config_completed: false,
+                stages_count: 0,
+                certificate_template_id: null,
+                active: false,
+                disabled_btns_actions: true
             };
             vue.rows.push(new_item);
-            console.log(vue.rows);
-            // vue.$refs.input_edit_process.focus()
             this.$nextTick(() => {
                 const editButtonRef = this.$refs.input_edit_process;
                 editButtonRef.focus();
