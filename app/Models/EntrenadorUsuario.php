@@ -281,7 +281,7 @@ class EntrenadorUsuario extends Model implements Recordable
         return $response;
     }
 
-    protected function asignar($data)
+    protected function asignar($data, $single_trainer = true)
     {
         $trainer_id = $data['trainer_id'];
         $user_id = $data['user_id'];
@@ -314,21 +314,24 @@ class EntrenadorUsuario extends Model implements Recordable
         }
         Bouncer::scope()->to($entrenador_workspace_id);
         Bouncer::assign('trainer')->to($entrenador);
-        $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
-        if (!is_null($hasTrainer)) {
-            $hasTrainer->trainer_id = $trainer_id;
-            $hasTrainer->save();
-            //update relations
-            ChecklistRpta::alumno($user_id)->update([
-                'coach_id'=>$trainer_id
-            ]);
-            // $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
-            // $response['error'] = true;
-            // $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
-            // return $response;
-            $msg = "Se asignó el usuario y el entrenador.";
-            $response['msg'] = $msg;
-            return $response;
+
+        if($single_trainer) {
+            $hasTrainer = EntrenadorUsuario::where('user_id', $user_id)->where('active',1)->first();
+            if (!is_null($hasTrainer)) {
+                $hasTrainer->trainer_id = $trainer_id;
+                $hasTrainer->save();
+                //update relations
+                ChecklistRpta::alumno($user_id)->update([
+                    'coach_id'=>$trainer_id
+                ]);
+                // $userTrainer = User::select('document')->where('id', $hasTrainer->trainer_id)->where('active', 1)->select('document')->first();
+                // $response['error'] = true;
+                // $response['msg'] = 'El usuario esta asignado al entrenador con documento: '.$userTrainer->document;
+                // return $response;
+                $msg = "Se asignó el usuario y el entrenador.";
+                $response['msg'] = $msg;
+                return $response;
+            }
         }
 
         $registro = EntrenadorUsuario::where('trainer_id', $trainer_id)

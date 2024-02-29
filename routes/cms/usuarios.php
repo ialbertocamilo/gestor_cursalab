@@ -13,6 +13,7 @@ Route::controller(UsuarioController::class)->group(function () {
 
 	Route::get('/search', 'search');
 	Route::get('/get-list-selects', 'getListSelects');
+    Route::get('/users-empty-criteria', 'countUsersWithEmptyCriteria');
 
 	Route::get('/form-selects', 'getFormSelectsV2');
 

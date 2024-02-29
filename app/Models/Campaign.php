@@ -15,13 +15,13 @@ class Campaign extends Model
 {
     use SoftDeletes;
 
-    // local atributes 
+    // local atributes
     protected $fillable = [ 'id', 'workspace_id', 'title','description','file_image', 'start_date', 'end_date', 'subject', 'body', 'file_banner','color', 'question', 'porcent', 'stage_id', 'stage_content','stage_postulate','stage_votation', 'state_postulate_support','state'];
 
     protected $casts = [
         'start_date' => 'datetime:d/m/Y', //datetime:d/m/Y h:i:s
         'end_date' => 'datetime:d/m/Y',
-        
+
         'stage_content' => 'boolean',
         'stage_postulate' => 'boolean',
         'stage_votation' => 'boolean',
@@ -29,7 +29,7 @@ class Campaign extends Model
         'state_postulate_support' => 'boolean',
         'state' => 'boolean',
     ];
-    
+
     public static $index_campaign = NULL;
 
     public function modules() {
@@ -39,7 +39,7 @@ class Campaign extends Model
     public function contents() {
         return $this->hasMany(CampaignContents::class);
     }
-    
+
     public function badges() {
         return $this->hasMany(CampaignBadges::class);
     }
@@ -70,7 +70,7 @@ class Campaign extends Model
                     ->whereNotNull('condition')
                     ->whereNotNull('value');
     }
-    
+
 
     public function requirement_postulates() {
         return $this->hasMany(CampaignRequirements::class)->where('type', 'POSTULATES');
@@ -81,19 +81,19 @@ class Campaign extends Model
     }
 
     public function getCampaingInicioFinFecha() {
-        if($this->start_date) return $this->start_date->format('d/m/Y').' - '.$this->end_date->format('d/m/Y'); 
+        if($this->start_date) return $this->start_date->format('d/m/Y').' - '.$this->end_date->format('d/m/Y');
         return 'Sin fecha';
     }
 
-    public function campaignGetStages() {    
-        $arrayModes = [ 
-                        [0, 1, 2],  
+    public function campaignGetStages() {
+        $arrayModes = [
+                        [0, 1, 2],
                         [0, 1],
                         [1, 2],
-                        [1] 
-                    ]; 
+                        [1]
+                    ];
 
-        return $arrayModes[$this->stage_id]; 
+        return $arrayModes[$this->stage_id];
     }
 
     public function processNullCriterio($requirement) {
@@ -122,7 +122,7 @@ class Campaign extends Model
 
         return $CAMPAIGN_DATA;
     }
-    
+
     public function processModulesCampaigId($CAMPAIGN_DATA) {
 
         $CAMPAIGN_DATA['modules'] = $this->modules->map(function ($module) {
@@ -131,7 +131,7 @@ class Campaign extends Model
 
         return $CAMPAIGN_DATA;
     }
-    
+
     public function getCurrContents() {
         $campaing_contents = $this->contents()->select('title', 'description', 'file_media', 'linked', 'state')->get();
 
@@ -144,7 +144,7 @@ class Campaign extends Model
     public function getCurrPostulates() {
         $requirement_postulate = $this->requirement_null_criterio('POSTULATES')->first();
 
-        $postulate_data = $this->processNullCriterio($requirement_postulate);  
+        $postulate_data = $this->processNullCriterio($requirement_postulate);
         $postulate_data['state'] = (bool) $this->state_postulate_support;
         $postulate_data['matchs'] = 0;
 
@@ -155,7 +155,7 @@ class Campaign extends Model
         $requirement_voters = $this->requirement_null_criterio('VOTERS')->first();
         $requirement_voters_criterio = $this->requirement_not_null_criterio('VOTERS')->first();
 
-        $voter_data = $this->processNullCriterio($requirement_voters);  
+        $voter_data = $this->processNullCriterio($requirement_voters);
 
         if(is_null($requirement_voters_criterio)) {
             $voter_data['requirement'] = NULL;
@@ -174,7 +174,7 @@ class Campaign extends Model
 
         return $voter_data;
     }
-    
+
     public function getCampaingStage() {
         $actual_stage = 'Sin etapa';
 
@@ -184,7 +184,7 @@ class Campaign extends Model
             ['text' => 'Votación', 'state' => $this->stage_votation ],
         ];
 
-        foreach ($description_stages as $key => [ 'state' => $state, 
+        foreach ($description_stages as $key => [ 'state' => $state,
                                                   'text' => $text ]) {
             if($state) $actual_stage = $text;
         }
@@ -202,20 +202,20 @@ class Campaign extends Model
         return $badges_data;
     }
 
-    protected function checkAnswer($request) 
+    protected function checkAnswer($request)
     {
         return CampaignSummoneds::where('campaign_id', $request->campaign_id)
                                 ->where('user_id', $request->user_id)->count();
     }
 
-    protected function checkPostulates($request) 
+    protected function checkPostulates($request)
     {
         return CampaignPostulates::where('user_id', $request->user_id)
                                  ->whereRelation('summoned', 'campaign_id', $request->campaign_id)
                                  ->count();
     }
 
-    protected function checkVotations($request) 
+    protected function checkVotations($request)
     {
         return CampaignVotations::where('user_id', $request->user_id)
                                  ->whereRelation('summoned', 'campaign_id', $request->campaign_id)
@@ -236,32 +236,32 @@ class Campaign extends Model
         $checkPostulate = $this->checkPostulates($request);
         $checkVoter = $this->checkVotations($request);
 
-        // for question 
-        if($stage_content === NULL) $RespStateContent = $checkAnswer; 
-        else if($stage_content && !$checkAnswer) $RespStateContent = false; 
+        // for question
+        if($stage_content === NULL) $RespStateContent = $checkAnswer;
+        else if($stage_content && !$checkAnswer) $RespStateContent = false;
         else if($stage_content && $checkAnswer) $RespStateContent = true;
         else $RespStateContent = $checkAnswer;
         // else $RespStateContent = false;
 
         // for postulates
-        if($stage_postulate === NULL) $RespStatePostulate = false; 
-        else if($stage_postulate && !$checkPostulate) $RespStatePostulate = false; 
+        if($stage_postulate === NULL) $RespStatePostulate = false;
+        else if($stage_postulate && !$checkPostulate) $RespStatePostulate = false;
         else if($stage_postulate && $checkPostulate) $RespStatePostulate = true;
         else $RespStatePostulate = $checkPostulate;
         // else $RespStatePostulate = false;
 
         // for votations
-        if($stage_votation === NULL) $RespStateVotation = $checkVoter; 
-        else if($stage_votation && !$checkVoter) $RespStateVotation = false; 
+        if($stage_votation === NULL) $RespStateVotation = $checkVoter;
+        else if($stage_votation && !$checkVoter) $RespStateVotation = false;
         else if($stage_votation && $checkVoter) $RespStateVotation = true;
         else $RespStateVotation = $checkVoter;
         // else $RespStateVotation = false;
 
-        return [ 'stage_content' => (bool) $RespStateContent, 
+        return [ 'stage_content' => (bool) $RespStateContent,
                  'stage_postulate' => (bool) $RespStatePostulate,
                  'stage_votation' => (bool) $RespStateVotation ];
     }
-    
+
     public function processUserCommingSoon() {
         $stateAnnounDate = ($this->start_date && $this->end_date);
         $stateResponse = false;
@@ -281,7 +281,7 @@ class Campaign extends Model
 
         $q = self::query();
 
-        if($workspace) 
+        if($workspace)
             $q->where('workspace_id', $workspace->id);
 
         if ($request->q)
@@ -291,8 +291,8 @@ class Campaign extends Model
             $q->where('state', $request->active);
 
         $sort = ($request->sortDesc == 'true') ? 'DESC' : 'ASC';
-        
-        if($request->sortBy) 
+
+        if($request->sortBy)
             $q->orderBy($request->sortBy, $sort);
         else
             $q->orderBy('created_at', 'DESC');
@@ -300,21 +300,23 @@ class Campaign extends Model
         return $q->paginate($request->paginate);
     }
 
-    
-    protected function saveConfigGeneral($data, $currGeneralConfig, $campaign_id = NULL) {  
+
+    protected function saveConfigGeneral($data, $currGeneralConfig, $campaign_id = NULL, $initializeStages = true) {
         ['value' => $stage_value] = $data;
 
         $arrayData = ['stage_content', 'stage_postulate', 'stage_votation'];
         $arrayStages = [];
         $initFlag = false;
 
-        foreach($stage_value as $value) {
-            $currKey = $arrayData[$value];
+        if ($initializeStages) {
+            foreach($stage_value as $value) {
+                $currKey = $arrayData[$value];
 
-            if(!$initFlag) {
-                $initFlag = true;
-                $arrayStages[$currKey] = true;
-            } else $arrayStages[$currKey] = false;
+                if(!$initFlag) {
+                    $initFlag = true;
+                    $arrayStages[$currKey] = true;
+                } else $arrayStages[$currKey] = false;
+            }
         }
 
         $stagesAttr = array_merge(['stage_id' => $data['id']], $arrayStages);
@@ -339,7 +341,7 @@ class Campaign extends Model
             $data_config['color'] = $data_config['color'] ?? NULL;
 
             $data_config = Arr::except($data_config, ['id']);
-            
+
             // info(['$data_config' => $data_config]);
             $campaign = self::find($campaign_id);
             $campaign->update($data_config);
@@ -347,7 +349,7 @@ class Campaign extends Model
             CampaignModules::saveModules($campaign, $currGeneralConfig['modules']);
 
             return $campaign;
-        
+
         }else {
             $campaign = self::create($data_config);
             CampaignModules::saveModules($campaign, $currGeneralConfig['modules']);
@@ -397,7 +399,7 @@ class Campaign extends Model
 
         $isequal = ($operator === '=');
         $calcdate = date( $isequal ? 'Y-m' : 'Y-m-d', strtotime("-$value months"));
-    
+
         return $calcdate;
     }
 
@@ -408,10 +410,10 @@ class Campaign extends Model
         switch($condition) {
             case 0: $conditionState = ($in_user_date >= $calcdate); break;
             case 1: $conditionState = ($in_user_date <= $calcdate); break;
-            default: 
+            default:
                 $in_user_date = date('Y-m', strtotime($in_user_date));
-                $conditionState = ($in_user_date == $calcdate); 
-            break; 
+                $conditionState = ($in_user_date == $calcdate);
+            break;
         }
 
         return $conditionState;
@@ -420,12 +422,12 @@ class Campaign extends Model
     protected function checkRequirementCampaign($requirement, $user_fecha, $user_criterios = [], $user_criterios_values = []) {
         $requirement_state = false;
 
-        foreach($requirement as $key => [  
+        foreach($requirement as $key => [
                                             'criterio_id' => $criterio_id,
                                             'condition' => $condition,
-                                            'value'  => $value 
+                                            'value'  => $value
                                          ]) {
-        
+
             // si la condicion es NULL y el value es NULL : viene con 'criterio_id'
             if (is_null($condition) && is_null($value)) {
                 $requirement_state = in_array($criterio_id, $user_criterios);
@@ -439,7 +441,7 @@ class Campaign extends Model
                 $calcdate = self::calc_date($condition, $value);
                 $requirement_state = self::check_date($condition, $calcdate, $user_fecha->value_date);
             }
-            // Si al menos 1 requisito no se cumple no debería ver la camapaña 
+            // Si al menos 1 requisito no se cumple no debería ver la camapaña
             if(!$requirement_state){
                 return $requirement_state;
             }
@@ -489,7 +491,7 @@ class Campaign extends Model
 
                     $state_postulates = self::checkRequirementCampaign($temp_requirement_postulates, $user_fecha, $user_criterios, $user_criterios_values);
 
-                    // si cumple 
+                    // si cumple
                     if($state_postulates) {
                         $process_campaigns[] = $campaign->id;
                         continue;
@@ -499,7 +501,7 @@ class Campaign extends Model
                 // verificamos 'requirement_voters' originalmente
                 $state_voters = self::checkRequirementCampaign($campaign->requirement_voters, $user_fecha, $user_criterios, $user_criterios_values);
 
-                // si cumple 
+                // si cumple
                 if($state_voters) {
                     $process_campaigns[] = $campaign->id;
                 }
@@ -531,5 +533,5 @@ class Campaign extends Model
 
         return ($voters_count > 0 && $voters_count_criterio > 0);
     }
-    
+
 }

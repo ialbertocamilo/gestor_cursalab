@@ -22,6 +22,7 @@ import DefaultTextArea from "./components/globals/DefaultTextArea";
 import DefaultFilter from './components/globals/DefaultFilter'
 import DefaultModalSection from "./components/globals/DefaultModalSection";
 import DefaultModalSectionExpand from "./components/globals/DefaultModalSectionExpand";
+import DefaultSimpleSection from "./components/globals/DefaultSimpleSection";
 import DefaultSection from "./components/globals/DefaultSection";
 import DefaultInfoTooltip from "./components/globals/DefaultInfoTooltip";
 import DefaultInfoTooltipForm from "./components/globals/DefaultInfoTooltipForm";
@@ -39,11 +40,13 @@ import DefaultErrors from "./components/globals/DefaultErrors"
 import DefaultBreadcrumbs from "./components/globals/DefaultBreadcrumbs";
 import DefaultSimpleBreadcrumbs from "./components/globals/DefaultSimpleBreadcrumbs";
 import DefaultSimpleMessageAlert from "./components/globals/DefaultSimpleMessageAlert";
+import DefaultButtonModalSteps from "./components/globals/DefaultButtonModalSteps";
+import DefaultDropzoneCrop from "./components/globals/DefaultDropzoneCrop";
 
 export default {
     components: {
         DefaultSelectOrUploadMultimediaDimension,
-        
+
         DefaultTable,
         DefaultSelect,
         DefaultInput,
@@ -65,6 +68,7 @@ export default {
         DefaultFilter,
         DefaultModalSection,
         DefaultModalSectionExpand,
+        DefaultSimpleSection,
         DefaultSection,
         DefaultInfoTooltip,
         DefaultInfoTooltipForm,
@@ -85,5 +89,7 @@ export default {
         DefaultSimpleBreadcrumbs,
 
         DefaultSimpleMessageAlert,
+        DefaultButtonModalSteps,
+        DefaultDropzoneCrop
     },
 }

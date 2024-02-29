@@ -9,7 +9,7 @@ class Poll extends BaseModel
     protected $table = 'polls';
 
     protected $fillable = [
-        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id', 'position'
+        'type_id', 'anonima', 'titulo', 'imagen', 'active', 'workspace_id', 'position', 'platform_id'
     ];
 
     /*
@@ -34,6 +34,14 @@ class Poll extends BaseModel
         return $this->belongsToMany(Course::class);
     }
 
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
+
     /*
 
         Methods
@@ -52,6 +60,7 @@ class Poll extends BaseModel
         $workspace = $session['workspace'];
 
         $query = self::withCount('questions')
+            ->FilterByPlatform()
             ->where('workspace_id', $workspace->id);
 
         if ($request->q)
@@ -270,7 +279,16 @@ class Poll extends BaseModel
         //     return [];
         // }
     }
+    protected function loadPollsByType($type){
+        $workspace = get_current_workspace();
+        $polls = Poll::where('active', 1)
+            ->whereRelation('type','code',$type)
+            ->with('type:id,code')
+            ->where('workspace_id', $workspace->id)
+            ->get();
 
+        return $polls;
+    }
 
     protected function updateSummariesAfterCompletingPoll($course, $user)
     {

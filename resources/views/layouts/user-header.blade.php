@@ -19,6 +19,35 @@
 
         <div class="d-flex">
 
+
+            @if(auth()->user()->isAn('induccion') || auth()->user()->isAn('super-user'))
+            <div class="btn-group">
+                <button class="d-flex align-items-center btn btn-outline-primary dropdown-toggle"
+                        type="button" data-toggle="dropdown" aria-expanded="false">
+                    <div class="btn_switch_platform">
+                        <i class="mdi mdi-swap-horizontal" aria-hidden="true"></i>
+                        <span class="text">Cambiar a:</span>
+                    </div>
+                </button>
+                <div class="dropdown-menu dropdown-header-menu shadow-md header-menu-session" style="width: fit-content">
+
+                    <button class="dropdown-item py-2 dropdown-item-custom text-body" type="button" onclick="switchPlatform('capacitacion')">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-shield-alt"></span>
+                        </div>
+                        <span>Gestiona capacitación</span>
+                    </button>
+                    <button class="dropdown-item py-2 dropdown-item-custom text-body" type="button" onclick="switchPlatform('induccion')">
+                        <div class="dropdown-icon-width">
+                            <span class="fas fa-th-large"></span>
+                        </div>
+                        <span>Gestiona inducción</span>
+                    </button>
+
+                </div>
+            </div>
+            @endif
+
             <div class="btn-group">
                 <button class="d-flex align-items-center btn btn-unset dropdown-toggle"
                         type="button" data-toggle="dropdown" aria-expanded="false">
@@ -58,7 +87,7 @@
                         </div>
                         <span>Preguntas Frecuentes</span>
                     </a>
-                    
+
                     <hr>
 
                     @endif

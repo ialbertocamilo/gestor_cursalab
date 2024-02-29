@@ -45,6 +45,8 @@ Vue.use(VueNotification, {
     }
 });
 import * as VueGoogleMaps from 'vue2-google-maps'
+// test: AIzaSyAutlRxqIv1gr3J3RcPdKOfprDRluJdmNg
+// prod: AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE
 Vue.use(VueGoogleMaps , {
     load: {
         key: 'AIzaSyBnS1vTLtRnpAH0H64msTG-I4OeEZcVNxE',
@@ -232,6 +234,12 @@ Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesLi
 
 Vue.component("guest-layout", require("./layouts/Guest/GuestListPage.vue"));
 
+// Inducción
+Vue.component("processes-layout", require("./layouts/Processes/ProcessesList.vue"));
+Vue.component("processes-assistants-layout", require("./layouts/Processes/Assistants/AssistantsList.vue"));
+Vue.component("stages-layout", require("./layouts/Stages/StagesList.vue"));
+
+
 
 /*----*/
 const app = new Vue({
@@ -284,6 +292,7 @@ const app = new Vue({
             const vue = this
 
             // Notify user that report is ready to donwload
+
             if (e.success) {
 
                 this.$toast.warning({
@@ -351,16 +360,6 @@ const app = new Vue({
             }
 
         },
-        // downloadReport(url, name) {
-        //     try {
-        //         FileSaver.saveAs(url, name)
-
-        //     } catch (error) {
-        //         console.log(error)
-
-        //     }
-        // },
-
         downloadReport(url, name) {
             try {
                 // Realizar una solicitud para obtener el archivo desde la URL

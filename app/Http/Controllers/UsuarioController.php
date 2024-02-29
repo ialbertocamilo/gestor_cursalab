@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserNotification;
 use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\User;
@@ -78,7 +79,8 @@ class UsuarioController extends Controller
             $workspace = session('workspace');
             $workspace['logo'] = FileService::generateUrl($workspace['logo'] ?? '');
             $roles = AssignedRole::getUserAssignedRoles($user->id);
-            $menus = Menu::getMenuByUser($user);
+            $platform = session('platform');
+            $menus = Menu::getMenuByUser($user, $platform);
             return [
                 'user' => [
                     'id' => $user->id,
@@ -169,14 +171,19 @@ class UsuarioController extends Controller
 
         $criteria_template = Criterion::setCriterionNameByCriterionTitle($criteria_template);
 
-        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspace->id);
-        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspace->id, $criteriaIds);
-        $usersWithEmptyCriteria = count($users);
         return $this->success([
             'sub_workspaces' => $sub_workspaces,
             'criteria_workspace' => $criteria_workspace,
-            'criteria_template' => $criteria_template,
-            'users_with_empty_criteria' => $usersWithEmptyCriteria
+            'criteria_template' => $criteria_template
+        ]);
+    }
+
+    public function countUsersWithEmptyCriteria() {
+
+        return $this->success([
+            'users_with_empty_criteria' => Criterion::countUsersWithEmptyCriteria(
+                get_current_workspace()->id
+            )
         ]);
     }
 
@@ -272,7 +279,7 @@ class UsuarioController extends Controller
             $national_occupations_catalog = NationalOccupationCatalog::select(DB::raw("CONCAT(code,' - ',name) as name"),'id')->get();
         }
         $response = compact('criteria','has_DC3_functionality','national_occupations_catalog','criterion_position_id');
-        
+
         return $compactResponse ? $response : $this->success($response);
     }
 
@@ -424,6 +431,13 @@ class UsuarioController extends Controller
 
             SummaryCourse::updateCourseRestartsCount($topic->course_id, $admin->id, $user->id);
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
+
             return $this->success(['msg' => 'Reinicio por tema exitoso']);
         }
 
@@ -447,6 +461,13 @@ class UsuarioController extends Controller
             $summary_topics->increment('restarts', 1, ['attempts' => 0, 'restarter_id' => $admin->id]);
 
             $course->increment('restarts', 1, ['restarter_id' => $admin->id]);
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                [$user->id],
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $course->name ]
+            );
 
             return $this->success(['msg' => 'Reinicio por curso exitoso']);
         }
@@ -897,6 +918,13 @@ class UsuarioController extends Controller
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el curso $curso->name.";
 
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::COURSE_ATTEMPTS_RESET,
+                [ 'courseName' => $curso->name ]
+            );
+
         } else {
 
             $topic = Posteo::where('id', $topicId)->first();
@@ -904,6 +932,13 @@ class UsuarioController extends Controller
                 $topicId, $admin['id'], $users
             );
             $msg = "Se reiniciaron los intentos de " . $usersCount . " usuario(s) para el tema $topic->name.";
+
+            UserNotification::createNotifications(
+                get_current_workspace()->id,
+                collect($users)->pluck('user_id')->toArray(),
+                UserNotification::TOPIC_ATTEMPTS_RESET,
+                [ 'topicName' => $topic->name ]
+            );
         }
 
         return response()->json([

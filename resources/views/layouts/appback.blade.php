@@ -65,7 +65,7 @@ if (isset($fullScreen)) {
         <div class="d-flex align-items-stretch bg-red text-center">
 
             <div class="col text-center">
-                ¡Tienes un pago vencido! En {{ $customer->getDaysToCuttoff() }} días tu plataforma se suspenderá. Comunícate con nuestro equipo para regularizar tus pagos.
+                ¡Tienes un pago vencido! Fecha de corte programado {{ $customer->platform_cutoff_date?->diffForHumans() ?? '--' }}. Comunícate con nuestro equipo para regularizar tus pagos.
             </div>
 
         </div>
@@ -221,7 +221,7 @@ if (isset($fullScreen)) {
                                             </div>
                                         </div>
                                     @endfor
-                                   
+
                                 </div>
                             </div>
                         </div>
@@ -329,8 +329,8 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.2391-' . date('Y-W-d-H')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=3.2391-' . date('Y-W-m')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.2393-' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.2393-' . date('Y-W')) }}"></script>
 
     <script>
         $(document).ready(function () {
@@ -404,6 +404,25 @@ if (isset($fullScreen)) {
         // });
 
         $('.collapse').collapse()
+    </script>
+    <script>
+        function switchPlatform( platform ) {
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "post",
+                url: "/switch_platform",
+                data: { "platform": platform },
+                dataType: "json",
+                success: function (response) {
+                    if(response.data.platform == 'induccion')
+                        window.location = '/procesos'
+                    else
+                        window.location = '/'
+                }
+            });
+        }
     </script>
     <style>
         .list-unstyled {

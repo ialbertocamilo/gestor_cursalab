@@ -5,7 +5,7 @@
             <template v-slot:card-title>
                 <div class="mt-2">
                     <v-card-title class="py-0 d-flex justify-center">
-                        Gestión de Tags
+                        Gestión de Etiquetas
                     </v-card-title>
                     <div style="position: absolute;right: 8px !important;top: 0 !important;">
                         <v-icon color="black"  @click="closeModal"> mdi-close </v-icon>
@@ -18,7 +18,7 @@
                         <v-col cols="12">
                             <DefaultInput
                                 label="Nuevo Tag"
-                                placeholder="Escribe un nuevo Tag"
+                                placeholder="Escribe una nueva etiqueta"
                                 v-model="resource.name"
                                 :rules="rules.name"
                                 show-required
@@ -29,7 +29,7 @@
                         <v-col cols="12">
                             <DefaultTextArea
                                 dense
-                                label="Descripción del tag(opcional)"
+                                label="Descripción de la etiqueta(opcional)"
                                 placeholder="Descripción"
                                 v-model="resource.description"
                                 :rows="4"
@@ -38,7 +38,7 @@
                             />
                         </v-col>
                         <v-col cols="12">
-                            <p class="label-type-tag">Selecciona el tipo de tag a crear</p>
+                            <p class="label-type-tag">Selecciona el tipo de etiqueta a crear</p>
                             <v-radio-group
                                 v-model="resource.type"
                                 row
@@ -63,7 +63,7 @@
                             <DefaultSelect
                                 v-model="filter.type"
                                 :items="types"
-                                label="Gestionar tags realizados previamente"
+                                label="Gestionar etiquetas realizadas previamente"
                                 item-text="label"
                                 item-value="value"
                                 @onChange="getData"
@@ -91,7 +91,7 @@
                                         </v-list-item-content>
 
                                         <v-list-item-action>
-                                            <v-btn icon @click="openFormModal(modalDeleteOptions,tag,null,'Eliminar tag')">
+                                            <v-btn icon @click="openFormModal(modalDeleteOptions,tag,null,'Eliminar etiqueta')">
                                                 <v-icon color="grey lighten-1">mdi-delete</v-icon>
                                             </v-btn>
                                         </v-list-item-action>
@@ -171,7 +171,7 @@ export default {
                 return;
             }
             if(!vue.resource.type){
-                vue.showAlert('Es necesario elegir un tipo de tag.','warning');
+                vue.showAlert('Es necesario elegir un tipo de etiqueta.','warning');
                 return;
             }
             const validateForm = vue.validateForm('tagForm')
@@ -183,7 +183,7 @@ export default {
                     .then(({ data }) => {
                         vue.resetValidation()
                         const tag = data.data.tag;
-                        vue.showAlert('Tag creado correctamente')
+                        vue.showAlert('Etiqueta creada correctamente')
                         vue.$emit('onConfirm',tag)
                     }).catch((error) => {
                         if (error && error.errors) {

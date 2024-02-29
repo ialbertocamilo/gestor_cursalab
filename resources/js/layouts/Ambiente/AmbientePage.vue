@@ -21,82 +21,82 @@
                 <v-tab-item value="tab-1" :reverse-transition="false" :transition="false">
                     <v-card flat>
                          <v-form ref="gestorForm">
-                            
+
                             <v-row class="mt-4">
                                 <v-col cols="12">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.link_genially"
-                                        clearable 
-                                        label="Link Genially" 
+                                        clearable
+                                        label="Link Genially"
                                     />
                                 </v-col>
                                 <!-- <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.color_primario"
-                                        type="color" 
-                                        clearable 
-                                        label="Color primario" 
+                                        type="color"
+                                        clearable
+                                        label="Color primario"
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.color_secundario"
-                                        type="color" 
-                                        clearable 
-                                        label="Color secundario" 
+                                        type="color"
+                                        clearable
+                                        label="Color secundario"
                                     />
                                 </v-col> -->
 
                                <!--  <v-col cols="3">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.color_primario_texto"
-                                        type="color" 
-                                        clearable 
-                                        label="Color primario texto" 
+                                        type="color"
+                                        clearable
+                                        label="Color primario texto"
                                     />
                                 </v-col>
                                 <v-col cols="3">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.color_secundario_texto"
-                                        type="color" 
-                                        clearable 
-                                        label="Color secundario texto" 
+                                        type="color"
+                                        clearable
+                                        label="Color secundario texto"
                                     />
                                 </v-col> -->
 
 
                                 <v-col cols="6">
-                                    <DefaultInput 
-                                        v-model="resource.titulo" 
-                                        clearable 
-                                        label="Título de la página" 
+                                    <DefaultInput
+                                        v-model="resource.titulo"
+                                        clearable
+                                        label="Título de la página"
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.titulo_login"
-                                        clearable 
-                                        label="Título del login" 
+                                        clearable
+                                        label="Título del login"
                                     />
                                 </v-col>
                                <!--  <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.link_pbi"
-                                        clearable 
-                                        label="Link - Power BI" 
+                                        clearable
+                                        label="Link - Power BI"
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.url_app_web"
-                                        clearable 
-                                        label="URL App Web" 
+                                        clearable
+                                        label="URL App Web"
                                     />
                                 </v-col> -->
 
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputFondo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputFondo"
                                         v-model="resource.fondo"
                                         label="Tamaño máximo (1920x1280 px)"
                                         label-button="Insertar fondo"
@@ -105,8 +105,8 @@
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputLogo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputLogo"
                                         v-model="resource.logo"
                                         label="Imagen (560x224 px)"
                                         label-button="Insertar logo"
@@ -116,8 +116,8 @@
                                 </v-col>
 
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputIcono" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputIcono"
                                         v-model="resource.icono"
                                         label="Tamaño máximo (32x32 px)"
                                         label-button="Insertar icono"
@@ -126,8 +126,8 @@
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputLogoEmpresa" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputLogoEmpresa"
                                         v-model="resource.logo_empresa"
                                         label="Imagen (400x400 px)"
                                         label-button="Insertar isotipo empresa"
@@ -142,30 +142,30 @@
                 <v-tab-item value="tab-2" :reverse-transition="false" :transition="false">
                     <v-card flat>
                         <v-form ref="applicationForm">
-                            
+
                             <DefaultErrors :errors="errors"/>
 
                             <v-row v-if="type == 'general'">
                                 <v-col cols="12" class="pb-0 mt-4">
-                                    <h5 class="text-primary-sub"> 
+                                    <h5 class="text-primary-sub">
                                         <i class="fas fa-sign-in-alt"></i> Login
                                     </h5>
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultInput 
-                                        v-model="resource.titulo_login_app" 
-                                        clearable 
-                                        class="mt-3" 
-                                        label="Título del login de la aplicación" 
+                                    <DefaultInput
+                                        v-model="resource.titulo_login_app"
+                                        clearable
+                                        class="mt-3"
+                                        label="Título del login de la aplicación"
                                     />
                                 </v-col>
                                 <v-col cols="6">
                                     <v-row>
                                         <v-col cols="6">
-                                            <DefaultInput 
-                                                v-model="resource.form_login_transparency" 
+                                            <DefaultInput
+                                                v-model="resource.form_login_transparency"
                                                 type="number"
-                                                label="Opacidad del formulario" 
+                                                label="Opacidad del formulario"
                                             />
                                         </v-col>
                                         <v-col cols="6">
@@ -173,30 +173,30 @@
                                                 <span class="mb-1">Posición del formulario</span>
                                                 <div class="d-flex justify-content-between">
                                                     <!-- {{ resource.form_login_position }} -->
-                                                <v-btn 
-                                                    small 
-                                                    color="primary" 
-                                                    :text="!(resource.form_login_position == 'start')" 
+                                                <v-btn
+                                                    small
+                                                    color="primary"
+                                                    :text="!(resource.form_login_position == 'start')"
                                                     @click="resource.form_login_position = 'start'">
                                                         <v-icon>
                                                             mdi-format-align-left
                                                         </v-icon>
                                                     </v-btn>
-                                                    
-                                                    <v-btn 
-                                                        small 
-                                                        color="primary" 
-                                                        :text="!(resource.form_login_position == 'center')" 
+
+                                                    <v-btn
+                                                        small
+                                                        color="primary"
+                                                        :text="!(resource.form_login_position == 'center')"
                                                         @click="resource.form_login_position = 'center'">
                                                         <v-icon>
                                                             mdi-format-align-center
-                                                        </v-icon> 
+                                                        </v-icon>
                                                     </v-btn>
 
-                                                    <v-btn 
-                                                        small 
-                                                        color="primary" 
-                                                        :text="!(resource.form_login_position == 'end')" 
+                                                    <v-btn
+                                                        small
+                                                        color="primary"
+                                                        :text="!(resource.form_login_position == 'end')"
                                                         @click="resource.form_login_position = 'end'">
                                                         <v-icon>
                                                             mdi-format-align-right
@@ -208,44 +208,44 @@
                                     </v-row>
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultInput 
+                                    <DefaultInput
                                         v-model="resource.subtitulo_login_app"
-                                        clearable 
-                                        label="Subtítulo del login de la aplicación" 
+                                        clearable
+                                        label="Subtítulo del login de la aplicación"
                                         />
                                 </v-col>
                                 <v-col cols="6" class="pt-0">
                                     <v-row>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_primario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color primario" 
+                                                type="color"
+                                                clearable
+                                                label="Color primario"
                                             />
                                         </v-col>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_secundario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color secundario" 
+                                                type="color"
+                                                clearable
+                                                label="Color secundario"
                                             />
                                         </v-col>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_terciario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color terciario" 
+                                                type="color"
+                                                clearable
+                                                label="Color terciario"
                                             />
                                         </v-col>
                                     </v-row>
                                 </v-col>
-                                
+
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputFondoApp" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputFondoApp"
                                         v-model="resource.fondo_app"
                                         label="Tamaño máximo (1920x1280 px)"
                                         label-button="Insertar fondo de aplicación"
@@ -255,8 +255,8 @@
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputFondoApp" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputFondoApp"
                                         v-model="resource.fondo_invitados_app"
                                         label="Tamaño máximo (1920x1280 px)"
                                         label-button="Insertar fondo de sección de invitados"
@@ -266,8 +266,8 @@
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputLogoApp" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputLogoApp"
                                         v-model="resource.logo_app"
                                         label="Imagen (560x224 px)"
                                         label-button="Logo del login"
@@ -278,8 +278,8 @@
                                 </v-col>
 
                                 <!-- <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputMaleLogo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputMaleLogo"
                                         v-model="resource.male_logo"
                                         label="Tamaño máximo (120x120 px)"
                                         label-button="Insertar icono colaborador masculino"
@@ -288,8 +288,8 @@
                                     />
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputFemaleLogo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputFemaleLogo"
                                         v-model="resource.female_logo"
                                         label="Imagen (120x120 px)"
                                         label-button="Insertar icono colaborador femenino"
@@ -300,34 +300,34 @@
                             </v-row>
                             <v-row v-else>
                                 <v-col cols="12" class="pb-0 mt-4">
-                                    <h5 class="text-primary-sub"> 
+                                    <h5 class="text-primary-sub">
                                         <i class="mdi mdi-format-color-fill"></i> Colores
                                     </h5>
                                 </v-col>
                                 <v-col cols="12" class="pt-0">
                                     <v-row>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_primario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color primario" 
+                                                type="color"
+                                                clearable
+                                                label="Color primario"
                                             />
                                         </v-col>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_secundario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color secundario" 
+                                                type="color"
+                                                clearable
+                                                label="Color secundario"
                                             />
                                         </v-col>
                                         <v-col cols="4">
-                                            <DefaultInput 
+                                            <DefaultInput
                                                 v-model="resource.color_terciario_app"
-                                                type="color" 
-                                                clearable 
-                                                label="Color terciario" 
+                                                type="color"
+                                                clearable
+                                                label="Color terciario"
                                             />
                                         </v-col>
                                     </v-row>
@@ -340,8 +340,8 @@
                                     </h5>
                                 </v-col>
                                 <v-col cols="6">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputLogoCursalab" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputLogoCursalab"
                                         v-model="resource.logo_cursalab"
                                         label="Imagen (560x224 px)"
                                         label-button="Logo cursalab"
@@ -355,40 +355,40 @@
                                         <p class="mb-1 mr-2">Posición del logo Cursalab</p>
                                         <div class="d-flex justify-content-between">
                                             <!-- {{ resource.logo_cursalab_position }} -->
-                                            <v-btn 
-                                                small 
-                                                color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'top-left')" 
+                                            <v-btn
+                                                small
+                                                color="primary"
+                                                :text="!(resource.logo_cursalab_position == 'top-left')"
                                                 @click="resource.logo_cursalab_position = 'top-left'">
                                                 <v-icon>
                                                     mdi-arrow-top-left-bold-box-outline
                                                 </v-icon>
                                             </v-btn>
-                                            
-                                            <v-btn 
-                                                small 
+
+                                            <v-btn
+                                                small
                                                 color="primary"
-                                                :text="!(resource.logo_cursalab_position == 'top-right')" 
+                                                :text="!(resource.logo_cursalab_position == 'top-right')"
                                                 @click="resource.logo_cursalab_position = 'top-right'">
                                                 <v-icon>
                                                     mdi-arrow-top-right-bold-box-outline
-                                                </v-icon> 
+                                                </v-icon>
                                             </v-btn>
 
-                                            <v-btn 
-                                                small 
-                                                color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'bottom-left')" 
+                                            <v-btn
+                                                small
+                                                color="primary"
+                                                :text="!(resource.logo_cursalab_position == 'bottom-left')"
                                                 @click="resource.logo_cursalab_position = 'bottom-left'">
                                                 <v-icon>
                                                     mdi-arrow-bottom-left-bold-box-outline
                                                 </v-icon>
                                             </v-btn>
 
-                                            <v-btn 
-                                                small 
-                                                color="primary" 
-                                                :text="!(resource.logo_cursalab_position == 'bottom-right')" 
+                                            <v-btn
+                                                small
+                                                color="primary"
+                                                :text="!(resource.logo_cursalab_position == 'bottom-right')"
                                                 @click="resource.logo_cursalab_position = 'bottom-right'">
                                                 <v-icon>
                                                     mdi-arrow-bottom-right-bold-box-outline
@@ -404,17 +404,17 @@
                                     </div>
                                     <hr>
                                     <div class="d-flex align-items-center">
-                                         <DefaultInput 
-                                            v-model="resource.template" 
-                                            clearable 
-                                            class="mt-3" 
-                                            placeholder="template-default" 
-                                            label="Código de plantilla" 
+                                         <DefaultInput
+                                            v-model="resource.template"
+                                            clearable
+                                            class="mt-3"
+                                            placeholder="template-default"
+                                            label="Código de plantilla"
                                         />
                                     </div>
                                     <hr>
                                     <div class="d-flex align-items-center">
-                                        <span class="mr-3">Habilitar validación de identidad usuarios (documento-documento)</span>
+                                        <span class="mr-3">Habilita el cambio de contraseña después de ingresar el documento de identidad o identificador.</span>
                                         <div>
                                             <DefaultToggle class="mt-0" v-model="resource.identity_validation_enabled" no-label dense/>
                                         </div>
@@ -436,9 +436,9 @@
                                     </h5>
                                 </v-col>
                                 <v-col cols="4">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputCompletedCoursesLogo" 
-                                        v-model="resource.completed_courses_logo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputCompletedCoursesLogo"
+                                        v-model="resource.completed_courses_logo"
                                         label="Tamaño máximo (120x120 px)"
                                         label-button="Icono para cursos completados"
                                         :file-types="['image']"
@@ -446,9 +446,9 @@
                                     />
                                 </v-col>
                                 <v-col cols="4">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputEnrolledCoursesLogo" 
-                                        v-model="resource.enrolled_courses_logo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputEnrolledCoursesLogo"
+                                        v-model="resource.enrolled_courses_logo"
                                         label="Tamaño máximo (120x120 px)"
                                         label-button="Icono para cursos inscritos"
                                         :file-types="['image']"
@@ -456,9 +456,9 @@
                                     />
                                 </v-col>
                                 <v-col cols="4">
-                                    <DefaultSelectOrUploadMultimedia 
-                                        ref="inputDiplomasLogo" 
-                                        v-model="resource.diplomas_logo" 
+                                    <DefaultSelectOrUploadMultimedia
+                                        ref="inputDiplomasLogo"
+                                        v-model="resource.diplomas_logo"
                                         label="Tamaño máximo (120x120 px)"
                                         label-button="Icono para diplomas"
                                         :file-types="['image']"
@@ -490,7 +490,7 @@ const fields = [
     'titulo', 'titulo_login',
     'fondo', 'logo', 'icono', 'logo_empresa', 'template',
     //app
-    'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
+    'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position',
     'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app','fondo_invitados_app' ,'logo_app',
     'male_logo', 'female_logo',
     'logo_cursalab_position','show_blog_btn','logo_cursalab',
@@ -567,7 +567,7 @@ const file_fields = [
             loadData() {
                 const vue = this;
                 const base_url = `${vue.base_endpoint}/edit/${vue.type}`;
-                vue.resource = { 
+                vue.resource = {
                     form_login_position: null,
                     logo_cursalab_position: null
                 };

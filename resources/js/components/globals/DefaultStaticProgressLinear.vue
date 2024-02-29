@@ -1,11 +1,14 @@
 <template>
     <v-progress-linear
         :value="localValue"
-        height="25"
+        :height="height"
         class="custom-static-progress-linear rounded-pill"
         :color="color"
+        :background-color="backgroundColor"
     >
-        <strong>{{ localValue }}</strong>
+        <div class="d-flex justify-content-center" :style="{ 'width': text, 'min-width': '30px' }">
+            <strong class="fstyle">{{ localValue }}</strong>
+        </div>
     </v-progress-linear>
 </template>
 
@@ -17,6 +20,14 @@ export default {
         },
         color: {
             default: 'primary',
+            required: false
+        },
+        backgroundColor: {
+            default: 'primary',
+            required: false
+        },
+        height: {
+            default: 25,
             required: false
         }
     },
@@ -37,3 +48,11 @@ export default {
     },
 }
 </script>
+<style lang="scss">
+.fstyle {
+    font-size: 10px;
+    font-family: "Nunito", sans-serif;
+    font-weight: 400;
+    line-height: 1;
+}
+</style>

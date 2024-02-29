@@ -71,13 +71,14 @@
                 @addDateRange="addDateRange($event)"
             />
 
-            <v-divider class=""/>
+            <v-divider class="" v-if="!showBtnDeleteSegment"/>
 
             <v-col
                 cols="12"
                 md="12"
                 lg="12"
                 class="d-flex justify-content-center"
+                v-if="!showBtnDeleteSegment"
             >
                 <v-btn
                     class="mr-1"
@@ -107,7 +108,8 @@ export default {
         "courseModules",
         'isCourseSegmentation',
         "options",
-        'hideModule'
+        'hideModule',
+        'showBtnDeleteSegment'
     ],
     data() {
         return {

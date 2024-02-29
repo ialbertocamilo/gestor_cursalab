@@ -12,7 +12,56 @@
             <!-- <v-card elevation="0" class="my-1" v-if="TypeOf(fileSelected) === 'object' || fileSelected === null"> -->
             <v-card elevation="0" class="my-1"
                     v-if="(TypeOf(fileSelected) === 'object' && !fileSelected.ext ) || fileSelected === null">
-                <v-card-text>
+                <v-card-text class="p-0" v-if="cropImage">
+                    <div v-if="imageCropped">
+                        <div class="preview_image_cropped" v-if="previewImageCropped">
+                            <div class="bx_img">
+                                <img :src="previewImageCropped">
+                            </div>
+                            <div class="text-center bx_replace_img">
+                                <div @click="removeImage">
+                                    <img src="/img/upload_ree.png">
+                                    <span>Reemplazar imagen</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <cropper
+                            ref="cropper"
+                            class="box-cropper"
+                            @change="change"
+                            :stencil-size="sizeCropp"
+                            :stencil-props="{
+                                handlers: {},
+                                movable: false,
+                                resizable: false,
+                            }"
+                            image-restriction="stencil"
+                            :src="imageCropped" />
+
+                            <div class="text-center mt-1">
+                                <v-btn
+                                    class="mx-1"
+                                    elevation="0"
+                                    color="primary"
+                                    @click="resizeImage"
+                                    style="max-width: min-content"
+                                >
+                                Aplicar
+                                </v-btn>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <DefaultDropzoneCrop
+                            :ref="dropzoneDefault"
+                            :types-allowed="fileTypes"
+                            @onUpload="setMediaPreviewUpload"
+                            @onPreview="setPreviewUpload"
+                        />
+                    </div>
+                </v-card-text>
+                <v-card-text v-else>
                     <DropzoneDefault
                         :ref="dropzoneDefault"
                         :types-allowed="fileTypes"
@@ -47,9 +96,8 @@
         </fieldset>
 
         <transition name="fade" v-if="showButton">
-            <!-- color="primary" -->
             <v-btn class="mt-1 border"  block elevation="0"
-               @click="openSelectPreviewMultimediaModal"
+                   @click="openSelectPreviewMultimediaModal"
             >
                 <v-icon class="mx-2" style="font-size: 0.95em;">fas fa-photo-video</v-icon>
                 {{ labelButton }}
@@ -73,9 +121,11 @@
 <script>
 import DropzoneDefault from "../forms/DropzoneDefault";
 import SelectMultimedia from "../forms/SelectMultimedia";
+import { Cropper } from "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/style.css";
 
 export default {
-    components: {SelectMultimedia, DropzoneDefault},
+    components: {SelectMultimedia, DropzoneDefault, Cropper},
     props: {
         label: {
             type: String,
@@ -113,7 +163,20 @@ export default {
             default: function () {
                 return []
             }
-        }
+        },
+        cropImage: {
+            type: Boolean,
+            default: false
+        },
+        sizeCropp: {
+            type: Object,
+            default: function () {
+                return {
+                    width: 500,
+                    height: 500
+                }
+            }
+        },
     },
     data() {
         return {
@@ -127,6 +190,8 @@ export default {
                 confirmLabel: 'Seleccionar',
                 cancelLabel: 'Cerrar'
             },
+            imageCropped: null,
+            previewImageCropped: null,
         }
     },
     computed: {
@@ -212,6 +277,31 @@ export default {
             let vue = this
             if (vue.$refs.dropzoneDefault)
                 vue.$refs.dropzoneDefault.limpiarArchivo()
+        },
+        removeImage() {
+            let vue = this
+            vue.previewImageCropped = null
+            vue.imageCropped = null
+            vue.removeAllFilesFromDropzone()
+            vue.$emit('removeImage', null)
+        },
+        change({ coordinates, canvas }) {
+			console.log(coordinates);
+		},
+        resizeImage() {
+            let vue = this
+            const result = this.$refs.cropper.getResult();
+            let data_url_canvas = result.canvas.toDataURL(
+                "image/png"
+            );
+            console.log(data_url_canvas);
+            vue.previewImageCropped = data_url_canvas;
+            vue.$emit('croppedImage', data_url_canvas)
+        },
+        setPreviewUpload(file) {
+            let vue = this
+            vue.imageCropped = file;
+            vue.$emit('onPreview', file)
         }
     }
 }
@@ -267,5 +357,52 @@ span.media-tag {
 .content_hover_file .hover_upload .icon_upload {
     margin-bottom: 10px;
     margin-top: 20px;
+}
+
+.box-cropper {
+    border: solid 1px #eee;
+    min-height: 160px;
+    width: 100%;
+}
+.preview_image_cropped {
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .bx_img {
+        max-height: 150px;
+        img {
+            max-width: 100%;
+            height: auto;
+            max-height: inherit;
+        }
+    }
+    .bx_replace_img {
+        display: none;
+        position: absolute;
+        background-color: #000000c2;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    &:hover .bx_replace_img {
+        display: flex;
+        div {
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            img {
+                max-width: 35px;
+                margin-bottom: 4px;
+            }
+        }
+    }
 }
 </style>

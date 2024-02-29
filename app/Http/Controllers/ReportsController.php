@@ -60,7 +60,7 @@ class ReportsController extends Controller
         // Format reports data
 
         foreach ($reports as &$report) {
-            $report['download_url'] = reportsSignedUrl($report['download_url']??'');
+            $report['download_url'] = $report['download_url'] ? reportsSignedUrl($report['download_url']) : '';
             $reportType = $reportsTypes->where('code', $report['report_type'])->first();
             $report['report_type'] = $reportType ? $reportType->name : '';
             $report['filters_descriptions'] = json_decode($report['filters_descriptions']) ?: new \stdClass();

@@ -10,13 +10,13 @@ class Topic extends BaseModel
     protected $fillable = [
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
-        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id',
-        'active', 'active_results', 'position','review_all_duration_media'
+        'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','path_qr',
+        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties'
     ];
 
-    //    protected $casts = [
-    //        'assessable' => 'string'
-    //    ];
+       protected $casts = [
+           'modality_in_person_properties' => 'object'
+       ];
 
     public $defaultRelationships = [
         'type_evaluation_id' => 'evaluation_type',
@@ -47,7 +47,10 @@ class Topic extends BaseModel
     {
         return $this->hasMany(Question::class);
     }
-
+    // public function poll()
+    // {
+    //     return $this->belongsTo(Poll::class,'poll_id');
+    // }
     public function requirement()
     {
         return $this->belongsTo(Topic::class, 'topic_requirement_id');
@@ -86,6 +89,24 @@ class Topic extends BaseModel
         return $this->belongsTo(Taxonomy::class, 'qualification_type_id');
     }
 
+    public function getModalityInPersonPropertiesAttribute($value){
+        if(is_null($value) || $value=='undefined'){
+            $data = [];
+            $data['reference'] = '';
+            $data['geometry'] = '';
+            $data['formatted_address'] = '';
+            $data['url'] = '';
+            $data['ubicacion'] = '';
+            $data['host_id'] = null;
+            $data['cohost_id'] = null;
+            $data['start_date'] = null;
+            $data['start_time'] = null;
+            $data['finish_time'] = null;
+            $data['show_medias_since_start_course'] = 0;
+            return $data;
+        }
+        return json_decode($value);
+    }
     public function countQuestionsByTypeEvaluation($code)
     {
         return $this->questions()
@@ -1273,5 +1294,66 @@ class Topic extends BaseModel
             default:
                 return $value;
         }
+    }
+
+    public function isAccessiblePoll(){
+        $topic = $this;
+        $is_accessible = false;
+        if($topic && isset($topic->modality_in_person_properties->poll_started)){
+            $is_accessible = $topic->modality_in_person_properties->poll_started;
+        }
+        return $is_accessible;
+    }
+
+    public function isAccessibleEvaluation(){
+        $topic = $this;
+        $is_accessible = false;
+        if(isset($topic->modality_in_person_properties->evaluation->status)){
+            $evaluationStatus = $topic->modality_in_person_properties->evaluation->status;
+            $evaluationFinishDate = $topic->modality_in_person_properties->evaluation->date_finish;
+            $is_accessible = $evaluationStatus == 'started';
+            if(Carbon::now()->format('Y-m-d H:i:s') >= $evaluationFinishDate){
+                $is_accessible = false;
+            }
+            if( $evaluationStatus == 'extra-time'){
+                $is_accessible = true;
+            }
+        }
+        return $is_accessible;
+    }
+    protected function validateAvaiableAccount($course,$data,$topic=null,$validate_before_create=false){
+        $is_avaiable = true;
+        if($course->modality->code == 'virtual'){
+
+            $type = Taxonomy::select('id')->where('group','meeting')->where('type','type')->where('code','room')->first();
+            $modality_in_person_properties = $data['modality_in_person_properties'];
+            $start_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['start_time']);
+            $finish_datetime = Carbon::parse($modality_in_person_properties['start_date'].' '.$modality_in_person_properties['finish_time']);
+            $starts_at = $start_datetime->format('Y-m-d H:i:s');
+            $finishes_at = $finish_datetime->format('Y-m-d H:i:s');
+            $meeting = null;
+            // if($validate_before_create){
+            //     Topic::where('starts_at', '<=', $dates['finishes_at'])->where('finishes_at', '>=', $dates['starts_at']);
+            // }
+            if($topic){
+                $meeting = Meeting::where('model_type','App\\Models\\Topic')->where('model_id',$topic->id)->first();
+                if($meeting and !$meeting->datesHaveChanged(compact('starts_at','finishes_at'))){
+                   return true;
+                }
+            }
+            $account = Account::getOneAvailableForMeeting($type, compact('starts_at','finishes_at'),$meeting);
+            $is_avaiable = boolval($account);
+        }
+        return $is_avaiable;
+    }
+    public function isAccessibleMultimedia(){
+        $topic = $this;
+        $avaiable_to_show_resources = $topic->modality_in_person_properties->show_medias_since_start_course;
+        if(!$avaiable_to_show_resources){
+            $current_time = Carbon::now();
+            $datetime = Carbon::parse($topic->modality_in_person_properties->start_date.' '.$topic->modality_in_person_properties->finish_time);
+            $avaiable_to_show_resources = $current_time>=$datetime;
+        }
+        return $avaiable_to_show_resources;
     }
 }

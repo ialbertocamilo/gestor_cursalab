@@ -8,7 +8,7 @@ use App\Models\Media;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\SummaryCourse;
-use App\Models\{ Certificate as Diploma };
+use App\Models\{ Certificate as Diploma, Process, Stage};
 use Carbon\Carbon;
 use File;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class DiplomaController extends Controller
             session(['config' => $data]);
         }
     }
-    
+
     public function show(){
         return view('diplomas.index');
     }
@@ -75,7 +75,7 @@ class DiplomaController extends Controller
 
         $plantilla = Storage::disk('s3')->get($file);
         $plantilla = "data:image/png;base64," . base64_encode($plantilla);
-        
+
         return response()->json(compact('diploma', 'plantilla'));
     }
 
@@ -88,15 +88,56 @@ class DiplomaController extends Controller
 
         $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
 
+        if($status)
+        {
+            $model_id = $request->model_id;
+            $model_type = $request->model_type;
+            if($model_type == 'Process') {
+                $process = Process::where('id', $model_id)->first();
+                if($process) {
+                    $process->certificate_template_id = $diploma?->id;
+                    $process->save();
+                }
+            }
+            else if($model_type == 'Stage') {
+                $stage = Stage::where('id', $model_id)->first();
+                if($stage) {
+                    $stage->certificate_template_id = $status;
+                    $stage->save();
+                }
+            }
+
+        }
+
         return response()->json(['error' => !$status]);
     }
-    
+
     public function save(Request $request)
     {
         $objects = collect($request->info['objects']);
         $background = $request->info['backgroundImage'];
 
         $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects);
+
+        if($status)
+        {
+            $model_id = $request->model_id;
+            $model_type = $request->model_type;
+            if($model_type == 'Process') {
+                $process = Process::where('id', $model_id)->first();
+                if($process) {
+                    $process->certificate_template_id = $status;
+                    $process->save();
+                }
+            }
+            else if($model_type == 'Stage') {
+                $stage = Stage::where('id', $model_id)->first();
+                if($stage) {
+                    $stage->certificate_template_id = $status;
+                    $stage->save();
+                }
+            }
+        }
 
         return response()->json(['error' => !$status]);
     }
@@ -136,7 +177,7 @@ class DiplomaController extends Controller
 
         $c_data = collect($data['objects']);
         $background = $data['backgroundImage'];
-        
+
         $e_statics = $c_data->where('static', true);
         $e_dinamics = $c_data->where('static', false);
 
@@ -184,7 +225,7 @@ class DiplomaController extends Controller
 
                     break;
                     case 'image':
-                          
+
                         $image2 = Diploma::image_create($e_static['src'], $e_static['scaleX'], $e_static['scaleY'], $e_static['width'], $e_static['height']);
 
                         Diploma::imagecopymerge_alpha(
@@ -201,7 +242,7 @@ class DiplomaController extends Controller
                     break;
                 }
             }
-            
+
             $image = Diploma::setDynamicsToImage($image, $e_dinamics, $background);
 
             // //Añadir marca de agua al 10% de la imagen total
@@ -226,7 +267,7 @@ class DiplomaController extends Controller
 
         return response()->json(compact('preview'));
     }
-    
+
 
     public function destroy(Diploma $diploma)
     {
@@ -243,7 +284,7 @@ class DiplomaController extends Controller
     public function downloadCertificate($id_user, $curso_id)
     {
         try {
-            
+
             $data = $this->getDiplomaCursoData($id_user, $curso_id);
             $config = Ambiente::first();
             $download = request()->routeIs('diplomas.download');

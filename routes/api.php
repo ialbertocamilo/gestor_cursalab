@@ -88,6 +88,7 @@ Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 're
 
     Route::prefix('progreso')->group(base_path('routes/app/progreso.php'));
     Route::prefix('cursos')->group(base_path('routes/app/courses.php'));
+    Route::prefix('courses-in-person')->group(base_path('routes/app/course-in-person.php'));
     Route::prefix('temas')->group(base_path('routes/app/topics.php'));
     Route::prefix('/')->group(base_path('routes/app/quizzes.php'));
     Route::prefix('/ranking')->group(base_path('routes/app/ranking.php'));
@@ -110,6 +111,7 @@ Route::group(['middleware' => ['auth:api', 'validated-session'], 'prefix' => 're
     Route::get('reports/user-history/{workspaceId?}/{schoolId?}', [RestReportsUsersController::class, 'fetchUserHistory']);
     Route::get('reports/user-history-filters', [RestReportsUsersController::class, 'fetchUserHistoryFilters']);
     Route::prefix('benefits')->group(base_path('routes/app/benefit.php'));
+    Route::prefix('processes')->group(base_path('routes/app/processes.php'));
 
     Route::post('actualizar_correo', [RestAyudaController::class, 'solicitud_cambio_correo']);
 });

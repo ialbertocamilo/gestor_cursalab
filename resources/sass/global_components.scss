@@ -653,6 +653,26 @@ fieldset.editor {
     }
 }
 
+.breadcrumbs_line.default-breadcrumb {
+    align-items: flex-end;
+    .default-breadcrumb-text {
+        font-size: 15px !important;
+        color: #2A3649;
+    }
+    .v-breadcrumbs__divider {
+        padding-bottom: 7px !important;
+    }
+    .btn_b {
+        // position: absolute;
+        // top: 0;
+        // left: 0;
+        font-size: 11px !important;
+        line-height: 1;
+    }
+    .d-flex.flex-column.position-relative.pt-2:last-child span.default-breadcrumb-text {
+        font-weight: 700 !important;
+    }
+}
 // CHECKLIST ACTIVIDADES
 .default-actividad-error {
     border: 2px #FF5252 solid;

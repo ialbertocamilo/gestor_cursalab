@@ -73,7 +73,7 @@ class Criterion extends BaseModel
 
         return $query->orderBy('created_at', 'desc')->get();
     }
-    
+
     protected function search($request)
     {
         // $criterion_values_id = CriterionValue::whereRelation('workspaces', 'id', $request->workspace_id)->pluck('id')->toArray();
@@ -188,14 +188,14 @@ class Criterion extends BaseModel
                 'name' => $criterion->name,
                 'available' => $criterion_available,
                 'disabled' => $criterion_disabled,
-            ]; 
+            ];
 
             foreach ($custom_pivot_fields as $code => $row) {
 
                 $field_disabled = false;
 
                 $field_available = $workspace ? ($current ? $current->pivot->$code : false) : true;
-                
+
                 if ($criterion->code == 'module') {
 
                     $field_available = true;
@@ -209,7 +209,7 @@ class Criterion extends BaseModel
                     'available' => $field_available,
                     'disabled' => $field_disabled,
                     'text' => $row['type'] == 'text' ? ($current->pivot->$code ?? $criterion->name) : NULL,
-                ]; 
+                ];
             }
         }
 
@@ -233,5 +233,12 @@ class Criterion extends BaseModel
         foreach ($criterionWorkspace as $criterion) {
             $criterion->name = $criterion->pivot->criterion_title ?? $criterion->name;
         }
+    }
+
+    public static function countUsersWithEmptyCriteria($workspaceId) {
+
+        $criteriaIds = SegmentValue::loadWorkspaceSegmentationCriteriaIds($workspaceId);
+        $users =  CriterionValue::findUsersWithIncompleteCriteriaValues($workspaceId, $criteriaIds);
+        return count($users);
     }
 }

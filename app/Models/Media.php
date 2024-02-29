@@ -53,9 +53,9 @@ class Media extends BaseModel
 
         return $workspaces;
     }
-    
 
-    public function announcementsByFile() 
+
+    public function announcementsByFile()
     {
         $announcements = Announcement::select('id', 'nombre as name','active')
                         ->where('imagen', $this->file)
@@ -79,7 +79,7 @@ class Media extends BaseModel
         return $announcements;
     }
 
-    public function vademecumsByFile() 
+    public function vademecumsByFile()
     {
         $vademecums = Vademecum::select('id', 'name', 'category_id')
                                ->where('media_id', $this->id)
@@ -103,7 +103,7 @@ class Media extends BaseModel
         return $vademecums;
     }
 
-    public function videotecasByFile() 
+    public function videotecasByFile()
     {
         $videotecas = Videoteca::select('id', 'title as name')
                               ->where('media_id', $this->id)
@@ -122,7 +122,7 @@ class Media extends BaseModel
         return $videotecas;
     }
 
-    public function schoolsByFile() 
+    public function schoolsByFile()
     {
         $schools = School::select('id', 'name')
                          ->where('imagen', $this->file)
@@ -142,7 +142,7 @@ class Media extends BaseModel
         return $schools;
     }
 
-    public function coursesByFile() 
+    public function coursesByFile()
     {
         $courses = Course::select('id', 'name')->where('imagen', $this->file)
                          ->with('schools:id,name')->get();
@@ -157,14 +157,14 @@ class Media extends BaseModel
                 })->toArray();
 
             } else $course->url = [];
-            
+
             return $course;
         });
- 
+
         return $courses;
     }
 
-    public function topicsByFile() 
+    public function topicsByFile()
     {
         $file = $this->file;
         $topics = Topic::select('id', 'course_id', 'name')
@@ -177,13 +177,13 @@ class Media extends BaseModel
                             $q_course->select('id', 'name');
                         },
                         'course.schools' => function($q_course_school){
-                            $q_course_school->select('id', 'name');   
+                            $q_course_school->select('id', 'name');
                         }
                         ])->get();
 
         $topics = $topics->map(function ($topic) {
             if ($topic->course && $topic->course->schools) {
-                
+
                 $topic->url = $topic->course->schools->map(function ($school) use ($topic) {
                     return url("/escuelas/{$school->id}/cursos/{$topic->course->id}/temas/edit/{$topic->id}");
                 })->toArray();
@@ -220,12 +220,15 @@ class Media extends BaseModel
      * @param bool $return_media
      * @return Media|Application|UrlGenerator|string
      */
-    protected function uploadFile($file, $name = null, bool $return_media = false)
+    protected function uploadFile($file, $name = null, bool $return_media = false, $extension = null)
     {
 
         // Get file values
         // info('Inicia');
-        $ext = $file->getClientOriginalExtension();
+        if($extension)
+            $ext = $extension;
+        else
+            $ext = $file->getClientOriginalExtension();
 
         if (!$name) {
             $namewithextension = $file->getClientOriginalName();
@@ -333,7 +336,30 @@ class Media extends BaseModel
 
         return $path;
     }
+    protected function uploadMediaBase64($name, $path, $base64,$save_in_media=true,$status='public')
+    {
+        $exploded = explode(',', $base64, 2);
+        $s3 = Storage::disk('s3')->put($path, base64_decode($exploded[1]), $status);
+        $size = Storage::disk('s3')->size($path);
 
+        try {
+            $save_size = round(($size / 1024) / 1024);
+        } catch (\Exception $exception) {
+            $save_size = 0;
+        }
+        if(!$save_in_media){
+            return $path;
+        }
+        $media = new Media;
+        $media->title = $name;
+        $media->file = $path;
+        $media->ext = 'jpg';
+        $media->size = $size;
+        $media->workspace_id = session('workspace')['id'] ?? NULL;
+        $media->save();
+
+        return $media;
+    }
     protected function validateStorageByWorkspace($files){
         $workspace = get_current_workspace();
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
@@ -348,7 +374,7 @@ class Media extends BaseModel
         // === workspace storage actual ===
 
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
-        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' && 
+        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' &&
                                 $total_current_storage['size'] <= $total_storage_limit);
         return  $still_has_storage;
     }
@@ -433,7 +459,7 @@ class Media extends BaseModel
         return compact('nombre','find_main_file');
     }
 
-    protected function requestUploadFile($data, $field,$return_media = false)
+    protected function requestUploadFile($data, $field,$return_media = false, $name_file = null, $ext = null)
     {
         if (!empty($data[$field])) {
 
@@ -444,7 +470,7 @@ class Media extends BaseModel
             $file_field = 'file_' . $field;
 
             if (!empty($data[$file_field])) {
-                $path = Media::uploadFile($data[$file_field],null,$return_media);
+                $path = Media::uploadFile($data[$file_field],$name_file,$return_media, $ext);
                 $data[$field] = $path;
             } else {
                 $data[$field] = null;
@@ -472,7 +498,7 @@ class Media extends BaseModel
     protected function requestUploadFileOnly($data, $field)
     {
         $file_field = 'file_' . $field;
-        
+
         if (!empty($data[$file_field]) && is_string($data[$file_field])) {
             $data[$file_field] = $data[$file_field];
         } else {
@@ -662,7 +688,7 @@ class Media extends BaseModel
     }
 
     protected function generateNameFile($name, $ext) {
-        
+
         $name = Str::of($name)->limit(200);
         $str_random = Str::random(15);
         $workspace_id = session('workspace')['id'] ?? NULL;

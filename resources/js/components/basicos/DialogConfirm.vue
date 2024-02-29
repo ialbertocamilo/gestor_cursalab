@@ -10,7 +10,7 @@
         content-class="br-dialog"
         :overlay-opacity="overlay_opacity"
     >
-        <v-card v-if="options" :class="[(options.type_modal == 'upload') ? 'bx_alert_upload' : '', (options.content_modal.upload && options.content_modal.upload.status == 'success') ? 'border_success' : 'border_error']">
+        <v-card v-if="options" :class="[(options.type_modal == 'upload') ? 'bx_alert_upload' : '', (options.type_modal == 'upload' && options.content_modal.upload && options.content_modal.upload.status == 'success') ? 'border_success' : 'border_error']">
             <v-card-title class="default-dialog-title mod_head" v-if="!options.hide_header">
                 <span v-html="options.title_modal ? options.title_modal : title"></span>
                 <v-btn icon :ripple="false" color="white"

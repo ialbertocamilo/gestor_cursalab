@@ -54,7 +54,7 @@ class CursoSearchResource extends JsonResource
 //            : 0;
         $assignedUsers = 1;
 
-
+        $modality_code = $this->modality->code;
         $_course = [
             'id' => $this->id,
             'name' => $this->name,
@@ -93,7 +93,7 @@ class CursoSearchResource extends JsonResource
             ],
 
             'curso_estado' => $this->getCourseStatus(),
-
+            'modality_code' => $modality_code,
             'actualizaciones' => '',
             'is_cursalab_super_user'=> is_cursalab_superuser(),
             'is_super_user'=>auth()->user()->isAn('super-user'),
@@ -111,9 +111,9 @@ class CursoSearchResource extends JsonResource
             $create_project = !isset($this->project->id);
             $edit_project = !$create_project;
             $project_id = isset($this->project->id) ? $this->project->id : 0;
-            $_course['create_project'] = $create_project;
-            $_course['edit_project'] = $edit_project;
-            $_course['project_users'] = ($edit_project && $this->active);
+            $_course['create_project'] = $create_project && $modality_code == 'asynchronous';
+            $_course['edit_project'] = $edit_project && $modality_code == 'asynchronous';
+            $_course['project_users'] = ($edit_project && $this->active) && $modality_code == 'asynchronous';
             $_course['project_users_route'] = route('project_users.list', [$project_id]);
             $_course['project'] = $this->project;
         }

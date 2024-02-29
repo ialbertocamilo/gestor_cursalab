@@ -85,6 +85,9 @@ class PollController extends Controller
         $workspace = $session['workspace'];
         $data['workspace_id'] = $workspace->id;
 
+        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+        $data['platform_id'] = $request['platform_id'] ?? $platform_training?->id;
+
         Poll::create($data);
 
         $msg = 'Encuesta creada correctamente.';

@@ -23,8 +23,14 @@ return [
     'announcements' => [
         'new-announcement' => 'Tienes un nuevo anuncio dentro de la plataforma.'
     ],
+    'meetings' => [
+        'new-meeting' => 'Se ha agendado una nueva sesión'
+    ],
+    'attemtps' => [
+        'course-attempts-reset' => 'Se reiniciaron los intentos para el curso <b>{courseName}</b>',
+        'topic-attempts-reset' => 'Se reiniciaron los intentos para el tema <b>{topicName}</b>'
+    ],
     'default' => [
         'from-push' => '{content}'
     ]
-
 ];

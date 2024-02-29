@@ -72,9 +72,6 @@ export default {
 </script>
 
 <style lang="scss">
-.br-dialog, .br-dialog .v-sheet.v-card{
-    border-radius: 16px !important;
-}
 .bx_close_modal_activity {
     position: absolute;
     right: 10px;

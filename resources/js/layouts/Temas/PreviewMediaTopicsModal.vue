@@ -127,7 +127,9 @@ export default {
     data() {
         return {
             topics: [],
-            currentMedia: '',
+            currentMedia: {
+                id:0
+            },
             currentTime: this.setCurrentTime(),
             isFullscreen: false,
         };
@@ -135,9 +137,9 @@ export default {
     methods: {
         closeModal() {
             let vue = this
-            vue.pauseMedia();
             console.log('onCancel');
             vue.$emit('onCancel')
+            vue.pauseMedia();
         },
         resetValidation() {
             let vue = this
@@ -209,7 +211,9 @@ export default {
         },
         pauseMedia() {
             this.$nextTick(() => {
-                this.currentMedia = null;
+                this.currentMedia = {
+                    id:0
+                };
             });
         }
     }

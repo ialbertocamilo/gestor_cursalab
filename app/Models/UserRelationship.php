@@ -116,6 +116,7 @@ class UserRelationship extends BaseModel
     {
         $direct_segmentation_type = Taxonomy::getFirstData('segment', 'type', 'direct-segmentation');
         $supervise_code_segment = Taxonomy::getFirstData('segment', 'code', 'user-supervise');
+        $segments = [];
 
         foreach ($users as $user) {
             $segment = Segment::firstOrCreate([
@@ -138,7 +139,9 @@ class UserRelationship extends BaseModel
             ];
 
             $segment->values()->sync($values);
+            array_push($segments, $segment);
         }
+        return $segments;
     }
 
     protected function setDataSupervisor($request)

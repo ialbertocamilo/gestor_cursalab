@@ -158,19 +158,6 @@
             <template v-slot:item.images="{ item, header }">
                 <div class="d-flex justify-center ssflex-row my-2 " style="gap: 5px;"
                      v-if="item.images">
-<!--
-                    <span v-for="(row, index) in item.images" :key="index" :title="row.name || 'Logo'"
-                        :style="`
-                            background-image: url(${row.image});
-                            background-position: center;
-                            background-size: cover;
-                            border-radius: 50%;
-                            height: 32px;
-                            width: 32px;
-                        `"
-                        >
-                    </span> -->
-
                     <v-img
                         v-for="(row, index) in item.images.slice(0, 3)"
                         max-height="50"
@@ -402,7 +389,7 @@
                         <button
                             type="button" class="btn btn-md position-relative"
                             :title="action.text"
-                            @click="doAction(action, item)"
+                            @click="item.disabled_btns_actions ? null : doAction(action, item)"
                             v-if="!action.show_condition || (action.show_condition && item[action.show_condition])"
                             :class="{'default-table-disable-action-btn' : action.disable_btn || (action.disable_btn && item[action.disable_btn])}"
                         >
@@ -412,7 +399,7 @@
                                 :content="item[action.count]"
                             >
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
-                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                <br> <span class="table-default-icon-title" v-text="action.text ? action.text : (item.active ? 'Activo' : 'Inactivo')"/>
                             </v-badge>
 
                             <!--
@@ -471,7 +458,7 @@
 
                             <template v-else>
                                 <i :class="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
-                                <br> <span class="table-default-icon-title" v-text="action.text"/>
+                                <br> <span class="table-default-icon-title" v-text="action.text ? action.text : (item.active ? 'Activo' : 'Inactivo')"/>
                             </template>
                         </button>
                         <!-- <span class="badge table_default_badge-notify"
@@ -529,6 +516,60 @@
 
                                 </v-list-item>
                                 <!--                                </v-list-item-group>-->
+                            </v-list>
+                        </v-menu>
+                    </div>
+                </div>
+            </template>
+            <template v-slot:item.actions_extras="{ item, header }">
+                <div class="default-table-actions d-flex justify-center flex-row my-2"
+                     v-if="dataTable.actions_extras && dataTable.actions_extras.length > 0">
+                    <div class="table-default-more-actions"
+                         v-if="dataTable.actions_extras && dataTable.actions_extras.length > 0 && isAvailableMoreActions(item)">
+                        <v-menu
+                            attach
+                            tile
+                            bottom
+                            left
+                            close-on-content-click
+                            close-on-click
+                            class="elevation-0"
+                        >
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                    color="primary"
+                                    icon
+                                    v-bind="attrs"
+                                    v-on="on"
+                                >
+                                    <v-icon v-text="'mdi-dots-horizontal'"/>
+                                </v-btn>
+                            </template>
+
+                            <v-list dense>
+                                <v-list-item
+                                    style="cursor: pointer;"
+                                    v-for="action in dataTable.actions_extras"
+                                    :key="action.text"
+                                    v-if="!action.show_condition || (action.show_condition && item[action.show_condition])"
+                                >
+                                    <v-list-item-content @click="doAction(action, item)">
+
+                                        <v-list-item-title class="d-flex justify-content-start">
+                                            <v-icon color="primary" class="mx-1" small
+                                                    v-text="action.method_name == 'status' ? (item.active ? action.icon : 'far fa-circle')  : action.icon"/>
+
+                                            {{ action.text }}
+
+                                            <template v-if="action.count && item[action.count]">
+                                                &nbsp;<strong>[{{ item[action.count] }}]</strong>
+                                            </template>
+
+                                        </v-list-item-title>
+
+                                    </v-list-item-content>
+
+                                </v-list-item>
                             </v-list>
                         </v-menu>
                     </div>
@@ -1082,6 +1123,27 @@
                     <img :src="item.perfil_speaker" v-if="item.perfil_speaker">
                 </div>
             </template>
+            <template v-slot:item.title_process="{ item, header }">
+                <div v-if="item.edit_inline == true" class="input_edit_process">
+                    <input type="text" v-on:keyup.enter="saveNewProcessInline(item)" v-model="item.title" ref="input_edit_process" placeholder="Escribe el título de tu proceso de inducción">
+                </div>
+                <div v-else>
+                    {{ item.title_process }}
+                </div>
+            </template>
+            <template v-slot:item.progress_process="{ item, header }">
+                <div v-if="item.progress_process == null">
+                    <span class="custom_benefit_type">Pendiente de asignación</span>
+                </div>
+                <div class="bx_progress_linear" v-else>
+                    <DefaultStaticProgressLinear
+                        :text="`${item.progress_process}%`"
+                        color="#25B374"
+                        height="20"
+                        background-color="#E6E6E6"
+                    />
+                </div>
+            </template>
 
             <!-- CUSTOM -->
             <template v-slot:[`item.custom_slot`]="{item}">
@@ -1090,6 +1152,9 @@
         </v-data-table>
         <!--   Custom Paginator -->
 
+        <div class="ps-3 mt-4" v-if="type_table=='process'">
+            <button @click="addNewProcessInline" class="btn_add_new_process_inline">+ Nuevo proceso de inducción</button>
+        </div>
         <section>
             <v-row class="justify-content-end" no-gutters>
                 <v-col cols="4" lg="2" sm="3" class="d-flex justify-content-end">
@@ -1172,6 +1237,10 @@ export default {
         avoid_first_data_load: {
             type: Boolean,
             default: false,
+        },
+        type_table: {
+            type: String,
+            default: ''
         }
     },
     data() {
@@ -1510,7 +1579,29 @@ export default {
 
             return messages.join('<br>');
         },
-
+        addNewProcessInline() {
+            let vue = this;
+            let new_item = {
+                title: '',
+                edit_inline: true,
+                assigned_users: 0,
+                config_completed: false,
+                stages_count: 0,
+                certificate_template_id: null,
+                active: false,
+                disabled_btns_actions: true
+            };
+            vue.rows.push(new_item);
+            this.$nextTick(() => {
+                const editButtonRef = this.$refs.input_edit_process;
+                editButtonRef.focus();
+            });
+        },
+        saveNewProcessInline( item ) {
+            let vue = this
+            item.edit_inline = false
+            vue.$emit('saveNewProcessInline', item)
+        },
         generateImagesNamesList(images) {
             let names = [];
             images.forEach(i => names.push(`<li style="font-size: 12px">${i.name}</li>`))
@@ -1640,4 +1731,18 @@ table .v-tooltip__content.menuable__content__active {
 
 }
 
+.input_edit_process input {
+    border: 1px solid #D9D9D9;
+    width: 100%;
+    max-width: 400px;
+    padding: 6px 10px;
+    border-radius: 5px;
+}
+.input_edit_process input:focus {
+    border: 1px solid #5458ea;
+}
+.btn_add_new_process_inline {
+    font-weight: 700 !important;
+    font-family: "Nunito", sans-serif;
+}
 </style>

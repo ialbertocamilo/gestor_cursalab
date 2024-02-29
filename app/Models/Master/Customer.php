@@ -66,7 +66,7 @@ class Customer extends BaseModel
         $customer = cache('current_customer');
 
         if (!$customer) {
-            
+
             $customer_id = config('app.customer.id');
             $customer = Customer::getCurrentById($customer_id);
 
@@ -104,7 +104,8 @@ class Customer extends BaseModel
 
         if ($this->platform_cutoff_date) {
 
-            $days = $this->platform_cutoff_date->diffInDays(now());
+            // $days = $this->platform_cutoff_date->diffInDays(now(), false);
+            $days = now()->diffInDays($this->platform_cutoff_date, false);
             $days = $days > 0 ? $days : 0;
         }
 

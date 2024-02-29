@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div class="modalAsignacionXDni">
         <v-row>
             <v-col cols="12">
-                <p class="text-h7 mb-0" v-text="description"></p>
+                <p class="text-h7 mb-0 text_default" v-text="description"></p>
             </v-col>
             <v-col class="d-flex justify-content-between" cols="12" md="6" lg="6">
                 <DefaultInput
@@ -136,6 +136,10 @@ export default {
         load_data_default: {
             type: Boolean,
             default: false
+        },
+        list_users_selected: {
+            type: Array,
+            default: []
         }
     },
     data() {
@@ -188,6 +192,12 @@ export default {
                     });
             }, 1600);
         },
+    },
+    mounted: function () {
+        this.$nextTick(function () {
+            let vue = this;
+            vue.usuarios_ok = vue.list_users_selected
+        })
     },
     methods: {
         agregarUsuario(usuario, index) {
@@ -243,75 +253,79 @@ export default {
     }
 }
 </script>
-<style>
-.custom-default-input {
-    border-radius: 6px !important;
-    border: 1px solid #DADAED !important;
-}
+<style lang="scss">
 
-.v-input__control {
-    box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
-}
+.modalAsignacionXDni {
 
-.v-input__slot {
-    background: white !important;
-}
+    .custom-default-input {
+        border-radius: 6px !important;
+        border: 1px solid #DADAED !important;
+    }
 
-.v-text-field__slot > label {
-    color: rgba(51, 61, 93, 0.5) !important;
-}
+    .v-input__control {
+        box-shadow: 0px 4px 4px rgba(165, 166, 246, 0.25);
+    }
 
-.v-icon.v-icon.v-icon--link {
-    color: #796aee !important;
-}
+    .v-input__slot {
+        background: white !important;
+    }
 
-.li-users_ok_error {
-    list-style-type: none;
-}
+    .v-text-field__slot > label {
+        color: rgba(51, 61, 93, 0.5) !important;
+    }
 
-.ul-users {
-    list-style: none;
-    height: 300px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
+    .v-icon.v-icon.v-icon--link {
+        color: #796aee !important;
+    }
 
-.ul-users-error {
-    list-style: none;
-    max-height: 100px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
+    .li-users_ok_error {
+        list-style-type: none;
+    }
 
-.ul_result-users {
-    list-style: none;
-    height: 300px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    width: 100%;
-    padding: 0 !important;
-}
+    .ul-users {
+        list-style: none;
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
 
-.box-result {
-    padding: 10px 5px 3px 0;
-    border: 1.8px solid #EDF1F4;
-}
+    .ul-users-error {
+        list-style: none;
+        max-height: 100px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
 
-.box-usuarios_ok {
-    border-style: solid;
-    padding: 10px 5px 3px 0;
-    border-color: #5458EA;
-    border-width: 0px 1.8px 1.8px 1.8px;
-}
+    .ul_result-users {
+        list-style: none;
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        width: 100%;
+        padding: 0 !important;
+    }
 
-.title-list {
-    padding: 0px 20px;
-    min-height: 60px !important;
-    display: flex;
-    align-items: center;
-    background: #EDF1F4;
-    background-repeat: repeat;
-    border-radius: 3px 3px 0px 0px;
-    color: #333D5D;
+    .box-result {
+        padding: 10px 5px 3px 0;
+        border: 1.8px solid #EDF1F4;
+    }
+
+    .box-usuarios_ok {
+        border-style: solid;
+        padding: 10px 5px 3px 0;
+        border-color: #5458EA;
+        border-width: 0px 1.8px 1.8px 1.8px;
+    }
+
+    .title-list {
+        padding: 0px 20px;
+        min-height: 60px !important;
+        display: flex;
+        align-items: center;
+        background: #EDF1F4;
+        background-repeat: repeat;
+        border-radius: 3px 3px 0px 0px;
+        color: #333D5D;
+    }
 }
 </style>

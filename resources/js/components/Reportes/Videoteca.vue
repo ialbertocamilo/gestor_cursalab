@@ -19,7 +19,7 @@
             </div>
             <!-- this only for FP -->
 
-            <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
             <!-- this only for FP -->
             <div v-show="workspaceId === 25">

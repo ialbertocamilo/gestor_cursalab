@@ -40,15 +40,15 @@ class Certificate extends Model
             $q->where('active', $request->active);
 
         $sort = ($request->sortDesc == 'true') ? 'DESC' : 'ASC';
-        
-        if($request->sortBy) 
+
+        if($request->sortBy)
             $q->orderBy($request->sortBy, $sort);
         else
             $q->orderBy('created_at', 'DESC');
 
         return $q->paginate($request->paginate);
     }
-    
+
     protected function getBasesFromImages($edit_plantilla)
     {
         $images_bases = [];
@@ -62,11 +62,11 @@ class Certificate extends Model
             ];
         });
     }
-    
+
 
     protected function pushTypeIText($e_static)
     {
-        $data = get_data_bykeys($e_static, ['type', 'text', 'left','top',  'fill', 'textAlign', 
+        $data = get_data_bykeys($e_static, ['type', 'text', 'left','top',  'fill', 'textAlign',
             // adicional
             'fontStyle', 'fontFamily', 'fontWeight', 'fontSize',
             // 'width', 'height',
@@ -94,9 +94,9 @@ class Certificate extends Model
 
         return $media_id;
     }
-    
 
-    protected function pushTypeImage($e_static, $nombre_plantilla, 
+
+    protected function pushTypeImage($e_static, $nombre_plantilla,
                                       $compare = false, $bases64_compare = []) {
         $data = get_data_bykeys($e_static, ['type', 'left','top', 'scaleX', 'scaleY'
             // adicional
@@ -104,21 +104,21 @@ class Certificate extends Model
             // 'flipX', 'flipY', 'skewX', 'skewY'
         ]);
 
-        $nombre_plantilla_final = Media::generateNameFile($nombre_plantilla, 'jpg'); 
+        $nombre_plantilla_final = Media::generateNameFile($nombre_plantilla, 'jpg');
         $path = 'images/diplomas/'.$nombre_plantilla_final;
 
         // comparar los bases
         if($compare){
             $media_id = self::compareBases64($e_static['src'], $bases64_compare);
 
-            // si es igual al base  
+            // si es igual al base
             if($media_id) {
                 $data['media_id'] = $media_id;
                 return $data;
             }
         }
 
-        $media = self::uploadMediaBase64($nombre_plantilla_final, $path, $e_static['src']);   
+        $media = self::uploadMediaBase64($nombre_plantilla_final, $path, $e_static['src']);
         $data['media_id'] = $media->id;
 
         // info(['msg' => 'create a media', 'media_id' => $media->id]);
@@ -204,7 +204,7 @@ class Certificate extends Model
     protected function calculateTextBox($font_size, $font_angle, $font_file, $text)
     {
         $box   = imagettfbbox($font_size, $font_angle, $font_file, $text);
-        
+
         if( !$box ) return false;
 
         $min_x = min( array($box[0], $box[2], $box[4], $box[6]) );
@@ -261,7 +261,7 @@ class Certificate extends Model
     protected function convertHexadecimalToRGB($hex)
     {
         $hex = str_replace("#", "", $hex);
-        
+
         if(strlen($hex) == 3) {
           $r = hexdec(substr($hex,0,1).substr($hex,0,1));
           $g = hexdec(substr($hex,1,1).substr($hex,1,1));
@@ -444,7 +444,7 @@ class Certificate extends Model
                     break;
                     case 'image':
                         $im2 = $this->image_create($e_static['src'],$e_static['scaleX'],$e_static['scaleY'],$e_static['width'],$e_static['height']);
-                        
+
                         $this->imagecopymerge_alpha(
                             $im, // destino base
                             $im2, // fuente base
@@ -455,7 +455,7 @@ class Certificate extends Model
                             $e_static['width']*$e_static['scaleX'],
                             $e_static['height']*$e_static['scaleY'],
                             100);
-                        
+
                         // === guarda imagen - media y retorna id ===
                         $info_s_objects[] = Certificate::pushTypeImage($e_static, $nombre_plantilla, $compare, $images_base64);
                     break;
@@ -491,8 +491,8 @@ class Certificate extends Model
             // === guarda imagen - media y retorna id ===
             $info_bg = Certificate::pushTypeImage($background, $nombre_plantilla, $compare, $images_base64);
 
-            $nombre_plantilla_final = $certificate ? 
-                Media::generateNameFile($nombre_plantilla, 'jpg') : 
+            $nombre_plantilla_final = $certificate ?
+                Media::generateNameFile($nombre_plantilla, 'jpg') :
                 $nombre_plantilla.'-'.rand(0,1000).'.jpg';
 
             $path = 'images/'.$nombre_plantilla_final;
@@ -512,9 +512,9 @@ class Certificate extends Model
 
             $diploma->save();
 
-            return true;
+            return $diploma->id ?? true;
         }
-        
+
         return false;
     }
 
@@ -525,19 +525,19 @@ class Certificate extends Model
         // Match Emoticons
         $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
         $clean_text = preg_replace($regexEmoticons, '', $text);
-    
+
         // Match Miscellaneous Symbols and Pictographs
         $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
         $clean_text = preg_replace($regexSymbols, '', $clean_text);
-    
+
         // Match Transport And Map Symbols
         $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
         $clean_text = preg_replace($regexTransport, '', $clean_text);
-    
+
         // Match Miscellaneous Symbols
         $regexMisc = '/[\x{2600}-\x{26FF}]/u';
         $clean_text = preg_replace($regexMisc, '', $clean_text);
-    
+
         // Match Dingbats
         $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
         $clean_text = preg_replace($regexDingbats, '', $clean_text);
@@ -559,7 +559,7 @@ class Certificate extends Model
 
         // Crear un recurso de imagen de corte
         $copy = imagecreatetruecolor($src_w, $src_h);
-    
+
         imagecopy($copy, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
         imagecopy($copy, $source_img, 0, 0, $src_x, $src_y, $src_w, $src_h);
 
@@ -580,7 +580,7 @@ class Certificate extends Model
                 $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
                 $text = Certificate::get_text($e_dinamic, $real_info);
                 $text = wordwrap($text, 40, "multiline");
-                
+
                 $fontsize =  $e_dinamic['fontSize'];
 
                 if (isset($e_dinamic['zoomX']) && $e_dinamic['zoomX']) {

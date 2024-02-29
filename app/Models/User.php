@@ -249,6 +249,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->belongsToMany(Benefit::class, 'user_benefits', 'user_id', 'benefit_id');
     }
 
+    public function processes()
+    {
+        return $this->belongsToMany(Process::class, 'process_instructors', 'user_id', 'process_id');
+    }
+
+    public function summary_process()
+    {
+        return $this->hasMany(ProcessSummaryUser::class);
+    }
+
     public function getWorkspaces()
     {
         $roles = AssignedRole::getUserAssignedRoles($this->id);
@@ -282,7 +292,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             ->whereHas('type', fn($q) => $q->whereNotIn('code', ['cursalab']));
 //            ->whereNotNull('subworkspace_id');
     }
-
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion' 
+                    ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id 
+                    : Taxonomy::getFirstData('user', 'type', 'employee')->id;
+        $q->where('type_id',$type_id);
+    }
     public function scopeFilterText($q, $filter)
     {
         $q->where(function ($q) use ($filter) {
@@ -468,7 +484,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return null;
         }
     }
-
+   
     public function updateStatusUser($active = null, $termination_date = null,$from_massive=false)
     {
         $user = $this;
@@ -567,7 +583,10 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $this->setPasswordData($data, $update_password, $user);
 
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
-
+                $platform = session('platform');
+                if($platform && $platform == 'induccion') {
+                    $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id;
+                }
                 $user = self::create($data);
                 $user_document = $this->syncDocumentCriterionValue(old_document: null, new_document: $data['document']);
             endif;
@@ -767,10 +786,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
     protected function search($request, $withAdvancedFilters = false)
     {
-        $query = self::onlyClientUsers();
-        if (auth()->user()->isA('super-user')) {
-            $query = self::query();
-        }
+        // $query = self::onlyClientUsers();
+        $query = self::FilterByPlatform();
 
         $with = ['subworkspace'];
 
@@ -866,6 +883,37 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 //            ? array_unique(array_column($all_courses, 'id'))
 //            : collect($all_courses)->unique()->values();
 //    }
+    protected function listUsersByCriteria($data){
+        $criterion_list = $data['criterion_list'];
+        // $criteria = Criterion::select('id','code','field_id')->with('field_type:id,name,code')->where('code',array_keys($criterion_list))->get();
+        //
+        $query = User::select('id','name','lastname','surname',DB::raw('CONCAT_WS(" ",name,lastname,surname) as fullname'),'document')
+                ->withWhereHas('criterion_values', function ($q) use ($data) {
+                    $q->select('id', 'value_text')
+                        // ->where('value_text', 'like', "%{$data['filter_text']}%")
+                        ->whereRelation('criterion', 'code', 'document');
+                })->where('active', 1);
+        $idx = 1;
+        $criterion_values = [];
+        foreach ($criterion_list as $criterion => $values) {
+            if(count($values)==0){
+                continue;
+            }
+            $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($values, $idx) {
+                $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
+                    ->whereIn("cvu{$idx}" . '.criterion_value_id', $values);
+            });
+            $idx++;
+            $criterion_values = array_merge($criterion_values,$values);
+        }
+        // dd($query->toSql());
+        $criterion_values_selected = CriterionValue::select('value_text')->whereIn('id',$criterion_values)->get();
+        $users = $query->get()->map(function($user){
+            $user->criterion_value_id = $user->criterion_values?->first()?->id;
+            return $user;
+        });
+        return compact('criterion_values_selected','users');
+    }
     public function getSegmentedByModelType(
         $model,
         $select=false,
@@ -942,6 +990,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $response_type = 'courses-separated',
         $byCoursesId = [],
         $bySchoolsId = [],
+        $modality_code = null,
+        $only_ids_courses=null
     )
     {
         $user = $this;
@@ -990,10 +1040,17 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if(count($byCoursesId)>0){
             $query->whereIn('id', $byCoursesId);
         }
-
+        if($modality_code){
+            // $query->whereRelation('modality','code',$modality_code);
+            $query->whereHas('modality',function($q) use ($modality_code){
+                $q->where('code',$modality_code);
+            });
+        }
         $courses = $query->whereIn('id', array_column($current_courses, 'id'))->get();
         // info('D');
-
+        if($only_ids_courses){
+            return $courses->pluck('id');
+        }
         if ($only_ids)
             return array_unique(array_column($current_courses, 'id'));
         $isUserUcfp = $user->subworkspace->parent_id === 25;
@@ -1096,7 +1153,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 if ($valid_segment) :
                     $tags = [];
                     if($user->subworkspace->parent_id === 25){
-                        $tags = $course->getCourseTagsToUCByUser($course, $user,$segment,$cycles);
+                        $tags = $course->tags;
+                        // $tags = $course->getCourseTagsToUCByUser($course, $user,$segment,$cycles);
                     }
                     // COMPATIBLE VALIDATION
 

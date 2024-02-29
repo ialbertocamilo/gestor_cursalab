@@ -7,7 +7,7 @@
 				administradores a los usuarios.
 			</template> -->
 			<list-item titulo="Módulo" subtitulo="Módulo al que pertenece el usuario" />
-			<list-item titulo="DNI, Apellidos y nombres" subtitulo="Datos personales" />
+			<list-item titulo="Documento, Apellidos y nombres" subtitulo="Datos personales" />
 			<list-item titulo="Carrera (Usuario)" subtitulo="Carrera actual en la que se encuentra" />
 			<list-item titulo="Ciclo actual (Usuario)" subtitulo="Ciclo actual en la que se encuentra" />
 			<list-item titulo="Tipo reinicio" subtitulo="Tipo de reinicio realizado (al tema o curso)" />
@@ -126,7 +126,7 @@
 						<v-icon class="mr-2" small>mdi-download</v-icon>
 						Descargar
 					</v-btn>
-					
+
 				</div>
 
 	        	<v-divider class=""></v-divider>

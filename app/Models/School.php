@@ -9,7 +9,7 @@ class School extends BaseModel
 {
     protected $fillable = [
         'name', 'description', 'imagen', 'plantilla_diploma', 'external_id',
-         'scheduled_restarts', 'active', 'certificate_template_id'
+         'scheduled_restarts', 'active', 'certificate_template_id','platform_id'
     ];
 
     public function setActiveAttribute($value)
@@ -32,6 +32,14 @@ class School extends BaseModel
         return $this->belongsToMany(Course::class);
     }
 
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
+
     protected static function search($request)
     {
         // $courses = Course::whereHas('workspace', function ($t) use ($request) {
@@ -46,12 +54,13 @@ class School extends BaseModel
         $escuelas = School::
         // addSelect('DISTINCT(ss.school_id)')
             // whereRelation('workspaces', 'workspace_id', $workspace->id)
-            
+
             // ->whereIn('ss.subworkspace_id',$modules_id)
             // with(['subworkspaces',function($q){
             //     $q->select('subworkspace_id','school_id','orden');
             // }])
-            when($request->canChangePosition ?? null, function ($q) use ($modules_id) {
+            FilterByPlatform()
+            ->when($request->canChangePosition ?? null, function ($q) use ($modules_id) {
                 $q->join('school_subworkspace as ss','ss.school_id','schools.id')->where('ss.subworkspace_id',$modules_id[0]);
             })
             ->whereHas('subworkspaces', function ($j) use ($modules_id) {
@@ -102,9 +111,12 @@ class School extends BaseModel
 
     protected function storeRequest($data, $school = null)
     {
+        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
         try {
 
             DB::beginTransaction();
+
+            $data['platform_id'] = $data['platform_id'] ?? $platform_training?->id;
 
             if ($school) :
                 $school->update($data);
@@ -119,7 +131,7 @@ class School extends BaseModel
                     ]);
                 }
             endif;
-            
+
             $school->subworkspaces()->sync($data['subworkspaces'] ?? []);
 
             // Generate code when is not defined
@@ -150,14 +162,14 @@ class School extends BaseModel
         if ($subworkspaces_suffix) {
 
             $subworkspaces = implode(', ', $this->subworkspaces->pluck('codigo_matricula')->toArray());
-            
+
             $this->name .= " [{$subworkspaces}]";
         }
 
         if ($active_suffix) {
 
             $active = !$this->active ? " [Inactivo]" : "";
-            
+
             $this->name .= "{$active}";
         }
     }

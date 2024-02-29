@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Role;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ class Menu extends Model
     private $group_taxonomy = 'gestor';
     private $type_taxonomy = 'menu';
     private $subtype_taxonomy = 'menu';
-    
+
     protected function list(){
         // return cache()->remember('list-menus', 1440,function () {
         //     return Taxonomy::select('id','group' ,'description','type' ,'position' ,'name','icon','extra_attributes')
@@ -44,9 +45,30 @@ class Menu extends Model
                 return $menu;
             });
     }
-    protected function getMenuByUser($user){
-        $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
-        return Menu::list()->map(function($menu) use ($submenus_id){
+    protected function getMenuByUser($user,$platform){
+        if($platform && $platform == 'induccion') {
+            if($user->isAn('super-user')){
+                $abilities_x_rol = Role::with('abilities')
+                ->where('name', $platform)
+                ->whereHas('abilities', function ($ability) {
+                        $ability->where('name', 'show');
+                    })->first();
+            }else{
+                $abilities_x_rol = $user->roles()->with('abilities')
+                                                ->where('name', $platform)
+                                                ->whereHas('abilities', function ($ability) {
+                                                        $ability->where('name', 'show');
+                                                    })->first();
+            }
+            $submenus_id = $abilities_x_rol ? $abilities_x_rol->abilities->pluck('entity_id')->toArray() : [];
+        }
+        else {
+            $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
+        }
+        if(is_null($platform) || empty($platform)){
+            $platform = 'capacitacion';
+        }
+        return Menu::list()->map(function($menu) use ($submenus_id,$platform){
             //Dar formato para front
             $items = [];
             $submenus = $menu->children->whereIn('id',$submenus_id);
@@ -62,7 +84,13 @@ class Menu extends Model
                     'is_beta'=> $submenu->is_beta,
                     'show_upgrade'=> $show_upgrade,
                 ];
-            } 
+            }
+            if($platform == 'induccion'){
+                $menu->show_upgrade = false;
+            }
+            if($platform == 'capacitacion' && $menu->name == 'INDUCCIÓN'){
+                return [];
+            }
             if(count($menu->children)>0 || $menu->show_upgrade){
                 // return $menu;
                 $show_upgrade = $menu->show_upgrade && count($menu->children) == 0;

@@ -21,6 +21,7 @@ class ChecklistImport implements ToCollection
         $workspace = get_current_workspace();
         $data_ok = collect();
         $data_no_procesada = collect();
+        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
 
         // Remover cabeceras : TITULO, DESCRIPCION y LISTA DE ACTIVIDADES
         $collection = $collection->reject(function ($value, $key) {
@@ -48,6 +49,7 @@ class ChecklistImport implements ToCollection
                 'active' => 1,
                 'workspace_id' => $workspace->id,
                 'type_id' => !is_null($type_checklist) ? $type_checklist->id : null,
+                'platform_id' => $platform_training?->id
             ]);
             foreach ($tempActividades->all() as $index => $actividad) {
                 if (!is_null($actividad) && !empty($actividad)) {

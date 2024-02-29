@@ -171,7 +171,7 @@ export default {
             vue.search = param_dni
 
             this.buscarNotasUsuario()
-            // console.log('VINO DNI')
+            // console.log('VINO Documento')
         }
         // vue.getSelects();
         // vue.filters.tipo_criterio = vue.tipo_criterio_id

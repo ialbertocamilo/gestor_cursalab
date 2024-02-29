@@ -11,8 +11,11 @@
         v-model="options.modal"
         :close-on-content-click="false"
         :return-value.sync="date"
-        transition="scale-transition"
-        offset-y
+        :transition="transition"
+        :offset-y="offsetY"
+        :offset-x="offsetX"
+        :top="top"
+        :left="left"
         min-width="auto"
         attach
     >
@@ -118,7 +121,27 @@ export default {
             type: String,
             default: ''
         },
-        min: String
+        min: String,
+        offsetY: {
+            type: Boolean,
+            default: true,
+        },
+        offsetX: {
+            type: Boolean,
+            default: false,
+        },
+        top: {
+            type: Boolean,
+            default: false,
+        },
+        left: {
+            type: Boolean,
+            default: false,
+        },
+        transition: {
+            type:String,
+            default: 'scale-transition'// slide-x-transition
+        }
 
     },
     computed: {

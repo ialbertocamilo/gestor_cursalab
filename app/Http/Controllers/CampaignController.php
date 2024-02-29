@@ -20,7 +20,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CampaignController extends Controller
 {
-	public function search(Request $request) 
+	public function search(Request $request)
 	{
         $campaigns = Campaign::search($request);
         CampaignSearchResource::collection($campaigns);
@@ -32,7 +32,7 @@ class CampaignController extends Controller
         return $this->success($campaign);
     }
 
-	public function store(Request $request) 
+	public function store(Request $request)
 	{
         $stage_values = $request->currStages['value'];
         $lastIndex = 0;
@@ -42,25 +42,26 @@ class CampaignController extends Controller
 
         // === GENERAL CONFIG ===
         if($request->currGeneralConfig) {
-            $lastIndex = Campaign::saveConfigGeneral($request->currStages,$request->currGeneralConfig);
+            $lastIndex = Campaign::saveConfigGeneral(
+                $request->currStages,$request->currGeneralConfig);
         }
 
         // === CONTENTS ===
         if(in_array(0, $stage_values) && $request->currContents) {
-            ['contents' => $contents] = $request->currContents; 
+            ['contents' => $contents] = $request->currContents;
             CampaignContents::saveContents($contents, $lastIndex);
 
             // OPTIONAL: QUESTION - PREGUNTA DE ENCUESTA
-            $question = $request->currContents['question'] ?? NULL; 
+            $question = $request->currContents['question'] ?? NULL;
             if($question) Campaign::saveQuestion($question, $lastIndex);
 
             // OPTIONAL: INSIGNIA 01 - RESPUESTA DE ENCUESTA
             if($currBadgeOne) CampaignBadges::saveBadge($currBadgeOne, 0, $lastIndex);
         }
-       
+
         // === POSTULATES ===
         if(in_array(1, $stage_values) && $request->currPostulates) {
-            
+
         	CampaignRequirements::saveRequirement('POSTULATES', $request->currPostulates, $lastIndex);
 
             // OPTIONAL: CHECK SUSTENTS
@@ -80,12 +81,12 @@ class CampaignController extends Controller
 
             // OPTIONAL: INSIGNIA 02 - RESPUESTA DE ENCUESTA
             if($currBadgeTwo) CampaignBadges::saveBadge($currBadgeTwo, 1, $lastIndex);
-        } 
+        }
 
 		return $this->success($lastIndex);
     }
 
-    public function duplicate(Campaign $campaign) 
+    public function duplicate(Campaign $campaign)
     {
     	// para copiar tambien los requiemientos
     	$with_requirements = false;
@@ -172,8 +173,8 @@ class CampaignController extends Controller
 
     	return $this->success(['msg' => 'Campaña duplicada correctamente.']);
     }
-	
-	public function update(Campaign $campaign, Request $request) 
+
+	public function update(Campaign $campaign, Request $request)
 	{
         $stage_values = $request->currStages['value'];
         $lastIndex = 0;
@@ -183,16 +184,18 @@ class CampaignController extends Controller
 
          // === GENERAL CONFIG ===
         if($request->currGeneralConfig) {
-            $lastIndex = Campaign::saveConfigGeneral($request->currStages, $request->currGeneralConfig, $campaign->id);
-        }   
+            $lastIndex = Campaign::saveConfigGeneral(
+                $request->currStages, $request->currGeneralConfig, $campaign->id, false
+            );
+        }
 
         // === CONTENTS ===
         if(in_array(0, $stage_values) && $request->currContents) {
-            ['contents' => $contents] = $request->currContents; 
+            ['contents' => $contents] = $request->currContents;
             CampaignContents::saveContents($contents, $lastIndex);
 
             // OPTIONAL: QUESTION - PREGUNTA DE ENCUESTA
-            $question = $request->currContents['question'] ?? NULL; 
+            $question = $request->currContents['question'] ?? NULL;
             // info(['$question'=> $question]);
             Campaign::saveQuestion($question, $lastIndex);
 
@@ -200,10 +203,10 @@ class CampaignController extends Controller
             if($currBadgeOne) CampaignBadges::updateBadge($currBadgeOne, 0, $lastIndex);
             else CampaignBadges::updateBadge($currBadgeOne, 0, $lastIndex, true); // deleted
         }
-       
+
         // === POSTULATES ===
         if(in_array(1, $stage_values) && $request->currPostulates) {
-            
+
             CampaignRequirements::saveRequirement('POSTULATES', $request->currPostulates, $lastIndex);
 
             // OPTIONAL: CHECK SUSTENTS
@@ -224,12 +227,12 @@ class CampaignController extends Controller
             // OPTIONAL: INSIGNIA 02 - RESPUESTA DE ENCUESTA
             if($currBadgeTwo) CampaignBadges::updateBadge($currBadgeTwo, 1, $lastIndex);
             else CampaignBadges::updateBadge($currBadgeTwo, 1, $lastIndex, true);
-        } 
+        }
 
         return $this->success($lastIndex);
 	}
 
-	public function edit_campaign(Campaign $campaign, Request $request) 
+	public function edit_campaign(Campaign $campaign, Request $request)
 	{
         $CAMPAIGN_DATA['currGeneralConfig'] = $campaign;
         $CAMPAIGN_DATA['currGeneralConfig'] = $campaign->processBadgesCampaigId(['one','two'], $CAMPAIGN_DATA['currGeneralConfig']);
@@ -243,12 +246,12 @@ class CampaignController extends Controller
             $CAMPAIGN_DATA_STAGES['currContents'] = $campaign->getCurrContents();
         }
 
-        // === POSTULATES ===  
+        // === POSTULATES ===
         if(in_array(1, $stage_values)) {
             $CAMPAIGN_DATA_STAGES['currPostulates'] = $campaign->getCurrPostulates();
         }
 
-        // === VOTERS === 
+        // === VOTERS ===
         if(in_array(2, $stage_values)) {
             $CAMPAIGN_DATA_STAGES['currVoters'] = $campaign->getCurrVoters();
         }
@@ -259,16 +262,16 @@ class CampaignController extends Controller
         return $this->success($CAMPAIGN_DATA_RESULT);
 	}
 
-	public function getFilterCriterion(Request $request) 
+	public function getFilterCriterion(Request $request)
 	{
 		$workspace = get_current_workspace();
-	
+
 		$criteria = Criterion::getListForSelectWorskpace($workspace?->id);
 
 		return $this->success($criteria);
 	}
 
-	public function getFilterCriterionValues(Criterion $criterion) 
+	public function getFilterCriterionValues(Criterion $criterion)
 	{
 		$workspace = get_current_workspace();
 
@@ -295,7 +298,7 @@ class CampaignController extends Controller
 		return $this->success(compact('modules'));
 	}
 
-	public function getVerifyRequirements(Request $request) 
+	public function getVerifyRequirements(Request $request)
 	{
      	$config = [ $request->condition, $request->months, $request->index, $request->section ];
         $requirements = CampaignRequirements::getReturnDataRequirements($config);
@@ -303,7 +306,7 @@ class CampaignController extends Controller
         return CampaignRequirements::checkVerifyCount($requirements, $request);
 	}
 
-    public function check_duplicate(Campaign $campaign) 
+    public function check_duplicate(Campaign $campaign)
     {
         if(in_array($campaign->stage_id, [0, 2])) {
             // modalidad : 1 - 3
@@ -312,31 +315,31 @@ class CampaignController extends Controller
             // modalidad : 2 - 4
             $state_duplicate = $campaign->checkFillPostulates();
         }
-        
+
         return $this->success($state_duplicate);
     }
 
-    public function update_stages(Campaign $campaign, Request $request) 
+    public function update_stages(Campaign $campaign, Request $request)
     {
         $campaign->update($request->all());
     	return $this->success(['msg' => 'Etapas actualizadas correctamente.']);
     }
-				
-	public function status(Campaign $campaign) 
+
+	public function status(Campaign $campaign)
 	{
 		$campaign->update(['state' => !$campaign->state ]);
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
 	}
-	
-	public function destroy(Campaign $campaign) 
+
+	public function destroy(Campaign $campaign)
 	{
 		$campaign->delete();
     	return $this->success(['msg' => 'Campaña eliminada correctamente.']);
 	}
 
     // === reportes ===
-    public function report_candidates(Campaign $campaign, Request $request) 
-    {   
+    public function report_candidates(Campaign $campaign, Request $request)
+    {
         $requirement_voter = $campaign->requirement_not_null_criterio('VOTERS')->first();
 
         $request->campaign_id = $campaign->id;
@@ -350,11 +353,11 @@ class CampaignController extends Controller
         return Excel::download(new ExportVotacionesCandidatos($candidates, $campaign), 'reporte_candidatos_'.date('Y-m-d H:i:s').'.xlsx');
     }
 
-    public function report_postulates(Campaign $campaign, Request $request) 
+    public function report_postulates(Campaign $campaign, Request $request)
     {
         $summoneds = $campaign->summoneds()
                               ->select('id','user_id','in_date', 'answer', 'candidate_state')
-                              ->with(['user:id,name,lastname,document,surname', 
+                              ->with(['user:id,name,lastname,document,surname',
                                       'postulates' => [
                                         'user:id,name,lastname,document,surname'
                                        ]

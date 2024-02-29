@@ -18,7 +18,7 @@
             </div>
 
             <list-item v-show="workspaceId === 25" titulo="Sede" subtitulo="Sede en la que se ubica el usuario" />
-            <list-item titulo="DNI, Apellidos y nombres, Género" subtitulo="Datos personales" />
+            <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
 
             <!-- this is only for FP -->
             <div v-if="workspaceId === 25">

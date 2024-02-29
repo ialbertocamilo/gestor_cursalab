@@ -191,6 +191,18 @@ Override Vue Toastification plugin styles
     }
 }
 
+.text_default {
+    color: #434D56;
+    font-weight: 400;
+    font-family: "Nunito", sans-serif;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-size: 13px;
+}
+
+.c-default {
+    color: #5458EA !important;
+}
 .font-nunito {
     font-family: "Nunito", sans-serif;
 }
@@ -517,4 +529,17 @@ Skeletons
 
 .text-line-through {
     text-decoration: line-through;
+}
+
+.br-dialog {
+    .v-sheet.v-card{
+        border-radius: 16px !important;
+    }
+    .v-card__title.default-dialog-title {
+        border-top-left-radius: 16px !important;
+        border-top-right-radius: 16px !important;
+    }
+}
+.cursor-pointer {
+    cursor: pointer;
 }

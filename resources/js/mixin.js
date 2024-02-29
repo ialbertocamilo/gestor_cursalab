@@ -845,6 +845,7 @@ export default {
             const modules = response2.data.modules
             const admins = response2.data.admins
             const VademecumList = response2.data.vademecums
+            const modalities = response2.data.modalities
 
             return  {
                 // user session
@@ -852,7 +853,7 @@ export default {
                 adminId,
                 workspaceId,
                 reportsBaseUrl,
-
+                modalities,
                 // admins
                 modules,
                 admins,
@@ -875,6 +876,9 @@ export default {
                 localStorage.setItem(dataParams.key, JSON.stringify(filters));
                 vue.openInNewTab(route);
             }
-        }
+        },
+        validateRequired(input) {
+            return input != undefined && input != null && input != "";
+        },
     },
 };
