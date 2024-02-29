@@ -35,10 +35,10 @@
     <!-- Google fonts  -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
     <!-- theme stylesheet-->
-    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=1.3418' . date('Y-W-d') ) }}" id="theme-stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.default.css?v=2.3419' . date('Y-W') ) }}" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2.3418-'.date('Y-W-m-d')) }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css?v=1.3418-'.date('Y-W-m-d-H')) }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css?v=2.3419-'.date('Y-W')) }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css?v=2.3419-'.date('Y-W')) }}">
     <!-- Favicon-->
     <link rel="shortcut icon" href="{{ $favicon }}">
 
