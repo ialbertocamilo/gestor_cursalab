@@ -165,6 +165,8 @@ class VademecumController extends Controller
     {
         $data = $request->validated();
 
+        // Validate storage limit
+
         $files = isset($data['file_media']) ? [$data['file_media']] : [];
         $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 

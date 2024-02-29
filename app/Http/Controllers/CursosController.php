@@ -239,6 +239,7 @@ class CursosController extends Controller
         $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
 
+        // Validate storage limit
 
         $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
         $hasStorageAvailable = Media::validateStorageByWorkspace($files);

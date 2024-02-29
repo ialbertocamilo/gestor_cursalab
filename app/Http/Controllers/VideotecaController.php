@@ -231,6 +231,8 @@ class VideotecaController extends Controller
     {
         $data = $request->validated();
 
+        // Validate storage limit
+
         $files = [];
         if (isset($data['file_media'])) $files[] = $data['file_media'];
         if (isset($data['file_preview'])) $files[] = $data['file_preview'];
@@ -322,6 +324,8 @@ class VideotecaController extends Controller
     public function update(VideotecaStoreRequest $request, Videoteca $videoteca)
     {
         $data = $request->validated();
+
+        // Validate storage limit
 
         $files = [];
         if (isset($data['file_media'])) $files[] = $data['file_media'];
