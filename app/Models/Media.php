@@ -416,15 +416,23 @@ class Media extends BaseModel
         $keyPrefix = $is_h5p ? $config['root'].'/h5p/'.$new_folder . '/' : $config['scorm']['root'] . '/' . $new_folder . '/';
         $options =  array(
             'concurrency' => 20,
-            'before' => function (\Aws\Command $command) use($public) {
-                if($public){
-                    $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
-                        ? 'public-read'
-                        : 'private';
-                }else{
-                    $command['ACL'] =  'public-read';
-                }
+            'before' => function (\Aws\Command $command){
+                $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
+                    ? 'public-read'
+                    : 'private';
         });
+        // $options =  array(
+        //     'concurrency' => 20,
+        //     'before' => function (\Aws\Command $command) use($public) {
+        //         if($public){
+        //             $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
+        //                 ? 'public-read'
+        //                 : 'private';
+        //         }else{
+        //             $command['ACL'] =  'public-read';
+        //         }
+        // });
+        // dd($options['before']);
         $client->uploadDirectory($temp_path, $bucket, $keyPrefix, $options);
 
 
