@@ -906,8 +906,9 @@ export default {
         },
         async validate() {
             let vue = this
+            
             const validForm = vue.validateForm('TemaForm')
-            const hasMultimedia = vue.resource.media.length > 0
+            const hasMultimedia = vue.resource.media ? vue.resource.media.length > 0 : false;
 
             if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
