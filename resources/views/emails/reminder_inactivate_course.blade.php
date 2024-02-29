@@ -8,11 +8,11 @@
     <tr style="background-color:#F9FAFB; text-align:justify; margin-top:10px;">
         <td style="font-family: 'Poppins', sans-serif; " align="center">
             @php
-                $message = count($data['courses']) > 0 ? 'tus cursos culminen!' : 'tus curso culmine!';
+                $message = count($data['courses']) > 1 ? 'tus cursos culminen!' : 'tu curso culmine!';
             @endphp
             <p style="color:#333D5D;font-size: 1.2rem;padding: 0px 46px;">
 
-                ¡Te quedan <span style="color:#FF4242;font-size: 1.4rem">4 días</span> para que {{ $message }}!
+                ¡Te quedan <span style="color:#FF4242;font-size: 1.4rem">4 días</span> para que {{ $message }}
             </p>
         </td>
     </tr>
