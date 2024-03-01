@@ -57,8 +57,8 @@
                                         </v-btn>
                                     </div>
                                     <DocPreview v-if="currentMedia.type_id == 'office'" :docValue="currentMedia.url" docType="office" style="height:100%" />
-                                    <div v-else-if="currentMedia.type_id == 'h5p'">
-                                        <div id='h5p-container'></div>
+                                    <div v-else-if="currentMedia.type_id == 'h5p'" class="d-flex justify-item-center align-items-center">
+                                        <div id='h5p-container' style="width: 100%;height: 100%;"></div>
                                     </div>
                                     <iframe v-else allowfullscreen="" frameborder="0" style="height: 100%;" width="100%" :src="currentMedia.url">
                                     </iframe>
@@ -184,7 +184,7 @@ export default {
             setTimeout(() => {
                 const el = document.getElementById('h5p-container');
                 const options = {
-                    h5pJsonPath: 'https://statics-testing.sfo2.digitaloceanspaces.com/test1/h5p/wrkspc-2-experiencia-2-2572-20240229130617-KMH6FKZvhk',
+                    h5pJsonPath: media.url,
                     frameJs: '/dist-h5p/frame.bundle.js',
                     frameCss: '/dist-h5p/styles/h5p.css',
                 };
@@ -193,6 +193,14 @@ export default {
                 // const h5pStandalone = new H5PStandalone(options, el);
                 // h5pStandalone.run();
             }, 2500);
+        },
+        removeH5P(){
+            var h5pContainer = document.getElementById("h5p-container");
+            if (h5pContainer) {
+                while (h5pContainer.firstChild) {
+                    h5pContainer.removeChild(h5pContainer.firstChild);
+                }
+            }
         },
         setCurrentTime() {
             const currentTime = new Date();
@@ -221,7 +229,7 @@ export default {
                     vue.setH5P(vue.currentMedia);
                 }
             } else {
-                
+                vue.removeH5P();
                 if (document.exitFullscreen) {
                 document.exitFullscreen();
                 } else if (document.mozCancelFullScreen) {
