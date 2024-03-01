@@ -118,8 +118,8 @@
 
 <script>
 import DocPreview from '../Project/DocPreview';
-// import { H5P } from 'h5p-standalone';
-import H5PStandalone from 'h5p-standalone';
+import { H5P } from 'h5p-standalone';
+// import H5PStandalone from 'h5p-standalone';
 export default {
     components: { DocPreview },
     props: {
@@ -184,12 +184,12 @@ export default {
             setTimeout(() => {
                 const el = document.getElementById('h5p-container');
                 const options = {
-                    h5pJsonPath: media.url,
-                    frameJs: '/assets/frame.bundle.js',
-                    frameCss: '/assets/styles/h5p.css',
+                    h5pJsonPath: 'https://statics-testing.sfo2.digitaloceanspaces.com/test1/h5p/wrkspc-2-experiencia-2-2572-20240229130617-KMH6FKZvhk',
+                    frameJs: '/dist-h5p/frame.bundle.js',
+                    frameCss: '/dist-h5p/styles/h5p.css',
                 };
                 // new H5PStandalone(el, options);
-                new H5PStandalone.H5P(el, options);
+                new H5P(el, options);
                 // const h5pStandalone = new H5PStandalone(options, el);
                 // h5pStandalone.run();
             }, 2500);
