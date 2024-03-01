@@ -38,7 +38,7 @@
                     <div v-if="currentMedia" style="height: 250px;">
                         <div v-if="['scorm','genially','office','link','h5p'].find(c => c==currentMedia.type_id)" style="height: 100%;">
                             <div v-if="!isFullscreen" style="width:100%;height: 100%;" class="d-flex justify-content-center align-items-center">
-                                <div>
+                                <div style="text-align: center;">
                                     <div>{{ currentMedia.name }}</div>
                                     <DefaultButton
                                         label="Abrir"
