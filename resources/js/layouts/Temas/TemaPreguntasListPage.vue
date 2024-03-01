@@ -5,7 +5,7 @@
             <v-card-title>
                 <v-row>
                     <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '9'">
-                        <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
+                        <DefaultBreadcrumbs :breadcrumbs="custom_breadcrumbs ? custom_breadcrumbs : breadcrumbs" :class="custom_breadcrumbs ?'breadcrumbs_line' : ''"/>
                     </v-col>
                     <v-col :cols="limits_ai_convert.has_permission_to_use_ia_evaluation ? '6' : '3'">
                         <div class="d-flex justify-content-end">
@@ -249,6 +249,7 @@ export default {
         'evaluation_data_sum',
         'evaluation_data_sum_required',
         'evaluation_data_sum_not_required',
+        'custom_breadcrumbs'
     ],
     data() {
         let vue = this

@@ -122,6 +122,10 @@ class WorkspaceController extends Controller
             'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
             'context_jarvis' => $data['context_jarvis'] && $data['context_jarvis'] !='null' ? $data['context_jarvis'] : ''
         ];
+        $data['reminders_configuration'] = [
+            'chunk' => $data['reminders_configuration']['chunk'] ?? 0,
+            'interval' => $data['reminders_configuration']['interval'] ?? 0,
+        ];
         // Set constraint: limit allowed users
 
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
@@ -208,6 +212,12 @@ class WorkspaceController extends Controller
             'openia_model' => $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo',
             'context_jarvis' => $workspace->jarvis_configuration['context_jarvis'] ?? ''
         ];
+        
+        $workspace->reminders_configuration = [
+            'chunk' => $workspace->reminders_configuration['chunk'] ?? 0,
+            'interval' => $workspace->reminders_configuration['interval'] ?? 0,
+        ];
+
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 
         $workspace['functionalities_selected'] = WorkspaceFunctionality::functionalities($workspace->id, true);
@@ -242,7 +252,12 @@ class WorkspaceController extends Controller
             'openia_model' => $data['openia_model'] ?? 'gpt-3.5-turbo',
             'context_jarvis' => $data['context_jarvis'] && $data['context_jarvis'] !='null' ? $data['context_jarvis'] : ''
         ];
-
+        $data['reminders_configuration'] = json_decode($data['reminders_configuration']);
+        // dd($data);
+        // // $data['reminders_configuration'] = json [
+        // //     'chunk' => $data['reminders_configuration']['chunk'] ?? 0,
+        // //     'interval' => $data['reminders_configuration']['interval'] ?? 0,
+        // // ];
         if (($data['limit_allowed_users_type'] ?? false) && ($data['limit_allowed_users_limit'] ?? false)):
 
             $constraint_user['type'] = $data['limit_allowed_users_type'];

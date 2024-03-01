@@ -43,15 +43,28 @@ Route::redirect('/', 'login', 301);
 // Route::view('email_limite','emails.email_limite_usuarios');
 Route::view('plataforma-suspendida','platform-cutoff')->middleware('platform-access-blocked');
 
+// Route::get('email_reminder',function(){
 Route::post('switch_platform', [GestorController::class, 'switchPlatform']);
 
 Route::get('email_reset',function(){
     $mail_data=[
-        'user'=>'Aldo López',
-        'url_to_reset'=> 'aslkdjasldk',
-        'minutes' => 60
+        'courses'=>[
+            ['id'=> 265 ,'name' => 'Seguridad y Salud en el Trabajo'],
+            ['id'=> 1271 ,'name' => 'Seguridad de la información'],
+        ],
+        'web_url' => config('app.web_url')
     ];
-    return view('emails.reset_password_gestor',['data'=>$mail_data]);
+    return view('emails.reminder_inactivate_course',['data'=>$mail_data]);
+});
+Route::get('email_reminder_course',function(){
+    $mail_data=[
+        'courses'=>[
+            ['id'=> 265 ,'name' => 'Seguridad y Salud en el Trabajo'],
+            ['id'=> 1271 ,'name' => 'Seguridad de la información'],
+        ],
+        'web_url' => config('app.web_url')
+    ];
+    return view('emails.reminder_progress_courses',['data'=>$mail_data]);
 });
 
 // login routes
@@ -257,31 +270,31 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     //     ];
     //     return view('pdf.dc3',$data);
     // });
-    Route::get('/generate-report-assistance', function(){
-        $course_id = 1492;
-        $topic_id = 4113;
+    // Route::get('/generate-report-assistance', function(){
+    //     $course_id = 1492;
+    //     $topic_id = 4113;
 
-        $assigned = \App\Models\CourseInPerson::listUsersBySession($course_id, $topic_id, 'all',null,false,true);
-        $required_signature = \App\Models\Course::where('id',$course_id)->select('modality_in_person_properties')->first()
-                                ?->modality_in_person_properties?->required_signature;
-        $topic =  \App\Models\Topic::where('id',$topic_id)->select('name','modality_in_person_properties')->first();
-        $modality_in_person_properties = $topic->modality_in_person_properties;
-        $host = App\Models\User::select('name','lastname','surname')->where('id',$modality_in_person_properties->host_id)->first();
-        $start_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
-        $finish_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
-        $diff = $finish_datetime->diff($start_datetime);
-        $duration = sprintf('%02d:%02d', $diff->h, $diff->i);
-        $data = [
-            'users' => $assigned['users'],
-            'required_signature' => $required_signature,
-            'colspan' => $required_signature ? '4' : '3',
-            'name_session'=>$topic->name,
-            'datetime'=>$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time,
-            'host' => $host->name.' '.$host->lastname.' '.$host->surname,
-            'duration'=>$duration
-        ];
-        return view('pdf.report-assistance',$data);
-    });
+    //     $assigned = \App\Models\CourseInPerson::listUsersBySession($course_id, $topic_id, 'all',null,false,true);
+    //     $required_signature = \App\Models\Course::where('id',$course_id)->select('modality_in_person_properties')->first()
+    //                             ?->modality_in_person_properties?->required_signature;
+    //     $topic =  \App\Models\Topic::where('id',$topic_id)->select('name','modality_in_person_properties')->first();
+    //     $modality_in_person_properties = $topic->modality_in_person_properties;
+    //     $host = App\Models\User::select('name','lastname','surname')->where('id',$modality_in_person_properties->host_id)->first();
+    //     $start_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time);
+    //     $finish_datetime = Carbon\Carbon::createFromFormat('Y-m-d H:i',$modality_in_person_properties->start_date.' '.$modality_in_person_properties->finish_time);
+    //     $diff = $finish_datetime->diff($start_datetime);
+    //     $duration = sprintf('%02d:%02d', $diff->h, $diff->i);
+    //     $data = [
+    //         'users' => $assigned['users'],
+    //         'required_signature' => $required_signature,
+    //         'colspan' => $required_signature ? '4' : '3',
+    //         'name_session'=>$topic->name,
+    //         'datetime'=>$modality_in_person_properties->start_date.' '.$modality_in_person_properties->start_time,
+    //         'host' => $host->name.' '.$host->lastname.' '.$host->surname,
+    //         'duration'=>$duration
+    //     ];
+    //     return view('pdf.report-assistance',$data);
+    // });
     // Route::get('welcome_email','emails.welcome_email');
 });
 

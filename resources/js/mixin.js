@@ -12,6 +12,7 @@ const extensiones = {
     excel: ["xls", 'xlsx', 'csv'],
     scorm: ["zip", "scorm"],
     office:['xls', 'xlsx', 'csv','ppt', 'pptx', 'doc', 'docx'],
+    h5p:['h5p']
     // rise: ["zip", "rise"],
 };
 const default_media_images = {
@@ -38,6 +39,8 @@ export default {
                 {label: 'SCORM', icon: 'mdi mdi-file-compare', type: 'scorm'},
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
                 {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
+                {label: 'H5P', icon: 'mdi mdi-layers', type: 'h5p'},
+                {label: 'Imagen', icon: 'mdi mdi-image-area', type: 'image'},
                 // {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
@@ -303,9 +306,15 @@ export default {
             // Validacion para scorms
             if (file.type === 'application/x-zip-compressed')
                 extension = 'zip'
-
+            if (file.type === 'application/vnd.h5p') {
+                extension = 'h5p';
+            }
             console.log('Extension :: ', extension)
             console.log('FileType :: ', file.type)
+            if(!extension){
+                extension = this.getNameExtension(file.name);
+            }
+            console.log('file :: ', file)
 
             if (extension) {
                 if (this.TypeOf(fileType) === 'array') {
@@ -324,7 +333,9 @@ export default {
             }
             return false;
         },
-
+        getNameExtension(filename) {
+            return filename.split('.').pop();
+        },
         addValuesFromArrayToUrl(arrayValues, nameParam = "param", propName = "id") {
             let tempString = ``;
             arrayValues.forEach((el) => {

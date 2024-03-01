@@ -425,7 +425,6 @@ export default {
         },
         openFormModalSegment(modalFormSegmentationOptions, event = null, action = null, title = null) {
             let vue = this
-            console.log(event);
             vue.dataForModalSegment = event
 
             vue.openFormModal(
@@ -444,7 +443,6 @@ export default {
         selectTemplateOrNewProcessModal( value ) {
             let vue = this
             // window.location.href = '/beneficios/create?type=' + value;
-            console.log(value);
             if(value == 'new')
             {
                 vue.openFormModal(vue.modalEditProcess)
@@ -476,8 +474,6 @@ export default {
         },
         async openModalEditProcess(process, edit = false) {
             let vue = this;
-
-            console.log(process);
             // this.showLoader()
             vue.modalEditProcess.process = process;
             if(process.instructions.length == 0)
@@ -494,9 +490,6 @@ export default {
             vue.modalEditProcess.open = true;
         },
         saveNewProcessModal( item ) {
-
-            console.log(item);
-            console.log(item.title);
             let vue = this
 
             vue.showLoader()
@@ -562,6 +555,7 @@ export default {
                     'finishes_at' : item.finishes_at,
                     'color' : item.color_selected,
                     'color_map_even' : item.color_map_even,
+                    'config_completed' : item.config_completed ? item.config_completed : false,
                     'color_map_odd' : item.color_map_odd,
                     'active': item.active
                 };
@@ -576,6 +570,7 @@ export default {
                                 'instructions',
                                 'color',
                                 'color_map_even',
+                                'config_completed',
                                 'color_map_odd',
                                 'logo',
                                 'background_mobile',
@@ -647,10 +642,8 @@ export default {
             }
 
         },
-        saveNewProcessInline( item ) {
-
-            console.log(item);
-            console.log(item.title);
+        saveNewProcessInline( item )
+        {
             let vue = this
 
             vue.showLoader()

@@ -36,9 +36,9 @@
             <template v-slot:content>
                 <div class="container-preview" >
                     <div v-if="currentMedia" style="height: 250px;">
-                        <div v-if="['scorm','genially','office','link'].find(c => c==currentMedia.type_id)" style="height: 100%;">
+                        <div v-if="['scorm','genially','office','link','h5p'].find(c => c==currentMedia.type_id)" style="height: 100%;">
                             <div v-if="!isFullscreen" style="width:100%;height: 100%;" class="d-flex justify-content-center align-items-center">
-                                <div>
+                                <div style="text-align: center;">
                                     <div>{{ currentMedia.name }}</div>
                                     <DefaultButton
                                         label="Abrir"
@@ -57,6 +57,9 @@
                                         </v-btn>
                                     </div>
                                     <DocPreview v-if="currentMedia.type_id == 'office'" :docValue="currentMedia.url" docType="office" style="height:100%" />
+                                    <div v-else-if="currentMedia.type_id == 'h5p'" class="d-flex justify-item-center align-items-center">
+                                        <div id='h5p-container' style="width: 100%;height: 100%;"></div>
+                                    </div>
                                     <iframe v-else allowfullscreen="" frameborder="0" style="height: 100%;" width="100%" :src="currentMedia.url">
                                     </iframe>
                                 </div>
@@ -115,6 +118,8 @@
 
 <script>
 import DocPreview from '../Project/DocPreview';
+import { H5P } from 'h5p-standalone';
+// import H5PStandalone from 'h5p-standalone';
 export default {
     components: { DocPreview },
     props: {
@@ -163,6 +168,7 @@ export default {
             await vue.$http.get(url).then(({ data }) => {
                 vue.topics = data.data.topics;
                 vue.currentMedia = vue.topics[0].medias[0];
+                
                 vue.hideLoader();
             })
         },
@@ -173,6 +179,28 @@ export default {
             let vue = this;
             vue.currentMedia = media;
             console.log('Cambiar media:', media);
+        },
+        setH5P(media){
+            setTimeout(() => {
+                const el = document.getElementById('h5p-container');
+                const options = {
+                    h5pJsonPath: media.url,
+                    frameJs: '/dist-h5p/frame.bundle.js',
+                    frameCss: '/dist-h5p/styles/h5p.css',
+                };
+                // new H5PStandalone(el, options);
+                new H5P(el, options);
+                // const h5pStandalone = new H5PStandalone(options, el);
+                // h5pStandalone.run();
+            }, 2500);
+        },
+        removeH5P(){
+            var h5pContainer = document.getElementById("h5p-container");
+            if (h5pContainer) {
+                while (h5pContainer.firstChild) {
+                    h5pContainer.removeChild(h5pContainer.firstChild);
+                }
+            }
         },
         setCurrentTime() {
             const currentTime = new Date();
@@ -185,9 +213,9 @@ export default {
             return `${hour}:${minutes}`;
         },
         toggleFullscreen() {
-            const iframe = this.$refs.iframe;
-
-            if (!this.isFullscreen) {
+            let vue = this;
+            const iframe = vue.$refs.iframe;
+            if (!vue.isFullscreen) {
                 if (iframe.requestFullscreen) {
                 iframe.requestFullscreen();
                 } else if (iframe.mozRequestFullScreen) {
@@ -197,7 +225,11 @@ export default {
                 } else if (iframe.msRequestFullscreen) {
                 iframe.msRequestFullscreen();
                 }
+                if(vue.currentMedia.type_id == 'h5p'){
+                    vue.setH5P(vue.currentMedia);
+                }
             } else {
+                vue.removeH5P();
                 if (document.exitFullscreen) {
                 document.exitFullscreen();
                 } else if (document.mozCancelFullScreen) {

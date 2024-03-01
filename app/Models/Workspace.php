@@ -41,6 +41,7 @@ class Workspace extends BaseModel
         'share_diplomas_social_media',
         'certificate_template_id',
         'dc3_configuration',
+        'reminders_configuration',
         'registro_capacitacion'
     ];
 
@@ -104,6 +105,7 @@ class Workspace extends BaseModel
         'limits' => 'json',
         'jarvis_configuration' => 'json',
         'dc3_configuration'=>'array',
+        'reminders_configuration'=>'json',
         'registro_capacitacion' => 'json'
     ];
 

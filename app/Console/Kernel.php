@@ -78,6 +78,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('beneficios:email-segments')->everyFiveMinutes();
         //Checklist
         $schedule->command('update:checklist-summary-user')->hourly();
+        //EMAILS
+        $schedule->command('send:reminder-inactivate-course')->fridays()->at('23:05');
+        $schedule->command('send:reminder-progress-course')->fridays()->at('23:00');
         $schedule->command('send:emails')->everyFiveMinutes();
 
         // Reports

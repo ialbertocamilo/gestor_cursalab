@@ -247,7 +247,15 @@ export default {
             required: true
         },
         width: String,
-        curso_id: String
+        curso_id: String,
+        proceso_text: {
+            type: String,
+            default: ''
+        },
+        etapa_text: {
+            type: String,
+            default: ''
+        }
     },
     data() {
         return {
@@ -255,19 +263,13 @@ export default {
             breadcrumbs: [
                 {
                     title: 'Proceso de inducción',
-                    text: '',
-                    disabled: false,
+                    text: this.proceso_text,
+                    disabled: true,
                     href: ''
                 },
                 {
-                    title: 'Etapa',
-                    text: '',
-                    disabled: false,
-                    href: ''
-                },
-                {
-                    title: 'Evaluación',
-                    text: null,
+                    title: '',
+                    text: 'Evaluación',
                     disabled: true,
                     href: ''
                 },
