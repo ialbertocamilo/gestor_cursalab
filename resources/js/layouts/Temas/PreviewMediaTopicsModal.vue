@@ -38,7 +38,7 @@
                     <div v-if="currentMedia" style="height: 250px;">
                         <div v-if="['scorm','genially','office','link','h5p'].find(c => c==currentMedia.type_id)" style="height: 100%;">
                             <div v-if="!isFullscreen" style="width:100%;height: 100%;" class="d-flex justify-content-center align-items-center">
-                                <div>
+                                <div style="text-align: center;">
                                     <div>{{ currentMedia.name }}</div>
                                     <DefaultButton
                                         label="Abrir"
@@ -57,8 +57,8 @@
                                         </v-btn>
                                     </div>
                                     <DocPreview v-if="currentMedia.type_id == 'office'" :docValue="currentMedia.url" docType="office" style="height:100%" />
-                                    <div v-else-if="currentMedia.type_id == 'h5p'">
-                                        <div id='h5p-container'></div>
+                                    <div v-else-if="currentMedia.type_id == 'h5p'" class="d-flex justify-item-center align-items-center">
+                                        <div id='h5p-container' style="width: 100%;height: 100%;"></div>
                                     </div>
                                     <iframe v-else allowfullscreen="" frameborder="0" style="height: 100%;" width="100%" :src="currentMedia.url">
                                     </iframe>
@@ -118,8 +118,8 @@
 
 <script>
 import DocPreview from '../Project/DocPreview';
-// import { H5P } from 'h5p-standalone';
-import H5PStandalone from 'h5p-standalone';
+import { H5P } from 'h5p-standalone';
+// import H5PStandalone from 'h5p-standalone';
 export default {
     components: { DocPreview },
     props: {
@@ -185,14 +185,22 @@ export default {
                 const el = document.getElementById('h5p-container');
                 const options = {
                     h5pJsonPath: media.url,
-                    frameJs: '/assets/frame.bundle.js',
-                    frameCss: '/assets/styles/h5p.css',
+                    frameJs: '/dist-h5p/frame.bundle.js',
+                    frameCss: '/dist-h5p/styles/h5p.css',
                 };
                 // new H5PStandalone(el, options);
-                new H5PStandalone.H5P(el, options);
+                new H5P(el, options);
                 // const h5pStandalone = new H5PStandalone(options, el);
                 // h5pStandalone.run();
             }, 2500);
+        },
+        removeH5P(){
+            var h5pContainer = document.getElementById("h5p-container");
+            if (h5pContainer) {
+                while (h5pContainer.firstChild) {
+                    h5pContainer.removeChild(h5pContainer.firstChild);
+                }
+            }
         },
         setCurrentTime() {
             const currentTime = new Date();
@@ -221,7 +229,7 @@ export default {
                     vue.setH5P(vue.currentMedia);
                 }
             } else {
-                
+                vue.removeH5P();
                 if (document.exitFullscreen) {
                 document.exitFullscreen();
                 } else if (document.mozCancelFullScreen) {
