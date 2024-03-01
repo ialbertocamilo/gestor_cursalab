@@ -40,6 +40,7 @@ export default {
                 {label: 'Link', icon: 'mdi mdi-link-variant', type: 'link'},
                 {label: 'Genially', icon: 'mdi mdi-google-circles', type: 'genially'},
                 {label: 'H5P', icon: 'mdi mdi-layers', type: 'h5p'},
+                {label: 'Imagen', icon: 'mdi mdi-image-area', type: 'image'},
                 // {label: 'Rise', icon: 'mdi mdi-archive', type: 'rise'},
             ],
             mixin_extensiones: extensiones,
@@ -307,7 +308,7 @@ export default {
                 extension = 'zip'
             if (file.type === 'application/vnd.h5p') {
                 extension = 'h5p';
-            } 
+            }
             console.log('Extension :: ', extension)
             console.log('FileType :: ', file.type)
             if(!extension){
