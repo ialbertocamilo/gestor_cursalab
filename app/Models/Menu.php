@@ -45,6 +45,10 @@ class Menu extends Model
                 return $menu;
             });
     }
+    protected function getListSubMenusByUser($user){
+        $submenus_id = $user->getAbilities()->where('name','show')->pluck('entity_id')->toArray();
+        return Taxonomy::select('code','name')->whereIn('id',$submenus_id)->get();
+    }
     protected function getMenuByUser($user,$platform){
         if($platform && $platform == 'induccion') {
             if($user->isAn('super-user')){
