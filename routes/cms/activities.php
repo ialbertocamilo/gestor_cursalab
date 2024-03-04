@@ -18,6 +18,7 @@ Route::controller(ActivityController::class)->group(function() {
 
     // Tareas
     Route::post('/tareas/store','TareasStore');
+    Route::get('/tareas/form-selects', 'ActivitiesGetFormSelects');
 
     // Sesiones
     Route::post('/sesiones/store','SesionesStore');

@@ -439,13 +439,13 @@
 
                                 <v-tooltip :left="true" attach>
                                     <template v-slot:activator="{ on, attrs }">
-                                        <i :class="getConditionalBadgeIcon(item, action.conditionalBadgeIcon)"
+                                        <i :class="[getConditionalBadgeIcon(item, action.conditionalBadgeIcon), {'color_icons': type_table=='process'}]"
                                            class="badge-icon"
                                            v-bind="attrs"
                                            v-on="on"
                                            :style="{
                                                fontSize:getConditionalBadgeIconSize(item, action.conditionalBadgeIcon),
-                                               color: (item.active ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
+                                               color: ((item.active || getConditionalBadgeIconColorActive(item, action.conditionalBadgeIcon)) ? getConditionalBadgeIconColor(item, action.conditionalBadgeIcon)  : 'grey') +'  !important'}"></i>
                                     </template>
 
                                     <!-- Tooltip message -->
@@ -1546,6 +1546,10 @@ export default {
         getConditionalBadgeIconMessage(item, conditions) {
             let condition = this.getMatchedCondition(item, conditions)
             return condition['message']
+        },
+        getConditionalBadgeIconColorActive(item, conditions) {
+            let condition = this.getMatchedCondition(item, conditions)
+            return condition['colorActive']
         },
         getMatchedCondition(item, conditions) {
 

@@ -51,6 +51,10 @@ class ProcessController extends Controller
     {
         $data = $request->validated();
 
+        $type_icon_finished = isset($data['icon_finished_name']) && str_contains($data['icon_finished_name'], 'img_onb_') ? 'icon_final_default' : 'icon_final';
+
+        $type_image_guia = isset($data['image_guide_name']) && str_contains($data['image_guide_name'], 'img_guide_') ? 'guide_default' : 'guide';
+
         if(isset($data['file_background_mobile']))
             $data = Media::requestUploadFile($data, 'background_mobile', false, 'background_mobile', 'png');
 
@@ -61,10 +65,10 @@ class ProcessController extends Controller
             $data = Media::requestUploadFile($data, 'logo', false, 'logo', 'png');
 
         if(isset($data['file_image_guia']))
-            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png');
+            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png', $type_image_guia);
 
         if(isset($data['file_icon_finished']))
-            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png');
+            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png', $type_icon_finished);
 
         $process = Process::storeRequest($data);
 
@@ -94,6 +98,10 @@ class ProcessController extends Controller
 
         $data = $request->validated();
 
+        $type_icon_finished = isset($data['icon_finished_name']) && str_contains($data['icon_finished_name'], 'img_onb_') ? 'icon_final_default' : 'icon_final';
+
+        $type_image_guia = isset($data['image_guide_name']) && str_contains($data['image_guide_name'], 'img_guide_') ? 'guide_default' : 'guide';
+
         if(isset($data['file_background_mobile']))
             $data = Media::requestUploadFile($data, 'background_mobile', false, 'background_mobile', 'png');
 
@@ -104,10 +112,10 @@ class ProcessController extends Controller
             $data = Media::requestUploadFile($data, 'logo', false, 'logo', 'png');
 
         if(isset($data['file_image_guia']))
-            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png');
+            $data = Media::requestUploadFile($data, 'image_guia', false, 'image_guia', 'png', $type_image_guia);
 
         if(isset($data['file_icon_finished']))
-            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png');
+            $data = Media::requestUploadFile($data, 'icon_finished', false, 'icon_finished', 'png', $type_icon_finished);
 
         $process = Process::storeRequest($data, $process);
 

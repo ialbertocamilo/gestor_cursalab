@@ -160,7 +160,7 @@
                                 <DefaultModalSectionExpand
                                     title="Avanzado"
                                     :expand="sections.showSectionAdvanced"
-                                    class="my-4"
+                                    class="my-4 bg_card_none"
                                 >
                                     <template slot="content">
 

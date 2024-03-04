@@ -286,7 +286,6 @@ export default {
             vue.$emit('removeImage', null)
         },
         change({ coordinates, canvas }) {
-			console.log(coordinates);
 		},
         resizeImage() {
             let vue = this
@@ -294,7 +293,6 @@ export default {
             let data_url_canvas = result.canvas.toDataURL(
                 "image/png"
             );
-            console.log(data_url_canvas);
             vue.previewImageCropped = data_url_canvas;
             vue.$emit('croppedImage', data_url_canvas)
         },

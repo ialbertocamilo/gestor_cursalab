@@ -54,46 +54,47 @@
                         </ul>
                     </v-row>
 
-                    <v-row justify="space-around" align="start" align-content="center">
-                        <v-col cols="12" class="d-flex justify-content-between pb-0"
-                            @click="advanced_config = !advanced_config"
-                            style="cursor: pointer">
-                            <strong class="cg">Avanzado</strong>
-                            <v-icon v-text="advanced_config ? 'mdi-chevron-up' : 'mdi-chevron-down'"/>
-                        </v-col>
-                        <v-col cols="12" class="py-0 separated">
-                            <DefaultDivider/>
-                        </v-col>
-                    </v-row>
-                    <v-row justify="space-around" align="start" align-content="center">
-                        <v-col cols="12" class="pb-0 pt-0" v-show="advanced_config">
-                            <div>
-                                <span class="text_default">Tipo de confirmación de recepción de documentos</span>
-                            </div>
-                            <div>
-                                <div>
-                                    <v-radio-group v-model="resource.reception" row>
-                                        <v-radio label="Sin confirmar" value="auto"></v-radio>
-                                        <v-radio label="Por firma" value="manual"></v-radio>
-                                    </v-radio-group>
-                                </div>
-                            </div>
-                            <div>
-                                <v-row>
-                                    <v-col cols="6">
-                                        <DefaultAutocomplete
-                                            dense
-                                            label="Indicar actividad requisito"
-                                            v-model="resource.requirement"
-                                            :items="selects.requirement_list"
-                                            item-text="name"
-                                            item-value="code"
-                                        />
-                                    </v-col>
-                                </v-row>
-                            </div>
-                        </v-col>
-                    </v-row>
+                    <DefaultModalSectionExpand
+                        title="Avanzado"
+                        :expand="sections.showSectionAdvanced"
+                        class="my-4 bg_card_none"
+                    >
+                        <template slot="content">
+
+                            <v-row>
+                                <v-col cols="12" class="p-0">
+                                    <div class="mt-2 mb-1">
+                                        <span class="text_default">Tipo de confirmación de recepción de documentos</span>
+                                    </div>
+                                    <div>
+                                        <div>
+                                            <v-radio-group v-model="resource.reception" row>
+                                                <v-radio label="Sin confirmar" value="auto"></v-radio>
+                                                <v-radio label="Por firma" value="manual"></v-radio>
+                                            </v-radio-group>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <DefaultAutocomplete
+                                                    dense
+                                                    label="Indicar actividad requisito"
+                                                    v-model="resource.requirement"
+                                                    :items="selects.requirement_list"
+                                                    item-text="name"
+                                                    item-value="code"
+                                                    :openUp="true"
+                                                />
+                                            </v-col>
+                                        </v-row>
+                                    </div>
+                                </v-col>
+                            </v-row>
+
+                        </template>
+                    </DefaultModalSectionExpand>
+
                 </v-form>
                 <SelectMultimedia :ref="modalPreviewMultimedia.ref" :options="modalPreviewMultimedia" :custom-filter="[]"
                     width="85vw" @onClose="closeSelectPreviewMultimediaModal" @onConfirm="onSelectMediaPreview" />
@@ -150,7 +151,9 @@ export default {
     },
     data() {
         return {
-            advanced_config: false,
+            sections: {
+                showSectionAdvanced: {status: false},
+            },
             errors: [],
             resourceDefault: {
                 id: null,
@@ -170,7 +173,7 @@ export default {
             },
             selects: {
                 courses: [],
-                requirement_list: []
+                requirement_list: [{'code':'none', 'name': 'Sin requisito'}]
             },
             rules: {
                 required: this.getRules(['required']),
@@ -338,16 +341,15 @@ export default {
 
             return 0;
         },
-        async loadSelects() {
+        async loadSelects()
+        {
             let vue = this;
-            // let url = `${vue.options.base_endpoint}/get-selects?type=constraints`
-            // await vue.$http.get(url)
-            //     .then(({ data }) => {
-            //         vue.constraints = data.data;
-            //         console.log(vue.constraints);
-            //     }).catch((error) => {
-            //     });
-            // vue.searchCourses();
+            let url = `${vue.options.base_endpoint}/form-selects`
+
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.requirement_list = data.data.requirements
+                })
         },
         async searchCourses(value) {
             let vue = this;

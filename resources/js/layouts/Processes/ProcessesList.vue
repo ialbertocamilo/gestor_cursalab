@@ -214,7 +214,8 @@ export default {
                             minValue: 1,
                             propertyCond: 'config_completed',
                             color: '#7fbade',
-                            icon: 'mdi mdi-check-circle'
+                            icon: 'mdi mdi-check-circle',
+                            colorActive: true
                         }]
                     },
                     {
@@ -235,7 +236,8 @@ export default {
                             minValue: 1,
                             propertyCond: 'assigned_users',
                             color: '#7fbade',
-                            icon: 'mdi mdi-check-circle'
+                            icon: 'mdi mdi-check-circle',
+                            colorActive: true
                         }]
                     },
                     {
@@ -256,7 +258,8 @@ export default {
                             minValue: 1,
                             propertyCond: 'stages_count',
                             color: '#7fbade',
-                            icon: 'mdi mdi-check-circle'
+                            icon: 'mdi mdi-check-circle',
+                            colorActive: true
                         }]
                     },
                     {
@@ -277,7 +280,8 @@ export default {
                             minValue: 1,
                             propertyCond: 'certificate_template_id',
                             color: '#7fbade',
-                            icon: 'mdi mdi-check-circle'
+                            icon: 'mdi mdi-check-circle',
+                            colorActive: true
                         }]
                     },
                 ],
@@ -577,7 +581,9 @@ export default {
                                 'background_web',
                                 'active',
                                 'image_guia',
-                                'icon_finished'
+                                'icon_finished',
+                                'icon_finished_name',
+                                'image_guide_name'
                             ];
                 const file_fields = [
                                 'logo',
@@ -602,12 +608,23 @@ export default {
                 if(item.img_guia_blob) {
                     resource.image_guia = item.img_guia_blob
                     resource.file_image_guia = item.img_guia_blob
+                    resource.image_guide_name = item.image_guide_name
+                }
+                else {
+                    if(item.image_guia) {
+                        resource.image_guia = item.image_guia
+                        resource.image_guide_name = item.image_guide_name
+                    }
                 }
                 if(item.icon_finished_blob) {
                     resource.icon_finished = item.icon_finished_blob
                     resource.file_icon_finished = item.icon_finished_blob
+                    resource.icon_finished_name = item.icon_finished_name
                 }
-
+                else {
+                    if(item.icon_finished)
+                        resource.icon_finished = item.icon_finished
+                }
 
                 const formData = vue.getMultipartFormData(method, resource, fields, file_fields);
 
