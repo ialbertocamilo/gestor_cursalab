@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use App\Mail\EmailTemplate;
 use App\Models\Mongo\EmailLog;
 use Illuminate\Console\Command;
@@ -30,11 +31,22 @@ class SendEmails extends Command
      */
     public function handle()
     {
-        $this->sendEmails();
+        $this->sendQueueEmails();
+        $this->sendProgrammedEmails();
     }
 
-    private function sendEmails(){
+    private function sendQueueEmails(){
         $emails_log = EmailLog::where('status','no_sent')->limit(15)->get();
+        $this->sendEmails($emails_log);
+    }
+    private function sendProgrammedEmails(){
+        $date_init =Carbon::today()->startOfDay()->format('Y-m-d H:i');
+        $date_final = Carbon::now()->format('Y-m-d H:i');
+        $emails_log = EmailLog::where('status','programmed')->where('time','>=',$date_init)->where('time','<=',$date_final)->limit(40)->get();
+        $this->sendEmails($emails_log);
+    }
+
+    private function sendEmails($emails_log){
         $bar = $this->output->createProgressBar(count($emails_log));
         $bar->start();
         foreach ($emails_log as $email_log) {

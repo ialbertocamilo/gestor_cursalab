@@ -555,9 +555,17 @@ class UserMassive extends Massive implements ToCollection
             if (_validateDate($fecha, 'Y-m-d')) {
                 return $fecha;
             }
-            if (_validateDate($fecha, 'Y/m/d') || _validateDate($fecha, 'd/m/Y') || _validateDate($fecha, 'd-m-Y')) {
-                // return date("d/m/Y",$fecha);
-                return Carbon::parse($fecha)->format('Y-m-d');
+
+            if (_validateDate($fecha, 'Y/m/d') ||
+                _validateDate($fecha, 'd/m/Y') ||
+                _validateDate($fecha, 'd-m-Y')) {
+
+                $originFormat = '';
+                if (_validateDate($fecha, 'Y/m/d')) $originFormat = 'Y/m/d';
+                if (_validateDate($fecha, 'd/m/Y')) $originFormat = 'd/m/Y';
+                if (_validateDate($fecha, 'd-m-Y')) $originFormat = 'd-m-Y';
+
+                return Carbon::createFromFormat($originFormat, $fecha)->format('Y-m-d');
             }
             $php_date = $fecha - 25569;
             $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));

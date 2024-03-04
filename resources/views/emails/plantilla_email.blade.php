@@ -41,10 +41,20 @@
                                         <td >
                                             <a href="https://cursalab.io/" target="_blank"
                                                 style="color: white;text-decoration: none;">
-                                                <img 
-                                                    src="{{ url('/img/logo_cursalab_v2_black.png') }}"
-                                                    alt="Cursalab" width="150"
-                                                    style="max-width: 150;height:auto;border:none;">
+
+                                                @if(isset($data) && isset($data['image_logo']))
+                                                    <img 
+                                                        {{-- src="https://cursalab.io/wp-content/uploads/2022/11/logo-web-light-1536x506.png" --}}
+                                                        src="{{ $data['image_logo'] }}"
+                                                        alt="Cursalab" width="150"
+                                                        style="max-width: 150;height:auto;border:none;">
+                                                @else
+                                                    <img 
+                                                        {{-- src="https://cursalab.io/wp-content/uploads/2022/11/logo-web-light-1536x506.png" --}}
+                                                        src="{{ url('/img/logo_cursalab_v2_black.png') }}"
+                                                        alt="Cursalab" width="150"
+                                                        style="max-width: 150;height:auto;border:none;">
+                                                @endif
                                             </a>
                                         </td> 
                                         @if(isset($data['image_subworkspace']))

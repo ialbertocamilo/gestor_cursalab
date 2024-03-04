@@ -317,7 +317,7 @@ export default {
             },
 
             topicValidationModalDefault: {
-                ref: 'TopicListValidationModal',
+                ref: 'TopicListValidationModalDefault',
                 action: null,
                 open: false,
                 base_endpoint: '',
