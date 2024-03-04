@@ -1,0 +1,1 @@
+php artisan set:menu --name_menu='INDUCCIÓN' --name_submenu='Procesos' --code_submenu='process' --icon_submenu='fa fa-users' --path='procesos' --subpaths='procesos'

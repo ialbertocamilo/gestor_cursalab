@@ -131,6 +131,7 @@ class ReportsController extends Controller
                 $permissions['show_report_historial_usuario'] = true; 
                 $permissions['show_report_criterios_vacios'] = true;
                 $permissions['show_report_multiple_usuarios'] = $isSuperUser; //Only super user
+                $permissions['show_report_process_progress'] = false;
                 break;
             case 'induccion':
                 # code...
@@ -143,7 +144,6 @@ class ReportsController extends Controller
                 $permissions['show_report_videoteca'] = false;
                 $permissions['show_report_vademecun'] = false;
                 $permissions['show_report_notas_usuario'] = false;
-                $permissions['show_report_usuarios'] = true;
                 $permissions['show_report_avance_curricula'] = false;
                 $permissions['show_report_diploma'] = false;
                 $permissions['show_report_visitas'] = false;
@@ -157,6 +157,9 @@ class ReportsController extends Controller
                 $permissions['show_report_ranking'] = false;
                 $permissions['show_report_historial_usuario'] = false; 
                 $permissions['show_report_criterios_vacios'] = false;
+                //REPORTS TO OMBOARDING
+                $permissions['show_report_usuarios'] = true;
+                $permissions['show_report_process_progress'] = true;
                 break;
         }
        return $permissions;
