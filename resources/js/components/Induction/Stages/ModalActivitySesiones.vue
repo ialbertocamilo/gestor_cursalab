@@ -92,7 +92,7 @@
                 <DefaultModalSectionExpand
                     title="Avanzado"
                     :expand="sections.showSectionAdvanced"
-                    class="my-4"
+                    class="my-4 bg_card_none"
                 >
                     <template slot="content">
 
@@ -130,7 +130,7 @@ import VueTimepicker from 'vue2-timepicker'
 import 'vue2-timepicker/dist/VueTimepicker.css'
 
 
-const fields = ['name', 'starts_at', 'date','model_id' ,'time', 'duration', 'attendants', 'type','model_type', 'host', 'description'];
+const fields = ['name', 'starts_at', 'date','model_id' ,'time', 'duration', 'attendants', 'type','model_type', 'host', 'description','requirement'];
 
 export default {
     components: {
@@ -439,8 +439,15 @@ export default {
             }
             return 0;
         },
-        loadSelects() {
-            let vue = this
+        async loadSelects()
+        {
+            let vue = this;
+            let url = `${vue.options.base_endpoint}/form-selects`
+
+            vue.$http.get(url)
+                .then(({data}) => {
+                    vue.selects.requirement_list = data.data.requirements
+                })
         },
         // addAttendants(attendants) {
         //     let vue = this

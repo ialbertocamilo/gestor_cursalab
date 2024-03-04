@@ -68,6 +68,7 @@
                                                 :items="selects.requirement_list"
                                                 item-text="name"
                                                 item-value="code"
+                                                :openUp="true"
                                             />
                                         </v-col>
                                         <v-col cols="12" class="check_active">

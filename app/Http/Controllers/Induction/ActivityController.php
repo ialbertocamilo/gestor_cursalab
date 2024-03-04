@@ -132,7 +132,7 @@ class ActivityController extends Controller
         return $this->success($response);
     }
 
-    public function SesionesGetFormSelects()
+    public function SesionesGetFormSelects(Process $process, Stage $stage)
     {
 
         // $default_meeting_type = Taxonomy::getFirstData('meeting', 'type', 'room');
@@ -151,8 +151,11 @@ class ActivityController extends Controller
         // }
         $hosts = Usuario::getCurrentHosts();
 
+        $q_requisitos = Activity::select('id as code', 'title as name')->where('stage_id', $stage?->id);
+        $requirements = $q_requisitos->orderBy('position')->get();
+
         // $response = compact('types', 'hosts', 'user_types', 'default_meeting_type');
-        $response = compact('hosts', 'user_types');
+        $response = compact('hosts', 'user_types', 'requirements');
 
         return $this->success($response);
     }
@@ -476,9 +479,9 @@ class ActivityController extends Controller
         // if ($topic)
         //     $q_requisitos->whereNotIn('id', [$topic->id]);
 
-        $requisitos = $q_requisitos->orderBy('position')->get();
+        $requirements = $q_requisitos->orderBy('position')->get();
 
-        $response = compact('requisitos');
+        $response = compact('requirements');
 
         return $this->success($response);
     }

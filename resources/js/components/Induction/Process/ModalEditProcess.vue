@@ -139,7 +139,7 @@
                                                             <div class="bg_bubble" :style="backgroundColorSelected"></div>
                                                             <div class="bx_change_img_profile">
                                                                 <div class="bx_img_profile">
-                                                                    <img :src="process.img_guia ? process.img_guia : '/img/induccion/personalizacion/perfil-hombre.png'">
+                                                                    <img :src="process.image_guia ? process.image_guia : '/img/induccion/personalizacion/perfil-hombre.png'">
                                                                     <div class="icon_edit" @click="openFormModal(modalAvatarsRepository, process)" ><img src="/img/induccion/personalizacion/edit_color.svg"></div>
                                                                 </div>
                                                                 <span class="text_default">Cambiar guía</span>
@@ -257,47 +257,47 @@
                                                     <div>
                                                         <div class="box_select_icons">
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_1')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_1')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_1')">
                                                                     <img src="/img/induccion/personalizacion/apreton-de-manos.png" ref="img_onb_1">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_2')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_2')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_2')">
                                                                     <img src="/img/induccion/personalizacion/rascacielos.png" ref="img_onb_2">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_3')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_3')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_3')">
                                                                     <img src="/img/induccion/personalizacion/fabrica.png" ref="img_onb_3">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_4')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_4')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_4')">
                                                                     <img src="/img/induccion/personalizacion/producto.png" ref="img_onb_4">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_5')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_5')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_5')">
                                                                     <img src="/img/induccion/personalizacion/tienda-de-comestibles.png" ref="img_onb_5">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_6')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_6')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_6')">
                                                                     <img src="/img/induccion/personalizacion/mercado.png" ref="img_onb_6">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_7')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_7')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_7')">
                                                                     <img src="/img/induccion/personalizacion/fabrica-2.png" ref="img_onb_7">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_8')">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding('img_onb_8')]" :style="backgroundColorSelected" @click="selectIconOnboarding('img_onb_8')">
                                                                     <img src="/img/induccion/personalizacion/detallista.png" ref="img_onb_8">
                                                                 </div>
                                                             </div>
                                                             <div class="item_icono_onb" v-for="(icon, index) in list_icons_finished_onboarding" :key="index">
-                                                                <div class="bg_icon_item" :style="backgroundColorSelected" @click="process.icon_finished_selected = icon.url ? icon.url : icon.logo_cropped">
+                                                                <div class="bg_icon_item" :class="[classSelectIconOnboarding(icon.title ? icon.title : 'name_icon_'+index)]" :style="backgroundColorSelected" @click="selectIconOnboardingUpload(icon.url ? icon.url : icon.logo_cropped, icon.title ? icon.title : 'name_icon_'+index)">
                                                                     <img :src="icon.url ? icon.url : icon.logo_cropped">
                                                                 </div>
                                                             </div>
@@ -650,6 +650,7 @@ export default {
             colorMapaSelected: '#27f748',
             colorImparPicker: '#27F748',
             colorParPicker: '#8BFC89',
+            icon_finished_selected_name: '',
 
             modalAvatarsRepository: {
                 ref: 'ModalAvatarsRepository',
@@ -904,9 +905,25 @@ export default {
         }
     },
     methods: {
-        async selectIconOnboarding(ref_image) {
+        classSelectIconOnboarding(ref_image) {
             let vue = this
-            vue.process.icon_finished_selected = vue.$refs[ref_image].src
+            return vue.icon_finished_selected_name == ref_image ? 'selected' : ''
+        },
+        selectIconOnboarding(ref_image) {
+            let vue = this
+            vue.$nextTick(() => {
+                vue.process.icon_finished_selected = vue.$refs[ref_image].src
+                vue.process.icon_finished_selected_name = ref_image
+                vue.icon_finished_selected_name = ref_image
+            })
+        },
+        selectIconOnboardingUpload(url, name) {
+            let vue = this
+            vue.$nextTick(() => {
+                vue.process.icon_finished_selected = url
+                vue.process.icon_finished_selected_name = name
+                vue.icon_finished_selected_name = name
+            })
         },
         images_upload_handler(blobInfo, success, failure) {
             let vue = this
@@ -931,11 +948,24 @@ export default {
 
             vue.closeFormModal(vue.modalUploadImageResize)
         },
-        changeImgGuia(data) {
+        changeImgGuia(data, name) {
             let vue = this
+
             if(data.logo_cropped) {
                 vue.$nextTick(() => {
-                    vue.process.img_guia = data.logo_cropped
+                    vue.process.image_guia = data.logo_cropped
+                    vue.process.image_guia_name = 'img_cropped'
+                })
+            }
+            else if(data.url) {
+                vue.$nextTick(() => {
+                    vue.process.image_guia = data.url
+                    vue.process.image_guia_name = 'img_uploaded'
+                })
+            } else {
+                vue.$nextTick(() => {
+                    vue.process.image_guia = data
+                    vue.process.image_guia_name = name
                 })
             }
             vue.closeFormModal(vue.modalAvatarsRepository)
@@ -1088,14 +1118,37 @@ export default {
                 let fondo_web_blob = await fetch(vue.fondo_web_cropped).then(res => res.blob());
                 vue.process.fondo_web = fondo_web_blob;
             }
-            if(vue.process.img_guia)
+            if(vue.process.image_guia)
             {
-                vue.process.img_guia_blob = await fetch(vue.process.img_guia).then(res => res.blob());
+                let image_guia_name = vue.process.image_guia_name &&
+                (vue.process.image_guia_name.indexOf('img_cropped') !== -1 ||
+                vue.process.image_guia_name.indexOf('img_guide_') !== -1)
+
+                if(image_guia_name) {
+                    vue.process.img_guia_blob = await fetch(vue.process.image_guia).then(res => res.blob());
+                }
+                else {
+                    vue.process.image_guia = vue.process.image_guia.split('/induccion/')
+                    vue.process.image_guia = vue.process.image_guia && vue.process.image_guia.length > 0 ? vue.process.image_guia[1] : ''
+                }
+                vue.process.image_guide_name = vue.process.image_guia_name
             }
             if(vue.process.icon_finished_selected)
             {
-                vue.process.icon_finished_blob = await fetch(vue.process.icon_finished_selected).then(res => res.blob());
+                let icon_finished_selected_name = vue.process.icon_finished_selected_name &&
+                (vue.process.icon_finished_selected_name.indexOf('img_onb_') !== -1 ||
+                vue.process.icon_finished_selected_name.indexOf('name_icon_') !== -1)
+
+                if(icon_finished_selected_name) {
+                    vue.process.icon_finished_blob = await fetch(vue.process.icon_finished_selected).then(res => res.blob());
+                }
+                else {
+                    vue.process.icon_finished = vue.process.icon_finished_selected.split('/induccion/')
+                    vue.process.icon_finished = vue.process.icon_finished && vue.process.icon_finished.length > 0 ? vue.process.icon_finished[1] : ''
+                }
+                vue.process.icon_finished_name = vue.process.icon_finished_selected_name
             }
+
             vue.$emit("onConfirm", vue.process);
         },
         showValidateActividades() {
@@ -1764,11 +1817,16 @@ span.v-stepper__step__step:after {
                 opacity: .6;
                 cursor: pointer;
                 overflow: hidden;
+                border: 1px solid #fff;
                 img {
                     max-width: 100%;
                 }
-                &:hover {
+                &:hover{
                     opacity: 1;
+                }
+                &.selected {
+                    opacity: 1;
+                    border-color: #5458EA;
                 }
             }
         }

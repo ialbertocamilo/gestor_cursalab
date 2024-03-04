@@ -36,7 +36,7 @@
                                 <DefaultModalSectionExpand
                                     title="Avanzado"
                                     :expand="sections.showSectionAdvanced"
-                                    class="my-4"
+                                    class="my-4 bg_card_none"
                                 >
                                     <template slot="content">
 
@@ -274,7 +274,7 @@ export default {
 
             vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.requirement_list = data.data.requisitos
+                    vue.selects.requirement_list = data.data.requirements
                 })
         },
         createFormData(method, validateForm) {

@@ -96,7 +96,6 @@ class RestActivityController extends Controller
 
     public function ActivityTopic(Process $process, Topic $topic, Request $request)
     {
-        $topic = Topic::where('id', $topic?->id)->first();
 
         $topics_data = collect();
 

@@ -19,6 +19,7 @@
                 <!-- <p class="title_act">Edita la imagen que estas por subir</p>
                 <p class="title_act">Agregar icono al final del proceso de inducción</p>
                 <div class="bx_items_activitys"> -->
+                <v-form ref="projectForm">
                     <v-row class="mt-3">
                         <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                             <h4 class="text_default lbl_tit" style="font-size: 16px;">Edita la imagen que estas por subir</h4>
@@ -46,6 +47,7 @@
                                 />
                         </v-col>
                     </v-row>
+                </v-form>
                 <!-- </div> -->
             </v-card-text>
 
@@ -74,20 +76,10 @@ export default {
         };
     },
     watch: {
-        // resource: {
-        //     handler(n, o) {
-        //         let vue = this;
-        //         console.log(n);
-        //         console.log(o);
-        //     },
-        //     deep: true
-        // },
         logo_cropped: {
             handler(n, o) {
                 let vue = this;
                 vue.disabled_btn_next = n ? false : true
-                console.log(n);
-                console.log(o);
             },
             deep: true
         },
@@ -111,6 +103,7 @@ export default {
 
         closeModal() {
             let vue = this
+            vue.resetValidation()
             vue.$emit('onCancel')
         },
         selectTemplateOrNewProcessModal(value) {
@@ -126,6 +119,9 @@ export default {
         },
         resetValidation() {
             let vue = this;
+            vue.removeFileFromDropzone(vue.resource.logotipo, 'inputLogo')
+            vue.$refs.projectForm.resetValidation()
+            vue.$refs.projectForm.reset()
             console.log('resetValidation')
             // vue.resource = {}
             // vue.logo_selected = null

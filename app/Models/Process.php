@@ -28,6 +28,7 @@ class Process extends BaseModel
         'background_mobile',
         'color',
         'icon_finished',
+        'icon_finished_name',
         'config_completed',
         'certificate_template_id',
         'starts_at',
@@ -35,6 +36,7 @@ class Process extends BaseModel
         'color_map_even',
         'color_map_odd',
         'image_guia',
+        'image_guide_name',
         'supervisor_criteria',
         'qualification_type_id'
     ];
@@ -178,6 +180,8 @@ class Process extends BaseModel
             $item->background_mobile = $item->background_mobile ? FileService::generateUrl($item->background_mobile) : $item->background_mobile;
             $item->background_web = $item->background_web ? FileService::generateUrl($item->background_web) : $item->background_web;
             $item->repository = $repository_media_process;
+
+            $item->image_guia = $item->image_guia ? FileService::generateUrl($item->image_guia) : $item->image_guia;
 
             $item->config_process = [
                 'edit' => $item->config_completed,

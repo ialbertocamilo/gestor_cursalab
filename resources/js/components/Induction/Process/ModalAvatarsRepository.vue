@@ -20,15 +20,27 @@
                             <v-col cols="12" md="12" lg="12" class="pb-0">
                                 <div class="box_avatars_img">
                                     <div class="item_avatar_img">
-                                        <img src="/img/induccion/personalizacion/perfil-hombre.png">
+                                        <div class="bg_icon_item" :class="[classSelectImageAvatar('img_guide_1')]" @click="selectImageAvatar('img_guide_1')">
+                                            <img src="/img/induccion/personalizacion/perfil-hombre.png" ref="img_guide_1">
+                                        </div>
                                     </div>
                                     <div class="item_avatar_img">
-                                        <img src="/img/induccion/personalizacion/perfil-mujer.png">
+                                        <div class="bg_icon_item" :class="[classSelectImageAvatar('img_guide_2')]" @click="selectImageAvatar('img_guide_2')">
+                                            <img src="/img/induccion/personalizacion/perfil-mujer.png" ref="img_guide_2">
+                                        </div>
                                     </div>
-                                    <div class="item_avatar_img" v-for="(img, index) in list_avatars" :key="999+index" @click="img_selected = img">
-                                        <img :src="img.logo_cropped">
+                                    <div class="item_avatar_img" v-for="(icon, index) in list_avatars" :key="index">
+                                        <div class="bg_icon_item" :class="[classSelectImageAvatar(icon.title ? icon.title : 'name_icon_'+index)]"  @click="selectImageAvatarUpload(icon, icon.title ? icon.title : 'name_icon_'+index)">
+                                            <img :src="icon.url ? icon.url : icon.logo_cropped">
+                                        </div>
                                     </div>
-                                    <div class="item_avatar_img" v-for="(img, index) in list_avatars_empty" :key="111+index"></div>
+                                    <div class="item_avatar_img">
+                                        <div class="bg_icon_item" style="outline: none !important;" @click="openFormModal(modalUploadImageResize)">
+                                            <v-icon style="color: #5458EA;">
+                                                mdi-plus-circle
+                                            </v-icon>
+                                        </div>
+                                    </div>
                                 </div>
                             </v-col>
                         </v-row>
@@ -101,30 +113,39 @@ export default {
             list_avatars_empty: [null,null,null,null],
             logo_selected: null,
             logo_cropped: null,
-            img_selected: null,
+            img_avatar_selected: null,
+            img_avatar_selected_name: '',
         };
     },
     watch: {
-        // process: {
-        //     handler(n, o) {
-        //         let vue = this;
-        //         vue.disabled_btn_next = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
-        //     },
-        //     deep: true
-        // }
-        img_selected: {
+        img_avatar_selected: {
             handler(n, o) {
                 let vue = this;
                 vue.disabled_btn_next = n ? false : true
-                console.log(n);
-                console.log(o);
             },
             deep: true
         },
     },
     methods: {
+        classSelectImageAvatar(ref_image) {
+            let vue = this
+            return vue.img_avatar_selected_name == ref_image ? 'selected' : ''
+        },
+        selectImageAvatar(ref_image) {
+            let vue = this
+            vue.$nextTick(() => {
+                vue.img_avatar_selected = vue.$refs[ref_image].src
+                vue.img_avatar_selected_name = ref_image
+            })
+        },
+        selectImageAvatarUpload(url, name) {
+            let vue = this
+            vue.$nextTick(() => {
+                vue.img_avatar_selected = url
+                vue.img_avatar_selected_name = name
+            })
+        },
         addIconFinishedOnboarding(data) {
-            console.log(data);
             let vue = this
             if(data.logo_cropped)
                 vue.list_avatars.push(data)
@@ -151,7 +172,7 @@ export default {
         },
         async confirm() {
             let vue = this;
-            vue.$emit("onConfirm", vue.img_selected);
+            vue.$emit("onConfirm", vue.img_avatar_selected, vue.img_avatar_selected_name);
         },
         cancel() {
             let vue = this;
@@ -161,7 +182,6 @@ export default {
         },
         async loadData(resource) {
             let vue = this
-            console.log(resource);
 
             if(resource.repository && resource.repository.list_guide.length > 0)
                 vue.list_avatars = resource.repository.list_guide
@@ -189,18 +209,26 @@ export default {
         padding: 30px 20px;
         border-radius: 8px;
         flex-wrap: wrap;
+        height: 260px;
+        overflow: auto;
+        padding-right: 0;
         .item_avatar_img {
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            overflow: hidden;
-            cursor: pointer;
-            background-color: #D9D9D9;
-            img {
-                max-width: 100%;
-            }
-            &:hover {
-                outline: 2px solid #5458EA;
+            .bg_icon_item{
+                width: 88px;
+                height: 88px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor: pointer;
+                background-color: #D9D9D9;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                img {
+                    max-width: 100%;
+                }
+                &:hover, &.selected {
+                    outline: 2px solid #5458EA;
+                }
             }
         }
     }

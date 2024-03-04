@@ -220,7 +220,7 @@ class Media extends BaseModel
      * @param bool $return_media
      * @return Media|Application|UrlGenerator|string
      */
-    protected function uploadFile($file, $name = null, bool $return_media = false, $extension = null)
+    protected function uploadFile($file, $name = null, bool $return_media = false, $extension = null, $type = null)
     {
 
         // Get file values
@@ -330,6 +330,8 @@ class Media extends BaseModel
             $media->ext = $ext;
             $media->size = $size;
             $media->workspace_id = $workspace_id;
+            if($type)
+                $media->type = $type;
             $media->save();
         }
 
@@ -473,7 +475,7 @@ class Media extends BaseModel
         return compact('nombre','find_main_file');
     }
 
-    protected function requestUploadFile($data, $field,$return_media = false, $name_file = null, $ext = null)
+    protected function requestUploadFile($data, $field, $return_media = false, $name_file = null, $ext = null, $type = null)
     {
         if (!empty($data[$field])) {
 
@@ -484,7 +486,7 @@ class Media extends BaseModel
             $file_field = 'file_' . $field;
 
             if (!empty($data[$file_field])) {
-                $path = Media::uploadFile($data[$file_field],$name_file,$return_media, $ext);
+                $path = Media::uploadFile($data[$file_field], $name_file, $return_media, $ext, $type);
                 $data[$field] = $path;
             } else {
                 $data[$field] = null;

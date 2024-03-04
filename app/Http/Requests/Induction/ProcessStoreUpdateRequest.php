@@ -41,7 +41,9 @@ class ProcessStoreUpdateRequest extends FormRequest
             'logo' => 'nullable',
             'file_logo' => 'nullable',
             'image_guia' => 'nullable',
+            'image_guide_name' => 'nullable',
             'file_image_guia' => 'nullable',
+            'icon_finished_name' => 'nullable',
             'icon_finished' => 'nullable',
             'file_icon_finished' => 'nullable',
 

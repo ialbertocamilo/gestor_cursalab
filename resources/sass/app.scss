@@ -543,3 +543,8 @@ Skeletons
 .cursor-pointer {
     cursor: pointer;
 }
+
+.bg_card_none .section-expanded .content-background {
+    border: none;
+    background: none;
+}
