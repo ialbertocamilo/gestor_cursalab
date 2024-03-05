@@ -814,12 +814,13 @@ class Benefit extends BaseModel
             ];
         }
         else {
-
+            $currentYear = Carbon::now()->year;
             $benefits_user_registered = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
                                             $q->orWhere('code', 'approved');
                                             $q->orWhere('code', 'exchanged');
                                         })
+                                        ->whereYear('fecha_registro', $currentYear)
                                         ->where('user_id',$user_id)->count();
             if($benefits_user_registered < $limit_benefits_x_user) {
                 try {
