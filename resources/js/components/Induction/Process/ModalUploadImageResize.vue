@@ -22,12 +22,12 @@
                 <v-form ref="projectForm">
                     <v-row class="mt-3">
                         <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                            <h4 class="text_default lbl_tit" style="font-size: 16px;">Edita la imagen que estas por subir</h4>
+                            <h4 class="text_default lbl_tit" style="font-size: 16px;">Edita la imagen que estás por subir</h4>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                            <span class="text_default">Agregar icono al final del proceso de inducción</span>
+                            <span class="text_default">Agregar ícono al final del proceso de inducción</span>
                         </v-col>
                     </v-row>
                     <v-row>
