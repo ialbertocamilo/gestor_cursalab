@@ -192,6 +192,7 @@ export default {
             },
             imageCropped: null,
             previewImageCropped: null,
+			result: null,
         }
     },
     computed: {
@@ -286,11 +287,21 @@ export default {
             vue.$emit('removeImage', null)
         },
         change({ coordinates, canvas }) {
+			this.result = canvas.toDataURL();
 		},
         resizeImage() {
             let vue = this
             const result = this.$refs.cropper.getResult();
-            let data_url_canvas = result.canvas.toDataURL(
+
+            var resizedCanvas = document.createElement("canvas");
+            var resizedContext = resizedCanvas.getContext("2d");
+
+            resizedCanvas.height = vue.sizeCropp.height;
+            resizedCanvas.width = vue.sizeCropp.width;
+
+            resizedContext.drawImage(result.canvas, 0, 0, vue.sizeCropp.width, vue.sizeCropp.height);
+
+            let data_url_canvas = resizedCanvas.toDataURL(
                 "image/png"
             );
             vue.previewImageCropped = data_url_canvas;

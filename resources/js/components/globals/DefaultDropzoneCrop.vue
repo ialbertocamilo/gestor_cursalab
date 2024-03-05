@@ -283,7 +283,7 @@ export default {
                     thumbnailElement.alt = file.name;
                     thumbnailElement.style.backgroundImage = 'url("' + dataUrl + '")';
                 }
-                vue.$emit("onPreview", dataUrl);
+                vue.$emit("onPreview", file.dataURL);
                 return setTimeout(((function(_this) {
                     return function() {
                         return file.previewElement.classList.add("dz-image-preview");

@@ -36,7 +36,7 @@
                                 <div class="dropdown-icon-width">
                                     <span class="fas fa-shield-alt"></span>
                                 </div>
-                                <span>Gestiona capacitación</span>
+                                <span>Gestiona aprendizaje</span>
                             </button>
                             <button class="dropdown-item py-2 dropdown-item-custom text-body" type="button" onclick="switchPlatform('induccion')">
                                 <div class="dropdown-icon-width">

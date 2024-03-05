@@ -96,6 +96,13 @@ class ActivityController extends Controller
         // return $this->success($data);
     }
 
+    public function editActivityTareas(Process $process, Stage $stage, Activity $activity)
+    {
+        $response = [];
+
+        return $this->success($response);
+    }
+
 
 
     public function SesionesStore(Process $process, Stage $stage, ActivityMeetingRequest $request)

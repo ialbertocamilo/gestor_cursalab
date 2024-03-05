@@ -314,7 +314,7 @@ export default {
                 console.log(1);
             }else{
                 if (resource) {
-                    let url = `${base}/${resource.id}/edit`
+                    let url = `${base}/edit/${resource.id}`
                     await vue.$http.get(url).then(({ data }) => {
                         vue.resource.id = data.data.id;
                         vue.resource.model_id = data.data.model_id;
