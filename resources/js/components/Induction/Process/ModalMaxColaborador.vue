@@ -36,7 +36,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <p class="text_default fw-bold">beneficios como máximo por año.</p>
+                            <p class="text_default fw-bold">beneficios como máximo.</p>
                             <p class="text_default lbl_aviso"><i class="fas fa-exclamation-triangle" style="color: #FF9800;"></i> <b>Recuerda que</b> en caso de reducir la cantidad de beneficios seleccionados, esto retiraría a los usuarios de los últimos beneficios a los que se hayan registrado.</p>
                         </div>
                     </v-col>
