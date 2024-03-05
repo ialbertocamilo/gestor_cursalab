@@ -455,6 +455,14 @@ export default {
             vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
         // === check localstorage anuncio ===
         }
+
+        // When subworkspace_id URL param is present refresh table
+        // with that parameter
+
+        let params = vue.getAllUrlParams(window.location.search);
+        if (params.subworkspace_id) {
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
+        }
     },
     methods: {
         getSelects() {
