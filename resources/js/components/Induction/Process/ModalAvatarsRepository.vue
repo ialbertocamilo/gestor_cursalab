@@ -8,12 +8,12 @@
                     <v-card-text>
                         <v-row class="mt-3">
                             <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                <h4 class="text_default lbl_tit">Repositorio de avatars</h4>
+                                <h4 class="text_default lbl_tit">Repositorio de guías</h4>
                             </v-col>
                         </v-row>
                         <v-row>
                             <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                <span class="text_default">Cambiar foto de perfil de tu empresa.</span>
+                                <span class="text_default">Cambiar foto de guías de tu empresa.</span>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -35,7 +35,7 @@
                                         </div>
                                     </div>
                                     <div class="item_avatar_img">
-                                        <div class="bg_icon_item" style="outline: none !important;" @click="openFormModal(modalUploadImageResize)">
+                                        <div class="bg_icon_item" style="outline: none !important;" @click="openModalUploadAvatarOnboarding(modalUploadImageResize)">
                                             <v-icon style="color: #5458EA;">
                                                 mdi-plus-circle
                                             </v-icon>
@@ -46,8 +46,8 @@
                         </v-row>
                         <v-row class="mt-4 text-center">
                             <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                <DefaultButton :label="'Agregar otra foto de perfil personalizada'"
-                                    @click="openFormModal(modalUploadImageResize)"
+                                <DefaultButton :label="'Agregar otra foto de guía personalizada'"
+                                    @click="openModalUploadAvatarOnboarding(modalUploadImageResize)"
                                     :outlined="true"
                                     style="border-radius: 20px;"
                                     />
@@ -75,6 +75,8 @@
             :width="'500px'"
             @onCancel="closeFormModal(modalUploadImageResize)"
             @onConfirm="addIconFinishedOnboarding"
+            :label="modalUploadImageResize.label"
+            :subtitle="modalUploadImageResize.subtitle"
         />
     </v-dialog>
 </template>
@@ -127,6 +129,13 @@ export default {
         },
     },
     methods: {
+
+        openModalUploadAvatarOnboarding(modalUploadImageResize) {
+            let vue = this
+            modalUploadImageResize.label = 'Recomendado (500 x 500px)'
+            modalUploadImageResize.subtitle = 'Agrega la imagen del guía.'
+            vue.openFormModal(modalUploadImageResize)
+        },
         classSelectImageAvatar(ref_image) {
             let vue = this
             return vue.img_avatar_selected_name == ref_image ? 'selected' : ''

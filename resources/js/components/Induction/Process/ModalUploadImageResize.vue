@@ -27,7 +27,7 @@
                     </v-row>
                     <v-row>
                         <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                            <span class="text_default">Agregar ícono al final del proceso de inducción</span>
+                            <span class="text_default">{{ subtitle ? subtitle : 'Agregar ícono al final del proceso de inducción' }}</span>
                         </v-col>
                     </v-row>
                     <v-row>
@@ -35,7 +35,7 @@
                             <DefaultSelectOrUploadMultimedia
                                 ref="inputLogo"
                                 v-model="resource.logotipo"
-                                label="Logotipo (500 x 500px)"
+                                :label="label ? label : 'Recomendado (500 x 500px)'"
                                 :file-types="['image']"
                                 @onSelect="setFile($event, resource,'logotipo')"
                                 @onPreview="logo_selected = $event"
@@ -65,7 +65,7 @@
 
 <script>
 export default {
-    props: ["value", "width"],
+    props: ["value", "width", "label", "subtitle"],
     data() {
         return {
             dialog: false,

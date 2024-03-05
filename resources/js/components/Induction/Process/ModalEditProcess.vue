@@ -183,7 +183,7 @@
                                                                                 </template>
                                                                                 <v-card>
                                                                                     <v-card-text class="pa-0">
-                                                                                        <v-color-picker v-model="colorPicker" flat />
+                                                                                        <v-color-picker v-model="colorPicker" mode="hexa" flat />
                                                                                     </v-card-text>
                                                                                 </v-card>
                                                                             </v-menu>
@@ -217,7 +217,7 @@
                                                                                 </template>
                                                                                 <v-card>
                                                                                     <v-card-text class="pa-0">
-                                                                                        <v-color-picker v-model="colorImparPicker" flat />
+                                                                                        <v-color-picker v-model="colorImparPicker" mode="hexa" flat />
                                                                                     </v-card-text>
                                                                                 </v-card>
                                                                             </v-menu>
@@ -241,7 +241,7 @@
                                                                                 </template>
                                                                                 <v-card>
                                                                                     <v-card-text class="pa-0">
-                                                                                        <v-color-picker v-model="colorParPicker" flat />
+                                                                                        <v-color-picker v-model="colorParPicker" mode="hexa" flat />
                                                                                     </v-card-text>
                                                                                 </v-card>
                                                                             </v-menu>
@@ -348,7 +348,7 @@
                                                         <DefaultSelectOrUploadMultimedia
                                                             ref="inputFondoMobile"
                                                             v-model="process.fondo_mobile"
-                                                            label="Fondo (720 x 1280px)"
+                                                            label="Fondo mobile (720 x 1280px)"
                                                             :file-types="['image']"
                                                             @onSelect="setFile($event, process, 'fondo_mobile')"
                                                             @onPreview="fondo_mobile_selected = $event"
@@ -1701,6 +1701,7 @@ span.v-stepper__step__step:after {
                 position: relative;
                 border-radius: 6px;
                 overflow: hidden;
+                margin: 0 20px;
                 .bx_fondo_pm img {
                     max-width: 100%;
                 }
