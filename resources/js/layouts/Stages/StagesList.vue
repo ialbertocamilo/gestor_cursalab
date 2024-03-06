@@ -211,7 +211,7 @@
                                                                             </div>
                                                                         </div> -->
                                                                         <div>
-                                                                            <div class="btn_action" @click="()=>{}" :class="{'disabled': activity.new || !activity.active}">
+                                                                            <div class="btn_action" @click="editActivity(stage, activity, i)" :class="{'disabled': activity.new || !activity.active}">
                                                                                 <v-icon class="ml-0 icon_size">
                                                                                     mdi mdi-pencil
                                                                                 </v-icon>
@@ -1070,6 +1070,22 @@ export default {
                     });
             }
         },
+        editActivity( stage, activity, position )
+        {
+            let vue = this;
+
+            // if(stage && activity)
+            // {
+            //     if(activity.type.code == 'tareas')
+            //     {
+            //         vue.modalActivityTareas.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/tareas`
+            //         vue.modalActivityTareas.model_id = stage.id
+            //         vue.modalActivityTareas.school_id = stage.school_id
+
+            //         vue.openFormModal(vue.modalActivityTareas, activity)
+            //     }
+            // }
+        },
         statusActivity( stage, activity, position )
         {
             let vue = this;
@@ -1231,7 +1247,6 @@ export default {
                 vue.modalActivityTareas.school_id = school_id
 
                 vue.openFormModal(vue.modalActivityTareas)
-                // vue.modalCreateProcess.open = true
                 vue.modalSelectActivity.open = false
             }
             else if(value == 'sesiones')

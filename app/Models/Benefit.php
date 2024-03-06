@@ -184,51 +184,73 @@ class Benefit extends BaseModel
             endif;
 
             if(!is_null($list_silabos)) {
-                foreach ($list_silabos as $key => $silabo) {
-                    BenefitProperty::updateOrCreate(
-                        ['id' => str_contains($silabo->id, 'n-') ? null : $silabo->id],
-                        [
-                            'name' => $silabo->name,
-                            'value' => $silabo->value,
-                            'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
-                            'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:i:s') : null,
-                            'active' => $silabo->active,
-                            'benefit_id' => $benefit->id,
-                            'type_id' => $property_silabo->id,
-                            'position' => $key + 1,
-                        ]
-                    );
+
+                if (count($list_silabos) > 0) {
+                    foreach ($list_silabos as $key => $silabo) {
+                        BenefitProperty::updateOrCreate(
+                            ['id' => str_contains($silabo->id, 'n-') ? null : $silabo->id],
+                            [
+                                'name' => $silabo->name,
+                                'value' => $silabo->value,
+                                'value_date' => $silabo->value_date ? Carbon::parse($silabo->value_date)->format('Y-m-d') : null,
+                                'value_time' => $silabo->value_time ? Carbon::parse($silabo->value_time)->format('H:i:s') : null,
+                                'active' => $silabo->active,
+                                'benefit_id' => $benefit->id,
+                                'type_id' => $property_silabo->id,
+                                'position' => $key + 1,
+                            ]
+                        );
+                    }
+                } else {
+                    BenefitProperty::query()
+                        ->where('benefit_id', $benefit->id)
+                        ->where('type_id', $property_silabo->id)
+                        ->delete();
                 }
             }
 
             if(!is_null($list_links)) {
-                foreach ($list_links as $key => $link) {
-                    BenefitProperty::updateOrCreate(
-                        ['id' => str_contains($link->id, 'n-') ? null : $link->id],
-                        [
-                            'name' => $link->name,
-                            'value' => $link->value,
-                            'active' => $link->active,
-                            'benefit_id' => $benefit->id,
-                            'type_id' => $property_links->id,
-                            'position' => $key + 1,
-                        ]
-                    );
+                if (count($list_links) > 0) {
+                    foreach ($list_links as $key => $link) {
+                        BenefitProperty::updateOrCreate(
+                            ['id' => str_contains($link->id, 'n-') ? null : $link->id],
+                            [
+                                'name' => $link->name,
+                                'value' => $link->value,
+                                'active' => $link->active,
+                                'benefit_id' => $benefit->id,
+                                'type_id' => $property_links->id,
+                                'position' => $key + 1,
+                            ]
+                        );
+                    }
+                } else {
+                    BenefitProperty::query()
+                        ->where('benefit_id', $benefit->id)
+                        ->where('type_id', $property_links->id)
+                        ->delete();
                 }
             }
 
             if(!is_null($lista_implementos)) {
-                foreach ($lista_implementos as $key => $implemento) {
-                    BenefitProperty::updateOrCreate(
-                        ['id' => str_contains($implemento->id, 'n-') ? null : $implemento->id],
-                        [
-                            'name' => $implemento->name,
-                            'active' => $implemento->active,
-                            'benefit_id' => $benefit->id,
-                            'type_id' => $property_implements->id,
-                            'position' => $key + 1,
-                        ]
-                    );
+                if (count($lista_implementos) > 0) {
+                    foreach ($lista_implementos as $key => $implemento) {
+                        BenefitProperty::updateOrCreate(
+                            ['id' => str_contains($implemento->id, 'n-') ? null : $implemento->id],
+                            [
+                                'name' => $implemento->name,
+                                'active' => $implemento->active,
+                                'benefit_id' => $benefit->id,
+                                'type_id' => $property_implements->id,
+                                'position' => $key + 1,
+                            ]
+                        );
+                    }
+                } else {
+                    BenefitProperty::query()
+                        ->where('benefit_id', $benefit->id)
+                        ->where('type_id', $property_implements->id)
+                        ->delete();
                 }
             }
 
@@ -814,12 +836,13 @@ class Benefit extends BaseModel
             ];
         }
         else {
-
+            $currentYear = Carbon::now()->year;
             $benefits_user_registered = UserBenefit::whereHas('status', function($q){
                                             $q->where('code', 'subscribed');
                                             $q->orWhere('code', 'approved');
                                             $q->orWhere('code', 'exchanged');
                                         })
+                                        ->whereYear('fecha_registro', $currentYear)
                                         ->where('user_id',$user_id)->count();
             if($benefits_user_registered < $limit_benefits_x_user) {
                 try {
