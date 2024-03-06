@@ -132,6 +132,7 @@ class ReportsController extends Controller
                 $permissions['show_report_criterios_vacios'] = true;
                 $permissions['show_report_multiple_usuarios'] = $isSuperUser; //Only super user
                 $permissions['show_report_process_progress'] = false;
+                $permissions['show_report_process_detail'] = false;
                 break;
             case 'induccion':
                 # code...
@@ -160,6 +161,7 @@ class ReportsController extends Controller
                 //REPORTS TO OMBOARDING
                 $permissions['show_report_usuarios'] = true;
                 $permissions['show_report_process_progress'] = true;
+                $permissions['show_report_process_detail'] = true;
                 break;
         }
        return $permissions;

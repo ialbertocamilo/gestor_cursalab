@@ -3,7 +3,7 @@
         <!-- Resumen del reporte -->
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el progreso de tus procesos.
+                Descarga el detalle de tus procesos.
             </template>
         </ResumenExpand>
 
@@ -11,14 +11,14 @@
             <div class="col-lg-6 col-xl-4 mb-3">
                 <DefaultAutocomplete
                     dense
-                    v-model="selectedModules"
-                    :items="modules"
-                    label="Módulo"
-                    item-text="name"
+                    v-model="selectedProcesses"
+                    :items="processes"
+                    label="Procesos"
+                    item-text="title"
                     item-value="id"
                     multiple
                     :showSelectAll="false"
-                    placeholder="Seleccione los módulos"
+                    placeholder="Seleccione los procesos"
                     :maxValuesSelected="maxValuesSelected.modules"
                 />
             </div>
@@ -67,7 +67,7 @@
 
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
-                        :disabled="selectedModules.length === 0"
+                        :disabled="selectedProcesses.length === 0"
                         class="btn btn-md btn-primary btn-block text-light col-5 col-md-4 py-2">
                     <i class="fas fa-download"></i>
                     <span>Generar reporte</span>
@@ -93,41 +93,45 @@ export default {
     },
     data() {
         return {
-            reportType: 'process_progress',
+            reportType: 'process_detail',
             format: 'xlsx',
             filteredSchools: [],
             schools: [],
             courses: [],
             selectedModules: [],
+            selectedProcesses:[],
             selectedSchools: [],
             selectedCourses: [],
             maxValuesSelected:{
-                modules:4,
+                modules:20,
                 schools:10,
                 show_select_all:false
-            }
+            },
+            processes:[]
         };
     },
-    watch: {
-
-    },
     mounted() {
-        // this.fetchFiltersData()
+        this.fetchFiltersData()
     }
     ,
     methods: {
         generateReport() {
             const vue = this
             vue.$emit('generateReport', {callback: vue.exportReport, type: vue.reportType})
-        }
-        ,
+        },
+        async fetchFiltersData(){
+            let urlReport = `${this.$props.reportsBaseUrl}/filtros/processes/${this.workspaceId}`
+            await axios.get(urlReport).then(({data})=>{
+                console.log(data);
+                this.processes = data;
+            })
+        },
         async exportReport(reportName) {
 
             this.$emit('reportStarted', {})
-            let selectedCourses = [this.selectedCourses];
 
             const filtersDescriptions = {
-                'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
+                'Procesos': this.generateNamesArray(this.processes, this.selectedProcesses),
             }
 
             // Perform request to generate report
@@ -142,7 +146,7 @@ export default {
                         adminId: this.adminId,
                         reportName,
                         filtersDescriptions,
-                        modulesIds: this.selectedModules ? this.selectedModules : [],
+                        processesIds: this.selectedProcesses ? this.selectedProcesses : [],
                         ext: this.format
                     }
                 })

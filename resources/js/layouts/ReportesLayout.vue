@@ -68,6 +68,13 @@
                         Progreso de procesos
                     </span>
                 </v-tab>
+                <v-tab class="justify-content-start py-7" key='process_detail' v-if="permissions.show_report_process_detail">
+                    <v-icon left>fa fa-users</v-icon>
+                    <span class="pt-2">
+                        Detalle de procesos
+                    </span>
+                </v-tab>
+                
                 <v-tab v-if="permissions.show_report_avance_curricula" class="justify-content-start py-7" key='avance-de-currícula'>
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
@@ -222,7 +229,7 @@
                 <v-tab class="justify-content-start py-7" key='benefit-report' v-if="permissions.show_report_benefit">
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
-                        Reporte de Beneficios
+                        Reporte de beneficios
                     </span>
                 </v-tab>
                 <v-tab class="justify-content-start py-7" key='user-benefit-report' v-if="permissions.show_report_benefit">
@@ -272,6 +279,18 @@
                     <v-card flat>
                         <v-card-text>
                             <ProcessProgress
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item v-if="permissions.show_report_process_detail">
+                    <v-card flat>
+                        <v-card-text>
+                            <ProcessDetail
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
@@ -686,6 +705,7 @@ import Dc3Dc4 from '../components/Reportes/Dc3Dc4'
 import RegistroCapacitacion
     from "../components/Reportes/RegistroCapacitacion.vue";
 import ProcessProgress from '../components/Reportes/ProcessProgress.vue';
+import ProcessDetail from '../components/Reportes/ProcessDetail.vue';
 export default {
     components: {
         RegistroCapacitacion,
@@ -717,7 +737,8 @@ export default {
         BenefitsReport,
         UsersBenefitReport,
         Dc3Dc4,
-        ProcessProgress
+        ProcessProgress,
+        ProcessDetail
     },
     data() {
         return {
