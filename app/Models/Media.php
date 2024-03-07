@@ -372,10 +372,12 @@ class Media extends BaseModel
         }
         $total_current_storage = formatSize($total_current_storage, parsed:false);
         // === workspace storage actual ===
+info('total current storage', $total_current_storage['size']);
 
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
         $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' &&
                                 $total_current_storage['size'] <= $total_storage_limit);
+        info('total storage limit', $total_storage_limit);
         return  $still_has_storage;
     }
     protected function extractZipToTempFolder($file, $temp_path)
