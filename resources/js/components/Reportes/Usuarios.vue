@@ -125,7 +125,8 @@ export default {
         workspaceId: 0,
         adminId: 0,
         modules: Array,
-        reportsBaseUrl: ''
+        reportsBaseUrl: '',
+        platform:'',
     },
     data() {
         return {
@@ -174,7 +175,8 @@ export default {
                         UsuariosActivos: UFC.UsuariosActivos,
                         UsuariosInactivos: UFC.UsuariosInactivos,
                         careers: this.career,
-                        areas: this.area
+                        areas: this.area,
+                        platform:this.platform
                     }
                 })
                 const vue = this

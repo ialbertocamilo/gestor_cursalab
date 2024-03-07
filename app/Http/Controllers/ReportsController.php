@@ -79,10 +79,12 @@ class ReportsController extends Controller
      */
     public function loadRepotsTypes(): JsonResponse
     {
-        $report_permissions = $this->getPermissionsReportsByPlatform();        
+        $platform = session('platform') ? session('platform') : 'capacitacion';
+        $report_permissions = $this->getPermissionsReportsByPlatform($platform);        
         return $this->success([
             'types'=>Taxonomy::getDataByGroupAndType('reports', 'report'),
-            'permissions'=> $report_permissions
+            'permissions'=> $report_permissions,
+            'platform' => $platform
         ]);
     }
 
@@ -95,10 +97,9 @@ class ReportsController extends Controller
         return $this->success($report);
     }
 
-    public function getPermissionsReportsByPlatform(){
+    public function getPermissionsReportsByPlatform($platform){
         Auth::checK();
         $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
-        $platform = session('platform') ? session('platform') : 'capacitacion';
         $permissions = [];
         switch ($platform) {
             case 'capacitacion':

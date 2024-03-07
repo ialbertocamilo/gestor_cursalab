@@ -270,6 +270,7 @@
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
+                                :platform="platform"
                                 :reportsBaseUrl="reportsBaseUrl"
                                 @generateReport="generateReport($event)"/>
                         </v-card-text>
@@ -746,6 +747,7 @@ export default {
             workspaceId: 0,
             adminId: 0,
             isSuperUser: false,
+            platform:'capacitacion',
             isAskingForNewReport: false,
             generateReportCallback: () => {},
 
@@ -857,7 +859,7 @@ export default {
 
                 vue.reportTypes = response3.data.data.types;
                 vue.permissions = response3.data.data.permissions;
-
+                vue.platform = response3.data.data.platform;
             } catch (ex) {
                 console.log(ex)
             }
