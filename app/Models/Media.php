@@ -269,7 +269,7 @@ class Media extends BaseModel
         $valid_ext2 = ['mp4', 'webm', 'mov'];
         $valid_ext3 = ['mp3'];
         $valid_ext4 = ['pdf'];
-        $valid_ext5 = ['zip', 'scorm']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
+        $valid_ext5 = ['zip', 'scorm'];
         $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
 
         if (in_array(strtolower($ext), $valid_ext1)) {
@@ -309,7 +309,7 @@ class Media extends BaseModel
         // Upload to remote storage
 
         if (!$uploaded) {
-
+            info($path);
             // $result = Storage::disk('s3')->put($path, file_get_contents($file));
             $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public'); // temporal
 
