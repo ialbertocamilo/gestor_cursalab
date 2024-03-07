@@ -47,7 +47,7 @@
                     v-model="selectedCourses"
                     :items="courses"
                     :disabled="!courses[0]"
-                    label="Curso"
+                    label="Curso con registro de capacitación activado"
                     item-text="name"
                     item-value="id"
                     placeholder="Seleccione los cursos"
@@ -108,7 +108,8 @@ export default {
                 {
                     id:'zip',
                     description: 'Archivo ZIP conteniendo los registros de capacitación'
-                }],
+                }
+            ],
             filteredSchools: [],
             schools: [],
             courses: [],
@@ -174,7 +175,7 @@ export default {
             this.courses = [];
             if (this.selectedSchools.length === 0) return false;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.selectedSchools.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.selectedSchools.join()}/registro-capacitacion`
             let res = await axios({
                 url,
                 method: 'get'

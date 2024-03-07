@@ -1052,8 +1052,9 @@ button.restart-queue {
 
 
 <style scoped>
+
 .v-tab {
-    text-transform: capitalize !important
+    text-transform: unset !important;
 }
 
 .main-tabs-wrapper {
