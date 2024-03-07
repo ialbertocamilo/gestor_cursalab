@@ -21,7 +21,6 @@ use App\Models\{Course,
     School,
     Vademecum,
     Videoteca,
-    Workspace,
     Workspace};
 
 class Media extends BaseModel
