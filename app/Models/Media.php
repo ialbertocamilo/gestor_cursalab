@@ -307,9 +307,8 @@ class Media extends BaseModel
             }
         }
         // Upload to remote storage
-        print_r($path);return '';
-        if (!$uploaded) {
 
+        if (!$uploaded) {
 
             // $result = Storage::disk('s3')->put($path, file_get_contents($file));
             $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public'); // temporal
