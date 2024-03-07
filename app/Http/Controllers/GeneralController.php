@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\DashboardService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Requests\GeneralStorageRequest;
@@ -253,7 +254,11 @@ class GeneralController extends Controller
 
     public function workspace_storage(Request $request)
     {
+        // Reload workspace limits from database instead of using the data
+        // from session, since is likely out-of-date
         $workspace = get_current_workspace();
+        $workspace = Workspace::find($workspace->id);
+
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
         $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
 
@@ -282,7 +287,7 @@ class GeneralController extends Controller
         $workspace_storage = DashboardService::loadCountUsersWorkspaces();
         $platform = session('platform');
         $users_count_inactives = $workspace_storage->subworkspaces->sum('users_count_actives');
-        
+
 
         $total_current_storage = $users_count_inactives + 1;
         $user_storage_check = $workspace_storage->limit_allowed_users['quantity'] < $total_current_storage;

@@ -15,7 +15,14 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Foundation\Application;
-use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
+use App\Models\{Course,
+    Topic,
+    Announcement,
+    School,
+    Vademecum,
+    Videoteca,
+    Workspace,
+    Workspace};
 
 class Media extends BaseModel
 {
@@ -362,7 +369,13 @@ class Media extends BaseModel
         return $media;
     }
     protected function validateStorageByWorkspace($files){
+
+        // Reload workspace limits from database instead of using the data
+        // from session, since is likely out-of-date
         $workspace = get_current_workspace();
+        $workspace = Workspace::find($workspace->id);
+
+
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
         $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
 
@@ -374,12 +387,10 @@ class Media extends BaseModel
         $total_current_storage = formatSize($total_current_storage, parsed:false);
         // === workspace storage actual ===
 
-        info('total current storage' . json_encode($total_current_storage));
-
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
         $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' &&
                                 $total_current_storage['size'] <= $total_storage_limit);
-        info('total storage limit'. $total_storage_limit);
+
         return  $still_has_storage;
     }
     protected function extractZipToTempFolder($file, $temp_path)
