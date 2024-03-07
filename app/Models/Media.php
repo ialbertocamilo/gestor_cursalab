@@ -309,7 +309,7 @@ class Media extends BaseModel
         // Upload to remote storage
 
         if (!$uploaded) {
-            info($path);
+            print_r($path);
             // $result = Storage::disk('s3')->put($path, file_get_contents($file));
             $result = Storage::disk('s3')->put($path, file_get_contents($file), 'public'); // temporal
 
