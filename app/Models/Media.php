@@ -307,7 +307,7 @@ class Media extends BaseModel
             }
         }
         // Upload to remote storage
-        print_r($path);return '';
+        dd($path);return '';
         if (!$uploaded) {
 
 
