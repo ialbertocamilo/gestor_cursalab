@@ -49,87 +49,99 @@
                 ============================================================================ -->
 
 
-                <v-tab class="justify-content-start py-7" :key="'#notas-de-usuario'">
+                <v-tab class="justify-content-start py-7" :key="'#notas-de-usuario'"  v-if="permissions.show_report_notas_usuario">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Notas de usuario
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='usuarios'>
+                <v-tab class="justify-content-start py-7" key='usuarios' v-if="permissions.show_report_usuarios">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Usuarios
                     </span>
                 </v-tab>
-
-                <v-tab class="justify-content-start py-7" key='avance-de-currícula'>
+                <v-tab class="justify-content-start py-7" key='process_progress' v-if="permissions.show_report_process_progress">
+                    <v-icon left>fa fa-users</v-icon>
+                    <span class="pt-2">
+                        Progreso de procesos
+                    </span>
+                </v-tab>
+                <v-tab class="justify-content-start py-7" key='process_detail' v-if="permissions.show_report_process_detail">
+                    <v-icon left>fa fa-users</v-icon>
+                    <span class="pt-2">
+                        Detalle de procesos
+                    </span>
+                </v-tab>
+                
+                <v-tab v-if="permissions.show_report_avance_curricula" class="justify-content-start py-7" key='avance-de-currícula'>
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Avance de currícula
                    </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='diplomas'>
+                <v-tab v-if="permissions.show_report_diploma" class="justify-content-start py-7" key='diplomas'>
                     <v-icon left>mdi-certificate</v-icon>
                     <span class="pt-2">
                         Diplomas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='visitas'>
+                <v-tab v-if="permissions.show_report_visitas" class="justify-content-start py-7" key='visitas'>
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Visitas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='notas-por-tema'>
+                <v-tab v-if="permissions.show_report_nota_por_tema" class="justify-content-start py-7" key='notas-por-tema'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Notas por tema
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='temas-no-evaluables'>
+                <v-tab v-if="permissions.show_report_tema_no_evaluable" class="justify-content-start py-7" key='temas-no-evaluables'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Temas no evaluables
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='notas-por-curso'>
+                <v-tab v-if="permissions.show_report_nota_por_curso" class="justify-content-start py-7" key='notas-por-curso'>
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Notas por curso
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' >
+                <v-tab class="justify-content-start py-7" key='dc3-dc4-report' v-if="permissions.show_report_dc3">
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        DC3 - DC4
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='registro-capacitacion' >
+                <v-tab class="justify-content-start py-7" key='registro-capacitacion' v-if="permissions.show_report_registro_capacitacion">
                     <v-icon left>mdi-book-open-page-variant-outline</v-icon>
                     <span class="pt-2">
                        Registro de capacitación
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='segmentacion'>
+                <v-tab v-if="permissions.show_report_segmentacion" class="justify-content-start py-7" key='segmentacion'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
                        Segmentación
                    </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='evaluaciones-abiertas'>
+                <v-tab v-if="permissions.show_report_evaluaciones_abiertas" class="justify-content-start py-7" key='evaluaciones-abiertas'>
                     <v-icon left>mdi-book-outline</v-icon>
                     <span class="pt-2">
                         Evaluaciones abiertas
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='reinicios'>
+                <v-tab v-if="permissions.show_report_reinicios" class="justify-content-start py-7" key='reinicios'>
                     <v-icon left>mdi-restart</v-icon>
                     <span class="pt-2">
                         Reinicios
@@ -143,35 +155,35 @@
                                     </span>
                                 </v-tab>
                 -->
-                <v-tab class="justify-content-start py-7" key='usuarios-uploads'>
+                <v-tab v-if="permissions.show_report_usuario_uploads" class="justify-content-start py-7" key='usuarios-uploads'>
                     <v-icon left>mdi-file-account-outline</v-icon>
                     <span class="pt-2">
                         Usuario Uploads
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='vademecum'>
+                <v-tab class="justify-content-start py-7" key='vademecum' v-if="permissions.show_report_vademecun">
                     <v-icon left>mdi-access-point</v-icon>
                     <span class="pt-2">
                         Protocolos y documentos
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='videoteca'>
+                <v-tab class="justify-content-start py-7" key='videoteca' v-if="permissions.show_report_videoteca">
                     <v-icon left>mdi-play-box-outline</v-icon>
                     <span class="pt-2">
                         Videoteca
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='checklist-detallado'>
+                <v-tab class="justify-content-start py-7" key='checklist-detallado' v-if="permissions.show_report_checklist">
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist Detallado
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='checklist-general'>
+                <v-tab class="justify-content-start py-7" key='checklist-general' v-if="permissions.show_report_checklist">
                     <v-icon left>mdi-playlist-check</v-icon>
                     <span class="pt-2">
                         Checklist General
@@ -179,55 +191,54 @@
                 </v-tab>
 
 
-                <v-tab class="justify-content-start py-7" key='ranking'>
+                <v-tab v-if="permissions.show_report_ranking" class="justify-content-start py-7" key='ranking'>
                     <v-icon left>mdi-numeric</v-icon>
                     <span class="pt-2">
                         Ranking
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='reuniones'>
+                <v-tab class="justify-content-start py-7" key='reuniones' v-if="permissions.show_report_sessions_live">
                     <v-icon left>mdi-monitor-account</v-icon>
                     <span class="pt-2">
                         Reuniones
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='historial-de-usuario'>
+                <v-tab v-if="permissions.show_report_historial_usuario" class="justify-content-start py-7" key='historial-de-usuario'>
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Historial de usuario
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7" key='criterios-vacios'>
+                <v-tab v-if="permissions.show_report_criterios_vacios" class="justify-content-start py-7" key='criterios-vacios'>
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
                         Criterios vacíos
                     </span>
                 </v-tab>
 
-                <v-tab class="justify-content-start py-7"
-                       v-if="isSuperUser"
+                <v-tab v-if="permissions.show_report_multiple_usuarios" class="justify-content-start py-7"
                        key='historial-multiples-usuarios'>
                     <v-icon left>mdi-account-multiple</v-icon>
                     <span class="pt-2">
                         Historial de múltiples usuarios
                     </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='benefit-report'>
+                <v-tab class="justify-content-start py-7" key='benefit-report' v-if="permissions.show_report_benefit">
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
-                        Reporte de Beneficios
+                        Reporte de beneficios
                     </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='user-benefit-report'>
+                <v-tab class="justify-content-start py-7" key='user-benefit-report' v-if="permissions.show_report_benefit">
                     <v-icon left>fa fa-square</v-icon>
                     <span class="pt-2">
                         Usuarios segmentados al Beneficio
                     </span>
                 </v-tab>
-                <v-tab class="justify-content-start py-7" key='votaciones' v-if="isSuperUser">
+                <v-tab class="justify-content-start py-7" key='votaciones' v-if="permissions.show_report_reconocimiento">
                     <v-icon left>fa fa-paper-plane</v-icon>
                     <span class="pt-2">
                         Votaciones
@@ -240,7 +251,7 @@
 
                 ============================================================================ -->
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_notas_usuario">
                     <v-card flat>
                         <v-card-text>
                             <NotasUsuario
@@ -252,10 +263,23 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_usuarios">
                     <v-card flat>
                         <v-card-text>
                             <Usuarios
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :platform="platform"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item v-if="permissions.show_report_process_progress">
+                    <v-card flat>
+                        <v-card-text>
+                            <ProcessProgress
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :modules="modules"
@@ -264,8 +288,19 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_process_detail">
+                    <v-card flat>
+                        <v-card-text>
+                            <ProcessDetail
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :modules="modules"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                @generateReport="generateReport($event)"/>
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item>
+                <v-tab-item v-if="permissions.show_report_avance_curricula">
                     <v-card flat>
                         <v-card-text>
                             <AvanceCurricula
@@ -278,7 +313,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_diploma">
                     <v-card flat>
                         <v-card-text>
                             <Diploma
@@ -291,7 +326,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_visitas">
                     <v-card flat>
                         <v-card-text>
                             <Visitas
@@ -304,7 +339,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_nota_por_tema">
                     <v-card flat>
                         <v-card-text>
                             <NotasTema
@@ -318,7 +353,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_tema_no_evaluable">
                     <v-card flat>
                         <v-card-text>
                             <TemasNoEvaluables
@@ -332,7 +367,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_nota_por_curso">
                     <v-card flat>
                         <v-card-text>
                             <NotasCurso
@@ -345,7 +380,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_dc3">
                     <v-card flat>
                         <v-card-text>
                             <Dc3Dc4
@@ -357,7 +392,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_registro_capacitacion">
                     <v-card flat>
                         <v-card-text>
                             <RegistroCapacitacion
@@ -369,7 +404,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_segmentacion">
                     <v-card flat>
                         <v-card-text>
                             <Segmentacion
@@ -382,7 +417,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_evaluaciones_abiertas">
                     <v-card flat>
                         <v-card-text>
                             <EvaAbiertas
@@ -395,7 +430,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_reinicios">
                     <v-card flat>
                         <v-card-text>
                             <Renicios
@@ -417,7 +452,7 @@
                                     </v-card>
                                 </v-tab-item>
                 -->
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_usuario_uploads">
                     <v-card flat>
                         <v-card-text>
                             <UsuarioUploads
@@ -429,7 +464,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_vademecun">
                     <v-card flat>
                         <v-card-text>
                             <Vademecum
@@ -442,7 +477,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_videoteca">
                     <v-card flat>
                         <v-card-text>
                             <Videoteca
@@ -454,7 +489,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_checklist">
                     <v-card flat>
                         <v-card-text>
                             <ChecklistDetallado
@@ -467,7 +502,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_checklist">
                     <v-card flat>
                         <v-card-text>
                             <ChecklistGeneral
@@ -480,7 +515,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_ranking">
                     <v-card flat>
                         <v-card-text>
                             <Ranking
@@ -496,7 +531,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_sessions_live">
                     <v-card flat>
                         <v-card-text>
                             <Meetings
@@ -507,7 +542,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_historial_usuario">
                     <v-card flat>
                         <v-card-text>
                             <HistorialUsuario
@@ -520,7 +555,7 @@
                     </v-card>
                 </v-tab-item>
 
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_criterios_vacios">
                     <v-card flat>
                         <v-card-text>
                             <EmptyCriteria
@@ -534,7 +569,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item v-if="isSuperUser">
+                <v-tab-item v-if="permissions.show_report_multiple_usuarios">
                     <v-card flat>
                         <v-card-text>
                             <UsersHistory
@@ -548,7 +583,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_benefit">
                     <v-card flat>
                         <v-card-text>
                             <BenefitsReport
@@ -562,7 +597,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                <v-tab-item>
+                <v-tab-item v-if="permissions.show_report_benefit">
                     <v-card flat>
                         <v-card-text>
                             <UsersBenefitReport
@@ -576,7 +611,7 @@
                         </v-card-text>
                     </v-card>
                 </v-tab-item>
-                 <v-tab-item v-if="isSuperUser">
+                 <v-tab-item v-if="permissions.show_report_reconocimiento">
                     <v-card flat>
                         <v-card-text>
                             <Votaciones
@@ -670,7 +705,8 @@ import Votaciones from "../components/Reportes/Votaciones.vue";
 import Dc3Dc4 from '../components/Reportes/Dc3Dc4'
 import RegistroCapacitacion
     from "../components/Reportes/RegistroCapacitacion.vue";
-
+import ProcessProgress from '../components/Reportes/ProcessProgress.vue';
+import ProcessDetail from '../components/Reportes/ProcessDetail.vue';
 export default {
     components: {
         RegistroCapacitacion,
@@ -701,7 +737,9 @@ export default {
         Segmentacion,
         BenefitsReport,
         UsersBenefitReport,
-        Dc3Dc4
+        Dc3Dc4,
+        ProcessProgress,
+        ProcessDetail
     },
     data() {
         return {
@@ -709,6 +747,7 @@ export default {
             workspaceId: 0,
             adminId: 0,
             isSuperUser: false,
+            platform:'capacitacion',
             isAskingForNewReport: false,
             generateReportCallback: () => {},
 
@@ -742,7 +781,31 @@ export default {
             reportDownloadUrl: null,
             reportFilename: null,
             permissions:{
-                hasPermissionToShowDc3Report:false
+                show_report_dc3:false,
+                show_report_registro_capacitacion:false,
+                show_report_sessions_live:false,
+                show_report_benefit:false,
+                show_report_reconocimiento:false,
+                show_report_checklist:false,
+                show_report_videoteca:false,
+                show_report_vademecun:false,
+                show_report_notas_usuario:false,
+                show_report_usuarios:false,
+                show_report_avance_curricula:false,
+                show_report_diploma:false,
+                show_report_visitas:false,
+                show_report_nota_por_tema:false,
+                show_report_tema_no_evaluable:false,
+                show_report_nota_por_curso:false,
+                show_report_segmentacion:false,
+                show_report_evaluaciones_abiertas:false,
+                show_report_reinicios:false,
+                show_report_usuario_uploads:false,
+                show_report_ranking:false,
+                show_report_historial_usuario:false,
+                show_report_criterios_vacios:false,
+                show_report_multiple_usuarios:false,
+                show_report_process_progress:false,
             }
         }
     },
@@ -795,8 +858,8 @@ export default {
                 })
 
                 vue.reportTypes = response3.data.data.types;
-                vue.permissions.hasPermissionToShowDc3Report = response3.data.data.hasPermissionToShowDc3Report;
-
+                vue.permissions = response3.data.data.permissions;
+                vue.platform = response3.data.data.platform;
             } catch (ex) {
                 console.log(ex)
             }

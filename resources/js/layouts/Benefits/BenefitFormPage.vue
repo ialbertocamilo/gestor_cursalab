@@ -672,9 +672,13 @@
                                         <span class="lbl_ben_implementos">Implementos necesarios</span>
                                         <div class="box_input_implementos">
                                             <div class="box_list_implementos">
-                                                <span class="item_implementos"  v-for="(implemento, i) in lista_implementos" :key="implemento.id">
+                                                <span class="item_implementos"
+                                                      v-for="(implemento, i) in lista_implementos"
+                                                      :key="implemento.id">
                                                     {{implemento.name}}
-                                                    <v-icon @click="lista_implementos.splice(i, 1);">mdi-close-circle</v-icon>
+                                                    <v-icon @click="lista_implementos.splice(i, 1);">
+                                                        mdi-close-circle
+                                                    </v-icon>
                                                 </span>
                                             </div>
                                             <div class="box_text_implementos" v-if="show_text_add_implement">
@@ -1184,6 +1188,31 @@ export default {
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.benefit_id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
 
+            // Clear values from inactive configurations
+
+            if (!vue.isModuleOptionActive('promotor'))
+                vue.resource.promotor = null;
+
+            if (!vue.isModuleOptionActive('speaker'))
+                vue.resource.speaker = null;
+
+            if (!vue.isModuleOptionActive('dificultad'))
+                vue.resource.dificultad = null;
+
+            if (!vue.isModuleOptionActive('duracion'))
+                vue.resource.duracion = null;
+
+            if (!vue.isModuleOptionActive('silabo'))
+                vue.list_silabos = [];
+
+            if (!vue.isModuleOptionActive('links'))
+                vue.list_links = [];
+
+            if (!vue.isModuleOptionActive('implementos'))
+                vue.lista_implementos = [];
+
+            // Preperate data
+
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
             formData.append('validateForm', validateForm ? "1" : "0");
 
@@ -1449,6 +1478,15 @@ export default {
             let vue = this;
             vue.modalSelectSpeaker.open = false
             window.open(`/speakers/create?mode=assign`)
+        },
+        isModuleOptionActive(code) {
+
+            let option = this.options_modules.find(o => o.code === code)
+            if (option) {
+                return option.active;
+            } else {
+                return false;
+            }
         }
     }
 }
