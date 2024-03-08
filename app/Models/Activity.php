@@ -42,8 +42,13 @@ class Activity extends BaseModel
         return $this->morphMany(Project::class, 'model');
     }
 
+    public function model()
+    {
+        return $this->morphTo();
+    }
+
     public function requirement()
     {
-        return $this->belongsTo(Topic::class, 'activity_requirement_id');
+        return $this->belongsTo(Activity::class, 'activity_requirement_id');
     }
 }

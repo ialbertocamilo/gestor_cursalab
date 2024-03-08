@@ -61,7 +61,8 @@ class ActivityController extends Controller
 
         $request->request->add([
             'platform_id' => $platform_onboarding?->id,
-            'course_id' => $course?->id
+            'course_id' => $course?->id,
+            'active' => 1,
         ]);
         $data = Project::storeUpdateRequest($request);
 

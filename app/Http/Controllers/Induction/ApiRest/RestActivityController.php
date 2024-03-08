@@ -16,6 +16,7 @@ use App\Models\Meeting;
 use App\Models\Poll;
 use App\Models\Process;
 use App\Models\ProcessSummaryActivity;
+use App\Models\Project;
 use App\Models\Question;
 use App\Models\Speaker;
 use App\Models\SummaryTopic;
@@ -97,7 +98,7 @@ class RestActivityController extends Controller
     public function ActivityTopic(Process $process, Topic $topic, Request $request)
     {
 
-        $topics_data = collect();
+        $topics_data = null;
 
         if($topic)
         {
@@ -143,7 +144,7 @@ class RestActivityController extends Controller
 
             // $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
 
-            $topics_data->push([
+            $topics_data['resources'] = [
                 'id' => $topic->id,
                 'nombre' => $topic->name,
                 // 'requisito_id' => $topic_status['topic_requirement'],
@@ -163,7 +164,7 @@ class RestActivityController extends Controller
                 // 'estado_tema' => $topic_status['status'],
                 // 'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                 // 'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
-            ]);
+            ];
         }
         return $this->successApp(['data' => $topics_data]);
     }
@@ -300,22 +301,70 @@ class RestActivityController extends Controller
     public function RegisterActivity(Process $process,  Request $request )
     {
         $user = Auth::user();
-        // dd($request->all(), $request->activity_id);
-        // $summary_activity = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $request->activity_id)->first();
-        $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $request->activity_id]);
-        // dd($summary_activity);
-        if($summary_activity)
+        $activity = Activity::with('model')->where('id', $request->activity_id)->first();
+        if($activity)
         {
-            // $summary_activity
+            if($activity->model_type == Project::class)
+            {
+                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                if($summary_activity)
+                {
+                    $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                    $summary_activity->progress = 100;
+                    $summary_activity->save();
+                }
+            }
+            else if($activity->model_type == Topic::class)
+            {
+                $activity_topic = $activity->model;
+
+                $media_topics = MediaTema::where('topic_id',$activity_topic->id)->orderBy('position')->get();
+
+                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+                ->where('topic_id', $activity_topic->id)
+                ->where('user_id', $user->id)
+                ->first();
+
+                $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+
+                $count_media_topics = $media_topics->count();
+                $count_media_completed = 0;
+
+                foreach ($media_topics as $media) {
+                    if(!is_null($media_progress)){
+                        foreach($media_progress as $medp){
+                            if($medp->media_topic_id == $media->id){
+                                if($medp->status == 'revisado')
+                                    $count_media_completed++;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $progress = $count_media_completed > 0 && $count_media_topics > 0 ? round(((($count_media_completed * 100 / $count_media_topics) * 100) / 100),2) : 0;
+
+                if($progress == 0) {
+                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'pending')?->id;
+                }
+                else if($progress >= 100) {
+                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                }
+                else {
+                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'in-progress')?->id;
+                }
+
+                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                if($summary_activity)
+                {
+                    $summary_activity->status_id = $status_progress;
+                    $summary_activity->progress = $progress;
+                    $summary_activity->save();
+                }
+
+            }
         }
-        // Taxonomy::firstOrCreate([
-        //     'group' => 'segment',
-        //     'type' => 'code',
-        //     'code' => 'user-supervise',
-        //     'name' => 'Supervisión de usuarios',
-        //     'active' => ACTIVE,
-        //     'position' => 1,
-        // ]);
+
         return response()->json(['error' => false], 200);
     }
 }
