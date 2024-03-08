@@ -56,8 +56,8 @@
                     </div>
                 </div>
                 <div class="bx_content" v-else-if="options.type_modal == 'confirm'">
-                    <div class="bx_header">
-                        <div class="img"><img src="/img/modal_alert.png"></div>
+                    <div class="bx_header d-flex justify-content-center">
+                        <div class="img"><img :src="`${options.image ? options.image : '/img/modal_alert.png'}`"></div>
                         <div class="cont">
                             <span>{{ options.content_modal.confirm.title }}</span>
                         </div>

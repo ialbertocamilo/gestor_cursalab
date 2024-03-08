@@ -135,6 +135,17 @@
                                         @onSelect="setFile($event, resource, 'logo_empresa')"
                                     />
                                 </v-col>
+                                <v-col cols="6">
+                                    <DefaultSimpleSection title="Configuración para cursos sin conexión" marginy="my-6 card_border card pb-4">
+                                        <template slot="content">
+                                            <DefaultInput
+                                                v-model="resource.size_limit_offline"
+                                                clearable
+                                                label="Tamaño en MB de los limites en cursos"
+                                            />
+                                        </template>
+                                    </DefaultSimpleSection>
+                                </v-col>
                             </v-row>
                         </v-form>
                     </v-card>
@@ -488,7 +499,7 @@ const fields = [
     // gestor
     'link_genially', 'color_primario', 'color_secundario',
     'titulo', 'titulo_login',
-    'fondo', 'logo', 'icono', 'logo_empresa', 'template',
+    'fondo', 'logo', 'icono', 'logo_empresa', 'template','size_limit_offline',
     //app
     'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position',
     'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app','fondo_invitados_app' ,'logo_app',

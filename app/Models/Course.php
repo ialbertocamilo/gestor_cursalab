@@ -20,7 +20,7 @@ class Course extends BaseModel
         'certificate_template_id',
         'activate_at', 'deactivate_at', 'user_confirms_certificate',
         'can_create_certificate_dc3_dc4','dc3_configuration','registro_capacitacion','modality_in_person_properties',
-        'platform_id'
+        'platform_id','is_offline'
     ];
 
     protected $casts = [

@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mongo\CourseInfoUsersM;
-use App\Models\RegistroCapacitacionTrainer;
 use DB;
 use App\Models\Poll;
 use App\Models\Ciclo;
 use App\Models\Curso;
-
 use App\Models\Media;
 use App\Models\Topic;
+
 use App\Models\Course;
 use App\Models\Person;
 use App\Models\Posteo;
+use App\Models\School;
+use App\Models\Ability;
 
 // use App\Perfil;
 // use App\Curso_perfil;
 // use App\Posteo_perfil;
-use App\Models\School;
-use App\Models\Ability;
 use App\Models\Carrera;
 use App\Models\Abconfig;
+use App\Models\Ambiente;
 use App\Models\Pregunta;
 use App\Models\Taxonomy;
 use App\Models\Categoria;
@@ -29,16 +28,18 @@ use App\Models\Curricula;
 use App\Models\Workspace;
 use App\Models\Requirement;
 use App\Models\CourseSchool;
-
 use App\Models\SortingModel;
 
 use Illuminate\Http\Request;
+
 use App\Models\Curso_encuesta;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Mongo\CourseInfoUsersM;
 use App\Http\Requests\CursoStoreRequest;
+use App\Models\RegistroCapacitacionTrainer;
 use App\Http\Requests\Curso\MoverCursoRequest;
-use App\Exports\Course\CourseSegmentationExport;
 
+use App\Exports\Course\CourseSegmentationExport;
 use App\Http\Resources\Curso\CursoSearchResource;
 use App\Http\Controllers\ApiRest\HelperController;
 use App\Http\Requests\Curso\CursoEncuestaStoreUpdate;
@@ -153,12 +154,12 @@ class CursosController extends Controller
                 ->get();
         }
 
-
+        $size_limit_offline = Ambiente::getSizeLimitOffline();
         $response = compact(
             'escuelas', 'requisitos', 'types', 'qualification_types',
             'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
             'instructors','legal_representatives','catalog_denominations','modalities',
-            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers'
+            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers','size_limit_offline'
         );
 
 
@@ -224,6 +225,7 @@ class CursosController extends Controller
             'has_DC3_functionality' => $form_selects['has_DC3_functionality'],
             'has_registro_capacitacion_functionality' => $form_selects['has_registro_capacitacion_functionality'],
             'registro_capacitacion_trainers' => $form_selects['registro_capacitacion_trainers'],
+            'size_limit_offline'=>$form_selects['size_limit_offline'],
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
             'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate,
             'has_DC3_functionality' => $has_DC3_functionality,
@@ -464,7 +466,6 @@ class CursosController extends Controller
 
         $types = Taxonomy::getSelectData('course', 'type');
         $modalities = $workspace->getModalitiesCourseByWorkspace();
-
         return $this->success(compact('types','modalities'));
     }
 

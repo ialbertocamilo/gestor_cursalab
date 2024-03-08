@@ -324,6 +324,18 @@
                                         </v-row>
                                     </template>
                                 </DefaultSimpleSection>
+                                <DefaultSimpleSection  v-if="current_modality.code == 'asynchronous'" title="Habilitar modo sin conexión para el curso" >
+                                    <template slot="content">
+                                        <v-row>
+                                            <div class="col-12">
+                                                <DefaultToggle dense
+                                                    :active-label="'Activar modo sin conexión para este curso en la plataforma'"
+                                                    :inactive-label="'Activar modo sin conexión para este curso en la plataforma'"
+                                                    v-model="resource.is_offline" />
+                                            </div>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
                                 <DefaultSimpleSection title="Programación de reinicios de evaluaciones"
                                     v-if="current_modality.code == 'asynchronous'">
                                     <template slot="content">
@@ -417,8 +429,12 @@
 
             <DialogConfirm :ref="trainerDeleteConfirmationDialog.ref" v-model="trainerDeleteConfirmationDialog.open"
                 width="408px" title="Eliminar entrenador" subtitle="¿Está seguro de eliminar el entrenador?"
-                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />
-
+                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />       
+            
+            <DialogConfirm v-model="modalInfoOffline.open" :options="modalInfoOffline" width="408px"
+                title="Toma nota" subtitle="¡Toma nota!"
+                @onConfirm="confirmModal(false)" @onCancel="modalInfoOffline.open = false" />
+            
             <DC3PersonModal :ref="modalDC3PersonOptions.ref" v-model="modalDC3PersonOptions.open"
                 :options="modalDC3PersonOptions" width="30vw" @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false" />
@@ -437,7 +453,7 @@ const fields = [
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
     'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate', 'can_create_certificate_dc3_dc4',
-    'dc3_configuration', 'registro_capacitacion', 'modality_id'
+    'dc3_configuration', 'registro_capacitacion', 'modality_id','is_offline'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -445,12 +461,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
 import RegistroTrainerModal from './RegistroTrainerModal';
-import DefaultRichText from "../../components/globals/DefaultRichText.vue";
-
+import DefaultRichText from "../../components/globals/DefaultRichText";
 export default {
     components: {
         DefaultRichText,
-        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal
+        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal,
     },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
@@ -533,7 +548,8 @@ export default {
                     required_signature: false,
                     visualization_type: 'scheduled-users'
                 },
-                registro_capacitacion: {}
+                registro_capacitacion: {},
+                is_offline:null,
             },
             resource: {
                 qualification_type: { position: 0 },
@@ -543,7 +559,8 @@ export default {
                     required_signature: false,
                     visualization_type: 'scheduled-users'
                 },
-                registro_capacitacion: {}
+                registro_capacitacion: {},
+                is_offline:null,
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -620,6 +637,20 @@ export default {
                         details: [
                             'Los usuarios con histórico se mantendrán con la información y no se recalculará su estado.'
                         ],
+                    }
+                },
+            },
+            size_limit_offline:0,
+            modalInfoOffline:{
+                open: false,
+                was_opened:false,
+                title_modal: '¡Toma nota!',
+                type_modal: 'confirm',
+                image:'img/user_taking_note.png',
+                content_modal: {
+                    confirm: {
+                        title: '',
+                        details: [],
                     }
                 },
             },
@@ -712,7 +743,7 @@ export default {
             }],
             ubicacion_mapa: null,
             registro_capacitacion_trainers: [],
-            catalog_denominations: []
+            catalog_denominations: [],
         }
     },
     async mounted() {
@@ -792,7 +823,8 @@ export default {
             }
         },
         confirmModal(validateForm = true) {
-
+            let vue = this
+            
             this.showLoader()
 
             // Get datetimes values
@@ -810,7 +842,6 @@ export default {
                 this.resource.deactivate_at = null
             }
 
-            let vue = this
             vue.errors = []
             vue.loadingActionBtn = true
             // vue.showLoader()
@@ -828,7 +859,12 @@ export default {
                 setTimeout(() => vue.closeModal(), 10000);
                 return;
             }
-
+            if(vue.resource.is_offline && !vue.modalInfoOffline.was_opened){
+                vue.hideLoader()
+                vue.modalInfoOffline.was_opened = true;
+                vue.modalInfoOffline.open = true;
+                return;
+            }
             const edit = (vue.resource && vue.resource.id)
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.resource.id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
@@ -959,7 +995,11 @@ export default {
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
-
+                    vue.size_limit_offline = response.size_limit_offline;
+                    vue.modalInfoOffline.content_modal.confirm.details= [
+                        'Recuerda que no se podrán visualizar los videos de youtube, vimeo y scorm en su versión de offline.',
+                        `Recuerda que el peso máximo del curso offline es de ${vue.size_limit_offline}.`
+                    ]
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.modalities = response.modalities;

@@ -26,7 +26,7 @@ class AmbienteRequest extends FormRequest
             'logo' => 'nullable', 
             'icono' => 'nullable', 
             'logo_empresa' => 'nullable',
-
+            'size_limit_offline'=> 'required',
             //app
             'titulo_login_app' => 'nullable|max:255',
             'subtitulo_login_app' => 'nullable|max:255',

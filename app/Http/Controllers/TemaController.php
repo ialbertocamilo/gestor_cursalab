@@ -16,6 +16,7 @@ use App\Models\Ability;
 
 use App\Models\Usuario;
 use App\Models\Abconfig;
+use App\Models\Ambiente;
 use App\Models\Pregunta;
 use App\Models\Question;
 use App\Models\Taxonomy;
@@ -48,7 +49,19 @@ class TemaController extends Controller
         PosteoSearchResource::collection($temas);
         return $this->success($temas);
     }
-
+    public function getSelects(School $school,Course $course){
+        $sum_size_topics = MediaTema::select('media.size')->join('media','media.file','media_topics.value')->whereHas('topic', function($q) use ($course) {
+            $q->where('course_id', $course->id)->where('active',ACTIVE);
+        })->groupBy('media.file')->get()->sum('size');
+        $limit_offline = Ambiente::getSizeLimitOffline(false);
+        $course_offline = [
+            'is_offline' => $course->is_offline,
+            'limit'=> $limit_offline['size_limit_offline'].$limit_offline['size_unit'],
+            'has_space'=> $sum_size_topics <= $limit_offline['size_in_kb'],
+            'sum_size_topics' => formatSize(kilobytes:$sum_size_topics,parsed:false)
+        ];
+        return $this->success(['course_offline'=>$course_offline]);
+    }
     public function getFormSelects(School $school, Course $course, Topic $topic = null, $compactResponse = false)
     {
         // $tags = []; //Tag::select('id', 'nombre')->get();

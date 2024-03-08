@@ -14,6 +14,7 @@ Route::controller(TemaController::class)->group(function() {
 	// ->middleware('permission:temas.editTema');
 
 	Route::get('/form-selects', 'getFormSelects')->name('temas.form-selects');
+	Route::get('/get-selects', 'getSelects');
 
 	Route::post('/store', 'store')->name('temas.store');
 
