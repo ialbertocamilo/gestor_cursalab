@@ -381,9 +381,13 @@ class Media extends BaseModel
         // === workspace storage actual ===
         $total_current_storage = $workspace_current_storage;
         foreach ($files as $file) {
-            if (is_string($file)) info($file);
-            $total_current_storage += round($file->getSize() / 1024);
+            if (is_string($file)) {
+                info($file);
+            } else {
+                $total_current_storage += round($file->getSize() / 1024);
+            }
         }
+
         $total_current_storage = formatSize($total_current_storage, parsed:false);
         // === workspace storage actual ===
 

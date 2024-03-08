@@ -165,7 +165,9 @@ class MediaController extends Controller
 
         // Upload files one by one
 
-        $hasStorageAvailable = Media::validateStorageByWorkspace($data['file']);
+        $hasStorageAvailable = Media::validateStorageByWorkspace(
+            is_array($data['file']) ? $data['file'] : [$data['file']]
+        );
         if ($hasStorageAvailable) {
 
             foreach ($data['file'] as $file) {
