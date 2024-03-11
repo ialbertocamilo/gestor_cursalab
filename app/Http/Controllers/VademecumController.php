@@ -107,18 +107,31 @@ class VademecumController extends Controller
     {
 
         $data = $request->validated();
-        $data = Media::requestUploadFileForId(
-            $data, 'media', $data['name'] ?? null
-        );
 
-        $result = Vademecum::storeRequest($data);
-        if ($result['status'] === 'success') {
-            $message = 'Vademecum creado correctamente.';
+        $files = isset($data['file_media']) ? [$data['file_media']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+
+        if (!$hasStorageAvailable) {
+
+            $data = Media::requestUploadFileForId(
+                $data, 'media', $data['name'] ?? null
+            );
+
+            $result = Vademecum::storeRequest($data);
+            if ($result['status'] === 'success') {
+                $message = 'Vademecum creado correctamente.';
+            } else {
+                $message = $result['message'];
+            }
+
+            return $this->success(['msg' => $message]);
+
         } else {
-            $message = $result['message'];
-        }
 
-        return $this->success(['msg' => $message]);
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     /**
@@ -151,14 +164,29 @@ class VademecumController extends Controller
     public function update(Vademecum $vademecum, VademecumStoreRequest $request)
     {
         $data = $request->validated();
-        $data = Media::requestUploadFileForId(
-            $data, 'media', $data['name'] ?? null
-        );
 
-        $result = Vademecum::storeRequest($data, $vademecum);
+        // Validate storage limit
 
-        // return $this->response($result);
-        return $this->success(['msg' => 'Vademecum actualizado correctamente.']);
+        $files = isset($data['file_media']) ? [$data['file_media']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+
+        if ($hasStorageAvailable) {
+
+            $data = Media::requestUploadFileForId(
+                $data, 'media', $data['name'] ?? null
+            );
+
+            $result = Vademecum::storeRequest($data, $vademecum);
+
+            // return $this->response($result);
+            return $this->success(['msg' => 'Vademecum actualizado correctamente.']);
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     /**

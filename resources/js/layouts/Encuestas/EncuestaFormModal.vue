@@ -183,6 +183,10 @@ export default {
 
                         if (error && error.errors)
                             vue.errors = error.errors
+
+                        if (error.response.data.msg) {
+                            vue.showAlert(error.response.data.msg, 'warning')
+                        }
                     })
             }
 

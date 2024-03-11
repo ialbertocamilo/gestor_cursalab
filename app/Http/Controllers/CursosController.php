@@ -144,7 +144,7 @@ class CursosController extends Controller
         }
 
         $modalities = $workspace->getModalitiesCourseByWorkspace();
-       
+
         $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
         $registro_capacitacion_trainers = [];
         if ($has_registro_capacitacion_functionality) {
@@ -239,16 +239,29 @@ class CursosController extends Controller
         $data['school_id'] = ($school->exists) ? $school->id : null;
         $data['escuelas'] = $request->lista_escuelas;
 
-        $data = Media::requestUploadFile($data, 'imagen');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
+        // Validate storage limit
 
-        Course::storeRequest($data);
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        $response = [
-            'msg' => 'Curso creado correctamente.',
-            'messages' => ['list' => []]
-        ];
-        return $this->success($response);
+        if (!$hasStorageAvailable) {
+            $data = Media::requestUploadFile($data, 'imagen');
+           // $data = Media::requestUploadFile($data, 'plantilla_diploma');
+
+            Course::storeRequest($data);
+
+            $response = [
+                'msg' => 'Curso creado correctamente.',
+                'messages' => ['list' => []]
+            ];
+            return $this->success($response);
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     public function updateCurso(School $school, Course $course, CursosStoreUpdateRequest $request)
@@ -256,27 +269,39 @@ class CursosController extends Controller
         $data = $request->validated();
 //        info($data);
 
-        if ($data['validateForm']):
-            $validations = Course::validateBeforeUpdate($data, $school, $course);
-            if (count($validations['list']) > 0)
-                return $this->success(compact('validations'), 'Ocurrió un error', 422);
-        endif;
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        $data = Media::requestUploadFile($data, 'imagen');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
+        if ($hasStorageAvailable) {
 
-        $data['school_id'] = ($school->exists) ? $school->id : null;
-        $data['escuelas'] = $request->lista_escuelas;
-//        $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
+            if ($data['validateForm']):
+                $validations = Course::validateBeforeUpdate($data, $school, $course);
+                if (count($validations['list']) > 0)
+                    return $this->success(compact('validations'), 'Ocurrió un error', 422);
+            endif;
 
-        $response_curso = Course::storeRequest($data, $course);
-        $response = [
-            'curso' => $response_curso,
-            'msg' => 'Curso actualizado correctamente.',
-            'messages' => Course::getMessagesAfterUpdate($course, 'Curso actualizado correctamente.')
-        ];
+            $data = Media::requestUploadFile($data, 'imagen');
+            //$data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        return $this->success($response);
+            $data['school_id'] = ($school->exists) ? $school->id : null;
+            $data['escuelas'] = $request->lista_escuelas;
+            //        $data['active'] = ($data['active'] === 'true' or $data['active'] === true) ? 1 : 0;
+
+            $response_curso = Course::storeRequest($data, $course);
+            $response = [
+                'curso' => $response_curso,
+                'msg' => 'Curso actualizado correctamente.',
+                'messages' => Course::getMessagesAfterUpdate($course, 'Curso actualizado correctamente.')
+            ];
+
+            return $this->success($response);
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     public function destroyCurso(School $school, Course $course, Request $request)
@@ -545,7 +570,7 @@ class CursosController extends Controller
 
         return Excel::download(new CourseSegmentationExport($workspace), $filename);
     }
-    
+
     public function listMediaTopics(Course $course)
     {
         $topics = $course->listMediaTopics();
@@ -607,7 +632,7 @@ class CursosController extends Controller
                     'id' => $id,
                 ];
 
-                $data[] = $row; 
+                $data[] = $row;
             }
 
             // $course_id = $data[0]['id'];
@@ -618,7 +643,7 @@ class CursosController extends Controller
                 $courses[$course->id]['topics'][] = $topic_id;
 
             } else {
-                
+
                 $courses[$course->id]['topics'] = [];
             }
 

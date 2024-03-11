@@ -134,7 +134,7 @@
                 </v-row>
             </v-form>
         </template>
-    </DefaultDialog> 
+    </DefaultDialog>
 </template>
 <script>
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector.vue";
@@ -223,7 +223,7 @@ export default {
     //     this.hideLoader()
     // },
     methods: {
- 
+
         resetSelects() {
             let vue = this
             // Limpiar inputs file
@@ -248,7 +248,7 @@ export default {
                 vue.loadingActionBtn = false
                 return
             }
-            
+
             if(vue.resource.subworkspaces.length == 0){
                 vue.showAlert('Es necesario seleccionar al menos 1 módulo','warning');
                 vue.loadingActionBtn = false
@@ -275,7 +275,11 @@ export default {
                     if (error && error.errors){
                         vue.errors = error.errors
                     }
-             
+
+                    if (error.response.data.msg) {
+                        vue.showAlert(error.response.data.msg, 'warning')
+                    }
+
                     this.hideLoader()
                 })
         },
