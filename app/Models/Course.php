@@ -785,6 +785,7 @@ class Course extends BaseModel
                         'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
+                        'is_offline' => boolval($course->is_offline),
                         'porcentaje' => $course_status['progress_percentage'],
                         'ultimo_tema_visto' => $last_topic_reviewed,
                     ];
@@ -794,6 +795,7 @@ class Course extends BaseModel
                     $last_school_courses[] = [
                         'id' => $course->id,
                         'modality_code' => $modality?->code,
+                        'is_offline' => boolval($course->is_offline),
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -815,6 +817,7 @@ class Course extends BaseModel
                         'descripcion' => $course->description,
                         'orden' => $course_position,
                         'imagen' => $course->imagen,
+                        'is_offline' => boolval($course->is_offline),
                         'requisito_id' => NULL,
                         'c_evaluable' => 0,
                         'disponible' => true,
@@ -844,6 +847,7 @@ class Course extends BaseModel
                         'descripcion' => $course->description,
                         'orden' => $course_position,
                         'imagen' => $course->imagen,
+                        'is_offline' => boolval($course->is_offline),
                         'c_evaluable' => $course->assessable,
                         'disponible' => $course_status['available'],
                         'status' => $course_status['status'],

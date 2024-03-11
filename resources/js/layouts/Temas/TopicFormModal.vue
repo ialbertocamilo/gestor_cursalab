@@ -194,7 +194,28 @@
                                             <td>
                                                 <div class="multimedia-table-icon mt-2">
                                                     <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
-                                                        <i :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"/>
+                                                        <v-tooltip v-if="is_offline && types_exclude_offline.find(m => m == media.type_id)" top>
+                                                            <template v-slot:activator="{ on, attrs }">
+                                                                <i 
+                                                                    style="position:relative" 
+                                                                    :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"
+                                                                    v-bind="attrs"
+                                                                    v-on="on"
+                                                                >
+                                                                    <v-icon 
+                                                                        v-if="is_offline && types_exclude_offline.find(m => m == media.type_id)"
+                                                                        style="font-size: 16px !important; position: absolute; bottom: -4px;  color: red;right: -8px;"
+                                                                    >
+                                                                        mdi mdi-cloud-off-outline
+                                                                    </v-icon>
+                                                                </i>
+                                                                
+                                                            </template>
+                                                            <span>Este archivo multimedia no se podrá visualizar en la vista sin conexión.</span>
+                                                        </v-tooltip>
+                                                        <i v-else
+                                                            :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"
+                                                        ></i>
                                                     </a>
                                                 </div>
                                             </td>
@@ -619,6 +640,10 @@
                 @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
                 @onConfirm="closeSimpleModal(modalFormSegmentationOptions),loadHosts()"
             />
+            <DialogConfirm v-model="modalInfoOffline.open" :options="modalInfoOffline" width="408px"
+                title="alerta" subtitle="¡Alerta!"
+                @onConfirm="sendForm({checkbox: false});closeSimpleModal(modalInfoOffline)" @onCancel="closeSimpleModal(modalInfoOffline)">
+            </DialogConfirm>
         </template>
     </DefaultDialog>
 </template>
@@ -848,8 +873,27 @@ export default {
                 confirmLabel: 'Confirmar',
                 action:'Retroceder',
                 create_from_course_list:false,
+            },
+            is_offline:false,
+            types_exclude_offline:['youtube','vimeo','scorm','link','genially','H5P'],
+            modalInfoOffline:{
+                open: false,
+                was_opened:false,
+                title_modal: '¡Alerta!',
+                type_modal: 'confirm',
+                description:'⚠️ No podrás descargar los archivos de youtube, vimeo, scorm, H5P y links embebidos para ver<b>sin conexión</b>. <br><b>Recuerda que puedes subirlos como PDF o formato de video para poder descargarlo</b>',
+                image:'/img/alert_offline.png',
+                show_checkbox_not_show_again:true,
+                preference_code:'not_show_modal_offline_topic',
+                content_modal: {
+                    confirm: {
+                        title: '',
+                        details: [],
+                    }
+                },
+                confirmLabel:'Aceptar',
+                hideCancelBtn:true
             }
-
         }
     },
     async mounted() {
@@ -890,6 +934,7 @@ export default {
                 finish_time:null,
                 show_medias_since_start_course:0
             };
+            vue.modalInfoOffline.was_opened = false;
             vue.resource.tags = [];
             vue.removeFileFromDropzone(vue.resource.imagen, 'inputLogo')
             // Selects independientes
@@ -917,6 +962,7 @@ export default {
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
+            
             if (vue.resource && vue.resource.id) {
 
                 if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.type_evaluation_id) {
@@ -987,7 +1033,7 @@ export default {
             vue.showLoader()
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
-
+            
             if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
@@ -1011,7 +1057,16 @@ export default {
                 vue.closeModal();
                 return;
             }
-
+            if(hasMultimedia 
+                && !vue.loadPreferencesBycode(vue.modalInfoOffline.preference_code)
+                && !vue.modalInfoOffline.was_opened 
+                && vue.resource.media.find( m => ['youtube','vimeo','scorm','link','genially','H5P'].includes(m.type_id) ) 
+            ){
+                vue.hideLoader()
+                vue.modalInfoOffline.was_opened = true;
+                vue.modalInfoOffline.open = true;
+                return;
+            }
             // const edit = vue.topic_id !== ''
             const edit = (vue.resource && vue.resource.id)
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.resource.id}` : 'store'}`
@@ -1119,6 +1174,7 @@ export default {
                     vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
                     vue.selects.course_code_modality = data.data.course_code_modality;
                     vue.hasPermissionToUseTags=data.data.has_permission_to_use_tags;
+                    vue.is_offline = data.data.is_offline;
                     vue.workspace_id = data.data.workspace_id;
                     // vue.selects.polls = data.data.polls;
                     // vue.selects.tags = data.data.tags;

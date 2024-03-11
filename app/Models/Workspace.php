@@ -42,6 +42,7 @@ class Workspace extends BaseModel
         'certificate_template_id',
         'dc3_configuration',
         'reminders_configuration',
+        'course_configuration',
         'registro_capacitacion'
     ];
 
@@ -106,6 +107,7 @@ class Workspace extends BaseModel
         'jarvis_configuration' => 'json',
         'dc3_configuration'=>'array',
         'reminders_configuration'=>'json',
+        'course_configuration'=>'json',
         'registro_capacitacion' => 'json'
     ];
 

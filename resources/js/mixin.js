@@ -888,6 +888,25 @@ export default {
                 vue.openInNewTab(route);
             }
         },
+        loadPreferencesBycode(attr){
+            let preferencesJSON = localStorage.getItem('preferences');
+            if(!preferencesJSON){
+                return null;
+            }
+            const preferences = JSON.parse(preferencesJSON);
+            return preferences[attr];
+        },
+        updatePreferenceByCode(attr,value){
+            let preferencesJSON = localStorage.getItem('preferences');
+            let preferences = {};
+            if (!preferencesJSON) {
+                preferences[attr] = value;
+            } else {
+                preferences = JSON.parse(preferencesJSON);
+                preferences[attr]=  value;
+            }
+            localStorage.setItem('preferences', JSON.stringify(preferences));
+        },
         validateRequired(input) {
             return input != undefined && input != null && input != "";
         },

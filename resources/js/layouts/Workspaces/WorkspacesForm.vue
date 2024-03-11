@@ -147,7 +147,7 @@
 
                     <v-tab-item :key="3" :value="'tab-3'" v-if="is_superuser">
 
-                        <DefaultSection title="Configuración de sistema de calificación" v-if="is_superuser">
+                        <DefaultSection title="Configuración de cursos" v-if="is_superuser">
                             <template v-slot:content>
                                 <v-row justify="space-around">
                                     <v-col cols="6">
@@ -161,12 +161,28 @@
                                             :rules="rules.qualification_type_id"
                                             dense
                                         />
-                                    </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultInfoTooltip
+                                        <!-- <DefaultInfoTooltip
                                             class=""
                                             top
-                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
+                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." /> -->
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultInput label="Nota mínima aprobatoria"
+                                            dense
+                                            v-model="resource.course_configuration.nota_aprobatoria" 
+                                            type="number" :min="0"
+                                            :max="resource.qualification_type ? resource.qualification_type.position : 0"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultInput label="Cantidad de intentos" v-model="resource.course_configuration.nro_intentos" dense type="number">
+                                        </DefaultInput>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultToggle dense
+                                            :active-label="'Activar el modo sin conexión para este curso en la plataforma.'"
+                                            :inactive-label="'Activar el modo sin conexión para este curso en la plataforma.'"
+                                            v-model="resource.course_configuration.is_offline" />
                                     </v-col>
                                 </v-row>
                             </template>
@@ -571,7 +587,7 @@ const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
-    'dc3_configuration','show_logo_in_app','limits','reminders_configuration'
+    'dc3_configuration','show_logo_in_app','limits','reminders_configuration','course_configuration'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -639,6 +655,11 @@ export default {
                 reminders_configuration:{
                     interval:0,
                     chunk:0 
+                },
+                course_configuration:{
+                    nota_aprobatoria:0,
+                    nro_intentos:2,
+                    is_offline:false
                 }
             },
             limit_allowed_users: null,
@@ -737,10 +758,13 @@ export default {
                 formData.set(
                     'reminders_configuration', JSON.stringify(vue.resource.reminders_configuration)
                 );
-                
+                formData.set(
+                    'course_configuration', JSON.stringify(vue.resource.course_configuration)
+                );
+
                 vue.setLimitUsersAllowed(formData);
                 vue.setJarvisConfiguration(formData);
-
+                // vue.getJSONEvaluaciones(formData)
                 // Submit data to be saved
 
                 await vue.$http
@@ -878,6 +902,17 @@ export default {
             let vue = this;
             vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
             vue.showReminderSection = vue.resource.selected_functionality[vue.taxonomy_id_reminder];
+        },
+        getJSONEvaluaciones(formData) {
+            let vue = this
+
+            const data = {
+                // preg_x_ev: vue.resource.preg_x_ev,
+                nota_aprobatoria: vue.resource.mod_evaluaciones.nota_aprobatoria,
+                nro_intentos: vue.resource.mod_evaluaciones.nro_intentos,
+            }
+            let json = JSON.stringify(data)
+            formData.append('mod_evaluaciones', json)
         }
     }
 }

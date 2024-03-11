@@ -133,8 +133,12 @@ class CursosController extends Controller
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
         $qualification_type = $workspace->qualification_type;
+        $course_configuration = $workspace->course_configuration;
+
         $show_buttom_ia_description_generate = Ability::hasAbility('course','jarvis-descriptions');
-        $has_DC3_functionality = boolval(get_current_workspace()->functionalities()->get()->where('code','dc3-dc4')->first());
+        $functionalities = get_current_workspace()->functionalities()->get();
+        $has_DC3_functionality = boolval($functionalities->where('code','dc3-dc4')->first());
+        $has_offline = boolval($functionalities->where('code','course-offline')->first());
         $instructors = [];
         $legal_representatives = [];
         $catalog_denominations = [];
@@ -146,7 +150,7 @@ class CursosController extends Controller
 
         $modalities = $workspace->getModalitiesCourseByWorkspace();
        
-        $has_registro_capacitacion_functionality =   boolval(get_current_workspace()->functionalities()->get()->where('code','registro-capacitacion')->first());
+        $has_registro_capacitacion_functionality =   boolval($functionalities->where('code','registro-capacitacion')->first());
         $registro_capacitacion_trainers = [];
         if ($has_registro_capacitacion_functionality) {
             $registro_capacitacion_trainers = RegistroCapacitacionTrainer::query()
@@ -157,9 +161,10 @@ class CursosController extends Controller
         $size_limit_offline = Ambiente::getSizeLimitOffline();
         $response = compact(
             'escuelas', 'requisitos', 'types', 'qualification_types',
-            'qualification_type','show_buttom_ia_description_generate','has_DC3_functionality',
+            'qualification_type','course_configuration','show_buttom_ia_description_generate','has_DC3_functionality',
             'instructors','legal_representatives','catalog_denominations','modalities',
-            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers','size_limit_offline'
+            'has_registro_capacitacion_functionality', 'registro_capacitacion_trainers','size_limit_offline',
+            'has_offline'
         );
 
 
@@ -229,6 +234,7 @@ class CursosController extends Controller
             'qualification_types' => Taxonomy::getDataForSelect('system', 'qualification-type'),
             'show_buttom_ia_description_generate' => $show_buttom_ia_description_generate,
             'has_DC3_functionality' => $has_DC3_functionality,
+            'has_offline' => $form_selects['has_offline'],
             'instructors' => $instructors,
             'legal_representatives' => $legal_representatives,
             'catalog_denominations' => $catalog_denominations

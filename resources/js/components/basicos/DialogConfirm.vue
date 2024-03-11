@@ -50,7 +50,7 @@
                     <div class="bx_details">
                         <ul>
                             <li v-for="(item, index) in options.content_modal.delete.details" :key="index">
-                                <span>{{ item }}</span>
+                                <span v-html="item"></span>
                             </li>
                         </ul>
                     </div>
@@ -62,10 +62,21 @@
                             <span>{{ options.content_modal.confirm.title }}</span>
                         </div>
                     </div>
+                    <div v-if="options.description" style="text-align: center;" v-html="options.description">
+                    </div>
+                    <div v-if="options.show_checkbox_not_show_again" class="d-flex justify-content-center mt-4">
+                        <v-checkbox
+                            class="default-checkbox"
+                            label="No volver a mostrar"
+                            color="primary"
+                            v-model="not_show_again"
+                            hide-details="false"
+                        />
+                    </div>
                     <div class="bx_details">
                         <ul>
                             <li v-for="(item, index) in options.content_modal.confirm.details" :key="index">
-                                <span>{{ item }}</span>
+                                <span v-html="item"></span>
                             </li>
                         </ul>
                     </div>
@@ -97,7 +108,11 @@
                 <DefaultModalActionButton
                     @cancel="closeModal"
                     @confirm="confirmModal"
-                    cancelLabel="Cancelar"/>
+                    :cancelLabel="options.cancelLabel"
+                    :confirmLabel="options.confirmLabel"
+                    :hideConfirmBtn="options.hideConfirmBtn"
+                    :hideCancelBtn="options.hideCancelBtn"
+                />
             </v-card-actions>
         </v-card>
         <v-card v-else>
@@ -130,6 +145,7 @@ export default {
     data() {
         return {
             dialog: false,
+            not_show_again:false
         };
     },
     methods: {
@@ -148,6 +164,9 @@ export default {
         },
         confirmModal() {
             let vue = this
+            if(vue.options.show_checkbox_not_show_again){
+                vue.updatePreferenceByCode(vue.options.preference_code,vue.not_show_again);
+            }
             vue.$emit('onConfirm')
         }
     },

@@ -141,7 +141,7 @@
                                             <DefaultInput
                                                 v-model="resource.size_limit_offline"
                                                 clearable
-                                                label="Tamaño en MB de los limites en cursos"
+                                                label="Tamaño en MB de los limites por curso descargado."
                                             />
                                         </template>
                                     </DefaultSimpleSection>

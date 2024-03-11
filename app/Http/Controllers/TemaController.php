@@ -91,11 +91,12 @@ class TemaController extends Controller
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         $workspace_id = get_current_workspace()->id;
         $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
+        $is_offline = $course->is_offline;
 
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
                              'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
-                             'hosts','course_code_modality','workspace_id','dinamyc_link');
+                             'hosts','course_code_modality','workspace_id','dinamyc_link','is_offline');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -134,6 +135,7 @@ class TemaController extends Controller
             'workspace_id' => $form_selects['workspace_id'],
             'hosts' =>  $form_selects['hosts'],
             'course_code_modality' => $form_selects['course_code_modality'],
+            'is_offline' => $form_selects['is_offline'],
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'dinamyc_link' => $form_selects['dinamyc_link'],
