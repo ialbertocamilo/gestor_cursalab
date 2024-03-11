@@ -42,7 +42,6 @@ class CursoSearchResource extends JsonResource
             $pivot_id_selected = $request->school_id  ?? $request->schools[0];
         }
 
-
         // Set assigned users to every course
 
 //        $usersCount = collect(CursosController::$coursesUsersAssigned)
