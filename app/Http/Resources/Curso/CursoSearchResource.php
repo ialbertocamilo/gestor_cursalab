@@ -222,6 +222,7 @@ class CursoSearchResource extends JsonResource
         //     'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary',
         // ];
 
+
         $data = [
             'nombre' => $this->name,
             'subtitles' => $subtitles,
