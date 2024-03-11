@@ -260,6 +260,33 @@
                                             />
                                         </v-col>
                                     </v-row>
+                                    <v-row v-if="resource.registro_capacitacion.company"
+                                           justify="left">
+                                        <v-col cols="6">
+                                            <DefaultSelect
+                                                dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaJobPosition"
+                                                label="Criterio para cargo del trabajador"
+                                                :rules="rules.criteriaJobPosition"
+                                            />
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <DefaultSelect
+                                                dense
+                                                :items="selects.workspace_criteria"
+                                                item-text="name"
+                                                return-object
+                                                show-required
+                                                v-model="resource.registro_capacitacion.criteriaArea"
+                                                label="Criterio para área del trabajador"
+                                                :rules="rules.criteriaArea"
+                                            />
+                                        </v-col>
+                                    </v-row>
                                 </div>
                             </template>
                         </DefaultModalSectionExpand>
@@ -362,7 +389,9 @@ export default {
                 CIIU: this.getRules(['required']),
                 economicActivity: this.getRules(['required']),
                 appUrl: this.getRules(['required']),
-                criteriaWorkersCount: this.getRules(['required'])
+                criteriaWorkersCount: this.getRules(['required']),
+                criteriaJobPosition: this.getRules(['required']),
+                criteriaArea: this.getRules(['required']),
             },
             resource: {},
             selects: {

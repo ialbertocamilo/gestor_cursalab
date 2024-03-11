@@ -65,6 +65,9 @@
                     placeholder="Formato"
                 />
             </div>
+            <div class="col-lg-6  col-xl-4 mb-3">
+                <FechaFiltro ref="FechasFiltros" />
+            </div>
 
             <div class="row col-sm-12 mb-3 ml-1">
                 <button type="submit"
@@ -192,11 +195,14 @@ export default {
 
             this.$emit('reportStarted', {})
             let selectedCourses = [this.selectedCourses];
+            let datesFilter = this.$refs.FechasFiltros;
 
             const filtersDescriptions = {
                 'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
                 Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
                 Cursos: this.generateNamesArray(this.courses, selectedCourses),
+                FechaInicio: datesFilter.start,
+                FechaFin: datesFilter.end
             }
 
             // Perform request to generate report
@@ -214,6 +220,8 @@ export default {
                         modulesIds: this.selectedModules ? this.selectedModules : [],
                         schoolsIds: this.selectedSchools,
                         coursesIds: selectedCourses,
+                        startDate: datesFilter.start,
+                        endDate: datesFilter.end,
                         ext: this.format
                     }
                 })
