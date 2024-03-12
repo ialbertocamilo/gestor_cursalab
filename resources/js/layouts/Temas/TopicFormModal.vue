@@ -124,6 +124,22 @@
                                 />
                             </v-col>
 
+                            <v-col
+                                v-if="isOpenEvaluation"
+                                cols="4">
+                                <DefaultInput
+                                    dense
+                                    max="25"
+                                    label="Nombre del botón"
+                                    placeholder="Escribe el nombre del botón"
+                                    v-model="resource.open_evaluation_button"
+                                    tooltip="Área para cambiar el nombre del botón para realizar la actividad de evaluación relacionada al tema"
+                                />
+                                <span style="font-size: 10px">
+                                    Max. caracteres 25
+                                </span>
+                            </v-col>
+
                             <v-col cols="4">
                                 <DefaultSelect
                                     v-show="showActiveResults"
@@ -720,7 +736,8 @@ export default {
                     finish_time:null,
                     show_medias_since_start_course:0
                 },
-                review_all_duration_media:0
+                review_all_duration_media:0,
+                open_evaluation_button: null
             },
             selects: {
                 assessable: [
@@ -865,6 +882,16 @@ export default {
             }
             return false;
         },
+        isOpenEvaluation() {
+            let vue = this;
+
+            if((vue.selects.evaluation_types).length && vue.resource.type_evaluation_id) {
+                const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
+                return (evaluation_type.name === 'Abierta')
+            }
+
+            return false;
+        }
     },
     methods: {
         resetValidation() {
@@ -906,7 +933,7 @@ export default {
         },
         async validate() {
             let vue = this
-            
+
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media ? vue.resource.media.length > 0 : false;
 
