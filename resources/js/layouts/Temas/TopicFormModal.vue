@@ -654,8 +654,8 @@ import TagModal  from "../../components/basicos/TagModal";
 import SegmentFormModal from "./../Blocks/SegmentFormModal";
 
 const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessable','tags',
-    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type',
-    'review_all_duration_media','modality_in_person_properties','path_qr'];
+    'topic_requirement_id', 'type_evaluation_id', 'active', 'active_results', 'course_id', 'qualification_type', 'review_all_duration_media',
+    'modality_in_person_properties','path_qr', 'open_evaluation_button'];
 
 const file_fields = ['imagen'];
 import QRCode from "qrcode";
