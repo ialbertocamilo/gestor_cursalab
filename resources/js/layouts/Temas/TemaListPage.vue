@@ -135,7 +135,7 @@
                 :options="modalTopicOptions"
                 :school_id="school_id"
                 :course_id="course_id"
-                @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters)"
+                @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters),getListInfo()"
                 @onCancel="closeFormModal(modalTopicOptions)"
             />
             <PreviewMediaTopicsModal

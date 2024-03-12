@@ -83,8 +83,11 @@ class CursosController extends Controller
         $coursesIds = collect($courses)
             ->pluck('id')
             ->toArray();
-
+        
         self::$coursesUsersAssigned = [];//Course::calculateUsersSegmentedCount($coursesIds);
+        //data offline
+        $request->size_limit_offline = Ambiente::select('size_limit_offline')->where('type','general')->first()->size_limit_offline;
+        $request->has_offline = get_current_workspace()->functionalities()->where('code','course-offline')->first();
 
         CursoSearchResource::collection($paginatedCourses);
 

@@ -322,8 +322,23 @@
                     <div v-if="getStatusIcon(item) === 'active'"
                          @click="doAction({type: 'action', method_name: 'status'}, item)"
                          style="cursor: pointer">
-                        <i class="row-icon fa fa-circle"/>
-                        <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                         <div v-if="item.has_space_offline !== undefined && !item.has_space_offline">
+                            <i 
+                                style="position:relative" 
+                                class="row-icon fa fa-circle"
+                            >
+                                <i
+                                    class="mdi mdi-cloud-remove"
+                                    style="font-size: 12px !important; position: absolute; top: -4px; color: red !important; right: -8px;"                                >
+                                </i>
+                            </i>
+                             <br> <span class="table-default-icon-title" v-text="'Activo '"/><br>
+                             <span style="font-size: 11px;color: #6C757D;">No visible sin conexión</span>
+                         </div>
+                         <div v-else>
+                            <i class="row-icon fa fa-circle"/>
+                             <br> <span class="table-default-icon-title" v-text="'Activo'"/>
+                         </div>
                     </div>
 
                     <div v-if="getStatusIcon(item) === 'inactive'"
@@ -1201,6 +1216,7 @@
 
 <script>
 import DefaultStaticProgressLinear from "./DefaultStaticProgressLinear";
+import axios from 'axios';
 
 export default {
     components: {DefaultStaticProgressLinear},

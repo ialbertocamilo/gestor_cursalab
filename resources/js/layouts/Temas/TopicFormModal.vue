@@ -206,7 +206,7 @@
                                                                         v-if="is_offline && types_exclude_offline.find(m => m == media.type_id)"
                                                                         style="font-size: 16px !important; position: absolute; bottom: -4px;  color: red;right: -8px;"
                                                                     >
-                                                                        mdi mdi-cloud-off-outline
+                                                                        mdi mdi-cloud-remove
                                                                     </v-icon>
                                                                 </i>
                                                                 

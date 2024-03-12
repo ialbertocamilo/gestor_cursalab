@@ -73,8 +73,8 @@ class Ambiente extends Model
         return Ambiente::select($query_select)->where('type','general')->first();
     }
 
-    protected function getSizeLimitOffline($parsed=true){
-        $size_limit_offline = Ambiente::select('size_limit_offline')->where('type','general')->first()->size_limit_offline;
+    protected function getSizeLimitOffline($parsed=true,$getSizeLimitOffline=null){
+        $size_limit_offline = $getSizeLimitOffline ?? Ambiente::select('size_limit_offline')->where('type','general')->first()->size_limit_offline;
         $size_unit = ' MB';
         $size_in_kb = $size_limit_offline * 1024;
         if($size_limit_offline >= 1024){
