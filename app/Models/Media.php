@@ -395,8 +395,12 @@ class Media extends BaseModel
         // === workspace storage actual ===
 
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
-        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' &&
-                                $total_current_storage['size'] <= $total_storage_limit);
+        $still_has_storage  = (
+            ($total_current_storage['size_unit'] == 'Gb' &&
+             $total_current_storage['size'] <= $total_storage_limit)
+            || $total_current_storage['size_unit'] == 'Mb'
+            || $total_current_storage['size_unit'] == 'Kb'
+        );
 
         return  $still_has_storage;
     }
