@@ -32,6 +32,7 @@ class CursoSearchResource extends JsonResource
             $modules = $modules->merge($school->subworkspaces);
         }
 
+
         $all_modules = $modules->unique();
 
         $modules = array_unique($modules->pluck('name')->toArray());
