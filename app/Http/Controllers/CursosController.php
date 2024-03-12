@@ -244,7 +244,7 @@ class CursosController extends Controller
         $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
         $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        if (!$hasStorageAvailable) {
+        if ($hasStorageAvailable) {
             $data = Media::requestUploadFile($data, 'imagen');
            // $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
