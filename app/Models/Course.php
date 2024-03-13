@@ -1378,6 +1378,7 @@ class Course extends BaseModel
                 } else {
                     $ids = $values->pluck('criterion_value_id');
                 }
+
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {
                     $join->on('users.id', '=', "cvu{$idx}" . '.user_id')
                         ->whereIn("cvu{$idx}" . '.criterion_value_id', $ids);
