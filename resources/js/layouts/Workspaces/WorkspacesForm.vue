@@ -147,7 +147,14 @@
 
                     <v-tab-item :key="3" :value="'tab-3'" v-if="is_superuser">
 
-                        <DefaultSection title="Configuración de cursos" v-if="is_superuser">
+                        <DefaultSection 
+                            v-if="is_superuser"
+                            title="Configuración de cursos" 
+                            tooltipInfoText="Seleccione la configuración que se tendrá por defecto en la creación de cursos."
+                        >
+                            <template v-slot:title>
+                                <strong>{{ title }}</strong>
+                            </template>
                             <template v-slot:content>
                                 <v-row justify="space-around">
                                     <v-col cols="6">
@@ -161,10 +168,6 @@
                                             :rules="rules.qualification_type_id"
                                             dense
                                         />
-                                        <!-- <DefaultInfoTooltip
-                                            class=""
-                                            top
-                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." /> -->
                                     </v-col>
                                     <v-col cols="3">
                                         <DefaultInput label="Nota mínima aprobatoria"
@@ -180,8 +183,8 @@
                                     </v-col>
                                     <v-col cols="12">
                                         <DefaultToggle dense
-                                            :active-label="'Activar el modo sin conexión para este curso en la plataforma.'"
-                                            :inactive-label="'Activar el modo sin conexión para este curso en la plataforma.'"
+                                            :active-label="'Activar el modo sin conexión para los cursos en la plataforma.'"
+                                            :inactive-label="'Activar el modo sin conexión para los cursos en la plataforma.'"
                                             v-model="resource.course_configuration.is_offline" />
                                     </v-col>
                                 </v-row>
