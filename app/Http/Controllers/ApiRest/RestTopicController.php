@@ -290,5 +290,17 @@ class RestTopicController extends Controller
 
         return $this->success(['msg' => "Se actualizó la duración del contenido."]);
     }
+    public function downloadMedia($topic_id,$media_id){
+        return MediaTema::downloadMedia($media_id);
+        $encryptionKey = 'donwload-offline'; // Reemplaza con tu clave secreta
+        
 
+        // Cifrar el contenido del archivo
+        $encryptedData = openssl_encrypt($object['Body'], 'aes-256-cbc', $encryptionKey, 0, $object['Metadata']['iv']);
+
+        // Retornar el archivo cifrado
+        return response()->streamDownload(function () use ($encryptedData) {
+            echo $encryptedData;
+        }, $fileName . '.enc');
+    }
 }

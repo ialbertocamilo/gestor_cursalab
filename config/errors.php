@@ -17,5 +17,6 @@ return [
 
     'limit-errors' => [
         'limit-user-allowed' => 'Has superado el límite de usuarios activos.',
+        'limit-storage-allowed' => 'Has superado la capacidad de almacenamiento dentro de la plataforma.'
     ]
 ];

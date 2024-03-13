@@ -79,20 +79,34 @@ class PollController extends Controller
     {
         $data = $request->validated();
 
-        $data = Media::requestUploadFile($data, 'imagen');
+        // Validate storage limit
 
-        $session = $request->session()->all();
-        $workspace = $session['workspace'];
-        $data['workspace_id'] = $workspace->id;
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
-        $data['platform_id'] = $request['platform_id'] ?? $platform_training?->id;
+        if ($hasStorageAvailable) {
 
-        Poll::create($data);
+            $data = Media::requestUploadFile($data, 'imagen');
 
-        $msg = 'Encuesta creada correctamente.';
+            $session = $request->session()->all();
+            $workspace = $session['workspace'];
+            $data['workspace_id'] = $workspace->id;
 
-        return $this->success(compact('msg'));
+            $platform_training = Taxonomy::getFirstData('project', 'platform', 'training');
+            $data['platform_id'] = $request['platform_id'] ?? $platform_training?->id;
+
+            Poll::create($data);
+
+            $msg = 'Encuesta creada correctamente.';
+
+            return $this->success(compact('msg'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     /**
@@ -121,13 +135,28 @@ class PollController extends Controller
     {
         $data = $request->validated();
 
-        $data = Media::requestUploadFile($data, 'imagen');
+        // Validate storage limit
 
-        $poll->update($data);
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        $msg = 'Encuesta actualizada correctamente.';
+        if ($hasStorageAvailable) {
 
-        return $this->success(compact('msg'));
+            $data = Media::requestUploadFile($data, 'imagen');
+
+            $poll->update($data);
+
+            $msg = 'Encuesta actualizada correctamente.';
+
+            return $this->success(compact('msg'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
     }
 
     /**

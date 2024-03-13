@@ -228,10 +228,14 @@ export default {
                         vue.showAlert(data.data.msg)
                         vue.$emit('onConfirm')
 
-                    }).catch((error) => {
+                    }).catch((e) => {
 
-                        if (error && error.errors)
-                            vue.errors = error.errors
+                        if (e.response.data.msg) {
+                            vue.showAlert(e.response.data.msg, 'warning')
+                        }
+
+                        if (e && e.errors)
+                            vue.errors = e.errors
                 })
 
             }

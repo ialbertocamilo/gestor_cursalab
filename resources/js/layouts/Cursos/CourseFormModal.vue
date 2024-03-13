@@ -17,7 +17,7 @@
                             :rules="rules.name" show-required emojiable dense />
                     </v-col>
                     <v-col cols="6" class="pb-0">
-                        <DefaultAutocomplete show-required :rules="rules.lista_escuelas" label="Escuelas a la pertenece"
+                        <DefaultAutocomplete show-required :rules="rules.lista_escuelas" label="Escuelas a las que pertenece"
                             v-model="resource.lista_escuelas" :items="selects.lista_escuelas" item-text="name"
                             item-value="id" multiple dense />
                     </v-col>
@@ -921,6 +921,10 @@ export default {
                     }
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
+
+                    if (e.response.data.msg) {
+                        vue.showAlert(e.response.data.msg, 'warning')
+                    }
                 })
         },
         setJSONReinicioProgramado(formData) {

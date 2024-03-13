@@ -47,7 +47,7 @@
                     v-model="selectedCourses"
                     :items="courses"
                     :disabled="!courses[0]"
-                    label="Curso"
+                    label="Curso con registro de capacitación activado"
                     item-text="name"
                     item-value="id"
                     placeholder="Seleccione los cursos"
@@ -64,6 +64,9 @@
                     item-value="id"
                     placeholder="Formato"
                 />
+            </div>
+            <div class="col-lg-6  col-xl-4 mb-3">
+                <FechaFiltro ref="FechasFiltros" />
             </div>
 
             <div class="row col-sm-12 mb-3 ml-1">
@@ -108,7 +111,8 @@ export default {
                 {
                     id:'zip',
                     description: 'Archivo ZIP conteniendo los registros de capacitación'
-                }],
+                }
+            ],
             filteredSchools: [],
             schools: [],
             courses: [],
@@ -174,7 +178,7 @@ export default {
             this.courses = [];
             if (this.selectedSchools.length === 0) return false;
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.selectedSchools.join()}`
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/${this.selectedSchools.join()}/registro-capacitacion`
             let res = await axios({
                 url,
                 method: 'get'
@@ -191,11 +195,14 @@ export default {
 
             this.$emit('reportStarted', {})
             let selectedCourses = [this.selectedCourses];
+            let datesFilter = this.$refs.FechasFiltros;
 
             const filtersDescriptions = {
                 'Módulos': this.generateNamesArray(this.modules, this.selectedModules),
                 Escuelas: this.generateNamesArray(this.schools, this.selectedSchools),
                 Cursos: this.generateNamesArray(this.courses, selectedCourses),
+                FechaInicio: datesFilter.start,
+                FechaFin: datesFilter.end
             }
 
             // Perform request to generate report
@@ -213,6 +220,8 @@ export default {
                         modulesIds: this.selectedModules ? this.selectedModules : [],
                         schoolsIds: this.selectedSchools,
                         coursesIds: selectedCourses,
+                        startDate: datesFilter.start,
+                        endDate: datesFilter.end,
                         ext: this.format
                     }
                 })

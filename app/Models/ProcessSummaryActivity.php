@@ -11,7 +11,7 @@ class ProcessSummaryActivity extends BaseModel
     protected $table = 'process_summary_users_activities';
 
     protected $fillable = [
-        'user_id', 'activity_id', 'status_id',
+        'user_id', 'activity_id', 'status_id', 'progress'
     ];
 
     // protected $casts = [

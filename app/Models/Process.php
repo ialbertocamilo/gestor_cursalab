@@ -360,13 +360,13 @@ class Process extends BaseModel
         $user = $data['user'];
 
         $process_id = $data['process'];
-
         // $summary_user_activities = ProcessSummaryActivity::whereHas('topic.course', function ($q) use ($user_courses) {
         //     $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
         // })
         // ->with('status:id,code')
         // ->where('user_id', $user->id)
         // ->get();
+        $user->load('summary_process');
 
         $process = Process::with(['instructions','stages.activities.type','stages.activities.requirement'])
                     ->where('id', $process_id)
@@ -378,15 +378,16 @@ class Process extends BaseModel
 
         if($process)
         {
+            $total_activities = 0;
             foreach ($process->stages as $stage) {
-                $stage->status = 'pendiente';
                 foreach ($stage->activities as $activity) {
+                    $total_activities++;
+                    $activity->progress = 0;
+                    $activity->status = 'pending';
                     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
-                    $activity->status = 'pendiente';
-                    $activity->progress = '0';
                     if($exist) {
-                        $activity->status = 'completo';
-                        $activity->progress = '100';
+                        $activity->status = $exist->status->code;
+                        $activity->progress = $exist->progress;
                     }
                 }
             }
@@ -397,6 +398,18 @@ class Process extends BaseModel
             $process->participants = $participants->count() ?? 0;
             $process->percentage = 0;
             $process->students = $participants;
+
+            $count_absences = $user->summary_process()->where('process_id', $process->id)->first()?->absences ?? 0;
+            $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : '-';
+
+            $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
+            $user_activities = ProcessSummaryActivity::where('user_id', $user->id)->where('status_id', $status_finished)->count();
+            $process->user_activities_progress = $user_activities;
+            $process->user_activities_total = $total_activities;
+
+
+            $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100),2) : 0;
+
             ProcessAssistantsSearchResource::collection($process->students);
         }
 
