@@ -32,6 +32,7 @@ class CursoSearchResource extends JsonResource
             $modules = $modules->merge($school->subworkspaces);
         }
 
+
         $all_modules = $modules->unique();
 
         $modules = array_unique($modules->pluck('name')->toArray());
@@ -41,7 +42,6 @@ class CursoSearchResource extends JsonResource
             $position = $this->course_position;
             $pivot_id_selected = $request->school_id  ?? $request->schools[0];
         }
-
 
         // Set assigned users to every course
 
@@ -222,6 +222,7 @@ class CursoSearchResource extends JsonResource
         //     'name' => 'Escuelas activas: ' . $active_schools_count,
         //     'class' => $active_schools_count == 0 ? 'text-red text-bold' : 'text-primary',
         // ];
+
 
         $data = [
             'nombre' => $this->name,

@@ -2,7 +2,7 @@
 # To build a specific set of containers with a version,
 # you can use the VERSION as an arg of the docker build command (e.g make docker VERSION=0.0.2)
 
-VERSION_DEP ?= 2.0.13
+VERSION_DEP ?= 2.0.14
 
 VERSION ?= v0.0.1
 

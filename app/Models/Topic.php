@@ -11,7 +11,7 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','path_qr',
-        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties'
+        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties', 'open_evaluation_button'
     ];
 
        protected $casts = [
@@ -714,7 +714,9 @@ class Topic extends BaseModel
                     'estado_tema_str' => $topic_status_arr[$topic_status['status']],
                     'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
                     'tags' => $topic->tags->map( fn($t) => $t->taxonomy),
-                    'review_all_duration_media' => boolval($topic->review_all_duration_media)
+                    'review_all_duration_media' => boolval($topic->review_all_duration_media),
+                    'open_evaluation_button' => $topic->open_evaluation_button
+                        ?: 'Dar evaluación'
                 ]);
             }
 

@@ -170,7 +170,7 @@ class VideotecaController extends Controller
      */
     public function create(Request $request)
     {
-        // $modules = Criterion::getValuesForSelect('module'); 
+        // $modules = Criterion::getValuesForSelect('module');
         $modules = Workspace::loadSubWorkspaces(['id', 'name as nombre']);
         $categorias = Taxonomy::getDataForSelectWorkspace('videoteca', 'categoria');
         $tags = Taxonomy::getDataForSelectWorkspace('videoteca', 'tag');
@@ -231,14 +231,30 @@ class VideotecaController extends Controller
     {
         $data = $request->validated();
 
-        $data = Media::requestUploadFileForId($data, 'media', $data['title'] ?? null);
-        $data = Media::requestUploadFileForId($data, 'preview', $data['title'] ?? null);
+        // Validate storage limit
 
-        $videoteca = Videoteca::storeRequest($data);
+        $files = [];
+        if (isset($data['file_media'])) $files[] = $data['file_media'];
+        if (isset($data['file_preview'])) $files[] = $data['file_preview'];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        $msg = 'Videoteca creada correctamente.';
+        if ($hasStorageAvailable) {
 
-        return response()->json(compact('videoteca', 'msg', 'data'));
+            $data = Media::requestUploadFileForId($data, 'media', $data['title'] ?? null);
+            $data = Media::requestUploadFileForId($data, 'preview', $data['title'] ?? null);
+
+            $videoteca = Videoteca::storeRequest($data);
+
+            $msg = 'Videoteca creada correctamente.';
+
+            return response()->json(compact('videoteca', 'msg', 'data'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     /**
@@ -309,14 +325,29 @@ class VideotecaController extends Controller
     {
         $data = $request->validated();
 
-        $data = Media::requestUploadFileForId($data, 'media', $data['title'] ?? null);
-        $data = Media::requestUploadFileForId($data, 'preview', $data['title'] ?? null);
+        // Validate storage limit
 
-        $videoteca = Videoteca::storeRequest($data, $videoteca);
-        $msg = 'Videoteca actualizada correctamente.';
+        $files = [];
+        if (isset($data['file_media'])) $files[] = $data['file_media'];
+        if (isset($data['file_preview'])) $files[] = $data['file_preview'];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        return response()->json(compact('videoteca', 'msg', 'data'));
+        if ($hasStorageAvailable) {
 
+            $data = Media::requestUploadFileForId($data, 'media', $data['title'] ?? null);
+            $data = Media::requestUploadFileForId($data, 'preview', $data['title'] ?? null);
+
+            $videoteca = Videoteca::storeRequest($data, $videoteca);
+            $msg = 'Videoteca actualizada correctamente.';
+
+            return response()->json(compact('videoteca', 'msg', 'data'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     /**

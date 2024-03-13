@@ -85,6 +85,11 @@ export default {
                         }, 800)
                     })
                     .catch(e => {
+
+                        if (e.response.data.msg) {
+                            vue.showAlert(e.response.data.msg, 'warning')
+                        }
+
                         vue.hideLoader()
                     })
             }

@@ -2,21 +2,21 @@
     <div class="wrapper">
 
         <v-row class="justify-content-center py-4 --mb-5">
-            <div class="col-4">
+            <div class="col-2">
                 <v-row class="--justify-content-center --pt-3 --pb-3" align="center">
-                    <div class="col-5">
+                    <div class="col-12">
                         <img :src="config.logo"
                              class="logo"
                             alt="Logo">
                     </div>
-                    <div class="col-7">
-                        <h1>Mis workspaces</h1>
-                        <h3>Bienvenido a {{ config.titulo }}</h3>
-                        <!-- <small>Ingresa a un workspace para administrar su contenido</small> -->
-                    </div>
+<!--                    <div class="col-7">-->
+<!--                        <h1>Mis workspaces</h1>-->
+<!--                        <h3>Bienvenido a {{ config.titulo }}</h3>-->
+<!--                        &lt;!&ndash; <small>Ingresa a un workspace para administrar su contenido</small> &ndash;&gt;-->
+<!--                    </div>-->
                 </v-row>
             </div>
-            <div v-if="true" class="col-4 d-flex justify-content-center align-items-center" style="gap: 1.5rem">
+            <div v-if="true" class="col-6 d-flex justify-content-center align-items-center" style="gap: 1.5rem">
                 <div :class="`${ !showDetail ? 'd-flex' : 'd-none' } align-items-end`">
                     <!-- <i class="mdi mdi-cloud-outline fa-2x mr-3"></i> -->
                     <div class="d-flex flex-column">
@@ -199,7 +199,7 @@
                                         title="Ir a cursos"
                                         @click="setActiveWorkspace(workspace.id, '/cursos')"
                                     >
-                                        <v-badge :content="'' + workspace.courses_count" :color="workspace.active ? 'primary' : 'grey'"> 
+                                        <v-badge :content="'' + workspace.courses_count" :color="workspace.active ? 'primary' : 'grey'">
                                             <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-notebook</v-icon>
                                             <br> <span class="table-default-icon-title" v-text="'Cursos'"/>
                                         </v-badge>
@@ -896,7 +896,7 @@ export default {
 
                     vue.hideLoader();
                 })
-            
+
         },
         loadPreference(){
             //Preferencia al cargar los datos listado o grilla

@@ -285,7 +285,8 @@ class RestCourseController extends Controller
                     $q->where('name', 'like', "%{$qs}%");
                 }
             })
-            ->where('user_id', $user->id);
+            ->where('user_id', $user->id)
+            ->whereNotNull('certification_issued_at');
 
         if ($request->type == 'accepted')
             $registrosQuery->whereNotNull('registro_capacitacion_path');
@@ -333,10 +334,25 @@ class RestCourseController extends Controller
         $subworkspace = Workspace::find($user->subworkspace_id);
         $course = Course::find($request->course_id);
 
-        // Get user cargo and area
+        // Get user cargo and area criteria ids
 
-        $positionCriterionValueId = User::getCriterionValueId($user->id, 6); // 6 PUESTO
-        $areaCriterionValueId = User::getCriterionValueId($user->id, 9); // 9 TIENDA/ÁREA
+        $jobPositionId = 6; // default value for NGR PUESTO
+        $areaId = 9; // default value for NGR TIENDA/ÁREA
+
+        if (isset($subworkspace->registro_capacitacion->criteriaJobPosition)) {
+            if ($subworkspace->registro_capacitacion->criteriaJobPosition->id) {
+                $jobPositionId = $subworkspace->registro_capacitacion->criteriaJobPosition->id;
+            }
+        }
+
+        if (isset($subworkspace->registro_capacitacion->criteriaArea)) {
+            if ($subworkspace->registro_capacitacion->criteriaArea->id) {
+                $areaId = $subworkspace->registro_capacitacion->criteriaArea->id;
+            }
+        }
+
+        $positionCriterionValueId = User::getCriterionValueId($user->id, $jobPositionId);
+        $areaCriterionValueId = User::getCriterionValueId($user->id, $areaId);
         $position = CriterionValue::find($positionCriterionValueId);
         $area = CriterionValue::find($areaCriterionValueId);
 
@@ -349,7 +365,8 @@ class RestCourseController extends Controller
             $workersCount = User::countWithCriteria($user->subworkspace_id, $criterionValueIdForCounting);
         }
 
-        // Get company address
+        // Get company address (from address field or criteria if is not defined)
+
         $address = '';
         if ($subworkspace->registro_capacitacion->company->address) {
             $address = $subworkspace->registro_capacitacion->company->address;

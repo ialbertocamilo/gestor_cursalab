@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Storage;
 
 class GestorController extends Controller
 {
+
     public function verCertificadoEscuela($usuario_id, $categoria_id)
     {
         try {

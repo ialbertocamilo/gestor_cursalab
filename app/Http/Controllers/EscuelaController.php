@@ -25,8 +25,8 @@ class EscuelaController extends Controller
 
         // $request->workspace_id = $workspace_id;
         $request->canChangePosition =   boolval(
-                                        isset($request->modules) 
-                                        && count($request->modules) == 1 
+                                        isset($request->modules)
+                                        && count($request->modules) == 1
                                         && !isset($request->active)
                                         && !isset($request->dates)
                                     );
@@ -76,26 +76,57 @@ class EscuelaController extends Controller
     public function store(EscuelaStoreUpdateRequest $request)
     {
         $data = $request->validated();
-        $data = Media::requestUploadFile($data, 'imagen');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        $escuela = School::storeRequest($data);
+        // Validate storage limit
 
-        $msg = 'Escuela creado correctamente.';
-        return $this->success(compact('escuela', 'msg'));
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+
+        if ($hasStorageAvailable) {
+
+            $data = Media::requestUploadFile($data, 'imagen');
+            //$data = Media::requestUploadFile($data, 'plantilla_diploma');
+
+            $escuela = School::storeRequest($data);
+
+            $msg = 'Escuela creado correctamente.';
+            return $this->success(compact('escuela', 'msg'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
     }
 
     public function update(EscuelaStoreUpdateRequest $request, School $school)
     {
         $data = $request->validated();
-        $data = Media::requestUploadFile($data, 'imagen');
-        $data = Media::requestUploadFile($data, 'plantilla_diploma');
 
-        School::storeRequest($data, $school);
+        // Validate storage limit
 
-        $msg = 'Escuela actualizada correctamente.';
+        $files = isset($data['file_imagen']) ? [$data['file_imagen']] : [];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        return $this->success(compact('school', 'msg'));
+        if ($hasStorageAvailable) {
+
+            $data = Media::requestUploadFile($data, 'imagen');
+            //$data = Media::requestUploadFile($data, 'plantilla_diploma');
+
+            School::storeRequest($data, $school);
+
+            $msg = 'Escuela actualizada correctamente.';
+
+            return $this->success(compact('school', 'msg'));
+
+        } else {
+
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
     }
 
     public function destroyEscuela(School $school)
@@ -147,8 +178,8 @@ class EscuelaController extends Controller
             $subworkspace_tag = $parts[0];
             $school_tag = $parts[1];
 
-            $subworkspace_ids[] = explode('_', $subworkspace_tag)[1]; 
-            $school_ids[] = explode('_', $school_tag)[1]; 
+            $subworkspace_ids[] = explode('_', $subworkspace_tag)[1];
+            $school_ids[] = explode('_', $school_tag)[1];
         }
 
         $data = $this->buildSourceTreeSelection($selections);
@@ -197,9 +228,9 @@ class EscuelaController extends Controller
                     'id' => $id,
                 ];
 
-                $data[] = $row; 
+                $data[] = $row;
 
-                // $courses[$index][$position] = $row;  
+                // $courses[$index][$position] = $row;
             }
 
             $course_id = $data[0]['id'];
@@ -210,7 +241,7 @@ class EscuelaController extends Controller
                 $courses[$course_id]['topics'][] = $topic_id;
 
             } else {
-                
+
                 $courses[$course_id]['topics'] = [];
             }
 

@@ -222,16 +222,24 @@ class SortingModel extends Model
                 $pivotField = 'school_id';
                 break;
             case CourseSchool::class:
+                $modelKey = 'school_id';
+                $pivotField = 'course_id';
+
+                self::fixNullPositionsInCourseSchols(
+                    $request->pivot_id_selected
+                );
+
                 $resource = $model::where('school_id', $request->pivot_id_selected)
                                 ->where('course_id', $request->id)
                                 ->first();
-                $modelKey = 'school_id';
-                $pivotField = 'course_id';
                 break;
             default:
                 return;
         }
-        $new_position = $action == 'up' ? $resource->position + 1 : $resource->position - 1;
+        $new_position = $action == 'up'
+            ? $resource->position + 1
+            : $resource->position - 1;
+
         DB::transaction(function () use ($model, $resource, $new_position, $modelKey, $pivotField) {
             // Actualizar el siguiente recurso
             $model::where('position', $new_position)
@@ -249,6 +257,35 @@ class SortingModel extends Model
             cache_clear_model(Course::class);
         }
     }
+
+    /**
+     * Fix null, duplicates and negative position values
+     */
+    public static function fixNullPositionsInCourseSchols($schoolId) {
+
+        $coursePositions = CourseSchool::query()
+            ->join('courses', 'courses.id', '=', 'course_id')
+            ->where('school_id',  $schoolId)
+            ->whereNull('courses.deleted_at')
+            ->orderBy('position')
+            ->get();
+
+        $lastPosition = 1;
+        foreach ($coursePositions as $coursePosition) {
+
+            if ($coursePosition->position != $lastPosition) {
+                CourseSchool::query()
+                    ->where('school_id',  $schoolId)
+                    ->where('course_id', $coursePosition->course_id)
+                    ->update([
+                        'position' => $lastPosition
+                    ]);
+            }
+
+            $lastPosition++;
+        }
+    }
+
     public static function setLastPositionInPivotTable($pivotModel,$model,$data,$fields_to_search){
         //example data structure ['subworkspace_id'=>$subworkspace->id,'school_id' => $school->id]
         $last_postion =  $pivotModel::where(function($q) use ($fields_to_search){

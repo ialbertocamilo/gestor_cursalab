@@ -15,7 +15,13 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Foundation\Application;
-use App\Models\{ Course, Topic, Announcement, School, Vademecum, Videoteca, Workspace };
+use App\Models\{Course,
+    Topic,
+    Announcement,
+    School,
+    Vademecum,
+    Videoteca,
+    Workspace};
 
 class Media extends BaseModel
 {
@@ -366,21 +372,36 @@ class Media extends BaseModel
         return $media;
     }
     protected function validateStorageByWorkspace($files){
+
+        // Reload workspace limits from database instead of using the data
+        // from session, since is likely out-of-date
         $workspace = get_current_workspace();
+        $workspace = Workspace::find($workspace->id);
+
         $workspace_current_storage = DashboardService::loadSizeWorkspaces([$workspace->id])->first();
         $workspace_current_storage = (int) $workspace_current_storage->medias_sum_size;
 
         // === workspace storage actual ===
         $total_current_storage = $workspace_current_storage;
         foreach ($files as $file) {
-            $total_current_storage += round($file->getSize() / 1024);
+            if (is_string($file)) {
+                info($file);
+            } else {
+                $total_current_storage += round($file->getSize() / 1024);
+            }
         }
+
         $total_current_storage = formatSize($total_current_storage, parsed:false);
         // === workspace storage actual ===
 
         $total_storage_limit = $workspace->limit_allowed_storage ?? 0;
-        $still_has_storage  = ($total_current_storage['size_unit'] == 'Gb' &&
-                                $total_current_storage['size'] <= $total_storage_limit);
+        $still_has_storage  = (
+            ($total_current_storage['size_unit'] == 'Gb' &&
+             $total_current_storage['size'] <= $total_storage_limit)
+            || $total_current_storage['size_unit'] == 'Mb'
+            || $total_current_storage['size_unit'] == 'Kb'
+        );
+
         return  $still_has_storage;
     }
     protected function extractZipToTempFolder($file, $temp_path)
@@ -422,7 +443,7 @@ class Media extends BaseModel
                 $command['ACL'] = strpos($command['Key'], 'CONFIDENTIAL') === false
                     ? 'public-read'
                     : 'private';
-        });
+            });
         // $options =  array(
         //     'concurrency' => 20,
         //     'before' => function (\Aws\Command $command) use($public) {

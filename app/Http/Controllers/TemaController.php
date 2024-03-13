@@ -56,7 +56,7 @@ class TemaController extends Controller
         $q_requisitos = Topic::select('id', 'name')->where('course_id', $course->id);
         if ($topic) {
             $q_requisitos->whereNotIn('id', [$topic->id]);
-        } 
+        }
 
         $filters = ['course_id' => $course->id];
         $default_position = $max_position = SortingModel::getNextItemOrderNumber(Topic::class, $filters, 'position');
@@ -135,6 +135,23 @@ class TemaController extends Controller
     public function store(School $school, Course $course, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+
+        // Validate storage limit
+
+        $files = [];
+        if (isset($data['file_imagen']))  $files[] = $data['file_imagen'];
+        foreach ($data['medias'] as $media) {
+            if (isset($media['file']))  $files[] = $media['file'];
+        }
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+        if (!$hasStorageAvailable) {
+            return response()->json([
+                'message' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
+        // Save topic
+
         //Validación para temas de un curso virtual: Valida si es que existe una cuenta disponible en el horario especificado
         if(!Topic::validateAvaiableAccount($course,$data)){
             return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
@@ -160,12 +177,29 @@ class TemaController extends Controller
     public function update(School $school, Course $course, Topic $topic, TemaStoreUpdateRequest $request)
     {
         $data = $request->validated();
+
+        // Validate storage limit
+
+        $files = [];
+        if (isset($data['file_imagen']))  $files[] = $data['file_imagen'];
+        foreach ($data['medias'] as $media) {
+            if (isset($media['file']))  $files[] = $media['file'];
+        }
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+        if (!$hasStorageAvailable) {
+            return response()->json([
+                'message' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
+        // Save topic
+
         if(!Topic::validateAvaiableAccount($course,$data,$topic)){
             return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
         }
         $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
-        
+
         // info($data);
         if ($data['validate']):
             $validations = Topic::validateBeforeUpdate($school, $topic, $data);
@@ -310,7 +344,7 @@ class TemaController extends Controller
 
         return $this->success(['pregunta' => $pregunta]);
     }
-    
+
     public function storeAIQuestion(School $school, Course $course, Topic $topic,Request $request){
         $question_type_code = $topic->evaluation_type->code === 'qualified'
         ? 'select-options'

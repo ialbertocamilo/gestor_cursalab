@@ -90,6 +90,21 @@ class AnnouncementController extends Controller
     {
         $data = $request->validated();
 
+        // Validate storage limit
+
+        $files = [];
+        if (isset($data['file_imagen'])) $files[] = $data['file_imagen'];
+        if (isset($data['file_archivo'])) $files[] = $data['file_archivo'];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+
+        if (!$hasStorageAvailable) {
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
+        // Save announcement
+
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'archivo');
         $modulesIds = $data['module_ids'];
@@ -140,6 +155,21 @@ class AnnouncementController extends Controller
     public function update(Announcement $announcement, AnnouncementStoreRequest $request)
     {
         $data = $request->validated();
+
+        // Validate storage limit
+
+        $files = [];
+        if (isset($data['file_imagen'])) $files[] = $data['file_imagen'];
+        if (isset($data['file_archivo'])) $files[] = $data['file_archivo'];
+        $hasStorageAvailable = Media::validateStorageByWorkspace($files);
+
+        if (!$hasStorageAvailable) {
+            return response()->json([
+                'msg' => config('errors.limit-errors.limit-storage-allowed')
+            ], 403);
+        }
+
+        // Save announcement
 
         $data = Media::requestUploadFile($data, 'imagen');
         $data = Media::requestUploadFile($data, 'archivo');
