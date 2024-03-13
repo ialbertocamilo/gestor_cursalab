@@ -285,7 +285,8 @@ class RestCourseController extends Controller
                     $q->where('name', 'like', "%{$qs}%");
                 }
             })
-            ->where('user_id', $user->id);
+            ->where('user_id', $user->id)
+            ->whereNotNull('certification_issued_at');
 
         if ($request->type == 'accepted')
             $registrosQuery->whereNotNull('registro_capacitacion_path');
