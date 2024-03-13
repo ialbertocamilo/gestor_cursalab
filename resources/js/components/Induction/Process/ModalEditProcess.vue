@@ -1,7 +1,9 @@
 
 
 <template>
-    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
+    <v-dialog :max-width="width" v-model="value" scrollable
+        :persistent="true"
+        @click:outside="closeModalOutside">
         <v-card class="modal_edit_process">
             <v-card-title class="default-dialog-title">
                 {{ process.id ? 'Editar' : 'Crear' }} proceso de inducción {{ step_title }}
@@ -1343,6 +1345,11 @@ export default {
 
             //         vue.selects.requirement_list = data.data.requirements
             //     })
+        },
+        closeModalOutside() {
+            let vue = this
+            // if (!vue.options.persistent)
+            //     vue.$emit('onCancel')
         },
     }
 };

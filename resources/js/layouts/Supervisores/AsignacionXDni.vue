@@ -52,7 +52,7 @@
                             style="justify-content: space-between"
                         >
                             <div>
-                                <span v-text="result.fullname" class="col-md-10"></span>
+                                <span v-text="result.fullname + ' - ' + result.document" class="col-md-10"></span>
                                 <v-btn color="#796aee" icon class="mr-1 col-md-2" @click="agregarUsuario(result, i)">
                                     <v-icon v-text="'mdi-plus'" color="#5458EA"></v-icon>
                                 </v-btn>
@@ -80,7 +80,7 @@
                             style="justify-content: space-between"
                         >
                             <div>
-                                <span v-text="usuario.fullname" class="col-md-10"></span>
+                                <span v-text="usuario.fullname + ' - ' + usuario.document" class="col-md-10"></span>
                                 <v-btn icon class="mr-1" @click="eliminarUsuario(usuario.dni)">
                                     <v-icon v-text="'mdi-minus'" color="#5458EA"></v-icon>
                                 </v-btn>

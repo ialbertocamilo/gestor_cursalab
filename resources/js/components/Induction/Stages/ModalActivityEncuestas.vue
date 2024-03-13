@@ -119,7 +119,7 @@ export default {
             rules: {
                 titulo: this.getRules(['required', 'max:255']),
             },
-            resources: [],
+            // resources: [],
             search: null,
             isLoading: false,
             debounceTimer: null,
@@ -151,12 +151,12 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.projectForm.reset()
             vue.$emit('onCancel')
         },
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
         },
         prevStep()
         {
@@ -179,8 +179,11 @@ export default {
             vue.options.cancelLabel = "Retroceder";
             vue.options.confirmLabel = "Guardar";
 
+            console.log(vue.encuesta_id);
             if(vue.stepper_box == 1)
             {
+                if(!(vue.encuesta_id && vue.encuesta_id != 0))
+                {
                 vue.errors = []
 
                 this.showLoader()
@@ -218,6 +221,12 @@ export default {
                 {
                     this.hideLoader()
                 }
+                }
+                else {
+
+                    vue.stepper_box = 2;
+                    vue.loadStep2 = true
+                }
             }
             else if(vue.stepper_box == 2)
             {
@@ -241,28 +250,21 @@ export default {
             let base = `${vue.options.base_endpoint}`
 
             if (resource) {
-                let url = `${base}/${resource.id}/edit`
+                let url = `${base}/edit/${resource.id}`
                 await vue.$http.get(url).then(({ data }) => {
-                    vue.resource.id = data.data.id;
-                    vue.resource.model_id = data.data.model_id;
-                    vue.resource.model_type = data.data.model_type;
-                    vue.resource.indications = data.data.indications;
-                    vue.resource.course_name = data.data.course_name;
-                    vue.resource.count_file = data.data.count_file;
-                    vue.resources = data.data.resources;
-                    vue.selects.courses.push(data.data.course);
+
+                    let _data = data.data
+
+                    vue.resource.titulo = _data.activity.title;
+                    vue.resource.description = _data.activity.description;
+                    vue.resource.poll_id = _data.poll.id
+                    vue.encuesta_id = _data.poll.id
                 })
                 console.log(2);
             } else {
                 console.log(3);
                 vue.resource.id = null;
-                vue.resource.model_id = vue.options.model_id;
-                vue.resource.model_type = 'App\\Models\\Stage';
-                vue.resource.indications = null;
-                vue.resource.course_name = null;
-                vue.resource.count_file = null;
-                vue.resources = [];
-                vue.selects.courses = [];
+                vue.resource.titulo = '';
             }
 
             return 0;
@@ -281,7 +283,7 @@ export default {
             let vue = this;
 
             vue.resource.model_id = vue.options.model_id;
-            vue.resource.model_type = 'App\\Models\\Stage';
+            // vue.resource.model_type = 'App\\Models\\Stage';
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields);
             formData.append('validate', validateForm ? "1" : "0");

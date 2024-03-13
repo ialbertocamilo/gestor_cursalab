@@ -530,17 +530,20 @@ export default {
 
             console.log(vue.base_endpoint);
 
-            let url = `${vue.options.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
+            let url = `${vue.options.base_endpoint}/${ resource ? `edit/${resource.id}` : 'form-selects'}`
             // let base = `${vue.options.base_endpoint}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.media_url = data.data.media_url
-                    vue.selects.requisitos = data.data.requisitos
-                    vue.selects.evaluation_types = data.data.evaluation_types
-                    vue.selects.qualification_types = data.data.qualification_types
-                    vue.limits_ia_convert = data.data.limits_ia_convert;
-                    vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
-                    vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    console.log(data.data);
+
+                    let _data = resource ? data.data.temas : data.data
+                    vue.media_url = _data.media_url
+                    vue.selects.requisitos = _data.requisitos
+                    vue.selects.evaluation_types = _data.evaluation_types
+                    vue.selects.qualification_types = _data.qualification_types
+                    vue.limits_ia_convert = _data.limits_ia_convert;
+                    vue.hasPermissionToUseIaEvaluation=_data.has_permission_to_use_ia_evaluation;
+                    vue.hasPermissionToUseIaDescription = _data.has_permission_to_use_ia_description;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -551,14 +554,14 @@ export default {
                         }, 200);
                     }
                     if (resource && resource.id) {
-                        vue.resource = Object.assign({}, data.data.tema)
+                        vue.resource = Object.assign({}, _data.tema)
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     } else {
-                        vue.resource.qualification_type = data.data.qualification_type
-                        vue.resource.position = data.data.default_position
+                        vue.resource.qualification_type = _data.qualification_type
+                        vue.resource.position = _data.default_position
                     }
 
-                    vue.resource.max_position = data.data.max_position
+                    vue.resource.max_position = _data.max_position
                 })
             return 0;
         },

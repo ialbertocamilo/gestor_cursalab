@@ -401,7 +401,7 @@ export default {
             // let url = resource ? `${base}/${resource.id}/edit` : `${base}/form-selects`;
             let url = `${base}/form-selects`;
 
-            if (vue.options.action == 'edit') url = `${base}/${resource.id}/edit`
+            if (vue.options.action == 'edit') url = `${base}/edit/${resource.id}`
             if (vue.options.action == 'duplicate') url = `${base}/${resource.id}/duplicate-data`
 
 

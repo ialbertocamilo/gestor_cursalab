@@ -101,10 +101,6 @@
                                                     dense
                                                 />
                                             </v-col>
-
-                                            <v-col cols="12" class="py-1">
-                                                <p class="mb-0">** Utilizado para mostrar el resultado del curso y que se tendrá por defecto en la creación de temas.</p>
-                                            </v-col>
                                         </v-row>
                                     </template>
                                 </DefaultModalSectionExpand>

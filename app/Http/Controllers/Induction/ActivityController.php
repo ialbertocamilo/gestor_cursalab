@@ -43,6 +43,39 @@ class ActivityController extends Controller
     //     return $this->success($data);
     // }
 
+    public function TareasUpdate(Process $process, Stage $stage, Activity $activity, ProjectStoreRequest $request)
+    {
+        $course_id = $request->project['course_id'];
+        $project_id = $request->project['id'] ?? null;
+        $project = Project::where('id', $project_id)->first();
+
+        if($course_id) {
+            $course = Course::where('id', $course_id)->first();
+            if($course) {
+                $course->name = 'Inducción - Tareas - '. $request->project['title'];
+                $course->save();
+
+                $request->request->add([
+                    'course_id' => $course?->id
+                ]);
+                $data = Project::storeUpdateRequest($request, $project);
+                cache_clear_model(Project::class);
+            }
+        }
+
+        $activity->title = $request->project['title'];
+        $activity->save();
+        cache_clear_model(Activity::class);
+
+        $response = [
+            'msg' => 'Actividad creada correctamente.',
+            'activity' => $activity,
+            'still_has_storage'=> $data['still_has_storage'] ?? true,
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+
     public function TareasStore(Process $process, Stage $stage, ProjectStoreRequest $request)
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'tareas');
@@ -79,27 +112,23 @@ class ActivityController extends Controller
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
 
-        // $activity = '';
-
-        // $stage = Stage::storeRequest($data);
-
-
         $response = [
             'msg' => 'Actividad creada correctamente.',
             'activity' => $activity,
             'still_has_storage'=> $data['still_has_storage'] ?? true,
             'messages' => ['list' => []]
         ];
+
         return $this->success($response);
-        // $req_project = new ProjectStoreRequest();
-        // $req_project->request->add(['project' => $data_activity]);
-        // dd($req_project);
-        // return $this->success($data);
     }
 
     public function editActivityTareas(Process $process, Stage $stage, Activity $activity)
     {
-        $response = [];
+        $project = Project::where('id', $activity?->model_id)->first();
+        $response = Project::editProject($project);
+        $response['title'] = $activity->title;
+        $response['activity_id'] = $activity->id;
+        // $response = [];
 
         return $this->success($response);
     }
@@ -406,10 +435,12 @@ class ActivityController extends Controller
 
         $data_activity = [
             'title' => $request->titulo,
+            'description' => $request->description,
             'stage_id' => $request->model_id,
             'model_id' => $poll?->id ?? null,
             'model_type' => Poll::class,
-            'type_id' => $type_activity?->id ?? null
+            'type_id' => $type_activity?->id ?? null,
+            'active' => false
         ];
 
         $activity = Activity::storeRequest($data_activity);
@@ -421,6 +452,39 @@ class ActivityController extends Controller
             'encuesta_id' => $poll?->id ?? 0,
             'messages' => ['list' => []]
         ];
+
+        return $this->success($response);
+    }
+
+    public function editActivityEncuestas(Process $process, Stage $stage, Activity $activity)
+    {
+        $poll = Poll::where('id', $activity?->model_id)->first();
+        $response['poll'] = $poll;
+        $response['activity'] = $activity;
+        // $response = [];
+
+        return $this->success($response);
+    }
+
+    public function editActivityTemas(Process $process, Stage $stage, Activity $activity)
+    {
+        $temas = Topic::where('id', $activity?->model_id)->first();
+        $response['temas'] = $temas;
+
+        return $this->success($response);
+    }
+
+    public function editActivityChecklist(Process $process, Stage $stage, Activity $activity)
+    {
+        $checklist = Checklist::where('id', $activity?->model_id)->first();
+        $response['checklist'] = $checklist;
+
+        return $this->success($response);
+    }
+
+    public function editActivitySesiones(Process $process, Stage $stage, Activity $activity)
+    {
+        $response = [];
 
         return $this->success($response);
     }

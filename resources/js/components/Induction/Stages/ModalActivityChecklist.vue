@@ -402,7 +402,7 @@ export default {
 
             console.log(vue.options.base_endpoint);
 
-            let url = `${vue.options.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
+            let url = `${vue.options.base_endpoint}/${ resource ? `edit/${resource.id}` : 'form-selects'}`
             // let base = `${vue.options.base_endpoint}`
             await vue.$http.get(url)
                 .then(({data}) => {
