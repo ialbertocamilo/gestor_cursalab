@@ -1,8 +1,7 @@
 <template>
     <section class="section-list">
-        <v-card flat class="elevation-0 mb-4">
-            <!--            Título con breadcumb-->
-            <!--            TODO: Add breadcumb-->
+        <!--
+            <v-card flat class="elevation-0 mb-4">
             <v-card-title>
 
                 <div v-if="showDetail">
@@ -15,7 +14,7 @@
                 </div>
 
                 <v-spacer/>
-
+        -->
                <!--  <DefaultSelect
                     class="col-3"
                     dense
@@ -26,8 +25,10 @@
                     item-value="id"
                     @onChange="getEstadisticas"
                 /> -->
+        <!--
             </v-card-title>
-        </v-card>
+        </v-card> 
+        -->
 
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
