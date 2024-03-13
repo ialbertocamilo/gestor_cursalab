@@ -294,10 +294,20 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
     }
     public function scopeFilterByPlatform($q){
         $platform = session('platform');
-        $type_id = $platform && $platform == 'induccion' 
-                    ? Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id 
-                    : Taxonomy::getFirstData('user', 'type', 'employee')->id;
-        $q->where('type_id',$type_id);
+
+        if ($platform && $platform == 'induccion') {
+
+            $type_id = Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id;
+            $q->where('type_id', $type_id);
+
+        } else {
+
+            $type_ids = [];
+            $type_ids[] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
+            $type_ids[] = Taxonomy::getFirstData('user', 'type', 'client')->id;
+
+            $q->whereIn('type_id', $type_ids);
+        }
     }
     public function scopeFilterText($q, $filter)
     {
@@ -484,7 +494,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             return null;
         }
     }
-   
+
     public function updateStatusUser($active = null, $termination_date = null,$from_massive=false)
     {
         $user = $this;
@@ -707,7 +717,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         if(!$email){
             return '';
         }
-       
+
         $mail_data = [ 'subject' => '¡Bienvenido a Cursalab! 🌟',
                        'user' => $user->name.' '.$user->lastname,
                        'user_id' => $user->id,
