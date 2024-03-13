@@ -92,6 +92,9 @@ Route::post('password_reset', [LoginController::class, 'reset_pass'])->name('pas
 Route::get('home', [DashboardController::class, 'index'])->name('home');
 Route::get('welcome', [DashboardController::class, 'index'])->name('home');
 
+// Gestor version
+Route::get('/version', [GestorController::class, 'getVersion']);
+
 // DESCARGAS
 Route::get('dnx/{id}', [GestorController::class, 'descargaArchivo']);
 Route::get('dnv/{id}', [GestorController::class, 'descargaVideo']);

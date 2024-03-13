@@ -25,6 +25,13 @@ use Illuminate\Support\Facades\Storage;
 
 class GestorController extends Controller
 {
+    /**
+     * Get latest GIT tag
+     */
+    public function getVersion() {
+        return exec('git describe');
+    }
+
     public function verCertificadoEscuela($usuario_id, $categoria_id)
     {
         try {
