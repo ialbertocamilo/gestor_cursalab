@@ -21,6 +21,26 @@
             :item-class="row_classes"
             :server-items-length="pagination.total_rows"
         >
+            <template v-slot:no-data>
+                <div v-if="dataTable.custom_no_data_text">
+                    <v-btn
+                        rounded
+                        color="primary"
+                        outlined
+                        @click="doAction({type: 'action', method_name:  dataTable.custom_no_data_text.action})"
+                        class="font-nunito"
+                    >
+                        <i 
+                            style="display: flex; justify-content: center; background: #344ea5; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; margin-right: 5px; padding-right: 1px;"
+                            :class="`${dataTable.custom_no_data_text.icon_button}`">
+                        </i>
+                        {{  dataTable.custom_no_data_text.label }}
+                    </v-btn>
+                </div>
+                <div v-else class="d-flex justify-content-center">
+                    <tr class="v-data-table__empty-wrapper"><td colspan="2">No se encontraron resultados</td></tr>
+                </div>
+            </template>
             <template v-for="(h,index) in dataTable.headers" v-slot:[`header.${h.value}`]="{  }">
                 <div v-if="h.value == 'custom-select'" class="d-flex align-items-center" style="width: 20px;" :key="index">
                     <v-checkbox
@@ -1748,5 +1768,17 @@ table .v-tooltip__content.menuable__content__active {
 .btn_add_new_process_inline {
     font-weight: 700 !important;
     font-family: "Nunito", sans-serif;
+}
+.icon-no-data-text-buttom{
+    display: flex;
+    justify-content: center;
+    background: #344ea5;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    margin-right: 5px;
+    padding-right: 1px;
 }
 </style>

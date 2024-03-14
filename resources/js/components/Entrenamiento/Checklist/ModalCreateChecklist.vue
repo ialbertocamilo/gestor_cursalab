@@ -19,28 +19,96 @@
                                 <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step1">
                                     <v-card-text>
                                         <v-row>
-                                            <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                                <span class="text_default lbl_tit">Indica la información que tendrá el checklist</span>
-                                            </v-col>
-                                            <v-col cols="12" md="12" lg="12" class="pb-0">
-                                                <DefaultInput clearable
-                                                            v-model="checklist.title"
-                                                            label="Título"
+                                            <v-col cols="7">
+                                                <DefaultInput 
+                                                    dense
+                                                    clearable
+                                                    v-model="resource.title"
+                                                    label="Título de checklist"
+                                                    placeholder="Escribe el titulo del checklist aquí"
                                                 />
                                             </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col cols="8" md="8" lg="8" class="pb-0">
-                                                <v-textarea
-                                                    rows="2"
-                                                    outlined
+                                            <v-col cols="5">
+                                                <DefaultAutocomplete
                                                     dense
-                                                    hide-details="auto"
-                                                    label="Descripción"
-                                                    v-model="checklist.description"
-                                                    class="txt_desc"
-                                                ></v-textarea>
+                                                    label="Seleccione el tipo de checklist"
+                                                    placeholder="Tipo de checklist"
+                                                    v-model="resource.type_checklist"
+                                                    :items="selects.type_checklist"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    @onChange="changeTypeChecklist"
+                                                />
                                             </v-col>
+                                            <v-col cols="7">
+                                                <DefaultRichText
+                                                    clearable
+                                                    :height="300"
+                                                    v-model="resource.description"
+                                                    label="Descripción"
+                                                    :rules="rules.content"
+                                                    :ignoreHTMLinLengthCalculation="true"
+                                                    :showGenerateIaDescription="showButtonIaGenerate"
+                                                    :key="`${showButtonIaGenerate}-editor`"
+                                                    :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
+                                                    :loading="loading_description"
+                                                    ref="descriptionRichText"
+                                                    @generateIaDescription="generateIaDescription"
+                                                />
+                                            </v-col>
+                                            <v-col cols="5">
+                                                <DefaultSelectOrUploadMultimedia ref="inputLogo" v-model="resource.image"
+                                                    label="Imagen (500x350px)" :file-types="['image']"
+                                                    @onSelect="setFile($event, resource, 'imagen')" select-width="60vw" select-height="100%" />
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <DefaultSimpleSection title="Comentarios" marginy="my-1" marginx="mx-0">
+                                                    <template slot="content">
+                                                        <div class="d-flex">
+                                                            <DefaultToggle class="ml-4 mb-2"
+                                                                v-model="resource.extra_attributes.required_comments" dense
+                                                                :active-label="'Activar comentarios dentro de las actividades del checklist'"
+                                                                :inactive-label="'Activar comentarios dentro de las actividades del checklist'" />
+                                                            <DefaultInfoTooltip
+                                                                text="Se agregarán comentarios a las actividades del checklist que puede brindar al supervisor"
+                                                                top
+                                                            />
+                                                        </div>
+                                                    </template>
+                                                </DefaultSimpleSection>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <DefaultSimpleSection title="Geolocalización" marginy="my-1" marginx="mx-0">
+                                                    <template slot="content">
+                                                        <div class="d-flex">
+                                                            <DefaultToggle class="ml-4 mb-2"
+                                                                v-model="resource.extra_attributes.required_geolocation" dense
+                                                                :active-label="'Activar geolocalización'"
+                                                                :inactive-label="'Activar geolocalización'" />
+                                                            <DefaultInfoTooltip
+                                                                text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
+                                                                top
+                                                            />    
+                                                        </div>
+                                                    </template>
+                                                </DefaultSimpleSection>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row justify="space-around" class="menuable">
+                                            <v-col cols="12">
+                                                <DefaultModalSectionExpand title="Configuración avanzada"
+                                                    :expand="sections.showSectionAdvancedconfiguration" :simple="true">
+                                                    <template slot="content">
+                                                        <v-col cols="6">
+                                                            <DefaultSelect dense :items="selects.qualification_types" item-text="name"
+                                                                return-object show-required v-model="resource.qualification_type"
+                                                                label="Sistema de calificación" :rules="rules.qualification_type_id" />
+                                                        </v-col>
+                                                    </template>
+                                                </DefaultModalSectionExpand>
+                                            </v-col>
+                                        </v-row>
+                                        <!-- <v-row>
                                             <v-col cols="4" md="4" lg="4">
                                                 <v-row>
                                                     <v-col cols="12" class="pb-0 pt-0">
@@ -49,17 +117,7 @@
                                                     <v-col cols="12" class="py-0 separated">
                                                         <DefaultDivider class="divider_light"/>
                                                     </v-col>
-                                                    <v-col cols="12" class="pt-0 pb-0 bx_type_checklist">
-                                                        <DefaultAutocomplete
-                                                            dense
-                                                            label="Tipo de checklist"
-                                                            v-model="checklist.type_checklist"
-                                                            :items="selects.type_checklist"
-                                                            item-text="name"
-                                                            item-value="id"
-                                                            @onChange="changeTypeChecklist"
-                                                        />
-                                                    </v-col>
+                                                    
                                                     <v-col cols="12" class="pt-0 pb-0 check_active">
                                                         <DefaultToggle v-model="checklist.active"/>
                                                     </v-col>
@@ -105,7 +163,7 @@
                                                 </v-row>
                                             </v-col>
 
-                                        </v-row>
+                                        </v-row> -->
                                     </v-card-text>
                                 </v-card>
                         </v-stepper-content>
@@ -340,12 +398,14 @@
 import draggable from 'vuedraggable'
 import SegmentFormModal from "./Blocks/SegmentFormModal";
 import ButtonsModal from './Blocks/ButtonsModal.vue';
+import DefaultRichText from "../../globals/DefaultRichText";
 
 export default {
     components: {
     draggable,
     SegmentFormModal,
-    ButtonsModal
+    ButtonsModal,
+    DefaultRichText,
 },
     props: {
         value: Boolean,
@@ -362,6 +422,9 @@ export default {
     },
     data() {
         return {
+            sections:{
+                showSectionAdvancedconfiguration:{ status: true },
+            },
             disabled_btn_next: true,
             stepper_box_btn1: true,
             stepper_box_btn2: true,
@@ -369,9 +432,6 @@ export default {
             stepper_box: 1,
             cancelLabel: "Cancelar",
             list_segments:[],
-            sections: {
-                showAdvancedOptions: false
-            },
             modalDateStart: {
                 open: false,
             },
@@ -420,6 +480,9 @@ export default {
                 type_checklist: [
                     {"id": "libre", "name": "Libre"},
                     {"id": "curso", "name": "Por curso"},
+                ],
+                qualification_types:[
+
                 ]
             },
             type_checklist: "libre",
@@ -443,9 +506,12 @@ export default {
             resourceDefault: {
                 id: null,
                 name: null,
+                extra_attributes :{},
                 type_checklist: null
             },
-            resource: {},
+            resource: {
+                extra_attributes:{}
+            },
             segments: [{
                 id: `new-segment-${Date.now()}`,
                 type_code: '',
@@ -476,7 +542,14 @@ export default {
             segment_by_document_clean: false,
             rules: {
                 // name: this.getRules(['required', 'max:255']),
-            }
+            },
+           //Jarvis
+            loading_description: false,
+            limits_descriptions_generate_ia: {
+                ia_descriptions_generated: 0,
+                limit_descriptions_jarvis: 0
+            },
+            showButtonIaGenerate: true,
             // data segmenteacion
         };
     },
@@ -487,6 +560,7 @@ export default {
     },
     async mounted() {
         // this.addActividad()
+        await this.loadLimitsGenerateIaDescriptions();
     },
     watch: {
         checklist: {
@@ -820,6 +894,46 @@ export default {
             console.log(vue.resource.type_checklist);
             console.log(vue.type_checklist);
             vue.type_checklist = vue.resource.type_checklist;
+        },
+        async loadLimitsGenerateIaDescriptions() {
+            await axios.get('/jarvis/limits?type=descriptions').then(({ data }) => {
+                this.limits_descriptions_generate_ia = data.data;
+            })
+        },
+        async generateIaDescription() {
+            const vue = this;
+            let url = `/jarvis/generate-description-jarvis`;
+            if (vue.loading_description || !vue.resource.name) {
+                const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al curso para poder generar la descripción';
+                vue.showAlert(message, 'warning', '')
+                return ''
+            }
+            if (vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis) {
+                vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
+                return ''
+            }
+            vue.loading_description = true;
+            await axios.post(url, {
+                name: vue.resource.name,
+                type: 'course'
+            }).then(({ data }) => {
+                vue.limits_descriptions_generate_ia.ia_descriptions_generated += 1;
+                let characters = data.data.description.split('');
+                vue.resource.description = ''; // Limpiar el contenido anterior
+                function updateDescription(index) {
+                    if (index < characters.length) {
+                        vue.resource.description += characters[index];
+                        setTimeout(() => {
+                            updateDescription(index + 1);
+                        }, 10);
+                    } else {
+                        vue.loading_description = false;
+                    }
+                }
+                updateDescription(0);
+            }).catch(() => {
+                vue.loading_description = false;
+            })
         },
     }
 };

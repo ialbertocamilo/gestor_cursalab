@@ -29,6 +29,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="abrirModalCreateEditChecklist($event, true)"
+                @abrirModalCreateEditChecklist="abrirModalCreateEditChecklist(objectModal)"
                 @duplicate="duplicateChecklist($event)"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
@@ -50,7 +51,7 @@
         <ModalCreateChecklist
             ref="ModalCreateChecklist"
             v-model="modal.crear_editar_checklist"
-            :width="'870px'"
+            :width="'1000px'"
             @onClose="closeModalCreateEditChecklist"
             @onConfirm="saveChecklist"
             :checklist="dataModalChecklist"
@@ -107,6 +108,11 @@ export default {
             dataTable: {
                 endpoint: '/entrenamiento/checklists/search',
                 ref: 'ChecklistTable',
+                custom_no_data_text:{
+                    label:'Agregar un checklist',
+                    icon_button:'mdi mdi-plus',
+                    action:'abrirModalCreateEditChecklist'
+                },
                 headers: [
                     {text: "Título", value: "title", align: 'start', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
