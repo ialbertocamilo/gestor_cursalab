@@ -55,7 +55,7 @@
                     slider-color="primary"
 
                     class="col-10 offset-1"
-                    
+
                 >
                     <v-tab v-if="show_criteria_segmentation">
                         {{ tabs_title }} Directa
@@ -148,13 +148,28 @@
                     @onConfirm="closeFormModal(modalInfoOptions)"
                     @onCancel="closeFormModal(modalInfoOptions)"
                 />
+
+                <SegmentMultipleCoursesModal
+                    :options="multipleCoursesModalOptions"
+                    :ref="multipleCoursesModalOptions.ref"
+                    @onConfirm="closeFormModal(multipleCoursesModalOptions)"
+                    @onCancel="closeFormModal(multipleCoursesModalOptions)"
+                />
             </v-form>
+            <div class="additional-text-wrapper">
+                <a href="javascript:"
+                   @click="multipleCoursesModalOptions.open = true">
+                    Guardar y asignar segmentación a otros cursos
+                </a>
+            </div>
         </template>
 
     </DefaultDialog>
 </template>
 
 <script>
+import SegmentMultipleCoursesModal from "./SegmentMultipleCoursesModal.vue";
+
 const fields = [
     "name",
     "email",
@@ -180,6 +195,7 @@ import SegmentByDocument from "./SegmentByDocument";
 
 export default {
     components: {
+        SegmentMultipleCoursesModal,
         Segment, SegmentByDocument, SegmentAlertModal
     },
     props: {
@@ -236,6 +252,15 @@ export default {
                 hideConfirmBtn: true,
                 persistent: true,
                 cancelLabel: 'Entendido'
+            },
+            multipleCoursesModalOptions: {
+                ref: 'SegmentMultipleCoursesModal',
+                open: false,
+                title: null,
+                resource:'data',
+                hideConfirmBtn: true,
+                persistent: true,
+                cancelLabel: 'Entendido0000000'
             },
             stackModals: { continues: [],
                 backers: [] },
@@ -294,7 +319,7 @@ export default {
         checkIfExistCriteria(stackSegments, current) {
             const vue = this;
             let stackMessage = [];
-            
+
             if(!vue.show_criteria_segmentation){
                 return stackMessage;
             }
@@ -485,7 +510,7 @@ export default {
         async loadData(resource) {
             let vue = this;
             vue.errors = [];
-            
+
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -630,5 +655,23 @@ export default {
 
 .group-sheet {
     padding-bottom: 40px;
+}
+
+.additional-text-wrapper {
+    width: 35%;
+    height: 40px;
+    position: absolute;
+    z-index: 1;
+    bottom: 17px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.additional-text-wrapper a {
+    font-size: 13px !important;
+    text-decoration: underline;
+    line-height: 15px;
 }
 </style>
