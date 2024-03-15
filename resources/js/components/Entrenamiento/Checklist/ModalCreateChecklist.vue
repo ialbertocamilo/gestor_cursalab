@@ -99,79 +99,154 @@
                                                 <DefaultModalSectionExpand title="Configuración avanzada"
                                                     :expand="sections.showSectionAdvancedconfiguration" :simple="true">
                                                     <template slot="content">
-                                                        <v-col cols="6">
-                                                            <DefaultSelect dense :items="selects.qualification_types" item-text="name"
-                                                                return-object show-required v-model="resource.qualification_type"
-                                                                label="Sistema de calificación" :rules="rules.qualification_type_id" />
-                                                        </v-col>
+                                                        <v-row justify="center">
+                                                            <v-col cols="6">
+                                                                <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 pb-4" marginx="mx-0">
+                                                                    <template slot="content">
+                                                                        <div class="d-flex justify-space-between" style="color:#5458EA">
+                                                                            <p>Define las escalas de evaluación</p>
+                                                                            <div>
+                                                                                <i class="mdi mdi-account-multiple-check"></i>
+                                                                                <span>Max: 3/5</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <draggable v-model="resource.evaluation_types" @start="drag_evaluation_type=true"
+                                                                                @end="drag_evaluation_type=false" class="custom-draggable" ghost-class="ghost">
+                                                                            <transition-group type="transition" name="flip-list" tag="div">
+                                                                                <div v-for="(evaluation_type) in resource.evaluation_types"
+                                                                                    :key="evaluation_type.id">
+                                                                                    <div class="activities">
+                                                                                        <v-row class="align-items-center px-2">
+                                                                                            <v-col cols="1" class="d-flex align-center justify-content-center ">
+                                                                                                <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                                                </v-icon>
+                                                                                            </v-col>
+                                                                                            <v-col cols="1">
+                                                                                                <div class="container-evaluation-type" :style="`background:${evaluation_type.color};`">
+                                                                                                </div>
+                                                                                            </v-col>
+                                                                                            <v-col cols="6">
+                                                                                                <DefaultInput 
+                                                                                                    dense
+                                                                                                    v-model="evaluation_type.name"
+                                                                                                    appendIcon="mdi mdi-pencil"
+                                                                                                />
+                                                                                            </v-col>
+                                                                                            <v-col>
+                                                                                                <DefaultInput 
+                                                                                                    suffix="%"
+                                                                                                    dense
+                                                                                                    v-model="evaluation_type.percent"
+                                                                                                />
+                                                                                            </v-col>
+                                                                                        </v-row>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </transition-group>
+                                                                        </draggable>
+                                                                        <div class="my-2">
+                                                                            <DefaultButton
+                                                                                label="Agregar escala"
+                                                                                icon="mdi-plus"
+                                                                                :outlined="true"
+                                                                                @click="()=>{}"
+                                                                            />
+                                                                        </div>
+                                                                    </template>
+                                                                </DefaultSimpleSection>
+                                                            </v-col>
+                                                            <v-col cols="6">
+                                                                <v-col cols="12" class="pt-1">
+                                                                    <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2" marginx="mx-0">
+                                                                        <template slot="content">
+                                                                            <DefaultSelect dense :items="selects.qualification_types" item-text="name"
+                                                                                return-object show-required v-model="resource.qualification_type"
+                                                                                label="Sistema de calificación" :rules="rules.qualification_type_id" />
+                                                                        </template>
+                                                                    </DefaultSimpleSection>
+                                                                </v-col>
+                                                                <v-col cols="12">
+                                                                    <DefaultSimpleSection title="Visualización" marginy="my-1" marginx="mx-0">
+                                                                        <template slot="content">
+                                                                            <div class="d-flex">
+                                                                                <DefaultToggle class="ml-4 mb-2"
+                                                                                    v-model="resource.extra_attributes.visualiazation_results" dense
+                                                                                    :active-label="'Permite que al finalizar el checklist la entidad evaluada visualice sus resultados.'"
+                                                                                    :inactive-label="'Permite que al finalizar el checklist la entidad evaluada visualice sus resultados.'" />
+                                                                                <DefaultInfoTooltip
+                                                                                    text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
+                                                                                    top
+                                                                                />    
+                                                                            </div>
+                                                                        </template>
+                                                                    </DefaultSimpleSection>
+                                                                </v-col>
+                                                                <v-col cols="12">
+                                                                    <DefaultSimpleSection title="Modo Recurrente" marginy="my-1" marginx="mx-0">
+                                                                        <template slot="content">
+                                                                            <div class="d-flex">
+                                                                                <DefaultToggle class="ml-4 mb-2"
+                                                                                    v-model="resource.extra_attributes.period_checklist" dense
+                                                                                    :active-label="'Este checklist se replicará.'"
+                                                                                    :inactive-label="'Este checklist se replicará.'" />
+                                                                                <DefaultInfoTooltip
+                                                                                    text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
+                                                                                    top
+                                                                                />    
+                                                                            </div>
+                                                                        </template>
+                                                                    </DefaultSimpleSection>
+                                                                </v-col>
+                                                            </v-col>
+                                                        </v-row>
                                                     </template>
                                                 </DefaultModalSectionExpand>
                                             </v-col>
                                         </v-row>
-                                        <!-- <v-row>
-                                            <v-col cols="4" md="4" lg="4">
-                                                <v-row>
-                                                    <v-col cols="12" class="pb-0 pt-0">
-                                                        <span class="text_default">Configuraciones</span>
-                                                    </v-col>
-                                                    <v-col cols="12" class="py-0 separated">
-                                                        <DefaultDivider class="divider_light"/>
-                                                    </v-col>
-                                                    
-                                                    <v-col cols="12" class="pt-0 pb-0 check_active">
-                                                        <DefaultToggle v-model="checklist.active"/>
-                                                    </v-col>
-                                                </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center" v-if="checklist.type_checklist === 'libre'">
-                                                    <v-col cols="12" class="d-flex justify-content-between pb-0"
-                                                        @click="sections.showAdvancedOptions = !sections.showAdvancedOptions"
-                                                        style="cursor: pointer">
-                                                        <span class="text_default cg">Avanzadas (Opcionales)</span>
-                                                        <v-icon>{{ sections.showAdvancedOptions ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                                                    </v-col>
-                                                    <v-col cols="12" class="py-0 separated">
-                                                        <DefaultDivider class="divider_light"/>
-                                                    </v-col>
-                                                </v-row>
-                                                <v-row justify="space-around" align="start" align-content="center" v-if="checklist.type_checklist === 'libre'">
-                                                    <v-col cols="12" class="d-flex justify-content-center pt-0">
-                                                        <v-expand-transition>
-                                                            <v-row v-show="sections.showAdvancedOptions">
-                                                                <v-col cols="12" class="pb-0">
-                                                                    <DefaultInputDate
-                                                                        clearable
-                                                                        :referenceComponent="'modalDateFilter'"
-                                                                        :options="modalDateStart"
-                                                                        v-model="resource.modalDateStart"
-                                                                        label="Inicio de checklist"
-                                                                        class="bx_calendar_top"
-                                                                    />
-                                                                </v-col>
-                                                                <v-col cols="12">
-                                                                    <DefaultInputDate
-                                                                        clearable
-                                                                        :referenceComponent="'modalDateFilter'"
-                                                                        :options="modalDateEnd"
-                                                                        v-model="resource.modalDateEnd"
-                                                                        label="Fin de checklist"
-                                                                        class="bx_calendar_top"
-                                                                    />
-                                                                </v-col>
-                                                            </v-row>
-                                                        </v-expand-transition>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-col>
-
-                                        </v-row> -->
                                     </v-card-text>
                                 </v-card>
                         </v-stepper-content>
                         <v-stepper-content step="2" class="p-0">
                                 <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step2">
                                     <v-card-text>
+                                        <v-row class="px-8">
+                                            <v-col cols="12">
+                                                <b> <h5>Crea el listado de actividades para tu checklist</h5> </b>
+                                                <p>
+                                                    Tener en cuenta que al agregar o quitar actividades a un checklist completado por un usuario no tendrá efectos en su avance. 
+                                                    Si un usuario ya completó un checklist se mantiene su estado y porcentaje, pero sí se actualiza para usuarios que aún no completan el checklist cuando el entrenador lo califique.
+                                                </p>
+                                            </v-col>
+                                        </v-row>
+                                        <v-carousel
+                                            :continuous="false"
+                                            :cycle="false"
+                                            :show-arrows="false"
+                                            hide-delimiter-background
+                                            delimiter-icon="custom-control-buttom"
+                                        >
+                                            <v-carousel-item>
+                                                <v-row class="px-12">
+                                                    <h5 style="color: #2A3649;" class="col col-12 py-0 my-0">¿Cómo deseas calificar tu checklist?</h5>
+                                                    <p style="color: #2A3649;" class="col col-12 py-0 my-0">Escoge una opción</p>
+                                                    <v-col cols="4" v-for="card in checklist_actions" :key="card.id">
+                                                        <DefaultCardAction :card_properties="card" />
+                                                    </v-col>
+                                                </v-row>
+                                            </v-carousel-item>
+                                            <v-carousel-item>
+                                                <v-row class="px-12">
+                                                    <h5 style="color: #2A3649;" class="col col-12 py-0 my-0">¿Cómo deseas calificar tu checklist?</h5>
+                                                    <p style="color: #2A3649;" class="col col-12 py-0 my-0">Escoge una opción</p>
+                                                    <v-col cols="4" v-for="card in checklist_actions" :key="card.id">
+                                                        <DefaultCardAction :card_properties="card" />
+                                                    </v-col>
+                                                </v-row>
+                                            </v-carousel-item>
+                                        </v-carousel>
+                                        
                                         <!-- checklist libre (segmentacion) -->
-                                        <div v-if="checklist.type_checklist === 'libre'">
+                                        <!-- <div v-if="checklist.type_checklist === 'libre'">
                                             <v-row>
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                     <span class="text_default lbl_tit">Relaciona el checklist a los usuarios según criterio o doc. de identidad.</span>
@@ -191,10 +266,10 @@
                                                     />
                                                 </v-col>
                                             </v-row>
-                                        </div>
+                                        </div> -->
                                         <!-- checklist libre (segmentacion) -->
                                         <!-- checklist curso -->
-                                        <div v-else-if="checklist.type_checklist === 'curso'">
+                                        <!-- <div v-else-if="checklist.type_checklist === 'curso'">
                                             <v-row>
                                                 <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
                                                     <span class="text_default lbl_tit">Relaciona el checklist a los usuarios según el o los cursos.</span>
@@ -265,7 +340,7 @@
                                                 </v-col>
                                             </v-row>
 
-                                        </div>
+                                        </div> -->
                                         <!-- checklist curso -->
 
                                     </v-card-text>
@@ -376,8 +451,8 @@
                     @confirm="nextStep"
                     :cancelLabel="cancelLabel"
                     confirmLabel="Continuar"
-                    :disabled_next="disabled_btn_next"
-                    />
+                />
+                    <!-- :disabled_next="disabled_btn_next" -->
             </v-card-actions>
         </v-card>
         <DefaultAlertDialog
@@ -397,15 +472,16 @@
 <script>
 import draggable from 'vuedraggable'
 import SegmentFormModal from "./Blocks/SegmentFormModal";
-import ButtonsModal from './Blocks/ButtonsModal.vue';
+import ButtonsModal from './Blocks/ButtonsModal';
 import DefaultRichText from "../../globals/DefaultRichText";
-
+import DefaultCardAction from "../../globals/DefaultCardAction"
 export default {
     components: {
     draggable,
     SegmentFormModal,
     ButtonsModal,
     DefaultRichText,
+    DefaultCardAction
 },
     props: {
         value: Boolean,
@@ -425,6 +501,11 @@ export default {
             sections:{
                 showSectionAdvancedconfiguration:{ status: true },
             },
+            checklist_actions :[
+                {id:1,icon:'mdi mdi-file-edit',code:'create_activities',name:'Crear actividades',description:'Crea las actividades de tu checklist desde cero tu mismo',color:'#F5539B'},
+                {id:2,icon:'mdi mdi-file-upload',code:'import_activities',name:'Importar actividades',description:'Sube tus actividades con una plantilla de excel',color:'#5357E0'},
+                {id:3,icon:'/img/loader-jarvis.svg',code:'ia_activities',name:'Ayuda con IA',description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',color:'#9B98FE'},
+            ],
             disabled_btn_next: true,
             stepper_box_btn1: true,
             stepper_box_btn2: true,
@@ -439,6 +520,7 @@ export default {
                 open: false,
             },
             drag: false,
+            drag_evaluation_type: false,
             expand_cursos: true,
             actividades_expanded: [],
             tipo_actividades: [
@@ -507,10 +589,20 @@ export default {
                 id: null,
                 name: null,
                 extra_attributes :{},
-                type_checklist: null
+                type_checklist: null,
+                evaluation_types:[
+                    {id:1,name:'Cumple',color:'#00E396',percent:100},
+                    {id:3,name:'En proceso',color:'#FFB700',percent:50},
+                    {id:2,name:'No cumple',color:'#FF4560',percent:0},
+                ]
             },
             resource: {
-                extra_attributes:{}
+                extra_attributes:{},
+                evaluation_types:[
+                    {id:1,name:'Cumple',color:'#00E396',percent:'100'},
+                    {id:3,name:'En proceso',color:'#FFB700',percent:'50'},
+                    {id:2,name:'No cumple',color:'#FF4560',percent:'0'},
+                ]
             },
             segments: [{
                 id: `new-segment-${Date.now()}`,
@@ -1232,4 +1324,28 @@ span.v-stepper__step__step:after {
 .border-error .v-input__slot fieldset {
     border-color: #FF5252 !important;
 }
+.container-evaluation-type{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.v-carousel__controls__item{
+    font-size: 6px !important;
+    background: red !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+}
+.custom-control-buttom{
+    font-size: 6px !important;
+    background: red !important;
+    border-radius: 50% !important;
+}
+.v-carousel-indicators .v-btn:not(.v-btn--active) {
+  background-color: #D9D9D9 !important; /* Color de fondo del botón inactivo */
+}
+
+.v-carousel-indicators .v-item--active {
+  background-color: #5458EA !important; /* Color de fondo del botón activo */
+}
+
 </style>
