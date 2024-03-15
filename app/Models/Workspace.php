@@ -20,7 +20,7 @@ class Workspace extends BaseModel
         'logo', 'logo_negativo', 'url_powerbi',
         'plantilla_diploma',
         'codigo_matricula',
-        'mod_evaluaciones',
+        // 'mod_evaluaciones',
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
@@ -99,7 +99,7 @@ class Workspace extends BaseModel
     }
 
     protected $casts = [
-        'mod_evaluaciones' => 'array',
+        // 'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
         'limit_allowed_users' => 'array',
