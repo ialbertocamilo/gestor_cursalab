@@ -221,7 +221,7 @@ class AuthController extends Controller
         $user->updateUserDeviceVersion($data);
         $user->updateLastUserLogin($data);
 
-        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'mod_evaluaciones', 'plantilla_diploma', 'contact_support')
+        $config_data = Workspace::with('main_menu', 'side_menu')->select('id', 'logo', 'plantilla_diploma', 'contact_support')
             ->where('id', $user->subworkspace_id)
             ->first();
 
