@@ -424,12 +424,12 @@ export default {
 
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.projectForm.reset()
             vue.$emit('onCancel')
         },
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
         },
         prevStep()
         {
@@ -464,10 +464,10 @@ export default {
 
                 let base = `${vue.options.base_endpoint}`
                 let url = edit
-                    ? `${base}/${vue.resource.id}/update`
+                    ? `${base}/${vue.resource.activity_id}/update`
                     : `${base}/store`;
 
-                let method = edit ? 'PUT' : 'POST';
+                let method = 'POST';
 
                 if (validateForm) {
                     const formData = vue.createFormData(method, validateForm);
@@ -532,28 +532,23 @@ export default {
             let base = `${vue.options.base_endpoint}`
 
             if (resource) {
-                let url = `${base}/${resource.id}/edit`
+                let url = `${base}/edit/${resource.id}`
                 await vue.$http.get(url).then(({ data }) => {
-                    vue.resource.id = data.data.id;
-                    vue.resource.model_id = data.data.model_id;
-                    vue.resource.model_type = data.data.model_type;
-                    vue.resource.indications = data.data.indications;
-                    vue.resource.course_name = data.data.course_name;
-                    vue.resource.count_file = data.data.count_file;
-                    vue.resources = data.data.resources;
-                    vue.selects.courses.push(data.data.course);
+                    let _data = data.data
+
+                    vue.resource = Object.assign({}, vue.resource, _data.curso)
+                    vue.resource.titulo = _data.activity.title
+                    vue.resource.description = _data.activity.description
+                    vue.resource.activity_id = _data.activity.id
+                    vue.resource.nota_aprobatoria = _data.curso.mod_evaluaciones.nota_aprobatoria;
+                    vue.resource.nro_intentos = _data.curso.mod_evaluaciones.nro_intentos;
+                    vue.resource.qualification_type = _data.topic.qualification_type
+                    vue.resource.topic = _data.topic.id
                 })
                 console.log(2);
             } else {
                 console.log(3);
                 vue.resource.id = null;
-                vue.resource.model_id = vue.options.model_id;
-                vue.resource.model_type = 'App\\Models\\Stage';
-                vue.resource.indications = null;
-                vue.resource.course_name = null;
-                vue.resource.count_file = null;
-                vue.resources = [];
-                vue.selects.courses = [];
             }
 
             return 0;
@@ -568,7 +563,7 @@ export default {
                     vue.selects.requirement_list = data.data.requirements
                     vue.selects.topic_list = data.data.topics
                     vue.selects.qualification_types = data.data.qualification_types
-                    vue.resource.qualification_type = data.data.qualification_type
+                    // vue.resource.qualification_type = data.data.qualification_type
                 })
         },
         createFormData(method, validateForm)

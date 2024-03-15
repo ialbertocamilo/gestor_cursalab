@@ -25,9 +25,10 @@
                                             <span class="text_default lbl_tit">Indica la información que tendrá este proceso de inducción</span>
                                         </v-col>
                                         <v-col cols="12" md="12" lg="12" class="pb-0">
-                                            <DefaultInput clearable
+                                            <DefaultInput
                                                         v-model="process.title"
                                                         label="Ingresa el nombre del proceso"
+                                                        :rules="rules.title"
                                             />
                                         </v-col>
                                     </v-row>
@@ -41,6 +42,8 @@
                                                 label="Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción"
                                                 v-model="process.description"
                                                 class="txt_desc"
+                                                :counter="300"
+                                                :rules="rules.description"
                                             ></v-textarea>
                                         </v-col>
                                     </v-row>
@@ -622,7 +625,8 @@ export default {
         return {
             list_icons_finished_onboarding: [],
             process: {
-                instructions: []
+                instructions: [],
+                description: ''
             },
             modalDateOptions: {
                 ref: 'DateEvent',
@@ -771,7 +775,8 @@ export default {
 
             segment_by_document_clean: false,
             rules: {
-                // name: this.getRules(['required', 'max:255']),
+                title: this.getRules(['required', 'max:200']),
+                description: this.getRules(['required', 'max:300'])
             }
             // data segmenteacion
         };
@@ -845,7 +850,7 @@ export default {
                 let vue = this;
 
                 if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 300);
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
@@ -871,7 +876,7 @@ export default {
                 vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
-                    if(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description)) {
+                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 300)) {
                         vue.stepper_box_btn1 = false;
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
@@ -1078,7 +1083,8 @@ export default {
             vue.fondo_web_selected = null
             vue.resource = {}
             vue.process = {
-                instructions: []
+                instructions: [],
+                description: ''
             }
 
             vue.colorPicker = '#FE141F'
@@ -1611,9 +1617,9 @@ span.v-stepper__step__step:after {
 .v-dialog.v-dialog--active .bx_steps .v-select--is-multi.v-autocomplete .v-select__slot {
     padding: 0 !important;
 }
-.bx_steps .v-text-field__details {
-    display: none;
-}
+//.bx_steps .v-text-field__details {
+   // display: none;
+//}
 .bx_step1 .default-toggle {
     margin-top: 3px !important;
 }

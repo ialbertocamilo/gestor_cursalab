@@ -163,8 +163,6 @@
                                 inactive-label="Tema inactivo"
                                 dense
                             />
-                            <small v-if="resource.disabled_estado_toggle"
-                                   v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
                         </div>
                     </v-col>
                 </v-row>
@@ -257,6 +255,7 @@ export default {
                 max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
+                activity_id: null
             },
             selects: {
                 assessable: [
@@ -337,7 +336,6 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.TemaForm.resetValidation()
-            vue.$refs.TemaForm.reset()
         },
         resetSelects() {
             let vue = this
@@ -347,6 +345,7 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.TemaForm.reset()
 
             vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
             vue.$emit('onCancel')
@@ -443,19 +442,19 @@ export default {
             }
 
             // const edit = vue.topic_id !== ''
-            const edit = (vue.resource && vue.resource.id)
+            const edit = (vue.resource && vue.resource.id && vue.resource.activity_id)
             let method = edit ? 'PUT' : 'POST';
 
             let base = `${vue.options.base_endpoint}`
 
-            let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = edit ? `${base}/${vue.resource.activity_id}/update` : `${base}/store`;
 
             vue.resource.model_id = vue.options.model_id;
             vue.resource.model_type = 'App\\Models\\Topic';
 
             vue.resource.school_id = vue.options.school_id
 
-            let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+            let formData = vue.getMultipartFormData('POST', vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
             vue.addMedias(formData)
             if (data.checkbox)
@@ -536,7 +535,7 @@ export default {
                 .then(({data}) => {
                     console.log(data.data);
 
-                    let _data = resource ? data.data.temas : data.data
+                    let _data = data.data
                     vue.media_url = _data.media_url
                     vue.selects.requisitos = _data.requisitos
                     vue.selects.evaluation_types = _data.evaluation_types
@@ -554,7 +553,10 @@ export default {
                         }, 200);
                     }
                     if (resource && resource.id) {
-                        vue.resource = Object.assign({}, _data.tema)
+                        console.log( _data.activity.id);
+
+                        vue.resource = Object.assign({}, vue.resource, _data.temas)
+                        vue.resource.activity_id = _data.activity.id
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     } else {
                         vue.resource.qualification_type = _data.qualification_type
@@ -622,7 +624,7 @@ export default {
         },
         async showAlertEvaluacion() {
             let vue = this
-            vue.resource.disabled_estado_toggle = vue.validateCountQuestions();
+            // vue.resource.disabled_estado_toggle = vue.validateCountQuestions();
 
             vue.topicsValidationModal.hideConfirmBtn = true
             const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);

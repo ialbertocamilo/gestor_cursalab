@@ -29,7 +29,7 @@
                             :rules="rules.name"/>
                     </v-col>
                     <v-col cols="12">
-                        <DefaultTextArea label="Descripción" v-model="resource.upload_name" />
+                        <DefaultTextArea label="Descripción" v-model="resource.description" />
                     </v-col>
                 </v-row>
                 <v-row>
@@ -57,6 +57,9 @@
                             v-model="resource.date"
                             :rules="rules.date"
                             :disabled="resource.status && resource.status.code == 'in-progress'"
+                            :offset-y="false"
+                            :offset-x="true"
+                            :top="true"
                         />
                     </v-col>
                     <v-col cols="4">
@@ -323,9 +326,9 @@ export default {
 
             let base = `${vue.options.base_endpoint}`
 
-            let url = vue.resource.id ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = vue.resource.id && vue.resource.activity_id ? `${base}/${vue.resource.activity_id}/update` : `${base}/store`;
 
-            let method = edit ? 'PUT' : 'POST';
+            let method = 'POST';
 
 
             vue.resource.model_id = vue.options.model_id;
@@ -412,6 +415,7 @@ export default {
                 // vue.selects.types = _data.types
                 vue.selects.hosts = _data.hosts
                 vue.selects.user_types = _data.user_types
+                vue.selects.requirement_list = _data.requirements
                 // vue.selects.benefits = _data.benefits ? _data.benefits : [];
                 // vue.selects.silabos = _data.silabos ? _data.silabos : [];
                 // // TODO: Por ahora
@@ -426,7 +430,8 @@ export default {
 
                     } else {
 
-                        vue.resource = _data.meeting
+                        vue.resource = Object.assign({}, vue.resource, _data.meeting)
+                        vue.resource.activity_id = resource.id
                     }
 
                 }
@@ -441,13 +446,13 @@ export default {
         },
         async loadSelects()
         {
-            let vue = this;
-            let url = `${vue.options.base_endpoint}/form-selects`
+            // let vue = this;
+            // let url = `${vue.options.base_endpoint}/form-selects`
 
-            vue.$http.get(url)
-                .then(({data}) => {
-                    vue.selects.requirement_list = data.data.requirements
-                })
+            // vue.$http.get(url)
+            //     .then(({data}) => {
+            //         vue.selects.requirement_list = data.data.requirements
+            //     })
         },
         // addAttendants(attendants) {
         //     let vue = this

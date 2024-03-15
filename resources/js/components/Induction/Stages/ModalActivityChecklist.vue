@@ -374,7 +374,9 @@ export default {
         resource: {
             handler(n, o) {
                 let vue = this;
-                vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                setTimeout(() => {
+                    vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                }, 100);
             },
             deep: true
         }
@@ -383,15 +385,6 @@ export default {
 
         async loadSelects()
         {
-            let vue = this;
-            let url = `${vue.options.base_endpoint}/form-selects`
-
-            vue.$http.get(url)
-                .then(({data}) => {
-                    console.log(data);
-
-                    vue.selects.requirement_list = data.data.requirements
-                })
         },
         async loadData(resource) {
             let vue = this
@@ -406,16 +399,28 @@ export default {
             // let base = `${vue.options.base_endpoint}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.media_url = data.data.media_url
-                    if (resource && resource.id) {
-                        vue.resource = Object.assign({}, data.data.tema)
-                        vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
-                    } else {
-                        vue.resource.qualification_type = data.data.qualification_type
-                        vue.resource.position = data.data.default_position
+                    console.log(data);
+
+                    let _data = data.data
+
+                    vue.selects.requirement_list = _data.requirements
+                    if (resource) {
+                        vue.resource = Object.assign({}, vue.resource, _data.checklist)
+                        vue.resource.activity_id = resource.id
                     }
 
-                    vue.resource.max_position = data.data.max_position
+                    console.log(vue.resource);
+
+                    // vue.media_url = data.data.media_url
+                    // if (resource && resource.id) {
+                    //     vue.resource = Object.assign({}, data.data.tema)
+                    //     vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
+                    // } else {
+                    //     vue.resource.qualification_type = data.data.qualification_type
+                    //     vue.resource.position = data.data.default_position
+                    // }
+
+                    // vue.resource.max_position = data.data.max_position
                 })
             return 0;
         },
@@ -451,12 +456,12 @@ export default {
 
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.projectForm.reset()
             vue.$emit('onCancel')
         },
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
         },
         resetSelects() {
             let vue = this
@@ -484,10 +489,10 @@ export default {
 
                 let base = `${vue.options.base_endpoint}`
                 let url = edit
-                    ? `${base}/${vue.resource.id}/update`
+                    ? `${base}/${vue.resource.activity_id}/update`
                     : `${base}/store`;
 
-                let method = edit ? 'PUT' : 'POST';
+                let method = 'POST';
 
                 if (validateForm) {
                     const formData = vue.createFormData(method, validateForm);
