@@ -379,7 +379,8 @@ class Process extends BaseModel
         if($process)
         {
             $total_activities = 0;
-            foreach ($process->stages as $stage) {
+            foreach ($process->stages as $index => $stage) {
+                $stage->status = $index == 0 ? 'progress' : 'locked';
                 foreach ($stage->activities as $activity) {
                     $total_activities++;
                     $activity->progress = 0;
@@ -387,7 +388,7 @@ class Process extends BaseModel
                     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
                     if($exist) {
                         $activity->status = $exist->status->code;
-                        $activity->progress = $exist->progress;
+                        $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
                     }
                 }
             }
@@ -406,7 +407,7 @@ class Process extends BaseModel
             $process->user_activities_total = $total_activities;
 
 
-            $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100),2) : 0;
+            $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
 
             // si es supervisor
             if(count($user->processes)) {
