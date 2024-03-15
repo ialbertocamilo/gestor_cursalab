@@ -111,7 +111,7 @@ class VademecumController extends Controller
         $files = isset($data['file_media']) ? [$data['file_media']] : [];
         $hasStorageAvailable = Media::validateStorageByWorkspace($files);
 
-        if (!$hasStorageAvailable) {
+        if ($hasStorageAvailable) {
 
             $data = Media::requestUploadFileForId(
                 $data, 'media', $data['name'] ?? null
@@ -119,7 +119,7 @@ class VademecumController extends Controller
 
             $result = Vademecum::storeRequest($data);
             if ($result['status'] === 'success') {
-                $message = 'Vademecum creado correctamente.';
+                $message = 'Documento creado correctamente.';
             } else {
                 $message = $result['message'];
             }
@@ -179,7 +179,7 @@ class VademecumController extends Controller
             $result = Vademecum::storeRequest($data, $vademecum);
 
             // return $this->response($result);
-            return $this->success(['msg' => 'Vademecum actualizado correctamente.']);
+            return $this->success(['msg' => 'Documento actualizado correctamente.']);
 
         } else {
 
