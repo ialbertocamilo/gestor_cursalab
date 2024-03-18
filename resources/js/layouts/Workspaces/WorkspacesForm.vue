@@ -171,27 +171,101 @@
                                 </v-row>
                             </template>
                         </DefaultSection>
-                        <DefaultSection title="Configuración de globael de checklist" v-if="is_superuser">
+                        <DefaultSection 
+                            v-if="is_superuser"
+                            title="Configuración de checklist" 
+                            tooltipInfoText="Seleccione la configuración que se tendrá por defecto en la creación de checklists."
+                        >
                             <template v-slot:content>
                                 <v-row justify="space-around">
                                     <v-col cols="6">
-                                        <DefaultSelect
-                                            clearable
-                                            :items="selects.qualification_types"
-                                            item-text="name"
-                                            return-object
-                                            v-model="resource.qualification_type"
-                                            label="Sistema de calificación"
-                                            :rules="rules.qualification_type_id"
-                                            dense
-                                        />
+                                        <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 pb-4" marginx="mx-0">
+                                            <template slot="content">
+                                                <div class="d-flex justify-space-between" style="color:#5458EA">
+                                                    <p>Define las escalas de evaluación</p>
+                                                </div>
+                                                <draggable v-model="resource.checklist_configuration.evaluation_types" @start="drag_evaluation_type=true"
+                                                        @end="drag_evaluation_type=false" class="custom-draggable" ghost-class="ghost">
+                                                    <transition-group type="transition" name="flip-list" tag="div">
+                                                        <div v-for="(evaluation_type) in resource.checklist_configuration.evaluation_types"
+                                                            :key="evaluation_type.id">
+                                                            <div class="activities">
+                                                                <v-row class="align-items-center px-2">
+                                                                    <v-col cols="1" class="d-flex align-center justify-content-center ">
+                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                        </v-icon>
+                                                                    </v-col>
+                                                                    <!-- COLOR EDITABLE -->
+                                                                    <v-col cols="1">
+                                                                        <v-menu v-model="evaluation_type.menu_picker"
+                                                                                bottom
+                                                                                :close-on-content-click="false"
+                                                                                offset-y
+                                                                                right
+                                                                                nudge-bottom="10"
+                                                                                min-width="auto">
+                                                                                <template v-slot:activator="{ on, attrs }">
+                                                                                    <div class="container-evaluation-type"  v-bind="attrs" v-on="on" :style="`background:${evaluation_type.color};`">
+                                                                                    </div>
+                                                                                </template>
+                                                                            <v-card>
+                                                                                <v-card-text class="pa-0">
+                                                                                    <v-color-picker v-model="evaluation_type.color" mode="hexa" flat />
+                                                                                </v-card-text>
+                                                                            </v-card>
+                                                                        </v-menu>
+                                                                    </v-col>
+                                                                    <v-col cols="6">
+                                                                        <DefaultInput 
+                                                                            dense
+                                                                            v-model="evaluation_type.name"
+                                                                            appendIcon="mdi mdi-pencil"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col>
+                                                                        <DefaultInput 
+                                                                            suffix="%"
+                                                                            dense
+                                                                            v-model="evaluation_type.extra_attributes.percent"
+                                                                        />
+                                                                    </v-col>
+                                                                </v-row>
+                                                            </div>
+                                                        </div>
+                                                    </transition-group>
+                                                </draggable>
+                                                <div class="my-2">
+                                                    <DefaultButton
+                                                        label="Agregar escala"
+                                                        icon="mdi-plus"
+                                                        :outlined="true"
+                                                        @click="addScaleEvaluation()"
+                                                    />
+                                                </div>
+                                            </template>
+                                        </DefaultSimpleSection>
                                     </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultInfoTooltip
-                                            class=""
-                                            top
-                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
-                                    </v-col>
+                                    <v-row class="col col-6 py-1">
+                                        <v-col cols="12">
+                                            <DefaultInput 
+                                                label="Limite de escalas de evaluación"
+                                                dense
+                                                v-model="resource.checklist_configuration.max_limit_create_evaluation_types"
+                                            />
+                                        </v-col>
+                                        <v-col cols="12">
+                                            <DefaultSelect
+                                                clearable
+                                                :items="selects.qualification_types"
+                                                item-text="name"
+                                                return-object
+                                                v-model="resource.checklist_configuration.qualification_type"
+                                                label="Sistema de calificación"
+                                                :rules="rules.qualification_type_id"
+                                                dense
+                                            />
+                                        </v-col>
+                                    </v-row>
                                 </v-row>
                             </template>
                         </DefaultSection>
@@ -905,4 +979,10 @@ export default {
     }
 }
 </script>
-
+<style>
+.container-evaluation-type{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+</style>

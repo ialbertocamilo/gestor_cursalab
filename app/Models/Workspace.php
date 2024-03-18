@@ -42,7 +42,8 @@ class Workspace extends BaseModel
         'certificate_template_id',
         'dc3_configuration',
         'reminders_configuration',
-        'registro_capacitacion'
+        'registro_capacitacion',
+        'checklist_configuration'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -106,7 +107,8 @@ class Workspace extends BaseModel
         'jarvis_configuration' => 'json',
         'dc3_configuration'=>'array',
         'reminders_configuration'=>'json',
-        'registro_capacitacion' => 'json'
+        'registro_capacitacion' => 'json',
+        'checklist_configuration' => 'json'
     ];
 
     public function setRegistroCapacitacionAttribute($value)
@@ -118,7 +120,39 @@ class Workspace extends BaseModel
     {
         return $value ? json_decode($value) : json_decode('{"company":{}}');
     }
-
+    public function getChecklistConfigurationAttribute($value){
+        if(is_null($value)){
+            return [
+                'evaluation_types'=>Taxonomy::getSelectData(group:'checklist',type:'system_calification',extraFields:['extra_attributes']),
+                'type_calification_id'=>null,
+                'max_limit_create_evaluation_types'=>5
+            ];
+        }
+        $value['evaluation_types'] = Taxonomy::getSelectData(group:'checklist',type:'system_calification',extraFields:['extra_attributes']);
+        return json_decode($value);
+    }
+    public function setChecklistConfigurationAttribute($value)
+    {
+        foreach ($value['evaluation_types'] as $index => $evaluation_type) {
+            Taxonomy::updateOrInsert([
+                'workspace_id' => $this->id,
+                'group' => 'checklist',
+                'type' => 'system_calification'
+            ],
+                [
+                'position' => $index+1,
+                'code' => $evaluation_type['code'],
+                'name' => $evaluation_type['name'],
+                'color' => $evaluation_type['color'],
+                'active' => 1,
+                'extra_attributes'=>[
+                    'percent'=> $evaluation_type['extra_attributes']['percent']
+                ]
+            ]);
+        }
+        unset($value['evaluation_types']);
+        $this->attributes['checklist_configuration'] = json_encode($value);
+    }
     public function medias() {
         return $this->hasMany(Media::class, 'workspace_id');
     }

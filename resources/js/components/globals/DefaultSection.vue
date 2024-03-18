@@ -3,6 +3,11 @@
 
         <v-subheader class="mt-4 px-0" v-if="titleDefault">
             <strong>{{ title }}</strong>
+            <DefaultInfoTooltip
+                v-if="tooltipInfoText"
+                class="ml-2"
+                bottom
+                :text="tooltipInfoText" />
         </v-subheader>
 
         <!-- <DefaultInfoTooltip
@@ -32,6 +37,10 @@ export default {
             type: Boolean,
             default: true,
         },
+        tooltipInfoText:{
+            type:String,
+            default:''
+        }
     }
 }
 </script>
