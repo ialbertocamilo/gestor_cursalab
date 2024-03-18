@@ -171,7 +171,30 @@
                                 </v-row>
                             </template>
                         </DefaultSection>
-
+                        <DefaultSection title="Configuración de globael de checklist" v-if="is_superuser">
+                            <template v-slot:content>
+                                <v-row justify="space-around">
+                                    <v-col cols="6">
+                                        <DefaultSelect
+                                            clearable
+                                            :items="selects.qualification_types"
+                                            item-text="name"
+                                            return-object
+                                            v-model="resource.qualification_type"
+                                            label="Sistema de calificación"
+                                            :rules="rules.qualification_type_id"
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex">
+                                        <DefaultInfoTooltip
+                                            class=""
+                                            top
+                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultSection>
                         <DefaultSection
                             title="Configuración de límites"
                             v-if="is_superuser"

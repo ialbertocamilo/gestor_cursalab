@@ -2,15 +2,16 @@
     <v-hover v-slot="{ hover }">
         <v-card :elevation="hover ? 16 : 2" :class="{ 'on-hover': hover }" class="mx-auto max-height-card py-8"
             @click="doAction(card_properties.action)">
-            <div v-if="card_properties.image">
+            <!-- <div v-if="card_properties.image">
                 <div class="mr-4 d-flex justify-content-end align-items-center">
                     <img :src="card_properties.image">
                 </div>
-            </div>
+            </div> -->
             <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-center"
                     :style="`width: 90px;height: 90px;border-radius: 50%;background-color: ${card_properties.color}`">
-                    <v-icon color="white" large>{{ card_properties.icon }}</v-icon>
+                    <v-icon v-if="card_properties.icon" color="white" large>{{ card_properties.icon }}</v-icon>
+                    <img v-else :src="card_properties.image" style="height: 40px;width: 40px;margin: auto;">
                 </div>
             </div>
             <v-card-title class="d-flex justify-content-center mb-3">

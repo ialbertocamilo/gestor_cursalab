@@ -8,6 +8,7 @@
         @click="click"
         :block="block"
         :disabled="disabled"
+        :rounded="rounded"
         :outlined="outlined"
         :text="text"
         :style="`${min_content ? 'max-width: min-content;' : 'width:100%;'}`"
@@ -59,6 +60,10 @@ export default {
         smallIcon: {
             type: Boolean,
             default: false
+        },
+        rounded:{
+            type:Boolean,
+            default:false
         },
         min_content:{
             type:Boolean,
