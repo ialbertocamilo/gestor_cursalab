@@ -648,7 +648,8 @@ export default {
                             if(!item.stages_route)
                                 item.stages_route = data.data.process.stages_route
 
-                            vue.openFormModal(vue.modalSelectConfigProcess, item);
+                            if(item.config_process && !item.config_process.activities)
+                                vue.openFormModal(vue.modalSelectConfigProcess, item);
                         })
                         .catch(error => {
                             if (error && error.errors){

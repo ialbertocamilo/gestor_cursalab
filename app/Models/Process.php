@@ -381,6 +381,7 @@ class Process extends BaseModel
             $total_activities = 0;
             foreach ($process->stages as $index => $stage) {
                 $stage->status = $index == 0 ? 'progress' : 'locked';
+                $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                 foreach ($stage->activities as $activity) {
                     $total_activities++;
                     $activity->progress = 0;

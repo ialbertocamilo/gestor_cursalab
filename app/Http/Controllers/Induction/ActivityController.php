@@ -24,6 +24,7 @@ use App\Models\Project;
 use App\Models\Question;
 use App\Models\School;
 use App\Models\Segment;
+use App\Models\SortingModel;
 use App\Models\Stage;
 use App\Models\Taxonomy;
 use App\Models\Topic;
@@ -146,7 +147,8 @@ class ActivityController extends Controller
             'model_id' => $meeting?->id ?? null,
             'model_type' => Meeting::class,
             'type_id' => $type_activity?->id ?? null,
-            'active' => false
+            'active' => false,
+            'position' => $request->position ?? 1
         ];
 
         $activity = Activity::storeRequest($data_activity);
@@ -233,7 +235,8 @@ class ActivityController extends Controller
             'stage_id' => $request->model_id,
             'model_id' => $tema?->id ?? null,
             'model_type' => Topic::class,
-            'type_id' => $type_activity?->id ?? null
+            'type_id' => $type_activity?->id ?? null,
+            'position' => $request->position ?? 1
         ];
 
         $activity = Activity::storeRequest($data_activity);
@@ -273,7 +276,10 @@ class ActivityController extends Controller
 
         $activity->title = $request->name;
         $activity->description = $request->content;
-        $activity->active = $request->active;
+        if($request->active)
+            $activity->active = $request->active;
+        if($request->position)
+            $activity->position = $request->position;
         $activity->save();
         cache_clear_model(Activity::class);
 
@@ -298,13 +304,16 @@ class ActivityController extends Controller
         // if ($topic)
         //     $q_requisitos->whereNotIn('id', [$topic->id]);
 
+        $filters = ['stage_id' => $stage->id];
+        $default_position = $max_position = SortingModel::getNextItemOrderNumber(Activity::class, $filters, 'position');
+
         $requirements = $q_requisitos->orderBy('position')->get();
 
         // $qualification_type = $course->qualification_type;
         $qualification_type = [];
         $media_url = get_media_root_url();
 
-        $response = compact( 'requirements', 'qualification_type', 'media_url');
+        $response = compact( 'requirements', 'qualification_type', 'media_url', 'default_position');
 
         return $this->success($response);
     }
@@ -440,7 +449,8 @@ class ActivityController extends Controller
             'stage_id' => $request->model_id,
             'model_id' => $checklist?->id ?? null,
             'model_type' => CheckList::class,
-            'type_id' => $type_activity?->id ?? null
+            'type_id' => $type_activity?->id ?? null,
+            'position' => $request->position ?? 1
         ];
 
         $activity = Activity::storeRequest($data_activity);
@@ -565,7 +575,8 @@ class ActivityController extends Controller
             'model_id' => $poll?->id ?? null,
             'model_type' => Poll::class,
             'type_id' => $type_activity?->id ?? null,
-            'active' => false
+            'active' => false,
+            'position' => $request->position ?? 1
         ];
 
         $activity = Activity::storeRequest($data_activity);
