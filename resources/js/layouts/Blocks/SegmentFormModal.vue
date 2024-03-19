@@ -256,11 +256,12 @@ export default {
             multipleCoursesModalOptions: {
                 ref: 'SegmentMultipleCoursesModal',
                 open: false,
-                title: null,
+                title: 'Segmentación múltiple',
                 resource:'data',
-                hideConfirmBtn: true,
+                hideConfirmBtn: false,
                 persistent: true,
-                cancelLabel: 'Entendido0000000'
+                cancelLabel: 'Cancelar',
+                confirmLabel: 'Continuar'
             },
             stackModals: { continues: [],
                 backers: [] },
