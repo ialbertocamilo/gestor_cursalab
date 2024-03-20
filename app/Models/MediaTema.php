@@ -87,7 +87,7 @@ class MediaTema extends BaseModel
         // Obtener el contenido del objeto
         $objectContent = $result['Body']->getContents();
         // Cifrar el contenido del archivo
-        $bytes = 'b"\x03R¯j¿Ñï(^¦P\x12x…QÒ"'; 
+        $bytes = '¯j¿Ñï(^¦P\x12x…QÒ'; 
         // $bytes = random_bytes(16);
         $encryptedData = openssl_encrypt($objectContent, 'aes-256-cbc', $encryptionKey, 0, $bytes);
         // Guardar el archivo cifrado en un archivo temporal
