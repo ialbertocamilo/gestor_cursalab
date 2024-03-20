@@ -64,7 +64,7 @@ export default {
           list_items:[
               {
                   icon:'mdi-security',
-                  title:'Authorization',
+                  title:'Autorización',
                   link:'/documentation-api/secret-key',
                   isGroup :true,
                   subItems:[
@@ -84,7 +84,7 @@ export default {
               },
               {
                   icon:'mdi-cloud-sync',
-                  title:"Lista de API's",
+                  title:"Recursos",
                   link:'/documentation-api/list-apis',
                   isGroup :true,
                   subItems:[

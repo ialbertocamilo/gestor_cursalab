@@ -13,7 +13,7 @@
             <v-card-text>
                 <v-row class="justify-content-start">
 
-                    <v-col cols="3">
+                    <v-col :cols="is_modal ? '6':'3'">
                         <DefaultInput clearable dense
                                       v-model="filters.q"
                                       label="Buscar por nombre..."
@@ -61,7 +61,7 @@ import DefaultStatusModal from "../../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../../Default/DefaultDeleteModal";
 
 export default {
-    props: ['encuesta_id'],
+    props: ['encuesta_id', 'is_modal'],
     components: {PreguntaFormModal, DefaultStatusModal, DefaultDeleteModal},
     data() {
         let vue = this

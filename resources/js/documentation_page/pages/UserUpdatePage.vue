@@ -142,7 +142,7 @@ code:
         "amount_errors":"Cantidad de errores encontrados."
         "processed_data": "Cantidad de data recibida.",
         "updated_users": "Documento y identificador del workspace de los usuarios actualizados."
-        "errors": "Listado de errores encontrados en la api."
+        "errors": "Listado de errores encontrados."
     }
 }`
 }],

@@ -6,13 +6,13 @@
         <v-card-text class="ml-2">
             <p>
                La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API's. 
-               Esta clave será entregada junto con los permisos de administrador del gestor y no tienen fecha de caducidad.
+               Esta clave será entregada al inicio de la implementación y no tienen fecha de caducidad.
             </p>
             <alert 
                 background='#F8F8FB'
                 border='#C1C1FF'
                 icon='mdi-information-outline'
-                text="Cada cuenta de administrador puede tener una clave secreta asociada para utilizar las API's."
+                text="Esta clave secreta está asociada a un tipo específico de administrador (gestor) de la plataforma."
                 class="mb-6"
             />
             <descriptionApi :options="api_description_options" />
@@ -60,7 +60,7 @@ export default {
 `
 const base_url = '${base_url}';
 const axios = require('axios');
-const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"});
+const data = JSON.stringify({"email":"admin@company.com","password":"PASSWORD"});
 const config = {
     method: 'post',
     url: base_url+'/integrations/secret-key',

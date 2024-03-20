@@ -9,7 +9,7 @@
         >
             <template v-slot:content>
                 <v-form ref="projectForm">
-                    <p>La subida de datos seran asignados a todos los usuarios segmentados en el proceso de inducción.</p>
+                    <p>La subida de datos serán asignados a todos los usuarios segmentados en el proceso de inducción.</p>
                     <v-row justify="space-around">
                         <v-col cols="12">
                             <v-text-field
@@ -25,7 +25,7 @@
                     </v-row>
                     <v-row>
                         <v-col cols="12">
-                            <DefaultTextArea label="Nombre de la subida de datos" v-model="resource.upload_name" />
+                            <DefaultTextArea label="Indicaciones" v-model="resource.indications" />
                         </v-col>
                     </v-row>
                     <div class="d-flex justify-space-between align-center my-4">
@@ -157,18 +157,24 @@ export default {
             errors: [],
             resourceDefault: {
                 id: null,
+                course_id: null,
+                activity_id: null,
                 model_id: null,
                 model_type: null,
                 indications: '',
                 course_name: '',
+                title: '',
                 count_file: 0
             },
             resource: {
                 id: null,
+                course_id: null,
+                activity_id: null,
                 model_id: null,
                 model_type: null,
                 indications: '',
                 course_name: '',
+                title: '',
                 count_file: 0
             },
             selects: {
@@ -238,13 +244,13 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.projectForm.reset()
             vue.$emit('onCancel')
         }
         ,
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
         }
         ,
         async confirmModal() {
@@ -260,11 +266,10 @@ export default {
 
             let base = `${vue.options.base_endpoint}`
             let url = edit
-                ? `${base}/${vue.resource.id}/update`
+                ? `${base}/${vue.resource.activity_id}/update`
                 : `${base}/store`;
 
             let method = edit ? 'PUT' : 'POST';
-            console.log(url);
             if (validateForm) {
                 const formData = vue.createFormData();
                 await vue.$http
@@ -293,7 +298,7 @@ export default {
         resetSelects() {
             let vue = this
         },
-        async loadData(resource) {
+        async loadData(item) {
 
             let vue = this
 
@@ -309,26 +314,31 @@ export default {
                     vue.selects.courses.push(vue.options.course);
                     vue.resource.model_id = vue.options.model_id;
                     vue.resource.model_type = 'App\\Models\\Stage';
+                    vue.resource.course_id = vue.options.course.id;
                     vue.search = vue.options.course.name;
                 })
-                console.log(1);
             }else{
-                if (resource) {
-                    let url = `${base}/edit/${resource.id}`
+                if (item) {
+                    let url = `${base}/edit/${item.id}`
                     await vue.$http.get(url).then(({ data }) => {
-                        vue.resource.id = data.data.id;
-                        vue.resource.model_id = data.data.model_id;
-                        vue.resource.model_type = data.data.model_type;
-                        vue.resource.indications = data.data.indications;
-                        vue.resource.course_name = data.data.course_name;
-                        vue.resource.count_file = data.data.count_file;
-                        vue.resources = data.data.resources;
-                        vue.selects.courses.push(data.data.course);
+                        let _data = data.data
+                        vue.resource.id = _data.id;
+                        vue.resource.activity_id = _data.activity_id;
+                        vue.resource.title = _data.title;
+                        vue.resource.course_id = _data.course_id;
+                        vue.resource.model_id = _data.model_id;
+                        vue.resource.model_type = _data.model_type;
+                        vue.resource.indications = _data.indications;
+                        vue.resource.course_name = _data.course_name;
+                        vue.resource.count_file = _data.count_file;
+                        vue.resources = _data.resources;
+                        vue.selects.courses.push(_data.course);
                     })
-                    console.log(2);
                 } else {
-                    console.log(3);
                     vue.resource.id = null;
+                    vue.resource.title = '';
+                    vue.resource.activity_id = null;
+                    vue.resource.course_id = null;
                     vue.resource.model_id = vue.options.model_id;
                     vue.resource.model_type = 'App\\Models\\Stage';
                     vue.resource.indications = null;
@@ -361,7 +371,6 @@ export default {
             let url = `${vue.options.base_endpoint}/get-selects?type=search-course&q=${value}`
             await vue.$http.get(url)
                 .then(({ data }) => {
-                    console.log(data);
                     vue.selects.courses = data.data;
                 }).catch((error) => {
                     if (error && error.errors)
@@ -415,7 +424,6 @@ export default {
         },
         onSelectMediaPreview(media) {
             let vue = this;
-            console.log(media);
             if (!media) {
                 vue.showAlert('Seleccione un multimedia.', 'warning')
                 return true;
