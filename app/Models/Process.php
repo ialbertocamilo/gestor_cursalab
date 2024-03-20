@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Resources\Induccion\ProcessAssistantsSearchResource;
+use App\Http\Resources\Induccion\SupervisorProcessesSupervisorsResource;
 use App\Http\Resources\Multimedia\MultimediaSearchResource;
 use App\Models\BaseModel;
 use App\Services\FileService;
@@ -294,7 +295,7 @@ class Process extends BaseModel
         return $processes_assigned;
     }
 
-    protected function getProcessesApi( $data )
+    protected function getSupervisorProcessesApi( $data )
     {
         $user = $data['user'];
 
@@ -304,57 +305,127 @@ class Process extends BaseModel
 
         $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
 
-        $processes_query = Process::with(['instructions','stages.activities.type'])
-                                    ->whereIn('id', $processes_assigned);
-
         $field = 'created_at';
         $sort = 'DESC';
 
-        $processes_query->orderBy($field, $sort);
+        $processes_query = Process::select('id', 'workspace_id', 'title', 'active', 'starts_at', 'finishes_at')
+                                    ->whereIn('id', $processes_assigned)
+                                    ->orderBy($field, $sort)
+                                    ->paginate(10);
 
-        $processes = $processes_query->paginate(10);
-
-        $processes_items = $processes->items();
-        foreach($processes_items as $item) {
-            if($item->stages){
-                $i = 0;
-                foreach ($item->stages as $stage) {
-                    if($i == 0)
-                        $stage->status = 'pendiente';
-                    else
-                        $stage->status = 'bloqueado';
-                    if($stage->activities) {
-                        foreach ($stage->activities as $activity) {
-                            $activity->status = 'pendiente';
-                        }
-                    }
-                    $i++;
-                }
-            }
-            $item->finishes_at = $item->finishes_at ? date('d-m-Y', strtotime($item->finishes_at)) : null;
-            $item->starts_at = $item->starts_at ? date('d-m-Y', strtotime($item->starts_at)) : null;
-            $item->participants = rand(12,35);
-            $item->percentage = rand(10,80);
-        }
-
-        $response['data'] = $processes->items();
-        $response['lastPage'] = $processes->lastPage();
-        $response['current_page'] = $processes->currentPage();
-        $response['first_page_url'] = $processes->url(1);
-        $response['from'] = $processes->firstItem();
-        $response['last_page'] = $processes->lastPage();
-        $response['last_page_url'] = $processes->url($processes->lastPage());
-        $response['next_page_url'] = $processes->nextPageUrl();
-        $response['path'] = $processes->getOptions()['path'];
-        $response['per_page'] = $processes->perPage();
-        $response['prev_page_url'] = $processes->previousPageUrl();
-        $response['to'] = $processes->lastItem();
-        $response['total'] = $processes->total();
-
-        return $response;
+        return $processes_query;
     }
 
-    protected function getProcessApi( $data )
+    protected function getSupervisorProcessOnlyStudentsApi( $data )
+    {
+        $response['data'] = null;
+        $user = $data['user'];
+
+        $process_id = $data['process'];
+
+        $process = Process::select('id','absences', 'limit_absences', 'count_absences', 'title', 'description', 'active', 'starts_at', 'finishes_at')
+                    ->where('id', $process_id)
+                    ->first();
+
+        if($process)
+        {
+            $user->load('summary_process');
+            if(count($user->processes)) {
+                $participants = $this->getProcessAssistantsList($process);
+                $process->participants = $participants->count() ?? 0;
+                $process->students = $participants;
+                $param_resource = [
+                    'process_id' => $process->id,
+                    'limit_absences' => $process->limit_absences,
+                    'count_absences' => $process->count_absences,
+                    'absences' => $process->absences,
+                ];
+                ProcessAssistantsSearchResource::customCollection($process->students, $param_resource);
+            }
+            $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
+            $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
+            $process->percentage = 0;
+
+            unset($process->segments);
+            unset($process->absences);
+            unset($process->limit_absences);
+            unset($process->count_absences);
+        }
+
+        return ['data'=> $process];
+    }
+
+    protected function getSupervisorProcessOnlySupervisorsApi( $data )
+    {
+        $response['data'] = null;
+        $user = $data['user'];
+
+        $process_id = $data['process'];
+
+        $process = Process::select('id', 'title', 'description', 'active')
+                    ->where('id', $process_id)
+                    ->with(['instructors' => function($q){
+                        $q->select('id', 'fullname', 'name', 'lastname', 'surname', 'document', 'active');
+                    }])
+                    ->first();
+
+        return ['data'=> $process];
+    }
+
+    protected function getSupervisorProcessApi( $data )
+    {
+        $response['data'] = null;
+        $user = $data['user'];
+
+        $process_id = $data['process'];
+
+        $process = Process::select('id', 'starts_at', 'finishes_at', 'title', 'description', 'workspace_id', 'absences', 'workspace_id')
+                    ->where('id', $process_id)
+                    ->first();
+        if($process)
+        {
+            $criteria_assigned = [];
+            foreach ($process->segments as $segment) {
+
+                $segment_class = new Segment();
+                $segment->type_code = $segment->type?->code;
+
+                $criteria = Segment::getCriteriaByWorkspace(Workspace::find($process->workspace_id));
+                $criteria_selected = ($segment->type_code == 'direct-segmentation') ? $segment_class->setDataDirectSegmentation($criteria, $segment, true) : [];
+
+                foreach($criteria_selected as $criteria)
+                {
+                    $segment_values = SegmentValue::whereIn('id', array_column($criteria['values_selected'], 'segment_value_id'))->get()->toArray();
+                    $criterion_values = CriterionValue::whereIn('id', array_column($segment_values, 'criterion_value_id'))->get()->toArray();
+                    foreach($criterion_values as $val) {
+                        array_push($criteria_assigned, $criteria['name'].'('.$val['value_text'].')');
+                    }
+                }
+            }
+            $process->criteria_assigned = implode(', ',$criteria_assigned);
+            $participants = $this->getProcessAssistantsList($process);
+            $process->participants = $participants->count() ?? 0;
+
+            $process_duration = 0;
+            foreach($process->stages as $stage) {
+                $process_duration += intval($stage->duration ?? 0);
+            }
+            $process->duration = $process_duration ? ($process_duration == 1 ? $process_duration .' día' : $process_duration .' días') : $process_duration;
+
+            $process->count_stages = $process->stages()->count();
+
+            $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
+            $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
+
+            $process->percentage = 0;
+            unset($process->stages);
+            unset($process->segments);
+        }
+
+        return ['data'=> $process];
+    }
+
+    protected function getUserProcessApi( $data )
     {
         $response['data'] = null;
         $user = $data['user'];
@@ -409,14 +480,6 @@ class Process extends BaseModel
 
 
             $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
-
-            // si es supervisor
-            if(count($user->processes)) {
-                $participants = $this->getProcessAssistantsList($process);
-                $process->participants = $participants->count() ?? 0;
-                $process->students = $participants;
-                ProcessAssistantsSearchResource::collection($process->students);
-            }
         }
 
         return ['data'=> $process];

@@ -11,7 +11,7 @@ class ProcessSummaryUser extends BaseModel
     protected $table = 'process_summary_users';
 
     protected $fillable = [
-        'user_id', 'process_id', 'status_id', 'absences'
+        'user_id', 'process_id', 'status_id', 'absences', 'progress'
     ];
 
     // protected $casts = [

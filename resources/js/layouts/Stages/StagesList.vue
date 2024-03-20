@@ -374,9 +374,9 @@
             :options="statusStageModal"
             width="408px"
             title="Editar etapa"
-            subtitle="¡Estás por cambiar el estado de esta etapa!"
+            subtitle="¡Estás por cambiar de estado esta actividad!"
             @onConfirm="confirmStatusStageModal"
-            @onCancel="statusStageModal.open = false"
+            @onCancel="closeFormModal(statusStageModal)"
         />
 
         <DialogConfirm
@@ -702,14 +702,25 @@ export default {
 
             statusStageModal: {
                 open: false,
-                title_modal: 'Desactivar etapa',
-                type_modal: 'confirm',
+                // base_endpoint: '/procesos',
+                contentText: '¿Desea cambiar de estado a este registro?',
+                endpoint: '',
+                width: '408px',
+                type_modal: 'status',
+                title_modal: 'Activar etapa',
+                status_item_modal: null,
                 content_modal: {
-                    confirm: {
+                    inactive: {
                         title: '¡Estas por desactivar una etapa!',
                         details: [
                             'Recuerda que al desactivar una etapa todas las actividades que estén enlazadas tambien serán desactivadas.'
                         ],
+                    },
+                    active: {
+                        title: '¡Estas por activar una etapa!',
+                        details: [
+                            'Recuerda que al activar una etapa todas las actividades que estén enlazadas tambien serán activadas.'
+                        ]
                     }
                 },
             },
@@ -1167,9 +1178,45 @@ export default {
         },
         statusStage( stage, position )
         {
+            console.log(stage);
             let vue = this;
             vue.statusStageModal.open = true
+            vue.statusStageModal.status_item_modal = Boolean(stage.active)
+            vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             vue.statusStageModal.stage_id = stage.id
+
+            if(stage.activities.length < 3) {
+                vue.statusStageModal.content_modal = {
+                    inactive: {
+                        title: '¡Debes tener al menos 4 actividades asignada por etapa!',
+                        details: [
+                            'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Debes tener al menos 4 actividades asignada por etapa!',
+                        details: [
+                            'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
+                        ]
+                    }
+                }
+            }
+            else {
+                vue.statusStageModal.content_modal = {
+                    inactive: {
+                        title: '¡Estas por desactivar una etapa!',
+                        details: [
+                            'Recuerda que al desactivar una etapa todas las actividades que estén enlazadas tambien serán desactivadas.'
+                        ],
+                    },
+                    active: {
+                        title: '¡Estas por activar una etapa!',
+                        details: [
+                            'Recuerda que al activar una etapa todas las actividades que estén enlazadas tambien serán activadas.'
+                        ]
+                    }
+                }
+            }
         },
         confirmStatusStageModal()
         {

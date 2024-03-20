@@ -329,7 +329,7 @@ class Segment extends BaseModel{
 
 
 
-    public function setDataDirectSegmentation($criteria, Segment $segment)
+    public function setDataDirectSegmentation($criteria, Segment $segment, $only_values_selected = false)
     {
 
         $criteria_selected = $segment->values->unique('criterion')->pluck('criterion')->toArray();
@@ -352,7 +352,7 @@ class Segment extends BaseModel{
 
             foreach ($grouped as $g) {
 
-                $criterion_code = $g['criterion']['field_type']['code'];
+                $criterion_code = isset($g['criterion']['field_type']) ? $g['criterion']['field_type']['code'] : null;
 
                 if ($criterion_code === 'date') :
 
@@ -374,9 +374,14 @@ class Segment extends BaseModel{
                 $segment_values_selected[] = $new;
             }
 
-            // $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
-            $criteria_selected[$key]['values'] = $criterion_used->values ?? [];
-            $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
+            if($only_values_selected){
+                $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
+            }
+            else{
+                // $criteria_selected[$key]['values'] = $criteria->where('id', $criterion['id'])->first()->values ?? [];
+                $criteria_selected[$key]['values'] = $criterion_used->values ?? [];
+                $criteria_selected[$key]['values_selected'] = $segment_values_selected ?? [];
+            }
         }
 
         return $criteria_selected;

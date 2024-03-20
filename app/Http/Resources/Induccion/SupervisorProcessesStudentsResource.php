@@ -5,7 +5,7 @@ namespace App\Http\Resources\Induccion;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProcessAssistantsSearchResource extends JsonResource
+class SupervisorProcessesStudentsResource extends JsonResource
 {
     private static $data;
 

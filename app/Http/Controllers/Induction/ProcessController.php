@@ -199,7 +199,7 @@ class ProcessController extends Controller
         $process = Process::where('id', $request->model_id)->first();
         $supervisors = $this->selectedSupervisors($request);
         if(count($segments_supervisors_criteria) > 0) {
-            $process->supervisor_criteria = json_encode(array_column($segments_supervisors_criteria, 'id'));
+            $process->supervisor_criteria = json_encode(array_unique(array_column($segments_supervisors_criteria, 'id')));
             $process->save();
 
             $selected_supervisors = $supervisors->pluck('id')->toArray();
@@ -476,7 +476,13 @@ class ProcessController extends Controller
     public function searchAssistants(Process $process, Request $request)
     {
         $assistants = Process::getProcessAssistantsList($process);
-        ProcessAssistantsSearchResource::collection($assistants)
+        $param_resource = [
+            'process_id' => $process->id,
+            'limit_absences' => $process->limit_absences,
+            'count_absences' => $process->count_absences,
+            'absences' => $process->absences,
+        ];
+        ProcessAssistantsSearchResource::customCollection($assistants, $param_resource)
                                         ->map(function($i) use ($process) {
                                             $i->process = $process?->id;
                                             $i->limit_absences = $process?->absences ?? 0;
