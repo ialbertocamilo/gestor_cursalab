@@ -49,7 +49,7 @@
                                                 </v-icon>
                                             </div>
                                             <b-tooltip target="tooltip-target-duration_stage" triggers="hover" placement="top">
-                                                Tiempo que durará la etapa, y que se bloqueará la etapa siguiente
+                                                Duración que la etapa tendrá para desarrollarse
                                             </b-tooltip>
                                         </span>
                                     </div>

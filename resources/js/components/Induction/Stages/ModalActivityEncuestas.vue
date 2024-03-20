@@ -7,7 +7,7 @@
         @onConfirm="confirmModal"
         @onCancelSteps="prevStep"
         :steps="true"
-        content-class="br-dialog"
+        content-class="br-dialog modal_activity_polls"
         >
             <template v-slot:content>
                 <v-form ref="projectForm">
@@ -59,8 +59,8 @@
                             </v-stepper-content>
                             <v-stepper-content step="2" class="p-0">
                                 <v-row>
-                                    <v-col cols="12" v-if="loadStep2 && encuesta_id != 0">
-                                        <encuesta-pregunta-layout :encuesta_id="encuesta_id"/>
+                                    <v-col cols="12" v-if="loadStep2 && encuesta_id != 0" class="step_questions">
+                                        <encuesta-pregunta-layout :encuesta_id="encuesta_id" :is_modal="true"/>
                                     </v-col>
                                 </v-row>
                             </v-stepper-content>
@@ -106,6 +106,7 @@ export default {
                 model_id: null,
                 model_type: null,
                 name: '',
+                titulo: '',
                 description: '',
                 requirement: null
             },
@@ -119,7 +120,7 @@ export default {
             rules: {
                 titulo: this.getRules(['required', 'max:255']),
             },
-            resources: [],
+            // resources: [],
             search: null,
             isLoading: false,
             debounceTimer: null,
@@ -141,7 +142,9 @@ export default {
         resource: {
             handler(n, o) {
                 let vue = this;
-                vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                setTimeout(() => {
+                    vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                }, 100);
             },
             deep: true
         }
@@ -151,12 +154,12 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.projectForm.reset()
             vue.$emit('onCancel')
         },
         resetValidation() {
             let vue = this
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
         },
         prevStep()
         {
@@ -179,48 +182,85 @@ export default {
             vue.options.cancelLabel = "Retroceder";
             vue.options.confirmLabel = "Guardar";
 
+            console.log(vue.encuesta_id);
             if(vue.stepper_box == 1)
             {
-                vue.errors = []
-
-                this.showLoader()
-
-                const validateForm = vue.validateForm('projectForm')
-                const edit = vue.options.action === 'edit'
-
-                let base = `${vue.options.base_endpoint}`
-                let url = edit
-                    ? `${base}/${vue.resource.id}/update`
-                    : `${base}/store`;
-
-                let method = edit ? 'PUT' : 'POST';
-
-                if (validateForm) {
-                    const formData = vue.createFormData(method, validateForm);
-                    await vue.$http
-                        .post(url, formData)
-                        .then(({ data }) => {
-
-                            this.hideLoader()
-                            vue.stepper_box = 2;
-                            vue.loadStep2 = true
-                            vue.encuesta_id = data.data.encuesta_id
-
-                        }).catch((error) => {
-                            if (error && error.errors) {
-                                const errors = error.errors ? error.errors : error;
-                                vue.show_http_errors(errors);
-                                this.hideLoader()
-                            }
-                        })
-                }
-                else
+                if(!(vue.encuesta_id && vue.encuesta_id != 0))
                 {
-                    this.hideLoader()
+                    vue.errors = []
+
+                    this.showLoader()
+
+                    const validateForm = vue.validateForm('projectForm')
+                    const edit = vue.options.action === 'edit'
+
+                    let base = `${vue.options.base_endpoint}`
+                    let url = edit
+                        ? `${base}/${vue.resource.id}/update`
+                        : `${base}/store`;
+
+                    let method = edit ? 'PUT' : 'POST';
+
+                    if (validateForm) {
+                        const formData = vue.createFormData(method, validateForm);
+                        await vue.$http
+                            .post(url, formData)
+                            .then(({ data }) => {
+
+                                this.hideLoader()
+                                vue.stepper_box = 2;
+                                vue.loadStep2 = true
+                                vue.encuesta_id = data.data.encuesta_id
+
+                            }).catch((error) => {
+                                if (error && error.errors) {
+                                    const errors = error.errors ? error.errors : error;
+                                    vue.show_http_errors(errors);
+                                    this.hideLoader()
+                                }
+                            })
+                    }
+                    else
+                    {
+                        this.hideLoader()
+                    }
+                }
+                else {
+
+                    vue.stepper_box = 2;
+                    vue.loadStep2 = true
                 }
             }
             else if(vue.stepper_box == 2)
             {
+                if(vue.encuesta_id && vue.encuesta_id != 0)
+                {
+                    vue.errors = []
+
+                    const validateForm = vue.validateForm('projectForm')
+
+                    let base = `${vue.options.base_endpoint}`
+                    let url = `${base}/${vue.resource.id}/update`;
+
+                    let method = 'POST';
+
+                    if (validateForm) {
+                        const formData = vue.createFormData(method, validateForm);
+
+                        this.showLoader()
+                        await vue.$http
+                            .post(url, formData)
+                            .then(({ data }) => {
+                                this.hideLoader()
+                            }).catch((error) => {
+                                if (error && error.errors) {
+                                    const errors = error.errors ? error.errors : error;
+                                    vue.show_http_errors(errors);
+                                    this.hideLoader()
+                                }
+                            })
+                    }
+                }
                 vue.closeModal()
                 vue.$emit("onConfirm");
             }
@@ -241,28 +281,21 @@ export default {
             let base = `${vue.options.base_endpoint}`
 
             if (resource) {
-                let url = `${base}/${resource.id}/edit`
+                let url = `${base}/edit/${resource.id}`
                 await vue.$http.get(url).then(({ data }) => {
-                    vue.resource.id = data.data.id;
-                    vue.resource.model_id = data.data.model_id;
-                    vue.resource.model_type = data.data.model_type;
-                    vue.resource.indications = data.data.indications;
-                    vue.resource.course_name = data.data.course_name;
-                    vue.resource.count_file = data.data.count_file;
-                    vue.resources = data.data.resources;
-                    vue.selects.courses.push(data.data.course);
+
+                    let _data = data.data
+                    vue.resource = Object.assign({}, vue.resource, _data.activity)
+                    vue.resource.titulo = _data.activity.title;
+                    // vue.resource.description = _data.activity.description;
+                    vue.resource.poll_id = _data.poll.id
+                    vue.encuesta_id = _data.poll.id
                 })
                 console.log(2);
             } else {
                 console.log(3);
                 vue.resource.id = null;
-                vue.resource.model_id = vue.options.model_id;
-                vue.resource.model_type = 'App\\Models\\Stage';
-                vue.resource.indications = null;
-                vue.resource.course_name = null;
-                vue.resource.count_file = null;
-                vue.resources = [];
-                vue.selects.courses = [];
+                vue.resource.titulo = '';
             }
 
             return 0;
@@ -281,7 +314,7 @@ export default {
             let vue = this;
 
             vue.resource.model_id = vue.options.model_id;
-            vue.resource.model_type = 'App\\Models\\Stage';
+            // vue.resource.model_type = 'App\\Models\\Stage';
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields);
             formData.append('validate', validateForm ? "1" : "0");
@@ -291,3 +324,14 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.modal_activity_polls {
+    .step_questions section.section-list {
+        padding-top: 0;
+        .v-card .v-card__title {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    }
+}
+</style>

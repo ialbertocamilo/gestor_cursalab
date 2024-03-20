@@ -152,7 +152,7 @@ export default {
                 const str = vue.ignoreHTMLinLengthCalculation
                     ? vue.removeHTML(value)
                     : value;
-                console.log(str.length)
+
                 if(str.length > vue.maxLength) {
                     vue.emitLengthState(true)
                 } else {

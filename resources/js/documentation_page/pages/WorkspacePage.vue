@@ -5,7 +5,9 @@
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Los Workspaces son espacios que agrupan Módulos. {{ is_inretail ? 'Ejemplo: Workspace: Intercorp Retail , Módulos dentro del workspace: Agora,InDigital XP,Intercorp Retail.' : '' }} 
+                Los Workspaces son espacios donde se organiza toda la información.
+                <br>Este recurso sirve principalmente para conocer los módulos (grupos) donde se organizan los usuarios.
+                <br>{{ is_inretail ? 'Ejemplo: Workspace: Intercorp Retail , Módulos dentro del workspace: Agora,InDigital XP,Intercorp Retail.' : '' }} 
             </p>
             <descriptionApi :options="api_description_options" :set_responses="true" />
         </v-card-text>
@@ -85,7 +87,7 @@ code:
             {
                 "workspace_id": "Identificador del workspace",
                 "name": "Nombre del workspace",
-                "subworkspaces":"Listado de subworkspaces('modulos') asociados"
+                "subworkspaces":"Listado de subworkspaces ('modulos') asociados"
             }
         ]
     }

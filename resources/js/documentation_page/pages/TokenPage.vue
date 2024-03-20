@@ -5,8 +5,10 @@
                 Token
             </v-card-title>
             <v-card-text class="ml-2">
-                <p>Es una cadena de texto codificado que permite a controlar el acceso al uso de nuestras API's.
-                    Esta clave será entregada junto con los permisos de administrador del gestor y la fecha de duración es de 1 mes.
+                <p>Es una cadena de texto cifrada, que está asociada a la clave secreta para permitir la autenticación. 
+                    <br>Esta se genera usando la llave secreta y los datos de autenticación del usuario.
+                    <br>Para hacer peticiones a los recursos es necesario incluir la clave secreta y el token generado.
+                    <br>La fecha de duración por defecto es de 1 mes.
                 </p>
                 <descriptionApi :options="api_description_options" />
             </v-card-text>
@@ -63,7 +65,7 @@ export default {
 `
 const base_url = '${base_url}';
 const axios = require('axios');
-const data = JSON.stringify({"email":"admin@admin.com","password":"4239872439"});
+const data = JSON.stringify({"email":"admin@company.com","password":"PASSWORD"});
 const config = {
     method: 'post',
     url: base_url+'/integrations/auth-user',
@@ -87,7 +89,7 @@ axios(config).then(function (response) {
 {
     "data": {
         "access_token": "Token para hacer la consulta.",
-        "token_type": "Tipo de token.(Bearer)",
+        "token_type": "Tipo de token. (Bearer)",
         "expires_in": "Tiempo de expiración.",
         "expires_in_format": "Formato del tiempo de expiración (Y-m-d H:i:s)"
     }

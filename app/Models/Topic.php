@@ -170,11 +170,14 @@ class Topic extends BaseModel
         try {
             DB::beginTransaction();
 
-            if ($tema) :
+            $isNew = false;
+            if ($tema) {
                 $tema->update($data);
-            else :
+            } else {
                 $tema = self::create($data);
-            endif;
+                $isNew = true;
+            }
+
             if ($data['topic_requirement_id']) {
                 Requirement::updateOrCreate(
                     ['model_type' => Topic::class, 'model_id' => $tema->id,],
@@ -251,9 +254,11 @@ class Topic extends BaseModel
                 $tema->save();
             }
 
-            // Fix topics position
+            // Fix topics position on updates
 
-            self::fixTopicsPosition($tema->course_id, $tema->id);
+            if (!$isNew) {
+                self::fixTopicsPosition($tema->course_id, $tema->id);
+            }
 
             DB::commit();
             return $tema;

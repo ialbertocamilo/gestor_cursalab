@@ -1,12 +1,13 @@
 <template>
     <v-card elevation="0" class="mx-10">
         <v-card-title class="font-weight-bold">
-           Alta de usuarios (crear)
+           Crear usuario (Alta de usuarios)
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-                Este proceso permite únicamente crear usuarios mediante el envió de sus datos personales y sus criterios correspondientes. <br>
-                La validación de creación de usuario se hace mediante el valor del documento, en caso el documento ya se encuentre registrado no se creará ni actualizará los datos la api lo retornará dentro del listado de errores.
+                Este proceso permite únicamente crear usuarios mediante el envio de sus datos personales y sus criterios correspondientes. <br>
+                La validación de creación de usuario se hace mediante el valor del documento, en caso el documento ya se encuentre registrado no se creará ni actualizará los datos.
+                <br> En caso un usuario ya exista, se retornará en el listado de errores/observaciones.
             </p>
             <descriptionApi
                 v-if="initialized"
@@ -33,7 +34,6 @@ const userFields = is_inretail
             "username": text (Optional),
             "phone_number": text,
             "email": text,`
-
         :
 `
             "active": boolean,
@@ -58,11 +58,11 @@ export default {
                         parameters:[
                             {
                                 name:'usuarios',
-                                type:'Array de usuarios(objeto)',
+                                type:'Array de usuarios (objeto)',
                                 description:`
                                     Listado de usuarios a crear. Cada usuario contiene atributos estáticos y dinámicos<br>
                                     <ul>
-                                        Estáticos:"active","document", "fullname","phone_number", etc.<br>
+                                        Estáticos:"active","document", "fullname","email", etc.<br>
                                         Dinámicos: "criterions"<br>
                                         Ejemplo:<br>
 <pre class='language-js line-numbers'><code>
@@ -73,7 +73,6 @@ export default {
                 "criterions": {
                   "module": text,
                   "gender": text,
-
 CRITERION_LIST
                 }
             }
@@ -96,7 +95,7 @@ CRITERION_LIST
                                 name:'Authorization',
                                 type:'String',
                                 description:`
-                                    Token asociado a la cuenta del administrador concatenado con el tipo de token.<br>Ejemplo:<br>
+                                    Token asociado a la cuenta del administrador concatenado con el tipo de token. <br>Ejemplo:<br>
 <pre class='language-js line-numbers'>
     <code>
         token:'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
@@ -135,7 +134,6 @@ let data = JSON.stringify({
                 "criterions": {
                     "module": text,
                     "gender": text,
-
 CRITERION_LIST
                 }
             }
@@ -168,7 +166,7 @@ code:
         "amount_errors":"Cantidad de errores encontrados."
         "processed_data": "Cantidad de data recibida.",
         "inserted_users": "Documento y identificador del workspace de los usuarios insertados."
-        "errors": "Listado de errores encontrados en la api."
+        "errors": "Listado de errores encontrados."
     }
 }`
 }],

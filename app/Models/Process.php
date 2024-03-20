@@ -379,7 +379,9 @@ class Process extends BaseModel
         if($process)
         {
             $total_activities = 0;
-            foreach ($process->stages as $stage) {
+            foreach ($process->stages as $index => $stage) {
+                $stage->status = $index == 0 ? 'progress' : 'locked';
+                $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                 foreach ($stage->activities as $activity) {
                     $total_activities++;
                     $activity->progress = 0;
@@ -387,17 +389,15 @@ class Process extends BaseModel
                     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
                     if($exist) {
                         $activity->status = $exist->status->code;
-                        $activity->progress = $exist->progress;
+                        $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
                     }
                 }
             }
 
             $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
             $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
-            $participants = $this->getProcessAssistantsList($process);
-            $process->participants = $participants->count() ?? 0;
+
             $process->percentage = 0;
-            $process->students = $participants;
 
             $count_absences = $user->summary_process()->where('process_id', $process->id)->first()?->absences ?? 0;
             $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : '-';
@@ -408,9 +408,15 @@ class Process extends BaseModel
             $process->user_activities_total = $total_activities;
 
 
-            $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100),2) : 0;
+            $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
 
-            ProcessAssistantsSearchResource::collection($process->students);
+            // si es supervisor
+            if(count($user->processes)) {
+                $participants = $this->getProcessAssistantsList($process);
+                $process->participants = $participants->count() ?? 0;
+                $process->students = $participants;
+                ProcessAssistantsSearchResource::collection($process->students);
+            }
         }
 
         return ['data'=> $process];

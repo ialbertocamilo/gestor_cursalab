@@ -31,56 +31,18 @@ class RestActivityController extends Controller
 {
     public function ActivityMeeting(Process $process, Meeting $meeting, Request $request)
     {
-        // $scheduled = Taxonomy::getFirstData('meeting', 'status', 'scheduled');
-        // $started = Taxonomy::getFirstData('meeting', 'status', 'in-progress');
-        // $finished = Taxonomy::getFirstData('meeting', 'status', 'finished');
-        // $overdue = Taxonomy::getFirstData('meeting', 'status', 'overdue');
-        // $cancelled = Taxonomy::getFirstData('meeting', 'status', 'cancelled');
-
-        // $subworkspace = auth()->user()->subworkspace;
-
-        // $request->merge(['usuario_id' => auth()->user()->id, 'workspace_id' => $subworkspace->parent_id]);
-
-        // if ($request->code) {
-        //     if ($request->code == 'today')
-        //         $request->merge([
-        //             'statuses' => [$scheduled->id, $started->id],
-        //             'date' => Carbon::today(),
-        //         ]);
-
-        //     if ($request->code == 'scheduled')
-        //         $request->merge([
-        //             'statuses' => [$scheduled->id],
-        //             'date_start' => Carbon::tomorrow(),
-        //         ]);
-
-        //     if ($request->code == 'finished')
-        //         $request->merge([
-        //             'statuses' => [$finished->id, $overdue->id, $cancelled->id],
-        //             'sortDesc' => 'true',
-        //         ]);
-        // }
-
-        // $meetings = Meeting::search($request);
-
         $meetings = Meeting::with('type', 'status', 'account.service', 'workspace', 'host', 'attendants.type')
-        ->withCount('attendants')
-        ->where('id', $meeting->id)
+                            ->withCount('attendants')
+                            ->where('id', $meeting->id)
 
-        ->whereHas('attendants', function ($q) use ($request) {
-            $q->where('usuario_id', auth()->user()->id);
-        })
-        ->first();
+                            ->whereHas('attendants', function ($q) use ($request) {
+                                $q->where('usuario_id', auth()->user()->id);
+                            })
+                            ->first();
 
         $res = new MeetingAppResource($meetings);
 
-        // info(__function__);
-
         $result['data'] = json_decode($res->toJson(), true);
-        // dd($result);
-        // $result['data'] = collect($result['data'])->groupBy('key')->all();
-
-        // if (count($result) === 0) $result = new stdClass();
 
         return $this->successApp($result);
     }
@@ -142,13 +104,9 @@ class RestActivityController extends Controller
                                         'last_media_access' => $last_media_access,
                                         'last_media_duration' => $last_media_duration);
 
-            // $topic_status = self::getTopicStatusByUser($topic, $user, $max_attempts,$statuses_topic);
-
             $topics_data['resources'] = [
                 'id' => $topic->id,
                 'nombre' => $topic->name,
-                // 'requisito_id' => $topic_status['topic_requirement'],
-                // 'requirements' => $topic_status['requirements'],
                 'imagen' => $topic->imagen,
                 'contenido' => $topic->content,
                 'media' => $media_embed,
@@ -156,14 +114,8 @@ class RestActivityController extends Controller
                 'media_topic_progress'=>$media_topic_progress,
                 'evaluable' => $topic->assessable ? 'si' : 'no',
                 'tipo_ev' => $topic->evaluation_type->code ?? NULL,
-                // 'nota' => $topic_status['grade'],
                 'nota_sistema_nombre' => $topic_status['system_grade_name'] ?? NULL,
                 'nota_sistema_valor' => $topic_status['system_grade_value'] ?? NULL,
-                // 'disponible' => $topic_status['available'],
-                // 'intentos_restantes' => $topic_status['remaining_attempts'],
-                // 'estado_tema' => $topic_status['status'],
-                // 'estado_tema_str' => $topic_status_arr[$topic_status['status']],
-                // 'mod_evaluaciones' => $course->getModEvaluacionesConverted($topic),
             ];
         }
         return $this->successApp(['data' => $topics_data]);
@@ -173,8 +125,6 @@ class RestActivityController extends Controller
     public function ActivityChecklist(Process $process, Checklist $checklist, Request $request)
     {
         $user = Auth::user();
-        // $tax_trainer_user = Taxonomy::getFirstData('checklist', 'type', 'trainer_user');
-        // $actividades_activas = $checklist->actividades->where('active', 1)->where('type_id', $tax_trainer_user->id)->sortBy('position');
 
         $checklistRpta = ChecklistRpta::where('checklist_id',$checklist->id)
                                         ->where('student_id', $user->id)
@@ -321,9 +271,9 @@ class RestActivityController extends Controller
                 $media_topics = MediaTema::where('topic_id',$activity_topic->id)->orderBy('position')->get();
 
                 $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
-                ->where('topic_id', $activity_topic->id)
-                ->where('user_id', $user->id)
-                ->first();
+                                                ->where('topic_id', $activity_topic->id)
+                                                ->where('user_id', $user->id)
+                                                ->first();
 
                 $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
 

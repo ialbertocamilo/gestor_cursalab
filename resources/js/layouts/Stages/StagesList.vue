@@ -1073,18 +1073,60 @@ export default {
         editActivity( stage, activity, position )
         {
             let vue = this;
+            console.log(activity);
 
-            // if(stage && activity)
-            // {
-            //     if(activity.type.code == 'tareas')
-            //     {
-            //         vue.modalActivityTareas.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/tareas`
-            //         vue.modalActivityTareas.model_id = stage.id
-            //         vue.modalActivityTareas.school_id = stage.school_id
+            if(stage && activity)
+            {
+                if(activity.type.code == 'tareas')
+                {
+                    vue.modalActivityTareas.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/tareas`
+                    vue.modalActivityTareas.model_id = stage.id
+                    vue.modalActivityTareas.school_id = stage.school_id
 
-            //         vue.openFormModal(vue.modalActivityTareas, activity)
-            //     }
-            // }
+                    vue.openFormModal(vue.modalActivityTareas, activity)
+                }
+                else if(activity.type.code == 'encuesta')
+                {
+                    vue.modalActivityEncuestas.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/encuestas`
+                    vue.modalActivityEncuestas.model_id = stage.id
+                    vue.modalActivityEncuestas.school_id = stage.school_id
+
+                    vue.openFormModal(vue.modalActivityEncuestas, activity)
+                }
+                else if(activity.type.code == 'sesion_online')
+                {
+                    vue.modalActivitySesiones.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/sesiones`
+                    vue.modalActivitySesiones.model_id = stage.id
+                    vue.modalActivitySesiones.school_id = stage.school_id
+
+                    vue.openFormModal(vue.modalActivitySesiones, activity)
+                }
+                else if(activity.type.code == 'temas')
+                {
+                    vue.modalActivityTemas.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/temas`
+                    vue.modalActivityTemas.model_id = stage.id
+                    vue.modalActivityTemas.school_id = stage.school_id
+
+                    vue.openFormModal(vue.modalActivityTemas, activity)
+                }
+                else if(activity.type.code == 'checklist')
+                {
+                    vue.modalActivityChecklist.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/checklist`
+                    vue.modalActivityChecklist.model_id = stage.id
+                    vue.modalActivityChecklist.school_id = stage.school_id
+
+                    vue.openFormModal(vue.modalActivityChecklist, activity)
+                }
+                else if(activity.type.code == 'evaluacion')
+                {
+                    vue.modalActivityEvaluaciones.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/evaluaciones`
+                    vue.modalActivityEvaluaciones.model_id = stage.id
+                    vue.modalActivityEvaluaciones.school_id = stage.school_id
+                    vue.modalActivityEvaluaciones.etapa_text = 'etapa_text'
+
+                    vue.openFormModal(vue.modalActivityEvaluaciones, activity)
+                }
+            }
         },
         statusActivity( stage, activity, position )
         {

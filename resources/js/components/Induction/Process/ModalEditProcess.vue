@@ -1,7 +1,9 @@
 
 
 <template>
-    <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
+    <v-dialog :max-width="width" v-model="value" scrollable
+        :persistent="true"
+        @click:outside="closeModalOutside">
         <v-card class="modal_edit_process">
             <v-card-title class="default-dialog-title">
                 {{ process.id ? 'Editar' : 'Crear' }} proceso de inducción {{ step_title }}
@@ -23,15 +25,16 @@
                                             <span class="text_default lbl_tit">Indica la información que tendrá este proceso de inducción</span>
                                         </v-col>
                                         <v-col cols="12" md="12" lg="12" class="pb-0">
-                                            <DefaultInput clearable
+                                            <DefaultInput
                                                         v-model="process.title"
                                                         label="Ingresa el nombre del proceso"
+                                                        :rules="rules.title"
                                             />
                                         </v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="12" md="12" lg="12" class="pb-0">
-                                            <v-textarea
+                                            <!-- <v-textarea
                                                 rows="5"
                                                 outlined
                                                 dense
@@ -39,15 +42,44 @@
                                                 label="Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción"
                                                 v-model="process.description"
                                                 class="txt_desc"
-                                            ></v-textarea>
+                                                :counter="300"
+                                                :rules="rules.description"
+                                            ></v-textarea> -->
+
+                                            <div>
+                                                <fieldset class="editor">
+                                                    <legend>Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción
+                                                    </legend>
+                                                    <editor
+                                                        @input="maxCharacters(process.description)"
+                                                        api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                        v-model="process.description"
+                                                        :init="{
+                                                            content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                            height: 170,
+                                                            menubar: false,
+                                                            language: 'es',
+                                                            force_br_newlines : true,
+                                                            force_p_newlines : false,
+                                                            forced_root_block : '',
+                                                            plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                            toolbar:
+                                                                'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                            images_upload_handler: images_upload_handler,
+                                                            toolbar_location: 'bottom'
+                                                        }"
+                                                    />
+                                                </fieldset>
+                                                <span class="text_default txt_counter d-flex justify-content-end">{{ process.description.length }}/350</span>
+                                            </div>
                                         </v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="12">
                                             <div class="row_dates d-flex">
                                                 <div class="d-flex align-center">
-                                                    <span class="text_default">Fecha de inicio del proceso:</span>
-                                                    <div>
+                                                    <span class="text_default mr-2">Fecha de inicio del proceso:</span>
+                                                    <div class="bx_input_date">
                                                         <DefaultInputDate
                                                             placeholder="Ingresar fecha"
                                                             reference-component="StartProcessDate"
@@ -61,58 +93,65 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex align-center">
-                                                    <span class="text_default ms-3">Fecha de fin del proceso: (opcional)</span>
-                                                    <DefaultInputDate
-                                                        placeholder="Ingresar fecha"
-                                                        reference-component="StartProcessDate"
-                                                        :options="modalDateOptions2"
-                                                        label=""
-                                                        v-model="process.finishes_at"
-                                                        :offset-y="false"
-                                                        :offset-x="true"
-                                                        :top="true"
-                                                        :left="true"
-                                                    />
+                                                    <span class="text_default mr-2">Fecha de fin del proceso: (opcional)</span>
+                                                    <div class="bx_input_date">
+                                                        <DefaultInputDate
+                                                            placeholder="Ingresar fecha"
+                                                            reference-component="StartProcessDate"
+                                                            :options="modalDateOptions2"
+                                                            label=""
+                                                            v-model="process.finishes_at"
+                                                            :offset-y="false"
+                                                            :offset-x="true"
+                                                            :top="true"
+                                                            :left="true"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="12" class="d-flex align-items-center">
-                                            <span class="text_default me-2">Inasistencias</span>
-                                            <div class="bx_switch_attendance">
-                                                <v-switch
-                                                    class="default-toggle"
-                                                    inset
-                                                    label="¿Deseas agregar límite de inasistencia a este proceso de inducción?"
-                                                    hide-details="auto"
-                                                    v-model="process.count_absences"
-                                                    dense
-                                                ></v-switch>
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <span class="text_default me-2">Inasistencias</span>
+                                                    <div class="bx_switch_attendance">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.count_absences"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-center">
+                                                    <span class="text_default lbl_tit mr-2" :class="{'disabled': !process.count_absences}">¿Deseas agregar límite de inasistencia a este proceso de inducción?</span>
+                                                    <div class="d-flex">
+                                                        <div class="bx_input_inasistencias" :class="{'disabled': !process.count_absences}">
+                                                            <input type="number" v-model="process.absences" :readonly="!process.count_absences">
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <!-- <v-radio-group v-model="process.limit_absences" row>
+                                                                <v-radio label="No" :value="false"></v-radio>
+                                                                <div class="divider_inline"></div>
+                                                                <v-radio label="Sí" :value="true"></v-radio>
+                                                            </v-radio-group> -->
+                                                            <v-checkbox
+                                                                v-model="process.limit_absences"
+                                                                hide-details="false"
+                                                                class="my-0 mr-4"
+                                                                :class="{'disabled_label': !process.count_absences}"
+                                                                label="Ilimitado"
+                                                                :disabled="!process.count_absences"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </v-col>
                                     </v-row>
-                                    <transition name="fade">
-                                        <v-row v-if="process.count_absences">
-                                            <!-- <v-col cols="12" md="12" lg="12" class="pb-0 pt-0">
-                                                <span class="text_default lbl_tit">¿Deseas agregar límite de inasistencia a este proceso de inducción?</span>
-                                            </v-col> -->
-                                            <v-col cols="12" md="12" lg="12">
-                                                <div class="d-flex">
-                                                    <div>
-                                                        <v-radio-group v-model="process.limit_absences" row>
-                                                            <v-radio label="No" :value="false"></v-radio>
-                                                            <div class="divider_inline"></div>
-                                                            <v-radio label="Sí, indica máximas inasistencias permitidas:" :value="true"></v-radio>
-                                                        </v-radio-group>
-                                                    </div>
-                                                    <div class="bx_input_inasistencias">
-                                                        <input type="number" v-model="process.absences">
-                                                    </div>
-                                                </div>
-                                            </v-col>
-                                        </v-row>
-                                    </transition>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
@@ -198,9 +237,9 @@
                                                                 <span class="text_default">Fondo de mapa</span>
                                                             </div>
                                                             <div>
-                                                                <div class="box_select_colors">
+                                                                <div class="box_select_colors colors_maps">
                                                                     <div class="item_color_onb">
-                                                                        <span class="text_default">Etapa impar</span>
+                                                                        <span class="text_default">Mapa 1</span>
                                                                         <div class="bg_color_item">
                                                                             <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorImparSelected" :style="swatchStyleImpar">
                                                                                 <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
@@ -224,7 +263,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="item_color_onb">
-                                                                        <span class="text_default">Etapa par</span>
+                                                                        <span class="text_default">Mapa 2</span>
                                                                         <div class="bg_color_item">
                                                                             <v-btn  hide-details class="ma-0 pa-0" solo @click="changeColorParSelected" :style="swatchStylePar">
                                                                                 <div class="icon_edit"><img src="/img/induccion/personalizacion/edit_color.svg"></div>
@@ -247,7 +286,15 @@
                                                                             </v-menu>
                                                                         </div>
                                                                     </div>
+                                                                    <div class="pt-3">
+                                                                        <span class="d-flex text_default fw-bold mb-2" style="line-height: 1; font-size: 12px;">Tendrás dos estilos de mapas en tu proceso.</span>
+                                                                        <span class="d-flex text_default" style="font-size: 12px;">Mapa 1: Etapas pares</span>
+                                                                        <span class="d-flex text_default" style="font-size: 12px;">Mapa 2: Etapas impares</span>
+                                                                    </div>
                                                                 </div>
+                                                            </div>
+                                                            <div>
+                                                                <span class="text_default fw-bold" style="font-size: 12px;">Al tener 2 o más etapas se tendrán distintos mapas</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -620,7 +667,8 @@ export default {
         return {
             list_icons_finished_onboarding: [],
             process: {
-                instructions: []
+                instructions: [],
+                description: ''
             },
             modalDateOptions: {
                 ref: 'DateEvent',
@@ -769,7 +817,8 @@ export default {
 
             segment_by_document_clean: false,
             rules: {
-                // name: this.getRules(['required', 'max:255']),
+                title: this.getRules(['required', 'max:200']),
+                description: this.getRules(['required', 'max:350'])
             }
             // data segmenteacion
         };
@@ -843,7 +892,7 @@ export default {
                 let vue = this;
 
                 if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description));
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350);
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
@@ -869,7 +918,7 @@ export default {
                 vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
-                    if(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description)) {
+                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350)) {
                         vue.stepper_box_btn1 = false;
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
@@ -902,9 +951,44 @@ export default {
                 }
             },
             deep: true
+        },
+        'process.count_absences': {
+            handler(n, o) {
+                let vue = this;
+                if(!n) {
+                    vue.process.limit_absences = false
+                    vue.process.absences = ''
+                }else{
+                    vue.process.limit_absences = vue.process.absences == ''
+                }
+            },
+            deep: true
+        },
+        'process.limit_absences': {
+            handler(n, o) {
+                let vue = this;
+                if(n) {
+                    vue.process.absences = ''
+                }
+            },
+            deep: true
+        },
+        'process.absences': {
+            handler(n, o) {
+                let vue = this;
+                if(n) {
+                    vue.process.limit_absences = false
+                }else {
+                    vue.process.limit_absences = true
+                }
+            },
+            deep: true
         }
     },
     methods: {
+        maxCharacters(input) {
+            let vue = this
+        },
         classSelectIconOnboarding(ref_image) {
             let vue = this
             return vue.icon_finished_selected_name == ref_image ? 'selected' : ''
@@ -1017,6 +1101,7 @@ export default {
         },
         nextStep(){
             let vue = this;
+            console.log(vue.process);
 
             if(vue.stepper_box == 1){
                 vue.stepper_box = 2;
@@ -1076,7 +1161,8 @@ export default {
             vue.fondo_web_selected = null
             vue.resource = {}
             vue.process = {
-                instructions: []
+                instructions: [],
+                description: ''
             }
 
             vue.colorPicker = '#FE141F'
@@ -1344,6 +1430,11 @@ export default {
             //         vue.selects.requirement_list = data.data.requirements
             //     })
         },
+        closeModalOutside() {
+            let vue = this
+            // if (!vue.options.persistent)
+            //     vue.$emit('onCancel')
+        },
     }
 };
 </script>
@@ -1408,8 +1499,7 @@ export default {
     padding: 0.7rem !important;
 }
 .bx_steps .v-text-field__slot label.v-label,
-.bx_steps .v-select__slot label.v-label,
-.text_default {
+.bx_steps .v-select__slot label.v-label {
     color: #434D56;
     font-weight: 400;
     font-family: "Nunito", sans-serif;
@@ -1532,24 +1622,24 @@ button.btn_secondary span.v-btn__content i{
 .item-draggable.activities .default-toggle.default-toggle.v-input--selection-controls {
     margin-top: initial !important;
 }
-.box_resultados,
-.box_seleccionados {
-    height: 130px;
-    overflow-y: auto;
-    border-radius: 8px;
-    border: 1px solid #D9D9D9;
-    padding: 10px 0;
-}
-.box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
-.box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
-    opacity: 0;
-}
-.bx_message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
+// .box_resultados,
+// .box_seleccionados {
+//     height: 130px;
+//     overflow-y: auto;
+//     border-radius: 8px;
+//     border: 1px solid #D9D9D9;
+//     padding: 10px 0;
+// }
+// .box_resultados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before,
+// .box_seleccionados .v-btn:not(.v-btn--text):not(.v-btn--outlined):hover:before {
+//     opacity: 0;
+// }
+// .bx_message {
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     height: 100%;
+// }
 span.v-stepper__step__step {
     color: #5458ea !important;
     background-color: #5458ea !important;
@@ -1596,17 +1686,17 @@ span.v-stepper__step__step:after {
 .bx_steps .v-text-field--outlined .v-label {
     top: 10px;
 }
-.bx_steps .v-btn--icon.v-size--default {
-    height: 22px;
-    width: 22px;
-}
+// .bx_steps .v-btn--icon.v-size--default {
+//     height: 22px;
+//     width: 22px;
+// }
 .bx_steps .v-select__slot,
 .v-dialog.v-dialog--active .bx_steps .v-select--is-multi.v-autocomplete .v-select__slot {
     padding: 0 !important;
 }
-.bx_steps .v-text-field__details {
-    display: none;
-}
+//.bx_steps .v-text-field__details {
+   // display: none;
+//}
 .bx_step1 .default-toggle {
     margin-top: 3px !important;
 }
@@ -1765,7 +1855,7 @@ span.v-stepper__step__step:after {
     .box_select_colors {
         display: flex;
         .item_color_onb {
-            margin-right: 15px;
+            margin-right: 3px;
             text-align: center;
             cursor: pointer;
             border: 1px solid transparent;
@@ -1791,13 +1881,22 @@ span.v-stepper__step__step:after {
             }
             .bg_color_item button,
             .bg_color_item .color_d {
-                height: 70px !important;
+                height: 75px !important;
                 width: 55px !important;
                 min-width: auto !important;
                 border-radius: 8px !important;
             }
             .bg_color_item.bg_color_item_default .color_d {
                 background-color: #5458EA;
+            }
+        }
+        &.colors_maps{
+            .item_color_onb {
+                .bg_color_item button,
+                .bg_color_item .color_d {
+                    height: 55px !important;
+                }
+
             }
         }
     }
@@ -1979,6 +2078,27 @@ span.v-stepper__step__step:after {
         .ii2 {
             flex: 1;
         }
+    }
+    .bx_input_date {
+        flex: 1;
+        max-width: 195px;
+    }
+    .row_dates, .row_border {
+        border: 1px solid #d9d9d9;
+        padding: 10px;
+        border-radius: 4px;
+        width: 100%;
+    }
+    .row_dates {
+        column-gap: 10px;
+        .v-text-field--enclosed .v-input__append-inner,
+        .v-text-field--enclosed .v-input__append-outer,
+        .v-text-field--enclosed .v-input__prepend-inner {
+            margin-top: 2px !important;
+        }
+    }
+    .text_default.disabled, .disabled_label label.v-label, .bx_input_inasistencias.disabled input {
+        color: #E4E4E4 !important;
     }
 }
 </style>

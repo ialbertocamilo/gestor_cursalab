@@ -10,6 +10,7 @@ class Activity extends BaseModel
     protected $fillable = [
         'stage_id',
         'title',
+        'description',
         'position',
         'active',
         'type_id',

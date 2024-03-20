@@ -163,8 +163,6 @@
                                 inactive-label="Tema inactivo"
                                 dense
                             />
-                            <small v-if="resource.disabled_estado_toggle"
-                                   v-text="'No se podrá activar el tema hasta que se le asigne o active una evaluación.'"/>
                         </div>
                     </v-col>
                 </v-row>
@@ -257,6 +255,7 @@ export default {
                 max_order: 1,
                 'update-validations': [],
                 qualification_type: {position: 0},
+                activity_id: null
             },
             selects: {
                 assessable: [
@@ -337,7 +336,6 @@ export default {
         resetValidation() {
             let vue = this
             vue.$refs.TemaForm.resetValidation()
-            vue.$refs.TemaForm.reset()
         },
         resetSelects() {
             let vue = this
@@ -347,6 +345,7 @@ export default {
             let vue = this
             vue.resetSelects()
             vue.resetValidation()
+            vue.$refs.TemaForm.reset()
 
             vue.topicsValidationModal = Object.assign({}, vue.topicsValidationModal, vue.topicsValidationModalDefault);
             vue.$emit('onCancel')
@@ -443,19 +442,19 @@ export default {
             }
 
             // const edit = vue.topic_id !== ''
-            const edit = (vue.resource && vue.resource.id)
+            const edit = (vue.resource && vue.resource.id && vue.resource.activity_id)
             let method = edit ? 'PUT' : 'POST';
 
             let base = `${vue.options.base_endpoint}`
 
-            let url = edit ? `${base}/${vue.resource.id}/update` : `${base}/store`;
+            let url = edit ? `${base}/${vue.resource.activity_id}/update` : `${base}/store`;
 
             vue.resource.model_id = vue.options.model_id;
             vue.resource.model_type = 'App\\Models\\Topic';
 
             vue.resource.school_id = vue.options.school_id
 
-            let formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+            let formData = vue.getMultipartFormData('POST', vue.resource, fields, file_fields);
             formData.append('validate', validateForm ? "1" : "0");
             vue.addMedias(formData)
             if (data.checkbox)
@@ -530,17 +529,20 @@ export default {
 
             console.log(vue.base_endpoint);
 
-            let url = `${vue.options.base_endpoint}/${ resource ? `search/${resource.id}` : 'form-selects'}`
+            let url = `${vue.options.base_endpoint}/${ resource ? `edit/${resource.id}` : 'form-selects'}`
             // let base = `${vue.options.base_endpoint}`
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.media_url = data.data.media_url
-                    vue.selects.requisitos = data.data.requisitos
-                    vue.selects.evaluation_types = data.data.evaluation_types
-                    vue.selects.qualification_types = data.data.qualification_types
-                    vue.limits_ia_convert = data.data.limits_ia_convert;
-                    vue.hasPermissionToUseIaEvaluation=data.data.has_permission_to_use_ia_evaluation;
-                    vue.hasPermissionToUseIaDescription = data.data.has_permission_to_use_ia_description;
+                    console.log(data.data);
+
+                    let _data = data.data
+                    vue.media_url = _data.media_url
+                    vue.selects.requisitos = _data.requisitos
+                    vue.selects.evaluation_types = _data.evaluation_types
+                    vue.selects.qualification_types = _data.qualification_types
+                    vue.limits_ia_convert = _data.limits_ia_convert;
+                    vue.hasPermissionToUseIaEvaluation=_data.has_permission_to_use_ia_evaluation;
+                    vue.hasPermissionToUseIaDescription = _data.has_permission_to_use_ia_description;
                     if(vue.hasPermissionToUseIaDescription){
                         setTimeout(() => {
                             let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -551,14 +553,17 @@ export default {
                         }, 200);
                     }
                     if (resource && resource.id) {
-                        vue.resource = Object.assign({}, data.data.tema)
+                        console.log( _data.activity.id);
+
+                        vue.resource = Object.assign({}, vue.resource, _data.temas)
+                        vue.resource.activity_id = _data.activity.id
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
                     } else {
-                        vue.resource.qualification_type = data.data.qualification_type
-                        vue.resource.position = data.data.default_position
+                        vue.resource.qualification_type = _data.qualification_type
+                        vue.resource.position = _data.default_position
                     }
 
-                    vue.resource.max_position = data.data.max_position
+                    vue.resource.max_position = _data.max_position
                 })
             return 0;
         },
@@ -619,7 +624,7 @@ export default {
         },
         async showAlertEvaluacion() {
             let vue = this
-            vue.resource.disabled_estado_toggle = vue.validateCountQuestions();
+            // vue.resource.disabled_estado_toggle = vue.validateCountQuestions();
 
             vue.topicsValidationModal.hideConfirmBtn = true
             const evaluation_type = vue.selects.evaluation_types.find(el => el.id === vue.resource.type_evaluation_id);
