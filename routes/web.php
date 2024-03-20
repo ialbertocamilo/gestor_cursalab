@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckRol;
+use App\Http\Controllers\RedisTest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dc3Controller;
 use App\Http\Controllers\UserController;
@@ -14,11 +15,11 @@ use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\TwoFAController;
 use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\ApiRest\RestTopicController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ApiRest\AdjuntarArchivosController;
-
-use App\Http\Controllers\RedisTest;
 
 
 Route::redirect('/', 'login', 301);
@@ -231,6 +232,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));
 
     Route::get('/generate-pdf', [Dc3Controller::class, 'generatePDFDownload']);
+    Route::get('/download/{topic}/{media}', [RestTopicController::class, 'downloadMedia']);
     // Route::get('/generate-pdf-blade', function(){
     //     $national_occupations_catalog = App\Models\NationalOccupationCatalog::select('code','name')->get()->toArray();
     //     $catalog_denominations = App\Models\Taxonomy::where('group','course')->where('type','catalog-denomination-dc3')->select('code','name')->get()->toArray();
