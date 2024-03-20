@@ -99,7 +99,8 @@ class WorkspaceController extends Controller
         $workspace['functionalities_selected'] = [];
         $workspace['functionalities'] = Taxonomy::getDataForSelect('system', 'functionality');
         $workspace['qualification_types'] = Taxonomy::getDataForSelect('system', 'qualification-type');
-
+        $_workspace = new Workspace();
+        $workspace['checklist_configuration'] = $_workspace->getChecklistConfigurationAttribute(value:null);
         return $this->success($workspace);
     }
 
@@ -501,7 +502,7 @@ class WorkspaceController extends Controller
             'has_registro_capacitacion_functionality' => $registroCapacitacionFunctionality ? true : false,
             'main_menu' => $formSelects['main_menu'],
             'side_menu' => $formSelects['side_menu'],
-            'workspace_criteria' => $formSelects['workspace_criteria']
+            'workspace_criteria' => $formSelects['workspace_criteria'],
         ]);
     }
 
@@ -545,13 +546,13 @@ class WorkspaceController extends Controller
         $workspace_criteria = get_current_workspace()->criterionWorkspace->map(function ($item){
             return collect($item)->only(['id', 'name']);
         });
-
         $response = compact(
             'main_menu',
             'side_menu',
             'qualification_types',
             'workspace_criteria',
-            'has_registro_capacitacion_functionality');
+            'has_registro_capacitacion_functionality'
+        );
 
         return $compactResponse ? $response : $this->success($response);
     }

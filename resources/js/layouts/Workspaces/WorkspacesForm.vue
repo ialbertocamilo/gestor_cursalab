@@ -172,7 +172,7 @@
                             </template>
                         </DefaultSection>
                         <DefaultSection 
-                            v-if="is_superuser"
+                            v-if="is_superuser && resource.checklist_configuration"
                             title="Configuración de checklist" 
                             tooltipInfoText="Seleccione la configuración que se tendrá por defecto en la creación de checklists."
                         >
@@ -187,8 +187,8 @@
                                                 <draggable v-model="resource.checklist_configuration.evaluation_types" @start="drag_evaluation_type=true"
                                                         @end="drag_evaluation_type=false" class="custom-draggable" ghost-class="ghost">
                                                     <transition-group type="transition" name="flip-list" tag="div">
-                                                        <div v-for="(evaluation_type) in resource.checklist_configuration.evaluation_types"
-                                                            :key="evaluation_type.id">
+                                                        <div v-for="(evaluation_type,index) in resource.checklist_configuration.evaluation_types"
+                                                            :key="index">
                                                             <div class="activities">
                                                                 <v-row class="align-items-center px-2">
                                                                     <v-col cols="1" class="d-flex align-center justify-content-center ">
@@ -222,11 +222,19 @@
                                                                             appendIcon="mdi mdi-pencil"
                                                                         />
                                                                     </v-col>
-                                                                    <v-col>
+                                                                    <v-col cols="3">
                                                                         <DefaultInput 
                                                                             suffix="%"
                                                                             dense
                                                                             v-model="evaluation_type.extra_attributes.percent"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col cols="1" class="d-flex justify-content-center">
+                                                                        <DefaultButton
+                                                                            label=""
+                                                                            icon="mdi-minus-circle"
+                                                                            isIcon
+                                                                            @click="removeScaleEvaluation(index)"
                                                                         />
                                                                     </v-col>
                                                                 </v-row>
@@ -245,26 +253,37 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
-                                    <v-row class="col col-6 py-1">
-                                        <v-col cols="12">
+                                    <v-row class="col col-6 py-1" style="height: 150px;">
+                                        <div class="col-12">
                                             <DefaultInput 
                                                 label="Limite de escalas de evaluación"
                                                 dense
                                                 v-model="resource.checklist_configuration.max_limit_create_evaluation_types"
                                             />
-                                        </v-col>
-                                        <v-col cols="12">
+                                        </div>
+                                        <div class="col-12">
                                             <DefaultSelect
                                                 clearable
                                                 :items="selects.qualification_types"
                                                 item-text="name"
-                                                return-object
                                                 v-model="resource.checklist_configuration.qualification_type"
                                                 label="Sistema de calificación"
                                                 :rules="rules.qualification_type_id"
                                                 dense
                                             />
-                                        </v-col>
+                                        </div>
+                                        <div class="col-12">
+                                            <DefaultAutocomplete
+                                                clearable
+                                                :items="resource.criteria_workspace"
+                                                item-text="name"
+                                                item-value="criterion_id"
+                                                v-model="resource.checklist_configuration.entities_criteria"
+                                                label="Selecciona las entidades"
+                                                dense
+                                                multiple
+                                            />
+                                        </div>
                                     </v-row>
                                 </v-row>
                             </template>
@@ -668,7 +687,7 @@ const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
-    'dc3_configuration','show_logo_in_app','limits','reminders_configuration'
+    'dc3_configuration','show_logo_in_app','limits','reminders_configuration','checklist_configuration'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
@@ -736,11 +755,21 @@ export default {
                 reminders_configuration:{
                     interval:0,
                     chunk:0 
+                },
+                checklist_configuration:{
+                    evaluation_types:[],
+                    qualification_type:null,
+                    max_limit_create_evaluation_types:5
                 }
             },
             limit_allowed_users: null,
             resource: {
                 selected_functionality: {},
+                checklist_configuration:{
+                    evaluation_types:[],
+                    qualification_type:null,
+                    max_limit_create_evaluation_types:5
+                }
             },
             selects: {
                 qualification_types: [],
@@ -833,6 +862,9 @@ export default {
                 
                 formData.set(
                     'reminders_configuration', JSON.stringify(vue.resource.reminders_configuration)
+                );
+                formData.set(
+                    'checklist_configuration', JSON.stringify(vue.resource.checklist_configuration)
                 );
                 
                 vue.setLimitUsersAllowed(formData);
@@ -939,6 +971,10 @@ export default {
                     }
                     vue.resource.selected_functionality = selected_functionality;
                     vue.functionalities = functionalities;
+                    if(!workspace){
+                        vue.resource.checklist_configuration = data.data.checklist_configuration;
+                    }
+                    console.log(vue.resource);
                     this.hideLoader();
                 })
                 .catch((error) => {
@@ -975,6 +1011,16 @@ export default {
             let vue = this;
             vue.showDc3Section = vue.resource.selected_functionality[vue.taxonomy_id_dc3];
             vue.showReminderSection = vue.resource.selected_functionality[vue.taxonomy_id_reminder];
+        },
+        addScaleEvaluation(){
+            let vue = this;
+            vue.resource.checklist_configuration.evaluation_types.push(
+                {id:null,name:'',color:'#FF4560',extra_attributes:{percent:'0'}},
+            )
+        },
+        removeScaleEvaluation(index){
+            let vue = this;
+            vue.resource.checklist_configuration.evaluation_types.splice(index, 1);
         }
     }
 }

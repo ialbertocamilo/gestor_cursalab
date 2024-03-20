@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use App\Mail\EmailTemplate;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mongo\JarvisAttempt;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -121,36 +122,69 @@ class Workspace extends BaseModel
         return $value ? json_decode($value) : json_decode('{"company":{}}');
     }
     public function getChecklistConfigurationAttribute($value){
+        $evaluation_types = Taxonomy::getSelectData(
+            group:'checklist',
+            type:'system_calification',
+            extraFields:['extra_attributes','workspace_id'],
+            filters:['workspace_id'=>$this->id]
+        );
+        if(count($evaluation_types) == 0){
+            $evaluation_types = Taxonomy::getSelectData(
+                group:'checklist',
+                type:'system_calification',
+                extraFields:['extra_attributes','workspace_id'],
+                filters:['workspace_id'=>null]
+            );
+        }
         if(is_null($value)){
             return [
-                'evaluation_types'=>Taxonomy::getSelectData(group:'checklist',type:'system_calification',extraFields:['extra_attributes']),
-                'type_calification_id'=>null,
+                'entities_criteria'=>[],
+                'evaluation_types'=>$evaluation_types,
+                'qualification_type'=>null,
                 'max_limit_create_evaluation_types'=>5
             ];
         }
-        $value['evaluation_types'] = Taxonomy::getSelectData(group:'checklist',type:'system_calification',extraFields:['extra_attributes']);
-        return json_decode($value);
+        $value = json_decode($value);
+        if(!isset($value->entities_criteria)){
+            $value->entities_criteria = [];
+        }
+        $value->evaluation_types = $evaluation_types;
+        return $value;
     }
     public function setChecklistConfigurationAttribute($value)
     {
-        foreach ($value['evaluation_types'] as $index => $evaluation_type) {
-            Taxonomy::updateOrInsert([
-                'workspace_id' => $this->id,
-                'group' => 'checklist',
-                'type' => 'system_calification'
-            ],
-                [
+        $value = json_decode($value);
+        $evaluation_type_ids = [];
+        foreach ($value->evaluation_types as $index => $evaluation_type) {
+            $code = Str::slug($evaluation_type->name);
+            $data = [
                 'position' => $index+1,
-                'code' => $evaluation_type['code'],
-                'name' => $evaluation_type['name'],
-                'color' => $evaluation_type['color'],
+                'code' => $code,
+                'name' => $evaluation_type->name,
+                'color' => $evaluation_type->color,
                 'active' => 1,
-                'extra_attributes'=>[
-                    'percent'=> $evaluation_type['extra_attributes']['percent']
-                ]
-            ]);
+                'extra_attributes'=>json_encode([
+                    'percent'=> $evaluation_type->extra_attributes->percent
+                ])
+            ];
+            if(isset($evaluation_type->workspace_id) && $evaluation_type->workspace_id && $evaluation_type->id){
+                Taxonomy::where('id',$evaluation_type->id)->update($data);
+                $evaluation_type_ids[] = $evaluation_type->id;
+                continue;
+            }
+            $workspace_id = $this->id ? $this->id : Db::table('workspaces')->select('id')->orderBy('id','desc')->first()?->id + 1;
+            $data['workspace_id'] = $workspace_id;
+            $data['group'] = 'checklist';
+            $data['type'] = 'system_calification';
+            $evaluation_type_id =Taxonomy::insertGetId($data);
+            $evaluation_type_ids[] = $evaluation_type_id;
         }
-        unset($value['evaluation_types']);
+        if(count($evaluation_type_ids)>0){
+            Taxonomy::whereNotIn('id',$evaluation_type_ids)
+                    ->whereNotNull('workspace_id')
+                    ->where('group','checklist')->where('type','system_calification')->where('workspace_id',$this->id)->delete();
+        }
+        unset($value->evaluation_types);
         $this->attributes['checklist_configuration'] = json_encode($value);
     }
     public function medias() {
@@ -813,7 +847,26 @@ class Workspace extends BaseModel
         }
 
         $workspace->refresh();
+        
+        $evaluation_types = collect(Taxonomy::getSelectData(
+            group:'checklist',
+            type:'system_calification',
+            extraFields:['extra_attributes','workspace_id','active'],
+            filters:['workspace_id'=>$this->id]
+        ))->map(function($q) use ($workspace){
+            $q['created_at'] = now();
+            $q['updated_at'] = now();
+            $q['group'] = 'checklist';
+            $q['type'] = 'system_calification';
+            $q['extra_attributes'] = json_encode($q['extra_attributes']);
+            $q['workspace_id'] = $workspace->id;
+            unset($q['id']);
+            return $q;
+        })->toArray();
 
+        if(count($evaluation_types)>0){
+            Taxonomy::insert($evaluation_types);
+        }
         foreach ($this->subworkspaces as $_subworkspace) {
 
             $_subworkspace_data = $_subworkspace->toArray();

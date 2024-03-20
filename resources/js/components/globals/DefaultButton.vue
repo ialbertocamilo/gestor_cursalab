@@ -5,6 +5,7 @@
         elevation="0"
         :ripple="false"
         :color="color"
+        :icon="isIcon"
         @click="click"
         :block="block"
         :disabled="disabled"
@@ -68,6 +69,10 @@ export default {
         min_content:{
             type:Boolean,
             default:true,
+        },
+        isIcon:{
+            type:Boolean,
+            default:false,
         }
     },
     methods: {

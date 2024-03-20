@@ -36,6 +36,8 @@ Route::controller(EntrenamientoController::class)->group(function() {
 	Route::prefix('/checklists')->middleware('hasHability:checklist')->group(function () {
 		Route::view('/', 'entrenamiento.checklist.index')->name('entrenamiento.checklist');
 		// ->middleware('permission:entrenamiento.index');
+		Route::get('/form-selects', 'getFormSelects');
+
 		Route::get('/search', 'searchChecklist');
 		Route::post('/search_checklist', 'searchChecklistByID');
 		Route::post('/listar_checklist', 'listarChecklist');

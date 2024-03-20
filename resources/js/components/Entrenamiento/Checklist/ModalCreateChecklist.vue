@@ -176,7 +176,7 @@
                                                                     <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 py-4" marginx="mx-0">
                                                                         <template slot="content">
                                                                             <DefaultSelect dense :items="selects.qualification_types" item-text="name"
-                                                                                return-object show-required v-model="resource.qualification_type"
+                                                                                show-required v-model="resource.extra_attributes.qualification_type"
                                                                                 label="Sistema de calificación" :rules="rules.qualification_type_id" />
                                                                         </template>
                                                                     </DefaultSimpleSection>
@@ -751,8 +751,10 @@ export default {
         }
     },
     async mounted() {
+        let vue = this;
         // this.addActividad()
-        await this.loadLimitsGenerateIaDescriptions();
+        await vue.loadLimitsGenerateIaDescriptions();
+        await vue.loadFormSelects();
     },
     watch: {
         checklist: {
@@ -801,6 +803,14 @@ export default {
     methods: {
         rep(){
             let vue = this
+        },
+        async loadFormSelects(){
+            let vue = this;
+            await axios.get('/entrenamiento/checklists/form-selects').then(({ data }) => {
+                vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
+                vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
+                vue.selects.extra_attributes = data.data.qualification_types;
+            })
         },
         validateRequired(input) {
             return input != undefined && input != null && input != "";
