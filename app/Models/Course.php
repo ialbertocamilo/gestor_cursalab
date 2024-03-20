@@ -1354,7 +1354,7 @@ class Course extends BaseModel
         print_r($fun_2);
     }
 
-    public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='')
+    public function usersSegmented($course_segments, $type = 'get_records',$filters=[],$addSelect='',$only_criterian_values_by_criterion=[])
     {
         // Example filters:
         // $filters = [
@@ -1376,7 +1376,16 @@ class Course extends BaseModel
                     })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
                 } else {
-                    $ids = $values->pluck('criterion_value_id');
+                    if(count($only_criterian_values_by_criterion) && in_array($idx,array_column($only_criterian_values_by_criterion,'criterion_id'))){
+                        $index_criterion_value=array_search($idx, array_column($only_criterian_values_by_criterion, 'criterion_id'));
+                        if ($index_criterion_value !== false) {
+                            $ids = [$only_criterian_values_by_criterion[$index_criterion_value]['criterion_value_id']];
+                        }else{
+                            $ids = $values->pluck('criterion_value_id');
+                        }
+                    }else{
+                        $ids = $values->pluck('criterion_value_id');
+                    }
                 }
 
                 $query->join("criterion_value_user as cvu{$idx}", function ($join) use ($ids, $idx) {

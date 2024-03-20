@@ -260,13 +260,23 @@ class Process extends BaseModel
         return $process;
     }
 
-    protected function getProcessAssistantsList(Process $process, bool $is_paginated = true, bool $absences = false)
+    protected function getProcessAssistantsList(Process $process, bool $is_paginated = true, bool $absences = false,$by_supervisor=null)
     {
         $course = new Course();
 
         $process->load('segments');
-
-        $segmentados_id = $course->usersSegmented($process->segments, 'users_id');
+        $values_criterio_user = [];
+        if($by_supervisor){
+            $supervisor_criteria = json_decode($process->supervisor_criteria);
+            if(count($supervisor_criteria)){
+                $values_criterio_user =  $by_supervisor->criterion_values
+                                        ->whereIn('criterion_id',$supervisor_criteria)
+                                        ->map(fn($c)=>['criterion_id'=>$c->criterion_id,'criterion_value_id'=>$c->id])->values()->toArray();
+            }
+            // dd($supervisor_criteria,$by_supervisor->criterion_values);
+            $by_supervisor->criterion_user;
+        }
+        $segmentados_id = $course->usersSegmented(course_segments:$process->segments, type:'users_id',only_criterian_values_by_criterion:$values_criterio_user);
         $segmentados_id = array_unique($segmentados_id);
 
         $segmentados = User::FilterByPlatform()->with(['subworkspace', 'summary_process'])
@@ -323,15 +333,14 @@ class Process extends BaseModel
 
         $process_id = $data['process'];
 
-        $process = Process::select('id','absences', 'limit_absences', 'count_absences', 'title', 'description', 'active', 'starts_at', 'finishes_at')
+        $process = Process::select('id','absences','supervisor_criteria','limit_absences', 'count_absences', 'title', 'description', 'active', 'starts_at', 'finishes_at')
                     ->where('id', $process_id)
                     ->first();
-
         if($process)
         {
             $user->load('summary_process');
-            if(count($user->processes)) {
-                $participants = $this->getProcessAssistantsList($process);
+            // if(count($user->processes)) {
+                $participants = $this->getProcessAssistantsList(process:$process,by_supervisor:$user);
                 $process->participants = $participants->count() ?? 0;
                 $process->students = $participants;
                 $param_resource = [
@@ -341,7 +350,7 @@ class Process extends BaseModel
                     'absences' => $process->absences,
                 ];
                 ProcessAssistantsSearchResource::customCollection($process->students, $param_resource);
-            }
+            // }
             $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
             $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
             $process->percentage = 0;
