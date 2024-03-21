@@ -46,8 +46,8 @@ class RestProcessController extends Controller
 
         // return response()->json($apiResponse, 200);
         $response = [
-            'progress' => rand(30, 100),
-            'stages' => '03/10',
+            'progress' => 0,
+            'stages' => '0/5',
             'processes' => $apiResponse
         ];
         return $this->success($response);
