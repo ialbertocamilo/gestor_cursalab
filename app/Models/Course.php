@@ -609,6 +609,7 @@ class Course extends BaseModel
     protected function getDataToCoursesViewAppByUser($user, $user_courses): array
     {
         // $workspace_id = auth()->user()->subworkspace->parent_id;
+        $size_limit_offline = Ambiente::select('size_limit_offline')->where('type','general')->first()->size_limit_offline;
         $workspace_id = $user->subworkspace->parent_id;
         $schools = $user_courses->groupBy('schools.*.id');
         $summary_topics_user = SummaryTopic::whereHas('topic.course', function ($q) use ($user_courses) {
@@ -678,6 +679,13 @@ class Course extends BaseModel
             // }
 
             foreach ($courses as $course) {
+                $course_offline_data = MediaTema::dataSizeCourse(course:$course,has_offline:$course->is_offline,size_limit_offline:$size_limit_offline);
+                $course_size = '';
+                $course_is_offline = false;
+                if($course_offline_data['is_offline'] && $course_offline_data['has_space']){
+                    $course_is_offline = true;
+                    $course_size = $course_offline_data['sum_size_topics']['size'].' '.$course_offline_data['sum_size_topics']['size_unit'];
+                }
                 $course_position = $positions_courses->where('school_id', $school_id)->where('course_id',$course->id)->first()?->position;
                 $modality = $modalities->where('id',$course->modality_id)->first();
 
@@ -785,7 +793,8 @@ class Course extends BaseModel
                         'modality_code' => $modality?->code,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
-                        'is_offline' => boolval($course->is_offline),
+                        'is_offline' => $course_is_offline,
+                        'course_size' => $course_size,
                         'porcentaje' => $course_status['progress_percentage'],
                         'ultimo_tema_visto' => $last_topic_reviewed,
                     ];
@@ -795,7 +804,8 @@ class Course extends BaseModel
                     $last_school_courses[] = [
                         'id' => $course->id,
                         'modality_code' => $modality?->code,
-                        'is_offline' => boolval($course->is_offline),
+                        'is_offline' => $course_is_offline,
+                        'course_size' => $course_size,
                         'nombre' => $course_name,
                         'imagen' => $course->imagen,
                         'porcentaje' => $course_status['progress_percentage'],
@@ -817,7 +827,8 @@ class Course extends BaseModel
                         'descripcion' => $course->description,
                         'orden' => $course_position,
                         'imagen' => $course->imagen,
-                        'is_offline' => boolval($course->is_offline),
+                        'is_offline' => $course_is_offline,
+                        'course_size' => $course_size,
                         'requisito_id' => NULL,
                         'c_evaluable' => 0,
                         'disponible' => true,
@@ -847,7 +858,8 @@ class Course extends BaseModel
                         'descripcion' => $course->description,
                         'orden' => $course_position,
                         'imagen' => $course->imagen,
-                        'is_offline' => boolval($course->is_offline),
+                        'is_offline' => $course_is_offline,
+                        'course_size' => $course_size,
                         'c_evaluable' => $course->assessable,
                         'disponible' => $course_status['available'],
                         'status' => $course_status['status'],
