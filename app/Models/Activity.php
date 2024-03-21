@@ -13,6 +13,8 @@ class Activity extends BaseModel
         'description',
         'position',
         'active',
+        'qualified',
+        'required',
         'type_id',
         'model_id',
         'model_type',
@@ -25,7 +27,9 @@ class Activity extends BaseModel
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'qualified' => 'boolean',
+        'required' => 'boolean'
     ];
 
     public function stage()

@@ -83,6 +83,11 @@ class Process extends BaseModel
         return $this->instructors()->where('type','direct');
     }
 
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'process_subworkspace', 'process_id', 'subworkspace_id');
+    }
+
     protected function getRepositoryMediaProcess() {
 
         $session = session()->all();
@@ -120,12 +125,16 @@ class Process extends BaseModel
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
         $workspace = get_current_workspace();
+        $modules_id = $data['modules'] ?? current_subworkspaces_id();
 
         $repository_media_process = $this->getRepositoryMediaProcess();
-        $processes_query = Process::with(['instructions', 'segments', 'stages','instructors_direct' => function($i){
+        $processes_query = Process::with(['instructions', 'segments', 'stages', 'subworkspaces','instructors_direct' => function($i){
                                         $i->select('id','fullname','document', 'name', 'lastname', 'surname');
                                     }])
-                                    ->where('workspace_id', $workspace->id);
+                                    ->whereHas('subworkspaces', function ($j) use ($modules_id) {
+                                        $j->whereIn('subworkspace_id', $modules_id);
+                                    });
+                                    // ->where('workspace_id', $workspace->id);
 
         if(request()->sortBy){
             if (request()->sortBy == 'title_process')
@@ -225,7 +234,17 @@ class Process extends BaseModel
                 $process->update($data);
             else:
                 $process = self::create($data);
+                foreach ($data['subworkspaces'] as  $subworkspace) {
+                    SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
+                        'subworkspace_id'=>$subworkspace,
+                        'process_id' => $process->id
+                    ],[
+                        'subworkspace_id'=>$subworkspace,
+                    ]);
+                }
             endif;
+
+            $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
 
 
             //instructions

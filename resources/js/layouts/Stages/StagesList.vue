@@ -577,7 +577,6 @@ export default {
                 asignar: false,
                 subida_masiva: false
             },
-
             modalActivityTareas: {
                 ref: 'ModalActivityTareas',
                 open: false,

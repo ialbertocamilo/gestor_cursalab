@@ -561,7 +561,8 @@ export default {
                     'color_map_even' : item.color_map_even,
                     'config_completed' : item.config_completed ? item.config_completed : false,
                     'color_map_odd' : item.color_map_odd,
-                    'active': item.active
+                    'active': item.active,
+                    'subworkspaces': item.subworkspaces
                 };
 
                 const fields = ['title',
@@ -583,7 +584,8 @@ export default {
                                 'image_guia',
                                 'icon_finished',
                                 'icon_finished_name',
-                                'image_guide_name'
+                                'image_guide_name',
+                                'subworkspaces'
                             ];
                 const file_fields = [
                                 'logo',

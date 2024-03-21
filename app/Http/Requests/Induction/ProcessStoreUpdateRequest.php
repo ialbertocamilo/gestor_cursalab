@@ -25,6 +25,7 @@ class ProcessStoreUpdateRequest extends FormRequest
     {
         return [
             'title' => 'required',
+            'subworkspaces' => 'required',
             'description' => 'nullable',
             'limit_absences' => 'boolean',
             'count_absences' => 'boolean',
