@@ -127,7 +127,7 @@ class RestQuizController extends Controller
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 
-    public function cargar_preguntas($topic_id,$is_offline=false)
+    public function cargar_preguntas($topic_id,Request $request)
     {
         $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
         $code_modality = $topic->course->modality->code;
@@ -161,7 +161,7 @@ class RestQuizController extends Controller
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if(!$is_offline){
+        if(!$request->is_offline){
             if ($row->isOutOfTimeForQuiz() && $is_qualified && $code_modality == 'asynchronous'){
                 return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
             }
