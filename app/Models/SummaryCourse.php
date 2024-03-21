@@ -172,7 +172,7 @@ class SummaryCourse extends Summary
     }
 
 
-    protected function updateUserData($course, $user = null, $update_attempts = true,$update_certification_data=true,$notSaveData=false)
+    protected function updateUserData($course, $user = null, $update_attempts = true,$update_certification_data=true,$notSaveData=false,$certification_issued_at=null)
     {
         $user = $user ?? auth()->user();
         $row_course = SummaryCourse::getCurrentRow($course, $user);
@@ -252,13 +252,13 @@ class SummaryCourse extends Summary
 //                    info("3");
                     $status = 'aprobado';
                     if($update_certification_data){
-                        $course_data['certification_issued_at'] = now();
+                        $course_data['certification_issued_at'] = $certification_issued_at ? $certification_issued_at : now();
 
                         // If user confirmation is not necessary,
                         // accepts certificate automatically
 
                         if (!$course->user_confirms_certificate) {
-                            $course_data['certification_accepted_at'] = now();
+                            $course_data['certification_accepted_at'] = $certification_issued_at ? $certification_issued_at : now();
                         }
                     }
                 }
@@ -267,13 +267,13 @@ class SummaryCourse extends Summary
 
                 $status = 'aprobado';
                 if($update_certification_data){
-                    $course_data['certification_issued_at'] = now();
+                    $course_data['certification_issued_at'] =$certification_issued_at ? $certification_issued_at : now();
 
                     // If user confirmation is not necessary,
                     // accepts certificate automatically
 
                     if (!$course->user_confirms_certificate) {
-                        $course_data['certification_accepted_at'] = now();
+                        $course_data['certification_accepted_at'] = $certification_issued_at ? $certification_issued_at : now();
                     }
                 }
             }
