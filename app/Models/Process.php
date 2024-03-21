@@ -281,8 +281,8 @@ class Process extends BaseModel
 
     protected function getProcessAssistantsList(Process $process, bool $is_paginated = true, bool $absences = false,$by_supervisor=null)
     {
+        session()->put('platform', 'induccion');
         $course = new Course();
-
         $process->load('segments');
         $values_criterio_user = [];
         if($by_supervisor){
