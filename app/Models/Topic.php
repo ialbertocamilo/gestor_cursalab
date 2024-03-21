@@ -167,7 +167,7 @@ class Topic extends BaseModel
 
     protected function storeRequest($data, $tema = null)
     {
-        try {
+        // try {
             DB::beginTransaction();
 
             $isNew = false;
@@ -262,11 +262,11 @@ class Topic extends BaseModel
 
             DB::commit();
             return $tema;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            info($e);
-            return $e;
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     info($e);
+        //     return $e;
+        // }
     }
 
     /**
