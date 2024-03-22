@@ -67,7 +67,8 @@ class RestProcessController extends Controller
         if($user_summary) {
             $user_summary->status_id = $status?->id;
             $user_summary->completed_instruction = true;
-            $user_summary->first_entry = now()->format('y-m-d H:i:s');
+            if(is_null($user_summary->first_entry))
+                $user_summary->first_entry = now()->format('y-m-d H:i:s');
             $user_summary->save();
         }
         else {
