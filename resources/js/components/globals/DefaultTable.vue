@@ -323,17 +323,27 @@
                          @click="doAction({type: 'action', method_name: 'status'}, item)"
                          style="cursor: pointer">
                          <div v-if="item.has_space_offline !== undefined && !item.has_space_offline">
-                            <i 
-                                style="position:relative" 
-                                class="row-icon fa fa-circle"
-                            >
-                                <i
-                                    class="mdi mdi-cloud-remove"
-                                    style="font-size: 12px !important; position: absolute; top: -4px; color: red !important; right: -8px;"                                >
-                                </i>
-                            </i>
-                             <br> <span class="table-default-icon-title" v-text="'Activo '"/><br>
-                             <span style="font-size: 11px;color: #6C757D;">No visible sin conexión</span>
+                            <v-tooltip left attach >
+                                <template v-slot:activator="{ on, attrs }">
+                                    <span
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <i 
+                                            style="position:relative" 
+                                            class="row-icon fa fa-circle"
+                                        >
+                                            <i
+                                                class="mdi mdi-cloud-remove"
+                                                style="font-size: 12px !important; position: absolute; top: -4px; color: red !important; right: -8px;"                                >
+                                            </i>
+                                        </i>
+                                        <br> <span class="table-default-icon-title" v-text="'Activo '"/><br>
+    
+                                    </span>
+                                </template>
+                                <span style="font-size: 11px;color: #6C757D;width: 150px;">No visible sin conexión</span>
+                            </v-tooltip>
                          </div>
                          <div v-else>
                             <i class="row-icon fa fa-circle"/>
