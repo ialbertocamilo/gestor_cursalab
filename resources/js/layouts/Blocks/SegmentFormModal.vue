@@ -150,13 +150,17 @@
                 />
 
                 <SegmentMultipleCoursesModal
+                    :originCourseId="model_id"
+                    :subworkspacesIds="subworkspacesIds"
                     :options="multipleCoursesModalOptions"
                     :ref="multipleCoursesModalOptions.ref"
                     @onConfirm="closeFormModal(multipleCoursesModalOptions)"
                     @onCancel="closeFormModal(multipleCoursesModalOptions)"
                 />
             </v-form>
-            <div class="additional-text-wrapper">
+            <div
+                v-if="isCourseSegmentation()"
+                class="additional-text-wrapper">
                 <a href="javascript:"
                    @click="multipleCoursesModalOptions.open = true">
                     Guardar y asignar segmentación a otros cursos
@@ -243,6 +247,7 @@ export default {
             courseModules: [],
             modulesSchools: [],
             modulesIds: [],
+            subworkspacesIds: [],
 
             modalInfoOptions: {
                 ref: 'SegmentAlertModal',
@@ -597,6 +602,7 @@ export default {
 
                 if (response.data.data) {
                     this.modulesIds = response.data.data.modulesIds
+                    this.subworkspacesIds = response.data.data.subworkspacesIds
                     this.modulesSchools = response.data.data.modulesSchools
 
                     // When there is no criteria selected, adds
