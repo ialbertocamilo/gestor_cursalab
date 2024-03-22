@@ -16,7 +16,9 @@ Route::controller(RestProcessController::class)->group(function () {
     Route::post('/supervisor/processes/save_attendance_massive', 'saveAttendanceMassive');
 
     // api para colaborador
-    Route::get('/user/processes/{process}/data', 'getProcess');
+    Route::get('/user/processes/{process}/data', 'getUserProcess');
+    Route::get('/user/processes/{process}/data/instructions', 'getUserProcessInstructions');
+    Route::post('/user/processes/{process}/data/instructions/save', 'saveUserProcessInstructions');
 
     // momentaneo
     Route::get('/', 'getSupervisorProcesses');

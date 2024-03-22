@@ -32,6 +32,20 @@
                                         />
                                     </v-col>
                                 </v-row>
+                                <v-row>
+                                    <v-col cols="5">
+                                        <DefaultAutocomplete
+                                            dense
+                                            label="Asignar encuesta"
+                                            v-model="resource.poll"
+                                            :items="selects.polls"
+                                            item-text="name"
+                                            item-value="code"
+                                            :openUp="true"
+                                            clearable
+                                        />
+                                    </v-col>
+                                </v-row>
 
                                 <DefaultModalSectionExpand
                                     title="Avanzado"
@@ -50,6 +64,7 @@
                                                     item-text="name"
                                                     item-value="code"
                                                     :openUp="true"
+                                                    clearable
                                                 />
                                             </v-col>
                                         </v-row>
@@ -108,14 +123,16 @@ export default {
                 name: '',
                 titulo: '',
                 description: '',
-                requirement: null
+                requirement: null,
+                poll: null
             },
             resource: {},
             sections: {
                 showSectionAdvanced: {status: false},
             },
             selects: {
-                requirement_list: [{'code':'none', 'name': 'Sin requisito'}]
+                requirement_list: [{'code':'none', 'name': 'Sin requisito'}],
+                polls: []
             },
             rules: {
                 titulo: this.getRules(['required', 'max:255']),
@@ -143,6 +160,7 @@ export default {
             handler(n, o) {
                 let vue = this;
                 setTimeout(() => {
+                    vue.encuesta_id = vue.resource.poll ? vue.resource.poll : vue.resource.poll_id
                     vue.options.confirmDisabled = !vue.validateForm('projectForm')
                 }, 100);
             },
@@ -155,6 +173,10 @@ export default {
             vue.resetSelects()
             vue.resetValidation()
             vue.$refs.projectForm.reset()
+
+            vue.encuesta_id = 0
+            vue.resource = {}
+            vue.stepper_box = 1
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -290,6 +312,9 @@ export default {
                     // vue.resource.description = _data.activity.description;
                     vue.resource.poll_id = _data.poll.id
                     vue.encuesta_id = _data.poll.id
+                    vue.resource.poll = _data.poll.id
+                    vue.resource.requirement = _data.activity.activity_requirement_id
+                    vue.selects.polls = _data.polls
                 })
                 console.log(2);
             } else {
@@ -308,6 +333,7 @@ export default {
             vue.$http.get(url)
                 .then(({data}) => {
                     vue.selects.requirement_list = data.data.requirements
+                    vue.selects.polls = data.data.polls
                 })
         },
         createFormData(method, validateForm) {

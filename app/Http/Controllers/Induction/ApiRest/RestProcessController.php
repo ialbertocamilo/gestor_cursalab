@@ -31,7 +31,63 @@ class RestProcessController extends Controller
         ];
         $apiResponse = Process::getUserProcessApi($data);
 
-        return response()->json($apiResponse, 200);
+        return $this->success($apiResponse);
+    }
+
+    public function getUserProcess(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return $this->success($apiResponse);
+    }
+
+    public function getUserProcessInstructions( Process $process )
+    {
+        $apiResponse = Process::getUserProcessOnlyInstructionsApi($process?->id);
+
+        return $this->success($apiResponse);
+    }
+
+    public function saveUserProcessInstructions( Process $process, Request $request )
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $status = Taxonomy::getFirstData('user-process', 'status', 'in-progress');
+
+        $user_summary = $user->summary_process()->where('process_id', $process->id)->first();
+
+        if($user_summary) {
+            $user_summary->status_id = $status?->id;
+            $user_summary->completed_instruction = true;
+            if(is_null($user_summary->first_entry))
+                $user_summary->first_entry = now()->format('y-m-d H:i:s');
+            $user_summary->save();
+        }
+        else {
+            $data = [
+                'user_id' => $user->id,
+                'process_id' => $process->id,
+                'status_id' => $status?->id,
+                'progress' => 0,
+                'absences' => 0,
+                'completed_instruction' => true,
+                'first_entry' => now()->format('y-m-d H:i:s')
+            ];
+            ProcessSummaryUser::create($data);
+        }
+
+        $apiResponse['error'] = false;
+        $apiResponse['message'] = 'La información del usuario se actualizó correctamente.';
+
+        return $this->success($apiResponse);
     }
 
     public function getSupervisorProcesses()
@@ -46,8 +102,8 @@ class RestProcessController extends Controller
 
         // return response()->json($apiResponse, 200);
         $response = [
-            'progress' => rand(30, 100),
-            'stages' => '03/10',
+            'progress' => 0,
+            'stages' => '0/5',
             'processes' => $apiResponse
         ];
         return $this->success($response);

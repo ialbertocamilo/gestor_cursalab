@@ -72,10 +72,10 @@
                                             />
                                         </v-col>
                                         <v-col cols="12" class="check_active">
-                                            <DefaultToggle v-model="resource.calificable" activeLabel="Calificable" inactiveLabel="Calificable" dense/>
+                                            <DefaultToggle v-model="resource.qualified" activeLabel="Calificable" inactiveLabel="Calificable" dense/>
                                         </v-col>
                                         <v-col cols="12" class="check_active">
-                                            <DefaultToggle v-model="resource.obligatorio" activeLabel="Obligatorio" inactiveLabel="Obligatorio" dense/>
+                                            <DefaultToggle v-model="resource.required" activeLabel="Obligatorio" inactiveLabel="Obligatorio" dense/>
                                         </v-col>
                                     </v-row>
                                 </v-col>
@@ -189,7 +189,7 @@
 
 
 <script>
-const fields = ['title', 'description', 'requirement', 'model_id', 'model_type', 'calificable', 'active', 'obligatorio', 'checklist_actividades' ];
+const fields = ['title', 'description', 'requirement', 'model_id', 'model_type', 'qualified', 'active', 'required', 'checklist_actividades' ];
 
 import draggable from 'vuedraggable'
 
@@ -288,8 +288,8 @@ export default {
                 id: null,
                 title: null,
                 active: false,
-                calificable: false,
-                obligatorio: false,
+                qualified: false,
+                required: false,
                 description: null,
                 requirement: null,
                 checklist_actividades: []
@@ -407,6 +407,9 @@ export default {
                     if (resource) {
                         vue.resource = Object.assign({}, vue.resource, _data.checklist)
                         vue.resource.activity_id = resource.id
+                        vue.resource.requirement = _data.activity.activity_requirement_id
+                        vue.resource.qualified = _data.activity.qualified
+                        vue.resource.required = _data.activity.required
                     }
 
                     console.log(vue.resource);

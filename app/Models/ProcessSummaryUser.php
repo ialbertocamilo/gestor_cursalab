@@ -11,12 +11,15 @@ class ProcessSummaryUser extends BaseModel
     protected $table = 'process_summary_users';
 
     protected $fillable = [
-        'user_id', 'process_id', 'status_id', 'absences', 'progress','enrolled_date'
+        'user_id', 'process_id', 'status_id', 'absences', 'progress', 'first_entry', 'completed_instruction','enrolled_date'
     ];
 
     // protected $casts = [
     //     'answers' => 'array',
     // ];
+    protected $casts = [
+        'completed_instruction' => 'boolean'
+    ];
 
     public $defaultRelationships = [
         'process_id' => 'activity',

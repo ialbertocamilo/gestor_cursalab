@@ -46,7 +46,7 @@ Route::controller(ActivityController::class)->group(function() {
     // Encuestas
     Route::post('/encuestas/store','EncuestasStore');
     Route::post('/encuestas/{activity}/update','EncuestasUpdate');
-    Route::get('/encuestas/form-selects', 'ActivitiesGetFormSelects');
+    Route::get('/encuestas/form-selects', 'EncuestasGetFormSelects');
     Route::get('/encuestas/edit/{activity}', 'editActivityEncuestas');
 
     // Evaluaciones

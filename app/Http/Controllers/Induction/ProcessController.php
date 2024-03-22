@@ -32,7 +32,16 @@ class ProcessController extends Controller
 
         return $this->success($data);
     }
+    public function getFormSelectsProcess()
+    {
+        $workspace = get_current_workspace();
 
+        $modules = Workspace::where('parent_id', $workspace?->id)
+            ->whereIn('id', current_subworkspaces_id())
+            ->select('id', 'name')->get();
+
+        return $this->success(compact('modules'));
+    }
     public function storeInline(Request $request)
     {
         $data = [ 'title' => $request->title ];

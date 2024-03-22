@@ -163,6 +163,11 @@ class Workspace extends BaseModel
         return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id')->withPivot('position');
     }
 
+    public function processes()
+    {
+        return $this->belongsToMany(Process::class, 'process_subworkspace', 'subworkspace_id')->withPivot('position');
+    }
+
     public function courses()
     {
         return $this->belongsToMany(Course::class);

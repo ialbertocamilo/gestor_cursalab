@@ -450,6 +450,10 @@ class ActivityController extends Controller
             'model_id' => $checklist?->id ?? null,
             'model_type' => CheckList::class,
             'type_id' => $type_activity?->id ?? null,
+            'active' => $request->active ?? false,
+            'qualified' => ($request->qualified === 'true' or $request->qualified === true or $request->qualified === 1 or $request->qualified === '1'),
+            'required' => ($request->required === 'true' or $request->required === true or $request->required === 1 or $request->required === '1'),
+            'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
 
@@ -532,6 +536,9 @@ class ActivityController extends Controller
         $activity->description = $request->description;
         if($request->active)
             $activity->active = $request->active;
+        $activity->qualified = ($request->qualified === 'true' or $request->qualified === true or $request->qualified === 1 or $request->qualified === '1');
+        $activity->required = ($request->required === 'true' or $request->required === true or $request->required === 1 or $request->required === '1');
+        $activity->activity_requirement_id = $request->requirement;
         $activity->save();
         cache_clear_model(Activity::class);
 
@@ -576,6 +583,7 @@ class ActivityController extends Controller
             'model_type' => Poll::class,
             'type_id' => $type_activity?->id ?? null,
             'active' => false,
+            'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
 
@@ -606,6 +614,7 @@ class ActivityController extends Controller
 
         $activity->title = $request->titulo;
         $activity->description = $request->description;
+        $activity->activity_requirement_id = $request->requirement;
         if($request->active)
             $activity->active = $request->active;
         $activity->save();
@@ -626,7 +635,31 @@ class ActivityController extends Controller
         $poll = Poll::where('id', $activity?->model_id)->first();
         $response['poll'] = $poll;
         $response['activity'] = $activity;
-        // $response = [];
+
+        return $this->success($response);
+    }
+
+    public function EncuestasGetFormSelects(Process $process, Stage $stage)
+    {
+        $q_requisitos = Activity::select('id as code', 'title as name')->where('stage_id', $stage?->id);
+
+        $modules_id = current_subworkspaces_id();
+
+        $processes_query = Process::select('id')
+                                    ->whereHas('subworkspaces', function ($j) use ($modules_id) {
+                                        $j->whereIn('subworkspace_id', $modules_id);
+                                    })->pluck('id')->toArray();
+
+        $polls = Activity::whereHas('stage', function($s) use ($processes_query){
+                                    $s->whereIn('process_id', $processes_query);
+                                })
+                                ->where('model_type', Poll::class)
+                                ->select('model_id as code', 'title as name')
+                                ->get();
+
+        $requirements = $q_requisitos->orderBy('position')->get();
+
+        $response = compact('requirements', 'polls');
 
         return $this->success($response);
     }

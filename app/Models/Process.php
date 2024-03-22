@@ -83,6 +83,11 @@ class Process extends BaseModel
         return $this->instructors()->where('type','direct');
     }
 
+    public function subworkspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'process_subworkspace', 'process_id', 'subworkspace_id');
+    }
+
     protected function getRepositoryMediaProcess() {
 
         $session = session()->all();
@@ -120,12 +125,16 @@ class Process extends BaseModel
         $filtro = $data['filtro'] ?? $data['q'] ?? '';
 
         $workspace = get_current_workspace();
+        $modules_id = $data['modules'] ?? current_subworkspaces_id();
 
         $repository_media_process = $this->getRepositoryMediaProcess();
-        $processes_query = Process::with(['instructions', 'segments', 'stages','instructors_direct' => function($i){
+        $processes_query = Process::with(['instructions', 'segments', 'stages', 'subworkspaces','instructors_direct' => function($i){
                                         $i->select('id','fullname','document', 'name', 'lastname', 'surname');
                                     }])
-                                    ->where('workspace_id', $workspace->id);
+                                    ->whereHas('subworkspaces', function ($j) use ($modules_id) {
+                                        $j->whereIn('subworkspace_id', $modules_id);
+                                    });
+                                    // ->where('workspace_id', $workspace->id);
 
         if(request()->sortBy){
             if (request()->sortBy == 'title_process')
@@ -225,7 +234,17 @@ class Process extends BaseModel
                 $process->update($data);
             else:
                 $process = self::create($data);
+                foreach ($data['subworkspaces'] as  $subworkspace) {
+                    SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
+                        'subworkspace_id'=>$subworkspace,
+                        'process_id' => $process->id
+                    ],[
+                        'subworkspace_id'=>$subworkspace,
+                    ]);
+                }
             endif;
+
+            $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
 
 
             //instructions
@@ -311,11 +330,17 @@ class Process extends BaseModel
     }
     protected function getProcessesAssigned( $user )
     {
-        $supervisor = $user->isSupervisor();
-        if($supervisor)
-            $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
-        else
-            $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
+        $processes_assigned = [];
+
+        if($user->type_id == $type_employee_onboarding?->id)
+        {
+            $supervisor = count($user->processes);
+            if($supervisor)
+                $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
+            else
+                $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        }
         return $processes_assigned;
     }
 
@@ -454,56 +479,60 @@ class Process extends BaseModel
         $user = $data['user'];
 
         $process_id = $data['process'];
-        // $summary_user_activities = ProcessSummaryActivity::whereHas('topic.course', function ($q) use ($user_courses) {
-        //     $q->whereIn('id', $user_courses->pluck('id'))->where('active', ACTIVE)->orderBy('position');
-        // })
-        // ->with('status:id,code')
-        // ->where('user_id', $user->id)
-        // ->get();
-        $user->load('summary_process');
-
-        $process = Process::with(['instructions','stages.activities.type','stages.activities.requirement'])
-                    ->where('id', $process_id)
-                    ->first();
-        // if($process)
-        // {
-        //     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where()->first();
-        // }
         $current_date = now()->startOfDay();
+
+        $process = Process::where('id', $process_id)
+                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd')
+                    ->first();
         if($process)
         {
-            $total_activities = 0;
+            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction')->first();
+            $process->completed_instruction = $user_summary?->completed_instruction ?? false;
             $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
-            foreach ($process->stages as $index => $stage) {
-                // $stage->status = $index == 0 ? 'progress' : 'locked';
-                $stage->status = 'locked';
-                if($user_summary_process->enrolled_date){
-                    $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
-                    $diff_days = $current_date->diffInDays($enrolled_date); 
-                    if($diff_days >= $stage->duration){
-                        $stage->status = 'progress';
+            $total_activities = 0;
+            $process->stages = $process->stages()->select('id', 'duration', 'position', 'title')->get();
+            if($process->stages->count() > 0) {
+                foreach ($process->stages as $index => $stage) {
+                    // $stage->status = $index == 0 ? 'progress' : 'locked';
+                    $stage->status = 'locked';
+                    if($user_summary_process?->enrolled_date){
+                        $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
+                        $diff_days = $current_date->diffInDays($enrolled_date); 
+                        if($diff_days >= $stage->duration){
+                            $stage->status = 'progress';
+                        }
                     }
-                }
-                $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
-                foreach ($stage->activities as $activity) {
-                    $total_activities++;
-                    $activity->progress = 0;
-                    $activity->status = 'pending';
-                    $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
-                    if($exist) {
-                        $activity->status = $exist->status->code;
-                        $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
+                    $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
+                    $stage->activities = $stage->activities()
+                                                ->with(['type', 'requirement' => function($r){
+                                                    $r->select('id', 'model_id', 'type_id', 'title', 'description')
+                                                    ->with(['type']);
+                                                }])
+                                                ->select('id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->get();
+                    if($stage->activities->count() > 0) {
+                        foreach ($stage->activities as $activity) {
+                            $total_activities++;
+                            $activity->progress = 0;
+                            $activity->status = 'pending';
+                            $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
+                            if($exist) {
+                                $activity->status = $exist->status->code;
+                                $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
+                            }
+                            unset($activity->type_id);
+                            unset($activity->activity_requirement_id);
+                        }
                     }
                 }
             }
-
             $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
             $process->starts_at = $process->starts_at ? date('d-m-Y', strtotime($process->starts_at)) : null;
 
             $process->percentage = 0;
 
             $count_absences = $user_summary_process?->absences ?? 0;
-            $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : '-';
+            $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : null;
 
             $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
             $user_activities = ProcessSummaryActivity::where('user_id', $user->id)->where('status_id', $status_finished)->count();
@@ -512,9 +541,23 @@ class Process extends BaseModel
 
 
             $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
+
+            unset($process->limit_absences);
+            unset($process->absences);
+            unset($process->count_absences);
         }
 
-        return ['data'=> $process];
+        return $process;
+    }
+
+    protected function getUserProcessOnlyInstructionsApi( $process_id )
+    {
+        $process = Process::with(['instructions'])
+                    ->where('id', $process_id)
+                    ->select('id', 'title' , 'description', 'logo', 'background_web', 'background_mobile', 'color', 'image_guia')
+                    ->first();
+
+        return $process;
     }
 
 }

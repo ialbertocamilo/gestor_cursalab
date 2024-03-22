@@ -18,6 +18,7 @@ class Campaign extends Model
     // local atributes
     protected $fillable = [ 'id', 'workspace_id', 'title','description','file_image', 'start_date', 'end_date', 'subject', 'body', 'file_banner','color', 'question', 'porcent', 'stage_id', 'stage_content','stage_postulate','stage_votation', 'state_postulate_support','state'];
 
+
     protected $casts = [
         'start_date' => 'datetime:d/m/Y', //datetime:d/m/Y h:i:s
         'end_date' => 'datetime:d/m/Y',
