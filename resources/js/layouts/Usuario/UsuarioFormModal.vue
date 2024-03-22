@@ -203,7 +203,7 @@
 
                 <v-row>
                     <v-col cols="3" class="rem-m">
-                        <DefaultToggle v-model="resource.active" dense 
+                        <DefaultToggle v-model="resource.active" dense
                                 active-label="Usuario activo" inactive-label="Usuario inactivo" @onChange="modalStatusEdit" />
                     </v-col>
                     <v-col cols="9">
@@ -360,7 +360,7 @@ export default {
                 name: this.getRules(['required', 'max:100', 'text']),
                 lastname: this.getRules(['required', 'max:100', 'text']),
                 surname: this.getRules(['required', 'max:100', 'text']),
-                document: this.getRules(['required', 'min:6']),
+                document: this.getRules(['required', 'min:5']),
                 password: this.getRules(['required', 'min:8']),
                 email: this.getRules(['required','min:4' ,'email']),
                 password_not_required: this.getRules([]),
