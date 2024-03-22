@@ -34,6 +34,42 @@ class RestProcessController extends Controller
         return response()->json($apiResponse, 200);
     }
 
+    public function getUserProcess(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
+    public function getUserProcessInstructions( Process $process )
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
+    public function saveUserProcessInstructions( Process $process, Request $request )
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
     public function getSupervisorProcesses()
     {
         $user = Auth::user();

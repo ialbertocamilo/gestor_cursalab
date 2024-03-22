@@ -123,7 +123,11 @@ class StageController extends Controller
      */
     public function status(Process $process, Stage $stage, Request $request)
     {
-        $stage->update(['active' => !$stage->active]);
+        $active = $stage->active;
+        $stage->update(['active' => !$active]);
+        foreach ($stage->activities as $activity) {
+            $activity->update(['active' => !$active]);
+        }
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }

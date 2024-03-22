@@ -328,27 +328,6 @@
             </v-card-text>
         </v-card>
 
-        <!--
-        <DialogConfirm
-            v-model="confirmationUpdateTitleModal.open"
-            :options="confirmationUpdateTitleModal"
-            width="408px"
-            title="Cambio de nombre de etapa"
-            subtitle="¡Estás por cambiar el nombre de la etapa!"
-            @onConfirm="confirmationUpdateTitleModal.open = false"
-            @onCancel="confirmationUpdateTitleModal.open = false"
-        />
-
-        <DialogConfirm
-            v-model="confirmationUpdateDurationModal.open"
-            :options="confirmationUpdateDurationModal"
-            width="408px"
-            title="Cambio de fecha de etapa"
-            subtitle="¡Estás por cambiar la fecha de la etapa!"
-            @onConfirm="confirmationUpdateDurationModal.open = false"
-            @onCancel="confirmationUpdateDurationModal.open = false"
-        />
-        -->
         <DialogConfirm
             v-model="deleteActivityModal.open"
             :options="deleteActivityModal"
@@ -356,7 +335,7 @@
             title="Eliminar actividad"
             subtitle="¡Estás por eliminar esta actividad!"
             @onConfirm="confirmDeleteActivityModal"
-            @onCancel="deleteActivityModal.open = false"
+            @onCancel="closeFormModal(deleteActivityModal)"
         />
 
         <DialogConfirm
@@ -366,7 +345,7 @@
             title="Editar actividad"
             subtitle="¡Estás por cambiar de estado esta actividad!"
             @onConfirm="confirmStatusActivityModal"
-            @onCancel="statusActivityModal.open = false"
+            @onCancel="closeFormModal(statusActivityModal)"
         />
 
         <DialogConfirm
@@ -374,9 +353,19 @@
             :options="statusStageModal"
             width="408px"
             title="Editar etapa"
-            subtitle="¡Estás por cambiar de estado esta actividad!"
+            subtitle="¡Estás por cambiar de estado esta etapa!"
             @onConfirm="confirmStatusStageModal"
             @onCancel="closeFormModal(statusStageModal)"
+        />
+
+        <DialogConfirm
+            v-model="statusValidateStageModal.open"
+            :options="statusValidateStageModal"
+            width="408px"
+            title="Editar etapa"
+            subtitle="¡Estás por cambiar de estado esta etapa!"
+            @onConfirm="closeFormModal(statusValidateStageModal)"
+            @onCancel="closeFormModal(statusValidateStageModal)"
         />
 
         <DialogConfirm
@@ -386,15 +375,15 @@
             title="Eliminar etapa"
             subtitle="¡Estás por eliminar esta etapa!"
             @onConfirm="confirmDeleteStageModal"
-            @onCancel="deleteStageModal.open = false"
+            @onCancel="closeFormModal(deleteStageModal)"
         />
 
         <DialogConfirm
             v-model="updatePercentageActivityModal.open"
             :options="updatePercentageActivityModal"
             width="408px"
-            @onConfirm="updatePercentageActivityModal.open = false"
-            @onCancel="updatePercentageActivityModal.open = false"
+            @onConfirm="closeFormModal(updatePercentageActivityModal)"
+            @onCancel="closeFormModal(updatePercentageActivityModal)"
         />
 
         <DialogConfirm
@@ -403,8 +392,8 @@
             width="408px"
             title="Cambio de tipo de actividad"
             subtitle="¡Estás por cambiar el tipo de actividad seleccionada!"
-            @onConfirm="changeTypeActivityModal.open = false"
-            @onCancel="changeTypeActivityModal.open = false"
+            @onConfirm="closeFormModal(changeTypeActivityModal)"
+            @onCancel="closeFormModal(changeTypeActivityModal)"
         />
 
         <DefaultDeleteModal
@@ -427,7 +416,7 @@
             v-model="modalEditStage.open"
             width="500px"
             :process_id="process_id"
-            @onCancel="modalEditStage.open = false"
+            @onCancel="closeFormModal(modalEditStage)"
             @onConfirm="saveEditStage(true)"
         />
 
@@ -437,7 +426,7 @@
             v-model="modalQualificationStage.open"
             width="400px"
             :process_id="process_id"
-            @onCancel="modalQualificationStage.open = false"
+            @onCancel="closeFormModal(modalQualificationStage)"
             @onConfirm="saveQualificationStages"
         />
 
@@ -448,7 +437,7 @@
             :process_id="modalSelectActivity.process_id"
             :stage_id="modalSelectActivity.stage_id"
             :school_id="modalSelectActivity.school_id"
-            @onCancel="modalSelectActivity.open = false"
+            @onCancel="closeFormModal(modalSelectActivity)"
             @selectActivityModal="selectActivityModal"
         />
 
@@ -642,35 +631,6 @@ export default {
                 etapa_text: ''
             },
 
-            // confirmationUpdateTitleModal: {
-            //     open: false,
-            //     title_modal: 'Cambio de nombre de etapa',
-            //     type_modal: 'confirm',
-            //     content_modal: {
-            //         confirm: {
-            //             title: '¡Estás por cambiar el nombre de la etapa!',
-            //             details: [
-            //                 'Esto afectará en la visualización de esta etapa.',
-            //                 'Esto afectará al nombre indicado en el diploma.'
-            //             ],
-            //         }
-            //     },
-            // },
-
-            // confirmationUpdateDurationModal: {
-            //     open: false,
-            //     title_modal: 'Cambio de fecha de etapa',
-            //     type_modal: 'confirm',
-            //     content_modal: {
-            //         confirm: {
-            //             title: '¡Estás por cambiar la fecha de la etapa!',
-            //             details: [
-            //                 'Esto afectará los tiempos de visualización de esta etapa y las siguientes.'
-            //             ],
-            //         }
-            //     },
-            // },
-
             deleteActivityModal: {
                 open: false,
                 title_modal: 'Eliminar actividad',
@@ -694,6 +654,20 @@ export default {
                         title: '¡Estás por actualizar el estado a esta actividad!',
                         details: [
                             'Los datos de la actividad no se podrán recuperar.'
+                        ],
+                    }
+                },
+            },
+
+            statusValidateStageModal: {
+                open: false,
+                title_modal: 'No se puede activar esta etapa',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Debes tener al menos 4 actividades asignada por etapa!',
+                        details: [
+                            'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
                         ],
                     }
                 },
@@ -882,9 +856,7 @@ export default {
                         stage.activities.forEach(element => {
                             sum_act += parseFloat(element.percentage_ev)
                         });
-                        console.log(sum_act);
                         if(sum_act > 100) {
-                            console.log('mucho');
                             vue.updatePercentageActivityModal.open = true
                             this.$nextTick(() => {
                                 activity.percentage_ev = 0
@@ -985,17 +957,6 @@ export default {
 
             vue.openFormModal(this.modalSelectActivity)
         },
-        // updateValueStage( input, item )
-        // {
-        //     let vue = this;
-        //     // console.log(item.new != undefined);
-        //     if(vue.positioned_stage[input] != item[input]) {
-        //         if(input == 'duration')
-        //             vue.confirmationUpdateDurationModal.open = true
-        //         else if(input == 'title')
-        //             vue.confirmationUpdateTitleModal.open = true
-        //     }
-        // },
         async deleteStage( stage, position )
         {
             console.log(stage);
@@ -1003,15 +964,6 @@ export default {
             let vue = this;
             vue.deleteStageModal.open = true
             vue.deleteStageModal.stage_id = stage.id
-            // // vue.openFormModal(deleteStageModal,stage,'delete','Cambio de estado de un beneficio')
-            // vue.deleteStageModal.open = true;
-
-            // await vue.$refs[vue.deleteStageModal.ref].loadData(rowData);
-            // // await vue.$refs[vue.deleteStageModal.ref].resetValidation();
-
-            // vue.$nextTick(() => {
-            //     vue.$refs[vue.deleteStageModal.ref].loadSelects();
-            // });
         },
         confirmDeleteStageModal()
         {
@@ -1179,40 +1131,48 @@ export default {
         {
             console.log(stage);
             let vue = this;
-            vue.statusStageModal.open = true
-            vue.statusStageModal.status_item_modal = Boolean(stage.active)
-            vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
-            vue.statusStageModal.stage_id = stage.id
 
-            if(stage.activities.length < 3) {
-                vue.statusStageModal.content_modal = {
-                    inactive: {
-                        title: '¡Debes tener al menos 4 actividades asignada por etapa!',
-                        details: [
-                            'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
-                        ],
-                    },
-                    active: {
-                        title: '¡Debes tener al menos 4 actividades asignada por etapa!',
-                        details: [
-                            'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
-                        ]
-                    }
-                }
+            if(stage.active) {
+                vue.statusStageModal.stage_id = stage.id
+                vue.statusStageModal.open = true
+                vue.statusStageModal.status_item_modal = Boolean(stage.active)
+                vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             }
             else {
-                vue.statusStageModal.content_modal = {
-                    inactive: {
-                        title: '¡Estas por desactivar una etapa!',
-                        details: [
-                            'Recuerda que al desactivar una etapa todas las actividades que estén enlazadas tambien serán desactivadas.'
-                        ],
-                    },
-                    active: {
-                        title: '¡Estas por activar una etapa!',
-                        details: [
-                            'Recuerda que al activar una etapa todas las actividades que estén enlazadas tambien serán activadas.'
-                        ]
+                if(stage.activities.length < 3) {
+                    vue.statusValidateStageModal.open = true
+                    vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
+                    vue.statusValidateStageModal.content_modal = {
+                        confirm: {
+                            title: '¡Debes tener al menos 4 actividades asignada por etapa!',
+                            details: [
+                                'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
+                            ],
+                        }
+                    }
+                }
+                else {
+                    let sum_act = 0;
+                    stage.activities.forEach(element => {
+                        sum_act += parseFloat(element.percentage_ev)
+                    });
+                    if(sum_act < 100) {
+                        vue.statusValidateStageModal.open = true
+                        vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
+                        vue.statusValidateStageModal.content_modal = {
+                            confirm: {
+                                title: '¡El porcentaje indicado no suma al 100% en esta etapa!',
+                                details: [
+                                    'Recuerda que por cada etapa la suma de los porcentajes debe ser de 100% para que este activa.'
+                                ],
+                            }
+                        }
+                    }
+                    else {
+                        vue.statusStageModal.stage_id = stage.id
+                        vue.statusStageModal.open = true
+                        vue.statusStageModal.status_item_modal = Boolean(stage.active)
+                        vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
                     }
                 }
             }

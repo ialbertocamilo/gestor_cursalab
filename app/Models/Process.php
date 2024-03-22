@@ -316,11 +316,17 @@ class Process extends BaseModel
     // Api
     protected function getProcessesAssigned( $user )
     {
-        $supervisor = $user->isSupervisor();
-        if($supervisor)
-            $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
-        else
-            $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
+        $processes_assigned = [];
+
+        if($user->type_id == $type_employee_onboarding?->id)
+        {
+            $supervisor = count($user->processes);
+            if($supervisor)
+                $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
+            else
+                $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        }
         return $processes_assigned;
     }
 
