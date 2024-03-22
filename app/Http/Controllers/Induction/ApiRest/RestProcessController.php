@@ -31,7 +31,7 @@ class RestProcessController extends Controller
         ];
         $apiResponse = Process::getUserProcessApi($data);
 
-        return response()->json($apiResponse, 200);
+        return $this->success($apiResponse);
     }
 
     public function getUserProcess(Process $process)
@@ -43,19 +43,14 @@ class RestProcessController extends Controller
         ];
         $apiResponse = Process::getUserProcessApi($data);
 
-        return response()->json($apiResponse, 200);
+        return $this->success($apiResponse);
     }
 
     public function getUserProcessInstructions( Process $process )
     {
-        $user = Auth::user();
-        $data = [
-            'process' => $process?->id,
-            'user' => $user
-        ];
-        $apiResponse = Process::getUserProcessApi($data);
+        $apiResponse = Process::getUserProcessOnlyInstructionsApi($process?->id);
 
-        return response()->json($apiResponse, 200);
+        return $this->success($apiResponse);
     }
 
     public function saveUserProcessInstructions( Process $process, Request $request )
@@ -65,9 +60,33 @@ class RestProcessController extends Controller
             'process' => $process?->id,
             'user' => $user
         ];
-        $apiResponse = Process::getUserProcessApi($data);
+        $status = Taxonomy::getFirstData('user-process', 'status', 'in-progress');
 
-        return response()->json($apiResponse, 200);
+        $user_summary = $user->summary_process()->where('process_id', $process->id)->first();
+
+        if($user_summary) {
+            $user_summary->status_id = $status?->id;
+            $user_summary->completed_instruction = true;
+            $user_summary->first_entry = now()->format('y-m-d H:i:s');
+            $user_summary->save();
+        }
+        else {
+            $data = [
+                'user_id' => $user->id,
+                'process_id' => $process->id,
+                'status_id' => $status?->id,
+                'progress' => 0,
+                'absences' => 0,
+                'completed_instruction' => true,
+                'first_entry' => now()->format('y-m-d H:i:s')
+            ];
+            ProcessSummaryUser::create($data);
+        }
+
+        $apiResponse['error'] = false;
+        $apiResponse['message'] = 'La información del usuario se actualizó correctamente.';
+
+        return $this->success($apiResponse);
     }
 
     public function getSupervisorProcesses()
