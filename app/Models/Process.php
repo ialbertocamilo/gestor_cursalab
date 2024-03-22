@@ -295,6 +295,20 @@ class Process extends BaseModel
     }
 
     // Api
+    protected function syncEnrolledDateProcess($user){
+        $processes = Process::getProcessesAssigned($user);
+        foreach ($processes as $process_id) {
+            ProcessSummaryUser::enrolledProcess($user->id,$process_id);
+        }
+    }
+    protected function setUsersToUpdateBackground($process_id){
+        $course = new Course();
+        $process = Process::find($process_id);
+        $users_id =$course->usersSegmented($process->segments,'users_id');
+        if(count($users_id)>0){
+            Summary::updateUsersByCourse($process,$users_id,false,false,'segmented',send_notification:false);
+        }
+    }
     protected function getProcessesAssigned( $user )
     {
         $supervisor = $user->isSupervisor();
@@ -455,12 +469,21 @@ class Process extends BaseModel
         // {
         //     $exist = ProcessSummaryActivity::where('user_id', $user->id)->where()->first();
         // }
-
+        $current_date = now()->startOfDay();
         if($process)
         {
             $total_activities = 0;
+            $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             foreach ($process->stages as $index => $stage) {
-                $stage->status = $index == 0 ? 'progress' : 'locked';
+                // $stage->status = $index == 0 ? 'progress' : 'locked';
+                $stage->status = 'locked';
+                if($user_summary_process->enrolled_date){
+                    $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
+                    $diff_days = $current_date->diffInDays($enrolled_date); 
+                    if($diff_days >= $stage->duration){
+                        $stage->status = 'progress';
+                    }
+                }
                 $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                 foreach ($stage->activities as $activity) {
                     $total_activities++;
@@ -479,7 +502,7 @@ class Process extends BaseModel
 
             $process->percentage = 0;
 
-            $count_absences = $user->summary_process()->where('process_id', $process->id)->first()?->absences ?? 0;
+            $count_absences = $user_summary_process?->absences ?? 0;
             $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : '-';
 
             $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
