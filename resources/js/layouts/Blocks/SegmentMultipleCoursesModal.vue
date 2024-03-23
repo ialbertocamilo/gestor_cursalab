@@ -19,7 +19,7 @@
                 <v-col cols="5">
                     <DefaultInput
                         clearable dense
-                        v-model="filters.q"
+                        v-model="search"
                         label="Buscar cursos por nombre o ID"
                         @onEnter=""
                         @clickAppendIcon=""
@@ -40,19 +40,21 @@
                         @scroll="handleScroll()"
                         class="courses-list">
 
-                        <div class="container p-0">
-                            <div  v-for="course of courses"
+                        <div v-if="coursesListIsVisible"
+                            class="container p-0">
+                            <div  v-for="course of currentCollection"
                                   :key="course.id" class="row course">
-                                <v-col cols="8"
+                                <v-col cols="7"
                                        class="d-flex pl-0 justify-content-start align-items-center">
 
                                     <v-checkbox
                                         class="my-0"
                                         label=""
                                         color="primary"
-                                        v-model="checked"
+                                        v-model="course.selected"
                                         value="selected"
                                         hide-details="false"
+                                        @change="updateSegmentacionAlert()"
                                     />
 
                                     <v-icon
@@ -65,8 +67,8 @@
                                         {{ course.name }}
                                     </span>
                                 </v-col>
-                                <v-col cols="1"
-                                       class="d-flex justify-content-end align-items-center">
+                                <v-col cols="2"
+                                       class="d-flex justify-content-start align-items-center">
                                     ID: {{ course.id }}
                                 </v-col>
                                 <v-col
@@ -75,27 +77,40 @@
                                     <div
                                         class="segmentation-alert"
                                         :class="{
-                                                    filled: n % 2 === 0,
-                                                    outline: n % 2 !== 0
+                                                    filled: course.isSegmented,
+                                                    outline: !course.isSegmented
                                                 }">
                                         <v-icon
                                             size="15"
-                                            :color="'#fff'"
+                                            :color="course.segmented ? '#5358E8' : '#fff'"
                                             class="ml-3 mr-3">
                                             mdi-account-group
                                         </v-icon>
 
                                         <v-icon
+                                            v-if="course.isSegmented"
                                             size="12"
                                             :color="'white'"
                                             class="ok-icon">
                                             mdi-check-circle
                                         </v-icon>
-                                        <!--                                                <v-icon class="alert-icon">-->
-                                        <!--                                                    mdi-alert-->
-                                        <!--                                                </v-icon>-->
-                                        <span class="mr-3">
+
+                                        <v-icon
+                                            v-if="!course.isSegmented"
+                                            size="12"
+                                            :color="'#5358E8'"
+                                            class="alert-icon">
+                                            mdi-alert
+                                        </v-icon>
+                                        <span
+                                            v-if="!course.isSegmented"
+                                            class="mr-3">
                                             Sin segmentación
+                                        </span>
+                                        <span
+                                            v-if="course.isSegmented"
+                                            class="mr-3">
+                                            Con segmentación
                                         </span>
                                     </div>
 
@@ -105,7 +120,8 @@
 
                     </div>
 
-                    <p class="text-red pt-3">
+                    <p v-if="showNotificationAlert"
+                       class="text-red pt-3">
                         *Haz seleccionado cursos que cuentan con segmentación. Al confirmar se modificará la segmentación de estos cursos.
                     </p>
                 </v-col>
@@ -144,16 +160,30 @@ export default {
             },
             deep: true
         },
+        search(newValue, oldValue) {
+
+            if (newValue)
+                this.loadData(1);
+            else
+                // Reset search results and syncronize selected results
+                this.syncSelectedSearchResults();
+        }
     },
     data() {
         return {
+            coursesListIsVisible: true,
             selectionLimit: 10,
             loadedPages: [],
+            lastPage: -1,
             courses: [],
-            checked: true,
-            filters : {
-                q: ''
-            }
+            searchedCourses: [],
+            showNotificationAlert: false,
+            search: ''
+        }
+    },
+    computed: {
+        currentCollection() {
+            return this.search ? this.searchedCourses : this.courses;
         }
     },
     methods: {
@@ -172,29 +202,63 @@ export default {
 
             // Page has already been loaded
 
-            if (this.loadedPages.includes(page))
-                return;
+            if (!this.search) {
+                if (this.loadedPages.includes(page))
+                    return;
+
+                if (page > this.lastPage && this.lastPage !== -1)
+                    return;
+            }
 
             try {
 
-                let workspaces = this.subworkspacesIds.map(encodeURIComponent)
-                workspaces = 'segmented_module[]=' + workspaces.join('&segmented_module[]=')
-                let url = `/cursos/search/?page=${page}&paginate=10&${workspaces}`
+                let url = ''
+                if (this.search) {
+                    url = `/cursos/search/?q=${this.search}&page=1&paginate=10`
+                } else {
+
+                    let workspaces = this.subworkspacesIds.map(encodeURIComponent)
+                    workspaces = 'segmented_module[]=' + workspaces.join('&segmented_module[]=')
+
+                    url = `/cursos/search/?page=${page}&paginate=10&${workspaces}`
+                }
+
+                // Perform courses request
 
                 const response = await axios({
                     method: 'get',
                     url
                 });
-                console.log(`Page ${page} has been loaded`)
-                this.loadedPages.push(page)
+
+                if (!this.search) {
+                    this.loadedPages.push(page)
+                    this.lastPage = response.data.data.last_page
+
+                    console.log(this.loadedPages)
+                    console.log(page)
+                    console.log(this.lastPage)
+                }
 
                 // Get courses
 
-                response.data.data.data.forEach(c => this.courses.push({
-                    id: c.id,
-                    name: c.name,
-                    selected: false
-                }))
+                response.data.data.data.forEach(c => {
+                    const course = {
+                        id: c.id,
+                        name: c.name,
+                        selected: false,
+                        isSegmented: c.segments_count > 0
+                    };
+                    if (this.search) {
+                        // Add to search results only when
+                        // is not already included
+
+                        if (!this.searchedCourses.some(c => c.id === course.id))
+                            this.searchedCourses.push(course);
+                    } else {
+                        if (!this.courses.some(c => c.id === course.id))
+                            this.courses.push(course);
+                    }
+                });
 
             } catch (ex) {
                 console.log(ex)
@@ -210,10 +274,54 @@ export default {
 
             if (isAtBottom) {
 
-                const lastPage = this.loadedPages[this.loadedPages.length - 1];
-                if (lastPage) {
-                    this.loadData(lastPage + 1);
+                this.loadNextPage()
+            }
+        },
+        loadNextPage() {
+            const lastPage = this.loadedPages[this.loadedPages.length - 1];
+            if (lastPage) {
+                this.loadData(lastPage + 1);
+            }
+        },
+        /**
+         * Show alert when at least one segmented course is selected
+         */
+        updateSegmentacionAlert() {
+
+            // Execute only when is NOT showing search results
+
+            if (this.search) return;
+
+            this.showNotificationAlert = this.courses.some(
+                c => c.selected && c.isSegmented
+            );
+
+            this.courses.sort((a, b) => {
+                if (a.selected && !b.selected) {
+                    return -1;
+                } else if (!a.selected && b.selected) {
+                    return 1;
+                } else {
+                    return 0;
                 }
+            });
+        },
+        syncSelectedSearchResults() {
+
+            let selectedInSearch =  this.searchedCourses.filter(sc => sc.selected)
+            if (selectedInSearch.length) {
+
+                selectedInSearch.forEach(sis => {
+
+                    let courseIndex = this.courses.findIndex(c => c.id === sis.id)
+                    if (courseIndex >= 0) {
+                        this.courses[courseIndex].selected = 'selected'
+                    } else {
+                        this.courses.push(sis)
+                    }
+                })
+                this.updateSegmentacionAlert();
+                this.searchedCourses = [];
             }
         }
     }
