@@ -101,7 +101,7 @@
                 @segmentation="
                     openSegmentationModal($event)
                 "
-                
+
                 @duplicate="
                     openFormModal(
                         duplicateFormModalOptions,
@@ -458,6 +458,12 @@ export default {
                         type: "action",
                         show_condition: "is_super_user",
                         method_name: "logs"
+                    },
+                    {
+                      text: "Reusar segmentación",
+                      icon: "mdi mdi-account-switch",
+                      type: "action",
+                      method_name: "openMultipleSegmentationModal"
                     },
                     {
                         text: "Eliminar",
@@ -820,6 +826,9 @@ export default {
                 return;
             }
             vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
+        },
+        openMultipleSegmentationModal() {
+          alert()
         }
     }
 }

@@ -3,6 +3,7 @@
 return [
     'courses' => [
         'new-course' => 'Tienes un curso asignado: <b>{courseName}</b> disponible dentro de la plataforma.',
+        'new-courses' => 'Tienes {coursesCount} cursos asignados dentro de la plataforma.',
         'new-certificate' => 'Tienes un diploma del curso: <b>{courseName}</b> pendiente a confirmar.'
     ],
     'users' => [

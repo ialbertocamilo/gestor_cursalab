@@ -150,7 +150,7 @@
                 />
 
                 <SegmentMultipleCoursesModal
-                    :originCourseId="model_id"
+                    :originCourseId="resource.id"
                     :subworkspacesIds="subworkspacesIds"
                     :options="multipleCoursesModalOptions"
                     :ref="multipleCoursesModalOptions.ref"

@@ -273,4 +273,14 @@ class SegmentController extends Controller
 
         // info(now()->format("Y-m-d H:i:s"));
     }
+
+    public function cloneSegmentation(Request $request) {
+
+        Segment::cloneSegmentation(
+            $request->originCourseId,
+            $request->destinationCoursesIds
+        );
+
+        return $this->success();
+    }
 }
