@@ -44,7 +44,7 @@
 
                     <div class="box-document-segmentation-results">
                         <ul>
-                            <li v-for="user in filter_result"
+                            <li v-for="(user,index) in filter_result" :key="index"
                                 class="d-flex justify-content-between align-items-center">
 
                                 {{ user.document }} - {{ user.fullname }}
@@ -78,6 +78,13 @@
                         clearable dense
                         v-model="usersearch"
                         placeholder="Buscar por nombre o documento"
+                    />
+                </v-col>
+                <v-col cols="4" v-show="segment.criteria_selected.length">
+                    <a class="pt-2 justify-end"
+                        @click="deleteAllUsers()"
+                       href="#"
+                       v-text="'Eliminar a todos'"
                     />
                 </v-col>
                 <v-col cols="12">
@@ -209,6 +216,10 @@ export default {
             let vue = this;
 
             vue.$emit("addUser", user);
+        },
+        deleteAllUsers(){
+            let vue = this;
+            vue.$emit("deleteUserAll");
         },
         deleteUser(user) {
             let vue = this;

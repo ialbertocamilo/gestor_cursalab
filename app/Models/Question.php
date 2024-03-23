@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use App\Imports\ExamenImport;
 
 class Question extends BaseModel
@@ -41,7 +42,33 @@ class Question extends BaseModel
                     ->whereRelation('type', 'code', $code)
                     ->get();
     }
-
+    protected function getListQuestionToReport($topic){
+        $columns_answers = ['a','b','c','d','e','f','g','h','i'];
+        $excel_headers = [
+            'PREGUNTA','OBLIGATORIO','PUNTAJE','RESPUESTA CORRECTA','A','B','C','D','E','F','G','H','I',
+        ];
+        $questions = Question::where('topic_id', $topic->id)
+                    ->get()->map(function($q) use ($columns_answers){
+                        // $data_answers['A']
+                        // $rptas_json = 
+                        $data = [
+                            $q->pregunta,
+                            $q->required ?  'Sí' : 'No',
+                            $q->score ,
+                            strtoupper($columns_answers[$q->rpta_ok-1])
+                        ];
+                        foreach ($columns_answers as $key => $column) {
+                            // dd($q->rptas_json[$key+1]);
+                            $data[] = isset($q->rptas_json[$key+1]) ? $q->rptas_json[$key+1] : '';
+                        }
+                        return $data;
+                    });
+        return [
+            'questions' => $questions,
+            'excel_headers' => $excel_headers,
+            'filename'=> substr(Str::slug($topic->name), 0, 30)
+        ];
+    }
     protected function getQuestionsForQuiz($topic, $limit = 5, $random = true, $code = 'selecciona')
     {
         $questions = Question::getByTopicAndType($topic, $code);

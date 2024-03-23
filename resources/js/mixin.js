@@ -52,9 +52,9 @@ export default {
     },
     // 25
     methods: {
-        descargarExcelwithValuesInArray({headers,values,comments,filename}){
+        descargarExcelwithValuesInArray({headers,values,comments=[],filename,confirm=false}){
             //values like array's of array [["name","lastname","email"],["aldo","lopez","aldo@gmail.com"]["pepe","perez","pepe@gmail.com"]]
-            if (window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
+            if ((confirm) || window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
                 values.unshift(headers);
                 const data = XLSX.utils.aoa_to_sheet(values);
                 //set comments
@@ -84,7 +84,10 @@ export default {
                     header: values
                 });
                 headers.forEach((element, index) => {
+                    console.log('index',index);
                     let indice = `${this.abc[index]}1`
+                    console.log('indice',indice);
+                    console.log('data',data[`${indice}`]);
                     data[`${indice}`].v = element;
                 });
                 const workbook = XLSX.utils.book_new();

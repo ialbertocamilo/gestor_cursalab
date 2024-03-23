@@ -500,4 +500,9 @@ class TemaController extends Controller
     public function downloadReportAssistance($school_id,$course_id,$topic_id){
         return TopicAssistanceUser::generatePDFDownload($course_id,$topic_id);
     }
+
+    protected function downloadQuestions($school, $course, Topic $topic){
+        $data = Question::getListQuestionToReport($topic);
+        return $this->success($data);
+    }
 }
