@@ -209,6 +209,7 @@ class ActivityController extends Controller
     {
         $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'temas');
         $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+        $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
 
         $data_course = [
             'name' => 'Inducción - Temas - '. $request['name'],
@@ -216,7 +217,8 @@ class ActivityController extends Controller
             'escuelas' => $request['school_id'] ? [ School::where('id', $request['school_id'])->first()?->id] : [],
             'reinicios_programado' => null,
             'requisito_id' => null,
-            'platform_id' => $platform_onboarding?->id
+            'platform_id' => $platform_onboarding?->id,
+            'modality_id' => $type_modality?->id
         ];
 
         $course = Course::storeRequest($data_course);
@@ -261,6 +263,10 @@ class ActivityController extends Controller
         if($course_id) {
             $course = Course::where('id', $course_id)->first();
             if($course) {
+                if(is_null($course->modality_id)) {
+                    $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
+                    $course->modality_id = $type_modality?->id;
+                }
                 $course->name = 'Inducción - Temas - '. $request->name;
                 $course->save();
 
@@ -802,6 +808,10 @@ class ActivityController extends Controller
         cache_clear_model(Topic::class);
 
         $course = $topic ? Course::where('id', $topic?->course_id)->first() : null;
+        if($course && is_null($course->modality_id)) {
+            $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
+            $course->modality_id = $type_modality?->id;
+        }
         $course_update = Course::storeRequest($data, $course);
 
         cache_clear_model(Course::class);
@@ -853,6 +863,10 @@ class ActivityController extends Controller
         cache_clear_model(Topic::class);
 
         $course = $topic ? Course::where('id', $topic?->course_id)->first() : null;
+        if($course && is_null($course->modality_id)) {
+            $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
+            $course->modality_id = $type_modality?->id;
+        }
         $course_update = Course::storeRequest($data, $course);
 
         cache_clear_model(Course::class);

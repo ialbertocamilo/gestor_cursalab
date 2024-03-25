@@ -666,33 +666,35 @@ export default {
         {
             let vue = this
 
-            vue.showLoader()
+            vue.openFormModal(vue.modalEditProcess)
 
-            const edit = vue.benefit_id !== ''
-            let url = `${vue.base_endpoint}/store_inline`
-            let method = 'POST';
+            // vue.showLoader()
 
-            if(item.title != '')
-            {
-                const resource = { 'title' : item.title };
-                const fields = ['title'];
-                const formData = vue.getMultipartFormData(method, resource, fields);
-                // formData.append('validateForm', validateForm ? "1" : "0");
+            // const edit = vue.benefit_id !== ''
+            // let url = `${vue.base_endpoint}/store_inline`
+            // let method = 'POST';
 
-                vue.$http.post(url, formData)
-                        .then(async ({data}) => {
-                            this.hideLoader()
-                            vue.showAlert(data.data.msg)
-                            // setTimeout(() => vue.closeModal(), 2000)
-                            vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                        })
-                        .catch(error => {
-                            if (error && error.errors){
-                                vue.errors = error.errors
-                            }
-                            // vue.loadingActionBtn = false
-                        })
-            }
+            // if(item.title != '')
+            // {
+            //     const resource = { 'title' : item.title };
+            //     const fields = ['title'];
+            //     const formData = vue.getMultipartFormData(method, resource, fields);
+            //     // formData.append('validateForm', validateForm ? "1" : "0");
+
+            //     vue.$http.post(url, formData)
+            //             .then(async ({data}) => {
+            //                 this.hideLoader()
+            //                 vue.showAlert(data.data.msg)
+            //                 // setTimeout(() => vue.closeModal(), 2000)
+            //                 vue.refreshDefaultTable(vue.dataTable, vue.filters);
+            //             })
+            //             .catch(error => {
+            //                 if (error && error.errors){
+            //                     vue.errors = error.errors
+            //                 }
+            //                 // vue.loadingActionBtn = false
+            //             })
+            // }
         },
     }
 };

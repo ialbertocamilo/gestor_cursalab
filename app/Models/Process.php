@@ -234,17 +234,23 @@ class Process extends BaseModel
                 $process->update($data);
             else:
                 $process = self::create($data);
-                foreach ($data['subworkspaces'] as  $subworkspace) {
-                    SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
-                        'subworkspace_id'=>$subworkspace,
-                        'process_id' => $process->id
-                    ],[
-                        'subworkspace_id'=>$subworkspace,
-                    ]);
+                if(isset($data['subworkspaces']))
+                {
+                    foreach ($data['subworkspaces'] as  $subworkspace) {
+                        SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
+                            'subworkspace_id'=>$subworkspace,
+                            'process_id' => $process->id
+                        ],[
+                            'subworkspace_id'=>$subworkspace,
+                        ]);
+                    }
                 }
             endif;
 
-            $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
+            if(isset($data['subworkspaces']))
+            {
+                $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
+            }
 
 
             //instructions
@@ -491,17 +497,20 @@ class Process extends BaseModel
             $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             $total_activities = 0;
             $process->stages = $process->stages()->select('id', 'duration', 'position', 'title')->get();
+            $days_stages = 0;
             if($process->stages->count() > 0) {
                 foreach ($process->stages as $index => $stage) {
-                    $stage->status = $index == 0 ? 'progress' : 'locked';
-                    // $stage->status = 'locked';
-                    // if($user_summary_process?->enrolled_date){
-                    //     $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
-                    //     $diff_days = $current_date->diffInDays($enrolled_date);
-                    //     if($diff_days >= $stage->duration){
-                    //         $stage->status = 'progress';
-                    //     }
-                    // }
+                    // $stage->status = $index == 0 ? 'progress' : 'locked';
+                    $stage->status = 'locked';
+                    if($user_summary_process?->enrolled_date){
+                        $enrolled_date = Carbon::create($user_summary_process->enrolled_date);
+                        $days_stages = $days_stages + $stage->duration;
+                        $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
+                        $diff_days = $current_date->diffInDays($finish_days_stage);
+                        if($diff_days <= $stage->duration){
+                            $stage->status = 'progress';
+                        }
+                    }
                     $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                     $stage->activities = $stage->activities()
                                                 ->with(['type', 'requirement' => function($r){
