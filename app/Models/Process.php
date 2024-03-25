@@ -497,7 +497,7 @@ class Process extends BaseModel
                     $stage->status = 'locked';
                     if($user_summary_process?->enrolled_date){
                         $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
-                        $diff_days = $current_date->diffInDays($enrolled_date); 
+                        $diff_days = $current_date->diffInDays($enrolled_date);
                         if($diff_days >= $stage->duration){
                             $stage->status = 'progress';
                         }
