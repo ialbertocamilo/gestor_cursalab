@@ -493,15 +493,15 @@ class Process extends BaseModel
             $process->stages = $process->stages()->select('id', 'duration', 'position', 'title')->get();
             if($process->stages->count() > 0) {
                 foreach ($process->stages as $index => $stage) {
-                    // $stage->status = $index == 0 ? 'progress' : 'locked';
-                    $stage->status = 'locked';
-                    if($user_summary_process?->enrolled_date){
-                        $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
-                        $diff_days = $current_date->diffInDays($enrolled_date);
-                        if($diff_days >= $stage->duration){
-                            $stage->status = 'progress';
-                        }
-                    }
+                    $stage->status = $index == 0 ? 'progress' : 'locked';
+                    // $stage->status = 'locked';
+                    // if($user_summary_process?->enrolled_date){
+                    //     $enrolled_date = Carbon::create($user_summary_process->enrolled_date)->startOfDay();
+                    //     $diff_days = $current_date->diffInDays($enrolled_date);
+                    //     if($diff_days >= $stage->duration){
+                    //         $stage->status = 'progress';
+                    //     }
+                    // }
                     $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                     $stage->activities = $stage->activities()
                                                 ->with(['type', 'requirement' => function($r){
