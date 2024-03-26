@@ -226,6 +226,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     Route::prefix('menus')->middleware('checkrol:super-user')->group(base_path('routes/cms/menus.php'));
 
     Route::prefix('procesos')->group(base_path('routes/cms/processes.php'));
+    Route::prefix('induccion')->group(base_path('routes/cms/onboarding.php'));
 
     Route::prefix('invitados')->middleware('checkrol:super-user')->group(base_path('routes/cms/invitados.php'));
     Route::prefix('testing')->middleware('checkrol:super-user')->group(base_path('routes/cms/testing.php'));

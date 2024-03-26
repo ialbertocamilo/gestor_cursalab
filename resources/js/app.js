@@ -235,6 +235,7 @@ Vue.component("votacion-detail-page", require("./layouts/Votaciones/VotacionesLi
 Vue.component("guest-layout", require("./layouts/Guest/GuestListPage.vue"));
 
 // Inducción
+Vue.component("onboarding-dashboard-layout", require("./layouts/Onboarding/Dashboard/DashboardList.vue"));
 Vue.component("processes-layout", require("./layouts/Processes/ProcessesList.vue"));
 Vue.component("processes-assistants-layout", require("./layouts/Processes/Assistants/AssistantsList.vue"));
 Vue.component("stages-layout", require("./layouts/Stages/StagesList.vue"));
