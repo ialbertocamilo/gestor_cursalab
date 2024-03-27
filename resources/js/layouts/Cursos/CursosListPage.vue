@@ -133,6 +133,7 @@
                 @status="updateCourseStatus($event)"
                 @edit="openFormModal(modalCourseOptions, $event, 'edit', `Editar curso - ${$event.name}`)"
                 @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, {resource_id:$event.id,type:'course'}, 'list', `Listado de multimedias del curso: ${course_name}`)"
+                @openMultipleSegmentationModal="openMultipleSegmentationModal($event)"
             />
             <LogsModal
                 :options="modalLogsOptions"
@@ -264,6 +265,15 @@
                 @onCancel="closeFormModal(modalDirectSegmentationOptions)"
                 :modalities="selects.modalities"
             />
+
+            <SegmentMultipleCoursesModal
+                :originCourseId="multipleCoursesModalOptions.resource.id"
+                :subworkspacesIds="multipleCoursesModalOptions.resource.modulesIds || []"
+                :options="multipleCoursesModalOptions"
+                :ref="multipleCoursesModalOptions.ref"
+                @onConfirm="closeFormModal(multipleCoursesModalOptions)"
+                @onCancel="closeFormModal(multipleCoursesModalOptions)"
+            />
         </v-card>
     </section>
 </template>
@@ -282,9 +292,12 @@ import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
 import CourseModalityModal from "./CourseModalityModal";
 import DuplicateForm from "../Escuelas/DuplicateForm";
 import DirectSegmentationForm from "./DirectSegmentationForm";
+import SegmentMultipleCoursesModal
+  from "../Blocks/SegmentMultipleCoursesModal.vue";
 
 export default {
     components: {
+      SegmentMultipleCoursesModal,
         ProjectFormModal,
         CursosEncuestaModal,
         MoverCursoModal,
@@ -659,7 +672,17 @@ export default {
                 title: 'Selecciona qué modalidad de curso deseas crear',
                 action: null,
                 persistent: true,
-            }
+            },
+            multipleCoursesModalOptions: {
+              ref: 'SegmentMultipleCoursesModal',
+              open: false,
+              title: 'Segmentación múltiple',
+              resource: {},
+              hideConfirmBtn: false,
+              persistent: true,
+              cancelLabel: 'Cancelar',
+              confirmLabel: 'Continuar'
+            },
         }
     },
     mounted() {
@@ -827,8 +850,9 @@ export default {
             }
             vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
         },
-        openMultipleSegmentationModal() {
-          alert()
+        openMultipleSegmentationModal(resource) {
+          this.multipleCoursesModalOptions.resource = resource
+          this.multipleCoursesModalOptions.open = true;
         }
     }
 }

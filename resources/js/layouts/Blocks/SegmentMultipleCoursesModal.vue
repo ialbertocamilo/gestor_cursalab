@@ -132,6 +132,9 @@
 </template>
 
 <script>
+
+import _ from 'lodash';
+
 export default {
     props: {
         originCourseId: {
@@ -160,14 +163,13 @@ export default {
             },
             deep: true
         },
-        search(newValue, oldValue) {
-
+        search: _.throttle(function(newValue) {
             if (newValue)
                 this.loadData(1);
             else
                 // Reset search results and syncronize selected results
                 this.syncSelectedSearchResults();
-        }
+        }, 400)
     },
     data() {
         return {
@@ -197,13 +199,14 @@ export default {
         onConfirm() {
             let vue = this
             this.submitData()
-            vue.$emit('onConfirm', true);
         },
         /**
          * Perform request to clone segmentation
          */
         async submitData() {
 
+            this.showLoader()
+            this.syncSelectedSearchResults();
             const selectedCourses = this.courses.filter(c => !!c.selected)
             const selectedCoursesIds = selectedCourses.map(c => c.id)
 
@@ -218,11 +221,12 @@ export default {
                     }
                 });
 
-
-
             } catch (ex) {
                 console.log(ex)
             }
+
+            this.hideLoader()
+            this.$emit('onConfirm', true);
         },
         async loadData(page = 1) {
 
