@@ -28,7 +28,7 @@
                 </v-col>
                 <v-col cols="7" class="d-flex justify-content-end align-items-center">
                     <p>
-                        Seleccionados: 0/{{ selectionLimit }}
+                        Seleccionados: {{ selectedCount }}/{{ selectionLimit }}
                     </p>
                 </v-col>
             </v-row>
@@ -54,7 +54,8 @@
                                         v-model="course.selected"
                                         value="selected"
                                         hide-details="false"
-                                        @change="updateSegmentacionAlert()"
+                                        :disabled="selectedCount >= selectionLimit && !course.selected"
+                                        @change="search = ''; sortSelectedCourses();"
                                     />
 
                                     <v-icon
@@ -151,6 +152,18 @@ export default {
             required: true
         }
     },
+    data() {
+      return {
+        coursesListIsVisible: true,
+        selectionLimit: 10,
+        loadedPages: [],
+        lastPage: -1,
+        courses: [],
+        searchedCourses: [],
+        showNotificationAlert: false,
+        search: ''
+      }
+    },
     watch: {
         /**
          * Load data when modal has been open
@@ -171,21 +184,12 @@ export default {
                 this.syncSelectedSearchResults();
         }, 1500)
     },
-    data() {
-        return {
-            coursesListIsVisible: true,
-            selectionLimit: 10,
-            loadedPages: [],
-            lastPage: -1,
-            courses: [],
-            searchedCourses: [],
-            showNotificationAlert: false,
-            search: ''
-        }
-    },
     computed: {
         currentCollection() {
             return this.search ? this.searchedCourses : this.courses;
+        },
+        selectedCount() {
+          return this.courses.filter(c => !!c.selected).length
         }
     },
     methods: {
@@ -220,6 +224,8 @@ export default {
                         destinationCoursesIds: selectedCoursesIds
                     }
                 });
+
+                this.showAlert('La segmentación múltiple se guardó correctamente.');
 
             } catch (ex) {
                 console.log(ex)
@@ -298,6 +304,10 @@ export default {
         loadSelects() {
 
         },
+        /**
+         * Lazy loads courses on scrolls
+         * @param e
+         */
         handleScroll(e) {
 
             const container = this.$refs.scrollContainer;
@@ -308,11 +318,26 @@ export default {
                 this.loadNextPage()
             }
         },
-        loadNextPage() {
+      /**
+       * Load courses of the next page
+       */
+      loadNextPage() {
             const lastPage = this.loadedPages[this.loadedPages.length - 1];
             if (lastPage) {
                 this.loadData(lastPage + 1);
             }
+        },
+        sortSelectedCourses() {
+
+          this.courses.sort((a, b) => {
+            if (a.selected && !b.selected) {
+              return -1;
+            } else if (!a.selected && b.selected) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
         },
         /**
          * Show alert when at least one segmented course is selected
@@ -326,16 +351,6 @@ export default {
             this.showNotificationAlert = this.courses.some(
                 c => c.selected && c.isSegmented
             );
-
-            this.courses.sort((a, b) => {
-                if (a.selected && !b.selected) {
-                    return -1;
-                } else if (!a.selected && b.selected) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            });
         },
         syncSelectedSearchResults() {
 
@@ -351,7 +366,9 @@ export default {
                         this.courses.push(sis)
                     }
                 })
+                this.sortSelectedCourses();
                 this.updateSegmentacionAlert();
+
                 this.searchedCourses = [];
             }
         }
