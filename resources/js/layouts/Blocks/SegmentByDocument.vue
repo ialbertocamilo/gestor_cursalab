@@ -73,21 +73,21 @@
 
             </v-row>
             <v-row>
-                <v-col cols="6" v-show="segment.criteria_selected.length">
+                <v-col cols="8" class="d-flex" v-show="segment.criteria_selected.length">
                     <DefaultInput
                         clearable dense
                         v-model="usersearch"
                         placeholder="Buscar por nombre o documento"
                     />
-                </v-col>
-                <v-col cols="6" v-show="segment.criteria_selected.length">
                     <DefaultButton
-                            icon="mdi-download"
-                            :outlined="true"
-                            label="Descargar"
-                        />
+                        icon="mdi-download"
+                        isIconButton
+                        @click="downloadUsers()"
+                    />
+                </v-col>
+                <v-col cols="4" v-show="segment.criteria_selected.length">
                     <a class="pt-2 justify-end"
-                        @click="deleteAllUsers()"
+                        @click="alertDeleteDialog.open = true"
                        href="#"
                        v-text="'Eliminar a todos'"
                     />
@@ -117,11 +117,17 @@
 
             </v-row>
         </v-col>
+        <DialogConfirm v-model="alertDeleteDialog.open" :options="alertDeleteDialog" width="408px"
+                title="Eliminar segmentación" subtitle="¡Estás a punto de eliminar la segmentación!"
+                @onConfirm="deleteAllUsers" @onCancel="alertDeleteDialog.open = false" />
     </v-row>
 </template>
 
 <script>
+import DialogConfirm from "../../components/basicos/DialogConfirm";
+
 export default {
+    components:{DialogConfirm},
     props: {
         segment: {
             required: true
@@ -141,7 +147,20 @@ export default {
             file: null,
             debounce: null,
             filter_result: [],
-            usersearch: null
+            usersearch: null,
+            alertDeleteDialog: {
+                open: false,
+                title_modal: 'Eliminar Segmentación',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Estás a punto de eliminar a todos los usuarios de esta segmentación!',
+                        details: [
+                            'Los usuarios dejaran de visualizar el curso.'
+                        ],
+                    }
+                },
+            }
         };
     },
     computed: {
@@ -224,6 +243,7 @@ export default {
         },
         deleteAllUsers(){
             let vue = this;
+            vue.alertDeleteDialog.open = false
             vue.$emit("deleteUserAll");
         },
         deleteUser(user) {
@@ -298,6 +318,17 @@ export default {
             vue.search = null;
             vue.usersearch = null;
             vue.filter_result = [];
+        },
+        downloadUsers(){
+            let vue = this;
+            let users_document = vue.segment.criteria_selected.map(u =>[ u.document]);
+            console.log(users_document,users_document);
+            vue.descargarExcelwithValuesInArray({
+                headers:['DOCUMENTO'],
+                values:users_document,
+                confirm:true,
+                filename:'Reporte de documentos'
+            });
         }
     }
 }
