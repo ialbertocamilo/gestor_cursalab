@@ -33,7 +33,7 @@ class SyncSchoolUniversitiesCourses extends Command
     private function syncCourses(){
         $cursalab_university_name = 'Cursalab University - T 🎓';
         $courses_to_migrate = CourseM::with(['type:id,code','modality:id,code'])->orderBy('position','ASC')->where('active',1)->get();
-        $workspaces = Workspace::where('id',8)->select('id','name','qualification_type_id')->whereRelation('functionalities','code','cursalab-university')->get();
+        $workspaces = Workspace::select('id','name','qualification_type_id')->whereRelation('functionalities','code','cursalab-university')->get();
         // dd($workspaces->pluck('id','name'));
         foreach ($workspaces as $workspace) {
             $subworkspaces_id = Workspace::where('parent_id',$workspace->id)->select('id')->get()->pluck('id');

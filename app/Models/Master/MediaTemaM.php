@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MediaTemaM extends Model
 {
+    protected $connection = 'mysql_master';
     use SoftDeletes;
     protected $table = 'media_topics';
 
