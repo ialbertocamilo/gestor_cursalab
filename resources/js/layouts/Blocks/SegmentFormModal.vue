@@ -162,7 +162,7 @@
                 v-if="isCourseSegmentation()"
                 class="additional-text-wrapper">
                 <a href="javascript:"
-                   @click="multipleCoursesModalOptions.open = true">
+                   @click="saveAndShowMultipleSegmentation()">
                     Guardar y asignar segmentación a otros cursos
                 </a>
             </div>
@@ -229,6 +229,7 @@ export default {
     },
     data() {
         return {
+            showMultipleSegmentation: false,
             tabs: null,
             steps: 0,
             // total: 0,
@@ -497,6 +498,11 @@ export default {
                                 "crear_supervisor"
                             );
                         }
+
+                        // Show modal to clone segmentation to other courses
+
+                        if (this.showMultipleSegmentation)
+                            this.multipleCoursesModalOptions.open = true;
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
@@ -650,6 +656,10 @@ export default {
         },
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
+        },
+        saveAndShowMultipleSegmentation() {
+            this.showMultipleSegmentation = true;
+            this.confirmModal();
         }
     }
 };

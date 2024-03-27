@@ -169,7 +169,7 @@ export default {
             else
                 // Reset search results and syncronize selected results
                 this.syncSelectedSearchResults();
-        }, 400)
+        }, 1500)
     },
     data() {
         return {
@@ -247,10 +247,14 @@ export default {
                     url = `/cursos/search/?q=${this.search}&page=1&paginate=10`
                 } else {
 
-                    let workspaces = this.subworkspacesIds.map(encodeURIComponent)
-                    workspaces = 'segmented_module[]=' + workspaces.join('&segmented_module[]=')
+                    if (this.subworkspacesIds.length) {
+                        let subworkspaces = this.subworkspacesIds.map(encodeURIComponent)
+                        subworkspaces = 'segmented_module[]=' + subworkspaces.join('&segmented_module[]=')
 
-                    url = `/cursos/search/?page=${page}&paginate=10&${workspaces}`
+                        url = `/cursos/search/?page=${page}&paginate=10&${subworkspaces}`
+                    } else {
+                        url = `/cursos/search/?page=${page}&paginate=10`
+                    }
                 }
 
                 // Perform courses request
@@ -267,6 +271,7 @@ export default {
 
                 // Get courses
 
+                this.searchedCourses = []
                 response.data.data.data.forEach(c => {
                     const course = {
                         id: c.id,
