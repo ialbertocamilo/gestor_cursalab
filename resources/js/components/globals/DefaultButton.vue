@@ -11,6 +11,7 @@
         :outlined="outlined"
         :text="text"
         :style="`${min_content ? 'max-width: min-content;' : 'width:100%;'}`"
+        :icon="isIconButton"
     >
         <v-icon :small="smallIcon" class="mr-1" v-text="icon" v-if="icon"/>
         {{ label }}
@@ -63,6 +64,10 @@ export default {
         min_content:{
             type:Boolean,
             default:true,
+        },
+        isIconButton:{
+            type:Boolean,
+            default:false,
         }
     },
     methods: {

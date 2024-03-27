@@ -27,6 +27,56 @@
                         />
                     </v-col>
                 </v-row>
+                <v-row justify="space-around">
+                    <v-col cols="12">
+                        <DefaultSection
+                            title="Duplicar funcionalidades"
+                        >
+                            <template v-slot:content>
+
+                                <v-row justify="start" class="custom-row-checkbox">
+
+                                    <v-col cols="4">
+                                        <v-checkbox
+                                            hide-details
+                                            label="Checklist"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <v-checkbox
+                                            hide-details
+                                            label="Beneficios"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <v-checkbox
+                                            hide-details
+                                            label="Protocolos y Documentos"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <v-checkbox
+                                            hide-details
+                                            label="Diplomas"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+                                    <v-col cols="4">
+                                        <v-checkbox
+                                            hide-details
+                                            label="Reconocimiento"
+                                        >
+                                        </v-checkbox>
+                                    </v-col>
+                                </v-row>
+
+                            </template>
+                        </DefaultSection>
+                    </v-col>
+                </v-row>
                 <v-row class="justify-content-center">
                     <v-col cols="6">
                         <DefaultSelectOrUploadMultimedia

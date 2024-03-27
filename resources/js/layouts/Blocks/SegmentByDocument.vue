@@ -73,14 +73,19 @@
 
             </v-row>
             <v-row>
-                <v-col cols="7" v-show="segment.criteria_selected.length">
+                <v-col cols="6" v-show="segment.criteria_selected.length">
                     <DefaultInput
                         clearable dense
                         v-model="usersearch"
                         placeholder="Buscar por nombre o documento"
                     />
                 </v-col>
-                <v-col cols="4" v-show="segment.criteria_selected.length">
+                <v-col cols="6" v-show="segment.criteria_selected.length">
+                    <DefaultButton
+                            icon="mdi-download"
+                            :outlined="true"
+                            label="Descargar"
+                        />
                     <a class="pt-2 justify-end"
                         @click="deleteAllUsers()"
                        href="#"

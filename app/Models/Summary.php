@@ -150,7 +150,7 @@ class Summary extends BaseModel
         }
         $chunk_users = array_chunk($users_id_segmented,80);
         foreach ($chunk_users as $users) {
-            self::setSummaryUpdates($users,[$course->id],$summary_course_update,$event);
+            self::setSummaryUpdates($users,[$course?->id],$summary_course_update,$event);
         }
 
         // Create notifications for users assigned to course
