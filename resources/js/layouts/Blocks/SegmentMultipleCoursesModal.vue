@@ -55,7 +55,7 @@
                                         value="selected"
                                         hide-details="false"
                                         :disabled="selectedCount >= selectionLimit && !course.selected"
-                                        @change="search = ''; sortSelectedCourses();"
+                                        @change="search = ''; updateSegmentacionAlert();sortSelectedCourses();"
                                     />
 
                                     <v-icon
@@ -121,13 +121,23 @@
 
                     </div>
 
-                    <p v-if="showNotificationAlert"
+                    <p v-if="showSegmentationAlert"
                        class="text-red pt-3">
                         *Haz seleccionado cursos que cuentan con segmentación. Al confirmar se modificará la segmentación de estos cursos.
                     </p>
+
+                  <DialogConfirm
+                      :ref="segmentationAlertModal.ref"
+                      v-model="segmentationAlertModal.open"
+                      :options="segmentationAlertModal"
+                      width="408px"
+                      title="Cambiar de estado al curso"
+                      subtitle="¿Está seguro de cambiar de estado al curso?"
+                      @onConfirm="submitData()"
+                      @onCancel="segmentationAlertModal.open = false"
+                  />
                 </v-col>
             </v-row>
-
         </template>
     </DefaultDialog>
 </template>
@@ -135,8 +145,10 @@
 <script>
 
 import _ from 'lodash';
+import DialogConfirm from "../../components/basicos/DialogConfirm.vue";
 
 export default {
+  components: {DialogConfirm},
     props: {
         originCourseId: {
             type: Number,
@@ -160,8 +172,26 @@ export default {
         lastPage: -1,
         courses: [],
         searchedCourses: [],
-        showNotificationAlert: false,
-        search: ''
+        showSegmentationAlert: false,
+        search: '',
+        segmentationAlertModal: {
+          ref: 'segmentationAlertModal',
+          title: 'Actualizar Curso',
+          contentText: '¿Desea actualizar este registro?',
+          open: false,
+          endpoint: '',
+          title_modal: 'Alerta de cambio de segmentación',
+          type_modal: 'confirm',
+          status_item_modal: null,
+          content_modal: {
+            confirm: {
+              title: 'Estás por cambiar la segmentación de los siguientes cursos:',
+              details: [
+                // list of courses goes here
+              ],
+            }
+          },
+        },
       }
     },
     watch: {
@@ -201,8 +231,22 @@ export default {
 
         },
         onConfirm() {
-            let vue = this
-            this.submitData()
+
+            if (this.showSegmentationAlert) {
+
+              // Adds list of courses for alert
+
+              let courses = this.courses.filter(c => !!c.selected && c.isSegmented)
+              courses.forEach(c => {
+                this.segmentationAlertModal
+                    .content_modal
+                    .confirm.details.push(c.name)
+              })
+
+              this.segmentationAlertModal.open = true
+            } else {
+              this.submitData()
+            }
         },
         /**
          * Perform request to clone segmentation
@@ -348,7 +392,7 @@ export default {
 
             if (this.search) return;
 
-            this.showNotificationAlert = this.courses.some(
+            this.showSegmentationAlert = this.courses.some(
                 c => c.selected && c.isSegmented
             );
         },
