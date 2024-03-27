@@ -73,14 +73,24 @@ class Question extends BaseModel
         );
     }
     protected function getListQuestionToReport($topic){
+        $evaluation_type = $topic->evaluation_type->code;
+        $question_type_code = $evaluation_type === 'qualified'
+                ? 'select-options'
+                : 'written-answer';
         $columns_answers = ['a','b','c','d','e','f','g','h','i'];
-        $excel_headers = [
+        $excel_headers = $evaluation_type === 'qualified' ? [
             'PREGUNTA','OBLIGATORIO','PUNTAJE','RESPUESTA CORRECTA','A','B','C','D','E','F','G','H','I',
-        ];
+        ] : ['PREGUNTA']; 
         $questions = Question::where('topic_id', $topic->id)
-                    ->get()->map(function($q) use ($columns_answers){
+                    ->whereRelation('type','code',$question_type_code)
+                    ->get()->map(function($q) use ($columns_answers,$evaluation_type) {
                         // $data_answers['A']
                         // $rptas_json = 
+                        if($evaluation_type == 'open'){
+                            return [
+                                $q->pregunta
+                            ];
+                        }
                         $data = [
                             $q->pregunta,
                             $q->required ?  'Sí' : 'No',

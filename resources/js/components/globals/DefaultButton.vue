@@ -14,7 +14,7 @@
         :icon="isIconButton"
     >
         <v-icon :small="smallIcon" class="mr-1" v-text="icon" v-if="icon"/>
-        {{ label }}
+        <span v-if="!isIconButton">{{ label }}</span>
         <v-icon :small="smallIcon" class="ml-1" v-text="appendIcon" v-if="appendIcon"/>
     </v-btn>
 </template>

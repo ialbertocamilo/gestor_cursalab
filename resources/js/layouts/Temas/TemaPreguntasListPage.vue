@@ -46,13 +46,14 @@
                             <DefaultModalButton
                                 :text="true"
                                 @click="openFormModal(modalOptions, null, 'create')"
-                                :label="'Agregar pregunta'"/>
+                                :label="'Pregunta'"/>
                             <br>
                             <DefaultModalButton
                                 :text="true"
                                 icon_name="mdi-download"
+                                isIconButton
                                 @click="downloadReportQuestions()"
-                                :label="'Descargar evaluación'"/>
+                            />
                         </div>
                     </v-col>
                 </v-row>
