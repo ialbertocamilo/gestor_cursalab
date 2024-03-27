@@ -11,6 +11,7 @@ use App\Models\Workspace;
 use App\Models\Master\TopicM;
 use App\Models\Master\CourseM;
 use Illuminate\Console\Command;
+use App\Models\Master\QuestionM;
 use Illuminate\Support\Facades\Storage;
 
 class SyncSchoolUniversitiesCourses extends Command
@@ -35,13 +36,14 @@ class SyncSchoolUniversitiesCourses extends Command
         $courses_to_migrate = CourseM::with(['type:id,code','modality:id,code'])->orderBy('position','ASC')->where('active',1)->get();
         $workspaces = Workspace::select('id','name','qualification_type_id')->whereRelation('functionalities','code','cursalab-university')->get();
         // dd($workspaces->pluck('id','name'));
+        $filter_questions_by_date = false;
         foreach ($workspaces as $workspace) {
             $subworkspaces_id = Workspace::where('parent_id',$workspace->id)->select('id')->get()->pluck('id');
             request()->workspace_id = $workspace->id;
             $school = School::whereHas('subworkspaces', function ($j) use ($subworkspaces_id) {
                 $j->whereIn('subworkspace_id', $subworkspaces_id);
             })->with('courses')->where('code','cursalab-university')->first();
-            $filter_topics_by_date = false;
+            $filter_by_date = false;
             if(!$school){
                 $school = School::storeRequest(
                     [ 
@@ -56,7 +58,8 @@ class SyncSchoolUniversitiesCourses extends Command
                     ]
                 );
                 $school->load('courses');
-                $filter_topics_by_date = true;
+                $filter_by_date = true; 
+                $filter_questions_by_date = true;
             }
             $courses_id_to_create = $courses_to_migrate->pluck('id')->diff($school->courses->pluck('external_id'));
             $courses_to_create = $courses_to_migrate->whereIn('id',$courses_id_to_create)->all();
@@ -66,7 +69,7 @@ class SyncSchoolUniversitiesCourses extends Command
                 $_course_to_update = $school->courses->where('external_id',$course->id)->first();
                 $_course = $this->duplicateCourse($course,$workspace,$school,$_course_to_update);
 
-                $topics_to_migrate = TopicM::getTopicsToMigrate($course,$filter_topics_by_date);
+                $topics_to_migrate = TopicM::getTopicsToMigrate($course,$filter_by_date);
                 $topics_duplicated = Topic::where('course_id',$_course_to_update->id)->orderBy('position','ASC')->get();
 
                 $topics_id_to_create = $topics_to_migrate->pluck('id')->diff($topics_duplicated->pluck('external_id'));
@@ -93,8 +96,11 @@ class SyncSchoolUniversitiesCourses extends Command
                 $bar->advance();
             }
             $bar->finish();
-             
         }
+        //MIGRATE QUESTIONS
+        info('start migrate questions');
+        QuestionM::migrateQuestions($filter_questions_by_date);
+        info('finish migrate questions');
     }
     function duplicateCourse($course,$workspace,$school,$_course_to_update=null){
         if($course->imagen || $course->imagen != $_course_to_update?->imagen){

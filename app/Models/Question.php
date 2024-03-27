@@ -42,6 +42,36 @@ class Question extends BaseModel
                     ->whereRelation('type', 'code', $code)
                     ->get();
     }
+    //Insert question from cursalab master (school university)
+    protected function insertQuestionFromMaster($topic,$question_type_code,$question){
+        Question::insert(
+            [
+                'external_id' => $question['id'],
+                'topic_id' => $topic->id,
+                'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
+                'pregunta' => $question['pregunta'],
+                'rptas_json' => json_encode($question['rptas_json']),
+                'rpta_ok' => $question['rpta_ok'],
+                'active' => $question['active'],
+                'required' => $question['required'] ?? NULL,
+                'score' => calculateValueForQualification($question['score'], 20, $topic->qualification_type->position),
+            ]
+        );
+    }
+    protected function updateQuestionFromMaster($topic,$question_type_code,$question){
+        Question::where('external_id',$question['id'])->update(
+            [
+                'topic_id' => $topic->id,
+                'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
+                'pregunta' => $question['pregunta'],
+                'rptas_json' => $question['rptas_json'],
+                'rpta_ok' => $question['rpta_ok'],
+                'active' => $question['active'],
+                'required' => $question['required'] ?? NULL,
+                'score' => calculateValueForQualification($question['score'], 20, $topic->qualification_type->position),
+            ]
+        );
+    }
     protected function getListQuestionToReport($topic){
         $columns_answers = ['a','b','c','d','e','f','g','h','i'];
         $excel_headers = [
