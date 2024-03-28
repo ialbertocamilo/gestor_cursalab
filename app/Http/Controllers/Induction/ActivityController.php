@@ -263,7 +263,7 @@ class ActivityController extends Controller
         if($course_id) {
             $course = Course::where('id', $course_id)->first();
             if($course) {
-                if(is_null($course->modality_id)) {
+                if(is_null($course->modality_id) || $course->modality_id == 0) {
                     $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
                     $course->modality_id = $type_modality?->id;
                 }
@@ -291,6 +291,8 @@ class ActivityController extends Controller
 
         $response = [
             'tema' => $tema,
+            'course' => $course,
+            'modality' => Taxonomy::getFirstData('course', 'modality', 'asynchronous'),
             'msg' => 'Actividad actualizada correctamente.',
             'activity' => $activity,
             'messages' => [
@@ -808,7 +810,7 @@ class ActivityController extends Controller
         cache_clear_model(Topic::class);
 
         $course = $topic ? Course::where('id', $topic?->course_id)->first() : null;
-        if($course && is_null($course->modality_id)) {
+        if($course && (is_null($course->modality_id) || $course->modality_id == 0)) {
             $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
             $course->modality_id = $type_modality?->id;
         }
@@ -863,7 +865,7 @@ class ActivityController extends Controller
         cache_clear_model(Topic::class);
 
         $course = $topic ? Course::where('id', $topic?->course_id)->first() : null;
-        if($course && is_null($course->modality_id)) {
+        if($course && (is_null($course->modality_id) || $course->modality_id == 0)) {
             $type_modality = Taxonomy::getFirstData('course', 'modality', 'asynchronous');
             $course->modality_id = $type_modality?->id;
         }

@@ -28,8 +28,8 @@
                             <v-card-text class="py-0">
                                 <div class="d-flex align-center" style="height: 73px;">
                                     <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">700/1200</span>
-                                        <span>Cantidad de colaboradores</span>
+                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{users_active}}/1200</span>
+                                        <span>Colaboradores activos</span>
                                     </div>
                                 </div>
                             </v-card-text>
@@ -49,7 +49,7 @@
                             <v-card-text class="py-0">
                                 <div class="d-flex align-center" style="height: 73px;">
                                     <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">70/150</span>
+                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{process_progress}}/{{process_total}}</span>
                                         <span>Procesos en curso</span>
                                     </div>
                                 </div>
@@ -123,6 +123,9 @@ export default {
 
     data() {
         return {
+            process_progress: 0,
+            process_total: 0,
+            users_active: 0,
             dataTable: {
                 endpoint: '/induccion/dashboard/search',
                 ref: 'DashboardTable',
@@ -338,7 +341,25 @@ export default {
                 },
             },
         }
-    }
+    },
+    mounted() {
+        let vue = this
+        vue.loadInfo();
+    },
+    methods: {
+        loadInfo() {
+            let vue = this
+            const url = `/induccion/dashboard/info`
+            vue.$http.get(url)
+                .then(({data}) => {
+                    console.log(data.data);
+                    let _data = data.data
+                    vue.process_progress = _data.process_progress
+                    vue.process_total = _data.process_total
+                    vue.users_active = _data.users_active
+                })
+        },
+    },
 }
 </script>
 <style lang="scss">
