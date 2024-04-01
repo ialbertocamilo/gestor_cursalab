@@ -109,6 +109,9 @@ class SyncSchoolUniversitiesCourses extends Command
         if($course->imagen && !Storage::disk('s3')->exists($course->imagen)){
             $this->copyFileBetweenBuckets($course->imagen);
         }
+        if($_course_to_update?->id == 2214){
+            dd($course->imagen != $_course_to_update?->imagen,$course->imagen,$_course_to_update?->imagen,Storage::disk('s3')->exists($course->imagen));
+        }
         $type_id =  Taxonomy::getFirstData('course', 'type', $course->type->code)->id;
         $modality_id = Taxonomy::getFirstData('course', 'modality', $course->modality->code)->id;
 
