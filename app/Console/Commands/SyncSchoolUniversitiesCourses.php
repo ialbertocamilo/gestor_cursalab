@@ -106,6 +106,9 @@ class SyncSchoolUniversitiesCourses extends Command
         if($course->imagen || $course->imagen != $_course_to_update?->imagen){
             $this->copyFileBetweenBuckets($course->imagen);
         }
+        if($course->imagen && !Storage::disk('s3')->exists($course->imagen)){
+            $this->copyFileBetweenBuckets($course->imagen);
+        }
         $type_id =  Taxonomy::getFirstData('course', 'type', $course->type->code)->id;
         $modality_id = Taxonomy::getFirstData('course', 'modality', $course->modality->code)->id;
 
@@ -174,9 +177,6 @@ class SyncSchoolUniversitiesCourses extends Command
         $_topic=Topic::storeRequest($topic_data,$_topic_to_update);
     }
     function copyFileBetweenBuckets(string $sourceKey){
-        // $newSourceKey = $folder_master_manager . '/' . $sourceKey;
-        // $file = Storage::disk('s3')->get($newSourceKey,['bucket' => $bucket_master_manager]);
-
         $bucket_master_manager = 'statics-zona1';
         $folder_master_manager = 'master-cursalab';
         $config = config('filesystems.disks.s3');
