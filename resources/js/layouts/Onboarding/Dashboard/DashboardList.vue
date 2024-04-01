@@ -16,7 +16,7 @@
                                         <apexcharts type="radialBar" height="100" :options="graphic_data_advance.chartOptions" :series="graphic_data_advance.series"/>
                                     </div>
                                     <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">70%</span>
+                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">10%</span>
                                         <span>Cumplimiento de inducción</span>
                                     </div>
                                 </div>
@@ -67,23 +67,37 @@
                     </v-col>
                 </v-row>
                 <v-row justify="start">
-                    <v-col cols="5">
+                    <v-col cols="5" md="12" lg="6">
                         <v-card>
                             <v-card-text>
-                                <div>
-                                    <span class="text_default fw-bold">Gráfico circular</span>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="text_default fw-bold">Gráfico circular</span>
+                                    </div>
+                                    <div>
+                                        <DefaultAutocomplete
+                                            label="Proceso"
+                                            v-model="process"
+                                            :items="selects.lista_procesos"
+                                            item-text="title"
+                                            item-value="id"
+                                            dense
+                                            @input="searchProcess"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <apexcharts
                                         height="450"
                                         :options="graphic_data.chartOptions"
                                         :series="graphic_data.series"
+                                        ref="graphic_donut"
                                     />
                                 </div>
                             </v-card-text>
                         </v-card>
                     </v-col>
-                    <v-col cols="7">
+                    <v-col cols="7" md="12" lg="6">
                         <v-card>
                             <v-card-text>
                                 <div>
@@ -123,6 +137,7 @@ export default {
 
     data() {
         return {
+            process: null,
             process_progress: 0,
             process_total: 0,
             users_active: 0,
@@ -130,12 +145,14 @@ export default {
                 endpoint: '/induccion/dashboard/search',
                 ref: 'DashboardTable',
                 headers: [
-                    {text: "Supervisores", value: "name", align: 'start', sortable: true},
+                    {text: "Supervisores", value: "fullname", align: 'start', sortable: true},
                     {text: "Departamento", value: "department", align: 'center', sortable: false},
-                    {text: "Evaluador", value: "evaluador", align: 'center', sortable: false},
-                    {text: "Puesto", value: "puesto", align: 'center', sortable: false},
+                    {text: "Puesto", value: "job", align: 'center', sortable: false},
                     {text: "Estado", value: "status", align: 'center', sortable: false},
                 ],
+            },
+            filters: {
+                q: '',
             },
             graphic_data_bars: {
                 series: [
@@ -170,7 +187,7 @@ export default {
                         colors: ['transparent']
                     },
                     xaxis: {
-                        categories: ['Ene', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                     },
                     yaxis: {
                         title: {
@@ -190,7 +207,7 @@ export default {
                 },
             },
             graphic_data_advance: {
-                series: [70],
+                series: [10],
                 chartOptions: {
                     chart: {
                         height: 100,
@@ -251,7 +268,7 @@ export default {
                 },
             },
             graphic_data: {
-                series: [15,20,25,40],
+                series: [],
                 chartOptions: {
                     chart: {
                         id: "vuechart-example",
@@ -260,7 +277,7 @@ export default {
                         height: 400,
                     },
                     colors: ['#161BB6', '#5458EA', '#E7CCFF', '#6C02CA' ],
-                    labels: ["Bienvenido a nuestra empresa", "Orientación sobre políticas y procedimientos", "Etapa 3", "Etapa 4"],
+                    labels: [],
                     legend: {
                         width: '250px',
                         fontSize: '13px',
@@ -325,21 +342,11 @@ export default {
                             }
                         }
                     },
-                    // responsive: [
-                    //     {
-                    //         breakpoint: 300,
-                    //         options: {
-                    //             chart: {
-                    //                 width: 200
-                    //             },
-                    //             legend: {
-                    //                 position: "bottom"
-                    //             }
-                    //         }
-                    //     }
-                    // ]
                 },
             },
+            selects: {
+                lista_procesos: [],
+            }
         }
     },
     mounted() {
@@ -357,6 +364,32 @@ export default {
                     vue.process_progress = _data.process_progress
                     vue.process_total = _data.process_total
                     vue.users_active = _data.users_active
+                    vue.selects.lista_procesos = _data.processes
+                })
+        },
+        searchProcess() {
+            let vue = this
+            const url = `/induccion/dashboard/search/process/`+vue.process
+            vue.$http.get(url)
+                .then(({data}) => {
+                    let _data = data.data
+                    console.log(_data);
+                    if(_data.length > 0) {
+                        vue.graphic_data.chartOptions.labels = []
+                        vue.graphic_data.series = []
+                        let labels = []
+                        _data.forEach(element => {
+                            labels.push(element.title)
+                            vue.graphic_data.series.push(element.percentage)
+                        });
+                        console.log(labels);
+                        vue.$refs.graphic_donut.updateOptions({
+                            chartOptions: {
+                                labels: labels
+                            }
+                        })
+                        vue.$refs.graphic_donut.refresh();
+                    }
                 })
         },
     },

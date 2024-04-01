@@ -540,8 +540,19 @@ class Process extends BaseModel
 
             $process->percentage = 0;
 
-            $count_absences = $user_summary_process?->absences ?? 0;
-            $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : null;
+            if($process->count_absences) {
+                $count_absences = $user_summary_process?->absences ?? 0;
+                if($process->limit_absences) {
+                    $process->user_absences = $count_absences;
+                }
+                else {
+                    $absences = $process->absences ?? 0;
+                    $process->user_absences = $count_absences.'/'.$absences;
+                }
+            }
+            else {
+                $process->user_absences = null;
+            }
 
             $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
             $user_activities = ProcessSummaryActivity::where('user_id', $user->id)->where('status_id', $status_finished)->count();

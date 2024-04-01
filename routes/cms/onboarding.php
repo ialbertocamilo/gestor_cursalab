@@ -8,5 +8,6 @@ Route::controller(OnboardingController::class)->group(function() {
     Route::view('/dashboard', 'onboarding.dashboard.index')->name('onboarding.dashboard.index');
     Route::get('/dashboard/search', 'search');
     Route::get('/dashboard/info', 'info');
+    Route::get('/dashboard/search/process/{process}', 'searchProcess');
 
 });
