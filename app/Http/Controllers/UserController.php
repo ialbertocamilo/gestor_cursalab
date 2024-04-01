@@ -77,7 +77,6 @@ class UserController extends Controller
     public function store(AdminStoreRequest $request)
     {
         $data = $request->validated();
-
         $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
 
         $user = User::create($data);

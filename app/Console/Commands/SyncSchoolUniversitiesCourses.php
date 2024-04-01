@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 class SyncSchoolUniversitiesCourses extends Command
 {
 
-    protected $signature = 'sync:school-university-courses';
+    protected $signature = 'sync:school-university-courses {workspace_id?}';
 
     protected $description = 'Sync courses from master manager';
 
@@ -32,9 +32,13 @@ class SyncSchoolUniversitiesCourses extends Command
     }
 
     private function syncCourses(){
+        $workspace_id = $this->argument('workspace_id');
+
         $cursalab_university_name = 'Cursalab University - T 🎓';
         $courses_to_migrate = CourseM::with(['type:id,code','modality:id,code'])->orderBy('position','ASC')->where('active',1)->get();
-        $workspaces = Workspace::select('id','name','qualification_type_id')->whereRelation('functionalities','code','cursalab-university')->get();
+        $workspaces = Workspace::select('id','name','qualification_type_id')->when($workspace_id, function($q) use ($workspace_id){
+            $q->where('id', $workspace_id);
+        })->whereRelation('functionalities','code','cursalab-university')->get();
         // dd($workspaces->pluck('id','name'));
         $filter_questions_by_date = false;
         foreach ($workspaces as $workspace) {
@@ -101,6 +105,7 @@ class SyncSchoolUniversitiesCourses extends Command
         info('start migrate questions');
         QuestionM::migrateQuestions($filter_questions_by_date);
         info('finish migrate questions');
+        return;
     }
     function duplicateCourse($course,$workspace,$school,$_course_to_update=null){
         if($course->imagen || $course->imagen != $_course_to_update?->imagen){
