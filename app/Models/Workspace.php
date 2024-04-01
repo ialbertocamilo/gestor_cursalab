@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\CheckList;
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mongo\JarvisAttempt;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -940,7 +941,7 @@ class Workspace extends BaseModel
         //Duplicate FUNCTIONALITIES
         $duplicate_functionalities = json_decode($data['duplicate']);
         if(isset($duplicate_functionalities->checklist) && $duplicate_functionalities->checklist){
-            Checklist::duplicateChecklistFromWorkspace($this,$workspace);
+            CheckList::duplicateChecklistFromWorkspace($this,$workspace);
         }
         info('duplicate duplicateBenefitsFromWorkspace');
         if(isset($duplicate_functionalities->benefits) && $duplicate_functionalities->benefits){
