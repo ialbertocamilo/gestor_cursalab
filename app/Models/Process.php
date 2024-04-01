@@ -489,6 +489,7 @@ class Process extends BaseModel
 
         $process = Process::where('id', $process_id)
                     ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id')
+                    ->active()
                     ->first();
         if($process)
         {
@@ -496,7 +497,10 @@ class Process extends BaseModel
             $process->completed_instruction = $user_summary?->completed_instruction ?? false;
             $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             $total_activities = 0;
-            $process->stages = $process->stages()->select('id', 'duration', 'position', 'title')->get();
+            $process->stages = $process->stages()
+                                    ->select('id', 'duration', 'position', 'title')
+                                    ->active()
+                                    ->get();
             $days_stages = 0;
             if($process->stages->count() > 0) {
                 foreach ($process->stages as $index => $stage) {
@@ -518,6 +522,7 @@ class Process extends BaseModel
                                                     ->with(['type']);
                                                 }])
                                                 ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->active()
                                                 ->get();
                     if($stage->activities->count() > 0) {
                         foreach ($stage->activities as $activity) {
