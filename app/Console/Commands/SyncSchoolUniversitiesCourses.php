@@ -107,10 +107,7 @@ class SyncSchoolUniversitiesCourses extends Command
             $this->copyFileBetweenBuckets($course->imagen);
         }
         if($course->imagen && !Storage::disk('s3')->exists($course->imagen)){
-            $this->copyFileBetweenBuckets($course->imagen,$_course_to_update?->id == 2214);
-        }
-        if($_course_to_update?->id == 2214){
-            dd($course->imagen != $_course_to_update?->imagen,$course->imagen,$_course_to_update?->imagen,Storage::disk('s3')->exists($course->imagen));
+            $this->copyFileBetweenBuckets($course->imagen);
         }
         $type_id =  Taxonomy::getFirstData('course', 'type', $course->type->code)->id;
         $modality_id = Taxonomy::getFirstData('course', 'modality', $course->modality->code)->id;
@@ -179,7 +176,7 @@ class SyncSchoolUniversitiesCourses extends Command
         ];
         $_topic=Topic::storeRequest($topic_data,$_topic_to_update);
     }
-    function copyFileBetweenBuckets(string $sourceKey,$log=false){
+    function copyFileBetweenBuckets(string $sourceKey){
         $bucket_master_manager = 'statics-zona1';
         $folder_master_manager = 'master-cursalab';
         $config = config('filesystems.disks.s3');
@@ -198,16 +195,13 @@ class SyncSchoolUniversitiesCourses extends Command
         ]);
 
         $bucket = $bucket_master_manager;
-        $sourceKey = $folder_master_manager . '/' . $sourceKey;
+        $from_sourceKey = $folder_master_manager . '/' . $sourceKey;
 
         $result = $s3Client->getObject([
             'Bucket' => $bucket,
-            'Key' =>  $sourceKey,
+            'Key' =>  $from_sourceKey,
         ]);
         $content = $result['Body']->getContents();
-        if($log){
-            dd($sourceKey);
-        }
         Storage::disk('s3')->put($sourceKey, $content, 'public');
         return true;   
     }
