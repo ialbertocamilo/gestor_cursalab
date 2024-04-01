@@ -293,7 +293,7 @@ class Process extends BaseModel
         $values_criterio_user = [];
         if($by_supervisor){
             $supervisor_criteria = json_decode($process->supervisor_criteria);
-            if(count($supervisor_criteria)){
+            if($supervisor_criteria && count($supervisor_criteria)){
                 $values_criterio_user =  $by_supervisor->criterion_values
                                         ->whereIn('criterion_id',$supervisor_criteria)
                                         ->map(fn($c)=>['criterion_id'=>$c->criterion_id,'criterion_value_id'=>$c->id])->values()->toArray();
@@ -488,11 +488,11 @@ class Process extends BaseModel
         $current_date = now()->startOfDay();
 
         $process = Process::where('id', $process_id)
-                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd')
+                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id')
                     ->first();
         if($process)
         {
-            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction')->first();
+            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction', 'status_id')->first();
             $process->completed_instruction = $user_summary?->completed_instruction ?? false;
             $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             $total_activities = 0;
@@ -562,9 +562,29 @@ class Process extends BaseModel
 
             $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
 
+            $process->certificate = [
+                'enabled' => false,
+                'message' => null,
+                'url' => null,
+                'login_aprendizaje' => false
+            ];
+            
+            $user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
+            if($user_summary?->status_id == $user_process_finished?->id)
+            {
+                $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
+                $process->certificate = [
+                    'enabled' => true,
+                    'message' => '¡Gracias por realizar este proceso con nosotros!',
+                    'url' => $certificate?->path_image ?? null,
+                    'login_aprendizaje' => false
+                ];
+            }
+
             unset($process->limit_absences);
             unset($process->absences);
             unset($process->count_absences);
+            unset($process->certificate_template_id);
         }
 
         return $process;
