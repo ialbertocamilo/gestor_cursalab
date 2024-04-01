@@ -517,7 +517,7 @@ class Process extends BaseModel
                                                     $r->select('id', 'model_id', 'type_id', 'title', 'description')
                                                     ->with(['type']);
                                                 }])
-                                                ->select('id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
                                                 ->get();
                     if($stage->activities->count() > 0) {
                         foreach ($stage->activities as $activity) {
