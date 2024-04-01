@@ -1299,6 +1299,8 @@ class Topic extends BaseModel
             case 'pdf':
             case 'office':
                 return get_media_url($value, 's3');
+            case 'image':
+                return get_media_url($value, 's3');
             default:
                 return $value;
         }
