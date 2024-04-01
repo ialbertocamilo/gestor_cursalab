@@ -206,7 +206,7 @@ class SyncSchoolUniversitiesCourses extends Command
         ]);
         $content = $result['Body']->getContents();
         if($log){
-            dd($content,$sourceKey);
+            dd($sourceKey);
         }
         Storage::disk('s3')->put($sourceKey, $content, 'public');
         return true;   
