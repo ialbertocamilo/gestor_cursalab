@@ -5,15 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\Poll;
 use App\Models\Post;
+use App\Models\Role;
 use App\Models\Curso;
 use App\Models\Media;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
+
 use App\Models\School;
 
 use App\Models\Ability;
-
 use App\Models\Usuario;
 use App\Models\Abconfig;
 use App\Models\Pregunta;
@@ -23,11 +24,13 @@ use App\Models\Categoria;
 use App\Models\MediaTema;
 use App\Models\Workspace;
 use Illuminate\Support\Str;
+use App\Models\AssignedRole;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
 use Illuminate\Support\Facades\DB;
 use App\Models\TopicAssistanceUser;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
@@ -89,7 +92,16 @@ class TemaController extends Controller
 
     public function searchTema(School $school, Course $course, Topic $topic)
     {
+         // Checks whether current user is a super user
+        Auth::checK();
+        $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
+        if($school->code == 'cursalab-university'){
+            $topic->media->map(function($m){
+                $m['value'] = '**********';
+                return $m;
+            });
+        }
         $topic->tags = [];
 
         $topic->load('qualification_type');
