@@ -147,6 +147,9 @@ class SyncSchoolUniversitiesCourses extends Command
         $medias = [];
         $_medias = $topic->medias->sortBy('position')->toArray();
         foreach ($_medias as $media) {
+            if(in_array($media['type_id'],['pdf','audio','office','image','video']) && !Storage::disk('s3')->exists($media['value'])){
+                $this->copyFileBetweenBuckets($media['value']);
+            }
             $medias[] = [
                 "valor" => $media['value'],
                 "titulo" => $media['title'],
