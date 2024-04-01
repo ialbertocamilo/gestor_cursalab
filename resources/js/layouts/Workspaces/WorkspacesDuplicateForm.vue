@@ -40,6 +40,7 @@
                                         <v-checkbox
                                             hide-details
                                             label="Checklist"
+                                            v-model="resource.duplicate.checklist"
                                         >
                                         </v-checkbox>
                                     </v-col>
@@ -47,6 +48,7 @@
                                         <v-checkbox
                                             hide-details
                                             label="Beneficios"
+                                            v-model="resource.duplicate.benefits"
                                         >
                                         </v-checkbox>
                                     </v-col>
@@ -54,6 +56,7 @@
                                         <v-checkbox
                                             hide-details
                                             label="Protocolos y Documentos"
+                                            v-model="resource.duplicate.protocols_and_documents"
                                         >
                                         </v-checkbox>
                                     </v-col>
@@ -61,6 +64,7 @@
                                         <v-checkbox
                                             hide-details
                                             label="Diplomas"
+                                            v-model="resource.duplicate.certificates"
                                         >
                                         </v-checkbox>
                                     </v-col>
@@ -68,6 +72,7 @@
                                         <v-checkbox
                                             hide-details
                                             label="Reconocimiento"
+                                            v-model="resource.duplicate.campaigns"
                                         >
                                         </v-checkbox>
                                     </v-col>
@@ -127,11 +132,25 @@ export default {
                 url_powerbi: '',
                 logo: null,
                 logo_negativo: null,
+                duplicate:{
+                    checklist:true,
+                    benefits:true,
+                    campaigns:true,
+                    protocols_and_documents:true,
+                    certificates:true,
+                }
                 // selected_criteria: {},
                 // selected_functionality: {}
             },
             limit_allowed_users: null,
             resource: {
+                duplicate:{
+                    checklist:true,
+                    benefits:true,
+                    campaigns:true,
+                    protocols_and_documents:true,
+                    certificates:true,
+                }
             },
             functionalities: [],
             rules: {
@@ -184,7 +203,9 @@ export default {
                 let formData = vue.getMultipartFormData(
                     method, vue.resource, fields, file_fields
                 );
-
+                formData.set(
+                    'duplicate', JSON.stringify(vue.resource.duplicate)
+                );
                 // Submit data to be saved
 
                 vue.$http

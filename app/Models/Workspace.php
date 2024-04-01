@@ -763,15 +763,15 @@ class Workspace extends BaseModel
             'medias', // OK
             'polls.questions', //
         ];
-
+        
+        
         $workspace = $this->replicate();
-
         $workspace->push();
 
         $workspace->update($data);
 
         $workspace->push();
-
+       
         $this->load($relationships);
 
         $_crit_module = Criterion::where('code', 'module')->first();
@@ -905,7 +905,8 @@ class Workspace extends BaseModel
         $workspace->medias()->createMany($this->medias->toArray());
 
         $modules_id = $this->subworkspaces->pluck('criterion_value_id')->toArray();
-
+        
+        //Duplicate Announcement
         $_announcements = Announcement::whereRelationIn('criterionValues', 'criterion_value_id', $modules_id)->get();
 
         $modules_ids = $workspace->subworkspaces()->pluck('criterion_value_id')->toArray();
@@ -917,7 +918,7 @@ class Workspace extends BaseModel
 
             $announcement->criterionValues()->sync($modules_ids);
         }
-
+        //Duplicate Videoteca
         foreach ($this->videotecas as $_videoteca) {
 
             $_videoteca_data = $_videoteca->toArray();
@@ -932,7 +933,21 @@ class Workspace extends BaseModel
             $videoteca->modules()->sync($subworkspace_ids);
             // $videoteca->tags()->sync($_videoteca->tags);
         }
-
+        //Duplicate FUNCTIONALITIES
+        $duplicate_functionalities = json_decode($data['duplicate']);
+        if(isset($duplicate_functionalities->checklist) && $duplicate_functionalities->checklist){
+            Checklist::duplicateChecklistFromWorkspace($this,$workspace);
+        }
+        if(isset($duplicate_functionalities->benefits) && $duplicate_functionalities->benefits){
+            Benefit::duplicateBenefitsFromWorkspace($this,$workspace);
+        }
+        if(isset($duplicate_functionalities->certificates) && $duplicate_functionalities->certificates){
+            Certificate::duplicateCertificatesFromWorkspace($this,$workspace);
+        }
+        if(isset($duplicate_functionalities->protocols_and_documents) && $duplicate_functionalities->protocols_and_documents){
+            $current_modules_ids = $this->subworkspaces->pluck('id');
+            Vademecum::duplicateVademecumsFromWorkspace($current_modules_ids,$workspace);
+        }
         return $workspace;
     }
 

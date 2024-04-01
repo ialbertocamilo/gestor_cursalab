@@ -614,4 +614,24 @@ class Certificate extends Model
 
         return $image;
     }
+    protected function duplicateCertificatesFromWorkspace($current_workspace,$new_workspace){
+        $certificates = Certificate::select('media_id', 'title', 'path_img', 'info_bg', 'd_objects', 's_objects', 'active')
+        ->withWhereHas('media', function($query) use($current_workspace){
+            $query->select('id','title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id','ia_convert')
+            ->where('workspace_id', $current_workspace->id);
+        })->get();
+        foreach ($certificates as $certificate) {
+            $media = $certificate->media->toArray();
+            $media['workspace_id'] = $new_workspace->id;
+            unset($media->id);
+            $_media = new Media();
+            $_media->fill($media);
+            $_media->save();
+            $certificate = $certificate->toArray();
+            $certificate['media_id'] = $_media->id;
+            $_certificate = new Certificate();
+            $_certificate->fill($certificate);
+            $_certificate->save();
+        }
+    }
 }

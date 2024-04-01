@@ -322,7 +322,6 @@ export default {
         downloadUsers(){
             let vue = this;
             let users_document = vue.segment.criteria_selected.map(u =>[ u.document]);
-            console.log(users_document,users_document);
             vue.descargarExcelwithValuesInArray({
                 headers:['DOCUMENTO'],
                 values:users_document,
