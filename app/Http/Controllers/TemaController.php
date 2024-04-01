@@ -231,7 +231,7 @@ class TemaController extends Controller
         return $this->success($response);
     }
     private function uploadQRTopic($data){
-        if(str_contains($data['path_qr'], 'base64')){
+        if(isset($data['path_qr']) && str_contains($data['path_qr'], 'base64')){
             $name =  'qr/'.Str::slug($data['name']).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
             $name = Str::of($name)->limit(100);
             $path = $name.'.png';
