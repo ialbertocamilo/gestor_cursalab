@@ -175,6 +175,9 @@ class ProcessController extends Controller
      */
     public function status(Process $process, Request $request)
     {
+        if(!$process->active){
+            Process::setUsersToUpdateBackground($process->id);
+        }
         $process->update(['active' => !$process->active]);
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);

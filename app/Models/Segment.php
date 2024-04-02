@@ -439,7 +439,9 @@ class Segment extends BaseModel{
                 $course = Course::find($request->model_id);
                 Summary::updateUsersByCourse($course,null,false,false,'segmented',send_notification:true);
             }
-
+            if($request->model_type == 'App\\Models\\Process'){
+                Process::setUsersToUpdateBackground($request->model_id);
+            }
             DB::commit();
         } catch (\Exception $e) {
 

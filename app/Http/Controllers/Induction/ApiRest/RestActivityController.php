@@ -262,59 +262,113 @@ class RestActivityController extends Controller
                     $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
                     $summary_activity->progress = 100;
                     $summary_activity->save();
+                    $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
+                }
+            }
+            else if($activity->model_type == Poll::class)
+            {
+                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                if($summary_activity)
+                {
+                    $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                    $summary_activity->progress = 100;
+                    $summary_activity->save();
+                    $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
+                }
+            }
+            else if($activity->model_type == Meeting::class)
+            {
+                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                if($summary_activity)
+                {
+                    $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                    $summary_activity->progress = 100;
+                    $summary_activity->save();
+                    $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
+                }
+            }
+            else if($activity->model_type == Checklist::class)
+            {
+                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                if($summary_activity)
+                {
+                    $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                    $summary_activity->progress = 100;
+                    $summary_activity->save();
+                    $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
                 }
             }
             else if($activity->model_type == Topic::class)
             {
-                $activity_topic = $activity->model;
+                $type_activity_temas = Taxonomy::getFirstData('processes', 'activity_type', 'temas')?->id;
+                $type_activity_evaluacion = Taxonomy::getFirstData('processes', 'activity_type', 'evaluacion')?->id;
 
-                $media_topics = MediaTema::where('topic_id',$activity_topic->id)->orderBy('position')->get();
+                if($type_activity_temas == $activity->type_id)
+                {
+                    $activity_topic = $activity->model;
 
-                $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
-                                                ->where('topic_id', $activity_topic->id)
-                                                ->where('user_id', $user->id)
-                                                ->first();
+                    $media_topics = MediaTema::where('topic_id',$activity_topic->id)->orderBy('position')->get();
 
-                $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
+                    $summary_topic = SummaryTopic::select('id','media_progress','last_media_access','last_media_duration')
+                                                    ->where('topic_id', $activity_topic->id)
+                                                    ->where('user_id', $user->id)
+                                                    ->first();
 
-                $count_media_topics = $media_topics->count();
-                $count_media_completed = 0;
+                    $media_progress = !is_null($summary_topic?->media_progress) ? json_decode($summary_topic?->media_progress) : null;
 
-                foreach ($media_topics as $media) {
-                    if(!is_null($media_progress)){
-                        foreach($media_progress as $medp){
-                            if($medp->media_topic_id == $media->id){
-                                if($medp->status == 'revisado')
-                                    $count_media_completed++;
-                                break;
+                    $count_media_topics = $media_topics->count();
+                    $count_media_completed = 0;
+
+                    foreach ($media_topics as $media) {
+                        if(!is_null($media_progress)){
+                            foreach($media_progress as $medp){
+                                if($medp->media_topic_id == $media->id){
+                                    if($medp->status == 'revisado')
+                                        $count_media_completed++;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
 
-                $progress = $count_media_completed > 0 && $count_media_topics > 0 ? round(((($count_media_completed * 100 / $count_media_topics) * 100) / 100),2) : 0;
+                    $progress = $count_media_completed > 0 && $count_media_topics > 0 ? round(((($count_media_completed * 100 / $count_media_topics) * 100) / 100),2) : 0;
 
-                if($progress == 0) {
-                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'pending')?->id;
-                }
-                else if($progress >= 100) {
-                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
-                }
-                else {
-                    $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'in-progress')?->id;
-                }
+                    if($progress == 0) {
+                        $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'pending')?->id;
+                        $response['message'] = 'Aún no terminas de revisar la actividad <b>'.$activity->title.'</b>.';
+                    }
+                    else if($progress >= 100) {
+                        $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                        $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
+                    }
+                    else {
+                        $status_progress = Taxonomy::getFirstData('user-activity', 'status', 'in-progress')?->id;
+                        $response['message'] = 'Aún no terminas de revisar la actividad <b>'.$activity->title.'</b>.';
+                    }
 
-                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
-                if($summary_activity)
+                    $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                    if($summary_activity)
+                    {
+                        $summary_activity->status_id = $status_progress;
+                        $summary_activity->progress = $progress;
+                        $summary_activity->save();
+                    }
+                }
+                else if($type_activity_evaluacion == $activity->type_id)
                 {
-                    $summary_activity->status_id = $status_progress;
-                    $summary_activity->progress = $progress;
-                    $summary_activity->save();
+                    $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+                    if($summary_activity)
+                    {
+                        $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                        $summary_activity->progress = 100;
+                        $summary_activity->save();
+                        $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
+                    }
                 }
-
             }
         }
+        $response['error'] = false;
 
-        return response()->json(['error' => false], 200);
+        return $this->success($response);
     }
 }

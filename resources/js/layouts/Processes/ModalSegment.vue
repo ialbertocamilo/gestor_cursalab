@@ -554,7 +554,7 @@ export default {
         },
         showModalCondition(){
             const vue = this;
-            const responseCheck = vue.checkIfExistCriteria(vue.segments, 'module');
+            const responseCheck = [] // vue.checkIfExistCriteria(vue.segments, 'module');
 
             let state = true;
 

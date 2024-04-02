@@ -1584,22 +1584,24 @@ export default {
             return messages.join('<br>');
         },
         addNewProcessInline() {
-            let vue = this;
-            let new_item = {
-                title: '',
-                edit_inline: true,
-                assigned_users: 0,
-                config_completed: false,
-                stages_count: 0,
-                certificate_template_id: null,
-                active: false,
-                disabled_btns_actions: true
-            };
-            vue.rows.push(new_item);
-            this.$nextTick(() => {
-                const editButtonRef = this.$refs.input_edit_process;
-                editButtonRef.focus();
-            });
+            // let vue = this;
+            // let new_item = {
+            //     title: '',
+            //     edit_inline: true,
+            //     assigned_users: 0,
+            //     config_completed: false,
+            //     stages_count: 0,
+            //     certificate_template_id: null,
+            //     active: false,
+            //     disabled_btns_actions: true
+            // };
+            // vue.rows.push(new_item);
+            // this.$nextTick(() => {
+            //     const editButtonRef = this.$refs.input_edit_process;
+            //     editButtonRef.focus();
+            // });
+            let vue = this
+            vue.$emit('saveNewProcessInline', null)
         },
         saveNewProcessInline( item ) {
             let vue = this

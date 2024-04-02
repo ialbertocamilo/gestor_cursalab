@@ -234,17 +234,23 @@ class Process extends BaseModel
                 $process->update($data);
             else:
                 $process = self::create($data);
-                foreach ($data['subworkspaces'] as  $subworkspace) {
-                    SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
-                        'subworkspace_id'=>$subworkspace,
-                        'process_id' => $process->id
-                    ],[
-                        'subworkspace_id'=>$subworkspace,
-                    ]);
+                if(isset($data['subworkspaces']))
+                {
+                    foreach ($data['subworkspaces'] as  $subworkspace) {
+                        SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
+                            'subworkspace_id'=>$subworkspace,
+                            'process_id' => $process->id
+                        ],[
+                            'subworkspace_id'=>$subworkspace,
+                        ]);
+                    }
                 }
             endif;
 
-            $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
+            if(isset($data['subworkspaces']))
+            {
+                $process->subworkspaces()->sync($data['subworkspaces'] ?? []);
+            }
 
 
             //instructions
@@ -287,7 +293,7 @@ class Process extends BaseModel
         $values_criterio_user = [];
         if($by_supervisor){
             $supervisor_criteria = json_decode($process->supervisor_criteria);
-            if(count($supervisor_criteria)){
+            if($supervisor_criteria && count($supervisor_criteria)){
                 $values_criterio_user =  $by_supervisor->criterion_values
                                         ->whereIn('criterion_id',$supervisor_criteria)
                                         ->map(fn($c)=>['criterion_id'=>$c->criterion_id,'criterion_value_id'=>$c->id])->values()->toArray();
@@ -314,6 +320,20 @@ class Process extends BaseModel
     }
 
     // Api
+    protected function syncEnrolledDateProcess($user){
+        $processes = Process::getProcessesAssigned($user);
+        foreach ($processes as $process_id) {
+            ProcessSummaryUser::enrolledProcess($user->id,$process_id);
+        }
+    }
+    protected function setUsersToUpdateBackground($process_id){
+        $course = new Course();
+        $process = Process::find($process_id);
+        $users_id =$course->usersSegmented($process->segments,'users_id');
+        if(count($users_id)>0){
+            Summary::updateUsersByCourse($process,$users_id,false,false,'segmented',send_notification:false);
+        }
+    }
     protected function getProcessesAssigned( $user )
     {
         $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
@@ -465,28 +485,44 @@ class Process extends BaseModel
         $user = $data['user'];
 
         $process_id = $data['process'];
-
+        $current_date = now()->startOfDay();
 
         $process = Process::where('id', $process_id)
-                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd')
+                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id')
+                    ->active()
                     ->first();
         if($process)
         {
-            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction')->first();
+            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction', 'status_id')->first();
             $process->completed_instruction = $user_summary?->completed_instruction ?? false;
-
+            $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             $total_activities = 0;
-            $process->stages = $process->stages()->select('id', 'duration', 'position', 'title')->get();
+            $process->stages = $process->stages()
+                                    ->select('id', 'duration', 'position', 'title')
+                                    ->active()
+                                    ->get();
+            $days_stages = 0;
             if($process->stages->count() > 0) {
                 foreach ($process->stages as $index => $stage) {
-                    $stage->status = $index == 0 ? 'progress' : 'locked';
+                    // $stage->status = $index == 0 ? 'progress' : 'locked';
+                    $stage->status = 'locked';
+                    if($user_summary_process?->enrolled_date){
+                        $enrolled_date = Carbon::create($user_summary_process->enrolled_date);
+                        $days_stages = $days_stages + $stage->duration;
+                        $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
+                        $diff_days = $current_date->diffInDays($finish_days_stage);
+                        if($diff_days <= $stage->duration){
+                            $stage->status = 'progress';
+                        }
+                    }
                     $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
                     $stage->activities = $stage->activities()
                                                 ->with(['type', 'requirement' => function($r){
                                                     $r->select('id', 'model_id', 'type_id', 'title', 'description')
                                                     ->with(['type']);
                                                 }])
-                                                ->select('id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->active()
                                                 ->get();
                     if($stage->activities->count() > 0) {
                         foreach ($stage->activities as $activity) {
@@ -509,8 +545,19 @@ class Process extends BaseModel
 
             $process->percentage = 0;
 
-            $count_absences = $user->summary_process()->where('process_id', $process->id)->first()?->absences ?? 0;
-            $process->user_absences = $process->absences ? $count_absences.'/'.$process->absences : null;
+            if($process->count_absences) {
+                $count_absences = $user_summary_process?->absences ?? 0;
+                if($process->limit_absences) {
+                    $process->user_absences = $count_absences;
+                }
+                else {
+                    $absences = $process->absences ?? 0;
+                    $process->user_absences = $count_absences.'/'.$absences;
+                }
+            }
+            else {
+                $process->user_absences = null;
+            }
 
             $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
             $user_activities = ProcessSummaryActivity::where('user_id', $user->id)->where('status_id', $status_finished)->count();
@@ -520,9 +567,29 @@ class Process extends BaseModel
 
             $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
 
+            $process->certificate = [
+                'enabled' => false,
+                'message' => null,
+                'url' => null,
+                'login_aprendizaje' => false
+            ];
+            
+            $user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
+            if($user_summary?->status_id == $user_process_finished?->id)
+            {
+                $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
+                $process->certificate = [
+                    'enabled' => true,
+                    'message' => '¡Gracias por realizar este proceso con nosotros!',
+                    'url' => $certificate?->path_image ?? null,
+                    'login_aprendizaje' => false
+                ];
+            }
+
             unset($process->limit_absences);
             unset($process->absences);
             unset($process->count_absences);
+            unset($process->certificate_template_id);
         }
 
         return $process;

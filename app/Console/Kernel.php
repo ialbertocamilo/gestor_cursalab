@@ -32,7 +32,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('reinicios:programados')->everyFifteenMinutes();
         $schedule->command('summary:reset-user-attempts')->everyFiveMinutes();
         // $schedule->command('delete:err_masivos')->dailyAt('03:00');
-
+        
+        $schedule->command('update:summary-user-process')->everyFiveMinutes();
         $schedule->command('summary:update-data')->everyFifteenMinutes()
          ->withoutOverlapping();
         // $schedule->command('summary:update-data-v2')->everyFifteenMinutes();
