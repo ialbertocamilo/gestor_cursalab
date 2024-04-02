@@ -1002,6 +1002,13 @@ class Segment extends BaseModel{
         try {
             DB::beginTransaction();
 
+            foreach ($destinationCoursesIds as $destinationCourseId) {
+
+                // Delete course's old segments and segments values
+
+                self::deleteCourseSegments($destinationCourseId);
+            }
+
             foreach ($segments as $originSegment) {
 
                 $originSegmentValues = SegmentValue::query()
@@ -1015,10 +1022,6 @@ class Segment extends BaseModel{
                 $segmentTemplate['active'] = 1;
 
                 foreach ($destinationCoursesIds as $destinationCourseId) {
-
-                    // Delete course's old segments and segments values
-
-                    self::deleteCourseSegments($destinationCourseId);
 
                     // Create new segment for current course
 
