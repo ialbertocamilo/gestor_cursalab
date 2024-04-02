@@ -149,10 +149,10 @@ class RestQuizController extends Controller
         if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [A]'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-        if((!$row && $code_modality != 'asynchronous') || $request->is_offline){
+        if(!$row && ($code_modality != 'asynchronous' || $request->is_offline)){
             $user = auth()->user();
-            $row = SummaryTopic::getCurrentRowOrCreate($topic, $user);
-            SummaryCourse::getCurrentRowOrCreate($topic->course, $user);
+            $row = SummaryTopic::storeData($topic, $user);
+            SummaryCourse::storeData($topic->course, $user);
         }
         if (!$row)
             return response()->json(['error' => true, 'data' => ['msg' => 'Tema no iniciado.']], 200);
