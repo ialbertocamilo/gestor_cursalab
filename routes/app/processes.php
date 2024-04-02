@@ -20,6 +20,9 @@ Route::controller(RestProcessController::class)->group(function () {
     Route::get('/user/processes/{process}/data/instructions', 'getUserProcessInstructions');
     Route::post('/user/processes/{process}/data/instructions/save', 'saveUserProcessInstructions');
 
+    
+    Route::get('/faqs', 'getFaqs');
+
     // momentaneo
     Route::get('/', 'getSupervisorProcesses');
     Route::get('/{process}/data', 'getProcess');

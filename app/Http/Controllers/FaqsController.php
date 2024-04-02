@@ -56,11 +56,15 @@ class FaqsController extends Controller
         // Retrieve taxonomy id for FAQ
 
         $taxonomy = Taxonomy::getFirstData('post', 'section', 'faq');
-
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
         // Set data to store
 
         $data = $request->validated();
         $data['section_id'] = $taxonomy->id;
+        $data['platform_id_onb'] = $type_id;
         $faq = Post::create($data);
 
         SortingModel::reorderItems(

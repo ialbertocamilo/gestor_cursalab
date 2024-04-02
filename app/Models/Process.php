@@ -20,6 +20,7 @@ class Process extends BaseModel
         'workspace_id',
         'title',
         'description',
+        'block_stages',
         'count_absences',
         'limit_absences',
         'absences',
@@ -39,7 +40,8 @@ class Process extends BaseModel
         'image_guia',
         'image_guide_name',
         'supervisor_criteria',
-        'qualification_type_id'
+        'qualification_type_id',
+        'position'
     ];
 
     protected $casts = [
@@ -47,6 +49,7 @@ class Process extends BaseModel
         'count_absences' => 'boolean',
         'limit_absences' => 'boolean',
         'config_completed' => 'boolean',
+        'block_stages' => 'boolean'
     ];
 
     protected $hidden = [
@@ -488,7 +491,7 @@ class Process extends BaseModel
         $current_date = now()->startOfDay();
 
         $process = Process::where('id', $process_id)
-                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id')
+                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id', 'block_stages', 'position')
                     ->active()
                     ->first();
         if($process)
@@ -504,15 +507,20 @@ class Process extends BaseModel
             $days_stages = 0;
             if($process->stages->count() > 0) {
                 foreach ($process->stages as $index => $stage) {
-                    // $stage->status = $index == 0 ? 'progress' : 'locked';
-                    $stage->status = 'locked';
-                    if($user_summary_process?->enrolled_date){
-                        $enrolled_date = Carbon::create($user_summary_process->enrolled_date);
-                        $days_stages = $days_stages + $stage->duration;
-                        $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
-                        $diff_days = $current_date->diffInDays($finish_days_stage);
-                        if($diff_days <= $stage->duration){
-                            $stage->status = 'progress';
+                    // segun el copy, si block_stages es 1 entonces siempre se debe mostrar
+                    if($process->block_stages) {
+                        $stage->status = 'progress';
+                    }
+                    else {
+                        $stage->status = 'locked';
+                        if($user_summary_process?->enrolled_date){
+                            $enrolled_date = Carbon::create($user_summary_process->enrolled_date);
+                            $days_stages = $days_stages + $stage->duration;
+                            $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
+                            $diff_days = $current_date->diffInDays($finish_days_stage);
+                            if($diff_days <= $stage->duration){
+                                $stage->status = 'progress';
+                            }
                         }
                     }
                     $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
@@ -521,7 +529,7 @@ class Process extends BaseModel
                                                     $r->select('id', 'model_id', 'type_id', 'title', 'description')
                                                     ->with(['type']);
                                                 }])
-                                                ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id')
+                                                ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id', 'position')
                                                 ->active()
                                                 ->get();
                     if($stage->activities->count() > 0) {

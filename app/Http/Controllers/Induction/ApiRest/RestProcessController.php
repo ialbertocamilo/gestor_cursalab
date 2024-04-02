@@ -9,6 +9,7 @@ use App\Models\CheckList;
 use App\Models\ChecklistRpta;
 use App\Models\ChecklistRptaItem;
 use App\Models\EntrenadorUsuario;
+use App\Models\Post;
 use App\Models\Process;
 use App\Models\ProcessInstructor;
 use App\Models\ProcessSummaryUser;
@@ -21,6 +22,15 @@ use Illuminate\Support\Facades\Auth;
 
 class RestProcessController extends Controller
 {
+    
+    public function getFaqs()
+    {
+        $tax_id = Taxonomy::where('type', 'section')->where('code', 'faq')->first('id');
+        $platform_id = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+        $preguntas = Post::where('section_id', $tax_id->id)->where('platform_id_onb', $platform_id?->id)->get();
+
+        return $this->success($preguntas);
+    }
 
     public function getProcess(Process $process)
     {

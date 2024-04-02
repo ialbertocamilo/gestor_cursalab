@@ -157,6 +157,24 @@
                                             </div>
                                         </v-col>
                                     </v-row>
+                                    <v-row>
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.block_stages"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
