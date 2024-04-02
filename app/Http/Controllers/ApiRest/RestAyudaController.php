@@ -200,8 +200,8 @@ class RestAyudaController extends Controller
     public function preguntas_frecuentes()
     {
         $tax_id = Taxonomy::where('type', 'section')->where('code', 'faq')->first('id');
-
-        $preguntas = Post::where('section_id', $tax_id->id)->get();
+        $platform_id = Taxonomy::getFirstData('project', 'platform', 'training');
+        $preguntas = Post::where('section_id', $tax_id->id)->where('platform_id_onb', $platform_id?->id)->get();
 
         return response()->json(compact('preguntas'));
     }
