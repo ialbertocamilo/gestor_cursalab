@@ -389,7 +389,7 @@ class Process extends BaseModel
             $user->load('summary_process');
             // if(count($user->processes)) {
                 $participants = $this->getProcessAssistantsList(process:$process,by_supervisor:$user);
-                $process->participants = $participants->count() ?? 0;
+                $process->participants = $participants->total() ?? 0;
                 $process->students = $participants;
                 $param_resource = [
                     'process_id' => $process->id,
@@ -461,7 +461,7 @@ class Process extends BaseModel
             }
             $process->criteria_assigned = implode(', ',$criteria_assigned);
             $participants = $this->getProcessAssistantsList($process);
-            $process->participants = $participants->count() ?? 0;
+            $process->participants = $participants->total() ?? 0;
 
             $process_duration = 0;
             foreach($process->stages as $stage) {

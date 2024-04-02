@@ -693,7 +693,7 @@ class CheckList extends BaseModel
 
     protected function getStudentChecklistInfoById($checklist_id, $student_id = null, $trainer_id = null){
         $alumno_id = $student_id ? $student_id : Auth::user()?->id;
-
+        
         $user = User::where('id', $alumno_id)->first();
         if($trainer_id) {
             $entrenador = null;

@@ -125,18 +125,21 @@ class RestActivityController extends Controller
     public function ActivityChecklist(Process $process, Checklist $checklist, Request $request)
     {
         $user = Auth::user();
-
+        
         $checklistRpta = ChecklistRpta::where('checklist_id',$checklist->id)
                                         ->where('student_id', $user->id)
+                                        ->whereNotNull('coach_id')
                                         ->first();
-        if (!$checklistRpta) {
-            $checklistRpta = ChecklistRpta::create([
-                'checklist_id' => $checklist->id,
-                'student_id' => $user->id,
-                'percent' => 0
-            ]);
-        }
-        $response = CheckList::getStudentChecklistInfoById($checklist?->id);
+                                        
+        $trainer_id = $checklistRpta?->coach_id ?? null;
+        // if (!$checklistRpta) {
+        //     $checklistRpta = ChecklistRpta::create([
+        //         'checklist_id' => $checklist->id,
+        //         'student_id' => $user->id,
+        //         'percent' => 0
+        //     ]);
+        // }
+        $response = CheckList::getStudentChecklistInfoById($checklist?->id, $user?->id, $trainer_id);
 
         return response()->json($response, 200);
     }
