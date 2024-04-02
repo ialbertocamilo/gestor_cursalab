@@ -167,7 +167,7 @@ class Topic extends BaseModel
 
     protected function storeRequest($data, $tema = null)
     {
-        try {
+        // try {
             DB::beginTransaction();
 
             $isNew = false;
@@ -262,11 +262,11 @@ class Topic extends BaseModel
 
             DB::commit();
             return $tema;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            info($e);
-            return $e;
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     info($e);
+        //     return $e;
+        // }
     }
 
     /**
@@ -1298,6 +1298,8 @@ class Topic extends BaseModel
             case 'h5p':
             case 'pdf':
             case 'office':
+                return get_media_url($value, 's3');
+            case 'image':
                 return get_media_url($value, 's3');
             default:
                 return $value;

@@ -22,6 +22,7 @@ class WorkspaceDuplicateRequest extends FormRequest
             'logo_negativo' => 'nullable',
             'file_logo' => 'required_without:logo',
             'file_logo_negativo' => 'nullable',
+            'duplicate'=>'nullable'
         ];
     }
 

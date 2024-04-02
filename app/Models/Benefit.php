@@ -1617,4 +1617,40 @@ class Benefit extends BaseModel
             }
         }
     }
+
+    protected function duplicateBenefitsFromWorkspace($current_workspace,$new_workspace){
+        $benefits = Benefit::select('id','type_id','speaker_id','status_id','poll_id','group_id','title','description','image','cupos',
+        'inicio_inscripcion','fin_inscripcion','fecha_liberacion','fecha_encuesta','correo','duracion',
+        'promotor','promotor_imagen','direccion','referencia','accesible','dificultad','active'
+    )->with([
+        'speaker:id,name,biography,email,specialty,image,active',
+        'properties:id,benefit_id,type_id,name,value,value_date,value_time,position,active'
+    ])->where('workspace_id',$current_workspace->id)->get();
+        foreach ($benefits as $benefit) {
+            $_properties = $benefit->properties->map(function ($p) {
+                unset($p['benefit_id']);
+                unset($p['id']);
+                return $p;
+            })->toArray();
+
+            if($benefit->speaker){
+                $speaker = $benefit->speaker->toArray();
+                unset($speaker['id']);
+                $speaker['workspace_id'] = $new_workspace->id;
+                $_speaker = new Speaker();
+                $_speaker->fill($speaker);
+                $_speaker->save();
+                $benefit['speaker_id'] = $_speaker->id;
+            }
+            $benefit = $benefit->toArray();
+            unset($benefit['id']);
+            unset($benefit['speaker']);
+            unset($benefit['properties']);
+            $benefit['workspace_id'] = $new_workspace->id;
+            $_benefit = new Benefit();
+            $_benefit->fill($benefit);
+            $_benefit->save();
+            $_benefit->properties()->createMany($_properties);
+        }
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use App\Imports\ExamenImport;
 
 class Question extends BaseModel
@@ -41,7 +42,73 @@ class Question extends BaseModel
                     ->whereRelation('type', 'code', $code)
                     ->get();
     }
-
+    //Insert question from cursalab master (school university)
+    protected function insertQuestionFromMaster($topic,$question_type_code,$question){
+        Question::insert(
+            [
+                'external_id' => $question['id'],
+                'topic_id' => $topic->id,
+                'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
+                'pregunta' => $question['pregunta'],
+                'rptas_json' => json_encode($question['rptas_json']),
+                'rpta_ok' => $question['rpta_ok'],
+                'active' => $question['active'],
+                'required' => $question['required'] ?? NULL,
+                'score' => calculateValueForQualification($question['score'], 20, $topic->qualification_type->position),
+            ]
+        );
+    }
+    protected function updateQuestionFromMaster($topic,$question_type_code,$question){
+        Question::where('external_id',$question['id'])->update(
+            [
+                'topic_id' => $topic->id,
+                'type_id' => Taxonomy::getFirstData('question', 'type', $question_type_code)?->id,
+                'pregunta' => $question['pregunta'],
+                'rptas_json' => $question['rptas_json'],
+                'rpta_ok' => $question['rpta_ok'],
+                'active' => $question['active'],
+                'required' => $question['required'] ?? NULL,
+                'score' => calculateValueForQualification($question['score'], 20, $topic->qualification_type->position),
+            ]
+        );
+    }
+    protected function getListQuestionToReport($topic){
+        $evaluation_type = $topic->evaluation_type->code;
+        $question_type_code = $evaluation_type === 'qualified'
+                ? 'select-options'
+                : 'written-answer';
+        $columns_answers = ['a','b','c','d','e','f','g','h','i'];
+        $excel_headers = $evaluation_type === 'qualified' ? [
+            'PREGUNTA','OBLIGATORIO','PUNTAJE','RESPUESTA CORRECTA','A','B','C','D','E','F','G','H','I',
+        ] : ['PREGUNTA']; 
+        $questions = Question::where('topic_id', $topic->id)
+                    ->whereRelation('type','code',$question_type_code)
+                    ->get()->map(function($q) use ($columns_answers,$evaluation_type) {
+                        // $data_answers['A']
+                        // $rptas_json = 
+                        if($evaluation_type == 'open'){
+                            return [
+                                $q->pregunta
+                            ];
+                        }
+                        $data = [
+                            $q->pregunta,
+                            $q->required ?  'Sí' : 'No',
+                            $q->score ,
+                            strtoupper($columns_answers[$q->rpta_ok-1])
+                        ];
+                        foreach ($columns_answers as $key => $column) {
+                            // dd($q->rptas_json[$key+1]);
+                            $data[] = isset($q->rptas_json[$key+1]) ? $q->rptas_json[$key+1] : '';
+                        }
+                        return $data;
+                    });
+        return [
+            'questions' => $questions,
+            'excel_headers' => $excel_headers,
+            'filename'=> substr(Str::slug($topic->name), 0, 30)
+        ];
+    }
     protected function getQuestionsForQuiz($topic, $limit = 5, $random = true, $code = 'selecciona')
     {
         $questions = Question::getByTopicAndType($topic, $code);

@@ -808,4 +808,23 @@ class CheckList extends BaseModel
 
         return $response;
     }
+
+    protected function duplicateChecklistFromWorkspace($current_workspace,$new_workspace){
+        $checklists = CheckList::select('id','workspace_id','title','description','active','workspace_id','type_id','starts_at','finishes_at','platform_id')
+        ->with('actividades:id,checklist_id,activity,type_id,active,position')->where('workspace_id',$current_workspace->id)->get();
+        foreach ($checklists as $checklist) {
+            $actividades = $checklist->actividades->map(function($actividad){
+                unset($actividad['id']);
+                unset($actividad['checklist_id']);
+                return $actividad;
+            })->toArray();
+            $checklist = $checklist->toArray();
+            $checklist['workspace_id'] = $new_workspace->id;
+            unset($checklist['id']);
+            $_checklist = new CheckList();
+            $_checklist->fill($checklist);
+            $_checklist->save();
+            $_checklist->actividades()->createMany($actividades);
+        }
+    }
 }

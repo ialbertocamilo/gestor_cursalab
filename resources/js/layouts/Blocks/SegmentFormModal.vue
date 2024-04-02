@@ -137,6 +137,7 @@
                             :current-clean="segment_by_document_clean"
                             @addUser="addUser"
                             @deleteUser="deleteUser"
+                            @deleteUserAll="deleteUserAll"
                         />
 
                     </v-tab-item>
@@ -614,6 +615,12 @@ export default {
                 vue.segment_by_document.criteria_selected.splice(index, 1);
 
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
+            }
+        },
+        deleteUserAll() {
+            let vue = this;
+            if(vue.segment_by_document.criteria_selected.length) {
+                vue.segment_by_document.criteria_selected = [];
             }
         },
         isCourseSegmentation() {
