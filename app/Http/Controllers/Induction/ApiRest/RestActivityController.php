@@ -141,6 +141,14 @@ class RestActivityController extends Controller
         // }
         $response = CheckList::getStudentChecklistInfoById($checklist?->id, $user?->id, $trainer_id);
 
+        $supervisor = User::where('id', $trainer_id)
+                        ->with(['subworkspace'=>function($s){
+                                    $s->select('id','name');
+                                }])
+                        ->select('id', 'name', 'lastname', 'surname', 'subworkspace_id')
+                        ->first();
+        $response['supervisor'] = $supervisor;
+
         return response()->json($response, 200);
     }
     public function ActivityChecklistUserByTrainer(Process $process, Checklist $checklist, User $user, Request $request)
