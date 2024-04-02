@@ -83,7 +83,7 @@
                                                 }">
                                         <v-icon
                                             size="15"
-                                            :color="course.segmented ? '#5358E8' : '#fff'"
+                                            :color="course.isSegmented ? '#fff' : '#5358E8'"
                                             class="ml-3 mr-3">
                                             mdi-account-group
                                         </v-icon>
@@ -201,6 +201,10 @@ export default {
         'options.open' :  {
             handler(newValue, oldValue) {
                 if (newValue) {
+                    this.loadedPages = [];
+                    this.lastPage = -1;
+                    this.courses = [];
+                    this.search = '';
                     this.loadData(1);
                 }
             },

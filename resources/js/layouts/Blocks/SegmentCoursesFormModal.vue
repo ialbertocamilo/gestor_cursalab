@@ -190,7 +190,7 @@
                 />
 
               <SegmentMultipleCoursesModal
-                  :originCourseId="resource.id"
+                  :originCourseId="courseId"
                   :subworkspacesIds="[]"
                   :options="multipleCoursesModalOptions"
                   :ref="multipleCoursesModalOptions.ref"
@@ -274,6 +274,7 @@ export default {
     },
     data() {
         return {
+            courseId: null,
             showMultipleSegmentation: false,
             tabs: null,
             steps: 0,
@@ -623,8 +624,10 @@ export default {
 
                         // Show modal to clone segmentation to other courses
 
-                        if (this.showMultipleSegmentation)
-                          this.multipleCoursesModalOptions.open = true;
+                        if (this.showMultipleSegmentation) {
+                          vue.courseId = vue.resource.id;
+                          vue.multipleCoursesModalOptions.open = true;
+                        }
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
