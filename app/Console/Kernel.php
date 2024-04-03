@@ -95,6 +95,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('create:dc3')->everyFiveMinutes();
         //Courses in person
         $schedule->command('duplicate:assistance')->everyFiveMinutes();
+        //SYNC CURSALAB UNIVERSITY
+        $schedule->command('sync:school-university-courses')->fridays()->at('06:00');
     }
 
     /**
