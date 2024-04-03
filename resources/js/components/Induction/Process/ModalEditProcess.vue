@@ -83,7 +83,7 @@
                                         <v-col cols="12">
                                             <div class="row_dates d-flex">
                                                 <div class="d-flex align-center">
-                                                    <span class="text_default mr-2">Fecha de inicio del proceso:</span>
+                                                    <span class="text_default mr-2">Fecha de inicio del proceso *:</span>
                                                     <div class="bx_input_date">
                                                         <DefaultInputDate
                                                             placeholder="Ingresar fecha *"

@@ -36,7 +36,7 @@
                                     <v-col cols="5">
                                         <DefaultAutocomplete
                                             dense
-                                            label="Asignar encuesta"
+                                            label="Encuestas guardadas"
                                             v-model="resource.poll"
                                             :items="selects.polls"
                                             item-text="name"

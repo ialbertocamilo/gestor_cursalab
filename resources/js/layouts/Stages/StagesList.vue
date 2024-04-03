@@ -838,11 +838,8 @@ export default {
     },
     methods: {
         updatePercentageActivity( stage, activity, ref, event) {
-            console.log(activity);
-            console.log(ref);
-            console.log(event);
             let vue = this
-            if(activity.percentage_ev && activity.percentage_ev > 0)
+            if(activity.percentage_ev && activity.percentage_ev >= 0)
             {
                 if(activity.percentage_ev > 100){
                     this.$nextTick(() => {
@@ -863,7 +860,6 @@ export default {
                             });
                         }
                         else {
-                            console.log('save');
                             this.showLoader()
 
                             const url = `/procesos/${stage.process_id}/etapas/${stage.id}/activity/${activity.id}/update`
@@ -888,7 +884,6 @@ export default {
                                 });
                         }
                     }
-                    console.log('save2');
                 }
             }
         },
