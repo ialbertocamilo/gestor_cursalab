@@ -1624,6 +1624,7 @@ class Benefit extends BaseModel
         'promotor','promotor_imagen','direccion','referencia','accesible','dificultad','active'
     )->with([
         'speaker:id,name,biography,email,specialty,image,active',
+        'speaker.experiences:speaker_id,company,occupation,active',
         'properties:id,benefit_id,type_id,name,value,value_date,value_time,position,active'
     ])->where('workspace_id',$current_workspace->id)->get();
         foreach ($benefits as $benefit) {
@@ -1641,6 +1642,13 @@ class Benefit extends BaseModel
                 $_speaker->fill($speaker);
                 $_speaker->save();
                 $benefit['speaker_id'] = $_speaker->id;
+                $experiencies = $benefit->speaker->experiences->map(function($experiencie){
+                    unset($experiencie->speaker_id);
+                    return $experiencie;
+                })->toArray();
+                if(count($experiencies)>0){
+                    $_speaker->experiences()->createMany($experiencies);
+                }
             }
             $benefit = $benefit->toArray();
             unset($benefit['id']);
