@@ -23,14 +23,14 @@ class TopicM extends Model
         return $this->hasMany(MediaTemaM::class, 'topic_id');
     }
 
-    protected function getTopicsToMigrate($course,$filter_topics_by_date){
+    protected function getTopicsToMigrate($course){
         $date_init = Carbon::today()->startOfDay()->format('Y-m-d H:i');
         return TopicM::with('medias:topic_id,title,value,embed,downloadable,position,type_id')
             ->where('course_id',$course->id)
             ->where('active',1)
-            ->when(!$filter_topics_by_date, function ($q) use($date_init){
-                $q->where('updated_at','>=',$date_init);
-            })
+            // ->when(!$filter_topics_by_date, function ($q) use($date_init){
+            //     $q->where('updated_at','>=',$date_init);
+            // })
             ->orderBy('position','ASC')
             ->get();
     }

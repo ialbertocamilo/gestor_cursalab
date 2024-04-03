@@ -69,11 +69,12 @@ class SyncSchoolUniversitiesCourses extends Command
             $courses_to_create = $courses_to_migrate->whereIn('id',$courses_id_to_create)->all();
             $courses_to_update = $courses_to_migrate->whereIn('id',$school->courses->pluck('external_id'))->all();
             $bar = $this->output->createProgressBar(count($courses_to_update));
+
             foreach ($courses_to_update as $key => $course) {
                 $_course_to_update = $school->courses->where('external_id',$course->id)->first();
                 $_course = $this->duplicateCourse($course,$workspace,$school,$_course_to_update);
 
-                $topics_to_migrate = TopicM::getTopicsToMigrate($course,$filter_by_date);
+                $topics_to_migrate = TopicM::getTopicsToMigrate($course);
                 $topics_duplicated = Topic::where('course_id',$_course_to_update->id)->orderBy('position','ASC')->get();
 
                 $topics_id_to_create = $topics_to_migrate->pluck('id')->diff($topics_duplicated->pluck('external_id'));
@@ -92,7 +93,7 @@ class SyncSchoolUniversitiesCourses extends Command
 
             $bar = $this->output->createProgressBar(count($courses_to_create));
             foreach ($courses_to_create as $course) {
-                $topics =  TopicM::getTopicsToMigrate($course,false);
+                $topics =  TopicM::getTopicsToMigrate($course);
                 $_course = $this->duplicateCourse($course,$workspace,$school);
                 foreach ($topics as $topic) {
                     $this->duplicateTopic($topic,$_course,$workspace);
@@ -103,7 +104,7 @@ class SyncSchoolUniversitiesCourses extends Command
         }
         //MIGRATE QUESTIONS
         info('start migrate questions');
-        QuestionM::migrateQuestions($filter_questions_by_date);
+        QuestionM::migrateQuestions();
         info('finish migrate questions');
         return;
     }

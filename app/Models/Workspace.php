@@ -953,8 +953,8 @@ class Workspace extends BaseModel
         }
         info('duplicate duplicateVademecumsFromWorkspace');
         if(isset($duplicate_functionalities->protocols_and_documents) && $duplicate_functionalities->protocols_and_documents){
-            $current_modules_ids = $this->subworkspaces->pluck('id');
-            Vademecum::duplicateVademecumsFromWorkspace($current_modules_ids,$workspace);
+            $current_modules_ids = $this->subworkspaces->pluck('criterion_value_id')->toArray();
+            Vademecum::duplicateVademecumsFromWorkspace($current_modules_ids,$workspace,$modules_ids);
         }
         return $workspace;
     }
