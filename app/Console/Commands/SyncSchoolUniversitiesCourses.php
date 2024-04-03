@@ -73,7 +73,7 @@ class SyncSchoolUniversitiesCourses extends Command
                 $_course_to_update = $school->courses->where('external_id',$course->id)->first();
                 $_course = $this->duplicateCourse($course,$workspace,$school,$_course_to_update);
 
-                $topics_to_migrate = TopicM::getTopicsToMigrate($course,$filter_by_date);
+                $topics_to_migrate = TopicM::getTopicsToMigrate($course);
                 $topics_duplicated = Topic::where('course_id',$_course_to_update->id)->orderBy('position','ASC')->get();
 
                 $topics_id_to_create = $topics_to_migrate->pluck('id')->diff($topics_duplicated->pluck('external_id'));
