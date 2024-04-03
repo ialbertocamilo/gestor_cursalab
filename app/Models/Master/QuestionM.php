@@ -52,7 +52,10 @@ class QuestionM extends Model
         foreach ($questionsGroupByTopics as $topic_id => $questions_to_migrate) {
             $topics = Topic::with(['questions','evaluation_type:id,code','qualification_type'])
                     ->where('external_id',$topic_id)
-                    ->select('id','type_evaluation_id','qualification_type_id')
+                    ->whereHas('course',function($q){
+                        $q->where('external_code','cursalab-university');
+                    })
+                    ->select('id','course_id','type_evaluation_id','qualification_type_id')
                     ->get();
             foreach ($topics as $key => $topic) {
                 $question_type_code = $topic->evaluation_type->code === 'qualified'
@@ -64,7 +67,6 @@ class QuestionM extends Model
                 $questions_id_to_create = $questions_to_migrate->pluck('id')->diff($questions_duplicated->pluck('external_id'));
                 $questions_to_create = $questions_to_migrate->whereIn('id',$questions_id_to_create)->all();
                 $questions_to_update = $questions_to_migrate->whereIn('id',$questions_duplicated->pluck('external_id'))->all();
-    
                 foreach ($questions_to_create as $question) {
                     Question::insertQuestionFromMaster($topic,$question_type_code,$question->toArray());
                 }
