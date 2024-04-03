@@ -378,7 +378,7 @@ class AuthController extends Controller
         $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
         //has offline
         $config_data->is_offline = boolval(WorkspaceFunctionality::join('taxonomies','taxonomies.id','workspace_functionalities.functionality_id')
-                        ->where('workspace_functionalities.workspace_id',$workspace->parent_id)
+                        ->where('workspace_functionalities.workspace_id',$workspace?->parent_id)
                         ->where('workspace_functionalities.active',1)
                         ->where('taxonomies.code','course-offline')
                         ->first());
