@@ -175,6 +175,24 @@
                                             </div>
                                         </v-col>
                                     </v-row>
+                                    <v-row>
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.migrate_users"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>

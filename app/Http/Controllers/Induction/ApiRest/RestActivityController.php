@@ -148,13 +148,23 @@ class RestActivityController extends Controller
                         ->select('id', 'name', 'lastname', 'surname', 'subworkspace_id')
                         ->first();
         $response['supervisor'] = $supervisor;
+        $response['feedback_required'] = false;
 
         return response()->json($response, 200);
     }
-    public function ActivityChecklistUserByTrainer(Process $process, Checklist $checklist, User $user, Request $request)
+
+    public function ActivityChecklistUserByTrainer(Process $process, Activity $activity, User $user, Request $request)
     {
         $trainer = Auth::user();
-        $response = CheckList::getStudentChecklistInfoById($checklist?->id, $user?->id, $trainer?->id);
+        $response = CheckList::getStudentChecklistInfoById($activity?->model_id, $user?->id, $trainer?->id);
+
+        $summary_activity = ProcessSummaryActivity::where(['user_id'=> $user->id, 'activity_id' => $activity->id])->first();
+        $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+
+        $response['editable'] = true;
+        if($summary_activity?->status_id == $status_finished) {
+            $response['editable'] = false;
+        }
 
         return response()->json($response, 200);
     }
@@ -258,6 +268,42 @@ class RestActivityController extends Controller
         return response()->json(['error' => false, 'data' => $topics_data], 200);
         // *********
     }
+    
+    public function RegisterUserChecklist(Process $process, User $user, Request $request )
+    {
+        $trainer = Auth::user();
+        $activity = Activity::with('model')->where('id', $request->activity_id)->first();
+
+        $response['message'] = 'No se pudo revisar la actividad';
+        $response['error'] = true;
+
+        if($activity->model_type == Checklist::class)
+        {
+            $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
+            if($summary_activity)
+            {
+                $progress_checklist = CheckList::getStudentChecklistInfoById($activity->model_id, $user?->id, $trainer?->id);
+                $activities = (isset($progress_checklist['actividades'])) ? $progress_checklist['actividades'] : [];
+                $total = 0;
+                foreach($activities as $act) {
+                    if($act->estado == 'En proceso'){
+                        $total += 30;
+                    }
+                    else if($act->estado == 'Cumple') {
+                        $total += 100;
+                    }
+                }
+                
+                $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
+                $summary_activity->progress = count($activities) ? ($total / count($activities)) : 0;
+                $summary_activity->save();
+                $response['message'] = 'Se revisó la actividad <b>'.$activity->title.'</b> correctamente.';
+                $response['error'] = false;
+            }
+        }
+
+        return $this->success($response);
+    }
 
     public function RegisterActivity(Process $process,  Request $request )
     {
@@ -288,17 +334,6 @@ class RestActivityController extends Controller
                 }
             }
             else if($activity->model_type == Meeting::class)
-            {
-                $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
-                if($summary_activity)
-                {
-                    $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
-                    $summary_activity->progress = 100;
-                    $summary_activity->save();
-                    $response['message'] = 'Completaste la actividad <b>'.$activity->title.'</b> correctamente.';
-                }
-            }
-            else if($activity->model_type == Checklist::class)
             {
                 $summary_activity = ProcessSummaryActivity::firstOrCreate(['user_id'=> $user->id, 'activity_id' => $activity->id]);
                 if($summary_activity)

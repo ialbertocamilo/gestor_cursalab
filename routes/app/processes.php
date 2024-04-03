@@ -35,4 +35,5 @@ Route::controller(RestProcessController::class)->group(function () {
 });
 
 Route::prefix('/user/processes/{process}/activity')->group(base_path('routes/app/activities.php'));
+Route::prefix('/supervisor/processes/{process}/activity')->group(base_path('routes/app/activities.php'));
 Route::prefix('/{process}/activity')->group(base_path('routes/app/activities.php'));
