@@ -42,11 +42,13 @@ class QuestionM extends Model
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
-    protected function migrateQuestions($filter_by_date){
+    protected function migrateQuestions(){
         $date_init = Carbon::today()->startOfDay()->format('Y-m-d H:i');
-        $questionsGroupByTopics = QuestionM::with('type:id,code')->when(!$filter_by_date, function ($q) use($date_init){
-            $q->where('updated_at','>=',$date_init);
-        })->where('active',1)->get()->groupBy('topic_id');
+        $questionsGroupByTopics = QuestionM::with('type:id,code')
+        // ->when(!$filter_by_date, function ($q) use($date_init){
+        //     $q->where('updated_at','>=',$date_init);
+        // })
+        ->where('active',1)->get()->groupBy('topic_id');
         foreach ($questionsGroupByTopics as $topic_id => $questions_to_migrate) {
             $topics = Topic::with(['questions','evaluation_type:id,code','qualification_type'])
                     ->where('external_id',$topic_id)

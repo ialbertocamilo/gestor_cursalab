@@ -104,7 +104,7 @@ class SyncSchoolUniversitiesCourses extends Command
         }
         //MIGRATE QUESTIONS
         info('start migrate questions');
-        QuestionM::migrateQuestions($filter_questions_by_date);
+        QuestionM::migrateQuestions();
         info('finish migrate questions');
         return;
     }
