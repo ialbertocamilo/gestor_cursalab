@@ -257,6 +257,7 @@ class AuthController extends Controller
                 ->where('id', $workspace->parent_id)
                 ->first()
             : null;
+        
         //CUSTOM DESIGN BY WORKSPACE
         $custom_ambiente = Ambiente::getCustomAmbienteByWorkspace($workspace->parent_id);
         if ($workspace_data) {
@@ -375,7 +376,12 @@ class AuthController extends Controller
         }
         $config_data->filters = config('data.filters');
         $config_data->meetings_upload_template = config('app.meetings.app_upload_template');
-
+        //has offline
+        $config_data->is_offline = boolval(WorkspaceFunctionality::join('taxonomies','taxonomies.id','workspace_functionalities.functionality_id')
+                        ->where('workspace_functionalities.workspace_id',$workspace->parent_id)
+                        ->where('workspace_functionalities.active',1)
+                        ->where('taxonomies.code','course-offline')
+                        ->first());
         return [
             'access_token' => $token,
             'bucket_base_url' => get_media_root_url(),
