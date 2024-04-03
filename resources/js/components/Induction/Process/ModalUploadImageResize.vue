@@ -95,6 +95,7 @@ export default {
                 data.logotipo_blob = await fetch(vue.logo_cropped).then(res => res.blob());
             }
             vue.$emit("onConfirm", data);
+            vue.closeModal()
         },
         cancel() {
             let vue = this;
@@ -103,7 +104,11 @@ export default {
 
         closeModal() {
             let vue = this
+            vue.removeFileFromDropzone(vue.resource.logotipo, 'inputLogo')
+            vue.$refs.projectForm.reset()
             vue.resetValidation()
+            // vue.resource = {}
+            vue.$refs.inputLogo.removeImage()
             vue.$emit('onCancel')
         },
         selectTemplateOrNewProcessModal(value) {
@@ -119,10 +124,7 @@ export default {
         },
         resetValidation() {
             let vue = this;
-            vue.removeFileFromDropzone(vue.resource.logotipo, 'inputLogo')
             vue.$refs.projectForm.resetValidation()
-            vue.$refs.projectForm.reset()
-            console.log('resetValidation')
             // vue.resource = {}
             // vue.logo_selected = null
             // vue.logo_cropped = null
