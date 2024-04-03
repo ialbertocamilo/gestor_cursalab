@@ -62,7 +62,7 @@ class SyncSchoolUniversitiesCourses extends Command
                         "active" => true,
                         "subworkspaces" =>$subworkspaces_id->toArray(),
                         "scheduled_restarts" => '{"activado":false,"tiempo_en_minutos":null,"reinicio_dias":null,"reinicio_horas":null,"reinicio_minutos":1}',
-                        "imagen" => null
+                        "imagen" => $cursalab_univeristy_img
                     ]
                 );
                 $school->load('courses');
