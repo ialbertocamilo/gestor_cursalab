@@ -35,6 +35,7 @@ class SyncSchoolUniversitiesCourses extends Command
         $workspace_id = $this->argument('workspace_id');
 
         $cursalab_university_name = 'Cursalab University - T 🎓';
+        $cursalab_univeristy_img = 'images/cursalab-university.png';
         $courses_to_migrate = CourseM::with(['type:id,code','modality:id,code'])->orderBy('position','ASC')->where('active',1)->get();
         $workspaces = Workspace::select('id','name','qualification_type_id')->when($workspace_id, function($q) use ($workspace_id){
             $q->where('id', $workspace_id);
@@ -49,6 +50,9 @@ class SyncSchoolUniversitiesCourses extends Command
             })->with('courses')->where('code','cursalab-university')->first();
             $filter_by_date = false;
             if(!$school){
+                if(!Storage::disk('s3')->exists($cursalab_univeristy_img)){
+                    $this->copyFileBetweenBuckets($cursalab_univeristy_img);
+                }
                 $school = School::storeRequest(
                     [ 
                         "name" => $cursalab_university_name,
