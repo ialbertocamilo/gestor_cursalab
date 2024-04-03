@@ -445,7 +445,8 @@ export default {
                       text: "Reusar segmentación",
                       icon: "mdi mdi-account-switch",
                       type: "action",
-                      method_name: "openMultipleSegmentationModal"
+                        show_condition: 'segments_count',
+                        method_name: "openMultipleSegmentationModal"
                     },
                     {
                         text: "Eliminar",
@@ -523,7 +524,6 @@ export default {
             modalCourseModality:{
                 open:false,
                 ref: 'CourseTypeModal',
-                open: false,
                 base_endpoint: '/course',
                 confirmLabel: 'Guardar',
                 resource: 'course',
@@ -534,7 +534,6 @@ export default {
             modalDirectSegmentationOptions:{
                 open:false,
                 ref: 'CourseDirectSegmentation',
-                open: false,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'course',

@@ -201,6 +201,7 @@ export default {
         'options.open' :  {
             handler(newValue, oldValue) {
                 if (newValue) {
+                    this.showSegmentationAlert = false;
                     this.loadedPages = [];
                     this.lastPage = -1;
                     this.courses = [];
@@ -264,7 +265,7 @@ export default {
 
             try {
 
-                let res = await axios({
+                await axios({
                     url: '/segments/multiple-segmentation',
                     method: 'post',
                     data: {
@@ -274,6 +275,12 @@ export default {
                 });
 
                 this.showAlert('La segmentación múltiple se guardó correctamente.');
+
+                // After a delay refresh page to update segmentation icons
+
+                setTimeout(() => {
+                    location.reload()
+                }, 1000)
 
             } catch (ex) {
                 console.log(ex)

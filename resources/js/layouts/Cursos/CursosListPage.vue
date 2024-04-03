@@ -476,6 +476,7 @@ export default {
                       text: "Reusar segmentación",
                       icon: "mdi mdi-account-switch",
                       type: "action",
+                      show_condition: 'segments_count',
                       method_name: "openMultipleSegmentationModal"
                     },
                     {
