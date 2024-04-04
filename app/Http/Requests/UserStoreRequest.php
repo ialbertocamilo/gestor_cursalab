@@ -67,7 +67,7 @@ class UserStoreRequest extends FormRequest
             'surname' => 'required|min:2|max:255',
             // 'password' => "{$pass}|max:255|password_available:{$id}",
             'password' => $passwordRules,
-            'document' => "required|min:6|unique:users,document,{$id},id,deleted_at,NULL",
+            'document' => "required|min:5|unique:users,document,{$id},id,deleted_at,NULL",
             'username' => 'nullable',
             'phone_number' => 'nullable',
             'person_number' => 'nullable',

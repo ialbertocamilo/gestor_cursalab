@@ -137,7 +137,7 @@ class School extends BaseModel
             // Generate code when is not defined
 
             if (!$school->code) {
-                $school->code = 'S' . str_pad($school->id, 2, '0', STR_PAD_LEFT);
+                $school->code = isset($data['code']) ? $data['code'] : 'S' . str_pad($school->id, 2, '0', STR_PAD_LEFT);
                 $school->save();
             }
 

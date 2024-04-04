@@ -329,8 +329,8 @@ if (isset($fullScreen)) {
         const USER_WORKSPACE_SLUG = "{{ $workspace?->slug }}";
     </script>
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
-    <script src="{{ asset('js/app.js?v=3.3420-' . date('Y-W')) }}"></script>
-    <script src="{{ asset('js/custom.js?v=3.3420-' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/app.js?v=3.3422-' . date('Y-W')) }}"></script>
+    <script src="{{ asset('js/custom.js?v=3.3422-' . date('Y-W')) }}"></script>
 
     <script>
         $(document).ready(function () {
@@ -417,7 +417,7 @@ if (isset($fullScreen)) {
                 dataType: "json",
                 success: function (response) {
                     if(response.data.platform == 'induccion')
-                        window.location = '/procesos'
+                        window.location = '/induccion'
                     else
                         window.location = '/'
                 }

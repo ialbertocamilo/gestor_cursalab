@@ -693,7 +693,7 @@ class CheckList extends BaseModel
 
     protected function getStudentChecklistInfoById($checklist_id, $student_id = null, $trainer_id = null){
         $alumno_id = $student_id ? $student_id : Auth::user()?->id;
-
+        
         $user = User::where('id', $alumno_id)->first();
         if($trainer_id) {
             $entrenador = null;
@@ -807,5 +807,24 @@ class CheckList extends BaseModel
         $response = $checklist_collection->sortByDesc('disponible')->values()->first();
 
         return $response;
+    }
+
+    protected function duplicateChecklistFromWorkspace($current_workspace,$new_workspace){
+        $checklists = CheckList::select('id','workspace_id','title','description','active','workspace_id','type_id','starts_at','finishes_at','platform_id')
+        ->with('actividades:id,checklist_id,activity,type_id,active,position')->where('workspace_id',$current_workspace->id)->get();
+        foreach ($checklists as $checklist) {
+            $actividades = $checklist->actividades->map(function($actividad){
+                unset($actividad['id']);
+                unset($actividad['checklist_id']);
+                return $actividad;
+            })->toArray();
+            $checklist = $checklist->toArray();
+            $checklist['workspace_id'] = $new_workspace->id;
+            unset($checklist['id']);
+            $_checklist = new CheckList();
+            $_checklist->fill($checklist);
+            $_checklist->save();
+            $_checklist->actividades()->createMany($actividades);
+        }
     }
 }

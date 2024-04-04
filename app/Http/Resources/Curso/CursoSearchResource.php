@@ -36,7 +36,9 @@ class CursoSearchResource extends JsonResource
 
         $all_modules = $modules->unique();
 
+        $modulesIds =  array_unique($modules->pluck('id')->toArray());
         $modules = array_unique($modules->pluck('name')->toArray());
+
         $position = null;
         $pivot_id_selected = null;
         if($request->canChangePosition){
@@ -68,6 +70,7 @@ class CursoSearchResource extends JsonResource
             'nombre' => $this->name,
             'schools' => implode(', ', $schools),
             'modules' => implode(', ', $modules),
+            'modulesIds' => $modulesIds,
             'images' => $this->getModulesImages($all_modules),
             'first_school_id' => $first_school,
             'image' => FileService::generateUrl($this->imagen),

@@ -2,10 +2,13 @@
 
 namespace App\Http\Resources\Induccion;
 
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProcessAssistantsSearchResource extends JsonResource
 {
+    private static $data;
+
     /**
      * Transform the resource into an array.
      *
@@ -14,7 +17,15 @@ class ProcessAssistantsSearchResource extends JsonResource
      */
     public function toArray($request)
     {
-        $count_absences = $this->resource->summary_process()->where('process_id', $this->process)->first()?->absences ?? 0;
+        $data = self::$data;
+        $count_absences = $data ? ($this->resource->summary_process()->where('process_id', $data['process_id'])->first()?->absences ?? 0) : null;
+        $absences = null;
+        if($data && $data['count_absences']){
+            if($data['limit_absences'])
+                $absences = $count_absences.'/'.$data['absences'];
+            else
+                $absences = $count_absences;
+        }
 
         return [
             'id' => $this->id,
@@ -22,8 +33,14 @@ class ProcessAssistantsSearchResource extends JsonResource
             'document' => $this->document ?? 'Sin documento',
             'module' => $this->resource->subworkspace?->name ?? 'No module',
             'active' => !!$this->active,
-            'absences' => $count_absences.'/'.$this->limit_absences,
+            'absences' => $absences,
             'percentage' => 0
         ];
+    }
+
+    public static function customCollection($resource, $data): AnonymousResourceCollection
+    {
+      self::$data = $data;
+      return parent::collection($resource);
     }
 }

@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\CheckList;
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mongo\JarvisAttempt;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -163,6 +164,11 @@ class Workspace extends BaseModel
     public function schools()
     {
         return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id')->withPivot('position');
+    }
+
+    public function processes()
+    {
+        return $this->belongsToMany(Process::class, 'process_subworkspace', 'subworkspace_id')->withPivot('position');
     }
 
     public function courses()
@@ -760,19 +766,19 @@ class Workspace extends BaseModel
             'medias', // OK
             'polls.questions', //
         ];
-
+        
+        
         $workspace = $this->replicate();
-
         $workspace->push();
 
         $workspace->update($data);
 
         $workspace->push();
-
+       
         $this->load($relationships);
 
         $_crit_module = Criterion::where('code', 'module')->first();
-
+        info('duplicate polls');
         foreach ($this->polls as $_poll) {
 
             $poll = $workspace->polls()->create($_poll->toArray());
@@ -781,6 +787,7 @@ class Workspace extends BaseModel
         }
 
         $workspace->refresh();
+        info('duplicate subworkspaces');
 
         foreach ($this->subworkspaces as $_subworkspace) {
 
@@ -883,6 +890,7 @@ class Workspace extends BaseModel
             }
         }
 
+        info('duplicate criterionWorkspace');
 
         $workspace->functionalities()->sync($this->functionalities);
 
@@ -902,19 +910,21 @@ class Workspace extends BaseModel
         $workspace->medias()->createMany($this->medias->toArray());
 
         $modules_id = $this->subworkspaces->pluck('criterion_value_id')->toArray();
-
+        
+        //Duplicate Announcement
         $_announcements = Announcement::whereRelationIn('criterionValues', 'criterion_value_id', $modules_id)->get();
 
         $modules_ids = $workspace->subworkspaces()->pluck('criterion_value_id')->toArray();
         $subworkspace_ids = $workspace->subworkspaces()->pluck('id')->toArray();
-
+        info('duplicate _announcements');
         foreach ($_announcements as $_announcement) {
 
             $announcement = Announcement::create($_announcement->toArray());
 
             $announcement->criterionValues()->sync($modules_ids);
         }
-
+        //Duplicate Videoteca
+        info('duplicate videotecas');
         foreach ($this->videotecas as $_videoteca) {
 
             $_videoteca_data = $_videoteca->toArray();
@@ -929,7 +939,25 @@ class Workspace extends BaseModel
             $videoteca->modules()->sync($subworkspace_ids);
             // $videoteca->tags()->sync($_videoteca->tags);
         }
-
+        info('duplicate duplicateChecklistFromWorkspace');
+        //Duplicate FUNCTIONALITIES
+        $duplicate_functionalities = json_decode($data['duplicate']);
+        if(isset($duplicate_functionalities->checklist) && $duplicate_functionalities->checklist){
+            CheckList::duplicateChecklistFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateBenefitsFromWorkspace');
+        if(isset($duplicate_functionalities->benefits) && $duplicate_functionalities->benefits){
+            Benefit::duplicateBenefitsFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateCertificatesFromWorkspace');
+        if(isset($duplicate_functionalities->certificates) && $duplicate_functionalities->certificates){
+            Certificate::duplicateCertificatesFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateVademecumsFromWorkspace');
+        if(isset($duplicate_functionalities->protocols_and_documents) && $duplicate_functionalities->protocols_and_documents){
+            $current_modules_ids = $this->subworkspaces->pluck('criterion_value_id')->toArray();
+            Vademecum::duplicateVademecumsFromWorkspace($current_modules_ids,$workspace,$modules_ids);
+        }
         return $workspace;
     }
 

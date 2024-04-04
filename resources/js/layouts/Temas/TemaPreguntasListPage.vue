@@ -46,7 +46,14 @@
                             <DefaultModalButton
                                 :text="true"
                                 @click="openFormModal(modalOptions, null, 'create')"
-                                :label="'Agregar pregunta'"/>
+                                :label="'Pregunta'"/>
+                            <br>
+                            <DefaultModalButton
+                                :text="true"
+                                icon_name="mdi-download"
+                                isIconButton
+                                @click="downloadReportQuestions()"
+                            />
                         </div>
                     </v-col>
                 </v-row>
@@ -493,6 +500,24 @@ export default {
                     this.questionsError.push(`No hay definida una respuesta correcta: ${r.custom_tema_preguntas_pregunta} .`)
                 }
             });
+        },
+        async downloadReportQuestions(){
+            let vue = this;
+            vue.showLoader();
+            let url = `/escuelas/${vue.categoria_id}/cursos/${vue.curso_id}/temas/${vue.tema_id}/preguntas/download`
+            await axios.get(url).then(({data})=>{
+                let questions = data.data.questions;
+                let headers = data.data.excel_headers;
+                let filename = data.data.filename;
+                this.descargarExcelwithValuesInArray({
+                    headers:headers,
+                    values:questions,
+                    confirm:true,
+                    filename:filename
+                });
+                vue.hideLoader();
+
+            })
         }
     }
 

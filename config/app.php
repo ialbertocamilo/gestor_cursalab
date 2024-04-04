@@ -140,7 +140,7 @@ return [
     |
     */
 
-    'timezone' => 'America/Lima',
+    'timezone' => env('TIMEZONE', 'America/Lima'),
 
     /*
     |--------------------------------------------------------------------------

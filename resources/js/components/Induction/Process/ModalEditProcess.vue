@@ -24,31 +24,36 @@
                                         <v-col cols="12" md="12" lg="12" class="pb-0 pt-0 mb-3">
                                             <span class="text_default lbl_tit">Indica la información que tendrá este proceso de inducción</span>
                                         </v-col>
-                                        <v-col cols="12" md="12" lg="12" class="pb-0">
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="7" class="pb-0">
                                             <DefaultInput
                                                         v-model="process.title"
                                                         label="Ingresa el nombre del proceso"
                                                         :rules="rules.title"
+                                                        show-required
+                                            />
+                                        </v-col>
+                                        <v-col cols="5">
+                                            <DefaultAutocomplete
+                                                show-required
+                                                :rules="rules.subworkspaces"
+                                                dense
+                                                label="Módulos"
+                                                v-model="process.subworkspaces"
+                                                :items="selects.subworkspaces"
+                                                item-text="name"
+                                                item-value="id"
+                                                multiple
+                                                :count-show-values="1"
                                             />
                                         </v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="12" md="12" lg="12" class="pb-0">
-                                            <!-- <v-textarea
-                                                rows="5"
-                                                outlined
-                                                dense
-                                                hide-details="auto"
-                                                label="Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción"
-                                                v-model="process.description"
-                                                class="txt_desc"
-                                                :counter="300"
-                                                :rules="rules.description"
-                                            ></v-textarea> -->
-
                                             <div>
                                                 <fieldset class="editor">
-                                                    <legend>Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción
+                                                    <legend>Ingresa aquí el texto de bienvenida al momento de ingresar en la inducción *
                                                     </legend>
                                                     <editor
                                                         @input="maxCharacters(process.description)"
@@ -78,10 +83,10 @@
                                         <v-col cols="12">
                                             <div class="row_dates d-flex">
                                                 <div class="d-flex align-center">
-                                                    <span class="text_default mr-2">Fecha de inicio del proceso:</span>
+                                                    <span class="text_default mr-2">Fecha de inicio del proceso *:</span>
                                                     <div class="bx_input_date">
                                                         <DefaultInputDate
-                                                            placeholder="Ingresar fecha"
+                                                            placeholder="Ingresar fecha *"
                                                             reference-component="StartProcessDate"
                                                             :options="modalDateOptions"
                                                             label=""
@@ -148,6 +153,42 @@
                                                             />
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.block_stages"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.migrate_users"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
                                                 </div>
                                             </div>
                                         </v-col>
@@ -668,6 +709,7 @@ export default {
             list_icons_finished_onboarding: [],
             process: {
                 instructions: [],
+                subworkspaces: [],
                 description: ''
             },
             modalDateOptions: {
@@ -769,6 +811,7 @@ export default {
                 hideCancelBtn:true,
             },
             selects: {
+                subworkspaces: [],
                 type_checklist: [
                     {"id": "libre", "name": "Libre"},
                     {"id": "curso", "name": "Por curso"},
@@ -818,7 +861,8 @@ export default {
             segment_by_document_clean: false,
             rules: {
                 title: this.getRules(['required', 'max:200']),
-                description: this.getRules(['required', 'max:350'])
+                description: this.getRules(['required', 'max:350']),
+                subworkspaces: this.getRules(['required']),
             }
             // data segmenteacion
         };
@@ -892,7 +936,7 @@ export default {
                 let vue = this;
 
                 if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350);
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350);
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
@@ -918,7 +962,7 @@ export default {
                 vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
-                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350)) {
+                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350)) {
                         vue.stepper_box_btn1 = false;
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
@@ -1162,6 +1206,7 @@ export default {
             vue.resource = {}
             vue.process = {
                 instructions: [],
+                subworkspaces: [],
                 description: ''
             }
 
@@ -1181,6 +1226,12 @@ export default {
         },
         async confirm() {
             let vue = this;
+            if(vue.process.subworkspaces.length == 0){
+                vue.showAlert('Es necesario seleccionar al menos 1 módulo','warning');
+                // vue.loadingActionBtn = false
+                // this.hideLoader()
+                return;
+            }
 
             // const allIsValid = vue.moreValidaciones()
 
@@ -1419,16 +1470,15 @@ export default {
                 }
             })
         },
-        loadSelects(resource) {
+        async loadSelects() {
             let vue = this
-            // let url = `${vue.options.base_endpoint}/form-selects`
+            let url = `/procesos/form-selects`
 
-            // vue.$http.get(url)
-            //     .then(({data}) => {
-            //         console.log(data);
-
-            //         vue.selects.requirement_list = data.data.requirements
-            //     })
+            vue.$http.get(url)
+                .then(({data}) => {
+                    console.log(data.data.modules);
+                    vue.selects.subworkspaces = data.data.modules
+                })
         },
         closeModalOutside() {
             let vue = this

@@ -419,6 +419,8 @@ export default {
             // vue.options.open = false
             vue.resetSelects();
             vue.resetValidation();
+            vue.list_criteria = [];
+            vue.list_criteria_selected = []
 
             // alert modal info
             vue.modalInfoOptions.hideConfirmBtn = false;
@@ -433,7 +435,6 @@ export default {
         },
         resetValidation() {
             let vue = this;
-            vue.list_criteria = [];
             vue.stepper_box = 1;
             vue.$refs.segmentForm.resetValidation();
         },
@@ -553,7 +554,7 @@ export default {
         },
         showModalCondition(){
             const vue = this;
-            const responseCheck = vue.checkIfExistCriteria(vue.segments, 'module');
+            const responseCheck = [] // vue.checkIfExistCriteria(vue.segments, 'module');
 
             let state = true;
 
@@ -750,6 +751,8 @@ console.log(vue.segments);
                     vue.segments.forEach(element => {
                         if(element.criteria_selected.length > 0) {
                             element.criteria_selected.forEach(item => {
+                                console.log(item)
+                                console.log(resource)
                                 resource.supervisor_criteria.forEach(item_sc => {
                                     if(item_sc == item.id) {
                                         vue.$nextTick(() => {

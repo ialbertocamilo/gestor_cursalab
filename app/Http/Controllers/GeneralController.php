@@ -344,4 +344,15 @@ class GeneralController extends Controller
         //     return 'Hubo un error :C';
         // }
     }
+
+    public function syncCoursesCursalabUniversity($workspace_id){
+        $has_functionality = Workspace::select('id','name','qualification_type_id')->where('id',$workspace_id)
+                ->whereRelation('functionalities','code','cursalab-university')->first();
+        if(!$has_functionality){
+            return $this->success(['message'=>'Este workspace no tiene activado la funcionalidad.']); 
+        }
+
+        Artisan::call('sync:school-university-courses '.$workspace_id);
+        return $this->success(['message'=>'Se sincronizo los cursos correctamente.']); 
+    }
 }

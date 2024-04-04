@@ -155,7 +155,7 @@
                                >
 
                             <div class="row" :style="{'border': `${workspace.active ? '2px solid white' : '2px solid lightgray'}`}">
-                                <v-col :cols="view ? '12' : '3'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace"
+                                <v-col :cols="view ? '12' : '2'" class="logo-wrapper  pt-3 pb-3 cursor-pointer" @click="setActiveWorkspace(workspace.id, '/home')" title="Ir al workspace"
                                 :style="{'height': `${view ? '105px' : 'auto'}`}"
                                 >
 
@@ -168,7 +168,7 @@
                                     <span :style="{'color': `${workspace.active ? 'black' : 'gray'}`}">{{ workspace.name }}</span>
                                 </v-col>
 
-                                <v-col :cols="view ? '12' : '6'" :class="'stats pt-4 pb-2 d-flex  align-items-center workspace-badge ' + (view ? 'justify-content-around' : 'justify-content-end')"
+                                <v-col :cols="view ? '12' : '7'" :class="'stats pt-4 pb-2 d-flex  align-items-center workspace-badge ' + (view ? 'justify-content-around' : 'justify-content-end')"
                                     :style="{'background-color': `${view ? 'rgba(165, 166, 246, 0.2)' : 'white'}`}"
                                 >
 
@@ -240,7 +240,16 @@
                                             <br> <span class="table-default-icon-title" v-text="'Duplicar'"/>
                                         </span>
                                     </button>
-
+                                    <button
+                                        type="button" class="btn btn-md"
+                                        @click="syncUniversityCourses(workspace.id)"
+                                        v-show="!view && workspace.is_cursalab_super_user && workspace.can_sync_cursalab_university"
+                                    >
+                                        <span class="v-badge">
+                                            <v-icon class="icon" :color="workspace.active ? 'primary' : 'grey'">mdi-sync</v-icon>
+                                            <br> <span class="table-default-icon-title" v-text="'Sincronizar (CU)'"/>
+                                        </span>
+                                    </button>
                                     <button
                                         type="button" class="btn btn-md"
                                         @click="openFormModal(
@@ -918,6 +927,19 @@ export default {
             let preferences = JSON.parse(preferencesJSON);
             preferences.workspace_list_diplay_format = this.view ? 'grilla' : 'lista';
             localStorage.setItem('preferences', JSON.stringify(preferences));
+        },
+        syncUniversityCourses(workspace_id){
+            let vue = this;
+            vue.showLoader();
+            let url = `/general/sync-courses-cursalab-university/${workspace_id}`;
+            this.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.showAlert(data.data.message);
+                    vue.hideLoader();
+                }).catch((e)=>{
+                    console.log(e);
+                })
         }
     }
 }

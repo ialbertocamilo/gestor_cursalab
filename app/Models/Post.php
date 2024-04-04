@@ -22,6 +22,7 @@ class Post extends BaseModel
         'user_id',
         'active',
         'check_text_area',
+        'platform_id_onb'
     ];
 
     /*
@@ -48,6 +49,20 @@ class Post extends BaseModel
             $value === '1'
         );
     }
+
+    /*
+
+        Scopes
+
+    --------------------------------------------------------------------------*/
+
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id_onb',$type_id);
+    }
     /*
 
         Methods
@@ -69,6 +84,8 @@ class Post extends BaseModel
         } else {
             $query = self::query();
         }
+
+        $query->FilterByPlatform();
 
         if ($request->q) {
             $query->where('title', 'like', "%$request->q%");
