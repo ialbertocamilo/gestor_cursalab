@@ -16,7 +16,7 @@
                                         <apexcharts type="radialBar" height="100" :options="graphic_data_advance.chartOptions" :series="graphic_data_advance.series"/>
                                     </div>
                                     <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">10%</span>
+                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">0%</span>
                                         <span>Cumplimiento de inducción</span>
                                     </div>
                                 </div>
@@ -28,7 +28,7 @@
                             <v-card-text class="py-0">
                                 <div class="d-flex align-center" style="height: 73px;">
                                     <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{users_active}}/1200</span>
+                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{users_active}}/{{users_total}}</span>
                                         <span>Colaboradores activos</span>
                                     </div>
                                 </div>
@@ -86,8 +86,9 @@
                                         />
                                     </div>
                                 </div>
-                                <div>
+                                <div style="height: 450px;">
                                     <apexcharts
+                                        v-if="show_graphic_data"
                                         height="450"
                                         :options="graphic_data.chartOptions"
                                         :series="graphic_data.series"
@@ -103,8 +104,55 @@
                                 <div>
                                     <span class="text_default fw-bold">Cumplimiento mensual de procesos</span>
                                 </div>
+                                <div class="d-flex mt-2" style="column-gap: 20px;">
+                                    <div>
+                                        <DefaultAutocomplete
+                                            label="Periodo"
+                                            v-model="filter_bars.periodo"
+                                            :items="selects.lista_periodo"
+                                            item-text="title"
+                                            item-value="id"
+                                            dense
+                                            @input="filterGraphicBar"
+                                        />
+                                    </div>
+                                    <div>
+                                        <DefaultAutocomplete
+                                            label="Área"
+                                            v-model="filter_bars.area"
+                                            :items="selects.lista_area"
+                                            item-text="title"
+                                            item-value="id"
+                                            dense
+                                            @input="filterGraphicBar"
+                                        />
+                                    </div>
+                                    <div>
+                                        <DefaultAutocomplete
+                                            label="Sede"
+                                            v-model="filter_bars.sede"
+                                            :items="selects.lista_sede"
+                                            item-text="title"
+                                            item-value="id"
+                                            dense
+                                            @input="filterGraphicBar"
+                                        />
+                                    </div>
+                                    <div>
+                                        <DefaultAutocomplete
+                                            label="Cargo"
+                                            v-model="filter_bars.cargo"
+                                            :items="selects.lista_cargo"
+                                            item-text="title"
+                                            item-value="id"
+                                            dense
+                                            @input="filterGraphicBar"
+                                        />
+                                    </div>
+                                </div>
                                 <div style="height: 400px">
                                     <apexcharts
+                                        v-if="show_graphic_data_bars"
                                         height="400" type="bar"
                                         :options="graphic_data_bars.chartOptions"
                                         :series="graphic_data_bars.series"
@@ -141,6 +189,15 @@ export default {
             process_progress: 0,
             process_total: 0,
             users_active: 0,
+            users_total: 0,
+            show_graphic_data: false,
+            show_graphic_data_bars: false,
+            filter_bars: {
+                periodo: null,
+                sede: null,
+                cargo: null,
+                area: null
+            },
             dataTable: {
                 endpoint: '/induccion/dashboard/search',
                 ref: 'DashboardTable',
@@ -207,7 +264,7 @@ export default {
                 },
             },
             graphic_data_advance: {
-                series: [10],
+                series: [0],
                 chartOptions: {
                     chart: {
                         height: 100,
@@ -364,7 +421,16 @@ export default {
                     vue.process_progress = _data.process_progress
                     vue.process_total = _data.process_total
                     vue.users_active = _data.users_active
+                    vue.users_total = _data.users_total
                     vue.selects.lista_procesos = _data.processes
+                    if(_data.processes && _data.processes.length > 0){
+                        vue.process = _data.processes[0].id
+                        this.searchProcess()
+                    }
+                    vue.graphic_data_bars.series[0] = {'data': _data.data_graphic_bars}
+                    setTimeout(() => {
+                        vue.show_graphic_data_bars = true
+                    }, 100);
                 })
         },
         searchProcess() {
@@ -373,7 +439,7 @@ export default {
             vue.$http.get(url)
                 .then(({data}) => {
                     let _data = data.data
-                    console.log(_data);
+                    vue.show_graphic_data = false
                     if(_data.length > 0) {
                         vue.graphic_data.chartOptions.labels = []
                         vue.graphic_data.series = []
@@ -382,16 +448,17 @@ export default {
                             labels.push(element.title)
                             vue.graphic_data.series.push(element.percentage)
                         });
-                        console.log(labels);
-                        vue.$refs.graphic_donut.updateOptions({
-                            chartOptions: {
-                                labels: labels
-                            }
-                        })
-                        vue.$refs.graphic_donut.refresh();
+                        vue.graphic_data.chartOptions.labels = labels
+                        setTimeout(() => {
+                            vue.show_graphic_data = true
+                        }, 100);
                     }
                 })
         },
+        filterGraphicBar() {
+            let vue = this
+
+        }
     },
 }
 </script>

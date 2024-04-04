@@ -417,7 +417,7 @@ if (isset($fullScreen)) {
                 dataType: "json",
                 success: function (response) {
                     if(response.data.platform == 'induccion')
-                        window.location = '/procesos'
+                        window.location = '/induccion'
                     else
                         window.location = '/'
                 }
