@@ -71,7 +71,7 @@ class Audit extends MongoLedger
     {
         if ($this->isBasicEvent()) {
             // parse to array
-            $modified = is_string($this->modified) ? 
+            $modified = is_string($this->modified) ?
                         json_decode($this->modified) : $this->modified;
 
             return array_diff($modified, $this->excluded_fields);
@@ -179,7 +179,7 @@ class Audit extends MongoLedger
             if(!is_string($value)) {
                 $available = false;
                 break;
-            } 
+            }
         }
         return $available;
     }
@@ -232,7 +232,6 @@ class Audit extends MongoLedger
                 ' / ' .
                 $this->getLabelName($this->pivot['relation'] ?? 'Relación');
         }
-
         return $name;
     }
 

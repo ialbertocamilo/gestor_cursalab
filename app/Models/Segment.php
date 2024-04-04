@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Resources\SegmentSearchUsersResource;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Segment extends BaseModel{
     protected $fillable = [
@@ -996,5 +997,84 @@ class Segment extends BaseModel{
             "),
             ['model_type' => $model_type, 'model_id' => $model_id]);
             return $segments;
+    }
+
+    public static function cloneSegmentation ($originCourseId, $destinationCoursesIds) {
+
+        $segments = Segment::getSegmentsByModelV2('App\\Models\\Course', $originCourseId);
+        $keys = [
+            'name', 'model_type', 'type_id',
+        ];
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($destinationCoursesIds as $destinationCourseId) {
+
+                // Delete course's old segments and segments values
+
+                self::deleteCourseSegments($destinationCourseId);
+            }
+
+            foreach ($segments as $originSegment) {
+
+                $originSegmentValues = SegmentValue::query()
+                    ->where('segment_id', $originSegment['id'])
+                    ->get()
+                    ->toArray();
+
+                // Get values from origin segment
+
+                $segmentTemplate = array_intersect_key($originSegment, array_flip($keys));
+                $segmentTemplate['active'] = 1;
+
+                foreach ($destinationCoursesIds as $destinationCourseId) {
+
+                    // Create new segment for current course
+
+                    $segmentTemplate['model_id'] = $destinationCourseId;
+                    $newSegment = Segment::create($segmentTemplate);
+
+                    // Create segment values for new segment
+
+                    $destinationSegmentValues = $originSegmentValues;
+                    foreach ($destinationSegmentValues as &$segmentValue) {
+                        $segmentValue['segment_id'] = $newSegment->id;
+                        unset($segmentValue['id']);
+                        unset($segmentValue['created_at']);
+                        unset($segmentValue['update_at']);
+                    }
+                    SegmentValue::insert($destinationSegmentValues);
+                }
+            }
+
+            // Set users for update courses list
+
+            Summary::updateUsersByCourses($destinationCoursesIds);
+
+            DB::commit();
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            Log::error('Transaction failed: ' . $e->getMessage());
+        }
+
+
+        //dd($segments);
+    }
+
+    public static function deleteCourseSegments($courseId) {
+
+        $segments = Segment::query()
+            ->where('model_id', $courseId)
+            ->where('model_type', 'App\\Models\\Course')
+            ->get();
+
+        foreach ($segments as $segment) {
+            $segment->values()->delete();
+            $segment->delete();
+        }
     }
 }
