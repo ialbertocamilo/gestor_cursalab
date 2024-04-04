@@ -12,6 +12,8 @@ Route::controller(SegmentController::class)->group(function() {
 
     Route::post('/store', 'store');
 
+    Route::post('/multiple-segmentation', 'cloneSegmentation');
+
     Route::get('/{block}/edit', 'edit');
     Route::put('/{block}/update', 'update');
 

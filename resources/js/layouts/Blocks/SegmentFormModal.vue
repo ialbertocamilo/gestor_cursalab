@@ -55,7 +55,7 @@
                     slider-color="primary"
 
                     class="col-10 offset-1"
-                    
+
                 >
                     <v-tab v-if="show_criteria_segmentation">
                         {{ tabs_title }} Directa
@@ -143,19 +143,38 @@
                     </v-tab-item>
                 </v-tabs-items>
 
-                <SegmentAlertModal
-                    :options="modalInfoOptions"
-                    :ref="modalInfoOptions.ref"
-                    @onConfirm="closeFormModal(modalInfoOptions)"
-                    @onCancel="closeFormModal(modalInfoOptions)"
-                />
+              <SegmentAlertModal
+                  :options="modalInfoOptions"
+                  :ref="modalInfoOptions.ref"
+                  @onConfirm="closeFormModal(modalInfoOptions)"
+                  @onCancel="closeFormModal(modalInfoOptions)"
+              />
+
+              <SegmentMultipleCoursesModal
+                  :originCourseId="courseId"
+                  :subworkspacesIds="subworkspacesIds"
+                  :options="multipleCoursesModalOptions"
+                  :ref="multipleCoursesModalOptions.ref"
+                  @onConfirm="closeFormModal(multipleCoursesModalOptions)"
+                  @onCancel="closeFormModal(multipleCoursesModalOptions)"
+              />
             </v-form>
+          <div
+              v-if="isCourseSegmentation()"
+              class="additional-text-wrapper">
+            <a href="javascript:"
+               @click="saveAndShowMultipleSegmentation()">
+              Guardar y asignar segmentación a otros cursos
+            </a>
+          </div>
         </template>
 
     </DefaultDialog>
 </template>
 
 <script>
+import SegmentMultipleCoursesModal from "./SegmentMultipleCoursesModal.vue";
+
 const fields = [
     "name",
     "email",
@@ -181,6 +200,7 @@ import SegmentByDocument from "./SegmentByDocument";
 
 export default {
     components: {
+        SegmentMultipleCoursesModal,
         Segment, SegmentByDocument, SegmentAlertModal
     },
     props: {
@@ -210,6 +230,8 @@ export default {
     },
     data() {
         return {
+            courseId: null,
+            showMultipleSegmentation: false,
             tabs: null,
             steps: 0,
             // total: 0,
@@ -237,6 +259,16 @@ export default {
                 hideConfirmBtn: true,
                 persistent: true,
                 cancelLabel: 'Entendido'
+            },
+            multipleCoursesModalOptions: {
+              ref: 'SegmentMultipleCoursesModal',
+              open: false,
+              title: 'Segmentación múltiple',
+              resource:'data',
+              hideConfirmBtn: false,
+              persistent: true,
+              cancelLabel: 'Cancelar',
+              confirmLabel: 'Continuar'
             },
             stackModals: { continues: [],
                 backers: [] },
@@ -295,7 +327,7 @@ export default {
         checkIfExistCriteria(stackSegments, current) {
             const vue = this;
             let stackMessage = [];
-            
+
             if(!vue.show_criteria_segmentation){
                 return stackMessage;
             }
@@ -467,6 +499,13 @@ export default {
                                 "crear_supervisor"
                             );
                         }
+
+                        // Show modal to clone segmentation to other courses
+
+                        if (this.showMultipleSegmentation) {
+                          vue.courseId = vue.resource.id;
+                          vue.multipleCoursesModalOptions.open = true;
+                        }
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
@@ -486,7 +525,7 @@ export default {
         async loadData(resource) {
             let vue = this;
             vue.errors = [];
-            
+
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
@@ -572,6 +611,7 @@ export default {
 
                 if (response.data.data) {
                     this.modulesIds = response.data.data.modulesIds
+                    this.subworkspacesIds = response.data.data.subworkspacesIds
                     this.modulesSchools = response.data.data.modulesSchools
 
                     // When there is no criteria selected, adds
@@ -617,14 +657,12 @@ export default {
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
         },
-        deleteUserAll() {
-            let vue = this;
-            if(vue.segment_by_document.criteria_selected.length) {
-                vue.segment_by_document.criteria_selected = [];
-            }
-        },
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
+        },
+        saveAndShowMultipleSegmentation() {
+          this.showMultipleSegmentation = true;
+          this.confirmModal();
         }
     }
 };
@@ -637,5 +675,23 @@ export default {
 
 .group-sheet {
     padding-bottom: 40px;
+}
+
+.additional-text-wrapper {
+  width: 35%;
+  height: 40px;
+  position: absolute;
+  z-index: 1;
+  bottom: 17px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+.additional-text-wrapper a {
+  font-size: 13px !important;
+  text-decoration: underline;
+  line-height: 15px;
 }
 </style>

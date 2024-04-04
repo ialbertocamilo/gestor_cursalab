@@ -14,6 +14,7 @@ class UserNotification extends Model
     // Notifications types
 
     public const NEW_COURSE = 'new-course';
+    public const NEW_COURSES = 'new-courses';
     public const NEW_CERTIFICATE = 'new-certificate';
     public const PASSWORD_RESET  = 'password-reset';
     public const PASSWORD_UPDATE = 'password-update';
