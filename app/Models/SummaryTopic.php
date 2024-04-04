@@ -60,12 +60,15 @@ class SummaryTopic extends Summary
         $row = $this->getCurrentRow($topic);
 
         if ($row && !$row->taking_quiz) {
-
             $duration = config('app.quizzes.duration');
-
+            $current_quiz_finishes_at = now()->addHours($duration);
+            if(isset($topic?->course?->mod_evaluaciones['duration_quizz'])){
+                $duration_quizz = $topic?->course?->mod_evaluaciones['duration_quizz'];
+                $current_quiz_finishes_at = now()->addMinutes($duration_quizz);
+            }
             $data = [
                 'current_quiz_started_at' => now(),
-                'current_quiz_finishes_at' => now()->addHours($duration),
+                'current_quiz_finishes_at' => $current_quiz_finishes_at,
                 'taking_quiz' => ACTIVE,
             ];
 

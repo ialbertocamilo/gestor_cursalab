@@ -130,7 +130,8 @@ class WorkspaceController extends Controller
         $data['course_configuration'] = [
             'nota_aprobatoria' => $data['course_configuration']['nota_aprobatoria'] ?? 0,
             'nro_intentos' => $data['course_configuration']['nro_intentos'] ?? 0,
-            'is_offline' => $data['course_configuration']['is_offline'] ?? 0
+            'is_offline' => $data['course_configuration']['is_offline'] ?? 0,
+            'duration_quizz' => $data['course_configuration']['duration_quizz'] ?? 0,
         ];
         // Set constraint: limit allowed users
 
@@ -227,6 +228,7 @@ class WorkspaceController extends Controller
             'nota_aprobatoria' => $workspace->course_configuration['nota_aprobatoria'] ?? 0,
             'nro_intentos' => $workspace->course_configuration['nro_intentos'] ?? 0,
             'is_offline' => $workspace->course_configuration['is_offline'] ?? 0,
+            'duration_quizz' => $workspace->course_configuration['duration_quizz'] ?? 0,
         ];
         $workspace['is_superuser'] = auth()->user()->isA('super-user');
 

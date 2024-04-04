@@ -156,7 +156,7 @@
                                 <strong>{{ title }}</strong>
                             </template>
                             <template v-slot:content>
-                                <v-row justify="space-around">
+                                <v-row>
                                     <v-col cols="6">
                                         <DefaultSelect
                                             clearable
@@ -180,6 +180,13 @@
                                     <v-col cols="3">
                                         <DefaultInput label="Cantidad de intentos" v-model="resource.course_configuration.nro_intentos" dense type="number">
                                         </DefaultInput>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultInput label="Duración de evaluación (minutos)"
+                                            dense
+                                            v-model="resource.course_configuration.duration_quizz" 
+                                            type="number" :min="0"
+                                        />
                                     </v-col>
                                     <v-col cols="12">
                                         <DefaultToggle dense

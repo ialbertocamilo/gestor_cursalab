@@ -276,7 +276,7 @@
                                 </DefaultSimpleSection>
                                 <DefaultSimpleSection title="Configuración de evaluaciones">
                                     <template slot="content">
-                                        <v-row justify="center">
+                                        <v-row>
                                             <v-col cols="6">
 
                                                 <DefaultSelect dense :items="selects.qualification_types" item-text="name"
@@ -294,6 +294,15 @@
                                             <v-col cols="3">
                                                 <DefaultInput label="Cantidad de intentos" v-model="resource.nro_intentos" dense
                                                     :rules="rules.nro_intentos" type="number" show-required></DefaultInput>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <DefaultInput label="Duración de evaluación (minutos)"
+                                                    dense
+                                                    v-model="resource.duration_quizz" 
+                                                    :rules="rules.nro_intentos" 
+                                                    show-required
+                                                    type="number" :min="0"
+                                                />
                                             </v-col>
                                             <v-col cols="12" class="py-1">
                                                 <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado
@@ -522,6 +531,7 @@ export default {
                 duration: null,
                 investment: null,
                 nota_aprobatoria: null,
+                duration_quizz:null,
                 nro_intentos: null,
                 scheduled_restarts_activado: false,
                 scheduled_restarts_dias: null,
@@ -561,6 +571,7 @@ export default {
                 },
                 registro_capacitacion: {},
                 is_offline:null,
+                duration_quizz:null
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -949,6 +960,7 @@ export default {
                 // preg_x_ev: vue.resource.preg_x_ev,
                 nota_aprobatoria: vue.resource.nota_aprobatoria,
                 nro_intentos: vue.resource.nro_intentos,
+                duration_quizz: vue.resource.duration_quizz
             }
             let json = JSON.stringify(data)
             formData.append('mod_evaluaciones', json)
@@ -1026,6 +1038,7 @@ export default {
 
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
+                        response.curso.duration_quizz = response.curso.mod_evaluaciones.duration_quizz;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
 
                         vue.resource = Object.assign({}, response.curso)
@@ -1047,8 +1060,8 @@ export default {
                         vue.resource.nota_aprobatoria = response.course_configuration.nota_aprobatoria;
                         vue.resource.nro_intentos = response.course_configuration.nro_intentos;
                         vue.resource.is_offline = response.course_configuration.is_offline;
-
-
+                        vue.resource.duration_quizz = response.course_configuration.duration_quizz;
+                        
                         vue.resource.modality_id = vue.options.modality.id;
                         if (vue.school_id) {
 
