@@ -64,7 +64,7 @@ class SummaryTopic extends Summary
             $current_quiz_finishes_at = now()->addHours($duration);
             if(isset($topic?->course?->mod_evaluaciones['duration_quizz'])){
                 $duration_quizz = $topic?->course?->mod_evaluaciones['duration_quizz'];
-                $current_quiz_finishes_at = now()->addMinutes($duration_quizz)->second(1);
+                $current_quiz_finishes_at = now()->second(0)->addMinutes($duration_quizz)->second(10);
             }
             $data = [
                 'current_quiz_started_at' => now(),
