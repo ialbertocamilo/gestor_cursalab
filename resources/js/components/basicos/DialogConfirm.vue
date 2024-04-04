@@ -164,7 +164,7 @@ export default {
         },
         confirmModal() {
             let vue = this
-            if(vue.options.show_checkbox_not_show_again){
+            if(vue.options && vue.options.show_checkbox_not_show_again){
                 vue.updatePreferenceByCode(vue.options.preference_code,vue.not_show_again);
             }
             vue.$emit('onConfirm')
