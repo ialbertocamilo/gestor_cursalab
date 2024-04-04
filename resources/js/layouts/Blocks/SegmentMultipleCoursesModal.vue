@@ -305,7 +305,7 @@ export default {
 
                 let url = ''
                 if (this.search) {
-                    url = `/cursos/search/?q=${this.search}&page=1&paginate=10`
+                    url = `/cursos/search/?q=${this.search}&page=1&paginate=30`
                 } else {
 
                     if (this.subworkspacesIds.length) {
