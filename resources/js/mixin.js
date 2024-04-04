@@ -52,7 +52,7 @@ export default {
     },
     // 25
     methods: {
-        descargarExcelwithValuesInArray({headers,values,comments=[],filename,confirm=false}){
+        descargarExcelwithValuesInArray({headers,values,comments=[],filename,confirm=false,filesheet=null}){
             //values like array's of array [["name","lastname","email"],["aldo","lopez","aldo@gmail.com"]["pepe","perez","pepe@gmail.com"]]
             if ((confirm) || window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
                 values.unshift(headers);
@@ -74,7 +74,8 @@ export default {
                     }
                 }
                 const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, data, filename);
+                const file_sheet = filesheet ? filesheet : filename;
+                XLSX.utils.book_append_sheet(workbook, data, file_sheet);
                 XLSX.writeFile(workbook, `${filename}.xlsx`);
             }
         },

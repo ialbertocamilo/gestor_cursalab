@@ -513,7 +513,8 @@ export default {
                     headers:headers,
                     values:questions,
                     confirm:true,
-                    filename:filename
+                    filename:filename,
+                    filesheet:'Examen'
                 });
                 vue.hideLoader();
 

@@ -116,12 +116,12 @@
                             <v-row>
                                 <v-col cols="6">
                                     <div class="d-flex justify-content-between mx-2">
-                                        <div class="lbl_lists"><span>Colaboradores segmentados</span></div>
+                                        <div class="lbl_lists"><span>Colaboradores encontrados</span></div>
                                         <div class="lbl_lists"><span>Agregar</span></div>
                                     </div>
                                     <div class="box_resultados">
                                         <div class="bx_message" v-if="filter_result == null">
-                                            <span class="text_default">Colaboradores segmentados</span>
+                                            <span class="text_default">Colaboradores encontrados</span>
                                         </div>
                                         <ul v-else>
                                             <li v-for="user in filter_result" :key="user.id" class="d-flex align-center justify-content-between">
@@ -138,14 +138,14 @@
                                 </v-col>
                                 <v-col cols="6">
                                     <div class="d-flex justify-content-between mx-2">
-                                        <div class="lbl_lists"><span>Colaboradores registrados</span></div>
+                                        <div class="lbl_lists"><span>Colaboradores segmentados</span></div>
                                         <div class="d-flex justify-content-between">
                                             <div class="lbl_lists"><span>Retirar</span></div>
                                         </div>
                                     </div>
                                     <div class="box_seleccionados">
                                         <div class="bx_message" v-if="segment_by_document.segmentation_by_document == null">
-                                            <span class="text_default">Colaboradores registrados</span>
+                                            <span class="text_default">Colaboradores segmentados</span>
                                         </div>
                                         <ul v-else>
                                             <li v-for="user in segment_by_document.segmentation_by_document" :key="user.id" class="d-flex align-center justify-content-between">
