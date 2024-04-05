@@ -15,15 +15,21 @@ class DashboardSupervisorsResource extends JsonResource
      */
     public function toArray($request)
     {
-         return [
+        if($this->processes->count()) {
+            $status = [ 'text' => 'En curso', 'color' => 'green'];
+        }
+        else {
+            $status = [ 'text' => 'Pendiente' ];'';
+        }
+        return [
             'id' => $this->id,
             'name' => $this->name,
             'lastname' => $this->lastname,
             'surname' => $this->surname,
             'fullname' => $this->fullname,
-            'department' => 'department',
-            'job' => 'job',
-            'status' => 'status'
+            'document' => $this->document ?? 'Sin documento',
+            'module' => $this->resource->subworkspace->name ?? 'No module',
+            'status' => $status
         ];
     }
 }
