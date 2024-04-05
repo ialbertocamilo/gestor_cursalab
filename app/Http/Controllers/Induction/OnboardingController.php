@@ -109,6 +109,7 @@ class OnboardingController extends Controller
         $data_graphic_bars = count($summary_process_in_months) ? array_values($summary_process_in_months[0]) : [];
 
         $response = compact('process_total', 'process_progress', 'process_bar', 'users_active', 'processes', 'users_total', 'users_bar', 'data_graphic_bars');
+        
         return $this->success($response);
     }
 }
