@@ -384,7 +384,34 @@ class Certificate extends Model
 
         return  abort(404);
     }
-
+    protected function saveFont($data){
+        
+        $hasStorageAvailable = Media::validateStorageByWorkspace([]);
+        if ($hasStorageAvailable) {
+            $font_name = $data['name'];
+            $_taxonomy_font_parent = new Taxonomy();
+            $_taxonomy_font_parent->group = 'certificate';
+            $_taxonomy_font_parent->type = 'font';
+            $_taxonomy_font_parent->name = $font_name;
+            $_taxonomy_font_parent->active = 1;
+            $_taxonomy_font_parent->save();
+            $fonts = ['font-normal','font-bold','font-italic','font-bold-italic'];
+            $_taxonomy_font_child = [];
+            foreach ($fonts as $font) {
+                $path_font =  Media::uploadFile($data[$font],null, false, 'ttf', 'font');
+                $_taxonomy_font_child[] = [
+                    'group'=> 'certificate',
+                    'type'=> 'font',
+                    'code' => $font,
+                    'name' => Str::slug($font_name).'-'.$font,
+                    'active'=>1,
+                    'parent_id' => $_taxonomy_font_parent->id,
+                    'path'=> $path_font
+                ];
+            }
+            Taxonomy::insert($_taxonomy_font_child);
+        }
+    }
     protected function storeRequest($title, $background, $objects, $certificate = null, $images_base64 = null)
     {
         $e_statics = $objects->where('static', true);

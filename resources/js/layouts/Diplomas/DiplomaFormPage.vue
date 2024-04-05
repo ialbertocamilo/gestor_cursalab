@@ -10,6 +10,11 @@
                     @click="openFormModal(modalDiplomaFormInfoOptions, null, 'status', 'Instrucciones')">
                     <v-icon>mdi-information</v-icon>
                 </v-btn>
+                <v-spacer></v-spacer>
+                <DefaultModalButton
+                    :label="'Añadir nueva fuente'"
+                    @click="openFormModal(modalFontsOptions, null, null,'Crea una nueva fuente')"
+                />
             </v-card-title>
         </v-card>
 
@@ -142,6 +147,8 @@
                     @emit_add_image="add_image"
                     @emit_prev="prev"
                     @emit_delete="delete_object"
+                    @emit_change_font="changeFont"
+                    :fonts="fonts"
                 />
                 <!-- <div class="menu-cancel-btn">
                     <v-btn
@@ -202,7 +209,14 @@
             @onCancel="closeFormModal(modalDiplomaAlertOptions)"
             @onConfirm="delete_object_confirm"
         />
-
+        <FontsModal
+            width="30vh"
+            :ref="modalFontsOptions.ref"
+            :options="modalFontsOptions"
+            @onCancel="closeFormModal(modalFontsOptions)"
+            @onConfirm="closeFormModal(modalFontsOptions)"
+        />
+        
     </section>
 </template>
 <script>
@@ -212,11 +226,13 @@ import DiplomaFormInfoModal from './DiplomaFormInfoModal.vue';
 import DiplomaPreviewModal from './DiplomaPreviewModal.vue';
 import DiplomaAlertModal from './DiplomaAlertModal.vue';
 import DiplomaFormSave from './DiplomaFormSave.vue';
+import FontsModal from './FontsModal.vue';
+
 
 export default {
     components:{
         DiplomaPreviewModal, DiplomaFormInfoModal, DiplomaAlertModal,
-        DiplomaFormSave, panelEditor
+        DiplomaFormSave, panelEditor,FontsModal
     },
     props:['modulo_id', 'diploma_id', 'model_id', 'model_type', 'redirect'],
     data(){
@@ -259,6 +275,11 @@ export default {
                 subTitle:'',
                 hideCancelBtn: true,
             },
+            modalFontsOptions:{
+                ref: 'FontModal',
+                open: false,
+                subTitle:'',
+            },
             modalDiplomaPreviewOptions:{
                 ref: 'DiplomaPreviewModal',
                 open: false,
@@ -286,7 +307,9 @@ export default {
                 resource:{
                     tipo: null
                 }
-            }
+            },
+            fonts:[],
+            font_id:null
         }
     },
     created(){
@@ -311,7 +334,7 @@ export default {
     async mounted(){
         let vue = this;
         this.canvas = new fabric.Canvas('canvas');
-
+        vue.loadInitData();
         if(vue.diploma_id) await vue.loadData(); // para cargar data al actualizar
 
         // === añadir puntero a input ===
@@ -366,6 +389,16 @@ export default {
         vue.canvas.on('object:moving', vue.preventDragOffCanvas);
     },
     methods:{
+        loadInitData(){
+            let vue = this;
+            axios.get('/diplomas/init-data').then(({data})=>{
+                vue.fonts = data.data.fonts;
+            })
+        },
+        changeFont(font_id){
+            let vue = this;
+            vue.font_id = font_id;
+        },
         leavePage() {
             const vue = this
             window.location.href = vue.redirect ? vue.redirect : vue.base_endpoint;
@@ -866,6 +899,7 @@ export default {
             let data = {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
                 'zoom':this.canvas.getZoom(),
+                'font_id':this.font_id
             };
             this.name_plantilla = null;
 
@@ -897,7 +931,8 @@ export default {
                 // 'nombre_plantilla': this.name_plantilla,
                 'nombre_plantilla': title_plantilla,
                 'model_id': vue.model_id,
-                'model_type': vue.model_type
+                'model_type': vue.model_type,
+                'font_id' : vue.font_id
             };
 
             vue.showLoader();

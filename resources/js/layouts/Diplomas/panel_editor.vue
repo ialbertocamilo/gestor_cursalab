@@ -39,6 +39,19 @@
                 <v-icon>mdi-format-text</v-icon>
             </v-btn>
         </div>
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="Fuente de Texto">
+            <DefaultSelect
+                :items="fonts"
+                label="Fuente de texto"
+                v-model="font_id"
+                item-text="name"
+                item-value="id"
+                dense
+                @input="changeFont"
+                :disabled="d_btn"
+            />
+        </div>
 
         <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Imagen">
@@ -66,7 +79,12 @@
 </template>
 <script>
 export default {
-    props:['d_btn'],
+    props:['d_btn','fonts'],
+    data(){
+        return {
+            font_id:null
+        }
+    },
     methods: {
         emitir_add_text(text,hasControls,tipo,id_formato,font_size){
             this.$emit("emit_add_text", text,hasControls,tipo,id_formato,font_size);
@@ -79,6 +97,10 @@ export default {
         },
         emitir_prev(){
             this.$emit("emit_prev");
+        },
+        changeFont(font_id){
+            console.log('font_id,',font_id);
+            this.$emit("emit_change_font",font_id);
         },
         emitir_delete(){
             this.$emit("emit_delete",'bg');
