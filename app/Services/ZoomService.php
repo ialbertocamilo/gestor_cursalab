@@ -312,6 +312,7 @@ class ZoomService extends MeetingService
         //SOLUCIÓN TEMPORAL PARA MARCAR ASISTENCIAS PARA WORKSPACES DE MEXICO
         $has_taxonomy = Taxonomy::where('group','system')->where('type','attendant-call')->where('code','gt-6')->where('active',1)->first();
         $sub_hours_time = $has_taxonomy ? 6 : 5;
+        
         foreach ($registros_usuario as $registro) {
             $join_time = Carbon::createFromFormat($this->dateFormat, $registro['join_time'])->subHours($sub_hours_time);
             $leave_time = isset($registro['leave_time']) ? Carbon::createFromFormat($this->dateFormat, $registro['leave_time'])->subHours($sub_hours_time) : $now;
