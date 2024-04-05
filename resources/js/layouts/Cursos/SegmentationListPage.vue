@@ -144,7 +144,7 @@
                         :curso_escuela="escuela_id"
                     /> -->
 
-            <!--    <DialogConfirm
+             <DialogConfirm
                    :ref="deleteConfirmationDialog.ref"
                    v-model="deleteConfirmationDialog.open"
                    width="450px"
@@ -152,15 +152,16 @@
                    subtitle="¿Está seguro de eliminar el curso?"
                    @onConfirm="confirmDelete"
                    @onCancel="deleteConfirmationDialog.open = false"
-               /> -->
-            <!--        <CourseValidationsDelete
-                       width="50vw"
-                       :ref="courseValidationModal.ref"
-                       :options="courseValidationModal"
-                       @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
-                       @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
-                       :resource="{}"
-                   /> -->
+            />
+
+           <CourseValidationsDelete
+                width="50vw"
+                :ref="courseValidationModal.ref"
+                :options="courseValidationModal"
+                @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
+                :resource="{}"
+            /> 
 
             <DialogConfirm
                 :ref="courseUpdateStatusModal.ref"
@@ -711,7 +712,7 @@ export default {
             let vue = this
             vue.deleteConfirmationDialog.open = false
             vue.showLoader()
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`
+            let url = `/escuelas/${vue.delete_model.first_school_id.id}/cursos/${vue.delete_model.id}/delete`
             const bodyData = {validateForm}
 
             vue.$http.post(url, bodyData)
