@@ -19,6 +19,7 @@ use App\Models\ProcessSummaryActivity;
 use App\Models\Project;
 use App\Models\Question;
 use App\Models\Speaker;
+use App\Models\Stage;
 use App\Models\SummaryTopic;
 use App\Models\Taxonomy;
 use App\Models\Topic;
@@ -304,6 +305,20 @@ class RestActivityController extends Controller
 
         return $this->success($response);
     }
+
+  
+    // public function updateProcessSummaryUser($user = null, $process_id = null, $stage_id = null)
+    // {
+    //     $tax_user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
+    //     $user_summary = $user->summary_process()->where('process_id', $process_id)->first();
+    //     $user_summary_activities = $user->summary_process_stages()->where('stage_id', $stage_id)->first();
+
+    //     $stages = Stage::where('process_id', $process_id)->get();
+    //     dd($user_summary_activities);
+    //     if($user_summary?->status_id != $tax_user_process_finished?->id) {
+    //         dd($user_summary);
+    //     }
+    // }
 
     public function RegisterActivity(Process $process,  Request $request )
     {
