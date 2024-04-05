@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Attendant;
-use App\Models\Error;
 use Carbon\Carbon;
+use App\Models\Error;
 use GuzzleHttp\Client;
+use App\Models\Taxonomy;
+use App\Models\Attendant;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -308,11 +309,12 @@ class ZoomService extends MeetingService
         $data_attendants[$key]['present_at_first_call'] = false;
         $data_attendants[$key]['present_at_middle_call'] = false;
         $data_attendants[$key]['present_at_last_call'] = false;
-
+        //SOLUCIÓN TEMPORAL PARA MARCAR ASISTENCIAS PARA WORKSPACES DE MEXICO
+        $has_taxonomy = Taxonomy::where('group','system')->where('type','attendant-call')->where('code','gt-6')->where('active',1)->first();
+        $sub_hours_time = $has_taxonomy ? 6 : 5;
         foreach ($registros_usuario as $registro) {
-            $join_time = Carbon::createFromFormat($this->dateFormat, $registro['join_time'])->subHours(5);
-            $leave_time = isset($registro['leave_time']) ? Carbon::createFromFormat($this->dateFormat, $registro['leave_time'])->subHours(5) : $now;
-
+            $join_time = Carbon::createFromFormat($this->dateFormat, $registro['join_time'])->subHours($sub_hours_time);
+            $leave_time = isset($registro['leave_time']) ? Carbon::createFromFormat($this->dateFormat, $registro['leave_time'])->subHours($sub_hours_time) : $now;
             if ($meeting->attendance_call_first_at->between($join_time, $leave_time))
                 $data_attendants[$key]['present_at_first_call'] = true;
 
