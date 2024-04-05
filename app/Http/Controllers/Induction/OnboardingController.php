@@ -19,16 +19,45 @@ class OnboardingController extends Controller
     public function search(Request $request)
     {
         $workspace = get_current_workspace();
-        $request->mergeIfMissing([
-            'workspace_id' => $workspace?->id
-        ]);
+        $request->mergeIfMissing(['workspace' => $workspace?->id]);
+        $request->mergeIfMissing(['code' => 'supervise']);
 
-        $process_ids = Process::where('workspace_id', $workspace?->id)->pluck('id')->toArray();
-        $instructors = User::select('id', 'name', 'lastname', 'surname')
-                            ->whereHas('processes', function($e) use ($process_ids){
-                                $e->whereIn('process_id', $process_ids);
-                            })
-                            ->paginate(15);
+        $data = User::query()
+            ->whereHas('segments')
+            ->withCount([
+                'segments' => function ($q) {
+                    $q->
+                    whereRelation('code', 'code', 'user-supervise');
+                },
+            ])
+            ->whereRelation('segments.code', 'code', 'user-supervise');
+
+        $data->withWhereHas('subworkspace', function ($query) use ($request) {
+            if ($request->subworkspace)
+                $query->whereIn('id', $request->subworkspace);
+            else
+                $query->where('parent_id', $request->workspace);
+        });
+
+        if ($request->has('q'))
+            $data->filterText($request->q);
+
+        $field = $request->sortBy ?? 'created_at';
+        $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
+
+        $instructors = $data->orderBy($field, $sort)->paginate($request->paginate);
+        // $workspace = get_current_workspace();
+        // $request->mergeIfMissing([
+        //     'workspace_id' => $workspace?->id
+        // ]);
+
+        // $process_ids = Process::where('workspace_id', $workspace?->id)->pluck('id')->toArray();
+        // $instructors = User::select('id', 'name', 'lastname', 'surname','subworkspace_id', 'document')
+        //                     ->whereHas('processes', function($e) use ($process_ids){
+        //                         $e->whereIn('process_id', $process_ids);
+        //                     })
+        //                     ->with(['subworkspace'])
+        //                     ->paginate(15);
         DashboardSupervisorsResource::collection($instructors);
         return $this->success($instructors);
     }
@@ -52,10 +81,14 @@ class OnboardingController extends Controller
         $now = date('Y-m-d');
 
         $processes = Process::where('workspace_id', $workspace?->id)->select('id', 'title')->get();
+
         $process_total = Process::where('workspace_id', $workspace?->id)->count();
         $process_progress = Process::where('workspace_id', $workspace?->id)->whereDate('starts_at', '<', $now)->active()->count();
+        $process_bar = $process_total > 0 ? ($process_progress * 100) / $process_total : 0;
+
         $users_active = User::where('type_id', $type_employee_onboarding->id)->where('active', 1)->count();
         $users_total = User::where('type_id', $type_employee_onboarding->id)->count();
+        $users_bar = $users_total > 0 ? ($users_active * 100) / $users_total : 0;
 
         $summary_process_in_months = ProcessSummaryUser::selectRaw(
             'SUM(CASE WHEN month(completed_process_date) = 1 THEN 1 ELSE 0 END) as ENE,
@@ -75,7 +108,8 @@ class OnboardingController extends Controller
 
         $data_graphic_bars = count($summary_process_in_months) ? array_values($summary_process_in_months[0]) : [];
 
-        $response = compact('process_total', 'process_progress', 'users_active', 'processes', 'users_total', 'data_graphic_bars');
+        $response = compact('process_total', 'process_progress', 'process_bar', 'users_active', 'processes', 'users_total', 'users_bar', 'data_graphic_bars');
+        
         return $this->success($response);
     }
 }

@@ -37,7 +37,7 @@
                                 <v-progress-linear
                                     :color="'#973DE7'"
                                     height="6"
-                                    :value="67"
+                                    :value="users_bar"
                                     rounded
                                 >
                                 </v-progress-linear>
@@ -58,7 +58,7 @@
                                 <v-progress-linear
                                     :color="'#973DE7'"
                                     height="6"
-                                    :value="28"
+                                    :value="process_bar"
                                     rounded
                                 >
                                 </v-progress-linear>
@@ -188,8 +188,10 @@ export default {
             process: null,
             process_progress: 0,
             process_total: 0,
+            process_bar: 0,
             users_active: 0,
             users_total: 0,
+            users_bar: 0,
             show_graphic_data: false,
             show_graphic_data_bars: false,
             filter_bars: {
@@ -203,8 +205,8 @@ export default {
                 ref: 'DashboardTable',
                 headers: [
                     {text: "Supervisores", value: "fullname", align: 'start', sortable: true},
-                    {text: "Departamento", value: "department", align: 'center', sortable: false},
-                    {text: "Puesto", value: "job", align: 'center', sortable: false},
+                    {text: "Módulo", value: "module", align: 'center', sortable: false},
+                    {text: "Documento", value: "document", align: 'center', sortable: false},
                     {text: "Estado", value: "status", align: 'center', sortable: false},
                 ],
             },
@@ -420,8 +422,10 @@ export default {
                     let _data = data.data
                     vue.process_progress = _data.process_progress
                     vue.process_total = _data.process_total
+                    vue.process_bar = _data.process_bar
                     vue.users_active = _data.users_active
                     vue.users_total = _data.users_total
+                    vue.users_bar = _data.users_bar
                     vue.selects.lista_procesos = _data.processes
                     if(_data.processes && _data.processes.length > 0){
                         vue.process = _data.processes[0].id

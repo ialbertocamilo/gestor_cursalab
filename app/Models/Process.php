@@ -584,8 +584,9 @@ class Process extends BaseModel
                 'login_aprendizaje' => false
             ];
             
-            $user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
-            if($user_summary?->status_id == $user_process_finished?->id)
+            $tax_user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
+            // if($user_summary?->status_id == $tax_user_process_finished?->id)
+            if($process->user_activities_progressbar >= 100)
             {
                 $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
                 $process->certificate = [
@@ -600,6 +601,7 @@ class Process extends BaseModel
             unset($process->absences);
             unset($process->count_absences);
             unset($process->certificate_template_id);
+            unset($process->block_stages);
         }
 
         return $process;
