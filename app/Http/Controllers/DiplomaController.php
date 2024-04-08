@@ -304,6 +304,66 @@ class DiplomaController extends Controller
         }
     }
 
+    public function downloadCertificateProcess($id_user, $process_id)
+    {
+        try {
+
+            $data = $this->getDiplomaProcessData($id_user, $process_id);
+            $config = Ambiente::first();
+            $download = request()->routeIs('diplomas_induccion.download');
+
+            if ($data['old_template'] === false) {
+                $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
+            }
+            
+            return view('certificate_template', compact('data', 'config', 'download'));
+
+        } catch (\Throwable $th) {
+
+            info($th);
+
+            $errorMessage = 'Este diploma no está disponible. Contacta con tu supervisor o soporte de la plataforma.';
+            return view('error', compact('errorMessage'));
+        }
+    }
+    
+    private function getDiplomaProcessData($user_id, $process_id)
+    {
+        $user = User::with('subworkspace')
+            ->select('id', 'name', 'surname', 'lastname', 'subworkspace_id')
+            ->where('id', $user_id)->first();
+
+        if (!$user) abort(404);
+
+        $process = Process::select('id', 'title', 'certificate_template_id')
+                            ->where('id', $process_id)
+                            ->first();
+
+        $editableTemplate = Diploma::find($process?->certificate_template_id);
+
+        if ($editableTemplate) {
+            $backgroundInfo = json_decode($editableTemplate->info_bg, true);
+            $dObjects = json_decode($editableTemplate->d_objects, true);
+            $pathImage = $editableTemplate->path_image;
+        } 
+
+        $fecha = $user->summary_process()->where('process_id', $process_id)->first()?->completed_process_date;
+
+        return array(
+            'old_template' => $editableTemplate ? false : true,
+            'show_certification_date' => null,
+            'courses' => null,
+            'grade' => null,
+            'course-average-grade' => null,
+            'users' => $user->fullname,
+            'fecha' => $fecha,
+            'image' => NULL,
+            'backgroundInfo' => $backgroundInfo ?? [],
+            'dObjects' => $dObjects ?? [],
+            'pathImage' => $pathImage ?? null,
+        );
+    }
+
     private function getDiplomaCursoData($user_id, $course_id)
     {
         $user = User::with('subworkspace')
