@@ -52,7 +52,7 @@ class DiplomaController extends Controller
         $data = $request->all();
         $hasStorageAvailable = Media::validateStorageByWorkspace([]);
         if ($hasStorageAvailable) {
-            // try {
+            try {
                 $message = Certificate::saveFont($data);
                 $response = [
                     'msg' => 'Fuente creado correctamente.',
@@ -61,11 +61,11 @@ class DiplomaController extends Controller
                 return $this->success([
                     'msg' => 'Fuente creado correctamente.',
                 ]);
-            // } catch (\Throwable $th) {
-            //     return $this->success([
-            //         'msg' => 'Error al crear fuente.',
-            //     ]);
-            // }
+            } catch (\Throwable $th) {
+                return $this->success([
+                    'msg' => 'Error al crear fuente.',
+                ]);
+            }
         }
         return response()->json([
             'msg' => config('errors.limit-errors.limit-storage-allowed')
@@ -110,8 +110,15 @@ class DiplomaController extends Controller
         $objects = collect($request->info['objects']);
         $background = $request->info['backgroundImage'];
 
-        $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
-
+        // $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
+        $status =  Diploma::storeRequest(
+                    title:$request->nombre_plantilla, 
+                    background: $background,
+                    objects:$objects,
+                    images_base64:$images_base64,
+                    font_id:$request->get('font_id')
+                );
+       
         if($status)
         {
             $model_id = $request->model_id;
@@ -140,8 +147,7 @@ class DiplomaController extends Controller
     {
         $objects = collect($request->info['objects']);
         $background = $request->info['backgroundImage'];
-
-        $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects);
+        $status = Diploma::storeRequest(title:$request->nombre_plantilla, background: $background,objects:$objects,font_id:$request->get('font_id'));
 
         if($status)
         {
@@ -171,19 +177,17 @@ class DiplomaController extends Controller
         $e_dinamics = $d_per;
         $x = $bg_info['left'];
         $y = $bg_info['top'];
-
         $pathImage = str_replace(" ", "%20", $pathImage);
-        $headers = get_headers(get_media_url($pathImage));
+        $headers = get_headers(get_media_url($pathImage,'s3'));
 
         if ($headers && strpos($headers[0], "200 OK") !== false) {
 
-            $image = file_get_contents(get_media_url($pathImage));
+            $image = file_get_contents(get_media_url($pathImage,'s3'));
             $image = imagecreatefromstring($image);
             $width = imagesx($image);
 
             $bg_info['image_width'] = $width;
-
-            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info);
+            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info,$real_info['font_id']);
             $preview = Diploma::jpg_to_base64($image);
 
             return $preview;
@@ -240,19 +244,12 @@ class DiplomaController extends Controller
                                 $fontName = $list_type_fonts->where('code','font-bold')->first();
                             }
                             $s3FontUrl = get_media_url($fontName->path,'s3');
-                            // $font = public_path('fonts/diplomas/' . basename($fontName->path));
-                            // $local_paths_font[] = $font;
-                            // file_put_contents($font, file_get_contents($font_name));
                             $fontFilename = basename($fontName->path);
                             $fileContents = file_get_contents($s3FontUrl);
-                            // Storage::put('public/' . $fontFilename, $fileContents);
                             if(!Storage::disk('public')->exists($fontName->path)){
                                 Storage::disk('public')->put($fontName->path, $fileContents);
                             }
-                            // $font = Storage::disk('public')->url($fontName->path);
-                            // $font = storage_path('app/public/' . $fontFilename);
                             $font = storage_path('app/public/' . $fontName->path);
-                            // dd($fileUrl);
                             $local_paths_font[] = $font;
                         }else{
                             $fontName = 'calisto-mt.ttf';
@@ -305,7 +302,7 @@ class DiplomaController extends Controller
                 }
             }
 
-            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $background);
+            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $background,[],$font_id);
 
             // //Añadir marca de agua al 10% de la imagen total
             // $ambiente = DB::table('config_general')->select('marca_agua')->first();
@@ -464,6 +461,7 @@ class DiplomaController extends Controller
             'backgroundInfo' => $backgroundInfo ?? [],
             'dObjects' => $dObjects ?? [],
             'pathImage' => $pathImage ?? null,
+            'font_id' => $editableTemplate?->font_id
         );
     }
 }

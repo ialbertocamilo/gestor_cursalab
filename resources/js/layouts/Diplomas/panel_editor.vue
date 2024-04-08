@@ -41,7 +41,7 @@
         </div>
         <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Fuente de Texto">
-            <DefaultSelect
+            <DefaultAutocomplete
                 :items="fonts"
                 label="Fuente de texto"
                 v-model="font_id"
@@ -50,6 +50,7 @@
                 dense
                 @input="changeFont"
                 :disabled="d_btn"
+                :openUp="true"
             />
         </div>
 

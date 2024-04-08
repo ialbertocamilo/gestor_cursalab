@@ -141,6 +141,7 @@
 
             <div class="d-flex justify-center position-relative menu-save">
                 <panelEditor
+                    ref="panel_editor"
                     :d_btn="d_btn"
                     @emit_add_text="add_text"
                     @emit_add_itext="add_itext"
@@ -214,7 +215,7 @@
             :ref="modalFontsOptions.ref"
             :options="modalFontsOptions"
             @onCancel="closeFormModal(modalFontsOptions)"
-            @onConfirm="closeFormModal(modalFontsOptions)"
+            @onConfirm="closeFormModal(modalFontsOptions),loadInitData()"
         />
         
     </section>
@@ -919,7 +920,7 @@ export default {
                 this.hideLoader();
             });
         },
-        save_plantilla(){
+        async save_plantilla(){
             const vue = this;
 
             const title_plantilla = vue.$refs.DiplomaFormSaveModal.resource.diploma;
@@ -940,7 +941,7 @@ export default {
             if(vue.diploma_id) {
                 data = { ...data, edit_plantilla: vue.edit_plantilla }
                 // === actualizar ===
-                axios.put('/diplomas/update/'+vue.diploma_id, data).then((res) => {
+                await axios.put('/diplomas/update/'+vue.diploma_id, data).then((res) => {
 
                     vue.d_preview = false;
                     vue.dialog_save = false;
@@ -953,11 +954,14 @@ export default {
                         vue.showAlert('El diploma fue actualizado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
-                });
+                }).catch(()=>{
+                    vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
+                    vue.hideLoader();
+                });;
 
             } else {
                 // === guardar ===
-                axios.post('/diplomas/save', data).then((res)=>{
+                await axios.post('/diplomas/save', data).then((res)=>{
                     this.d_preview = false;
                     this.dialog_save = false;
                     let vue = this;
@@ -970,6 +974,9 @@ export default {
                         vue.showAlert('El diploma fue guardado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
+                }).catch(()=>{
+                    vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
+                    vue.hideLoader();
                 });
             }
         },
@@ -991,6 +998,9 @@ export default {
 
             const response = await axios.get('/diplomas/search/'+vue.diploma_id)
             const { plantilla, diploma } = response.data;
+            vue.$refs.panel_editor.font_id = diploma.font_id;
+            console.log(vue.$refs.panel_editor.font_id);
+            vue.changeFont(diploma.font_id);
             const { entries, assign } = Object;
             assign(this.edit_plantilla, diploma); // asignar diploma
             const { s_objects_images, s_object_bg, s_objects_text } = diploma;

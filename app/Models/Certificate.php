@@ -13,7 +13,7 @@ class Certificate extends Model
 {
     use softdeletes;
 
-    protected $fillable = ['media_id', 'title', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active'];
+    protected $fillable = ['media_id', 'title','font_id', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     private $dias_ES = array("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo");
@@ -412,12 +412,20 @@ class Certificate extends Model
             Taxonomy::insert($_taxonomy_font_child);
         }
     }
-    protected function storeRequest($title, $background, $objects, $certificate = null, $images_base64 = null)
+    protected function storeRequest($title, $background, $objects, $certificate = null, $images_base64 = null,$font_id=null)
     {
         $e_statics = $objects->where('static', true);
         $e_dinamics = $objects->where('static', false);
 
         $compare = $certificate ? true : false;
+        //Custom FONTS
+        $custom_font = false;
+        $list_type_fonts = [];
+        if($font_id){
+            $custom_font = true;
+            $list_type_fonts = Taxonomy::select('code','path')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+        }
+        $local_paths_font = [];
 
         if ($background) {
 
@@ -436,16 +444,36 @@ class Certificate extends Model
 
                     case 'i-text':
                         //  === para el font ===
-                        $fontName = 'calisto-mt.ttf';
-                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold-italic.ttf';
-                        }else if($e_static['fontStyle'] === 'italic') {
-                            $fontName = 'calisto-mt-italic.ttf';
-                        }else if($e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold.ttf';
+                        if($custom_font && count($list_type_fonts)){
+                            $fontName = $list_type_fonts->where('code','font-normal')->first();
+                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
+                                $fontName = $list_type_fonts->where('code','font-bold-italic')->first();
+                            }else if($e_static['fontStyle'] === 'italic') {
+                                $fontName = $list_type_fonts->where('code','font-italic')->first();
+                            }else if($e_static['fontWeight'] === 'bold') {
+                                $fontName = $list_type_fonts->where('code','font-bold')->first();
+                            }
+                            $s3FontUrl = get_media_url($fontName->path,'s3');
+                            $fontFilename = basename($fontName->path);
+                            $fileContents = file_get_contents($s3FontUrl);
+                            if(!Storage::disk('public')->exists($fontName->path)){
+                                Storage::disk('public')->put($fontName->path, $fileContents);
+                            }
+                            $font = storage_path('app/public/' . $fontName->path);
+                            $local_paths_font[] = $font;
+                        }else{
+                            $fontName = 'calisto-mt.ttf';
+                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
+                                $fontName = 'calisto-mt-bold-italic.ttf';
+                            }else if($e_static['fontStyle'] === 'italic') {
+                                $fontName = 'calisto-mt-italic.ttf';
+                            }else if($e_static['fontWeight'] === 'bold') {
+                                $fontName = 'calisto-mt-bold.ttf';
+                            }
+                            $font = realpath('.').'/fonts/diplomas/'.$fontName;
                         }
 
-                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        // $font = realpath('.').'/fonts/diplomas/'.$fontName;
                         //  === para el font ===
 
                         $rgb = Certificate::hex2rgb($e_static['fill']);
@@ -455,7 +483,7 @@ class Certificate extends Model
                         // resize font;
                         $divideSize = $e_static['fontSize'] / 3.3;
                         $fontsize = $e_static['fontSize'] - $divideSize;
-
+                        
                         imagettftext(
                             $im,
                             $fontsize,
@@ -466,7 +494,7 @@ class Certificate extends Model
                             $font,
                             utf8_decode($e_static['text'])
                         );
-
+                        
                         $info_s_objects[] = Certificate::pushTypeIText($e_static);
                     break;
                     case 'image':
@@ -532,6 +560,7 @@ class Certificate extends Model
             $diploma = $certificate ?? new Certificate;
             $diploma->media_id = $media->id;
             $diploma->title = $title;
+            $diploma->font_id = $font_id;
             $diploma->path_image = $path;
             $diploma->info_bg = json_encode($info_bg);
             $diploma->s_objects = json_encode($info_s_objects);
@@ -594,14 +623,31 @@ class Certificate extends Model
         imagecopymerge($dst_im, $copy, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct);
     }
 
-    protected function setDynamicsToImage($image, $e_dinamics, $background, $real_info = [])
+    protected function setDynamicsToImage($image, $e_dinamics, $background, $real_info = [],$font_id=null)
     {
         $x = $background['left'];
         $y = $background['top'];
-
+        //Custom FONTS
+        $custom_font = false;
+        $list_type_fonts = [];
+        if($font_id){
+            $custom_font = true;
+            $list_type_fonts = Taxonomy::select('code','path')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+        }
+        $local_paths_font = [];
         foreach ($e_dinamics as $e_dinamic)
         {
-            $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
+             //  === para el font ===
+             if($custom_font && count($list_type_fonts)){
+                $fontName = $list_type_fonts->where('code','font-normal')->first();
+                if(!Storage::disk('public')->exists($fontName->path)){
+                    Storage::disk('public')->put($fontName->path, $fileContents);
+                }
+                $font = storage_path('app/public/' . $fontName->path);
+                $local_paths_font[] = $font;
+            }else{
+                $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
+            }
             if($e_dinamic['type']=='text'){
                 $rgb = Certificate::hex2rgb($e_dinamic['fill']);
                 $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
@@ -617,10 +663,31 @@ class Certificate extends Model
                 $left = $e_dinamic['left'] - $x;
                 $top = $e_dinamic['top'] - $y + $fontsize;
 
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
-                ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+                
 
+                 //  === para el font ===
+                 if($custom_font && count($list_type_fonts)){
+                    $fontName = $list_type_fonts->where('code','font-normal')->first();
+                    if ($e_dinamic['fontStyle'] === 'italic' && $e_dinamic['fontWeight'] === 'bold') {
+                        $fontName = $list_type_fonts->where('code','font-bold-italic')->first();
+                    }else if($e_dinamic['fontStyle'] === 'italic') {
+                        $fontName = $list_type_fonts->where('code','font-italic')->first();
+                    }else if($e_dinamic['fontWeight'] === 'bold') {
+                        $fontName = $list_type_fonts->where('code','font-bold')->first();
+                    }
+                    $s3FontUrl = get_media_url($fontName->path,'s3');
+                    $fontFilename = basename($fontName->path);
+                    $fileContents = file_get_contents($s3FontUrl);
+                    if(!Storage::disk('public')->exists($fontName->path)){
+                        Storage::disk('public')->put($fontName->path, $fileContents);
+                    }
+                    $font = storage_path('app/public/' . $fontName->path);
+                    $local_paths_font[] = $font;
+                }else{
+                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
+                    ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
+                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+                }
                 //Eliminar emogis
                 $text = trim(Certificate::remove_emoji($text));
                 //Centrado multilinea
@@ -642,7 +709,7 @@ class Certificate extends Model
         return $image;
     }
     protected function duplicateCertificatesFromWorkspace($current_workspace,$new_workspace){
-        $certificates = Certificate::select('media_id', 'title',  'info_bg', 'd_objects', 's_objects', 'active')
+        $certificates = Certificate::select('media_id', 'title',  'info_bg','font_id','d_objects', 's_objects', 'active')
         ->withWhereHas('media', function($query) use($current_workspace){
             $query->select('id','title', 'description', 'file', 'ext', 'external_id', 'size', 'workspace_id')
             ->where('workspace_id', $current_workspace->id);
