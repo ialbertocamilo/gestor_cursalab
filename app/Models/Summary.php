@@ -150,7 +150,7 @@ class Summary extends BaseModel
         }
         $chunk_users = array_chunk($users_id_segmented,80);
         foreach ($chunk_users as $users) {
-            self::setSummaryUpdates($users,[$course->id],$summary_course_update,$event);
+            self::setSummaryUpdates($users,[$course?->id],$summary_course_update,$event);
         }
 
         // Create notifications for users assigned to course
@@ -172,7 +172,63 @@ class Summary extends BaseModel
         }
     }
 
-    protected function setSummaryUpdates($user_ids, $course_ids = null, $summary_course_update = null, $event = null)
+    /**
+     * Update users who match the segments of the provided courses
+     * for this purpose all the caurse MUST have the same segmentation
+     */
+    public static function updateUsersByCourses($coursesIds) {
+
+        if (!count($coursesIds)) return;
+
+        // Since all courses have the same segmentation, uses the segments
+        // of the first one to get the users list
+
+        $course = Course::find($coursesIds[0]);
+        $segmentsUsersIds = $course->usersSegmented($course->segments, 'users_id');
+
+        // Update user summaries
+
+        $chunkUsers = array_chunk($segmentsUsersIds,80);
+        foreach ($chunkUsers as $usersIds) {
+            self::setSummaryUpdates($usersIds, $coursesIds, false, 'segmented');
+        }
+
+        // Create notifications for users assigned to course
+
+        if ( count($segmentsUsersIds) ) {
+
+            // There are two kinds of notifications for new courses,
+            // when there is only one, and when there are several
+            // courses
+
+            if (count($coursesIds) === 1) {
+                $school = $course->schools->first();
+                if ($school && get_current_workspace()) {
+                    UserNotification::createNotifications(
+                        get_current_workspace()->id,
+                        $segmentsUsersIds,
+                        UserNotification::NEW_COURSE,
+                        [
+                            'courseName' => $course->name
+                        ],
+                        'escuela/'.$school->id.'/cursos/' . $course?->id . '/tema'
+                    );
+                }
+            } else {
+                UserNotification::createNotifications(
+                    get_current_workspace()->id,
+                    $segmentsUsersIds,
+                    UserNotification::NEW_COURSES,
+                    [
+                        'coursesCount' => count($coursesIds)
+                    ],
+                    'cursos'
+                );
+            }
+        }
+    }
+
+    protected static function setSummaryUpdates($user_ids, $course_ids = null, $summary_course_update = null, $event = null)
     {
         $data = [
             'summary_user_update' => true,

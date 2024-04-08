@@ -140,7 +140,7 @@ export default {
         resource: {
             handler( n, o ) {
                 let vue = this
-                if(vue.validateRequired(vue.resource.title) && vue.validateRequired(vue.resource.duration))
+                if(vue.validateRequired(vue.resource.title) && vue.validateRequired(vue.resource.duration) && vue.resource.duration > 0)
                     vue.disabled_btn_next = false
                 else
                     vue.disabled_btn_next = true

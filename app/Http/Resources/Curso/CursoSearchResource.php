@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources\Curso;
 
+use Carbon\Carbon;
+use App\Models\MediaTema;
+use App\Services\FileService;
 use App\Http\Controllers\CursosController;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Services\FileService;
-use Carbon\Carbon;
 
 class CursoSearchResource extends JsonResource
 {
@@ -35,7 +36,9 @@ class CursoSearchResource extends JsonResource
 
         $all_modules = $modules->unique();
 
+        $modulesIds =  array_unique($modules->pluck('id')->toArray());
         $modules = array_unique($modules->pluck('name')->toArray());
+
         $position = null;
         $pivot_id_selected = null;
         if($request->canChangePosition){
@@ -55,6 +58,7 @@ class CursoSearchResource extends JsonResource
         $assignedUsers = 1;
 
         $modality_code = $this->modality->code;
+        $data_offline = MediaTema::dataSizeCourse($this,$request->has_offline,$request->size_limit_offline);
         $_course = [
             'id' => $this->id,
             'name' => $this->name,
@@ -66,6 +70,7 @@ class CursoSearchResource extends JsonResource
             'nombre' => $this->name,
             'schools' => implode(', ', $schools),
             'modules' => implode(', ', $modules),
+            'modulesIds' => $modulesIds,
             'images' => $this->getModulesImages($all_modules),
             'first_school_id' => $first_school,
             'image' => FileService::generateUrl($this->imagen),
@@ -105,6 +110,7 @@ class CursoSearchResource extends JsonResource
             // 'compatibilities_count' => 1,
             'compatibility_available' => get_current_workspace()->id == 25,
             'is_super_user'=>auth()->user()->isAn('super-user'),
+            'has_space_offline' => $data_offline['has_space']
         ];
         if($request->hasHabilityToShowProjectButtons){
             //relation projects
@@ -163,7 +169,6 @@ class CursoSearchResource extends JsonResource
         if (!$this->active) {
             $estado .= ' [Inactivo]';
         }
-
         // $icon_data = [];
         $data = [
             'estado' => $estado,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,6 +14,8 @@ class Activity extends BaseModel
         'description',
         'position',
         'active',
+        'qualified',
+        'required',
         'type_id',
         'model_id',
         'model_type',
@@ -25,8 +28,15 @@ class Activity extends BaseModel
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'qualified' => 'boolean',
+        'required' => 'boolean'
     ];
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('active', 1);
+    }
 
     public function stage()
     {

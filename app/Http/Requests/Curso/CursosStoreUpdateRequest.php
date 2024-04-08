@@ -58,6 +58,7 @@ class CursosStoreUpdateRequest extends FormRequest
             'modality_in_person_properties' => 'nullable',
             'modality_id' => 'nullable',
             'registro_capacitacion' => 'nullable',
+            'is_offline' => 'nullable',
         ];
     }
 
@@ -68,6 +69,7 @@ class CursosStoreUpdateRequest extends FormRequest
         $show_certification_date = ($this->show_certification_date === 'true' or $this->show_certification_date === true or $this->show_certification_date === 1 or $this->show_certification_date === '1');
 
         $show_certification_to_user = ($this->show_certification_to_user === 'true' or $this->show_certification_to_user === true or $this->show_certification_to_user === 1 or $this->show_certification_to_user === '1');
+        $is_offline = ($this->is_offline === 'true' or $this->is_offline === true or $this->is_offline === 1 or $this->is_offline === '1');
 
         $user_confirms_certificate = (
             $this->user_confirms_certificate === 'true' or
@@ -85,6 +87,7 @@ class CursosStoreUpdateRequest extends FormRequest
 
 
         $data['active'] = $active;
+        $data['is_offline'] = $is_offline;
         $data['show_certification_date'] = $show_certification_date;
         $data['show_certification_to_user'] = $show_certification_to_user;
         $data['user_confirms_certificate'] = $user_confirms_certificate;

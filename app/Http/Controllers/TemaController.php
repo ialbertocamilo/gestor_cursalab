@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\Poll;
 use App\Models\Post;
+use App\Models\Role;
 use App\Models\Curso;
 use App\Models\Media;
 use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Posteo;
+
 use App\Models\School;
 
 use App\Models\Ability;
-
 use App\Models\Usuario;
 use App\Models\Abconfig;
+use App\Models\Ambiente;
 use App\Models\Pregunta;
 use App\Models\Question;
 use App\Models\Taxonomy;
@@ -23,11 +25,13 @@ use App\Models\Categoria;
 use App\Models\MediaTema;
 use App\Models\Workspace;
 use Illuminate\Support\Str;
+use App\Models\AssignedRole;
 use App\Models\SortingModel;
 use Illuminate\Http\Request;
 use App\Models\TagRelationship;
 use Illuminate\Support\Facades\DB;
 use App\Models\TopicAssistanceUser;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Tema\TemaStoreUpdateRequest;
 use App\Http\Resources\Posteo\PosteoSearchResource;
@@ -48,7 +52,10 @@ class TemaController extends Controller
         PosteoSearchResource::collection($temas);
         return $this->success($temas);
     }
-
+    public function getSelects(School $school,Course $course){
+        $course_offline = MediaTema::dataSizeCourse($course);
+        return $this->success(['course_offline'=>$course_offline]);
+    }
     public function getFormSelects(School $school, Course $course, Topic $topic = null, $compactResponse = false)
     {
         // $tags = []; //Tag::select('id', 'nombre')->get();
@@ -78,18 +85,28 @@ class TemaController extends Controller
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         $workspace_id = get_current_workspace()->id;
         $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
+        $is_offline = $course->is_offline;
 
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
                              'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
-                             'hosts','course_code_modality','workspace_id','dinamyc_link');
+                             'hosts','course_code_modality','workspace_id','dinamyc_link','is_offline');
 
         return $compactResponse ? $response : $this->success($response);
     }
 
     public function searchTema(School $school, Course $course, Topic $topic)
     {
+         // Checks whether current user is a super user
+        Auth::checK();
+        $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
         $topic->media = MediaTema::where('topic_id', $topic->id)->orderBy('position')->get();
+        if($school->code == 'cursalab-university'){
+            $topic->media->map(function($m){
+                $m['value'] = '**********';
+                return $m;
+            });
+        }
         $topic->tags = [];
 
         $topic->load('qualification_type');
@@ -121,6 +138,7 @@ class TemaController extends Controller
             'workspace_id' => $form_selects['workspace_id'],
             'hosts' =>  $form_selects['hosts'],
             'course_code_modality' => $form_selects['course_code_modality'],
+            'is_offline' => $form_selects['is_offline'],
             'evaluation_types' => $form_selects['evaluation_types'],
             'qualification_types' => $form_selects['qualification_types'],
             'dinamyc_link' => $form_selects['dinamyc_link'],
@@ -219,7 +237,7 @@ class TemaController extends Controller
         return $this->success($response);
     }
     private function uploadQRTopic($data){
-        if(str_contains($data['path_qr'], 'base64')){
+        if(isset($data['path_qr']) && str_contains($data['path_qr'], 'base64')){
             $name =  'qr/'.Str::slug($data['name']).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
             $name = Str::of($name)->limit(100);
             $path = $name.'.png';
@@ -499,5 +517,10 @@ class TemaController extends Controller
 
     public function downloadReportAssistance($school_id,$course_id,$topic_id){
         return TopicAssistanceUser::generatePDFDownload($course_id,$topic_id);
+    }
+
+    protected function downloadQuestions($school, $course, Topic $topic){
+        $data = Question::getListQuestionToReport($topic);
+        return $this->success($data);
     }
 }

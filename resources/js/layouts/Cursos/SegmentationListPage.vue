@@ -125,6 +125,7 @@
                     )
                 "
                 @preview_medias="openFormModal(modalPreviewMediaTopicsOptions, {resource_id:$event.id,type:'course'}, 'list', `Listado de multimedias del curso: ${$event.name}`)"
+                @openMultipleSegmentationModal="openMultipleSegmentationModal($event)"
             />
             <CursosEncuestaModal
                 width="50vw"
@@ -143,7 +144,7 @@
                         :curso_escuela="escuela_id"
                     /> -->
 
-            <!--    <DialogConfirm
+             <DialogConfirm
                    :ref="deleteConfirmationDialog.ref"
                    v-model="deleteConfirmationDialog.open"
                    width="450px"
@@ -151,15 +152,16 @@
                    subtitle="¿Está seguro de eliminar el curso?"
                    @onConfirm="confirmDelete"
                    @onCancel="deleteConfirmationDialog.open = false"
-               /> -->
-            <!--        <CourseValidationsDelete
-                       width="50vw"
-                       :ref="courseValidationModal.ref"
-                       :options="courseValidationModal"
-                       @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
-                       @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
-                       :resource="{}"
-                   /> -->
+            />
+
+           <CourseValidationsDelete
+                width="50vw"
+                :ref="courseValidationModal.ref"
+                :options="courseValidationModal"
+                @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
+                @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
+                :resource="{}"
+            /> 
 
             <DialogConfirm
                 :ref="courseUpdateStatusModal.ref"
@@ -245,6 +247,14 @@
                 @onCancel="modalDirectSegmentationOptions.open = false"
                 :modalities="selects.modalities"
             />
+          <SegmentMultipleCoursesModal
+              :originCourseId="multipleCoursesModalOptions.resource.id"
+              :subworkspacesIds="multipleCoursesModalOptions.resource.modulesIds || []"
+              :options="multipleCoursesModalOptions"
+              :ref="multipleCoursesModalOptions.ref"
+              @onConfirm="closeFormModal(multipleCoursesModalOptions)"
+              @onCancel="closeFormModal(multipleCoursesModalOptions)"
+          />
         </v-card>
     </section>
 </template>
@@ -262,9 +272,12 @@ import LogsModal from "../../components/globals/Logs";
 import PreviewMediaTopicsModal from "../Temas/PreviewMediaTopicsModal.vue";
 import CourseModalityModal from "./CourseModalityModal";
 import DirectSegmentationForm from "./DirectSegmentationForm";
+import SegmentMultipleCoursesModal
+  from "../Blocks/SegmentMultipleCoursesModal.vue";
 
 export default {
     components: {
+      SegmentMultipleCoursesModal,
         ProjectFormModal,
         CursosEncuestaModal,
         MoverCursoModal,
@@ -430,6 +443,13 @@ export default {
                         method_name: "logs"
                     },
                     {
+                      text: "Reusar segmentación",
+                      icon: "mdi mdi-account-switch",
+                      type: "action",
+                        show_condition: 'segments_count',
+                        method_name: "openMultipleSegmentationModal"
+                    },
+                    {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
                         type: 'action',
@@ -505,7 +525,6 @@ export default {
             modalCourseModality:{
                 open:false,
                 ref: 'CourseTypeModal',
-                open: false,
                 base_endpoint: '/course',
                 confirmLabel: 'Guardar',
                 resource: 'course',
@@ -516,7 +535,6 @@ export default {
             modalDirectSegmentationOptions:{
                 open:false,
                 ref: 'CourseDirectSegmentation',
-                open: false,
                 base_endpoint: '/segments',
                 confirmLabel: 'Guardar',
                 resource: 'course',
@@ -581,6 +599,16 @@ export default {
                 confirmLabel: 'Confirmar',
                 cancelLabel: 'Cancelar',
                 resource: 'Topic',
+            },
+            multipleCoursesModalOptions: {
+              ref: 'SegmentMultipleCoursesModal',
+              open: false,
+              title: 'Segmentación múltiple',
+              resource: {},
+              hideConfirmBtn: false,
+              persistent: true,
+              cancelLabel: 'Cancelar',
+              confirmLabel: 'Continuar'
             },
         }
     },
@@ -684,7 +712,7 @@ export default {
             let vue = this
             vue.deleteConfirmationDialog.open = false
             vue.showLoader()
-            let url = `/escuelas/${vue.escuela_id}/cursos/${vue.delete_model.id}/delete`
+            let url = `/escuelas/${vue.delete_model.first_school_id.id}/cursos/${vue.delete_model.id}/delete`
             const bodyData = {validateForm}
 
             vue.$http.post(url, bodyData)
@@ -782,6 +810,10 @@ export default {
                 return;
             }
             vue.openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del curso - ${resource.name}`)
+        },
+        openMultipleSegmentationModal(resource) {
+          this.multipleCoursesModalOptions.resource = resource
+          this.multipleCoursesModalOptions.open = true;
         }
     }
 

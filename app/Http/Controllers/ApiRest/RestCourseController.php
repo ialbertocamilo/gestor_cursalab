@@ -3,27 +3,28 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App;
-use App\Models\CriterionValue;
-use App\Models\RegistroCapacitacionTrainer;
-use App\Models\Workspace;
-use App\Services\FileService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\PollAnswerStoreRequest;
-use App\Models\Course;
 use App\Models\Poll;
-use App\Models\PollQuestionAnswer;
-use App\Models\SummaryCourse;
-use App\Models\Taxonomy;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
+use App\Models\Course;
+use App\Models\Taxonomy;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
+use App\Services\FileService;
 use Intervention\Image\Image;
+use App\Models\CriterionValue;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Monolog\Handler\IFTTTHandler;
+use App\Models\PollQuestionAnswer;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Mongo\CourseOfflineAudit;
+use Illuminate\Support\Facades\Response;
+use App\Models\RegistroCapacitacionTrainer;
+use App\Http\Requests\PollAnswerStoreRequest;
 
 class RestCourseController extends Controller
 {
@@ -45,7 +46,10 @@ class RestCourseController extends Controller
 
         return $this->successApp(['data' => $data]);
     }
-
+    public function auditOffline(Request $request){
+        CourseOfflineAudit::saveAudit($request->all());
+        return $this->successApp(['data' => null,'message'=>'se guardo correctamente.']);
+    }
     public function loadPoll(Request $request,Course $course)
     {
         if ($course->hasBeenValidated())

@@ -169,6 +169,7 @@
                             :current-clean="segment_by_document_clean"
                             @addUser="addUser"
                             @deleteUser="deleteUser"
+                            @deleteUserAll="deleteUserAll"
                         />
 
                     </v-tab-item>
@@ -188,7 +189,25 @@
                     @onConfirm="closeFormModal(modalInfoOptions)"
                     @onCancel="closeFormModal(modalInfoOptions)"
                 />
+
+              <SegmentMultipleCoursesModal
+                  :originCourseId="courseId"
+                  :subworkspacesIds="[]"
+                  :options="multipleCoursesModalOptions"
+                  :ref="multipleCoursesModalOptions.ref"
+                  @onConfirm="closeFormModal(multipleCoursesModalOptions)"
+                  @onCancel="closeFormModal(multipleCoursesModalOptions)"
+              />
             </v-form>
+
+            <div
+                v-if="isCourseSegmentation()"
+                class="additional-text-wrapper">
+              <a href="javascript:"
+                 @click="saveAndShowMultipleSegmentation()">
+                Guardar y asignar segmentación a otros cursos
+              </a>
+            </div>
         </template>
 
     </DefaultDialog>
@@ -220,9 +239,11 @@ import Segment from "./Segment";
 import SegmentAlertModal from "./SegmentAlertModal";
 import SegmentByDocument from "./SegmentByDocument";
 import SegmentValues from "./SegmentValues.vue";
+import SegmentMultipleCoursesModal from "./SegmentMultipleCoursesModal.vue";
 
 export default {
     components: {
+      SegmentMultipleCoursesModal,
         SegmentValues,
         SegmentModuleModal,
         Segment, SegmentByDocument, SegmentAlertModal
@@ -254,6 +275,8 @@ export default {
     },
     data() {
         return {
+            courseId: null,
+            showMultipleSegmentation: false,
             tabs: null,
             steps: 0,
             show_criteria_segmentation:true,
@@ -291,6 +314,16 @@ export default {
                 hideConfirmBtn: false,
                 persistent: true,
                 cancelLabel: 'Cancelar'
+            },
+            multipleCoursesModalOptions: {
+              ref: 'SegmentMultipleCoursesModal',
+              open: false,
+              title: 'Segmentación múltiple',
+              resource:'data',
+              hideConfirmBtn: false,
+              persistent: true,
+              cancelLabel: 'Cancelar',
+              confirmLabel: 'Continuar'
             },
             stackModals: { continues: [],
                 backers: [] },
@@ -412,7 +445,7 @@ export default {
         checkIfExistCriteria(stackSegments, current) {
             const vue = this;
             let stackMessage = [];
-            
+
             if(!vue.show_criteria_segmentation){
                 return stackMessage;
             }
@@ -589,6 +622,13 @@ export default {
                                 "crear_supervisor"
                             );
                         }
+
+                        // Show modal to clone segmentation to other courses
+
+                        if (this.showMultipleSegmentation) {
+                          vue.courseId = vue.resource.id;
+                          vue.multipleCoursesModalOptions.open = true;
+                        }
                     })
                     .catch(error => {
                         if (error && error.errors) vue.errors = error.errors;
@@ -725,8 +765,18 @@ export default {
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
         },
+        deleteUserAll() {
+            let vue = this;
+            if(vue.segment_by_document.criteria_selected.length) {
+                vue.segment_by_document.criteria_selected = [];
+            }
+        },
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
+        },
+        saveAndShowMultipleSegmentation() {
+          this.showMultipleSegmentation = true;
+          this.confirmModal();
         }
     }
 };
@@ -739,6 +789,24 @@ export default {
 
 .group-sheet {
     padding-bottom: 40px;
+}
+
+.additional-text-wrapper {
+  width: 35%;
+  height: 40px;
+  position: absolute;
+  z-index: 1;
+  bottom: 17px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+.additional-text-wrapper a {
+  font-size: 13px !important;
+  text-decoration: underline;
+  line-height: 15px;
 }
 
 .first-tab {

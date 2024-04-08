@@ -19,7 +19,7 @@ Route::controller(ProcessController::class)->group(function() {
     // Route::post('/segments/save', 'saveSegment');
     // Route::post('/segments/users', 'usersSegmentedBenefit');
     // Route::post('/segments/enviar_correo', 'sendEmailSegments');
-	// Route::get('/form-selects', 'getFormSelects');
+	Route::get('/form-selects', 'getFormSelectsProcess');
 
     Route::put('/{process}/update_qualifications','updateQualificationStages');
     Route::put('/{process}/status', 'status');

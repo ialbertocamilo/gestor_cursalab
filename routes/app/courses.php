@@ -15,4 +15,5 @@ Route::controller(RestCourseController::class)->group(function() {
     Route::post('/aceptar-diploma/{course}', 'acceptCertification')->middleware('extend-session');
 
     Route::post('/registro-capacitacion', 'generateRegistroCapacitacion');
+    Route::post('/audit-offline', 'auditOffline');
 });

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Induction\ApiRest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Induccion\SupervisorProcessesResource;
 use App\Models\Benefit;
 use App\Models\CheckList;
 use App\Models\ChecklistRpta;
 use App\Models\ChecklistRptaItem;
 use App\Models\EntrenadorUsuario;
+use App\Models\Post;
 use App\Models\Process;
 use App\Models\ProcessInstructor;
 use App\Models\ProcessSummaryUser;
@@ -20,16 +22,14 @@ use Illuminate\Support\Facades\Auth;
 
 class RestProcessController extends Controller
 {
-
-    public function getProcesses()
+    
+    public function getFaqs()
     {
-        $user = Auth::user();
-        $data = [
-            'user' => $user ?? null,
-        ];
-        $apiResponse = Process::getProcessesApi($data);
+        $tax_id = Taxonomy::where('type', 'section')->where('code', 'faq')->first('id');
+        $platform_id = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+        $preguntas = Post::where('section_id', $tax_id->id)->where('platform_id_onb', $platform_id?->id)->get();
 
-        return response()->json($apiResponse, 200);
+        return $this->success($preguntas);
     }
 
     public function getProcess(Process $process)
@@ -39,7 +39,118 @@ class RestProcessController extends Controller
             'process' => $process?->id,
             'user' => $user
         ];
-        $apiResponse = Process::getProcessApi($data);
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return $this->success($apiResponse);
+    }
+
+    public function getUserProcess(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getUserProcessApi($data);
+
+        return $this->success($apiResponse);
+    }
+
+    public function getUserProcessInstructions( Process $process )
+    {
+        $apiResponse = Process::getUserProcessOnlyInstructionsApi($process?->id);
+
+        return $this->success($apiResponse);
+    }
+
+    public function saveUserProcessInstructions( Process $process, Request $request )
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $status = Taxonomy::getFirstData('user-process', 'status', 'in-progress');
+
+        $user_summary = $user->summary_process()->where('process_id', $process->id)->first();
+
+        if($user_summary) {
+            $user_summary->status_id = $status?->id;
+            $user_summary->completed_instruction = true;
+            if(is_null($user_summary->first_entry))
+                $user_summary->first_entry = now()->format('y-m-d H:i:s');
+            $user_summary->save();
+        }
+        else {
+            $data = [
+                'user_id' => $user->id,
+                'process_id' => $process->id,
+                'status_id' => $status?->id,
+                'progress' => 0,
+                'absences' => 0,
+                'completed_instruction' => true,
+                'first_entry' => now()->format('y-m-d H:i:s')
+            ];
+            ProcessSummaryUser::create($data);
+        }
+
+        $apiResponse['error'] = false;
+        $apiResponse['message'] = 'La información del usuario se actualizó correctamente.';
+
+        return $this->success($apiResponse);
+    }
+
+    public function getSupervisorProcesses()
+    {
+        $user = Auth::user();
+        $data = [
+            'user' => $user ?? null,
+        ];
+        $apiResponse = Process::getSupervisorProcessesApi($data);
+
+        SupervisorProcessesResource::collection($apiResponse);
+
+        // return response()->json($apiResponse, 200);
+        $response = [
+            'progress' => 0,
+            'stages' => '0/5',
+            'processes' => $apiResponse
+        ];
+        return $this->success($response);
+    }
+
+    public function getSupervisorProcess(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getSupervisorProcessApi($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
+    public function getSupervisorProcessOnlyStudents(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getSupervisorProcessOnlyStudentsApi($data);
+
+        return response()->json($apiResponse, 200);
+    }
+
+    public function getSupervisorProcessOnlySupervisors(Process $process)
+    {
+        $user = Auth::user();
+        $data = [
+            'process' => $process?->id,
+            'user' => $user
+        ];
+        $apiResponse = Process::getSupervisorProcessOnlySupervisorsApi($data);
 
         return response()->json($apiResponse, 200);
     }

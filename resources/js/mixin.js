@@ -52,9 +52,9 @@ export default {
     },
     // 25
     methods: {
-        descargarExcelwithValuesInArray({headers,values,comments,filename}){
+        descargarExcelwithValuesInArray({headers,values,comments=[],filename,confirm=false,filesheet=null}){
             //values like array's of array [["name","lastname","email"],["aldo","lopez","aldo@gmail.com"]["pepe","perez","pepe@gmail.com"]]
-            if (window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
+            if ((confirm) || window.confirm('Se han encontrado observaciones. ¿Desea descargar lista de observaciones?')) {
                 values.unshift(headers);
                 const data = XLSX.utils.aoa_to_sheet(values);
                 //set comments
@@ -74,7 +74,8 @@ export default {
                     }
                 }
                 const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, data, filename);
+                const file_sheet = filesheet ? filesheet : filename;
+                XLSX.utils.book_append_sheet(workbook, data, file_sheet);
                 XLSX.writeFile(workbook, `${filename}.xlsx`);
             }
         },
@@ -84,7 +85,10 @@ export default {
                     header: values
                 });
                 headers.forEach((element, index) => {
+                    console.log('index',index);
                     let indice = `${this.abc[index]}1`
+                    console.log('indice',indice);
+                    console.log('data',data[`${indice}`]);
                     data[`${indice}`].v = element;
                 });
                 const workbook = XLSX.utils.book_new();
@@ -887,6 +891,25 @@ export default {
                 localStorage.setItem(dataParams.key, JSON.stringify(filters));
                 vue.openInNewTab(route);
             }
+        },
+        loadPreferencesBycode(attr){
+            let preferencesJSON = localStorage.getItem('preferences');
+            if(!preferencesJSON){
+                return null;
+            }
+            const preferences = JSON.parse(preferencesJSON);
+            return preferences[attr];
+        },
+        updatePreferenceByCode(attr,value){
+            let preferencesJSON = localStorage.getItem('preferences');
+            let preferences = {};
+            if (!preferencesJSON) {
+                preferences[attr] = value;
+            } else {
+                preferences = JSON.parse(preferencesJSON);
+                preferences[attr]=  value;
+            }
+            localStorage.setItem('preferences', JSON.stringify(preferences));
         },
         validateRequired(input) {
             return input != undefined && input != null && input != "";

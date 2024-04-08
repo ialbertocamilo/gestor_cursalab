@@ -259,6 +259,16 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         return $this->hasMany(ProcessSummaryUser::class);
     }
 
+    public function summary_process_stages()
+    {
+        return $this->hasMany(ProcessSummaryStage::class);
+    }
+
+    public function summary_process_activities()
+    {
+        return $this->hasMany(ProcessSummaryActivity::class);
+    }
+
     public function getWorkspaces()
     {
         $roles = AssignedRole::getUserAssignedRoles($this->id);
@@ -565,7 +575,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             DB::beginTransaction();
             $old_document = $user ? $user->document : null;
             $current_workspace_id = get_current_workspace();
-
+            $platform = session('platform');
             if ($user) :
                 if ($from_massive) {
                     $data['summary_user_update'] = true;
@@ -593,7 +603,6 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 $this->setPasswordData($data, $update_password, $user);
 
                 $data['type_id'] = $data['type_id'] ?? Taxonomy::getFirstData('user', 'type', 'employee')->id;
-                $platform = session('platform');
                 if($platform && $platform == 'induccion') {
                     $data['type_id'] = Taxonomy::getFirstData('user', 'type', 'employee_onboarding')->id;
                 }
@@ -632,7 +641,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             }
 
             $criterion_list_final_date = [];
-
+            if($platform=='induccion' && !$from_massive){
+                Process::syncEnrolledDateProcess($user);
+            }
             foreach($data['criterion_list_final'] as $crr) {
                 if(is_numeric($crr) || is_array($crr)) {
                     array_push($criterion_list_final, $crr);

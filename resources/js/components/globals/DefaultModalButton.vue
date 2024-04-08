@@ -9,12 +9,13 @@
         :color="color"
         @click="emitClick"
         :outlined="outlined"
+        :icon="isIconButton"
     >
         <!-- <div class="icon_tmp" v-if="template">
             <img src="/img/anfitriones.png">
         </div> -->
         <v-icon class="mr-1" v-text="icon_name" v-if="icon"/>
-        {{ label }}
+        <span v-if="!isIconButton">{{ label }}</span>
     </v-btn>
 </template>
 
@@ -53,6 +54,10 @@ export default {
             type: Boolean,
             default: false
         },
+        isIconButton:{
+            type:Boolean,
+            default:false,
+        }
     },
     methods: {
         emitClick(){

@@ -14,7 +14,7 @@ class Ambiente extends Model
         'link_genially',
         'color_primario', 'color_secundario',
         'titulo', 'titulo_login',
-        'fondo', 'logo', 'icono', 'logo_empresa',
+        'fondo', 'logo', 'icono', 'logo_empresa','size_limit_offline',
         //app
         'titulo_login_app', 'subtitulo_login_app', 'form_login_transparency',  'form_login_position', 
         'color_primario_app', 'color_secundario_app', 'color_terciario_app', 'fondo_app', 'fondo_invitados_app','logo_app',
@@ -67,5 +67,23 @@ class Ambiente extends Model
             }
         }
         return $custom_ambiente;
+    }
+
+    protected function getAttributeGeneral($query_select=['id']){
+        return Ambiente::select($query_select)->where('type','general')->first();
+    }
+
+    protected function getSizeLimitOffline($parsed=true,$getSizeLimitOffline=null){
+        $size_limit_offline = $getSizeLimitOffline ?? Ambiente::select('size_limit_offline')->where('type','general')->first()->size_limit_offline;
+        $size_unit = ' MB';
+        $size_in_kb = $size_limit_offline * 1024;
+        if($size_limit_offline >= 1024){
+            $size_limit_offline = round($size_limit_offline/1024,2);
+            $size_unit = ' GB';
+        }
+        if($parsed){
+            return $size_limit_offline . $size_unit;
+        }
+        return compact('size_limit_offline','size_unit','size_in_kb');
     }
 }

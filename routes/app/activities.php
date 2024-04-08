@@ -10,6 +10,7 @@ Route::controller(RestActivityController::class)->group(function () {
     Route::get('/checklist/{checklist}', 'ActivityChecklist');
     Route::get('/questions/{topic}', 'ActivityAssessment');
     Route::post('/register', 'RegisterActivity');
-    Route::get('/checklist_by_trainer/{checklist}/{user}', 'ActivityChecklistUserByTrainer');
+    Route::get('/checklist_by_trainer/{activity}/{user}', 'ActivityChecklistUserByTrainer');
+    Route::post('/register_user_checklist/{user}', 'RegisterUserChecklist');
 
 });

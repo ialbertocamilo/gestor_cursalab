@@ -26,7 +26,9 @@ class RestQuizController extends Controller
     {
         $user = auth()->user();
         $resultado = 0;
-
+        //if is offlined set data when the answers was created.
+        $is_offline = $request->is_offline;
+        $created_at = $request->created_at;
         $topic = Topic::with('course.topics.evaluation_type')->find($request->tema);
 
         if (count($request->respuestas) == 0)
@@ -50,7 +52,7 @@ class RestQuizController extends Controller
             'active_results' => (bool) $topic->active_results,
             'attempts' => $row->attempts + 1,
             'total_attempts' => $row->total_attempts + 1,
-            'last_time_evaluated_at' => now(),
+            'last_time_evaluated_at' => ($is_offline && $created_at) ? $created_at : now(),
             'current_quiz_started_at' => NULL,
             'current_quiz_finishes_at' => NULL,
             'taking_quiz' => NULL,
@@ -110,7 +112,7 @@ class RestQuizController extends Controller
         // $data_ev['intentos_realizados'] = $row->attempts;
         $data_ev['encuesta_pendiente'] = NULL;
 
-        $row_course = SummaryCourse::updateUserData($topic->course);
+        $row_course = SummaryCourse::updateUserData(course:$topic->course,certification_issued_at:$created_at);
         $row_user = SummaryUser::updateUserData();
 
         if ($row_course->status->code == 'enc_pend') {
@@ -125,7 +127,7 @@ class RestQuizController extends Controller
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 
-    public function cargar_preguntas($topic_id)
+    public function cargar_preguntas($topic_id,Request $request)
     {
         $topic = Topic::with('evaluation_type', 'course','course.modality:id,code')->find($topic_id);
         $code_modality = $topic->course->modality->code;
@@ -147,7 +149,7 @@ class RestQuizController extends Controller
         if ($is_qualified AND !$topic->evaluation_verified) return response()->json(['data' => ['msg' => 'Evaluación no disponible. Intente de nuevo en unos minutos. [A]'], 'error' => true], 200);
 
         $row = SummaryTopic::setStartQuizData($topic);
-        if(!$row && $code_modality != 'asynchronous'){
+        if(!$row && ($code_modality != 'asynchronous' || $request->is_offline)){
             $user = auth()->user();
             $row = SummaryTopic::storeData($topic, $user);
             SummaryCourse::storeData($topic->course, $user);
@@ -159,8 +161,11 @@ class RestQuizController extends Controller
         if ($row->hasNoAttemptsLeft(null,$topic->course) && $is_qualified)
             return response()->json(['error' => true, 'msg' => 'Sin intentos.'], 200);
 
-        if ($row->isOutOfTimeForQuiz() && $is_qualified && $code_modality == 'asynchronous')
-            return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
+        if(!$request->is_offline){
+            if ($row->isOutOfTimeForQuiz() && $is_qualified && $code_modality == 'asynchronous'){
+                return response()->json(['data' => ['msg' => 'Fuera de tiempo. Intente de nuevo en unos minutos.'], 'error' => true], 200);
+            }
+        }
 
         $limit = NULL;
         // $limit = auth()->user()->getSubworkspaceSetting('mod_evaluaciones', 'preg_x_ev');

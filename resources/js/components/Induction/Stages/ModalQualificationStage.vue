@@ -229,14 +229,16 @@ export default {
 
             await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.qualification_types = data.qualification_types
+                    vue.selects.qualification_types = data.data.qualification_types
+
+                    if(data.data.qualification_type)
+                        vue.resource.qualification_type = data.data.qualification_type
                 })
         },
         resetValidation()
         {
             let vue = this
             vue.$refs.stageForm.resetValidation()
-            vue.$refs.stageForm.reset()
             vue.message_error = ''
         },
         closeModal()
@@ -244,6 +246,7 @@ export default {
             let vue = this;
             vue.disabled_btn_next = true
             vue.resetValidation()
+            vue.$refs.stageForm.reset()
             vue.$emit("onCancel");
         },
         async confirmModal() {

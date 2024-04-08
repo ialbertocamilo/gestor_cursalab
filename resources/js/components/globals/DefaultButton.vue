@@ -5,7 +5,6 @@
         elevation="0"
         :ripple="false"
         :color="color"
-        :icon="isIcon"
         @click="click"
         :block="block"
         :disabled="disabled"
@@ -13,9 +12,10 @@
         :outlined="outlined"
         :text="text"
         :style="`${min_content ? 'max-width: min-content;' : 'width:100%;'}`"
+        :icon="isIconButton"
     >
         <v-icon :small="smallIcon" class="mr-1" v-text="icon" v-if="icon"/>
-        {{ label }}
+        <span v-if="!isIconButton">{{ label }}</span>
         <v-icon :small="smallIcon" class="ml-1" v-text="appendIcon" v-if="appendIcon"/>
     </v-btn>
 </template>
@@ -70,7 +70,7 @@ export default {
             type:Boolean,
             default:true,
         },
-        isIcon:{
+        isIconButton:{
             type:Boolean,
             default:false,
         }

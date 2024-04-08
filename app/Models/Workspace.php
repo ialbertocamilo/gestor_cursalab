@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CheckList;
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class Workspace extends BaseModel
         'logo', 'logo_negativo', 'url_powerbi',
         'plantilla_diploma',
         'codigo_matricula',
-        'mod_evaluaciones',
+        // 'mod_evaluaciones',
         'reinicios_programado',
         'contact_support',
         'limit_allowed_users',
@@ -44,7 +45,8 @@ class Workspace extends BaseModel
         'dc3_configuration',
         'reminders_configuration',
         'registro_capacitacion',
-        'checklist_configuration'
+        'checklist_configuration',
+        'course_configuration',
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -100,7 +102,7 @@ class Workspace extends BaseModel
     }
 
     protected $casts = [
-        'mod_evaluaciones' => 'array',
+        // 'mod_evaluaciones' => 'array',
         'reinicios_programado' => 'array',
         'contact_support' => 'array',
         'limit_allowed_users' => 'array',
@@ -109,7 +111,8 @@ class Workspace extends BaseModel
         'dc3_configuration'=>'array',
         'reminders_configuration'=>'json',
         'registro_capacitacion' => 'json',
-        'checklist_configuration' => 'json'
+        'checklist_configuration' => 'json',
+        'course_configuration'=>'json',
     ];
 
     public function setRegistroCapacitacionAttribute($value)
@@ -229,6 +232,11 @@ class Workspace extends BaseModel
     public function schools()
     {
         return $this->belongsToMany(School::class, 'school_subworkspace', 'subworkspace_id')->withPivot('position');
+    }
+
+    public function processes()
+    {
+        return $this->belongsToMany(Process::class, 'process_subworkspace', 'subworkspace_id')->withPivot('position');
     }
 
     public function courses()
@@ -826,19 +834,19 @@ class Workspace extends BaseModel
             'medias', // OK
             'polls.questions', //
         ];
-
+        
+        
         $workspace = $this->replicate();
-
         $workspace->push();
 
         $workspace->update($data);
 
         $workspace->push();
-
+       
         $this->load($relationships);
 
         $_crit_module = Criterion::where('code', 'module')->first();
-
+        info('duplicate polls');
         foreach ($this->polls as $_poll) {
 
             $poll = $workspace->polls()->create($_poll->toArray());
@@ -867,6 +875,8 @@ class Workspace extends BaseModel
         if(count($evaluation_types)>0){
             Taxonomy::insert($evaluation_types);
         }
+        info('duplicate subworkspaces');
+
         foreach ($this->subworkspaces as $_subworkspace) {
 
             $_subworkspace_data = $_subworkspace->toArray();
@@ -968,6 +978,7 @@ class Workspace extends BaseModel
             }
         }
 
+        info('duplicate criterionWorkspace');
 
         $workspace->functionalities()->sync($this->functionalities);
 
@@ -987,19 +998,21 @@ class Workspace extends BaseModel
         $workspace->medias()->createMany($this->medias->toArray());
 
         $modules_id = $this->subworkspaces->pluck('criterion_value_id')->toArray();
-
+        
+        //Duplicate Announcement
         $_announcements = Announcement::whereRelationIn('criterionValues', 'criterion_value_id', $modules_id)->get();
 
         $modules_ids = $workspace->subworkspaces()->pluck('criterion_value_id')->toArray();
         $subworkspace_ids = $workspace->subworkspaces()->pluck('id')->toArray();
-
+        info('duplicate _announcements');
         foreach ($_announcements as $_announcement) {
 
             $announcement = Announcement::create($_announcement->toArray());
 
             $announcement->criterionValues()->sync($modules_ids);
         }
-
+        //Duplicate Videoteca
+        info('duplicate videotecas');
         foreach ($this->videotecas as $_videoteca) {
 
             $_videoteca_data = $_videoteca->toArray();
@@ -1014,7 +1027,25 @@ class Workspace extends BaseModel
             $videoteca->modules()->sync($subworkspace_ids);
             // $videoteca->tags()->sync($_videoteca->tags);
         }
-
+        info('duplicate duplicateChecklistFromWorkspace');
+        //Duplicate FUNCTIONALITIES
+        $duplicate_functionalities = json_decode($data['duplicate']);
+        if(isset($duplicate_functionalities->checklist) && $duplicate_functionalities->checklist){
+            CheckList::duplicateChecklistFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateBenefitsFromWorkspace');
+        if(isset($duplicate_functionalities->benefits) && $duplicate_functionalities->benefits){
+            Benefit::duplicateBenefitsFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateCertificatesFromWorkspace');
+        if(isset($duplicate_functionalities->certificates) && $duplicate_functionalities->certificates){
+            Certificate::duplicateCertificatesFromWorkspace($this,$workspace);
+        }
+        info('duplicate duplicateVademecumsFromWorkspace');
+        if(isset($duplicate_functionalities->protocols_and_documents) && $duplicate_functionalities->protocols_and_documents){
+            $current_modules_ids = $this->subworkspaces->pluck('criterion_value_id')->toArray();
+            Vademecum::duplicateVademecumsFromWorkspace($current_modules_ids,$workspace,$modules_ids);
+        }
         return $workspace;
     }
 

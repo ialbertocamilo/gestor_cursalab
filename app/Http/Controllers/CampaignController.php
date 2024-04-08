@@ -227,6 +227,19 @@ class CampaignController extends Controller
             // OPTIONAL: INSIGNIA 02 - RESPUESTA DE ENCUESTA
             if($currBadgeTwo) CampaignBadges::updateBadge($currBadgeTwo, 1, $lastIndex);
             else CampaignBadges::updateBadge($currBadgeTwo, 1, $lastIndex, true);
+
+            // Validation: only two rules should exist for Voters,
+            // so remove conditions with NULL values
+
+            $query = CampaignRequirements::where('campaign_id', $campaign->id);
+
+            if ($query->count() > 2) {
+               $query->whereNull('criterio_id')
+                    ->whereNull('condition')
+                    ->whereNull('value')
+                    ->where('type', 'VOTERS')
+                    ->forceDelete();
+            }
         }
 
         return $this->success($lastIndex);

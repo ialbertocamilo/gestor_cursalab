@@ -21,6 +21,7 @@ Route::controller(GeneralController::class)->group(function() {
 	// Route::put('/workspace-plan', 'workspace_plan')->name('general.workspace_plan');
 	Route::get('/execute-command-jarvis', 'executeCommandJarvis');
 
+	Route::get('/sync-courses-cursalab-university/{workspace_id}', 'syncCoursesCursalabUniversity');
 });
 
 

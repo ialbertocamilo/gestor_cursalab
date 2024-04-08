@@ -31,6 +31,7 @@ class WorkspaceResource extends JsonResource
             'users_count' => thousandsFormat(Workspace::countUsers($this->id)),
             'is_super_user' => auth()->user()->isAn('super-user'),
             'is_cursalab_super_user' => is_cursalab_superuser(false),
+            'can_sync_cursalab_university' => boolval($this->functionalities->where('code','cursalab-university')->first()),
             // 'is_super_user' => false,
             // 'users_count' => thousandsFormat($this->users_count),
             // 'schools_count' => Workspace::countUsers($this->id),

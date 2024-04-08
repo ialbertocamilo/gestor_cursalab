@@ -276,7 +276,7 @@
                                 </DefaultSimpleSection>
                                 <DefaultSimpleSection title="Configuración de evaluaciones">
                                     <template slot="content">
-                                        <v-row justify="center">
+                                        <v-row>
                                             <v-col cols="6">
 
                                                 <DefaultSelect dense :items="selects.qualification_types" item-text="name"
@@ -294,6 +294,15 @@
                                             <v-col cols="3">
                                                 <DefaultInput label="Cantidad de intentos" v-model="resource.nro_intentos" dense
                                                     :rules="rules.nro_intentos" type="number" show-required></DefaultInput>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <DefaultInput label="Duración de evaluación (minutos)"
+                                                    dense
+                                                    v-model="resource.duration_quizz" 
+                                                    :rules="rules.nro_intentos" 
+                                                    show-required
+                                                    type="number" :min="0"
+                                                />
                                             </v-col>
                                             <v-col cols="12" class="py-1">
                                                 <p class="mb-0 p-small-instruction">** Utilizado para mostrar el resultado
@@ -320,6 +329,18 @@
                                                     :active-label="'Habilitar aceptación de diploma al usuario'"
                                                     :inactive-label="'Habilitar aceptación de diploma al usuario'"
                                                     v-model="resource.user_confirms_certificate" />
+                                            </div>
+                                        </v-row>
+                                    </template>
+                                </DefaultSimpleSection>
+                                <DefaultSimpleSection  v-if="current_modality.code == 'asynchronous' && has_offline" title="Habilitar modo sin conexión para el curso" >
+                                    <template slot="content">
+                                        <v-row>
+                                            <div class="col-12">
+                                                <DefaultToggle dense
+                                                    :active-label="'Activar el modo sin conexión para este curso en la plataforma.'"
+                                                    :inactive-label="'Activar el modo sin conexión para este curso en la plataforma.'"
+                                                    v-model="resource.is_offline" />
                                             </div>
                                         </v-row>
                                     </template>
@@ -417,8 +438,12 @@
 
             <DialogConfirm :ref="trainerDeleteConfirmationDialog.ref" v-model="trainerDeleteConfirmationDialog.open"
                 width="408px" title="Eliminar entrenador" subtitle="¿Está seguro de eliminar el entrenador?"
-                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />
-
+                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />       
+            
+            <DialogConfirm v-model="modalInfoOffline.open" :options="modalInfoOffline" width="580px"
+                title="Toma nota" subtitle="¡Toma nota!"
+                @onConfirm="confirmModal(false),closeSimpleModal(modalInfoOffline)" @onCancel="closeSimpleModal(modalInfoOffline)" />
+            
             <DC3PersonModal :ref="modalDC3PersonOptions.ref" v-model="modalDC3PersonOptions.open"
                 :options="modalDC3PersonOptions" width="30vw" @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false" />
@@ -437,7 +462,7 @@ const fields = [
     'description', 'requisito_id', 'lista_escuelas',
     'duration', 'investment', 'show_certification_date', 'certificate_template_id',
     'activate_at', 'deactivate_at', 'show_certification_to_user', 'user_confirms_certificate', 'can_create_certificate_dc3_dc4',
-    'dc3_configuration', 'registro_capacitacion', 'modality_id'
+    'dc3_configuration', 'registro_capacitacion', 'modality_id','is_offline'
 ];
 const file_fields = ['imagen', 'plantilla_diploma'];
 import CursoValidacionesModal from "./CursoValidacionesModal";
@@ -445,12 +470,11 @@ import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
 import RegistroTrainerModal from './RegistroTrainerModal';
-import DefaultRichText from "../../components/globals/DefaultRichText.vue";
-
+import DefaultRichText from "../../components/globals/DefaultRichText";
 export default {
     components: {
         DefaultRichText,
-        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal
+        editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal,
     },
     // props: ["modulo_id", 'categoria_id', 'curso_id'],
     props: {
@@ -507,6 +531,7 @@ export default {
                 duration: null,
                 investment: null,
                 nota_aprobatoria: null,
+                duration_quizz:null,
                 nro_intentos: null,
                 scheduled_restarts_activado: false,
                 scheduled_restarts_dias: null,
@@ -533,7 +558,8 @@ export default {
                     required_signature: false,
                     visualization_type: 'scheduled-users'
                 },
-                registro_capacitacion: {}
+                registro_capacitacion: {},
+                is_offline:null,
             },
             resource: {
                 qualification_type: { position: 0 },
@@ -543,7 +569,9 @@ export default {
                     required_signature: false,
                     visualization_type: 'scheduled-users'
                 },
-                registro_capacitacion: {}
+                registro_capacitacion: {},
+                is_offline:null,
+                duration_quizz:null
             },
             rules: {
                 name: this.getRules(['required', 'max:120']),
@@ -623,6 +651,22 @@ export default {
                     }
                 },
             },
+            size_limit_offline:0,
+            modalInfoOffline:{
+                open: false,
+                was_opened:false,
+                title_modal: '¡Toma nota!',
+                type_modal: 'confirm',
+                image:'/img/user_taking_note.png',
+                content_modal: {
+                    confirm: {
+                        title: '',
+                        details: [],
+                    }
+                },
+                confirmLabel:'Aceptar',
+                hideCancelBtn:true
+            },
             courseUpdateStatusModal: {
                 ref: 'CourseUpdateStatusModal',
                 title: 'Actualizar Curso',
@@ -700,6 +744,7 @@ export default {
             //Permissions
             showButtonIaGenerate: false,
             has_DC3_functionality: false,
+            has_offline:false,
             current_modality: {},
             catalog_denominations: [],
             //Courses in person
@@ -712,7 +757,7 @@ export default {
             }],
             ubicacion_mapa: null,
             registro_capacitacion_trainers: [],
-            catalog_denominations: []
+            catalog_denominations: [],
         }
     },
     async mounted() {
@@ -759,6 +804,7 @@ export default {
             let vue = this
             // Limpiar inputs file
             vue.removeFileFromDropzone(vue.resource.imagen, 'inputLogo')
+            vue.modalInfoOffline.was_opened = false;
             // Selects independientes
             // Selects dependientes
             // vue.resource = Object.assign({}, {})
@@ -792,7 +838,8 @@ export default {
             }
         },
         confirmModal(validateForm = true) {
-
+            let vue = this
+            
             this.showLoader()
 
             // Get datetimes values
@@ -810,7 +857,6 @@ export default {
                 this.resource.deactivate_at = null
             }
 
-            let vue = this
             vue.errors = []
             vue.loadingActionBtn = true
             // vue.showLoader()
@@ -828,7 +874,13 @@ export default {
                 setTimeout(() => vue.closeModal(), 10000);
                 return;
             }
-
+            
+            if(vue.resource.is_offline && !vue.modalInfoOffline.was_opened){
+                vue.hideLoader()
+                vue.modalInfoOffline.was_opened = true;
+                vue.modalInfoOffline.open = true;
+                return;
+            }
             const edit = (vue.resource && vue.resource.id)
             let url = `${vue.base_endpoint}/${edit ? `update/${vue.resource.id}` : 'store'}`
             let method = edit ? 'PUT' : 'POST';
@@ -908,6 +960,7 @@ export default {
                 // preg_x_ev: vue.resource.preg_x_ev,
                 nota_aprobatoria: vue.resource.nota_aprobatoria,
                 nro_intentos: vue.resource.nro_intentos,
+                duration_quizz: vue.resource.duration_quizz
             }
             let json = JSON.stringify(data)
             formData.append('mod_evaluaciones', json)
@@ -963,7 +1016,12 @@ export default {
                     let response = data.data ? data.data : data;
 
                     vue.selects.requisito_id = response.requisitos
-
+                    vue.size_limit_offline = response.size_limit_offline;
+                    vue.modalInfoOffline.content_modal.confirm.details= [
+                        'Recuerda que los archivos que se podrán descargar son: Office, PDF, video y audio.<b>Y los que no se podrán descargar son: youtube, vimeo y scorm en su versión sin conexión</b>.',
+                        `Los cursos disponibles para descargar no deben exceder el ${vue.size_limit_offline} de peso.`,
+                        'Tus usuarios deben tener la aplicación oficial descargada en sus dispositivos.',
+                    ]
                     vue.selects.qualification_types = response.qualification_types
                     vue.selects.lista_escuelas = response.escuelas
                     vue.selects.modalities = response.modalities;
@@ -974,11 +1032,13 @@ export default {
                     vue.people.legal_representatives = response.legal_representatives;
                     vue.catalog_denominations = response.catalog_denominations;
                     vue.has_DC3_functionality = response.has_DC3_functionality;
+                    vue.has_offline = response.has_offline;
                     vue.registro_capacitacion_trainers = response.registro_capacitacion_trainers;
                     vue.has_registro_capacitacion_functionality = response.has_registro_capacitacion_functionality;
 
                     if (resource && resource.id) {
                         response.curso.nota_aprobatoria = response.curso.mod_evaluaciones.nota_aprobatoria;
+                        response.curso.duration_quizz = response.curso.mod_evaluaciones.duration_quizz;
                         response.curso.nro_intentos = response.curso.mod_evaluaciones.nro_intentos;
 
                         vue.resource = Object.assign({}, response.curso)
@@ -996,7 +1056,12 @@ export default {
                         }
 
                     } else {
-                        vue.resource.qualification_type = response.qualification_type
+                        vue.resource.qualification_type = response.qualification_type;
+                        vue.resource.nota_aprobatoria = response.course_configuration.nota_aprobatoria;
+                        vue.resource.nro_intentos = response.course_configuration.nro_intentos;
+                        vue.resource.is_offline = response.course_configuration.is_offline;
+                        vue.resource.duration_quizz = response.course_configuration.duration_quizz;
+                        
                         vue.resource.modality_id = vue.options.modality.id;
                         if (vue.school_id) {
 

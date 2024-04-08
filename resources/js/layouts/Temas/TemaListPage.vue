@@ -44,6 +44,22 @@
                             append-icon="mdi-magnify"
                         />
                     </v-col>
+                    <v-spacer></v-spacer>
+                    <div class="d-flex align-items-center ml-4" v-if="course_offline.is_offline">
+                        <DefaultInfoTooltip 
+                            left
+                            icon="mdi-database"
+                            :color="course_offline.has_space ? '#2A3649' : '#FF4242'"
+                            text="Espacio dedicado a contenido sin conexión en la plataforma." 
+                        />
+                        <!-- <v-icon color="#2A3649">mdi-database</v-icon> #FF4242 #2A3649-->
+                        <p 
+                            class="my-0 mx-2" 
+                            :style="`${course_offline.has_space ? 'color: #2A3649' : 'color:#FF4242'};text-transform: uppercase;`"
+                        >
+                            {{ course_offline.sum_size_topics.size+' '+ course_offline.sum_size_topics.size_unit }} / {{ course_offline.limit }}
+                        </p>
+                    </div>
                 </v-row>
             </v-card-text>
             <DefaultTable
@@ -119,7 +135,7 @@
                 :options="modalTopicOptions"
                 :school_id="school_id"
                 :course_id="course_id"
-                @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters)"
+                @onConfirm="closeFormModal(modalTopicOptions, dataTable, filters),getListInfo()"
                 @onCancel="closeFormModal(modalTopicOptions)"
             />
             <PreviewMediaTopicsModal
@@ -162,6 +178,7 @@ export default {
     data() {
         let vue = this
         return {
+            tooltip:false,
             breadcrumbs: [
                 {title: 'Escuelas', text: `${this.school_name}`, disabled: false, href: `/escuelas`},
                 {
@@ -353,12 +370,21 @@ export default {
                 open: false,
                 base_endpoint: `/escuelas/${this.school_id}/cursos/${this.course_id}/temas`,
             },
-            showPreviewButton:false
+            showPreviewButton:false,
+            course_offline:{
+                is_offline:false,
+                sum_size_topics:{
+                    size:0,
+                    size_unit:'0 MB',
+                },
+                limit:'1 GB',
+                space:true,
+            }
         }
     },
     mounted() {
         let vue = this
-        // vue.getSelects();
+        vue.getListInfo();
 
         // vue.filters.module = vue.modulo_id
 
@@ -366,13 +392,12 @@ export default {
         // vue.filters.curso = vue.course_id
     },
     methods: {
-        getSelects() {
+        async getListInfo() {
             let vue = this
-            const url = `/escuelas/get-selects`
-            vue.$http.get(url)
+            const url = `${vue.modalCursoEncuesta.base_endpoint}/get-selects`
+            await vue.$http.get(url)
                 .then(({data}) => {
-                    vue.selects.modules = data.data.modules
-                    vue.modalOptions.selects.modules = data.data.modules
+                    vue.course_offline = data.data.course_offline
                 })
         },
         activity() {
@@ -383,7 +408,7 @@ export default {
             vue.delete_model = tema
             vue.deleteConfirmationDialog.open = true
         },
-        confirmDelete(validateForm = true) {
+        async confirmDelete(validateForm = true) {
             let vue = this
             vue.showLoader()
             vue.deleteConfirmationDialog.open = false
@@ -400,7 +425,7 @@ export default {
             let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.delete_model.id}`
             const bodyData = {validateForm}
 
-            vue.$http.post(url, bodyData)
+            await vue.$http.post(url, bodyData)
                 .then(async ({data}) => {
                     vue.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0
@@ -417,13 +442,14 @@ export default {
                     await vue.handleValidationsBeforeUpdate(error, vue.topicValidationModal, vue.topicValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
+            vue.getListInfo();
         },
 
         updateTopicStatus(course) {
             let vue = this
             vue.update_model = course
             vue.topicUpdateStatusModal.open = true
-            vue.topicUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active)
+            vue.topicUpdateStatusModal.status_item_modal = Boolean(vue.update_model.active);
         },
         async confirmUpdateStatus(validateForm = true) {
             let vue = this
@@ -442,7 +468,7 @@ export default {
             let url = `/escuelas/${vue.school_id}/cursos/${vue.course_id}/temas/${vue.update_model.id}/status`;
             const bodyData = {validateForm}
 
-            vue.$http.put(url, bodyData)
+            await vue.$http.put(url, bodyData)
                 .then(async ({data}) => {
                     vue.hideLoader()
                     const has_info_messages = data.data.messages.list.length > 0;
@@ -461,6 +487,7 @@ export default {
                     vue.handleValidationsBeforeUpdate(error, vue.topicValidationModalUpdateStatus, vue.topicValidationModalDefault);
                     vue.loadingActionBtn = false
                 })
+            vue.getListInfo();
         },
         enablePreviewbutton(){
             let vue = this;

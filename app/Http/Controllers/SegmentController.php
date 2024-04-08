@@ -58,15 +58,23 @@ class SegmentController extends Controller
     public function loadModulesFromCourseSchools(Request $request) {
         $modules = Course::getModulesFromCourseSchools($request->courseId);
         $modulesIds = [];
+        $subworkspacesIds = [];
         if ($modules) {
             $modulesIds = collect($modules)
                 ->unique('module_id')
                 ->pluck('module_id')
                 ->toArray();
+
+            $subworkspacesIds = Workspace::query()
+                ->whereIn('criterion_value_id', $modulesIds)
+                ->get()
+                ->pluck('id')
+                ->toArray();
         }
 
         return $this->success([
             'modulesIds' => $modulesIds,
+            'subworkspacesIds' => $subworkspacesIds,
             'modulesSchools' => $modules
         ]);
     }
@@ -264,5 +272,15 @@ class SegmentController extends Controller
             });
 
         // info(now()->format("Y-m-d H:i:s"));
+    }
+
+    public function cloneSegmentation(Request $request) {
+
+        Segment::cloneSegmentation(
+            $request->originCourseId,
+            $request->destinationCoursesIds
+        );
+
+        return $this->success();
     }
 }

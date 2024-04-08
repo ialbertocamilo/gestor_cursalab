@@ -18,7 +18,7 @@ class Vademecum extends Model
     protected $table = 'vademecum';
 
     protected $fillable = [
-        'name', 'category_id', 'subcategory_id', 'media_id', 'active', 'media_type'
+        'id','name', 'category_id', 'subcategory_id', 'media_id', 'active', 'media_type'
     ];
 
     protected $hidden = [
@@ -360,7 +360,38 @@ class Vademecum extends Model
 
         return $result;
     }
+    protected function duplicateVademecumsFromWorkspace($current_modules_ids,$workspace,$modules_ids){
+        $vademecums = Vademecum::select('id','name', 'category_id', 'subcategory_id', 'media_id', 'active', 'media_type')
+        ->with(['category:id,group,type,name,active','subcategory:id,parent_id,group,type,name,active'])
+        ->whereHas('modules', function ($q) use ($current_modules_ids) {
+            $q->whereIn('module_id', $current_modules_ids);
+        })->get();
+        foreach ($vademecums as $vademecum) {
+            $category = $vademecum->category->toArray();
+            $subcategory = $vademecum->subcategory->toArray();
+            $vademecum = $vademecum->toArray();
+            $_category = New Taxonomy();
+            unset($category->id);
+            $category['workspace_id'] = $workspace->id;
+            $_category->fill($category);
+            $_category->save();
 
+            $_subcategory = new Taxonomy();
+            unset($subcategory['id']);
+            $subcategory['workspace_id'] = $workspace->id;
+            $subcategory['parent_id'] = $_category->id;
+            $_subcategory->fill($subcategory);
+            $_subcategory->save();
+            
+            $_vademecum = new Vademecum();
+            unset($vademecum['id']);
+            $vademecum['category_id'] = $_category->id;
+            $vademecum['subcategory_id'] = $_subcategory->id;
+            $_vademecum->fill($vademecum);
+            $_vademecum->save();
+            $_vademecum->modules()->sync($modules_ids);
+        }
+    }
     // todo: this method, is not used anywhere
     // protected function importFromFile($data)
     // {

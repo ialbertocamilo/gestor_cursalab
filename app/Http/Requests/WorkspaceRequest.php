@@ -49,7 +49,8 @@ class WorkspaceRequest extends FormRequest
 
             'dc3_configuration'=>'nullable',
             'reminders_configuration'=>'nullable',
-            'checklist_configuration'=>'nullable'
+            'checklist_configuration'=>'nullable',
+            'course_configuration'=>'nullable',
         ];
     }
 

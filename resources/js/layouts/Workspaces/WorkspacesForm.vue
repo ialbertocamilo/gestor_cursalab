@@ -147,9 +147,13 @@
 
                     <v-tab-item :key="3" :value="'tab-3'" v-if="is_superuser">
 
-                        <DefaultSection title="Configuración de sistema de calificación" v-if="is_superuser">
+                        <DefaultSection 
+                            v-if="is_superuser"
+                            title="Configuración de cursos" 
+                            tooltipInfoText="Seleccione la configuración que se tendrá por defecto en la creación de cursos."
+                        >
                             <template v-slot:content>
-                                <v-row justify="space-around">
+                                <v-row>
                                     <v-col cols="6">
                                         <DefaultSelect
                                             clearable
@@ -162,11 +166,30 @@
                                             dense
                                         />
                                     </v-col>
-                                    <v-col cols="6" class="d-flex">
-                                        <DefaultInfoTooltip
-                                            class=""
-                                            top
-                                            text="Seleccione el sistema de calificación que se tendrá por defecto en la creación de cursos." />
+                                    <v-col cols="3">
+                                        <DefaultInput label="Nota mínima aprobatoria"
+                                            dense
+                                            v-model="resource.course_configuration.nota_aprobatoria" 
+                                            type="number" :min="0"
+                                            :max="resource.qualification_type ? resource.qualification_type.position : 0"
+                                        />
+                                    </v-col>
+                                    <v-col cols="3">
+                                        <DefaultInput label="Cantidad de intentos" v-model="resource.course_configuration.nro_intentos" dense type="number">
+                                        </DefaultInput>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultInput label="Duración de evaluación (minutos)"
+                                            dense
+                                            v-model="resource.course_configuration.duration_quizz" 
+                                            type="number" :min="0"
+                                        />
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <DefaultToggle dense
+                                            :active-label="'Activar el modo sin conexión para los cursos en la plataforma.'"
+                                            :inactive-label="'Activar el modo sin conexión para los cursos en la plataforma.'"
+                                            v-model="resource.course_configuration.is_offline" />
                                     </v-col>
                                 </v-row>
                             </template>
@@ -178,7 +201,7 @@
                         >
                             <template v-slot:content>
                                 <v-row justify="space-around">
-                                    <v-col cols="6">
+                                    <v-col cols="7">
                                         <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 pb-4" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex justify-space-between" style="color:#5458EA">
@@ -188,7 +211,7 @@
                                                         @end="drag_evaluation_type=false" class="custom-draggable" ghost-class="ghost">
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(evaluation_type,index) in resource.checklist_configuration.evaluation_types"
-                                                            :key="index">
+                                                            :key="`key-${index}`">
                                                             <div class="activities">
                                                                 <v-row class="align-items-center px-2">
                                                                     <v-col cols="1" class="d-flex align-center justify-content-center ">
@@ -215,7 +238,12 @@
                                                                             </v-card>
                                                                         </v-menu>
                                                                     </v-col>
-                                                                    <v-col cols="6">
+                                                                    <v-col cols="1" class="p-0 pb-2">
+                                                                        <ButtonEmojiPicker
+                                                                            :ref="`emoji_picker_${index}`"
+                                                                        ></ButtonEmojiPicker>
+                                                                    </v-col>
+                                                                    <v-col cols="5">
                                                                         <DefaultInput 
                                                                             dense
                                                                             v-model="evaluation_type.name"
@@ -233,7 +261,7 @@
                                                                         <DefaultButton
                                                                             label=""
                                                                             icon="mdi-minus-circle"
-                                                                            isIcon
+                                                                            isIconButton
                                                                             @click="removeScaleEvaluation(index)"
                                                                         />
                                                                     </v-col>
@@ -253,7 +281,7 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
-                                    <v-row class="col col-6 py-1" style="height: 150px;">
+                                    <v-row class="col col-5 py-1" style="height: 150px;">
                                         <div class="col-12">
                                             <DefaultInput 
                                                 label="Limite de escalas de evaluación"
@@ -642,36 +670,6 @@
                                 </v-row>
                             </template>
                         </DefaultSection>
-                        <!-- <DefaultSection title="Logos y firmas (DC3)" v-if="is_superuser">
-                            <template v-slot:content>
-                                <v-row>
-                                    <v-col cols="6">
-                                        <DefaultSelectOrUploadMultimedia
-                                            ref="inputLogoDC3"
-                                            v-model="resource.dc3_logo"
-                                            label="Logo Empresa DC3"
-                                            :file-types="['image']"
-                                            @onSelect="setFile($event, resource,'dc3_logo')"/>
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultSelectOrUploadMultimedia
-                                            ref="inputInstructorSignature"
-                                            v-model="resource.dc3_instructor_signature"
-                                            label="Firma (Instructor o tutor)"
-                                            :file-types="['image']"
-                                            @onSelect="setFile($event, resource,'dc3_instructor_signature')"/>
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultSelectOrUploadMultimedia
-                                            ref="inputBossSignature"
-                                            v-model="resource.dc3_boss_signature"
-                                            label="Firma (Patrón o representante legal)"
-                                            :file-types="['image']"
-                                            @onSelect="setFile($event, resource,'dc3_boss_signature')"/>
-                                    </v-col>
-                                </v-row>
-                            </template>
-                        </DefaultSection> -->
                     </v-tab-item>
                 </v-tabs-items>
 
@@ -682,20 +680,20 @@
 
 <script>
 
-
 const fields = [
     'name', 'url_powerbi', 'logo', 'logo_negativo',
     'logo_marca_agua', 'marca_agua_estado', 'qualification_type',
     'notificaciones_push_envio_inicio', 'notificaciones_push_envio_intervalo', 'notificaciones_push_chunk', 'selected_functionality', 'criterio_id_fecha_inicio_reconocimiento','limit_allowed_storage', 'show_logo_in_app', 'share_diplomas_social_media',
-    'dc3_configuration','show_logo_in_app','limits','reminders_configuration','checklist_configuration'
+    'dc3_configuration','show_logo_in_app','limits','reminders_configuration','course_configuration','checklist_configuration'
 ];
 const file_fields = ['logo', 'logo_negativo', 'logo_marca_agua'];
 const mensajes = [
     'Los criterios "por defecto" son obligatorios e inalterables, mientras que los "personalizados" son propios del wokspace.',
     'Para desactivar un criterio, debes retirarlo de las segmentaciones donde fue usado.',
 ];
-
+import ButtonEmojiPicker from '../../components/basicos/ButtonEmojiPicker.vue';
 export default {
+    components:{ButtonEmojiPicker},
     props: {
         options: {
             type: Object,
@@ -760,6 +758,11 @@ export default {
                     evaluation_types:[],
                     qualification_type:null,
                     max_limit_create_evaluation_types:5
+                },
+                course_configuration:{
+                    nota_aprobatoria:0,
+                    nro_intentos:2,
+                    is_offline:false
                 }
             },
             limit_allowed_users: null,
@@ -866,10 +869,13 @@ export default {
                 formData.set(
                     'checklist_configuration', JSON.stringify(vue.resource.checklist_configuration)
                 );
-                
+                formData.set(
+                    'course_configuration', JSON.stringify(vue.resource.course_configuration)
+                );
+
                 vue.setLimitUsersAllowed(formData);
                 vue.setJarvisConfiguration(formData);
-
+                // vue.getJSONEvaluaciones(formData)
                 // Submit data to be saved
 
                 await vue.$http
@@ -1021,7 +1027,18 @@ export default {
         removeScaleEvaluation(index){
             let vue = this;
             vue.resource.checklist_configuration.evaluation_types.splice(index, 1);
-        }
+        },
+        getJSONEvaluaciones(formData) {
+            let vue = this
+
+            const data = {
+                // preg_x_ev: vue.resource.preg_x_ev,
+                nota_aprobatoria: vue.resource.mod_evaluaciones.nota_aprobatoria,
+                nro_intentos: vue.resource.mod_evaluaciones.nro_intentos,
+            }
+            let json = JSON.stringify(data)
+            formData.append('mod_evaluaciones', json)
+        },
     }
 }
 </script>

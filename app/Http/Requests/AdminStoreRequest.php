@@ -69,7 +69,24 @@ class AdminStoreRequest extends FormRequest
 
             'selected_workspaces' => 'required'
         ];
+        foreach ($this->selected_workspaces as $key => $selected_workspaces) {
+            if(count($selected_workspaces['selected_subworkspaces'])>0){
+                $rules['selected_workspaces.'.$key.'.selected_roles'] = 'required|array|min:1';
+            }
+            if(count($selected_workspaces['selected_roles'])>0){
+                $rules['selected_workspaces.'.$key.'.selected_subworkspaces'] = 'required|array|min:1';
+            }
+            # code...
+        }
+        $messages = [
+            'selected_workspaces.*.selected_roles.required' => 'Los roles seleccionados son obligatorios.',
+            'selected_workspaces.*.selected_roles.array' => 'Los roles seleccionados deben ser un arreglo.',
+            'selected_workspaces.*.selected_roles.min' => 'Debe seleccionar al menos un rol en cada espacio de trabajo.',
 
+            'selected_workspaces.*.selected_subworkspaces.required' => 'Los módulos seleccionados son obligatorios.',
+            'selected_workspaces.*.selected_subworkspaces.array' => 'Los módulos seleccionados deben ser un arreglo.',
+            'selected_workspaces.*.selected_subworkspaces.min' => 'Debe seleccionar al menos un módulo en cada espacio de trabajo.',
+        ];
         return $rules;
     }
 
@@ -80,7 +97,13 @@ class AdminStoreRequest extends FormRequest
 
         return $this->all();
     }
-
+    public function messages()
+    {
+        return [
+            'selected_workspaces.*.selected_roles.required' => 'Los roles son obligatorios.',
+            'selected_workspaces.*.selected_roles.min' => 'Debe seleccionar al menos un rol en cada espacio de trabajo.',
+        ];
+    }
     // public function messages()
     // {
     //     return [

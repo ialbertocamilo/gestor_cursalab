@@ -14,11 +14,14 @@ use Illuminate\Http\Request;
 class StageController extends Controller
 {
 
-    public function getFormSelects($compactResponse = false)
+    public function getFormSelects(Process $process, $compactResponse = false)
     {
-        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
 
-        $response = compact('qualification_types');
+        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
+        $qualification_type = $process->qualification_type_id ? Taxonomy::where('id', $process->qualification_type_id)
+                                        ->first(['name', 'id', 'code', 'name as nombre', 'position']) : null;
+
+        $response = compact('qualification_types', 'qualification_type');
 
         return $compactResponse ? $response : $this->success($response);
     }
@@ -120,7 +123,11 @@ class StageController extends Controller
      */
     public function status(Process $process, Stage $stage, Request $request)
     {
-        $stage->update(['active' => !$stage->active]);
+        $active = $stage->active;
+        $stage->update(['active' => !$active]);
+        foreach ($stage->activities as $activity) {
+            $activity->update(['active' => !$active]);
+        }
 
         return $this->success(['msg' => 'Estado actualizado correctamente.']);
     }
