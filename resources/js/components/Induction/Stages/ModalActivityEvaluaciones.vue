@@ -10,10 +10,10 @@
         content-class="br-dialog"
         >
             <template v-slot:content>
-                <v-form ref="projectForm">
                     <v-stepper non-linear class="stepper_box" v-model="stepper_box">
                         <v-stepper-items>
                             <v-stepper-content step="1" class="p-0">
+                                <v-form ref="projectForm">
                                 <v-row>
                                     <v-col cols="12" class="d-flex justify-content-center">
                                         <DefaultInput
@@ -176,6 +176,7 @@
 
                                     </template>
                                 </DefaultModalSectionExpand>
+                                </v-form>
                             </v-stepper-content>
                             <v-stepper-content step="2" class="p-0">
                                 <v-row>
@@ -215,7 +216,6 @@
                             </v-stepper-step>
                         </v-stepper-header>
                     </v-stepper>
-                </v-form>
             </template>
         </DefaultDialog>
     </div>
@@ -381,7 +381,8 @@ export default {
         resource: {
             handler(n, o) {
                 let vue = this;
-                vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                const validateForm = vue.validateForm('projectForm')
+                vue.options.confirmDisabled = !validateForm
             },
             deep: true
         },
@@ -545,9 +546,9 @@ export default {
                     vue.resource.qualification_type = _data.topic.qualification_type
                     vue.resource.topic = _data.topic.id
                 })
-                console.log(2);
+                const validateForm = vue.validateForm('projectForm')
+                vue.options.confirmDisabled = !validateForm
             } else {
-                console.log(3);
                 vue.resource.id = null;
             }
 

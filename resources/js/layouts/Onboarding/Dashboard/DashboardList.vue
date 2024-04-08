@@ -12,12 +12,17 @@
                         <v-card>
                             <v-card-text class="py-0">
                                 <div class="d-flex align-center">
-                                    <div style="width: 80px;">
-                                        <apexcharts type="radialBar" height="100" :options="graphic_data_advance.chartOptions" :series="graphic_data_advance.series"/>
+                                    <div class="d-flex align-center" style="flex: 1;">
+                                        <div style="width: 80px;">
+                                            <apexcharts type="radialBar" height="100" :options="graphic_data_advance.chartOptions" :series="graphic_data_advance.series"/>
+                                        </div>
+                                        <div>
+                                            <span class="d-flex fw-bold mb-1" style="font-size: 24px;">0%</span>
+                                            <span>Cumplimiento de inducción</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">0%</span>
-                                        <span>Cumplimiento de inducción</span>
+                                    <div style="font-size: 22px;">
+                                        <a href="/exportar/node"><span class="mdi mdi-arrow-right-circle"></span></a>
                                     </div>
                                 </div>
                             </v-card-text>
@@ -26,10 +31,15 @@
                     <v-col cols="4">
                         <v-card style="overflow: hidden;">
                             <v-card-text class="py-0">
-                                <div class="d-flex align-center" style="height: 73px;">
-                                    <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{users_active}}/{{users_total}}</span>
-                                        <span>Colaboradores activos</span>
+                                <div class="d-flex align-center">
+                                    <div class="d-flex align-center" style="height: 73px; flex: 1;">
+                                        <div>
+                                            <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{users_active}}/{{users_total}}</span>
+                                            <span>Colaboradores activos</span>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 22px;">
+                                        <a href="/usuarios"><span class="mdi mdi-arrow-right-circle"></span></a>
                                     </div>
                                 </div>
                             </v-card-text>
@@ -47,10 +57,15 @@
                     <v-col cols="4">
                         <v-card style="overflow: hidden;">
                             <v-card-text class="py-0">
-                                <div class="d-flex align-center" style="height: 73px;">
-                                    <div>
-                                        <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{process_progress}}/{{process_total}}</span>
-                                        <span>Procesos en curso</span>
+                                <div class="d-flex align-center">
+                                    <div class="d-flex align-center" style="height: 73px; flex: 1;">
+                                        <div>
+                                            <span class="d-flex fw-bold mb-1" style="font-size: 24px;">{{process_progress}}/{{process_total}}</span>
+                                            <span>Procesos en curso</span>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 22px;">
+                                        <a href="/procesos"><span class="mdi mdi-arrow-right-circle"></span></a>
                                     </div>
                                 </div>
                             </v-card-text>
