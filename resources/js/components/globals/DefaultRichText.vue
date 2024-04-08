@@ -22,7 +22,7 @@
                     forced_root_block: '',
                     plugins: ['lists anchor', 'code', 'paste','link','image', 'emoticons'],
                     toolbar:
-                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link | image `,
+                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? '| image ' : ''}`,
                     images_file_types: 'jpg,svg,webp,gif',
                     setup: function (editor) {
                         // if(showGenerateIaDescription){
@@ -98,6 +98,10 @@ export default {
         showGenerateIaDescription:{
             type:Boolean,
             default:false
+        },
+        showIconAddImage:{
+            type:Boolean,
+            default:true
         },
         loading:{
             type:Boolean,

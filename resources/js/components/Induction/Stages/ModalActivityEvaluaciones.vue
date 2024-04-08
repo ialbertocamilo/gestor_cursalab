@@ -421,11 +421,16 @@ export default {
         {
             let vue = this;
 
-            vue.stepper_box = 1
-
             vue.resetSelects()
             vue.resetValidation()
             vue.$refs.projectForm.reset()
+
+            vue.stepper_box = 1
+            vue.width = '868px';
+            vue.options.cancelLabel = "Cancelar";
+            vue.options.confirmLabel = "Continuar";
+            vue.loadStep2 = false
+
             vue.$emit('onCancel')
         },
         resetValidation() {
