@@ -520,7 +520,7 @@ class Process extends BaseModel
                             $days_stages = $days_stages + $stage->duration;
                             $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
                             $diff_days = $current_date->diffInDays($finish_days_stage);
-                            if($diff_days <= $stage->duration){
+                            if($diff_days <= $stage->duration || $finish_days_stage <= $current_date){
                                 $stage->status = 'progress';
                             }
                         }
