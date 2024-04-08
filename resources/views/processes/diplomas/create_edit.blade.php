@@ -19,6 +19,8 @@
                             model_id="{{ $model_id }}"
                             model_type="{{ $model_type }}"
                             redirect="{{ $redirect }}"
+                            btn_process="true"
+                            btn_course="false"
         />
     </v-app>
 @endsection
