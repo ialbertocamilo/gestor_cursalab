@@ -157,9 +157,14 @@
                                             </div>
                                         </v-col>
                                     </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                    
+                                    <DefaultModalSectionExpand
+                                        title="Avanzado"
+                                        :expand="sections.showSectionAdvanced"
+                                        class="my-4 bg_card_none"
+                                    >
+                                        <template slot="content">
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -173,11 +178,8 @@
                                                     <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                            
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -191,11 +193,8 @@
                                                     <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                            
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -235,8 +234,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
+                                        </template>
+                                    </DefaultModalSectionExpand>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
@@ -810,7 +809,7 @@ export default {
             confirmLabel: "Continuar",
             list_segments:[],
             sections: {
-                showAdvancedOptions: false
+                showSectionAdvanced: {status: false},
             },
             modalDateStart: {
                 open: false,
@@ -1261,6 +1260,8 @@ export default {
             vue.colorMapaSelected = '#27f748'
             vue.colorImparPicker = '#27F748'
             vue.colorParPicker = '#8BFC89'
+
+            vue.sections.showSectionAdvanced.status = false
 
             vue.resetValidation()
             vue.$emit("onCancel");
