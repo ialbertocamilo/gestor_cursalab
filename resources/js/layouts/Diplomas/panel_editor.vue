@@ -62,7 +62,13 @@
             </v-btn>
             <input @change="emitir_add_image()" class="input_img" type="file" id="input_image">
         </div>
-
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="QR de verificación">
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_qr_image()"
+                    text>
+                <v-icon>mdi-qrcode</v-icon>
+            </v-btn>
+        </div>
         <!-- <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Previsualización">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_prev()" text>
@@ -95,6 +101,9 @@ export default {
         },
         emitir_add_image(){
             this.$emit("emit_add_image");
+        },
+        emitir_add_qr_image(){
+            this.$emit("emitir_add_qr_image");
         },
         emitir_prev(){
             this.$emit("emit_prev");

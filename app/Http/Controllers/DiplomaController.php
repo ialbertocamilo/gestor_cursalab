@@ -79,9 +79,11 @@ class DiplomaController extends Controller
 
         // === partes de plantilla ===
         $s_objects_decoded = json_decode($diploma->s_objects);
+
         $s_objects_decoded = collect($s_objects_decoded);
 
         $array_medias = $s_objects_decoded->where('type', 'image');
+
         $array_text = $s_objects_decoded->where('type', 'i-text');
 
         foreach ($array_medias as $media_row ) {
@@ -453,6 +455,8 @@ class DiplomaController extends Controller
             'old_template' => $editableTemplate ? false : true,
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
+            'course_id' => $course_to_export->id,
+            'user_id' => $user_id,
             'grade' => (string) intval($grade),
             'course-average-grade' => (string) intval($grade),
             'users' => $user->fullname,

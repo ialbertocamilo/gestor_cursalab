@@ -10,6 +10,7 @@
         "altek/eventually": "^2.0",
         "barryvdh/laravel-dompdf": "^2.0",
         "cviebrock/eloquent-sluggable": "^9.0",
+        "endroid/qr-code": "^5.0",
         "genealabs/laravel-model-caching": "^0.12.4",
         "guzzlehttp/guzzle": "^7.2",
         "hisorange/browser-detect": "^4.5",

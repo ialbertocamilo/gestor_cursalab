@@ -149,6 +149,7 @@
                     @emit_prev="prev"
                     @emit_delete="delete_object"
                     @emit_change_font="changeFont"
+                    @emitir_add_qr_image="add_qr_image"
                     :fonts="fonts"
                 />
                 <!-- <div class="menu-cancel-btn">
@@ -228,7 +229,7 @@ import DiplomaPreviewModal from './DiplomaPreviewModal.vue';
 import DiplomaAlertModal from './DiplomaAlertModal.vue';
 import DiplomaFormSave from './DiplomaFormSave.vue';
 import FontsModal from './FontsModal.vue';
-
+import QRCode from "qrcode";
 
 export default {
     components:{
@@ -579,6 +580,33 @@ export default {
             };
             reader.readAsDataURL(file);
         },
+        async add_qr_image(){
+            let vue = this;
+            let QRbase64 = await new Promise((resolve, reject) => {
+                QRCode.toDataURL('http://gestor.test/', function (err, code) {
+                    if (err) {
+                        reject(reject);
+                        return;
+                    }
+                    resolve(code);
+                });
+            });
+            fabric.Image.fromURL(QRbase64, function (img) {
+                let oImg = img.set({
+                    type:'qr_image',
+                    qr_image: true,
+                    left: 200,
+                    top: 200,
+                    angle: 0,
+                    contextMenuImage: true,
+                    static: false,
+                    lockRotation: true
+                });
+                vue.canvas.add(oImg).renderAll();
+                vue.canvas.setActiveObject(oImg);
+                vue.canvas.toDataURL({ format: 'jpg', quality: 1 });
+            });
+        },
         add_image_param(data) {
             const { img, left, top, scaleX, scaleY } = data; // === imagen ===
 
@@ -639,12 +667,48 @@ export default {
             this.canvas.add(text2);
             this.canvas.setActiveObject(text2);
         },
+        async add_image_qr_data(data){
+            let  vue = this;
+            const {  left, top, scaleX, scaleY,width,height } = data; // === imagen ===
+            let QRbase64 = await new Promise((resolve, reject) => {
+                QRCode.toDataURL('http://gestor.test/', function (err, code) {
+                    if (err) {
+                        reject(reject);
+                        return;
+                    }
+                    resolve(code);
+                });
+            });
+            console.log(data, left, top, scaleX, scaleY,QRbase64,height,width);
+            fabric.Image.fromURL(QRbase64, function (img) {
+                let oImg = img.set({
+                    type:'qr_image',
+                    qr_image: true,
+                    width,
+                    height,
+                    left,
+                    top,
+                    angle: 0,
+                    contextMenuImage: true,
+                    static: false,
+                    lockRotation: true,
+                    scaleX,
+                    scaleY,
+                });
+                vue.canvas.add(oImg).renderAll();
+                vue.canvas.setActiveObject(oImg);
+                vue.canvas.toDataURL({format: 'jpg', quality: 1});
+            });
+        },
         add_text_param(data){
             const vue = this;
+            if(data.type == 'qr_image'){
+                vue.add_image_qr_data(data);
+                return '';
+            }
             const { id: tipo, fill, text, id_formato,
                     fontSize, fontStyle, fontWeight, centrado,
                     top, left, height, width } = data;
-
             vue.close_context_menu();
 
             let text2 = new fabric.Text("Text", {

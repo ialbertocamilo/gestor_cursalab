@@ -520,7 +520,6 @@ class Certificate extends Model
             $info_d_objects = []; // d_objects[]
 
             foreach ($e_dinamics as $e_dinamic) {
-
                 if($e_dinamic['type']=='text'){
                     $info_d_objects [] = [
                         'type'=>$e_dinamic['type'],
@@ -541,8 +540,23 @@ class Certificate extends Model
                         'zoomX'=> $e_dinamic['zoomX'] ?? null,
                     ];
                 }
+                if($e_dinamic['type']=='qr_image'){
+                    $info_d_objects [] = [
+                        'id'=>'qr-validator',
+                        'type'=>$e_dinamic['type'],
+                        'fill'=>$e_dinamic['fill'],
+                        'left'=>$e_dinamic['left'],
+                        // 'left_calc'=>$e_dinamic['left'] - $x,
+                        'top'=>$e_dinamic['top'],
+                        // 'top_calc'=>$e_dinamic['top'] - $y,
+                        'height'=>$e_dinamic['height'],
+                        'width'=>$e_dinamic['width'],
+                        'scaleX' => $e_dinamic['scaleX'],
+                        'scaleY' => $e_dinamic['scaleY'],
+                        'zoomX'=> $e_dinamic['zoomX'] ?? null,
+                    ];
+                }
             }
-
             // === guarda imagen - media y retorna id ===
             $info_bg = Certificate::pushTypeImage($background, $nombre_plantilla, $compare, $images_base64);
 
@@ -703,6 +717,23 @@ class Certificate extends Model
                     imagettftext($image,$fontsize,0 ,$left,$top , $color, $font,utf8_decode(trim($e_text)));
                     $top = $top + $fontsize + (0.2*$fontsize);
                 }
+            }
+            if($e_dinamic['type']=='qr_image'){
+                $user_id = $real_info['user_id'] ?? 216;
+                $course_id = $real_info['course_id'] ?? 1312;
+                $text_qr = env('APP_URL').'/tools/ver_diploma/'.$user_id.'/'.$course_id;
+                $qr_code_string = generate_qr_code_in_base_64($text_qr,$e_dinamic['height'],$e_dinamic['width'],$e_dinamic['scaleX'],$e_dinamic['scaleY']);
+                $image2 = self::image_create($qr_code_string, $e_dinamic['scaleX'], $e_dinamic['scaleY'], $e_dinamic['width'], $e_dinamic['height']);
+                self::imagecopymerge_alpha(
+                    $image, // destino base
+                    $image2, // fuente base
+                    $e_dinamic['left']-$x,
+                    $e_dinamic['top']-$y,
+                    0,
+                    0,
+                    $e_dinamic['width']*$e_dinamic['scaleX'],
+                    $e_dinamic['height']*$e_dinamic['scaleY'],
+                    100);
             }
         }
 
