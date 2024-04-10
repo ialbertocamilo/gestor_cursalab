@@ -298,8 +298,8 @@
                                             <v-col cols="6">
                                                 <DefaultInput label="Duración de evaluación (minutos)"
                                                     dense
-                                                    v-model="resource.duration_quizz" 
-                                                    :rules="rules.nro_intentos" 
+                                                    v-model="resource.duration_quizz"
+                                                    :rules="rules.nro_intentos"
                                                     show-required
                                                     type="number" :min="0"
                                                 />
@@ -438,12 +438,12 @@
 
             <DialogConfirm :ref="trainerDeleteConfirmationDialog.ref" v-model="trainerDeleteConfirmationDialog.open"
                 width="408px" title="Eliminar entrenador" subtitle="¿Está seguro de eliminar el entrenador?"
-                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />       
-            
+                @onConfirm="confirmTrainerDelete" @onCancel="trainerDeleteConfirmationDialog.open = false" />
+
             <DialogConfirm v-model="modalInfoOffline.open" :options="modalInfoOffline" width="580px"
                 title="Toma nota" subtitle="¡Toma nota!"
                 @onConfirm="confirmModal(false),closeSimpleModal(modalInfoOffline)" @onCancel="closeSimpleModal(modalInfoOffline)" />
-            
+
             <DC3PersonModal :ref="modalDC3PersonOptions.ref" v-model="modalDC3PersonOptions.open"
                 :options="modalDC3PersonOptions" width="30vw" @onConfirm="setPersonDC3"
                 @onCancel="modalDC3PersonOptions.open = false" />
@@ -839,7 +839,7 @@ export default {
         },
         confirmModal(validateForm = true) {
             let vue = this
-            
+
             this.showLoader()
 
             // Get datetimes values
@@ -874,7 +874,7 @@ export default {
                 setTimeout(() => vue.closeModal(), 10000);
                 return;
             }
-            
+
             if(vue.resource.is_offline && !vue.modalInfoOffline.was_opened){
                 vue.hideLoader()
                 vue.modalInfoOffline.was_opened = true;
@@ -1057,11 +1057,16 @@ export default {
 
                     } else {
                         vue.resource.qualification_type = response.qualification_type;
-                        vue.resource.nota_aprobatoria = response.course_configuration.nota_aprobatoria;
-                        vue.resource.nro_intentos = response.course_configuration.nro_intentos;
-                        vue.resource.is_offline = response.course_configuration.is_offline;
-                        vue.resource.duration_quizz = response.course_configuration.duration_quizz;
-                        
+
+                        // Initialize data with workspace defaults
+
+                        if (response.course_configuration) {
+                            vue.resource.nota_aprobatoria = response.course_configuration.nota_aprobatoria;
+                            vue.resource.nro_intentos = response.course_configuration.nro_intentos;
+                            vue.resource.is_offline = response.course_configuration.is_offline;
+                            vue.resource.duration_quizz = response.course_configuration.duration_quizz;
+                        }
+
                         vue.resource.modality_id = vue.options.modality.id;
                         if (vue.school_id) {
 
