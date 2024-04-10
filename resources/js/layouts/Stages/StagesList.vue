@@ -1140,7 +1140,6 @@ export default {
         },
         statusStage( stage, position )
         {
-            console.log(stage);
             let vue = this;
 
             if(stage.active) {
@@ -1150,7 +1149,7 @@ export default {
                 vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             }
             else {
-                if(stage.activities.length < 3) {
+                if(stage.activities.length <= 3) {
                     vue.statusValidateStageModal.open = true
                     vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
                     vue.statusValidateStageModal.content_modal = {
