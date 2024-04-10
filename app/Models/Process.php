@@ -22,6 +22,8 @@ class Process extends BaseModel
         'description',
         'block_stages',
         'migrate_users',
+        'alert_user_deleted',
+        'message_user_deleted',
         'count_absences',
         'limit_absences',
         'absences',
@@ -51,7 +53,8 @@ class Process extends BaseModel
         'limit_absences' => 'boolean',
         'config_completed' => 'boolean',
         'block_stages' => 'boolean',
-        'migrate_users' => 'boolean'
+        'migrate_users' => 'boolean',
+        'alert_user_deleted' => 'boolean'
     ];
 
     protected $hidden = [

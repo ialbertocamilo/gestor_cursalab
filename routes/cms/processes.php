@@ -6,6 +6,7 @@ Route::controller(ProcessController::class)->group(function() {
 
     Route::view('/', 'processes.index')->name('process.index');
 
+	Route::post('/duplicate', 'duplicate')->name('process.duplicate');
 	Route::post('/store', 'store')->name('process.store');
 	Route::post('/store_inline', 'storeInline')->name('process.store_inline');
 	Route::put('/update/{process}', 'update')->name('process.update');

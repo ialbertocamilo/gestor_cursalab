@@ -193,6 +193,50 @@
                                             </div>
                                         </v-col>
                                     </v-row>
+                                    <v-row>
+                                        <v-col cols="12" class="d-flex align-items-center">
+                                            <div class="row_border">
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.alert_user_deleted"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">Mostrar un mensaje al usuario cuando no apruebe el proceso de inducción y quede eliminado</span>
+                                                </div>
+                                                <div v-if="process.alert_user_deleted" class="mt-3">
+                                                    <div class="">
+                                                        <fieldset class="editor">
+                                                            <legend>Edita el mensaje que se mostrará al usuario
+                                                            </legend>
+                                                            <editor
+                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                v-model="process.message_user_deleted"
+                                                                :init="{
+                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                    height: 170,
+                                                                    menubar: false,
+                                                                    language: 'es',
+                                                                    force_br_newlines : true,
+                                                                    force_p_newlines : false,
+                                                                    forced_root_block : '',
+                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                                    toolbar:
+                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                    images_upload_handler: images_upload_handler,
+                                                                    toolbar_location: 'bottom'
+                                                                }"
+                                                            />
+                                                        </fieldset>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
@@ -710,7 +754,8 @@ export default {
             process: {
                 instructions: [],
                 subworkspaces: [],
-                description: ''
+                description: '',
+                alert_user_deleted: false
             },
             modalDateOptions: {
                 ref: 'DateEvent',

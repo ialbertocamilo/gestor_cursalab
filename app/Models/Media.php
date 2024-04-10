@@ -37,8 +37,16 @@ class Media extends BaseModel
     protected $table = 'media';
 
     protected $fillable = [
-        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id','ia_convert'
+        'title', 'description', 'file', 'ext', 'status', 'external_id', 'size', 'workspace_id','ia_convert', 'platform_id'
     ];
+
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
 
     public function modulesByFile() {
 
@@ -328,6 +336,11 @@ class Media extends BaseModel
         }
 
         // Insert Media
+        
+        $platform = session('platform');
+        $platform_type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')?->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')?->id;
 
         if ($uploaded) {
             $media = new \App\Models\Media();
@@ -336,6 +349,7 @@ class Media extends BaseModel
             $media->ext = $ext;
             $media->size = $size;
             $media->workspace_id = $workspace_id;
+            $media->platform_id = $platform_type_id ?? null;
             if($type)
                 $media->type = $type;
             $media->save();
@@ -590,7 +604,8 @@ class Media extends BaseModel
         $workspace = $session['workspace'];
 
         $query = Media::query()
-                      ->where('workspace_id', $workspace->id);
+                        ->FilterByPlatform()
+                        ->where('workspace_id', $workspace->id);
 
         if ($request->q) {
             $q = trim($request->q);
