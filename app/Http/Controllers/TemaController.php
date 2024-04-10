@@ -98,6 +98,7 @@ class TemaController extends Controller
         }
         $dinamyc_link = $dinamyc_link.'/lista-reuniones';
 
+        
         $is_offline = $course->is_offline;
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
