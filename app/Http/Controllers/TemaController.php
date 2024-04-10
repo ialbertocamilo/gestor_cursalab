@@ -84,9 +84,21 @@ class TemaController extends Controller
         $hosts = Usuario::getCurrentHosts(false,null,'get_records',[DB::raw("CONCAT(document,' - ',CONCAT_WS(' ',name,lastname,surname)) as 'document_fullname'")]);
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         $workspace_id = get_current_workspace()->id;
-        $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
-        $is_offline = $course->is_offline;
+        // $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
+        $dinamyc_link = 'https://app.cursalab.io';
+        $gestor_url = env('APP_URL');
+        if(Str::contains($gestor_url, 'inretail') ){
+            $dinamyc_link = 'https://inretail.cursalab.io';
+        }
+        if(Str::contains($gestor_url, 'potenciandotutalentongr') ){
+            $dinamyc_link = 'https://potenciandotutalentongr.pe';
+        }
+        if(Str::contains($gestor_url, 'campusaustralgroup') ){
+            $dinamyc_link = 'https://campusaustralgroup.com';
+        }
+        $dinamyc_link = $dinamyc_link.'/lista-reuniones';
 
+        $is_offline = $course->is_offline;
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
                              'has_permission_to_use_ia_evaluation','has_permission_to_use_ia_description','has_permission_to_use_tags',
