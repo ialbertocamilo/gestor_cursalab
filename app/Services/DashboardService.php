@@ -319,8 +319,12 @@ class  DashboardService {
 
     public static function loadSizeWorkspaces($workspaces_ids)
     {
+        $platform = currentPlatform();
         return Workspace::select('id', 'name')
                         ->whereIn('id', $workspaces_ids)
+                        ->whereHas('medias', function ($query) use($platform){
+                            $query->where('platform_id', $platform?->id);
+                        })
                         ->withSum('medias', 'size')->get();
     }
 

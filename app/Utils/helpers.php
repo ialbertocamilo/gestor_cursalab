@@ -1,10 +1,11 @@
 <?php
 
-use App\Models\Workspace;
-use App\Services\FileService;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Aws\S3\S3Client;
+use App\Models\Taxonomy;
+use App\Models\Workspace;
+use Illuminate\Support\Str;
+use App\Services\FileService;
 
 const INACTIVE = false;
 const ACTIVE = true;
@@ -691,4 +692,11 @@ function db_raw_dateformat($field, $alias = null, $format = "'%d/%m/%Y %H:%i'")
     $alias = $alias ?? $field;
 
     return \DB::raw("DATE_FORMAT({$field}, $format) as {$alias}");
+}
+
+function currentPlatform(){
+    $session_platform = session('platform');
+    $platform_code = $session_platform && $session_platform == 'induccion' ? 'onboarding' : 'training';
+    $platform = Taxonomy::getFirstData('project', 'platform', $platform_code);
+    return $platform;
 }
