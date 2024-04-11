@@ -16,7 +16,7 @@
                         <v-col cols="12">
                             <DefaultToggle v-model="url.activate_by_default" type="only-label" label="¿Desea que los usuarios se activen automáticamente al ingresar/ o realizar el registro?" />
                         </v-col>
-                        <v-col cols="12" style="display: grid; grid-template-columns: auto auto auto 1fr;">
+                        <v-col cols="12"  :style="`display: grid;grid-template-columns: ${url.type_form == 'custom_criteria' ? 'auto 1fr 1fr 1fr 2fr;' : 'auto auto auto 1fr;' }`">
                             <div class="flex flex-column">
                                 <span>Tiempo</span>
                                 <div>
@@ -48,11 +48,41 @@
                                     dense
                                 />
                             </div>
+                            <div class="flex flex-column mx-2">
+                                <span>Tipo de formulario</span>
+                                <DefaultSelect
+                                    :attach="false"
+                                    v-model="url.type_form"
+                                    :items="types_form"
+                                    item-text="label"
+                                    item-value="value"
+                                    dense
+                                />
+                            </div>
+                            <div class="flex flex-column mx-2" v-if="url.type_form == 'custom_criteria'">
+                                <span>Criterios</span>
+                                <DefaultAutocomplete
+                                    :attach="false"
+                                    v-model="url.criteria_list"
+                                    :items="criteria"
+                                    item-text="criterion_title"
+                                    item-value="criterion_id"
+                                    dense
+                                    multiple
+                                    :showSelectAll="false"
+                                />
+                            </div>
+                        </v-col>
+                        <v-col cols="12">
                             <div class="flex align-self-end">
                                 <DefaultButton
                                     style=" width: 100%;max-width: 100% !important;"
                                     label="Añadir"
-                                    :disabled="!url.code ||(url.type_of_time && (url.number_time<1 || url.number_time>99))"
+                                    :disabled=" 
+                                        !url.code 
+                                        || !url.subworkspace_id
+                                        || (url.type_of_time && (url.number_time<1 || url.number_time>99)) 
+                                        || (url.type_form == 'custom_criteria' && url.criteria_list.length ==0)"
                                     @click="add_url()"
                                 />
                             </div>
@@ -126,18 +156,26 @@ export default {
             generic_url:'',
             app_url:'',
             modules:[],
+            criteria:[],
             url:{
                 type_of_time:'months',
+                type_form: 'default',
                 number_time:1,
                 code:null,
                 activate_by_default:false,
-                subworkspace_id:null
+                subworkspace_id:null,
+                criteria_list :[]
             },
             types_of_time:[
                 {label:'Día(s)',value:'day'},
                 {label:'Semana(s)',value:'week'},
                 {label:'Mes(es)',value:'months'},
                 {label:'Sin expiración',value:null}
+            ],
+            types_form:[
+                {label:'Datos personales y criterios obligatorios.',value:'default'},
+                {label:'Datos personales y criterios personalizados.',value:'custom_criteria'},
+                {label:'Solo datos personales (sin criterios).',value:'without_criteria'},
             ],
             urls_generated:[],
             modalDeleteOptions: {
@@ -191,6 +229,7 @@ export default {
                 vue.app_url = data.data.app_url;
                 vue.url.code = data.data.generic_url;
                 vue.modules = data.data.modules;
+                vue.criteria = data.data.criteria;
             })
         },
         copy_content(id,text){

@@ -69,7 +69,7 @@
                             :color="itHasFeature('qr-validator', activeTemplate) ? '#5751e6' : '#e0e0e0'">
                             mdi-check-circle
                         </v-icon>
-                        Validador de QR
+                        QR de verificación
                     </span>
                 </v-col>
 
