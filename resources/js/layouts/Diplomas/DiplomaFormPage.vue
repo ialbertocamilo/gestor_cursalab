@@ -143,6 +143,8 @@
                 <panelEditor
                     ref="panel_editor"
                     :d_btn="d_btn"
+                    :btn_process="btn_process"
+                    :btn_course="btn_course"
                     @emit_add_text="add_text"
                     @emit_add_itext="add_itext"
                     @emit_add_image="add_image"
@@ -236,7 +238,7 @@ export default {
         DiplomaPreviewModal, DiplomaFormInfoModal, DiplomaAlertModal,
         DiplomaFormSave, panelEditor,FontsModal
     },
-    props:['modulo_id', 'diploma_id', 'model_id', 'model_type', 'redirect'],
+    props:['modulo_id', 'diploma_id', 'model_id', 'model_type', 'redirect', 'btn_process', 'btn_course'],
     data(){
         return {
             size:'16',

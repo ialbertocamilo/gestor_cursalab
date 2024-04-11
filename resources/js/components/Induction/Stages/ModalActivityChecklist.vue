@@ -279,6 +279,7 @@ export default {
             type_checklist: "none",
             tabs: null,
             steps: 0,
+            loadStep2: false,
             // total: 0,
             total: [],
 
@@ -336,47 +337,13 @@ export default {
         }
     },
     async mounted() {
-        // this.addActividad()
     },
     watch: {
-        // checklist: {
-        //     handler(n, o) {
-        //         let vue = this;
-
-        //         if(vue.stepper_box == 1) {
-        //             vue.stepper_box_btn1 = !(vue.validateRequired(vue.resource.type_checklist) && vue.validateRequired(vue.resource.title) && vue.validateRequired(vue.resource.description));
-        //             vue.disabled_btn_next = vue.stepper_box_btn1;
-        //         }
-        //         else if(vue.stepper_box == 2){
-        //             let errors = vue.showValidateActividades()
-        //             vue.disabled_btn_next =  errors > 0;
-        //         }
-        //     },
-        //     deep: true
-        // },
-        // stepper_box: {
-        //     handler(n, o) {
-        //         let vue = this;
-
-        //         if(vue.stepper_box == 1) {
-        //             if(vue.validateRequired(vue.resource.type_checklist) && vue.validateRequired(vue.resource.title) && vue.validateRequired(vue.resource.description)) {
-        //                 vue.stepper_box_btn1 = false;
-        //             }
-        //             vue.disabled_btn_next = vue.stepper_box_btn1;
-        //         }
-        //         else if(vue.stepper_box == 2){
-        //             let errors = vue.showValidateActividades()
-        //             vue.disabled_btn_next =  errors > 0;
-        //         }
-        //     },
-        //     deep: true
-        // },
         resource: {
             handler(n, o) {
                 let vue = this;
-                setTimeout(() => {
-                    vue.options.confirmDisabled = !vue.validateForm('projectForm')
-                }, 100);
+                const validateInputs = vue.validateRequired(vue.resource.title)
+                vue.options.confirmDisabled = !validateInputs
             },
             deep: true
         }
@@ -388,22 +355,22 @@ export default {
         },
         async loadData(resource) {
             let vue = this
+
+            vue.options.confirmDisabled = true
+
             vue.$nextTick(() => {
                 vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
                 vue.resource.media = []
             })
 
-            console.log(vue.options.base_endpoint);
-
             let url = `${vue.options.base_endpoint}/${ resource ? `edit/${resource.id}` : 'form-selects'}`
-            // let base = `${vue.options.base_endpoint}`
+            
             await vue.$http.get(url)
                 .then(({data}) => {
-                    console.log(data);
 
                     let _data = data.data
-
                     vue.selects.requirement_list = _data.requirements
+
                     if (resource) {
                         vue.resource = Object.assign({}, vue.resource, _data.checklist)
                         vue.resource.activity_id = resource.id
@@ -411,20 +378,9 @@ export default {
                         vue.resource.qualified = _data.activity.qualified
                         vue.resource.required = _data.activity.required
                     }
-
-                    console.log(vue.resource);
-
-                    // vue.media_url = data.data.media_url
-                    // if (resource && resource.id) {
-                    //     vue.resource = Object.assign({}, data.data.tema)
-                    //     vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
-                    // } else {
-                    //     vue.resource.qualification_type = data.data.qualification_type
-                    //     vue.resource.position = data.data.default_position
-                    // }
-
-                    // vue.resource.max_position = data.data.max_position
                 })
+                const validateInputs = vue.validateRequired(vue.resource.title)
+                vue.options.confirmDisabled = !validateInputs
             return 0;
         },
         validateRequired(input) {
@@ -456,6 +412,9 @@ export default {
             let vue = this
 
             vue.stepper_box = 1
+            vue.options.cancelLabel = "Cancelar";
+            vue.options.confirmLabel = "Continuar";
+            vue.loadStep2 = false
 
             vue.resetSelects()
             vue.resetValidation()

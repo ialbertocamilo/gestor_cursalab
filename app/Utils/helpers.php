@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Services\FileService;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Encoding\Encoding;
+use App\Models\Taxonomy;
 
 const INACTIVE = false;
 const ACTIVE = true;
@@ -707,4 +708,10 @@ function generate_qr_code_in_base_64($text,$height,$width,$scaleX=1,$scaleY=1){
     ->setMargin(30*$scaleX);
     $result = $writer->write($qrCode)->getDataUri();
     return $result;
+}
+function currentPlatform(){
+    $session_platform = session('platform');
+    $platform_code = $session_platform && $session_platform == 'induccion' ? 'onboarding' : 'training';
+    $platform = Taxonomy::getFirstData('project', 'platform', $platform_code);
+    return $platform;
 }

@@ -1,8 +1,18 @@
 <template>
     <div class="cont text-center d-flex align-center justify-space-around" style="grid-gap: 0.6rem;">
         <div class="css-tooltip css-tooltip--bottom"
-             data-tooltip="Nombre del curso">
+             data-tooltip="Nombre del curso"
+             v-if="(btn_course === 'true')">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del Curso', false, 'courses', 1)"
+                    text>
+                <v-icon>mdi-notebook</v-icon>
+            </v-btn>
+        </div>
+        
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="Nombre del proceso"
+             v-if="(btn_process === 'true')">
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_text('Nombre del Proceso', false, 'processes', 1)"
                     text>
                 <v-icon>mdi-notebook</v-icon>
             </v-btn>
@@ -85,8 +95,26 @@
     </div>
 </template>
 <script>
+
 export default {
-    props:['d_btn','fonts'],
+    props: {
+        d_btn: {
+            type: Boolean,
+            default: false
+        },
+        btn_process: {
+            type: String,
+            default: 'false'
+        },
+        btn_course: {
+            type: String,
+            default: 'true'
+        },
+        fonts:{
+            type: Array,
+            default:[]
+        }
+    },
     data(){
         return {
             font_id:null

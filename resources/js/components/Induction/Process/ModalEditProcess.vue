@@ -549,7 +549,7 @@
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(instruction, i) in process.instructions"
                                                             :key="instruction.id">
-                                                            <div class="item-draggable activities">
+                                                            <div class="item-draggable activities" :class="{'selected': selectedInstruction == instruction.id}">
                                                                 <div class="item_instruction">
                                                                     <div class="ii1 d-flex align-center justify-content-center ">
                                                                         <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
@@ -560,8 +560,8 @@
                                                                             <legend>Escribe aquí una indicación
                                                                             </legend>
                                                                             <editor
-                                                                                @onfocus="instructionSelected(instruction.description)"
-                                                                                @input="instructionSelected(instruction.description)"
+                                                                                @onfocus="instructionSelected(instruction.description, instruction.id)"
+                                                                                @input="instructionSelected(instruction.description, instruction.id)"
                                                                                 api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
                                                                                 v-model="instruction.description"
                                                                                 :init="{
@@ -721,6 +721,7 @@ export default {
                 open: false,
             },
             content_instruction: '',
+            selectedInstruction: '',
             step_title: '',
             // step 3
             tab_preview_images: 'mobile',
@@ -991,7 +992,7 @@ export default {
                     // vue.process.instructions.forEach(el => {
                     //     vue.instructionSelected(el.instruction)
                     // })
-                    vue.instructionSelected(vue.process.instructions[0].description);
+                    vue.instructionSelected(vue.process.instructions[0].description, vue.process.instructions[0].id);
                 }
             },
             deep: true
@@ -1107,9 +1108,10 @@ export default {
             let vue = this
             vue.modalAlert.open=false
         },
-        instructionSelected(value) {
+        instructionSelected(value, id) {
             let vue = this
             vue.content_instruction = value
+            vue.selectedInstruction = id
         },
         changeLogoSelected($event) {
             let vue = this
@@ -1145,7 +1147,6 @@ export default {
         },
         nextStep(){
             let vue = this;
-            console.log(vue.process);
 
             if(vue.stepper_box == 1){
                 vue.stepper_box = 2;
@@ -1476,7 +1477,6 @@ export default {
 
             vue.$http.get(url)
                 .then(({data}) => {
-                    console.log(data.data.modules);
                     vue.selects.subworkspaces = data.data.modules
                 })
         },
@@ -1647,6 +1647,10 @@ button.btn_secondary span.v-btn__content i{
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
     margin: 10px 0;
     border-radius: 8px;
+    &.selected {
+        box-shadow: 0px 4px 15px rgba(84, 88, 234, 0.34);
+        border: 1px solid #5458ea;
+    }
 }
 .item-draggable.activities textarea,
 .no-white-space .v-select__selection--comma,

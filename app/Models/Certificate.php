@@ -331,6 +331,9 @@ class Certificate extends Model
             case 'courses':
                 $text = $real_data['courses'] ?? 'Curso de buenas prácticas de programación';
                 $upper_string = false;
+            case 'processes':
+                $text = $real_data['processes'] ?? 'Proceso de inducción';
+                $upper_string = false;
             break;
             case 'fecha':
                 if (isset($real_data['fecha']) && $real_data['fecha']) {

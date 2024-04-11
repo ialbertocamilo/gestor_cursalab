@@ -40,6 +40,7 @@
                             :rules="rules.content"
                             :height="195"
                             :showGenerateIaDescription="hasPermissionToUseIaDescription"
+                            :showIconAddImage="false"
                             :key="`${hasPermissionToUseIaDescription}-editor`"
                             :limits_descriptions_generate_ia:="limits_descriptions_generate_ia"
                             :loading="loading_description"

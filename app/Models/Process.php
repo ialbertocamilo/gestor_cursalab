@@ -520,7 +520,7 @@ class Process extends BaseModel
                             $days_stages = $days_stages + $stage->duration;
                             $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
                             $diff_days = $current_date->diffInDays($finish_days_stage);
-                            if($diff_days <= $stage->duration){
+                            if($diff_days <= $stage->duration || $finish_days_stage <= $current_date){
                                 $stage->status = 'progress';
                             }
                         }
@@ -581,6 +581,7 @@ class Process extends BaseModel
                 'enabled' => false,
                 'message' => null,
                 'url' => null,
+                'url_download' => null,
                 'login_aprendizaje' => false
             ];
             
@@ -592,7 +593,8 @@ class Process extends BaseModel
                 $process->certificate = [
                     'enabled' => true,
                     'message' => '¡Gracias por realizar este proceso con nosotros!',
-                    'url' => $certificate?->path_image ?? null,
+                    'url' => "tools/induccion/ver_diploma/{$user->id}/{$process->id}",
+                    'url_download' => "tools/induccion/dnc/{$user->id}/{$process->id}",
                     'login_aprendizaje' => false
                 ];
             }
