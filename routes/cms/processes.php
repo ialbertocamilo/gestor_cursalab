@@ -10,6 +10,7 @@ Route::controller(ProcessController::class)->group(function() {
 	Route::post('/store', 'store')->name('process.store');
 	Route::post('/store_inline', 'storeInline')->name('process.store_inline');
 	Route::put('/update/{process}', 'update')->name('process.update');
+	Route::post('/{process}/update_positions_stages', 'updatePositionsStages')->name('process.update_positions_stages');
 
     Route::get('/search', 'search');
     Route::get('/repository_media', 'getRepositoryMediaProcess');

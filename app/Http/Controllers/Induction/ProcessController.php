@@ -32,6 +32,23 @@ use Illuminate\Support\Facades\DB;
 class ProcessController extends Controller
 {
 
+    public function updatePositionsStages(Process $process, Request $request)
+    {
+        $stages = ($request->stages) ? json_decode($request->stages) : [];
+        foreach ($stages as $stage) {
+            $save_stage = Stage::where('id', $stage->id)->first();
+            if($save_stage){
+                $save_stage->position = $stage->position;
+                $save_stage->save();
+            }
+        }
+        $response = [
+            'msg' => 'Posición actualizada correctamente.',
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+    
     public function search(Request $request)
     {
         $workspace = get_current_workspace();

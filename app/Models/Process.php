@@ -73,7 +73,7 @@ class Process extends BaseModel
 
     public function stages()
     {
-        return $this->hasMany(Stage::class, 'process_id', 'id');
+        return $this->hasMany(Stage::class, 'process_id', 'id')->orderBy('position');
     }
 
     public function segments()
