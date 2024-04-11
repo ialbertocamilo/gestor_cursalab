@@ -339,6 +339,7 @@ class Certificate extends Model
             case 'courses':
                 $text = $real_data['courses'] ?? 'Curso de buenas prácticas de programación';
                 $upper_string = false;
+                break;
             case 'processes':
                 $text = $real_data['processes'] ?? 'Proceso de inducción';
                 $upper_string = false;
@@ -516,7 +517,7 @@ class Certificate extends Model
             $platform_type_id = $platform && $platform == 'induccion'
                         ? Taxonomy::getFirstData('project', 'platform', 'onboarding')?->id
                         : Taxonomy::getFirstData('project', 'platform', 'training')?->id;
-                        
+
             // === guarda diploma ===
             $diploma = $certificate ?? new Certificate;
             $diploma->media_id = $media->id;

@@ -16,6 +16,7 @@ import UsersPage from '../pages/UsersPage.vue'
 import CourseDetailPage from '../pages/CourseDetailPage.vue'
 import UserUpdatePage from '../pages/UserUpdatePage.vue'
 import UserCreatePage from '../pages/UserCreatePage.vue'
+import LimitationsPage from "../pages/LimitationsPage.vue";
 
 
 Vue.use(VueRouter);
@@ -29,6 +30,11 @@ const routes = [
         path: "/documentation-api/secret-key",
 		name: "secret_key",
 		component:SecretKeyPage,
+    },
+    {
+        path: "/documentation-api/limitations",
+        name: "limitations",
+        component:LimitationsPage,
     },
 	{
         path: "/documentation-api/token",
@@ -95,7 +101,7 @@ const routes = [
 		name: "courseDetailPage",
 		component:CourseDetailPage,
     }
-	
+
 ]
 const router = new VueRouter({
 	mode: "history",
