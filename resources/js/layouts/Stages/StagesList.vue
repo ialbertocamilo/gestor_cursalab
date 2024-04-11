@@ -83,7 +83,7 @@
                             </v-col>
                         </v-row>
                         <draggable v-model="stages" @start="drag=true"
-                                @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionStage(stages, $event)">
                             <transition-group type="transition" name="flip-list" tag="div">
                                 <div v-for="(stage, i) in stages"
                                     :key="'stage_'+stage.id">
@@ -152,7 +152,7 @@
                                         <v-row>
                                             <v-col cols="12">
                                                 <draggable v-model="stage.activities" @start="drag=true"
-                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(stage, $event)">
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(activity, i) in stage.activities"
                                                             :key="'act_'+activity.id">
@@ -837,6 +837,80 @@ export default {
         }
     },
     methods: {
+        changePositionStage(stages, evt)
+        {
+            let vue = this
+            if (stages.length > 0) {
+                let index = 0
+                stages.forEach(element => {
+                    index = index + 1
+                    element.position = index
+                });
+            }
+            setTimeout(() => {
+                this.showLoader()
+
+                const url = `/procesos/${vue.process_id}/update_positions_stages`
+                const formData = new FormData();
+
+                let json_stages = JSON.stringify(stages)
+                formData.append('stages', json_stages)
+
+                vue.$http.post(url, formData)
+                    .then(async ({data}) => {
+
+                        let result = data.data.msg;
+                        vue.showAlert(result)
+
+                        this.hideLoader()
+
+                        vue.$nextTick(() => {
+                            vue.loadInfo()
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }, 100);
+        },
+        changePositionActivity(stage, evt)
+        {
+            let vue = this
+            if (stage.activities.length > 0) {
+                let index = 0
+                stage.activities.forEach(element => {
+                    index = index + 1
+                    element.position = index
+                });
+            }
+            setTimeout(() => {
+                this.showLoader()
+
+                const url = `/procesos/${stage.process_id}/etapas/${stage.id}/update_positions_activities`
+                const formData = new FormData();
+
+                let activities = JSON.stringify(stage.activities)
+                formData.append('activities', activities)
+
+                vue.$http.post(url, formData)
+                    .then(async ({data}) => {
+
+                        let result = data.data.msg;
+                        vue.showAlert(result)
+
+                        this.hideLoader()
+
+                        vue.$nextTick(() => {
+                            vue.loadInfo()
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }, 100);
+        },
         updatePercentageActivity( stage, activity, ref, event) {
             let vue = this
             if(activity.percentage_ev && activity.percentage_ev >= 0)
@@ -1140,7 +1214,6 @@ export default {
         },
         statusStage( stage, position )
         {
-            console.log(stage);
             let vue = this;
 
             if(stage.active) {
@@ -1150,7 +1223,7 @@ export default {
                 vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             }
             else {
-                if(stage.activities.length < 3) {
+                if(stage.activities.length <= 3) {
                     vue.statusValidateStageModal.open = true
                     vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
                     vue.statusValidateStageModal.content_modal = {

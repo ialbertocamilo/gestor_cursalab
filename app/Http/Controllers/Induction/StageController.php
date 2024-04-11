@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Induction;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Induction\StageStoreUpdateRequest;
+use App\Models\Activity;
 use App\Models\Course;
 use App\Models\Process;
 use App\Models\School;
@@ -14,6 +15,23 @@ use Illuminate\Http\Request;
 class StageController extends Controller
 {
 
+    public function updatePositionsActivities(Process $process, Stage $stage, Request $request)
+    {
+        $activities = ($request->activities) ? json_decode($request->activities) : [];
+        foreach ($activities as $activity) {
+            $save_activity = Activity::where('id', $activity->id)->first();
+            if($save_activity){
+                $save_activity->position = $activity->position;
+                $save_activity->save();
+            }
+        }
+        $response = [
+            'msg' => 'Posición actualizada correctamente.',
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+    
     public function getFormSelects(Process $process, $compactResponse = false)
     {
 
@@ -68,6 +86,13 @@ class StageController extends Controller
         $school = School::storeRequest($data_school);
 
         $data['school_id'] = $school?->id ?? null;
+
+        // position
+        $last_position =  Stage::where('process_id', $process->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data['position'] = $last_position + 1;            
 
         $stage = Stage::storeRequest($data);
 

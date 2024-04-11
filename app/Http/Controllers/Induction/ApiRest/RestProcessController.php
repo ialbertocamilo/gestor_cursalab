@@ -159,28 +159,30 @@ class RestProcessController extends Controller
     {
         $process_assigned = Process::getProcessesAssigned($user);
 
-        $process_user = Process::with(['instructions','stages.activities.type','stages.activities.requirement'])
+        $process_user = Process::select('id', 'title')
                             ->whereIn('id', $process_assigned)
                             ->first();
+                            
+        $summary_user_process = Process::getUserProcessApi(['user' => $user, 'process' => $process_user->id]);
 
-        $process_sum_user = ProcessSummaryUser::where('process_id', $process_user->id)
-                                            ->where('user_id', $user->id)
-                                            ->first();
         $response['data'] = [
             'id' => $user->id,
             'fullname' => $user->fullname,
             'document' => $user->document ?? 'Sin documento',
             'module' => $user->resource->subworkspace?->name ?? 'No module',
             'active' => $user->active,
-            'limit_absences' => $process_user?->absences ?? 0,
-            'count_absences' => $process_sum_user?->absences ?? 0,
-            'percentage' => 0,
+            'count_absences' => $summary_user_process->count_absences,
+            'user_absences' => $summary_user_process->user_absences,
+            'user_activities_progress' => $summary_user_process->user_activities_progress,
+            'user_activities_total' => $summary_user_process->user_activities_total,
+            'user_activities_progressbar' => $summary_user_process->user_activities_progressbar,
             'process' => [
                 'id' => $process_user?->id,
                 'title' => $process_user?->title,
             ],
-            'stages' => $process_user?->stages ?? null
+            'stages' => $summary_user_process->stages
         ];
+        
         return response()->json($response, 200);
     }
 

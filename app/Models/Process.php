@@ -22,6 +22,8 @@ class Process extends BaseModel
         'description',
         'block_stages',
         'migrate_users',
+        'alert_user_deleted',
+        'message_user_deleted',
         'count_absences',
         'limit_absences',
         'absences',
@@ -51,7 +53,8 @@ class Process extends BaseModel
         'limit_absences' => 'boolean',
         'config_completed' => 'boolean',
         'block_stages' => 'boolean',
-        'migrate_users' => 'boolean'
+        'migrate_users' => 'boolean',
+        'alert_user_deleted' => 'boolean'
     ];
 
     protected $hidden = [
@@ -70,7 +73,7 @@ class Process extends BaseModel
 
     public function stages()
     {
-        return $this->hasMany(Stage::class, 'process_id', 'id');
+        return $this->hasMany(Stage::class, 'process_id', 'id')->orderBy('position');
     }
 
     public function segments()
@@ -589,7 +592,7 @@ class Process extends BaseModel
             // if($user_summary?->status_id == $tax_user_process_finished?->id)
             if($process->user_activities_progressbar >= 100)
             {
-                $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
+                // $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
                 $process->certificate = [
                     'enabled' => true,
                     'message' => '¡Gracias por realizar este proceso con nosotros!',
@@ -601,7 +604,7 @@ class Process extends BaseModel
 
             unset($process->limit_absences);
             unset($process->absences);
-            unset($process->count_absences);
+            // unset($process->count_absences);
             unset($process->certificate_template_id);
             unset($process->block_stages);
         }

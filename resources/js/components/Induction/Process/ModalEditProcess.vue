@@ -157,9 +157,14 @@
                                             </div>
                                         </v-col>
                                     </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                    
+                                    <DefaultModalSectionExpand
+                                        title="Avanzado"
+                                        :expand="sections.showSectionAdvanced"
+                                        class="my-4 bg_card_none"
+                                    >
+                                        <template slot="content">
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -173,11 +178,8 @@
                                                     <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                            
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -191,8 +193,49 @@
                                                     <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
+                                            
+                                            <div>
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.alert_user_deleted"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">Mostrar un mensaje al usuario cuando no apruebe el proceso de inducción y quede eliminado</span>
+                                                </div>
+                                                <div v-if="process.alert_user_deleted" class="mt-3">
+                                                    <div class="">
+                                                        <fieldset class="editor">
+                                                            <legend>Edita el mensaje que se mostrará al usuario
+                                                            </legend>
+                                                            <editor
+                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                v-model="process.message_user_deleted"
+                                                                :init="{
+                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                    height: 170,
+                                                                    menubar: false,
+                                                                    language: 'es',
+                                                                    force_br_newlines : true,
+                                                                    force_p_newlines : false,
+                                                                    forced_root_block : '',
+                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                                    toolbar:
+                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                    images_upload_handler: images_upload_handler,
+                                                                    toolbar_location: 'bottom'
+                                                                }"
+                                                            />
+                                                        </fieldset>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </DefaultModalSectionExpand>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
@@ -710,7 +753,8 @@ export default {
             process: {
                 instructions: [],
                 subworkspaces: [],
-                description: ''
+                description: '',
+                alert_user_deleted: false
             },
             modalDateOptions: {
                 ref: 'DateEvent',
@@ -765,7 +809,7 @@ export default {
             confirmLabel: "Continuar",
             list_segments:[],
             sections: {
-                showAdvancedOptions: false
+                showSectionAdvanced: {status: false},
             },
             modalDateStart: {
                 open: false,
@@ -1216,6 +1260,8 @@ export default {
             vue.colorMapaSelected = '#27f748'
             vue.colorImparPicker = '#27F748'
             vue.colorParPicker = '#8BFC89'
+
+            vue.sections.showSectionAdvanced.status = false
 
             vue.resetValidation()
             vue.$emit("onCancel");
