@@ -1252,7 +1252,8 @@ export default {
             vue.process = {
                 instructions: [],
                 subworkspaces: [],
-                description: ''
+                description: '',
+                config_completed: false
             }
 
             vue.colorPicker = '#FE141F'

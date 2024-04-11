@@ -367,7 +367,7 @@ class Process extends BaseModel
         // $benefits_asigned = array_column($user->getSegmentedByModelType(Process::class),'id');
 
         $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
-
+        
         $field = 'created_at';
         $sort = 'DESC';
 
@@ -505,13 +505,13 @@ class Process extends BaseModel
             $process->completed_instruction = $user_summary?->completed_instruction ?? false;
             $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
             $total_activities = 0;
-            $process->stages = $process->stages()
+            $stages_list = $process->stages()
                                     ->select('id', 'duration', 'position', 'title')
                                     ->active()
                                     ->get();
             $days_stages = 0;
-            if($process->stages->count() > 0) {
-                foreach ($process->stages as $index => $stage) {
+            if($stages_list->count() > 0) {
+                foreach ($stages_list as $index => $stage) {
                     // segun el copy, si block_stages es 1 entonces siempre se debe mostrar
                     if($process->block_stages) {
                         $stage->status = 'progress';
@@ -529,7 +529,7 @@ class Process extends BaseModel
                         }
                     }
                     $stage->duration = $stage->duration ? ($stage->duration == 1 ? $stage->duration .' día' : $stage->duration .' días') : $stage->duration;
-                    $stage->activities = $stage->activities()
+                    $activities_list = $stage->activities()
                                                 ->with(['type', 'requirement' => function($r){
                                                     $r->select('id', 'model_id', 'type_id', 'title', 'description')
                                                     ->with(['type']);
@@ -537,8 +537,8 @@ class Process extends BaseModel
                                                 ->select('id', 'stage_id', 'title', 'description', 'type_id', 'activity_requirement_id', 'model_id', 'position')
                                                 ->active()
                                                 ->get();
-                    if($stage->activities->count() > 0) {
-                        foreach ($stage->activities as $activity) {
+                    if($activities_list->count() > 0) {
+                        foreach ($activities_list as $activity) {
                             $total_activities++;
                             $activity->progress = 0;
                             $activity->status = 'pending';
@@ -551,6 +551,7 @@ class Process extends BaseModel
                             unset($activity->activity_requirement_id);
                         }
                     }
+                    $stage->activities = $activities_list;
                 }
             }
             $process->finishes_at = $process->finishes_at ? date('d-m-Y', strtotime($process->finishes_at)) : null;
@@ -573,12 +574,19 @@ class Process extends BaseModel
             }
 
             $status_finished = Taxonomy::getFirstData('user-activity', 'status', 'finished')->id;
-            $user_activities = ProcessSummaryActivity::where('user_id', $user->id)->where('status_id', $status_finished)->count();
+            $user_activities = ProcessSummaryActivity::where('user_id', $user->id)
+                                ->whereHas('activity', function($a) use ($process) {
+                                    $stages_ids = Stage::select('id')->where('process_id', $process->id)->pluck('id')->toArray();
+                                    $a->whereIn('stage_id', $stages_ids);
+                                })
+                                ->where('status_id', $status_finished)
+                                ->count();
             $process->user_activities_progress = $user_activities;
             $process->user_activities_total = $total_activities;
 
 
             $process->user_activities_progressbar = $user_activities > 0 && $total_activities > 0 ? round(((($user_activities * 100 / $total_activities) * 100) / 100)) : 0;
+            $process->stages = $stages_list;
 
             $process->certificate = [
                 'enabled' => false,
@@ -592,7 +600,6 @@ class Process extends BaseModel
             // if($user_summary?->status_id == $tax_user_process_finished?->id)
             if($process->user_activities_progressbar >= 100)
             {
-                // $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
                 $process->certificate = [
                     'enabled' => true,
                     'message' => '¡Gracias por realizar este proceso con nosotros!',
@@ -601,6 +608,11 @@ class Process extends BaseModel
                     'login_aprendizaje' => false
                 ];
             }
+
+            $process->reprobate_user_alert = [
+                'show_alert' => false,
+                'message' => null
+            ];
 
             unset($process->limit_absences);
             unset($process->absences);
