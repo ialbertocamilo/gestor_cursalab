@@ -78,7 +78,7 @@
                             </DefaultSimpleSection>
                         </v-col>
                         <v-col cols="6">
-                            <DefaultSimpleSection title="Quienes pueden ver el contenido" marginy="my-1" marginx="mx-0">
+                            <DefaultSimpleSection title="Quiénes pueden ver el contenido" marginy="my-1" marginx="mx-0">
                                 <template slot="content">
                                     <v-radio-group v-model="resource.modality_in_person_properties.visualization_type" row
                                         class="ml-2">

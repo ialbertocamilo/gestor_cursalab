@@ -38,7 +38,7 @@ export default {
             api_description_options:{
                 title:'Actualizar usuarios',
                 type:'POST',
-                route:'/integrations/update-create-users',
+                route:'/integrations/update-users',
                 parameters_type:[
                     {
                         title:'Parámetros (body)',

@@ -63,6 +63,20 @@ export default {
       return {
           list_items:[
               {
+                  icon:'mdi-alert-circle-outline',
+                  title:'Limitaciones',
+                  link:'/documentation-api/limitations',
+                  isGroup :true,
+                  subItems: [
+                      {
+                          icon:'mdi-alert-circle-outline',
+                          title:'Solicitudes',
+                          show: true,
+                          link:'/documentation-api/limitations',
+                      },
+                  ]
+              },
+              {
                   icon:'mdi-security',
                   title:'Autorización',
                   link:'/documentation-api/secret-key',
@@ -145,7 +159,7 @@ export default {
                         {
                             icon:'mdi-account',
                             title:'Listado de usuarios',
-                            show:is_inretail,
+                            show:true,
                             link:'/documentation-api/users',
                         },
                         {
