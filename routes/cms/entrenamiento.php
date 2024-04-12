@@ -39,6 +39,8 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::get('/form-selects', 'getFormSelects');
 
 		Route::get('/search', 'searchChecklist');
+		Route::get('/init-data', 'getInitData');
+
 		Route::post('/search_checklist', 'searchChecklistByID');
 		Route::post('/listar_checklist', 'listarChecklist');
 		Route::post('/import', 'importChecklist');

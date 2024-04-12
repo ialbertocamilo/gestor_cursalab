@@ -123,6 +123,13 @@ class EntrenamientoController extends Controller
 
         return $this->success($data);
     }
+    public function getInitData(){
+        $modalities = Taxonomy::getDataForSelectAttrs('checklist','modality',['id','name','description','code','icon','color','position']);
+        $modalities = $modalities->toArray();
+        $positions = array_column($modalities, 'position');
+        array_multisort($positions, SORT_ASC, $modalities);
+        return $this->success(['modalities'=>$modalities]);
+    }
     public function listStudents($trainer_id)
     {
         $data = EntrenadorUsuario::listStudents($trainer_id);

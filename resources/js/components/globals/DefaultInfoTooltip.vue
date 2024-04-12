@@ -16,7 +16,7 @@
             />
         </template>
 
-        <span v-if="text" v-html="text" />
+        <span  style="" v-if="text" v-html="text" />
 
         <slot name="content"/>
 
@@ -63,3 +63,11 @@ export default {
     }
 }
 </script>
+<style scoped>
+    .v-tooltip__content.menuable__content__active {
+        border-width: 1px !important;
+        /* Fix position to show tooltip from right position */
+        right: 0 !important;
+        left: unset !important;
+    }
+</style>
