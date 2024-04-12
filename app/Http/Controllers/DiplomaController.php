@@ -52,20 +52,14 @@ class DiplomaController extends Controller
         $data = $request->all();
         $hasStorageAvailable = Media::validateStorageByWorkspace([]);
         if ($hasStorageAvailable) {
-            try {
-                $message = Certificate::saveFont($data);
-                $response = [
-                    'msg' => 'Fuente creado correctamente.',
-                    'messages' => ['list' => []]
-                ];
-                return $this->success([
-                    'msg' => 'Fuente creado correctamente.',
-                ]);
-            } catch (\Throwable $th) {
-                return $this->success([
-                    'msg' => 'Error al crear fuente.',
-                ]);
-            }
+            $message = Certificate::saveFont($data);
+            $response = [
+                'msg' => 'Fuente creado correctamente.',
+                'messages' => ['list' => []]
+            ];
+            return $this->success([
+                'msg' => 'Fuente creado correctamente.',
+            ]);
         }
         return response()->json([
             'msg' => config('errors.limit-errors.limit-storage-allowed')
@@ -198,8 +192,17 @@ class DiplomaController extends Controller
         return abort(404);
     }
     public function initData(){
-        $fonts = Taxonomy::select('id','name')->where('group','certificate')->where('type','font')->whereNull('parent_id')->get();
-        return $this->success(['fonts'=>$fonts]);
+        $fonts = Taxonomy::select('id','name')
+                    ->with('children:id,name,code,parent_id')
+                    ->where('group','certificate')
+                    ->where('type','font')
+                    ->whereNull('parent_id')->get()->map(function($font_parent){
+                        $font_parent->only_regular_font =  $font_parent->children->count() == 1;
+                        unset($font_parent->children);
+                        return $font_parent;
+                    });
+        $is_super_user = boolval(auth()->user()->isA('super-user'));
+        return $this->success(['fonts'=>$fonts,'is_super_user'=>$is_super_user]);
     }
     public function get_preview_data(Request $request)
     {
@@ -211,7 +214,7 @@ class DiplomaController extends Controller
         $list_type_fonts = [];
         if($font_id){
             $custom_font = true;
-            $list_type_fonts = Taxonomy::select('code','path')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
         }
         $local_paths_font = [];
 
@@ -236,34 +239,7 @@ class DiplomaController extends Controller
                     case 'i-text':
 
                         //  === para el font ===
-                        if($custom_font && count($list_type_fonts)){
-                            $fontName = $list_type_fonts->where('code','font-normal')->first();
-                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                                $fontName = $list_type_fonts->where('code','font-bold-italic')->first();
-                            }else if($e_static['fontStyle'] === 'italic') {
-                                $fontName = $list_type_fonts->where('code','font-italic')->first();
-                            }else if($e_static['fontWeight'] === 'bold') {
-                                $fontName = $list_type_fonts->where('code','font-bold')->first();
-                            }
-                            $s3FontUrl = get_media_url($fontName->path,'s3');
-                            $fontFilename = basename($fontName->path);
-                            $fileContents = file_get_contents($s3FontUrl);
-                            if(!Storage::disk('public')->exists($fontName->path)){
-                                Storage::disk('public')->put($fontName->path, $fileContents);
-                            }
-                            $font = storage_path('app/public/' . $fontName->path);
-                            $local_paths_font[] = $font;
-                        }else{
-                            $fontName = 'calisto-mt.ttf';
-                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                                $fontName = 'calisto-mt-bold-italic.ttf';
-                            }else if($e_static['fontStyle'] === 'italic') {
-                                $fontName = 'calisto-mt-italic.ttf';
-                            }else if($e_static['fontWeight'] === 'bold') {
-                                $fontName = 'calisto-mt-bold.ttf';
-                            }
-                            $font = realpath('.').'/fonts/diplomas/'.$fontName;
-                        }
+                        $font = Diploma::getPathFonth($e_static,$custom_font,$list_type_fonts);
                         //  === para el font ===
 
                         $rgb = Diploma::convertHexadecimalToRGB($e_static['fill']);
@@ -331,7 +307,7 @@ class DiplomaController extends Controller
         return response()->json(compact('preview'));
     }
 
-
+   
     public function destroy(Diploma $diploma)
     {
         $diploma->delete();

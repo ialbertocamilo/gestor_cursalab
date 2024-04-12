@@ -61,6 +61,7 @@
                 @input="changeFont"
                 :disabled="d_btn"
                 :openUp="true"
+                return-object
             />
         </div>
 
@@ -136,9 +137,8 @@ export default {
         emitir_prev(){
             this.$emit("emit_prev");
         },
-        changeFont(font_id){
-            console.log('font_id,',font_id);
-            this.$emit("emit_change_font",font_id);
+        changeFont(font){
+            this.$emit("emit_change_font",font);
         },
         emitir_delete(){
             this.$emit("emit_delete",'bg');

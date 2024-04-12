@@ -59,7 +59,14 @@ export default {
         }
     },
     methods: {
-        resetValidation() {},
+        resetValidation() {
+            let vue = this;
+            vue.resource.name = '';
+            vue.resource.fonts[0].file = null;
+            vue.resource.fonts[1].file = null;
+            vue.resource.fonts[2].file = null;
+            vue.resource.fonts[3].file = null;
+        },
         loadData(resource) {},
         loadSelects() {},
         onCancel() {
@@ -78,9 +85,13 @@ export default {
             }
             await axios.post('/diplomas/save-font', formData).then((res)=>{
                 vue.showAlert('Se creó la fuente correctamente.');
+                vue.hideLoader();
+                vue.resetValidation();
+                vue.$emit('onConfirm');
+            }).catch(()=>{
+                vue.showAlert('No se pudo crear la fuente.','error');
+                vue.hideLoader();
             });
-            vue.hideLoader();
-            vue.$emit('onCancel');
         },
         previewFont(event,type_font) {
             const fontFile = event;

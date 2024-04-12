@@ -388,19 +388,17 @@ class Certificate extends Model
         return  abort(404);
     }
     protected function saveFont($data){
-        
-        $hasStorageAvailable = Media::validateStorageByWorkspace([]);
-        if ($hasStorageAvailable) {
-            $font_name = $data['name'];
-            $_taxonomy_font_parent = new Taxonomy();
-            $_taxonomy_font_parent->group = 'certificate';
-            $_taxonomy_font_parent->type = 'font';
-            $_taxonomy_font_parent->name = $font_name;
-            $_taxonomy_font_parent->active = 1;
-            $_taxonomy_font_parent->save();
-            $fonts = ['font-normal','font-bold','font-italic','font-bold-italic'];
-            $_taxonomy_font_child = [];
-            foreach ($fonts as $font) {
+        $font_name = $data['name'];
+        $_taxonomy_font_parent = new Taxonomy();
+        $_taxonomy_font_parent->group = 'certificate';
+        $_taxonomy_font_parent->type = 'font';
+        $_taxonomy_font_parent->name = $font_name;
+        $_taxonomy_font_parent->active = 1;
+        $_taxonomy_font_parent->save();
+        $fonts = ['font-normal','font-bold','font-italic','font-bold-italic'];
+        $_taxonomy_font_child = [];
+        foreach ($fonts as $font) {
+            if(isset($data[$font]) && $data[$font] && $data[$font] != 'null'){
                 $path_font =  Media::uploadFile($data[$font],null, false, 'ttf', 'font');
                 $_taxonomy_font_child[] = [
                     'group'=> 'certificate',
@@ -409,9 +407,14 @@ class Certificate extends Model
                     'name' => Str::slug($font_name).'-'.$font,
                     'active'=>1,
                     'parent_id' => $_taxonomy_font_parent->id,
-                    'path'=> $path_font
+                    'path'=> $path_font,
+                    'extra_attributes'=> json_encode([
+                        'storage' => 's3'
+                    ]),
                 ];
             }
+        }
+        if(count($_taxonomy_font_child)){
             Taxonomy::insert($_taxonomy_font_child);
         }
     }
@@ -426,7 +429,7 @@ class Certificate extends Model
         $list_type_fonts = [];
         if($font_id){
             $custom_font = true;
-            $list_type_fonts = Taxonomy::select('code','path')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
         }
         $local_paths_font = [];
 
@@ -447,35 +450,7 @@ class Certificate extends Model
 
                     case 'i-text':
                         //  === para el font ===
-                        if($custom_font && count($list_type_fonts)){
-                            $fontName = $list_type_fonts->where('code','font-normal')->first();
-                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                                $fontName = $list_type_fonts->where('code','font-bold-italic')->first();
-                            }else if($e_static['fontStyle'] === 'italic') {
-                                $fontName = $list_type_fonts->where('code','font-italic')->first();
-                            }else if($e_static['fontWeight'] === 'bold') {
-                                $fontName = $list_type_fonts->where('code','font-bold')->first();
-                            }
-                            $s3FontUrl = get_media_url($fontName->path,'s3');
-                            $fontFilename = basename($fontName->path);
-                            $fileContents = file_get_contents($s3FontUrl);
-                            if(!Storage::disk('public')->exists($fontName->path)){
-                                Storage::disk('public')->put($fontName->path, $fileContents);
-                            }
-                            $font = storage_path('app/public/' . $fontName->path);
-                            $local_paths_font[] = $font;
-                        }else{
-                            $fontName = 'calisto-mt.ttf';
-                            if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                                $fontName = 'calisto-mt-bold-italic.ttf';
-                            }else if($e_static['fontStyle'] === 'italic') {
-                                $fontName = 'calisto-mt-italic.ttf';
-                            }else if($e_static['fontWeight'] === 'bold') {
-                                $fontName = 'calisto-mt-bold.ttf';
-                            }
-                            $font = realpath('.').'/fonts/diplomas/'.$fontName;
-                        }
-
+                        $font = Diploma::getPathFonth($e_static,$custom_font,$list_type_fonts);
                         // $font = realpath('.').'/fonts/diplomas/'.$fontName;
                         //  === para el font ===
 
@@ -649,22 +624,13 @@ class Certificate extends Model
         $list_type_fonts = [];
         if($font_id){
             $custom_font = true;
-            $list_type_fonts = Taxonomy::select('code','path')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
         }
         $local_paths_font = [];
         foreach ($e_dinamics as $e_dinamic)
         {
              //  === para el font ===
-             if($custom_font && count($list_type_fonts)){
-                $fontName = $list_type_fonts->where('code','font-normal')->first();
-                if(!Storage::disk('public')->exists($fontName->path)){
-                    Storage::disk('public')->put($fontName->path, $fileContents);
-                }
-                $font = storage_path('app/public/' . $fontName->path);
-                $local_paths_font[] = $font;
-            }else{
-                $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
-            }
+             
             if($e_dinamic['type']=='text'){
                 $rgb = Certificate::hex2rgb($e_dinamic['fill']);
                 $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
@@ -683,28 +649,8 @@ class Certificate extends Model
                 
 
                  //  === para el font ===
-                 if($custom_font && count($list_type_fonts)){
-                    $fontName = $list_type_fonts->where('code','font-normal')->first();
-                    if ($e_dinamic['fontStyle'] === 'italic' && $e_dinamic['fontWeight'] === 'bold') {
-                        $fontName = $list_type_fonts->where('code','font-bold-italic')->first();
-                    }else if($e_dinamic['fontStyle'] === 'italic') {
-                        $fontName = $list_type_fonts->where('code','font-italic')->first();
-                    }else if($e_dinamic['fontWeight'] === 'bold') {
-                        $fontName = $list_type_fonts->where('code','font-bold')->first();
-                    }
-                    $s3FontUrl = get_media_url($fontName->path,'s3');
-                    $fontFilename = basename($fontName->path);
-                    $fileContents = file_get_contents($s3FontUrl);
-                    if(!Storage::disk('public')->exists($fontName->path)){
-                        Storage::disk('public')->put($fontName->path, $fileContents);
-                    }
-                    $font = storage_path('app/public/' . $fontName->path);
-                    $local_paths_font[] = $font;
-                }else{
-                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
-                    ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
-                    ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
-                }
+                 $font = Diploma::getPathFonth($e_dinamic,$custom_font,$list_type_fonts);
+
                 //Eliminar emogis
                 $text = trim(Certificate::remove_emoji($text));
                 //Centrado multilinea
@@ -761,5 +707,41 @@ class Certificate extends Model
             $_certificate->fill($certificate);
             $_certificate->save();
         }
+    }
+    protected function getPathFonth($element,$custom_font,$list_type_fonts){
+        $font = '';
+        if($custom_font && count($list_type_fonts)){
+            $fontName = $list_type_fonts->where('code','font-normal')->first();
+            if ($element['fontStyle'] === 'italic' && $element['fontWeight'] === 'bold') {
+                $fontName = $list_type_fonts->where('code','font-bold-italic')->first() ?? $fontName;
+            }else if($element['fontStyle'] === 'italic') {
+                $fontName = $list_type_fonts->where('code','font-italic')->first() ?? $fontName;
+            }else if($element['fontWeight'] === 'bold') {
+                $fontName = $list_type_fonts->where('code','font-bold')->first() ?? $fontName;
+            }
+            if($fontName->extra_attributes['storage'] == 's3'){
+                $s3FontUrl = get_media_url($fontName->path,'s3');
+                $fontFilename = basename($fontName->path);
+                $fileContents = file_get_contents($s3FontUrl);
+                if(!Storage::disk('public')->exists($fontName->path)){
+                    Storage::disk('public')->put($fontName->path, $fileContents);
+                }
+                $font = storage_path('app/public/' . $fontName->path);
+                $local_paths_font[] = $font;
+            }else{
+                $font =  realpath('.').'/'.$fontName->path;
+            }
+        }else{
+            $fontName = 'calisto-mt.ttf';
+            if ($element['fontStyle'] === 'italic' && $element['fontWeight'] === 'bold') {
+                $fontName = 'calisto-mt-bold-italic.ttf';
+            }else if($element['fontStyle'] === 'italic') {
+                $fontName = 'calisto-mt-italic.ttf';
+            }else if($element['fontWeight'] === 'bold') {
+                $fontName = 'calisto-mt-bold.ttf';
+            }
+            $font = realpath('.').'/fonts/diplomas/'.$fontName;
+        }
+        return $font;
     }
 }

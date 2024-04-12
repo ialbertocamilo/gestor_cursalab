@@ -12,6 +12,7 @@
                 </v-btn>
                 <v-spacer></v-spacer>
                 <DefaultModalButton
+                    v-if="is_super_user"
                     :label="'Añadir nueva fuente'"
                     @click="openFormModal(modalFontsOptions, null, null,'Crea una nueva fuente')"
                 />
@@ -61,12 +62,12 @@
 
                                 <div class="css-tooltip css-tooltip--top"
                                      data-tooltip="Negrita">
-                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('bold')" text>
+                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn && only_regular_font" @click="edit_object('bold')" text>
                                         <v-icon>mdi-format-bold</v-icon>
                                     </v-btn>
                                 </div>
                                 <div class="css-tooltip css-tooltip--top" data-tooltip="Cursiva">
-                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('italic')" text>
+                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn && only_regular_font" @click="edit_object('italic')" text>
                                         <v-icon>mdi-format-italic</v-icon>
                                     </v-btn>
                                 </div>
@@ -313,7 +314,9 @@ export default {
                 }
             },
             fonts:[],
-            font_id:null
+            font_id:null,
+            only_regular_font:false,
+            is_super_user:false,
         }
     },
     created(){
@@ -397,11 +400,13 @@ export default {
             let vue = this;
             axios.get('/diplomas/init-data').then(({data})=>{
                 vue.fonts = data.data.fonts;
+                vue.is_super_user  = data.data.is_super_user;
             })
         },
-        changeFont(font_id){
+        changeFont(font){
             let vue = this;
-            vue.font_id = font_id;
+            vue.font_id = font.id;
+            vue.only_regular_font = font.only_regular_font;
         },
         leavePage() {
             const vue = this

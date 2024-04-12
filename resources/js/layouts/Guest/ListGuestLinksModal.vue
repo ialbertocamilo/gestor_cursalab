@@ -80,7 +80,6 @@
                                     label="Añadir"
                                     :disabled=" 
                                         !url.code 
-                                        || !url.subworkspace_id
                                         || (url.type_of_time && (url.number_time<1 || url.number_time>99)) 
                                         || (url.type_form == 'custom_criteria' && url.criteria_list.length ==0)"
                                     @click="add_url()"
