@@ -83,7 +83,7 @@
                             </v-col>
                         </v-row>
                         <draggable v-model="stages" @start="drag=true"
-                                @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionStage(stages, $event)">
                             <transition-group type="transition" name="flip-list" tag="div">
                                 <div v-for="(stage, i) in stages"
                                     :key="'stage_'+stage.id">
@@ -152,7 +152,7 @@
                                         <v-row>
                                             <v-col cols="12">
                                                 <draggable v-model="stage.activities" @start="drag=true"
-                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(stage, $event)">
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(activity, i) in stage.activities"
                                                             :key="'act_'+activity.id">
@@ -164,7 +164,7 @@
                                                                             </v-icon>
                                                                         </div>
                                                                         <div v-if="activity.new">
-                                                                            <div class="btn_add_activity" @click="addNewActivity(stage.id, stage.school_id)">
+                                                                            <div class="btn_add_activity" :class="{'disabled': stage.activities.length >= 8}" @click="addNewActivity(stage.id, stage.school_id, stage.activities)">
                                                                                 <span class="text_default c-default">+ Añadir actividad</span>
                                                                             </div>
                                                                         </div>
@@ -253,7 +253,7 @@
                                                                             <v-icon class="ml-0 mr-2 icon_size icon_size_drag">fas fa-grip-vertical
                                                                             </v-icon>
                                                                         </div>
-                                                                        <div class="btn_add_activity" @click="addNewActivity(stage.id, stage.school_id)">
+                                                                        <div class="btn_add_activity" :class="{'disabled': stage.activities.length >= 8}" @click="addNewActivity(stage.id, stage.school_id, stage.activities)">
                                                                             <span class="text_default c-default">+ Añadir actividad</span>
                                                                         </div>
                                                                     </v-col>
@@ -837,6 +837,80 @@ export default {
         }
     },
     methods: {
+        changePositionStage(stages, evt)
+        {
+            let vue = this
+            if (stages.length > 0) {
+                let index = 0
+                stages.forEach(element => {
+                    index = index + 1
+                    element.position = index
+                });
+            }
+            setTimeout(() => {
+                this.showLoader()
+
+                const url = `/procesos/${vue.process_id}/update_positions_stages`
+                const formData = new FormData();
+
+                let json_stages = JSON.stringify(stages)
+                formData.append('stages', json_stages)
+
+                vue.$http.post(url, formData)
+                    .then(async ({data}) => {
+
+                        let result = data.data.msg;
+                        vue.showAlert(result)
+
+                        this.hideLoader()
+
+                        vue.$nextTick(() => {
+                            vue.loadInfo()
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }, 100);
+        },
+        changePositionActivity(stage, evt)
+        {
+            let vue = this
+            if (stage.activities.length > 0) {
+                let index = 0
+                stage.activities.forEach(element => {
+                    index = index + 1
+                    element.position = index
+                });
+            }
+            setTimeout(() => {
+                this.showLoader()
+
+                const url = `/procesos/${stage.process_id}/etapas/${stage.id}/update_positions_activities`
+                const formData = new FormData();
+
+                let activities = JSON.stringify(stage.activities)
+                formData.append('activities', activities)
+
+                vue.$http.post(url, formData)
+                    .then(async ({data}) => {
+
+                        let result = data.data.msg;
+                        vue.showAlert(result)
+
+                        this.hideLoader()
+
+                        vue.$nextTick(() => {
+                            vue.loadInfo()
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }, 100);
+        },
         updatePercentageActivity( stage, activity, ref, event) {
             let vue = this
             if(activity.percentage_ev && activity.percentage_ev >= 0)
@@ -942,15 +1016,31 @@ export default {
             }
             return icon ? name_icon : name;
         },
-        addNewActivity( stage_id = null, school_id = null )
+        addNewActivity( stage_id = null, school_id = null, activities = [] )
         {
             let vue = this
-            console.log(school_id);
-            vue.modalSelectActivity.process_id = vue.process_id
-            vue.modalSelectActivity.stage_id = stage_id
-            vue.modalSelectActivity.school_id = school_id
+            
+            if(activities.length >= 8)
+            {
+                vue.statusValidateStageModal.title_modal = 'Límite de actividades por etapa',
+                vue.statusValidateStageModal.content_modal = {
+                    confirm: {
+                        title: '¡No puedes tener más de 8 actividades dentro de tus etapas!',
+                        details: [
+                            'Recuerda que solo podrás agregar 8 actividades como máximo por etapa.'
+                        ],
+                    }
+                }
+                vue.statusValidateStageModal.open = true
+            }
+            else
+            {
+                vue.modalSelectActivity.process_id = vue.process_id
+                vue.modalSelectActivity.stage_id = stage_id
+                vue.modalSelectActivity.school_id = school_id
 
-            vue.openFormModal(this.modalSelectActivity)
+                vue.openFormModal(this.modalSelectActivity)
+            }
         },
         async deleteStage( stage, position )
         {
@@ -1124,7 +1214,6 @@ export default {
         },
         statusStage( stage, position )
         {
-            console.log(stage);
             let vue = this;
 
             if(stage.active) {
@@ -1134,7 +1223,7 @@ export default {
                 vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             }
             else {
-                if(stage.activities.length < 3) {
+                if(stage.activities.length <= 3) {
                     vue.statusValidateStageModal.open = true
                     vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
                     vue.statusValidateStageModal.content_modal = {
@@ -1442,7 +1531,12 @@ export default {
 .btn_add_activity {
     cursor: pointer;
     span.text_default {
-        color: #5458EA;
+        color: #5458EA !important;
+    }
+    &.disabled {
+        span.text_default {
+            color: #BDBEC0 !important;
+        }
     }
 }
 .txt_duration {

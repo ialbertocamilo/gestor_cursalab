@@ -13,13 +13,21 @@ class Certificate extends Model
 {
     use softdeletes;
 
-    protected $fillable = ['media_id', 'title', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active'];
+    protected $fillable = ['media_id', 'title', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active','path_image', 'platform_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     private $dias_ES = array("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo");
     private $dias_EN = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
     private $meses_ES = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
     private $meses_EN = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+
+    public function scopeFilterByPlatform($q){
+        $platform = session('platform');
+        $type_id = $platform && $platform == 'induccion'
+                    ? Taxonomy::getFirstData('project', 'platform', 'onboarding')->id
+                    : Taxonomy::getFirstData('project', 'platform', 'training')->id;
+        $q->where('platform_id',$type_id);
+    }
 
     public function media()
     {
@@ -29,7 +37,7 @@ class Certificate extends Model
     protected function search($request, $paginate = 10) {
         $workspace = get_current_workspace();
 
-        $q = self::query()->withWhereHas('media', function($query) use($workspace) {
+        $q = self::query()->FilterByPlatform()->withWhereHas('media', function($query) use($workspace) {
             $query->where('workspace_id', $workspace->id);
         });
 
@@ -331,6 +339,9 @@ class Certificate extends Model
             case 'courses':
                 $text = $real_data['courses'] ?? 'Curso de buenas prácticas de programación';
                 $upper_string = false;
+            case 'processes':
+                $text = $real_data['processes'] ?? 'Proceso de inducción';
+                $upper_string = false;
             break;
             case 'fecha':
                 if (isset($real_data['fecha']) && $real_data['fecha']) {
@@ -501,6 +512,11 @@ class Certificate extends Model
             // === guarda imagen - media ===
             $media = Certificate::uploadMediaBase64($nombre_plantilla_final, $path, $preview);
 
+            $platform = session('platform');
+            $platform_type_id = $platform && $platform == 'induccion'
+                        ? Taxonomy::getFirstData('project', 'platform', 'onboarding')?->id
+                        : Taxonomy::getFirstData('project', 'platform', 'training')?->id;
+                        
             // === guarda diploma ===
             $diploma = $certificate ?? new Certificate;
             $diploma->media_id = $media->id;
@@ -509,6 +525,7 @@ class Certificate extends Model
             $diploma->info_bg = json_encode($info_bg);
             $diploma->s_objects = json_encode($info_s_objects);
             $diploma->d_objects = json_encode($info_d_objects);
+            $diploma->platform_id = $platform_type_id ?? null;
 
             $diploma->save();
 

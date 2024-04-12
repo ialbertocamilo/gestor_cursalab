@@ -99,9 +99,12 @@ Route::get('dnv/{id}', [GestorController::class, 'descargaVideo']);
 
 //Route::get('tools/ver_diploma/{iduser}/{idvideo}', 'GestorController@verCertificado');
 Route::get('tools/ver_diploma/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate'])->name('diplomas.view');
+Route::get('tools/induccion/ver_diploma/{user_id}/{process_id}', [DiplomaController::class, 'downloadCertificateProcess'])->name('diplomas_induccion.view');
+
 // Route::get('tools/ver_diploma/{user_id}/{course_id}', [GestorController::class, 'verCertificado']);
 //Route::get('tools/dnc/{iduser}/{idvideo}', 'GestorController@descargaCertificado');
 Route::get('tools/dnc/{user_id}/{course_id}', [DiplomaController::class, 'downloadCertificate'])->name('diplomas.download');
+Route::get('tools/induccion/dnc/{user_id}/{process_id}', [DiplomaController::class, 'downloadCertificateProcess'])->name('diplomas_induccion.download');
 // Route::get('tools/dnc/{user_id}/{course_id}', [GestorController::class, 'descargaCertificado']);
 
 Route::get('multimedia/topic/{media_topic_id}/download', [\App\Http\Controllers\MediaController::class, 'downloadMediaTopicExternalFile'])->name('media.download.media_topic');

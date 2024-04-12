@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center" class="mx-0">
-        <v-col cols="4" class="d-flex justify-content-around">
+        <v-col cols="12" class="d-flex justify-content-center">
             <v-btn
                 class="default-modal-action-button  mx-1 btn_back"
                 text

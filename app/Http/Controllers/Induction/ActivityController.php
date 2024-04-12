@@ -101,6 +101,13 @@ class ActivityController extends Controller
             'model_type' => Project::class,
             'type_id' => $type_activity?->id ?? null
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -150,6 +157,13 @@ class ActivityController extends Controller
             'active' => false,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -240,6 +254,13 @@ class ActivityController extends Controller
             'type_id' => $type_activity?->id ?? null,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -464,6 +485,13 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -594,6 +622,13 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -880,6 +915,13 @@ class ActivityController extends Controller
             'model_type' => Topic::class,
             'type_id' => $type_activity?->id ?? null
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);

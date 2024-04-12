@@ -13,6 +13,7 @@ Route::controller(StageController::class)->group(function() {
     Route::put('/{stage}/update','update');
     Route::put('/{stage}/status', 'status');
     Route::delete('/{stage}/delete', 'destroy');
+	Route::post('/{stage}/update_positions_activities', 'updatePositionsActivities')->name('stages.update_positions_activities');
 
 });
 

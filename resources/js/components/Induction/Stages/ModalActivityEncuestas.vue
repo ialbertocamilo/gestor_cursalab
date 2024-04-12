@@ -161,7 +161,8 @@ export default {
                 let vue = this;
                 setTimeout(() => {
                     vue.encuesta_id = vue.resource.poll ? vue.resource.poll : vue.resource.poll_id
-                    vue.options.confirmDisabled = !vue.validateForm('projectForm')
+                    const validateForm = vue.validateForm('projectForm')
+                    vue.options.confirmDisabled = !validateForm
                 }, 100);
             },
             deep: true
@@ -177,6 +178,9 @@ export default {
             vue.encuesta_id = 0
             vue.resource = {}
             vue.stepper_box = 1
+            vue.options.cancelLabel = "Cancelar";
+            vue.options.confirmLabel = "Continuar";
+            vue.loadStep2 = false
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -204,7 +208,6 @@ export default {
             vue.options.cancelLabel = "Retroceder";
             vue.options.confirmLabel = "Guardar";
 
-            console.log(vue.encuesta_id);
             if(vue.stepper_box == 1)
             {
                 if(!(vue.encuesta_id && vue.encuesta_id != 0))
@@ -294,6 +297,7 @@ export default {
         {
             let vue = this
 
+            vue.options.confirmDisabled = true
             vue.errors = []
 
             vue.$nextTick(() => {
@@ -316,9 +320,9 @@ export default {
                     vue.resource.requirement = _data.activity.activity_requirement_id
                     vue.selects.polls = _data.polls
                 })
-                console.log(2);
+                const validateForm = vue.validateForm('projectForm')
+                vue.options.confirmDisabled = !validateForm
             } else {
-                console.log(3);
                 vue.resource.id = null;
                 vue.resource.titulo = '';
             }

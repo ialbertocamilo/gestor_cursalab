@@ -22,6 +22,8 @@ class Process extends BaseModel
         'description',
         'block_stages',
         'migrate_users',
+        'alert_user_deleted',
+        'message_user_deleted',
         'count_absences',
         'limit_absences',
         'absences',
@@ -51,7 +53,8 @@ class Process extends BaseModel
         'limit_absences' => 'boolean',
         'config_completed' => 'boolean',
         'block_stages' => 'boolean',
-        'migrate_users' => 'boolean'
+        'migrate_users' => 'boolean',
+        'alert_user_deleted' => 'boolean'
     ];
 
     protected $hidden = [
@@ -70,7 +73,7 @@ class Process extends BaseModel
 
     public function stages()
     {
-        return $this->hasMany(Stage::class, 'process_id', 'id');
+        return $this->hasMany(Stage::class, 'process_id', 'id')->orderBy('position');
     }
 
     public function segments()
@@ -520,7 +523,7 @@ class Process extends BaseModel
                             $days_stages = $days_stages + $stage->duration;
                             $finish_days_stage = $enrolled_date->addDay($days_stages)->startOfDay();
                             $diff_days = $current_date->diffInDays($finish_days_stage);
-                            if($diff_days <= $stage->duration){
+                            if($diff_days <= $stage->duration || $finish_days_stage <= $current_date){
                                 $stage->status = 'progress';
                             }
                         }
@@ -581,6 +584,7 @@ class Process extends BaseModel
                 'enabled' => false,
                 'message' => null,
                 'url' => null,
+                'url_download' => null,
                 'login_aprendizaje' => false
             ];
             
@@ -588,18 +592,19 @@ class Process extends BaseModel
             // if($user_summary?->status_id == $tax_user_process_finished?->id)
             if($process->user_activities_progressbar >= 100)
             {
-                $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
+                // $certificate = $process->certificate_template_id ? Certificate::find($process->certificate_template_id) : null;
                 $process->certificate = [
                     'enabled' => true,
                     'message' => '¡Gracias por realizar este proceso con nosotros!',
-                    'url' => $certificate?->path_image ?? null,
+                    'url' => "tools/induccion/ver_diploma/{$user->id}/{$process->id}",
+                    'url_download' => "tools/induccion/dnc/{$user->id}/{$process->id}",
                     'login_aprendizaje' => false
                 ];
             }
 
             unset($process->limit_absences);
             unset($process->absences);
-            unset($process->count_absences);
+            // unset($process->count_absences);
             unset($process->certificate_template_id);
             unset($process->block_stages);
         }
