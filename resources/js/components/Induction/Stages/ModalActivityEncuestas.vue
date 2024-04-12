@@ -210,6 +210,7 @@ export default {
 
             if(vue.stepper_box == 1)
             {
+                console.log(vue.resource.id);
                 if(!(vue.encuesta_id && vue.encuesta_id != 0))
                 {
                     vue.errors = []
@@ -258,6 +259,7 @@ export default {
             }
             else if(vue.stepper_box == 2)
             {
+                console.log(vue.resource.id);
                 if(vue.encuesta_id && vue.encuesta_id != 0)
                 {
                     vue.errors = []

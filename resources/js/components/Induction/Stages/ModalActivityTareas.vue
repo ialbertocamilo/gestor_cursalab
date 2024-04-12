@@ -331,6 +331,7 @@ export default {
                         vue.resource.indications = _data.indications;
                         vue.resource.course_name = _data.course_name;
                         vue.resource.count_file = _data.count_file;
+                        vue.resource.requirement = _data.activity.activity_requirement_id
                         vue.resources = _data.resources;
                         vue.selects.courses.push(_data.course);
                     })

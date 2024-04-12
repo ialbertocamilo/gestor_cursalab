@@ -559,6 +559,7 @@ export default {
                         vue.resource = Object.assign({}, vue.resource, _data.temas)
                         vue.resource.activity_id = _data.activity.id
                         vue.resource.assessable = (vue.resource.assessable == 1) ? 1 : 0;
+                        vue.resource.requirement = _data.activity.activity_requirement_id
                     } else {
                         vue.resource.qualification_type = _data.qualification_type
                         vue.resource.position = _data.default_position
