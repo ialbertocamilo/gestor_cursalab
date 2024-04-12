@@ -496,14 +496,13 @@ class Process extends BaseModel
         $current_date = now()->startOfDay();
 
         $process = Process::where('id', $process_id)
-                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id', 'block_stages', 'position')
+                    ->select('id', 'limit_absences', 'absences', 'count_absences', 'color', 'icon_finished', 'starts_at', 'finishes_at', 'color_map_even', 'color_map_odd','certificate_template_id', 'block_stages', 'position', 'alert_user_deleted', 'message_user_deleted')
                     ->active()
                     ->first();
         if($process)
         {
-            $user_summary = $user->summary_process()->where('process_id', $process_id)->select('completed_instruction', 'status_id')->first();
-            $process->completed_instruction = $user_summary?->completed_instruction ?? false;
-            $user_summary_process = $user->summary_process()->where('process_id', $process->id)->first();
+            $user_summary_process = $user->summary_process()->where('process_id', $process->id)->select('completed_instruction', 'status_id', 'enrolled_date', 'absences')->first();
+            $process->completed_instruction = $user_summary_process?->completed_instruction ?? false;
             $total_activities = 0;
             $stages_list = $process->stages()
                                     ->select('id', 'duration', 'position', 'title')
@@ -597,7 +596,7 @@ class Process extends BaseModel
             ];
             
             $tax_user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
-            // if($user_summary?->status_id == $tax_user_process_finished?->id)
+            // if($user_summary_process?->status_id == $tax_user_process_finished?->id)
             if($process->user_activities_progressbar >= 100)
             {
                 $process->certificate = [
@@ -615,7 +614,7 @@ class Process extends BaseModel
                 'show_alert' => false,
                 'message' => null
             ];
-            if($user_summary?->status_id == $tax_user_process_removed_x_disapproval?->id) {
+            if($user_summary_process?->status_id == $tax_user_process_removed_x_disapproval?->id) {
                 if($process->alert_user_deleted){
                     $process->reprobate_user_alert = [
                         'show_alert' => true,
@@ -629,6 +628,8 @@ class Process extends BaseModel
             // unset($process->count_absences);
             unset($process->certificate_template_id);
             unset($process->block_stages);
+            unset($process->alert_user_deleted);
+            unset($process->message_user_deleted);
         }
 
         return $process;
