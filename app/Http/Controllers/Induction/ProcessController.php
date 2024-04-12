@@ -216,6 +216,16 @@ class ProcessController extends Controller
      */
     public function destroy(Process $process)
     {
+        if($process->stages) {
+            foreach ($process->stages as $stage) {
+                if($stage->activities) {
+                    foreach ($stage->activities as $activity) {
+                        $activity->delete();
+                    }
+                }
+                $stage->delete();
+            }
+        }
         $process->delete();
 
         return $this->success(['msg' => 'Proceso eliminado correctamente.']);

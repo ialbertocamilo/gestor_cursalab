@@ -622,7 +622,7 @@ class ActivityController extends Controller
         $data_activity = [
             'title' => $request->titulo,
             'description' => $request->description,
-            'stage_id' => $request->model_id,
+            'stage_id' => $stage->id,
             'model_id' => $poll?->id ?? null,
             'model_type' => Poll::class,
             'type_id' => $type_activity?->id ?? null,
@@ -643,7 +643,7 @@ class ActivityController extends Controller
 
         $response = [
             'msg' => 'Actividad creada correctamente.',
-            'activity' => $activity,
+            'activity' => $activity->original['data'],
             'encuesta_id' => $poll?->id ?? 0,
             'messages' => ['list' => []]
         ];
@@ -653,10 +653,16 @@ class ActivityController extends Controller
 
     public function EncuestasUpdate(Process $process, Stage $stage, Activity $activity, PollStoreRequest $request)
     {
-        $poll = Poll::where('id', $activity->model_id)->first();
+        if($request->model_id) {
+            $poll = Poll::where('id', $request->model_id)->first();
+            $activity->model_id = $request->model_id;
+        }
+        else {
+            $poll = Poll::where('id', $activity->model_id)->first();
+        }
 
         if($poll) {
-            $poll->titulo = $request->titulo;
+            // $poll->titulo = $request->titulo;
             if($request->active)
                 $poll->active = $request->active;
             $poll->save();

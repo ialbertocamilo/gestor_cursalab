@@ -609,10 +609,20 @@ class Process extends BaseModel
                 ];
             }
 
+            $tax_user_process_removed_x_disapproval = Taxonomy::getFirstData('user-process', 'status', 'removed_x_disapproval');
+
             $process->reprobate_user_alert = [
                 'show_alert' => false,
                 'message' => null
             ];
+            if($user_summary?->status_id == $tax_user_process_removed_x_disapproval?->id) {
+                if($process->alert_user_deleted){
+                    $process->reprobate_user_alert = [
+                        'show_alert' => true,
+                        'message' => $process->message_user_deleted
+                    ];
+                }
+            }
 
             unset($process->limit_absences);
             unset($process->absences);

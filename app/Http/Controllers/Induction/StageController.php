@@ -165,6 +165,11 @@ class StageController extends Controller
      */
     public function destroy(Process $process, Stage $stage)
     {
+        if($stage->activities) {
+            foreach($stage->activities as $activity) {
+                $activity->delete();
+            }
+        }
         $stage->delete();
 
         return $this->success(['msg' => 'Etapa eliminada correctamente.']);
