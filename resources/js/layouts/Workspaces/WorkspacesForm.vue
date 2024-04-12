@@ -762,7 +762,8 @@ export default {
                 course_configuration:{
                     nota_aprobatoria:0,
                     nro_intentos:2,
-                    is_offline:false
+                    is_offline:false,
+                    duration_quizz:60,
                 }
             },
             limit_allowed_users: null,
@@ -772,6 +773,12 @@ export default {
                     evaluation_types:[],
                     qualification_type:null,
                     max_limit_create_evaluation_types:5
+                },
+                course_configuration:{
+                    nota_aprobatoria:0,
+                    nro_intentos:2,
+                    is_offline:false,
+                    duration_quizz:60,
                 }
             },
             selects: {
@@ -979,8 +986,13 @@ export default {
                     vue.functionalities = functionalities;
                     if(!workspace){
                         vue.resource.checklist_configuration = data.data.checklist_configuration;
+                        vue.resource.course_configuration = {
+                            nota_aprobatoria:0,
+                            nro_intentos:2,
+                            is_offline:false,
+                            duration_quizz:60,
+                        };
                     }
-                    console.log(vue.resource);
                     this.hideLoader();
                 })
                 .catch((error) => {
