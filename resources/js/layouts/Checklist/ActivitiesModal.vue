@@ -7,7 +7,7 @@
             @onConfirm="confirmModal"
         >
             <template v-slot:content>
-                <v-row>
+                <v-row v-if="!show_activities">
                     <v-col cols="12">
                         <span style="font-size: 18px;">Crea el listado de actividades para tu checklist</span>
                         <br>
