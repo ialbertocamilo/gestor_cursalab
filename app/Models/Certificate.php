@@ -450,7 +450,7 @@ class Certificate extends Model
 
                     case 'i-text':
                         //  === para el font ===
-                        $font = Diploma::getPathFonth($e_static,$custom_font,$list_type_fonts);
+                        $font = self::getPathFonth($e_static,$custom_font,$list_type_fonts);
                         // $font = realpath('.').'/fonts/diplomas/'.$fontName;
                         //  === para el font ===
 
@@ -649,7 +649,7 @@ class Certificate extends Model
                 
 
                  //  === para el font ===
-                 $font = Diploma::getPathFonth($e_dinamic,$custom_font,$list_type_fonts);
+                 $font = self::getPathFonth($e_dinamic,$custom_font,$list_type_fonts);
 
                 //Eliminar emogis
                 $text = trim(Certificate::remove_emoji($text));
