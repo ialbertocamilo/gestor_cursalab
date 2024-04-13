@@ -91,6 +91,45 @@
                                             hide-details="false"
                                         />
                                     </v-col>
+                                    <v-col cols="12">
+                                        <DefaultSimpleSection title="Tipo de visión computacional"  v-if="resource.computational_vision">
+                                            <template v-slot:content>
+                                                <v-col cols="6">
+                                                    <DefaultSelect 
+                                                        v-model="resource.type_computational_vision.type"
+                                                        :items="types_computational_vision" 
+                                                        dense 
+                                                        item-text="name"
+                                                        item-value="id"
+                                                        show-required 
+                                                        label="Selecciona el criterio del responsable"
+                                                    />  
+                                                </v-col>
+                                                <v-col cols="6">
+                                                    <DefaultInput
+                                                        v-if="resource.type_computational_vision.type && resource.type_computational_vision.type != 'simil'"
+                                                        clearable
+                                                        v-model="resource.type_computational_vision.value"
+                                                        :label="`${resource.type_computational_vision.type == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
+                                                        dense
+                                                    />
+                                                </v-col>
+                                            </template>
+                                        </DefaultSimpleSection>
+                                    </v-col>
+                                    <v-col cols="12" v-if="resource.checklist_response == 3">
+                                        Respuestas personalizadas:
+                                        <v-divider></v-divider>
+                                        <div v-for="(option,index) in resource.custom_options" class="col col-12" :key="index">
+                                            <DefaultInput
+                                                clearable
+                                                v-model="resource.custom_options[index].value"
+                                                :label="`Opción ${index+1}`"
+                                                dense
+                                            />
+                                        </div>
+                                        <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption()">Agregar una respuesta personalizada +</span>
+                                    </v-col>
                                 </v-row>
                             </v-row>
                         </v-card-text>
@@ -154,6 +193,11 @@ export default {
                     description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',
                 }
             ],
+            types_computational_vision:[
+                {id:'simil',name:'Porcentaje de similitud'},
+                {id:'text',name:'Verificar texto'},
+                {id:'counter',name:'Contador de objetos'},
+            ],
             show_activities:false,
             resource:{
                 qualification_type:0,
@@ -161,12 +205,29 @@ export default {
                 checklist_response:false,
                 photo_response:false,
                 computational_vision:false,
+                custom_options:[],
+                type_computational_vision:{
+                    type:'',
+                    value:''
+                },
             },
             checklist_actions :[
                 {id:1,icon:'mdi mdi-home-city',code:'calificate_entity',name:'Calificar entidad',description:'Con este tipo de checklist se revisará a la entidad (tienda, oficina,etc)',color:'#57BFE3'},
                 {id:2,icon:'mdi mdi-clipboard-account',code:'calificate_user',name:'Calificar al usuario',description:'El supervisor podrá evaluar a personalmente a cada uno de los usuarios asignados',color:'#CE98FE'},
                 {id:3,icon:'mdi mdi-account-multiple-check',code:'autocalificate',name:'Autoevaluación',description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',color:'#547AE3'},
             ],
+            // {id:2,name:'Selecciona'},
+            checklist_type_response:[
+                {id:1,name:'Por escala de ev.'},
+                {id:3,name:'Desplegable'},
+            ],
+            //Jarvis
+            loading_description: false,
+            limits_descriptions_generate_ia: {
+                ia_descriptions_generated: 0,
+                limit_descriptions_jarvis: 0
+            },
+            showButtonIaGenerate: true,
         };
     },
 
@@ -196,6 +257,13 @@ export default {
         async loadSelects() {
 
         },
+        addCustomOption(){
+            let vue = this;
+            vue.resource.custom_options.push({
+                id:vue.resource.custom_options.length + 1,
+                value:''
+            })
+        }
     }
 }
 </script>

@@ -33,7 +33,7 @@
                 :data-table="dataTable"
                 :filters="filters"
                 @edit="abrirModalCreateEditChecklist($event, true)"
-                @abrirModalCreateEditChecklist="abrirModalCreateEditChecklist(objectModal)"
+                @abrirModalCreateEditChecklist="openFormModal(modalChecklistModality, null, null,'Selecciona el tipo de actividad a realizar')"
                 @duplicate="duplicateChecklist($event)"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"

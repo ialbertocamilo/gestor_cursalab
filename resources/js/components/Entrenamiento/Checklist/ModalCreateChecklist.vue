@@ -224,7 +224,7 @@
                         <DefaultModalSectionExpand title="Configuración avanzada"
                             :expand="sections.showSectionAdvancedconfiguration" :simple="true">
                             <template slot="content">
-                                <v-row justify="center">
+                                <v-row>
                                     <v-col cols="6">
                                         <DefaultSimpleSection title="Visualización" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
@@ -235,6 +235,23 @@
                                                         :inactive-label="'Permite que al finalizar el checklist la entidad evaluada visualice sus resultados.'" />
                                                     <DefaultInfoTooltip
                                                         text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
+                                                        top
+                                                    />    
+                                                </div>
+                                            </template>
+                                        </DefaultSimpleSection>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSimpleSection title="Comentarios post finalizado el checklist" marginy="my-1" marginx="mx-0">
+                                            <template slot="content">
+                                                <div class="d-flex">
+                                                    <DefaultToggle class="ml-4 mb-2"
+                                                        :disabled="!resource.extra_attributes.visualiazation_results"
+                                                        v-model="resource.extra_attributes.comments_if_checklist_completed" dense
+                                                        :active-label="'Se pueden agregar comentarios luego de haber terminado el checklist'"
+                                                        :inactive-label="'Se pueden agregar comentarios luego de haber terminado el checklist'" />
+                                                    <DefaultInfoTooltip
+                                                        text="Al finalizar el checklist el supervisor podrá responder comentarios de sus colaboradores."
                                                         top
                                                     />    
                                                 </div>
@@ -274,7 +291,7 @@
                                         </DefaultSimpleSection>
                                     </v-col>
                                     <v-col cols="6">
-                                        <DefaultSimpleSection title="Fecha límite del checklist" marginy="my-1" marginx="mx-0">
+                                        <DefaultSimpleSection title="Fecha límite de vigencia" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex  pb-3 px-4">
                                                     <DefaultInputDate
@@ -284,7 +301,7 @@
                                                         :referenceComponent="'modalDateFilter'"
                                                         :options="modalDateFilter"
                                                         v-model="resource.extra_attributes.end_date_checklist"
-                                                        label="Selecciona la fecha límite que tendrá tu proceso"
+                                                        label="Selecciona la fecha límite que tendrá tu checklist"
                                                     />
                                                 </div>
                                             </template>
@@ -297,8 +314,8 @@
                                                     <v-col cols="6" class="d-flex">
                                                         <DefaultToggle class="ml-4 mb-2"
                                                             v-model="resource.extra_attributes.required_signature_supervisor" dense
-                                                            :active-label="'Solicitar una firma al supervisor para cerrar checklist'"
-                                                            :inactive-label="'Solicitar una firma al supervisor para cerrar checklist'" />
+                                                            :active-label="'Solicitar una firma al supervisor para finalizar checklist'"
+                                                            :inactive-label="'Solicitar una firma al supervisor para finalizar checklist'" />
                                                         <DefaultInfoTooltip
                                                             text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
                                                             top
@@ -334,22 +351,6 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
-                                    <v-col cols="6">
-                                        <DefaultSimpleSection title="Comentarios post finalizado el checklist" marginy="my-1" marginx="mx-0">
-                                            <template slot="content">
-                                                <div class="d-flex">
-                                                    <DefaultToggle class="ml-4 mb-2"
-                                                        v-model="resource.extra_attributes.comments_if_checklist_completed" dense
-                                                        :active-label="'Se pueden agregar comentarios luego de haber terminado el checklist'"
-                                                        :inactive-label="'Se pueden agregar comentarios luego de haber terminado el checklist'" />
-                                                    <DefaultInfoTooltip
-                                                        text="Al finalizar el checklist el supervisor podrá responder comentarios de sus colaboradores."
-                                                        top
-                                                    />    
-                                                </div>
-                                            </template>
-                                        </DefaultSimpleSection>
-                                    </v-col>
                                     <v-col cols="12">
                                         <span>Calificación de entidad</span>
                                     </v-col>
@@ -374,9 +375,8 @@
                                             <template slot="content">
                                                 <div class="d-flex pb-3 px-4">
                                                     <DefaultSelect 
-                                                        :disabeld="!resource.extra_attributes.autocalificate_entity"
                                                         v-model="resource.extra_attributes.autocalificate_entity_criteria"
-                                                        :items="checklist_actions" 
+                                                        :items="criteria" 
                                                         dense 
                                                         item-text="name"
                                                         item-value="id"
@@ -761,6 +761,11 @@ export default {
             sections:{
                 showSectionAdvancedconfiguration:{ status: true },
             },
+            criteria:[
+                {id:1,name:'Tienda'},
+                {id:2,name:'Puesto'},
+                {id:2,name:'Área'},
+            ],
             checklist_actions :[
                 {id:1,icon:'mdi mdi-home-city',code:'calificate_entity',name:'Calificar entidad',description:'Con este tipo de checklist se revisará a la entidad (tienda, oficina,etc)',color:'#57BFE3'},
                 {id:2,icon:'mdi mdi-clipboard-account',code:'calificate_user',name:'Calificar al usuario',description:'El supervisor podrá evaluar a personalmente a cada uno de los usuarios asignados',color:'#CE98FE'},
@@ -888,7 +893,6 @@ export default {
                 type_code: '',
                 criteria_selected: []
             },
-            criteria: [],
             courseModules: [],
             modulesSchools: [],
 
@@ -983,7 +987,7 @@ export default {
             await axios.get('/entrenamiento/checklists/form-selects').then(({ data }) => {
                 vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
-                vue.selects.extra_attributes = data.data.qualification_types;
+                vue.selects.qualification_types = data.data.qualification_types;
             })
         },
         validateRequired(input) {
