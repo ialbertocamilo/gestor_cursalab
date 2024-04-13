@@ -432,6 +432,7 @@ export default {
 
                         vue.resource = Object.assign({}, vue.resource, _data.meeting)
                         vue.resource.activity_id = resource.id
+                        vue.resource.requirement = _data.activity.activity_requirement_id
                     }
 
                 }

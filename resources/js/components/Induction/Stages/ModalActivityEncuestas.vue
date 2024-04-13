@@ -96,7 +96,7 @@
 
 <script>
 
-const fields = ['titulo', 'description','requirement', 'model_id', 'model_type' ];
+const fields = ['titulo', 'description','requirement', 'model_id', 'model_type', 'stage_id' ];
 
 export default {
     props: {
@@ -119,6 +119,7 @@ export default {
             resourceDefault: {
                 id: null,
                 model_id: null,
+                stage_id: null,
                 model_type: null,
                 name: '',
                 titulo: '',
@@ -204,14 +205,15 @@ export default {
         async confirmModal()
         {
             let vue = this
-
+            
             vue.options.cancelLabel = "Retroceder";
             vue.options.confirmLabel = "Guardar";
 
             if(vue.stepper_box == 1)
             {
-                if(!(vue.encuesta_id && vue.encuesta_id != 0))
-                {
+                console.log(vue.resource.id);
+                // if(!(vue.encuesta_id && vue.encuesta_id != 0))
+                // {
                     vue.errors = []
 
                     this.showLoader()
@@ -220,18 +222,21 @@ export default {
                     const edit = vue.options.action === 'edit'
 
                     let base = `${vue.options.base_endpoint}`
-                    let url = edit
+                    let url = vue.resource.id
                         ? `${base}/${vue.resource.id}/update`
                         : `${base}/store`;
 
-                    let method = edit ? 'PUT' : 'POST';
+                    let method = 'POST';
 
                     if (validateForm) {
+                        // vue.resource.model_id = vue.resource.poll;
                         const formData = vue.createFormData(method, validateForm);
                         await vue.$http
                             .post(url, formData)
                             .then(({ data }) => {
-
+                                if(!vue.resource.id) {
+                                    vue.resource.id = data.data.activity.id;
+                                }
                                 this.hideLoader()
                                 vue.stepper_box = 2;
                                 vue.loadStep2 = true
@@ -249,15 +254,16 @@ export default {
                     {
                         this.hideLoader()
                     }
-                }
-                else {
+                // }
+                // else {
 
-                    vue.stepper_box = 2;
-                    vue.loadStep2 = true
-                }
+                //     vue.stepper_box = 2;
+                //     vue.loadStep2 = true
+                // }
             }
             else if(vue.stepper_box == 2)
             {
+                console.log(vue.resource.id);
                 if(vue.encuesta_id && vue.encuesta_id != 0)
                 {
                     vue.errors = []
@@ -270,6 +276,7 @@ export default {
                     let method = 'POST';
 
                     if (validateForm) {
+                        vue.resource.model_id = vue.resource.poll;
                         const formData = vue.createFormData(method, validateForm);
 
                         this.showLoader()
@@ -343,7 +350,7 @@ export default {
         createFormData(method, validateForm) {
             let vue = this;
 
-            vue.resource.model_id = vue.options.model_id;
+            vue.resource.stage_id = vue.options.model_id;
             // vue.resource.model_type = 'App\\Models\\Stage';
 
             let formData = vue.getMultipartFormData(method, vue.resource, fields);

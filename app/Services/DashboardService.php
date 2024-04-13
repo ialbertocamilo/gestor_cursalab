@@ -325,7 +325,9 @@ class  DashboardService {
                         ->whereHas('medias', function ($query) use($platform){
                             $query->where('platform_id', $platform?->id);
                         })
-                        ->withSum('medias', 'size')->get();
+                        ->withSum(['medias' => function ($q) use($platform){
+                            $q->where('platform_id', $platform?->id);
+                        }], 'size')->get();
     }
 
     public static function loadSizeByExtensionWorkspace($workspace_id, $key) {
@@ -376,7 +378,9 @@ class  DashboardService {
         $platform = currentPlatform();
         $query->whereHas('medias', function ($q) use($platform){
             $q->where('platform_id', $platform?->id);
-        })->withSum('medias', 'size');
+        })->withSum(['medias' => function ($q) use($platform){
+            $q->where('platform_id', $platform?->id);
+        }], 'size');
 
         return $query->first();
     }

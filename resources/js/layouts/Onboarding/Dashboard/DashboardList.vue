@@ -8,9 +8,9 @@
         <v-card flat class="elevation-0 mb-4">
             <v-card-text>
                 <v-row justify="start" class="align-items-center">
-                    <v-col cols="4">
+                    <v-col cols="3">
                         <v-card>
-                            <v-card-text class="py-0">
+                            <v-card-text class="py-2">
                                 <div class="d-flex align-center">
                                     <div class="d-flex align-center" style="flex: 1;">
                                         <div style="width: 80px;">
@@ -28,9 +28,9 @@
                             </v-card-text>
                         </v-card>
                     </v-col>
-                    <v-col cols="4">
+                    <v-col cols="3">
                         <v-card style="overflow: hidden;">
-                            <v-card-text class="py-0">
+                            <v-card-text class="py-2">
                                 <div class="d-flex align-center">
                                     <div class="d-flex align-center" style="height: 73px; flex: 1;">
                                         <div>
@@ -54,9 +54,9 @@
                             </div>
                         </v-card>
                     </v-col>
-                    <v-col cols="4">
+                    <v-col cols="3">
                         <v-card style="overflow: hidden;">
-                            <v-card-text class="py-0">
+                            <v-card-text class="py-2">
                                 <div class="d-flex align-center">
                                     <div class="d-flex align-center" style="height: 73px; flex: 1;">
                                         <div>
@@ -78,6 +78,35 @@
                                 >
                                 </v-progress-linear>
                             </div>
+                        </v-card>
+                    </v-col>
+                    <v-col cols="3">
+                        <v-card>
+                            <v-card-text class="py-2">
+                                <div class="d-flex flex-column w-90">
+                                    <p class="font-weight-bold mb-0">Almacenamiento general</p>
+                                    <div class="my-2">
+                                        <span class="fa-1_4x" v-text="workspace_status.size_medias_storage"></span>
+                                    utilizados de <span v-text="workspace_status.size_medias_limit+' Gb' "></span>
+                                    </div>
+
+                                    <v-progress-linear
+                                            :color="workspace_status.size_medias_porcent.exceded ? 'red' : 'primary' "
+                                            :value="workspace_status.size_medias_porcent.porcent"
+                                            height="20"
+                                            rounded
+                                        >
+                                        <div class="d-flex justify-content-end"
+                                            :style="{ width: (workspace_status.size_medias_porcent.porcent < 10) ? '12%' :workspace_status.  size_medias_porcent.porcent +'%'}">
+                                            <strong
+                                                class="text-white text-right"
+                                                v-text="workspace_status.size_medias_porcent.porcent + '%'">
+                                            </strong>
+                                        </div>
+                                    </v-progress-linear>
+
+                                </div>
+                            </v-card-text>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -420,14 +449,42 @@ export default {
             },
             selects: {
                 lista_procesos: [],
-            }
+            },
+            workspace_status: {
+                size_medias_storage: "0 Gb",
+                size_medias_limit: 0,
+
+                users_count_actives: 0,
+                users_count_inactives: 0,
+                users_count_limit: 0,
+
+                users_count_porcent: {
+                    porcent: 0,
+                    exceded: false
+                },
+                size_medias_porcent: {
+                    porcent: 0,
+                    exceded: false
+                },
+                routes_redirects: []
+            },
+            is_superuser: false,
         }
     },
     mounted() {
         let vue = this
         vue.loadInfo();
+        vue.getWorkspaceData();
     },
     methods: {
+        getWorkspaceData() {
+            let vue = this;
+
+            vue.$http.get('/general/workspace-current-status').then(({data}) => {
+                vue.workspace_status = data.data;
+                vue.is_superuser = data.data.is_superuser || false;
+            });
+        },
         loadInfo() {
             let vue = this
             const url = `/induccion/dashboard/info`
