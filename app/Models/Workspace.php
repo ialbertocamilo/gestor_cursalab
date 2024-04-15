@@ -167,7 +167,8 @@ class Workspace extends BaseModel
                 'color' => $evaluation_type->color,
                 'active' => 1,
                 'extra_attributes'=>json_encode([
-                    'percent'=> $evaluation_type->extra_attributes->percent
+                    'percent'=> $evaluation_type->extra_attributes->percent,
+                    'emoji'=> $evaluation_type->extra_attributes->emoji,
                 ])
             ];
             if(isset($evaluation_type->workspace_id) && $evaluation_type->workspace_id && $evaluation_type->id){

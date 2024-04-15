@@ -240,7 +240,7 @@
                                                                     </v-col>
                                                                     <v-col cols="1" class="p-0 pb-2">
                                                                         <ButtonEmojiPicker
-                                                                            :ref="`emoji_picker_${index}`"
+                                                                            v-model="evaluation_type.extra_attributes.emoji"
                                                                         ></ButtonEmojiPicker>
                                                                     </v-col>
                                                                     <v-col cols="5">
