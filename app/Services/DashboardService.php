@@ -376,9 +376,7 @@ class  DashboardService {
         self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
         
         $platform = currentPlatform();
-        $query->whereHas('medias', function ($q) use($platform){
-            $q->where('platform_id', $platform?->id);
-        })->withSum(['medias' => function ($q) use($platform){
+        $query->withSum(['medias' => function ($q) use($platform){
             $q->where('platform_id', $platform?->id);
         }], 'size');
 
