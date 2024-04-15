@@ -100,6 +100,7 @@ class AuthImpersonationController extends Controller
         
         $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
 
+        $user_induccion_aprendizaje = false;
         if($user->type_id == $type_employee_onboarding?->id) {
             $onboarding = true;
             $supervisor_induccion = count($user->processes) ? true : false;
@@ -111,6 +112,13 @@ class AuthImpersonationController extends Controller
             $supervisor_induccion = false;
             $supervisor = $user->isSupervisor();
             $processes = [];
+            if($user->isSupervisor() && count($user->processes)) {
+                $onboarding = true;
+                $supervisor_induccion = true;
+                $supervisor = $user->isSupervisor();
+                $processes = Process::getProcessesAssigned($user, true);
+                $user_induccion_aprendizaje = true;
+            }
         }
         // $can_be_host = $user->belongsToSegmentation($workspace);
 
@@ -167,6 +175,7 @@ class AuthImpersonationController extends Controller
             'huawei' => $user->huawei,
             'criterios' => $criterios,
             'supervisor_induccion' => $supervisor_induccion,
+            'user_induccion_aprendizaje' => $user_induccion_aprendizaje,
             'processes' => $processes,
             'onboarding' => $onboarding
         ];
@@ -220,11 +229,48 @@ class AuthImpersonationController extends Controller
             }
         }
         else{
-            $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
-            $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+            if($user_induccion_aprendizaje) {
+                $array_app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+                $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+                $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+                $array_full_app_side_menu = Workspace::getFullAppMenu('side_menu', $array_app_side_menu, $user);
+                
+                $array_app_side_menu[] = 'ind_induccion';
+                $array_full_app_side_menu['ind_induccion'] = true;
 
-            $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
-            $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+                $config_data->app_side_menu = $array_app_side_menu;
+                $config_data->full_app_side_menu = $array_full_app_side_menu;
+
+                $config_data->app_side_menu_induccion = [
+                    'ind_asistencia',
+                    'ind_procesos',
+                    'ind_faq',
+                    'ind_aprendizaje'
+                ];
+                $config_data->app_main_menu_induccion = [
+                    'ind_home_sup',
+                    'ind_asistencia',
+                    'ind_procesos'
+                ];
+                $config_data->full_app_main_menu_induccion = [
+                    'ind_home_sup' => true,
+                    'ind_asistencia' => true,
+                    'ind_procesos' => true
+                ];
+                $config_data->full_app_side_menu_induccion = [
+                    'ind_asistencia' => true,
+                    'ind_procesos' => true,
+                    'ind_faq' => true,
+                    'ind_aprendizaje' => true
+                ];
+            }
+            else {
+                $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+                $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
+
+                $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
+                $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+            }
         }
         $config_data->filters = config('data.filters');
         $config_data->meetings_upload_template = config('app.meetings.app_upload_template');

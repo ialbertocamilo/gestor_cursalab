@@ -75,7 +75,7 @@
                                                         }"
                                                     />
                                                 </fieldset>
-                                                <span class="text_default txt_counter d-flex justify-content-end">{{ process.description.length }}/350</span>
+                                                <!-- <span class="text_default txt_counter d-flex justify-content-end">{{ process.description.length }}/350</span> -->
                                             </div>
                                         </v-col>
                                     </v-row>
@@ -588,7 +588,7 @@
                                         <v-col cols="8">
                                             <div class="bx_overflow">
                                                 <draggable v-model="process.instructions" @start="drag=true"
-                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionInstructions">
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(instruction, i) in process.instructions"
                                                             :key="instruction.id">
@@ -599,7 +599,8 @@
                                                                         </v-icon>
                                                                     </div>
                                                                     <div class="ii2">
-                                                                        <fieldset class="editor">
+                                                                        <fieldset class="editor"
+                                                                                v-if="load_instructions">
                                                                             <legend>Escribe aquí una indicación
                                                                             </legend>
                                                                             <editor
@@ -749,6 +750,7 @@ export default {
     },
     data() {
         return {
+            load_instructions: true,
             list_icons_finished_onboarding: [],
             process: {
                 instructions: [],
@@ -981,7 +983,7 @@ export default {
                 let vue = this;
 
                 if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350);
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at));
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
@@ -1007,7 +1009,7 @@ export default {
                 vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
-                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350)) {
+                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at))) {
                         vue.stepper_box_btn1 = false;
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
@@ -1075,6 +1077,13 @@ export default {
         }
     },
     methods: {
+        changePositionInstructions() {
+            let vue = this
+            vue.load_instructions = false;
+            setTimeout(() => {
+                vue.load_instructions = true;
+            }, 50);
+        },
         maxCharacters(input) {
             let vue = this
         },
@@ -2178,6 +2187,7 @@ span.v-stepper__step__step:after {
         }
         .ii2 {
             flex: 1;
+            min-height: 192px;
         }
     }
     .bx_input_date {
