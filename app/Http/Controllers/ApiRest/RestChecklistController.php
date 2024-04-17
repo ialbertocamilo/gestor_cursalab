@@ -211,4 +211,22 @@ class RestChecklistController extends Controller
             /*'checklist_rpta_item' => $checklistRptaItem*/
         ], 200);
     }
+    //*CHECKLIST V3*/
+    public function getInitData(){
+        return [
+            'is_required_geololization' => true
+        ];
+    }
+    public function checklistsTrainer(Request $request){
+        return
+        [
+            'list-geolo'=>[
+                "tienda-1"=>[
+                    [
+                        
+                    ]
+                ]
+            ]
+        ];
+    }
 }
