@@ -55,10 +55,9 @@ export default {
             let vue = this
         }
         ,
-        async confirmModal(modality_course) {
+        async confirmModal(modality_checklist) {
             let vue = this;
-            
-            vue.$emit('onConfirm', modality_course)
+            vue.$emit('onConfirm', modality_checklist)
         },
         resetSelects() {
             let vue = this

@@ -5,7 +5,7 @@
                 <span class="fw-bold font-nunito">Checklists</span>
                 <v-spacer/>
                 <!-- <DefaultActivityButton :label="'Subida masiva'" @click="optionsModalSubidaMasivaChecklist.open = true"/>
-                <DefaultModalButton :label="'Crear Checklist'" @click="abrirModalCreateEditChecklist(objectModal)" class="font-nunito"/> -->
+                <DefaultModalButton :label="'Crear Checklist'" @click="abrirModalCreateEditChecklist(checklistCreateEditModal)" class="font-nunito"/> -->
                 <DefaultModalButton
                     :label="'Crear checklist'"
                     @click="openFormModal(modalChecklistModality, null, null,'Selecciona el tipo de actividad a realizar')"
@@ -252,7 +252,7 @@ export default {
                 },
                 width: '408px'
             },
-            objectModal: {
+            checklistCreateEditModal: {
                 id: 0,
                 title: '',
                 description: '',
@@ -465,7 +465,7 @@ export default {
                 checklist_actividades: [],
                 courses: []
             };
-            vue.objectModal = {
+            vue.checklistCreateEditModal = {
                 id: 0,
                 title: '',
                 description: '',
@@ -483,10 +483,11 @@ export default {
             let vue = this;
             vue.modal.asignar = false;
         },
-        openChecklistModal(){
+        openChecklistModal(modality){
             let vue = this;
             vue.openFormModal(vue.modalChecklistModality,'activity_card');
-            vue.abrirModalCreateEditChecklist(vue.objectModal);
+            vue.openFormModal.modality = modality;
+            vue.abrirModalCreateEditChecklist(vue.checklistCreateEditModal);
         },
         changeConfiguration(){
             let vue = this;
