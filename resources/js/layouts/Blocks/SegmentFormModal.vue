@@ -657,6 +657,12 @@ export default {
                 // vue.$refs["SegmentByDocument"].addOrRemoveFromFilterResult(user);
             }
         },
+        deleteUserAll() {
+            let vue = this;
+            if(vue.segment_by_document.criteria_selected.length) {
+                vue.segment_by_document.criteria_selected = [];
+            }
+        },
         isCourseSegmentation() {
             return this.model_type === 'App\\Models\\Course'
         },
