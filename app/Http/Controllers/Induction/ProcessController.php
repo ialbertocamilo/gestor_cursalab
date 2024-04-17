@@ -5,13 +5,21 @@ namespace App\Http\Controllers\Induction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Induction\ProcessStoreUpdateRequest;
 use App\Http\Resources\Induccion\ProcessAssistantsSearchResource;
+use App\Models\Activity;
+use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Criterion;
 use App\Models\CriterionValue;
 use App\Models\EntrenadorUsuario;
+use App\Models\Instruction;
 use App\Models\Media;
+use App\Models\Poll;
+use App\Models\PollQuestion;
 use App\Models\Process;
+use App\Models\ProcessSubworkspace;
+use App\Models\School;
 use App\Models\Segment;
+use App\Models\SortingModel;
 use App\Models\Stage;
 use App\Models\Supervisor;
 use App\Models\Taxonomy;
@@ -24,6 +32,23 @@ use Illuminate\Support\Facades\DB;
 class ProcessController extends Controller
 {
 
+    public function updatePositionsStages(Process $process, Request $request)
+    {
+        $stages = ($request->stages) ? json_decode($request->stages) : [];
+        foreach ($stages as $stage) {
+            $save_stage = Stage::where('id', $stage->id)->first();
+            if($save_stage){
+                $save_stage->position = $stage->position;
+                $save_stage->save();
+            }
+        }
+        $response = [
+            'msg' => 'Posición actualizada correctamente.',
+            'messages' => ['list' => []]
+        ];
+        return $this->success($response);
+    }
+    
     public function search(Request $request)
     {
         $workspace = get_current_workspace();
@@ -191,6 +216,16 @@ class ProcessController extends Controller
      */
     public function destroy(Process $process)
     {
+        if($process->stages) {
+            foreach ($process->stages as $stage) {
+                if($stage->activities) {
+                    foreach ($stage->activities as $activity) {
+                        $activity->delete();
+                    }
+                }
+                $stage->delete();
+            }
+        }
         $process->delete();
 
         return $this->success(['msg' => 'Proceso eliminado correctamente.']);
@@ -500,5 +535,208 @@ class ProcessController extends Controller
                                             $i->limit_absences = $process?->absences ?? 0;
                                         });
         return $this->success($assistants);
+    }
+
+    // Duplicar procesos
+    
+
+    public function duplicate(Request $request)
+    {
+        $response['msg'] = 'No se encontró el proceso, o el valor ingresado no es válido.';
+        if($request->process_id) {
+            $process = Process::where('id', $request->process_id)->first();
+            if($process) {
+                $new_process = $this->forDuplicateCreateProcess($process);
+                if($new_process) {
+                    $process_certificate = Certificate::where('id', $process->certificate_template_id)->first();
+                    if($process_certificate) {
+                        $new_certificate = Certificate::create([
+                            'media_id' => $process_certificate->media_id,
+                            'title' => $process_certificate->title,
+                            'path_image' => $process_certificate->path_image,
+                            'info_bg' => $process_certificate->info_bg,
+                            'd_objects' => $process_certificate->d_objects,
+                            's_objects' => $process_certificate->s_objects,
+                            'active' => $process_certificate->active
+                        ]);
+                        if($new_certificate) {
+                            $new_process->certificate_template_id = $new_certificate->id;
+                            $new_process->save();
+                        }
+                    }
+                    if($process->stages) {
+                        foreach($process->stages as $stage) {
+                            $new_school = null;
+                            if($stage->school_id) {
+                                $find_school = School::where('id', $stage->school_id)->first();
+                                if($find_school) {
+                                    $new_school = School::storeRequest([
+                                        'name' => $find_school->name,
+                                        'description' => $find_school->description,
+                                        'imagen' => $find_school->imagen,
+                                        'plantilla_diploma' => $find_school->plantilla_diploma,
+                                        'scheduled_restarts' => $find_school->scheduled_restarts,
+                                        'active' => $find_school->active,
+                                        'subworkspaces' => $find_school->subworkspaces,
+                                        'platform_id' => $find_school->platform_id,
+                                    ]);
+                                }
+                            }
+                            $new_stage = Stage::create([
+                                'process_id' => $new_process->id,
+                                'school_id' => $new_school?->id,
+                                'title' => $stage->title,
+                                'duration' => $stage->duration,
+                                'position' => $stage->position,
+                                'active' => false,
+                                'qualification_percentage' => $stage->qualification_percentage,
+                                'qualification_equivalent' => $stage->qualification_equivalent
+                            ]);
+                            if($new_stage) {
+                                $stage_certificate = Certificate::where('id', $stage->certificate_template_id)->first();
+                                if($stage_certificate) {
+                                    $new_certificate = Certificate::create([
+                                        'media_id' => $stage_certificate->media_id,
+                                        'title' => $stage_certificate->title,
+                                        'path_image' => $stage_certificate->path_image,
+                                        'info_bg' => $stage_certificate->info_bg,
+                                        'd_objects' => $stage_certificate->d_objects,
+                                        's_objects' => $stage_certificate->s_objects,
+                                        'active' => $stage_certificate->active
+                                    ]);
+                                    if($new_certificate) {
+                                        $new_stage->certificate_template_id = $new_certificate->id;
+                                        $new_stage->save();
+                                    }
+                                }
+                                // Crear actividades
+                                $this->forDuplicateCreateActivities($stage->activities, $new_stage);
+                            }
+                        }
+                    }
+                }
+            }
+            $response['msg'] = 'Proceso duplicado correctamente.';
+        }
+        return $this->success($response);
+    }
+
+    private function forDuplicateCreateProcess($process)
+    {
+        $new_process = Process::create([
+                'workspace_id' => $process->workspace_id,
+                'description' => $process->description,
+                'block_stages' => $process->block_stages,
+                'migrate_users' => $process->migrate_users,
+                'alert_user_deleted' => $process->alert_user_deleted,
+                'message_user_deleted' => $process->message_user_deleted,
+                'count_absences' => $process->count_absences,
+                'limit_absences' => $process->limit_absences,
+                'absences' => $process->absences,
+                'logo' => $process->logo,
+                'background_web' => $process->background_web,
+                'background_mobile' => $process->background_mobile,
+                'color' => $process->color,
+                'icon_finished' => $process->icon_finished,
+                'icon_finished_name' => $process->icon_finished_name,
+                'starts_at' => $process->starts_at,
+                'finishes_at' => $process->finishes_at,
+                'color_map_even' => $process->color_map_even,
+                'color_map_odd' => $process->color_map_odd,
+                'image_guia' => $process->image_guia,
+                'image_guide_name' => $process->image_guide_name,
+                'qualification_type_id' => $process->qualification_type_id,
+                'position' => $process->position,
+                'title' => '(Duplicado) '.$process->title,
+                'active' => false,
+                'config_completed' => false
+            ]);
+
+        // subworkspaces
+        if($process->subworkspaces)
+        {
+            foreach ($process->subworkspaces as  $subworkspace) {
+                SortingModel::setLastPositionInPivotTable(ProcessSubworkspace::class, Process::class, [
+                    'subworkspace_id'=>$subworkspace,
+                    'process_id' => $new_process->id
+                ],[
+                    'subworkspace_id'=>$subworkspace,
+                ]);
+            }
+            $new_process->subworkspaces()->sync($process->subworkspaces ?? []);
+        }
+        
+        //instructions
+        if($process->instructions)
+        {
+            foreach ($process->instructions as $key => $instruction) {
+                Instruction::create(
+                    [
+                        'description' => $instruction->description,
+                        'process_id' => $new_process->id,
+                        'position' => $key + 1,
+                    ]
+                );
+            }
+        }
+        return $new_process;
+    }
+
+    private function forDuplicateCreateActivities($activities, $new_stage)
+    {
+        if($activities)
+        {
+            foreach($activities as $activity)
+            {
+                $model_id = null;
+                if($activity->model_type == Poll::class)
+                {
+                    $poll = Poll::where('id', $activity?->model_id)->first();
+                    if($poll) {
+                        $new_poll = Poll::create([
+                            'workspace_id' => $poll->workspace_id,
+                            'type_id' => $poll->type_id,
+                            'anonima' => $poll->anonima,
+                            'titulo' => $poll->titulo,
+                            'imagen' => $poll->imagen,
+                            'position' => $poll->position,
+                            'active' => $poll->active,
+                            'platform_id' => $poll->platform_id
+                        ]);
+                        if($new_poll) {
+                            $model_id = $new_poll->id;
+                            if($poll->questions) {
+                                foreach($poll->questions as $question) {
+                                    PollQuestion::create([
+                                        "poll_id" => $new_poll->id,
+                                        "type_id" => $question->type_id,
+                                        "titulo" => $question->titulo,
+                                        "opciones" => $question->opciones,
+                                        "active" => $question->active
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+                    
+                $new_activity = Activity::create([
+                    'stage_id' => $new_stage->id,
+                    'title' => $activity->title,
+                    'description' => $activity->description,
+                    'position' => $activity->position,
+                    'active' => false,
+                    'qualified' => $activity->qualified,
+                    'required' => $activity->required,
+                    'type_id' => $activity->type_id,
+                    'model_id' => $model_id,
+                    'model_type' => $activity->model_type,
+                    'activity_requirement_id' => null,
+                    'percentage_ev' => $activity->percentage_ev
+                ]);
+                
+            }
+        }
+        
     }
 }

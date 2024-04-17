@@ -550,6 +550,7 @@ export default {
                     vue.resource.nro_intentos = _data.curso.mod_evaluaciones.nro_intentos;
                     vue.resource.qualification_type = _data.topic.qualification_type
                     vue.resource.topic = _data.topic.id
+                    vue.resource.requirement = _data.activity.activity_requirement_id
                 })
                 const validateForm = vue.validateForm('projectForm')
                 vue.options.confirmDisabled = !validateForm

@@ -322,10 +322,12 @@ class  DashboardService {
         $platform = currentPlatform();
         return Workspace::select('id', 'name')
                         ->whereIn('id', $workspaces_ids)
-                        ->whereHas('medias', function ($query) use($platform){
-                            $query->where('platform_id', $platform?->id);
-                        })
-                        ->withSum('medias', 'size')->get();
+                        // ->whereHas('medias', function ($query) use($platform){
+                        //     $query->where('platform_id', $platform?->id);
+                        // })
+                        ->withSum(['medias' => function ($q) use($platform){
+                            $q->where('platform_id', $platform?->id);
+                        }], 'size')->get();
     }
 
     public static function loadSizeByExtensionWorkspace($workspace_id, $key) {
@@ -374,9 +376,9 @@ class  DashboardService {
         self::withCountUsers($query, $user_cursalab, INACTIVE, alias: 'users_count_inactives');
         
         $platform = currentPlatform();
-        $query->whereHas('medias', function ($q) use($platform){
+        $query->withSum(['medias' => function ($q) use($platform){
             $q->where('platform_id', $platform?->id);
-        })->withSum('medias', 'size');
+        }], 'size');
 
         return $query->first();
     }

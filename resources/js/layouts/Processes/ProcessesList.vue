@@ -86,10 +86,21 @@
                 @edit="openFormModal(modalEditProcess, $event)"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un proceso')"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Cambio de estado de un proceso')"
+                @duplicar="openFormModalDuplicar($event)"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del proceso - ${$event.title}`)"
                 @saveNewProcessInline="saveNewProcessInline($event)"
             />
         </v-card>
+
+        <DialogConfirm
+            v-model="modalDuplicarOptions.open"
+            :options="modalDuplicarOptions"
+            width="408px"
+            title="Duplicar proceso"
+            subtitle="¡Estás por duplicar el proceso!"
+            @onConfirm="confirmDuplicateProcess"
+            @onCancel="closeFormModal(modalDuplicarOptions)"
+        />
 
         <DefaultDeleteModal
             :options="modalDeleteOptions"
@@ -150,6 +161,7 @@
 </template>
 
 <script>
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 import DefaultStatusModal from "../Default/DefaultStatusModal";
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalSelectTemplate from "../../components/Induction/Process/ModalSelectTemplate";
@@ -167,7 +179,8 @@ export default {
     ModalCreateProcess,
     ModalEditProcess,
     ModalSegment,
-    ModalSelectConfigProcess
+    ModalSelectConfigProcess,
+    DialogConfirm
 },
     mounted() {
         let vue = this
@@ -298,18 +311,18 @@ export default {
                         type: 'route',
                         route: 'assistans_route'
                     },
-                    // {
-                    //     text: "Duplicar",
-                    //     icon: 'far fa-clone',
-                    //     type: 'action',
-                    //     method_name: 'delete'
-                    // },
                     {
-                        text: "Listado",
-                        icon: 'fas fa-file-alt',
+                        text: "Duplicar",
+                        icon: 'far fa-clone',
                         type: 'action',
-                        method_name: 'send_emails'
+                        method_name: 'duplicar'
                     },
+                    // {
+                    //     text: "Listado",
+                    //     icon: 'fas fa-file-alt',
+                    //     type: 'action',
+                    //     method_name: 'send_emails'
+                    // },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',
@@ -381,6 +394,22 @@ export default {
                 persistent: true,
                 base_endpoint: "/search"
             },
+            modalDuplicarOptions: {
+                process_id: null,
+                open: false,
+                title_modal: 'Duplicar proceso',
+                type_modal: 'confirm',
+                content_modal: {
+                    confirm: {
+                        title: '¡Estás por duplicar este proceso!',
+                        details: [
+                            'Se duplicará los datos del proceso seleccionado.',
+                            'También se duplicará las actividades y el certificado asignado a este proceso.',
+                            'No se duplicará la segmentación.'
+                        ],
+                    }
+                },
+            },
             modalDeleteOptions: {
                 ref: 'BenefitDeleteModal',
                 open: false,
@@ -437,6 +466,35 @@ export default {
                         action,
                         title
                     )
+        },
+        async openFormModalDuplicar(data) {
+            let vue = this;
+            vue.modalDuplicarOptions.open = true;
+            vue.modalDuplicarOptions.process_id = data.id;
+            console.log(data.id);
+        },
+        confirmDuplicateProcess(){
+            let vue = this;
+            console.log(vue.modalDuplicarOptions);
+            if(vue.modalDuplicarOptions.process_id)
+            {
+                this.showLoader()
+                vue.$http.post(`/procesos/duplicate`, 
+                    {'process_id': vue.modalDuplicarOptions.process_id})
+                    .then((res) => {
+                        console.log(res);
+                        // if (res.data.type == "success") {
+                            // vue.$toast.success(`${res.data.data.msg}`, {position: 'bottom-center'});
+                            vue.closeFormModal(vue.modalDuplicarOptions);
+                            vue.refreshDefaultTable(vue.dataTable, vue.filters);
+                        // }
+                        this.hideLoader()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.hideLoader()
+                    });
+            }
         },
         loadInfo() {
         },
@@ -557,6 +615,8 @@ export default {
                     'count_absences' : item.count_absences,
                     'block_stages': item.block_stages,
                     'migrate_users': item.migrate_users,
+                    'alert_user_deleted': item.alert_user_deleted,
+                    'message_user_deleted': item.message_user_deleted,
                     'starts_at' : item.starts_at,
                     'finishes_at' : item.finishes_at,
                     'color' : item.color_selected,
@@ -574,6 +634,8 @@ export default {
                                 'count_absences',
                                 'block_stages',
                                 'migrate_users',
+                                'alert_user_deleted',
+                                'message_user_deleted',
                                 'starts_at',
                                 'finishes_at',
                                 'instructions',

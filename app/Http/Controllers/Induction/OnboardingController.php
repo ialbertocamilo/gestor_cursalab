@@ -10,6 +10,7 @@ use App\Models\ProcessSummaryUser;
 use App\Models\SummaryUser;
 use App\Models\Taxonomy;
 use App\Models\User;
+use App\Services\DashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

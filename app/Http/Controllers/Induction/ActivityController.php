@@ -57,6 +57,7 @@ class ActivityController extends Controller
         }
 
         $activity->title = $request->project['title'];
+        $activity->activity_requirement_id = $request->project['requirement'];
         $activity->save();
         cache_clear_model(Activity::class);
 
@@ -99,8 +100,16 @@ class ActivityController extends Controller
             'stage_id' => $request->project['model_id'],
             'model_id' => $data['project'] ?? null,
             'model_type' => Project::class,
-            'type_id' => $type_activity?->id ?? null
+            'type_id' => $type_activity?->id ?? null,
+            'activity_requirement_id' => $request->project['requirement']
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -120,6 +129,7 @@ class ActivityController extends Controller
         $project = Project::where('id', $activity?->model_id)->first();
         $response = Project::editProject($project);
         $response['title'] = $activity->title;
+        $response['activity'] = $activity;
         $response['activity_id'] = $activity->id;
         // $response = [];
 
@@ -148,8 +158,16 @@ class ActivityController extends Controller
             'model_type' => Meeting::class,
             'type_id' => $type_activity?->id ?? null,
             'active' => false,
-            'position' => $request->position ?? 1
+            'position' => $request->position ?? 1,
+            'activity_requirement_id' => $request->requirement
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -179,7 +197,9 @@ class ActivityController extends Controller
 
         $activity->title = $request->name;
         $activity->description = $request->description;
-        $activity->active = $request->active;
+        if($request->active)
+            $activity->active = $request->active;
+        $activity->activity_requirement_id = $request->requirement;
         $activity->save();
         cache_clear_model(Activity::class);
 
@@ -238,8 +258,16 @@ class ActivityController extends Controller
             'model_id' => $tema?->id ?? null,
             'model_type' => Topic::class,
             'type_id' => $type_activity?->id ?? null,
-            'position' => $request->position ?? 1
+            'position' => $request->position ?? 1,
+            'activity_requirement_id' => $request->requirement
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -282,6 +310,7 @@ class ActivityController extends Controller
 
         $activity->title = $request->name;
         $activity->description = $request->content;
+        $activity->activity_requirement_id = $request->requirement;
         if($request->active)
             $activity->active = $request->active;
         if($request->position)
@@ -464,6 +493,13 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
@@ -586,7 +622,7 @@ class ActivityController extends Controller
         $data_activity = [
             'title' => $request->titulo,
             'description' => $request->description,
-            'stage_id' => $request->model_id,
+            'stage_id' => $stage->id,
             'model_id' => $poll?->id ?? null,
             'model_type' => Poll::class,
             'type_id' => $type_activity?->id ?? null,
@@ -594,13 +630,20 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);
 
         $response = [
             'msg' => 'Actividad creada correctamente.',
-            'activity' => $activity,
+            'activity' => $activity->original['data'],
             'encuesta_id' => $poll?->id ?? 0,
             'messages' => ['list' => []]
         ];
@@ -610,10 +653,16 @@ class ActivityController extends Controller
 
     public function EncuestasUpdate(Process $process, Stage $stage, Activity $activity, PollStoreRequest $request)
     {
-        $poll = Poll::where('id', $activity->model_id)->first();
+        if($request->model_id) {
+            $poll = Poll::where('id', $request->model_id)->first();
+            $activity->model_id = $request->model_id;
+        }
+        else {
+            $poll = Poll::where('id', $activity->model_id)->first();
+        }
 
         if($poll) {
-            $poll->titulo = $request->titulo;
+            // $poll->titulo = $request->titulo;
             if($request->active)
                 $poll->active = $request->active;
             $poll->save();
@@ -782,7 +831,7 @@ class ActivityController extends Controller
         $meeting->attendants = Attendant::getMeetingAttendantsForMeeting($meeting);
         $meeting->setDateAndTimeToForm();
 
-        $response = compact('hosts', 'user_types', 'requirements', 'meeting');
+        $response = compact('hosts', 'user_types', 'requirements', 'meeting', 'activity');
 
         return $this->success($response);
     }
@@ -821,6 +870,7 @@ class ActivityController extends Controller
         $activity->title = $request->titulo;
         $activity->description = $request->description;
         $activity->model_id = $topic?->id ?? null;
+        $activity->activity_requirement_id = $request->requirement;
         if($request->active)
             $activity->active = $request->active;
         $activity->save();
@@ -878,8 +928,16 @@ class ActivityController extends Controller
             'stage_id' => $request->model_id,
             'model_id' => $topic?->id ?? null,
             'model_type' => Topic::class,
-            'type_id' => $type_activity?->id ?? null
+            'type_id' => $type_activity?->id ?? null,
+            'activity_requirement_id' => $request->requirement
         ];
+        
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
 
         $activity = Activity::storeRequest($data_activity);
         cache_clear_model(Activity::class);

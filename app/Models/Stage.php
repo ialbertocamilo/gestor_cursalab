@@ -45,7 +45,7 @@ class Stage extends BaseModel
 
     public function activities()
     {
-        return $this->hasMany(Activity::class, 'stage_id', 'id');
+        return $this->hasMany(Activity::class, 'stage_id', 'id')->orderBy('position');
     }
 
     protected function getStagesList( $data )
@@ -60,7 +60,7 @@ class Stage extends BaseModel
         $field = request()->sortBy ?? 'created_at';
         $sort = !is_null(request()->sortDesc) ? (request()->sortDesc == 'true' ? 'DESC' : 'ASC') : 'ASC';
 
-        $stages_query->orderBy($field, $sort);
+        $stages_query->orderBy('position');
 
         if (!is_null($filtro) && !empty($filtro)) {
             $stages_query->where(function ($query) use ($filtro) {

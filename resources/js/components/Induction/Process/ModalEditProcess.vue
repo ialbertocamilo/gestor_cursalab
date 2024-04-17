@@ -75,7 +75,7 @@
                                                         }"
                                                     />
                                                 </fieldset>
-                                                <span class="text_default txt_counter d-flex justify-content-end">{{ process.description.length }}/350</span>
+                                                <!-- <span class="text_default txt_counter d-flex justify-content-end">{{ process.description.length }}/350</span> -->
                                             </div>
                                         </v-col>
                                     </v-row>
@@ -157,9 +157,14 @@
                                             </div>
                                         </v-col>
                                     </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                    
+                                    <DefaultModalSectionExpand
+                                        title="Avanzado"
+                                        :expand="sections.showSectionAdvanced"
+                                        class="my-4 bg_card_none"
+                                    >
+                                        <template slot="content">
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -173,11 +178,8 @@
                                                     <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="12" class="d-flex align-items-center">
-                                            <div class="row_border">
+                                            
+                                            <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
                                                         <v-switch
@@ -191,8 +193,49 @@
                                                     <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
                                                 </div>
                                             </div>
-                                        </v-col>
-                                    </v-row>
+                                            
+                                            <div>
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.alert_user_deleted"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">Mostrar un mensaje al usuario cuando no apruebe el proceso de inducción y quede eliminado</span>
+                                                </div>
+                                                <div v-if="process.alert_user_deleted" class="mt-3">
+                                                    <div class="">
+                                                        <fieldset class="editor">
+                                                            <legend>Edita el mensaje que se mostrará al usuario
+                                                            </legend>
+                                                            <editor
+                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                v-model="process.message_user_deleted"
+                                                                :init="{
+                                                                    content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
+                                                                    height: 170,
+                                                                    menubar: false,
+                                                                    language: 'es',
+                                                                    force_br_newlines : true,
+                                                                    force_p_newlines : false,
+                                                                    forced_root_block : '',
+                                                                    plugins: ['lists image preview anchor', 'code', 'paste','link','emoticons'],
+                                                                    toolbar:
+                                                                        'styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | image | preview | code | link',
+                                                                    images_upload_handler: images_upload_handler,
+                                                                    toolbar_location: 'bottom'
+                                                                }"
+                                                            />
+                                                        </fieldset>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </DefaultModalSectionExpand>
                                 </v-card-text>
                             </v-card>
                         </v-stepper-content>
@@ -545,7 +588,7 @@
                                         <v-col cols="8">
                                             <div class="bx_overflow">
                                                 <draggable v-model="process.instructions" @start="drag=true"
-                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost">
+                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionInstructions">
                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                         <div v-for="(instruction, i) in process.instructions"
                                                             :key="instruction.id">
@@ -556,7 +599,8 @@
                                                                         </v-icon>
                                                                     </div>
                                                                     <div class="ii2">
-                                                                        <fieldset class="editor">
+                                                                        <fieldset class="editor"
+                                                                                v-if="load_instructions">
                                                                             <legend>Escribe aquí una indicación
                                                                             </legend>
                                                                             <editor
@@ -706,11 +750,13 @@ export default {
     },
     data() {
         return {
+            load_instructions: true,
             list_icons_finished_onboarding: [],
             process: {
                 instructions: [],
                 subworkspaces: [],
-                description: ''
+                description: '',
+                alert_user_deleted: false
             },
             modalDateOptions: {
                 ref: 'DateEvent',
@@ -765,7 +811,7 @@ export default {
             confirmLabel: "Continuar",
             list_segments:[],
             sections: {
-                showAdvancedOptions: false
+                showSectionAdvanced: {status: false},
             },
             modalDateStart: {
                 open: false,
@@ -937,7 +983,7 @@ export default {
                 let vue = this;
 
                 if(vue.stepper_box == 1) {
-                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350);
+                    vue.stepper_box_btn1 = !(vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at));
                     vue.disabled_btn_next = vue.stepper_box_btn1;
                 }
                 else if(vue.stepper_box == 2){
@@ -963,7 +1009,7 @@ export default {
                 vue.showBtnExtra = true
 
                 if(vue.stepper_box == 1) {
-                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at) && vue.process.description.length <= 350)) {
+                    if((vue.validateRequired(vue.process.title) && vue.validateRequired(vue.process.subworkspaces) && vue.validateRequired(vue.process.description) && vue.validateRequired(vue.process.starts_at))) {
                         vue.stepper_box_btn1 = false;
                     }
                     vue.disabled_btn_next = vue.stepper_box_btn1;
@@ -1031,6 +1077,13 @@ export default {
         }
     },
     methods: {
+        changePositionInstructions() {
+            let vue = this
+            vue.load_instructions = false;
+            setTimeout(() => {
+                vue.load_instructions = true;
+            }, 50);
+        },
         maxCharacters(input) {
             let vue = this
         },
@@ -1208,7 +1261,8 @@ export default {
             vue.process = {
                 instructions: [],
                 subworkspaces: [],
-                description: ''
+                description: '',
+                config_completed: false
             }
 
             vue.colorPicker = '#FE141F'
@@ -1216,6 +1270,8 @@ export default {
             vue.colorMapaSelected = '#27f748'
             vue.colorImparPicker = '#27F748'
             vue.colorParPicker = '#8BFC89'
+
+            vue.sections.showSectionAdvanced.status = false
 
             vue.resetValidation()
             vue.$emit("onCancel");
@@ -2131,6 +2187,7 @@ span.v-stepper__step__step:after {
         }
         .ii2 {
             flex: 1;
+            min-height: 192px;
         }
     }
     .bx_input_date {
