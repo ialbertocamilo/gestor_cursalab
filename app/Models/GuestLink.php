@@ -79,7 +79,6 @@ class GuestLink extends BaseModel
             ->where('url',$code)
             ->select('guest_id','id as code_id','type_form','criteria_list','expiration_date','workspace_id','subworkspace_id')
             ->first();
-
         if(!$guest_link || ($guest_link->expiration_date && $guest_link->expiration_date < date("Y-m-d G:i"))){
             $message = $guest_link ? 'Link expirado' : 'El link es incorrecto';
             return ['exist_url'=>false,'fondo_invitados_app'=>get_media_url($ambiente?->fondo_invitados_app),'message'=>$message,'logo'=>get_media_url($ambiente?->logo)];
@@ -90,6 +89,7 @@ class GuestLink extends BaseModel
                 : null ;
         }
         $data = $guest_link;
+        $data['show_criteria_section'] = true;
         if ($guest_link) {
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
             $data['logo'] =  get_media_url($guest_link?->workspace?->logo,'s3');
@@ -104,6 +104,7 @@ class GuestLink extends BaseModel
                     $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->whereIn('criterion_id',$guest_link->criteria_list)->values()->all();
                 break;
                 case 'without_criteria':
+                    $data['show_criteria_section'] = false;
                     $data['criteria_data'] = [];
                 break;
             }
