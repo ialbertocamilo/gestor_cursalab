@@ -855,6 +855,10 @@ export default {
                 vue.courseUpdateStatusModal.status_item_modal = !vue.resource.active
             }
         },
+        /**
+         * Validate whether course should be activated or not
+         * according course schedule
+         */
         validateCourseActivation() {
 
             if (this.resource.publish_date_1 ||

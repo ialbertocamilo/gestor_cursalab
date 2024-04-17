@@ -120,6 +120,15 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                 continue;
             }
 
+            // Validate evaluation date
+
+            if (!$excelData[$i][6]) {
+                $this->pushNoProcesados(
+                    $excelData[$i], 'No se ha definido la fecha de evaluación'
+                );
+                continue;
+            }
+
             // $assigned_courses = $user->getCurrentCourses();
             // $user_has_course = $usersSegmented->where('id',$user->id)->first();
             $user_has_course = array_search($user->id,$usersSegmented);
@@ -230,7 +239,9 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
 
         if (isset($excelData[6])) {
             $summaryCourse = SummaryCourse::getCurrentRowOrCreate($this->course, $user);
-            $summaryCourse->last_time_evaluated_at = $this->parseDatetime($excelData[6]);
+
+            $summaryCourse->last_time_evaluated_at = parseDatetime($excelData[6]);
+            $summaryCourse->certification_issued_at = parseDatetime($excelData[6]);
             $summaryCourse->save();
         }
 

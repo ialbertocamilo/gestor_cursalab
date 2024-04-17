@@ -225,6 +225,60 @@ function _validateDate($date, $format = 'Y-m-d H:i:s')
     return $d && $d->format($format) == $date;
 }
 
+function parseDatetime($date, $includeTime = false)
+{
+
+    $date = substr(trim($date), 0, $includeTime ? 16 : 10);
+    $timeFormat = $includeTime ? ' H:i' : '';
+
+    try {
+        $destinationFormat = 'Y-m-d' . $timeFormat;
+
+        // When time part is missing add it in dates
+        // with this format 12/03/2024
+
+        if ($includeTime && strlen($date) === 10 && strpos($date, '/')) {
+            $date .= ' 00:00';
+        }
+
+        if (_validateDate($date, $destinationFormat)) {
+            return $date;
+        }
+
+        if (_validateDate($date, 'Y/m/d' . $timeFormat) ||
+            _validateDate($date, 'd/m/Y' . $timeFormat) ||
+            _validateDate($date, 'd-m-Y' . $timeFormat)) {
+
+            $originFormat = '';
+
+            if (_validateDate($date, 'Y/m/d' . $timeFormat))
+                $originFormat = 'Y/m/d' . $timeFormat;
+            if (_validateDate($date, 'd/m/Y' . $timeFormat))
+                $originFormat = 'd/m/Y' . $timeFormat;
+            if (_validateDate($date, 'd-m-Y' . $timeFormat))
+                $originFormat = 'd-m-Y' . $timeFormat;
+
+            return Carbon::createFromFormat($originFormat, $date)->format($destinationFormat);
+        }
+
+        // Convert Excel numeric datetime
+
+        $phpDate = date_create('@' . ($date - 25569) * 86400);
+        return date_format($phpDate, $destinationFormat);
+
+    } catch (\Throwable $th) {
+        try {
+            if(strtotime($date)){
+                return Carbon::parse(strtotime($date))->format('Y-m-d');
+            }else{
+                return 'invalid date';
+            }
+        } catch (\Throwable $th) {
+            return 'invalid date';
+        }
+    }
+}
+
 function bytesToMB($bytes)
 {
     return round(($bytes / 1048576), 2);
