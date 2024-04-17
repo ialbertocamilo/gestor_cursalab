@@ -68,7 +68,7 @@ class Process extends BaseModel
 
     public function instructions()
     {
-        return $this->hasMany(Instruction::class, 'process_id', 'id');
+        return $this->hasMany(Instruction::class, 'process_id', 'id')->orderBy('position');
     }
 
     public function stages()
@@ -288,6 +288,7 @@ class Process extends BaseModel
             abort(errorExceptionServer());
         }
 
+        cache_clear_model(Instruction::class);
         cache_clear_model(Process::class);
 
         return $process;
@@ -342,7 +343,7 @@ class Process extends BaseModel
             Summary::updateUsersByCourse($process,$users_id,false,false,'segmented',send_notification:false);
         }
     }
-    protected function getProcessesAssigned( $user )
+    protected function getProcessesAssigned( $user, $user_aprendizaje = false )
     {
         $type_employee_onboarding = Taxonomy::getFirstData('user','type', 'employee_onboarding');
         $processes_assigned = [];
@@ -354,6 +355,9 @@ class Process extends BaseModel
                 $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
             else
                 $processes_assigned = array_column($user->getSegmentedByModelType(Process::class),'id');
+        }
+        if($user_aprendizaje) {
+            $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
         }
         return $processes_assigned;
     }
