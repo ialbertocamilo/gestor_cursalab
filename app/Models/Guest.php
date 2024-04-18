@@ -138,7 +138,7 @@ class Guest extends BaseModel {
             $usuario_controller = new UsuarioController();
             $dni_previo = $user->document;
             $email_previo = $user->email;
-            $user_controller->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
+            $usuario_controller->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
         }
         $guest_link->increment('count_registers', 1);
         $title = 'Tu solicitud ha sido aceptada';
