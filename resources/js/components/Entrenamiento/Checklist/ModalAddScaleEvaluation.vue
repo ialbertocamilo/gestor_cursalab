@@ -1,14 +1,14 @@
 <template>
     <div>
-        <DefaultDialog :options="options" :width="width" :showCardActions="false" @onCancel="closeModal"
+        <DefaultDialog :options="options" :width="width" :height="height" :showCardActions="false" @onCancel="closeModal"
             @onConfirm="confirmModal">
             <template v-slot:content>
                 <v-row>
-                    <v-col cols="12">
-                        <span>Escoge o crea una escala de evaluación para este checklist</span>
-                        <div>
+                    <v-col cols="12" class="d-flex justify-space-between">
+                        <span style="font-size: 16px;">Escoge o crea una escala de evaluación para este checklist</span>
+                        <div style="color: #5458EA;">  
                             <i class="mdi mdi-account-multiple-check"></i>
-                            <span>Max: {{evaluation_types_length}}/5</span>
+                            <span>Max: {{evaluation_types_checked.length}}/{{ max_limit_select_evaluation_types }}</span>
                         </div>
                     </v-col>
                     <!-- <v-col cols="12">
@@ -60,10 +60,18 @@
                             <template slot="content">
                                 <div v-for="(evaluation_type,index) in evaluation_types" :key="`key-${index}`">
                                     <div class="activities">
-                                        <v-row class="align-items-center px-2">
-                                            <v-col cols="1" class="d-flex align-center justify-content-center ">
-                                                <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                </v-icon>
+                                        <v-row class="align-items-center">
+                                            <v-col cols="1" class="d-flex align-center justify-content-center mt-5 mr-2">
+                                                <!-- @input="verifyLimits($event,index)" -->
+                                                <DefaultCheckbox
+                                                    v-model="evaluation_type.checked"
+                                                    :disabled="
+                                                        evaluation_types_checked.length >= max_limit_select_evaluation_types 
+                                                        && !evaluation_type.checked
+                                                    "
+                                                    labelTrue=''
+                                                    labelFalse=''
+                                                />
                                             </v-col>
                                             <!-- COLOR EDITABLE -->
                                             <v-col cols="1">
@@ -99,11 +107,20 @@
                                                     appendIcon="mdi mdi-pencil"
                                                 />
                                             </v-col>
-                                            <v-col cols="3">
+                                            <v-col cols="2">
                                                 <DefaultInput 
                                                     suffix="%"
                                                     dense
                                                     v-model="evaluation_type.extra_attributes.percent"
+                                                />
+                                            </v-col>
+                                            <v-col cols="1" class="d-flex justify-content-center">
+                                                <DefaultButton
+                                                    label=""
+                                                    icon="mdi-minus-circle"
+                                                    isIconButton
+                                                    @click="removeScaleEvaluation(index)"
+                                                    :disabled="!evaluation_type.can_delete"
                                                 />
                                             </v-col>
                                         </v-row>
@@ -114,7 +131,6 @@
                                         label="Agregar escala"
                                         icon="mdi-plus"
                                         :outlined="true"
-                                        :disabled="resource.evaluation_types.length >= 5"
                                         @click="addScaleEvaluation()"
                                     />
                                 </div>
@@ -130,20 +146,24 @@
 
 <script>
 import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
+import DefaultCheckbox from "../../globals/DefaultCheckBox.vue";
 
 export default {
-    components:{ButtonEmojiPicker},
+    components:{
+        ButtonEmojiPicker,DefaultCheckbox
+    },
     props: {
         options: {
             type: Object,
             required: true
         },
-        width: String
+        width: String,
+        height:String,
     },
     data() {
         return {
             evaluation_types:[],
-            evaluation_types_length:{},
+            max_limit_select_evaluation_types:3,
             // evaluation_type:{
             //     menu_picker:false,
             //     name:'',
@@ -155,7 +175,11 @@ export default {
             // }
         };
     },
-
+    computed: {
+        evaluation_types_checked: function () {
+            return this.evaluation_types.filter((e) => e.checked);
+        }
+    },
     methods: {
         closeModal() {
             let vue = this
@@ -175,14 +199,44 @@ export default {
         resetSelects() {
             let vue = this
         },
-        async loadData(evaluation_types_length) {
+        async loadData(max_limit_select_evaluation_types) {
             let vue = this
-            vue.evaluation_types_length = evaluation_types_length;
+            vue.max_limit_select_evaluation_types = max_limit_select_evaluation_types;
             return 0;
         },
         async loadSelects() {
 
         },
+        addScaleEvaluation(){
+            let vue = this;
+            if( vue.evaluation_types.length < 5){
+                vue.evaluation_types.push(
+                    {
+                        id:'insert-'+vue.evaluation_types.length+1,
+                        name:'',
+                        color:'#FF4560',
+                        extra_attributes:{
+                            percent:'0',
+                            emoji:''
+                        },
+                        can_delete:true
+                    },
+                )
+            }
+        },
+        removeScaleEvaluation(index){
+            let vue = this;
+            vue.evaluation_types.splice(index, 1);
+        },
+        verifyLimits(val,index){
+            let vue = this;
+            console.log(val,index,vue.evaluation_types_checked.length , vue.max_limit_select_evaluation_types);
+            if(val && vue.evaluation_types_checked.length >= vue.max_limit_select_evaluation_types){
+                console.log(vue.evaluation_types[index].checked);
+                vue.evaluation_types[index].checked = false;
+                console.log(vue.evaluation_types[index].checked);
+            }
+        }
     }
 }
 </script>

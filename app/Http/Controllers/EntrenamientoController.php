@@ -2,29 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChecklistRpta;
-use App\Models\ChecklistRptaItem;
+use App\Models\User;
 use App\Models\Curso;
-use App\Models\Resumen_x_curso;
+use App\Models\Course;
+use function foo\func;
+use App\Models\Segment;
 use App\Models\Usuario;
+use App\Models\Taxonomy;
 use App\Models\CheckList;
-use App\Models\CheckListItem;
-use App\Models\EntrenadorUsuario;
 
-use App\Http\Controllers\ApiRest\HelperController;
+use App\Models\Criterion;
+use App\Models\Workspace;
+
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-
+use App\Models\CheckListItem;
+use App\Models\ChecklistRpta;
+use App\Models\Resumen_x_curso;
+use App\Imports\ChecklistImport;
+use App\Models\ChecklistRptaItem;
+use App\Models\EntrenadorUsuario;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AsignarEntrenadorImport;
-use App\Imports\ChecklistImport;
-use App\Models\Course;
-use App\Models\Segment;
-use App\Models\Taxonomy;
-use App\Models\User;
-use App\Models\Workspace;
-use Illuminate\Support\Str;
-use function foo\func;
+use App\Http\Controllers\ApiRest\HelperController;
 
 
 class EntrenamientoController extends Controller
@@ -272,9 +273,9 @@ class EntrenamientoController extends Controller
     public function getFormSelects(){
         $checklist_default_configuration = get_current_workspace()->checklist_configuration;
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
-
+        $criteria = Criterion::getSelectionCheckbox(get_current_workspace());
         $data = compact(
-            'checklist_default_configuration','qualification_types'
+            'checklist_default_configuration','qualification_types','criteria'
         );
         return $this->success($data);
     }

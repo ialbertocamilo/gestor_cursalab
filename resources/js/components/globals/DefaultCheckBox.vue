@@ -4,6 +4,7 @@
         v-model="localBoolean"
         :label="localBoolean ? labelTrue : labelFalse"
         @change="updateValue"
+        :disabled="disabled"
     ></v-checkbox>
 </template>
 
@@ -22,6 +23,10 @@ export default {
             type: String,
             default: 'Inactivo'
         },
+        disabled:{
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {

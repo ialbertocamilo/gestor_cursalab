@@ -55,7 +55,7 @@
         <ModalCreateChecklist
             ref="ModalCreateChecklist"
             v-model="modal.crear_editar_checklist"
-            :width="'1000px'"
+            :width="'60vw'"
             @onClose="closeModalCreateEditChecklist"
             @onConfirm="saveChecklist"
             :checklist="dataModalChecklist"
@@ -87,7 +87,7 @@
             :options="modalChecklistModality"
             width="900px"
             @onConfirm="openChecklistModal"
-            @onCancel="modalChecklistModality.open = false"
+            @onCancel="closeSimpleModal(modalChecklistModality.open = false)"
             :modalities="modalities"
         />
         <ChecklistConfigurationModal
@@ -95,7 +95,7 @@
             v-model="modalChecklistConfiguration.open"
             :options="modalChecklistConfiguration"
             width="900px"
-            @onCancel="modalChecklistConfiguration.open = false"
+            @onCancel="closeSimpleModal(modalChecklistConfiguration)"
             @onConfirm="changeConfiguration"
         />
         <ActivitiesModal
@@ -391,9 +391,9 @@ export default {
 
             await vue.$refs.ModalCreateChecklist.resetValidation()
 
-            vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
-            if (edit)
-                vue.$refs.ModalCreateChecklist.rep()
+            // vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
+            // if (edit)
+            //     vue.$refs.ModalCreateChecklist.rep()
 
             vue.modal.crear_editar_checklist = true;
         },

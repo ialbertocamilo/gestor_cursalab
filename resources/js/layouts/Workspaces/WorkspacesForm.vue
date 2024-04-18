@@ -303,11 +303,23 @@
                                         <div class="col-12">
                                             <DefaultAutocomplete
                                                 clearable
-                                                :items="resource.criteria_workspace"
+                                                :items="resource.criteria_workspace.filter(cw => cw.code != 'module')"
                                                 item-text="name"
                                                 item-value="criterion_id"
                                                 v-model="resource.checklist_configuration.entities_criteria"
                                                 label="Selecciona las entidades"
+                                                dense
+                                                multiple
+                                            />
+                                        </div>
+                                        <div class="col-12">
+                                            <DefaultAutocomplete
+                                                clearable
+                                                :items="resource.criteria_workspace.filter(cw => cw.code != 'module')"
+                                                item-text="name"
+                                                item-value="criterion_id"
+                                                v-model="resource.checklist_configuration.managers_criteria"
+                                                label="Selecciona criterios de los responsables"
                                                 dense
                                                 multiple
                                             />

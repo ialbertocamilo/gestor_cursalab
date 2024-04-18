@@ -142,6 +142,7 @@ class Workspace extends BaseModel
         if(is_null($value)){
             return [
                 'entities_criteria'=>[],
+                'managers_criteria'=>[],
                 'evaluation_types'=>$evaluation_types,
                 'qualification_type'=>null,
                 'max_limit_create_evaluation_types'=>5
@@ -150,6 +151,9 @@ class Workspace extends BaseModel
         $value = json_decode($value);
         if(!isset($value->entities_criteria)){
             $value->entities_criteria = [];
+        }
+        if(!isset($value->managers_criteria)){
+            $value->managers_criteria = [];
         }
         $value->evaluation_types = $evaluation_types;
         return $value;
