@@ -273,7 +273,11 @@ class EntrenamientoController extends Controller
     public function getFormSelects(){
         $checklist_default_configuration = get_current_workspace()->checklist_configuration;
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
-        $criteria = Criterion::getSelectionCheckbox(get_current_workspace());
+        $criteria = [];
+        if(count($checklist_default_configuration->managers_criteria)){
+            $criteria = Criterion::select('id','name')->whereIn('id',$checklist_default_configuration->managers_criteria)->get();
+        }
+        unset($checklist_default_configuration->managers_criteria);
         $data = compact(
             'checklist_default_configuration','qualification_types','criteria'
         );

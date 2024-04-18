@@ -197,7 +197,9 @@ export default {
                 crear_editar_checklist: false,
                 ver_items: false,
                 asignar: false,
-                subida_masiva: false
+                subida_masiva: false,
+                modality_id:null,
+                base_endpoint:'/entrenamiento/checklists'
             },
             modalLogsOptions: {
                 ref: "LogsModal",
@@ -486,7 +488,7 @@ export default {
         openChecklistModal(modality){
             let vue = this;
             vue.openFormModal(vue.modalChecklistModality,'activity_card');
-            vue.openFormModal.modality = modality;
+            vue.modal.modality = modality;
             vue.abrirModalCreateEditChecklist(vue.checklistCreateEditModal);
         },
         changeConfiguration(){
