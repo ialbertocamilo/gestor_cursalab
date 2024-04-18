@@ -220,10 +220,61 @@ class RestChecklistController extends Controller
     public function checklistsTrainer(Request $request){
         return
         [
-            'list-geolo'=>[
-                "tienda-1"=>[
+            'checklists-geololization'=>[
+                "Ecnorza ZC"=>[
                     [
-                        
+                        'id'=>1,
+                        'modality'=>'entityqualify_entity',
+                        'type' => 'auditoria',
+                        'title'=> 'Trabajo realizado por el usuario en su estación.',
+                        'status' => 'pendiente',
+                    ]
+                ],
+                "Ecnorza AB"=>[
+                    [
+                        'id'=>2,
+                        'modality'=>'qualify_user',
+                        'type' => 'Por curso',
+                        'title'=> 'Reconoce los puntos de salida de seguridad en caso de sismo.',
+                        'status' => 'continuo',
+                    ]
+                ],
+                "Ecnorza AR"=>[
+                    [
+                        'id'=>3,
+                        'modality'=>'autoqualify',
+                        'type' => 'auditoria',
+                        'title'=> 'Gestión de inventario.',
+                        'status' => 'realizado',
+                    ]
+                ]
+            ],
+            'checklists'=>[
+                "Ecnorza RT"=>[
+                    [
+                        'id'=>4,
+                        'modality'=>'entityqualify_entity',
+                        'type' => 'auditoria',
+                        'title'=> 'Capacitación y desarrollo 1.',
+                        'status' => 'pendiente',
+                    ]
+                ],
+                "Ecnorza CK"=>[
+                    [
+                        'id'=>5,
+                        'modality'=>'qualify_user',
+                        'type' => 'Por curso',
+                        'title'=> 'Capacitación y desarrollo 2.',
+                        'status' => 'pendiente',
+                    ]
+                ],
+                "Ecnorza LT"=>[
+                    [
+                        'id'=>6,
+                        'modality'=>'autoqualify',
+                        'type' => 'auditoria',
+                        'title'=> 'Capacitación y desarrollo 3.',
+                        'status' => 'pendiente',
                     ]
                 ]
             ]
