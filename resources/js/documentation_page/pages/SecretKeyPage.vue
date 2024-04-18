@@ -1,11 +1,11 @@
 <template>
     <v-card elevation="0" class="mx-10">
         <v-card-title class="font-weight-bold">
-            Clave Secreta
+            Clave Secreta (Secret Key)
         </v-card-title>
         <v-card-text class="ml-2">
             <p>
-               La clave secreta es una cadena conformada por números y letras de 15 caracteres que será necesario para el uso de las API's. 
+               La clave secreta (secret key) es una cadena conformada por números y letras que será necesario para el uso de las API's. 
                Esta clave será entregada al inicio de la implementación y no tienen fecha de caducidad.
             </p>
             <alert 
