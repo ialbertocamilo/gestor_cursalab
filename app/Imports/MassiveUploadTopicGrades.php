@@ -127,6 +127,13 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                     $excelData[$i], 'No se ha definido la fecha de evaluación'
                 );
                 continue;
+            } else {
+                if (parseDatetime($excelData[$i]['6'], true) === 'invalid date') {
+                    $this->pushNoProcesados(
+                        $excelData[$i], 'La fecha es inválida'
+                    );
+                    continue;
+                }
             }
 
             // $assigned_courses = $user->getCurrentCourses();
@@ -187,7 +194,7 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
                     $views = $excelData[3] ?: ($summary ? $summary->views : 1);
                     $correct_answers = $excelData[4] ?: ($summary ? $summary->correct_answers : 1);
                     $failed_answers = $excelData[5] ?: ($summary ? $summary->failed_answers : 1);
-                    $last_time_evaluated_at = excelDateToDate($excelData[6]) ?: ($summary ? $summary->last_time_evaluated_at : 1);
+                    $last_time_evaluated_at = parseDatetime($excelData[6], true) ?: ($summary ? $summary->last_time_evaluated_at : 1);
                     $status = $this->getNewSummaryQualifiedTopicStatus($grade, $min_grade);
 
                     $summary_data = array_merge($summary_data, [
@@ -240,8 +247,8 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
         if (isset($excelData[6])) {
             $summaryCourse = SummaryCourse::getCurrentRowOrCreate($this->course, $user);
 
-            $summaryCourse->last_time_evaluated_at = parseDatetime($excelData[6]);
-            $summaryCourse->certification_issued_at = parseDatetime($excelData[6]);
+            $summaryCourse->last_time_evaluated_at = parseDatetime($excelData[6], true);
+            $summaryCourse->certification_issued_at = parseDatetime($excelData[6], true);
             $summaryCourse->save();
         }
 
@@ -288,30 +295,5 @@ class MassiveUploadTopicGrades extends Massive implements ToCollection
     public function getNoProcesados()
     {
         return $this->no_procesados;
-    }
-
-    /**
-     * Parse datetime d/m/Y to Y-m-d format
-     * @param $stringDatetime
-     * @return string|null
-     */
-    public function parseDatetime ($stringDatetime) {
-        try {
-            $datetime = Carbon::createFromFormat('d/m/Y H:i', $stringDatetime)
-                ->format('Y-m-d H:i');
-        } catch (Exception $ex) {
-            $datetime = null;
-        }
-
-        if (!$datetime) {
-            try {
-                $datetime = Carbon::createFromFormat('d/m/Y', $stringDatetime)
-                    ->format('Y-m-d');
-            } catch (Exception $ex) {
-                $datetime = null;
-            }
-        }
-
-        return $datetime;
     }
 }

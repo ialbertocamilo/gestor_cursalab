@@ -225,6 +225,10 @@ function _validateDate($date, $format = 'Y-m-d H:i:s')
     return $d && $d->format($format) == $date;
 }
 
+/**
+ * Parse datetime from string (23/05/2024) or number (Excel datetime)
+ * to mysql format (2024-05-23)
+ */
 function parseDatetime($date, $includeTime = false)
 {
 
@@ -263,6 +267,7 @@ function parseDatetime($date, $includeTime = false)
 
         // Convert Excel numeric datetime
 
+        if (!is_numeric($date)) return 'invalid date';
         $phpDate = date_create('@' . ($date - 25569) * 86400);
         return date_format($phpDate, $destinationFormat);
 
