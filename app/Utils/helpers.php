@@ -226,8 +226,8 @@ function _validateDate($date, $format = 'Y-m-d H:i:s')
 }
 
 /**
- * Parse datetime from string (23/05/2024) or number (Excel datetime)
- * to mysql format (2024-05-23)
+ * Parse datetime from string (23/05/2024 13:00) or number (Excel datetime)
+ * to mysql format (2024-05-23 13:00)
  */
 function parseDatetime($date, $includeTime = false)
 {

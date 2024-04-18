@@ -184,31 +184,6 @@ class UserMassive extends Massive implements ToCollection
                 $user[$dt['code']] = (mb_strtolower($dt['value_excel']) == 'active') ? 1 : 0;
             }
 
-            // No module defined
-
-//            if (!isset($dt['module'])) {
-//                $has_error = true;
-//                $errors_index[] = [
-//                    'index' => $dt['index'],
-//                    'message' => 'El módulo es obligatorio'
-//                ];
-//                continue;
-//            }
-
-            // Module is defined but without a value
-
-//            if (isset($dt['module'])) {
-//
-//                if (!$dt['module']) {
-//                    $has_error = true;
-//                    $errors_index[] = [
-//                        'index' => $dt['index'],
-//                        'message' => 'El módulo es obligatorio'
-//                    ];
-//                    continue;
-//                }
-//            }
-
 
             //DC3
             if($dt['code'] == 'national_occupation_id'){
@@ -312,6 +287,7 @@ class UserMassive extends Massive implements ToCollection
 
         $user['criterion_list'] = [];
         $user['criterion_list_final'] = [];
+
         foreach ($data_criteria as $dc) {
             //Validación de requerido
             if($dc['criterion_code'] == 'gender' && empty($dc['value_excel'])){
@@ -321,11 +297,23 @@ class UserMassive extends Massive implements ToCollection
                     'message' => ($this->messageInSpanish) ? 'El criterio género es requerido.' : 'The field ' . $dc['criterion_code'] . ' is required.'
                 ];
             }
+
+            // Module validation: The value is always required
+
+            if ($dc['criterion_code'] == 'module' && empty($dc['value_excel'])) {
+                $has_error = true;
+                $errors_index[] = [
+                    'index' => $dc['index'],
+                    'message' => 'El criterio módulo es obligatorio'
+                ];
+                continue;
+            }
+
             if (!empty($dc['value_excel'])) {
                 $criterion = $criteria->where('id', $dc['criterion_id'])->first();
                 $code_criterion = $criterion->field_type->code;
                 if (isset($code_criterion) && $code_criterion == 'date') {
-                    $dc['value_excel'] = $this->excelDateToDate($dc['value_excel']);
+                    $dc['value_excel'] = parseDatetime($dc['value_excel']);
                     if ($dc['value_excel'] == 'invalid date') {
                         $has_error = true;
                         $errors_index[] = [
@@ -335,6 +323,7 @@ class UserMassive extends Massive implements ToCollection
                         continue;
                     }
                 }
+
                 $colum_name = CriterionValue::getCriterionValueColumnNameByCriterion($criterion);
                 // if($criterion->code=='module'){
                 //     $colum_name = 'external_value';
@@ -546,41 +535,6 @@ class UserMassive extends Massive implements ToCollection
             }
         }
         return $staticHeaders;
-    }
-
-    private function excelDateToDate($fecha)
-    {
-        $fecha = trim($fecha);
-        try {
-            if (_validateDate($fecha, 'Y-m-d')) {
-                return $fecha;
-            }
-
-            if (_validateDate($fecha, 'Y/m/d') ||
-                _validateDate($fecha, 'd/m/Y') ||
-                _validateDate($fecha, 'd-m-Y')) {
-
-                $originFormat = '';
-                if (_validateDate($fecha, 'Y/m/d')) $originFormat = 'Y/m/d';
-                if (_validateDate($fecha, 'd/m/Y')) $originFormat = 'd/m/Y';
-                if (_validateDate($fecha, 'd-m-Y')) $originFormat = 'd-m-Y';
-
-                return Carbon::createFromFormat($originFormat, $fecha)->format('Y-m-d');
-            }
-            $php_date = $fecha - 25569;
-            $date = date("Y-m-d", strtotime("+$php_date days", mktime(0, 0, 0, 1, 1, 1970)));
-            return $date;
-        } catch (\Throwable $th) {
-            try {
-                if(strtotime($fecha)){
-                    return Carbon::parse(strtotime($fecha))->format('Y-m-d');
-                }else{
-                    return 'invalid date';
-                }
-            } catch (\Throwable $th) {
-                return 'invalid date';
-            }
-        }
     }
 
     private function validateLimitAllowedUsers(): bool
