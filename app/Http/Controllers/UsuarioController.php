@@ -1171,7 +1171,7 @@ class UsuarioController extends Controller
             $new_usuario_master = new UsuarioMaster;
             $new_usuario_master->dni = $usuario_input['document'];
             $new_usuario_master->email = isset($usuario_input['email']) ? $usuario_input['email'] : null;
-            $new_usuario_master->username = $usuario_input['username'];
+            $new_usuario_master->username = isset($usuario_input['username']) ? $usuario_input['username'] : null;
             $new_usuario_master->customer_id = ENV('CUSTOMER_ID');
             $new_usuario_master->created_at = now();
             $new_usuario_master->save();
@@ -1185,7 +1185,7 @@ class UsuarioController extends Controller
             if ( !$master_dni_existe ){
                 $usuario_master->dni = $usuario_input['document'];
             }
-            $usuario_master->username = $usuario_input['username'];
+            $usuario_master->username =isset($usuario_input['username']) ? $usuario_input['username'] : null;
             $usuario_master->updated_at = now();
             $usuario_master->save();
         }
