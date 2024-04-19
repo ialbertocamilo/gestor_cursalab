@@ -28,7 +28,7 @@ class GuestStoreRequest extends FormRequest
     public function rules()
     {
         $passwordRules = [
-            "required", 'confirmed', 'max:100','min:8',
+            "required", 'confirmed', 'max:100','min:5',
             // RulePassword::min(8)->letters()->numbers()->symbols(),
             // new CustomContextSpecificWords($this->email ?? NULL, 'email'),
             // new CustomContextSpecificWords($this->document ?? NULL, 'document'),
