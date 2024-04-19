@@ -13,6 +13,7 @@ class DuplicateCourses extends Command
     const DATE_TIME = '2024-04-18 16:00';
 
     const COURSES_NAMES = [
+
         "FOCO Venta Empresa",
         "FOCO Venta Empresa: Productos",
         "Flujo de Redi - Asistente de Venta Empresa",
