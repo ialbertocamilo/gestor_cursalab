@@ -10,6 +10,12 @@
                     @click="openFormModal(modalDiplomaFormInfoOptions, null, 'status', 'Instrucciones')">
                     <v-icon>mdi-information</v-icon>
                 </v-btn>
+                <v-spacer></v-spacer>
+                <DefaultModalButton
+                    v-if="is_super_user"
+                    :label="'Añadir nueva fuente'"
+                    @click="openFormModal(modalFontsOptions, null, null,'Crea una nueva fuente')"
+                />
             </v-card-title>
         </v-card>
 
@@ -56,12 +62,12 @@
 
                                 <div class="css-tooltip css-tooltip--top"
                                      data-tooltip="Negrita">
-                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('bold')" text>
+                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn && only_regular_font" @click="edit_object('bold')" text>
                                         <v-icon>mdi-format-bold</v-icon>
                                     </v-btn>
                                 </div>
                                 <div class="css-tooltip css-tooltip--top" data-tooltip="Cursiva">
-                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="edit_object('italic')" text>
+                                    <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn && only_regular_font" @click="edit_object('italic')" text>
                                         <v-icon>mdi-format-italic</v-icon>
                                     </v-btn>
                                 </div>
@@ -136,6 +142,7 @@
 
             <div class="d-flex justify-center position-relative menu-save">
                 <panelEditor
+                    ref="panel_editor"
                     :d_btn="d_btn"
                     :btn_process="btn_process"
                     :btn_course="btn_course"
@@ -144,6 +151,9 @@
                     @emit_add_image="add_image"
                     @emit_prev="prev"
                     @emit_delete="delete_object"
+                    @emit_change_font="changeFont"
+                    @emitir_add_qr_image="add_qr_image"
+                    :fonts="fonts"
                 />
                 <!-- <div class="menu-cancel-btn">
                     <v-btn
@@ -204,7 +214,14 @@
             @onCancel="closeFormModal(modalDiplomaAlertOptions)"
             @onConfirm="delete_object_confirm"
         />
-
+        <FontsModal
+            width="30vh"
+            :ref="modalFontsOptions.ref"
+            :options="modalFontsOptions"
+            @onCancel="closeFormModal(modalFontsOptions)"
+            @onConfirm="closeFormModal(modalFontsOptions),loadInitData()"
+        />
+        
     </section>
 </template>
 <script>
@@ -214,11 +231,13 @@ import DiplomaFormInfoModal from './DiplomaFormInfoModal.vue';
 import DiplomaPreviewModal from './DiplomaPreviewModal.vue';
 import DiplomaAlertModal from './DiplomaAlertModal.vue';
 import DiplomaFormSave from './DiplomaFormSave.vue';
+import FontsModal from './FontsModal.vue';
+import QRCode from "qrcode";
 
 export default {
     components:{
         DiplomaPreviewModal, DiplomaFormInfoModal, DiplomaAlertModal,
-        DiplomaFormSave, panelEditor
+        DiplomaFormSave, panelEditor,FontsModal
     },
     props:['modulo_id', 'diploma_id', 'model_id', 'model_type', 'redirect', 'btn_process', 'btn_course'],
     data(){
@@ -261,6 +280,11 @@ export default {
                 subTitle:'',
                 hideCancelBtn: true,
             },
+            modalFontsOptions:{
+                ref: 'FontModal',
+                open: false,
+                subTitle:'',
+            },
             modalDiplomaPreviewOptions:{
                 ref: 'DiplomaPreviewModal',
                 open: false,
@@ -288,7 +312,11 @@ export default {
                 resource:{
                     tipo: null
                 }
-            }
+            },
+            fonts:[],
+            font_id:null,
+            only_regular_font:false,
+            is_super_user:false,
         }
     },
     created(){
@@ -313,7 +341,7 @@ export default {
     async mounted(){
         let vue = this;
         this.canvas = new fabric.Canvas('canvas');
-
+        vue.loadInitData();
         if(vue.diploma_id) await vue.loadData(); // para cargar data al actualizar
 
         // === añadir puntero a input ===
@@ -368,6 +396,18 @@ export default {
         vue.canvas.on('object:moving', vue.preventDragOffCanvas);
     },
     methods:{
+        loadInitData(){
+            let vue = this;
+            axios.get('/diplomas/init-data').then(({data})=>{
+                vue.fonts = data.data.fonts;
+                vue.is_super_user  = data.data.is_super_user;
+            })
+        },
+        changeFont(font){
+            let vue = this;
+            vue.font_id = font.id;
+            vue.only_regular_font = font.only_regular_font;
+        },
         leavePage() {
             const vue = this
             window.location.href = vue.redirect ? vue.redirect : vue.base_endpoint;
@@ -547,6 +587,33 @@ export default {
             };
             reader.readAsDataURL(file);
         },
+        async add_qr_image(){
+            let vue = this;
+            let QRbase64 = await new Promise((resolve, reject) => {
+                QRCode.toDataURL('http://gestor.test/', function (err, code) {
+                    if (err) {
+                        reject(reject);
+                        return;
+                    }
+                    resolve(code);
+                });
+            });
+            fabric.Image.fromURL(QRbase64, function (img) {
+                let oImg = img.set({
+                    type:'qr_image',
+                    qr_image: true,
+                    left: 200,
+                    top: 200,
+                    angle: 0,
+                    contextMenuImage: true,
+                    static: false,
+                    lockRotation: true
+                });
+                vue.canvas.add(oImg).renderAll();
+                vue.canvas.setActiveObject(oImg);
+                vue.canvas.toDataURL({ format: 'jpg', quality: 1 });
+            });
+        },
         add_image_param(data) {
             const { img, left, top, scaleX, scaleY } = data; // === imagen ===
 
@@ -607,12 +674,48 @@ export default {
             this.canvas.add(text2);
             this.canvas.setActiveObject(text2);
         },
+        async add_image_qr_data(data){
+            let  vue = this;
+            const {  left, top, scaleX, scaleY,width,height } = data; // === imagen ===
+            let QRbase64 = await new Promise((resolve, reject) => {
+                QRCode.toDataURL('http://gestor.test/', function (err, code) {
+                    if (err) {
+                        reject(reject);
+                        return;
+                    }
+                    resolve(code);
+                });
+            });
+            console.log(data, left, top, scaleX, scaleY,QRbase64,height,width);
+            fabric.Image.fromURL(QRbase64, function (img) {
+                let oImg = img.set({
+                    type:'qr_image',
+                    qr_image: true,
+                    width,
+                    height,
+                    left,
+                    top,
+                    angle: 0,
+                    contextMenuImage: true,
+                    static: false,
+                    lockRotation: true,
+                    scaleX,
+                    scaleY,
+                });
+                vue.canvas.add(oImg).renderAll();
+                vue.canvas.setActiveObject(oImg);
+                vue.canvas.toDataURL({format: 'jpg', quality: 1});
+            });
+        },
         add_text_param(data){
             const vue = this;
+            if(data.type == 'qr_image'){
+                vue.add_image_qr_data(data);
+                return '';
+            }
             const { id: tipo, fill, text, id_formato,
                     fontSize, fontStyle, fontWeight, centrado,
                     top, left, height, width } = data;
-
             vue.close_context_menu();
 
             let text2 = new fabric.Text("Text", {
@@ -868,6 +971,7 @@ export default {
             let data = {
                 'info': this.canvas.toJSON(['id','static','x','y','width','height','centrado','id_formato','zoomX']),
                 'zoom':this.canvas.getZoom(),
+                'font_id':this.font_id
             };
             this.name_plantilla = null;
 
@@ -887,7 +991,7 @@ export default {
                 this.hideLoader();
             });
         },
-        save_plantilla(){
+        async save_plantilla(){
             const vue = this;
 
             const title_plantilla = vue.$refs.DiplomaFormSaveModal.resource.diploma;
@@ -899,7 +1003,8 @@ export default {
                 // 'nombre_plantilla': this.name_plantilla,
                 'nombre_plantilla': title_plantilla,
                 'model_id': vue.model_id,
-                'model_type': vue.model_type
+                'model_type': vue.model_type,
+                'font_id' : vue.font_id
             };
 
             vue.showLoader();
@@ -907,7 +1012,7 @@ export default {
             if(vue.diploma_id) {
                 data = { ...data, edit_plantilla: vue.edit_plantilla }
                 // === actualizar ===
-                axios.put('/diplomas/update/'+vue.diploma_id, data).then((res) => {
+                await axios.put('/diplomas/update/'+vue.diploma_id, data).then((res) => {
 
                     vue.d_preview = false;
                     vue.dialog_save = false;
@@ -920,11 +1025,14 @@ export default {
                         vue.showAlert('El diploma fue actualizado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
-                });
+                }).catch(()=>{
+                    vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
+                    vue.hideLoader();
+                });;
 
             } else {
                 // === guardar ===
-                axios.post('/diplomas/save', data).then((res)=>{
+                await axios.post('/diplomas/save', data).then((res)=>{
                     this.d_preview = false;
                     this.dialog_save = false;
                     let vue = this;
@@ -937,6 +1045,9 @@ export default {
                         vue.showAlert('El diploma fue guardado correctamente.');
                         setTimeout(() => vue.leavePage(), 1500);
                     }
+                }).catch(()=>{
+                    vue.showAlert('Hubo un problema al actualizar el diploma.', 'error');
+                    vue.hideLoader();
                 });
             }
         },
@@ -958,6 +1069,9 @@ export default {
 
             const response = await axios.get('/diplomas/search/'+vue.diploma_id)
             const { plantilla, diploma } = response.data;
+            vue.$refs.panel_editor.font_id = diploma.font_id;
+            console.log(vue.$refs.panel_editor.font_id);
+            vue.changeFont(diploma.font_id);
             const { entries, assign } = Object;
             assign(this.edit_plantilla, diploma); // asignar diploma
             const { s_objects_images, s_object_bg, s_objects_text } = diploma;

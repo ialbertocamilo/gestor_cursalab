@@ -2,10 +2,13 @@
 
 use Carbon\Carbon;
 use Aws\S3\S3Client;
-use App\Models\Taxonomy;
 use App\Models\Workspace;
+use Endroid\QrCode\QrCode;
 use Illuminate\Support\Str;
 use App\Services\FileService;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use App\Models\Taxonomy;
 
 const INACTIVE = false;
 const ACTIVE = true;
@@ -694,6 +697,18 @@ function db_raw_dateformat($field, $alias = null, $format = "'%d/%m/%Y %H:%i'")
     return \DB::raw("DATE_FORMAT({$field}, $format) as {$alias}");
 }
 
+function generate_qr_code_in_base_64($text,$height,$width,$scaleX=1,$scaleY=1){
+    $texto = "http://ejemplo.com";
+    $newwidth = $width * $scaleX;
+    $newheight = $height * $scaleY;
+    $writer = new PngWriter();
+    $qrCode = QrCode::create($text)
+    ->setEncoding(new Encoding('UTF-8'))
+    ->setSize($newwidth)
+    ->setMargin(30*$scaleX);
+    $result = $writer->write($qrCode)->getDataUri();
+    return $result;
+}
 function currentPlatform(){
     $session_platform = session('platform');
     $platform_code = $session_platform && $session_platform == 'induccion' ? 'onboarding' : 'training';

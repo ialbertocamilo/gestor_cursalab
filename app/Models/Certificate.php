@@ -13,7 +13,7 @@ class Certificate extends Model
 {
     use softdeletes;
 
-    protected $fillable = ['media_id', 'title', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active','path_image', 'platform_id'];
+    protected $fillable = ['media_id', 'title', 'font_id', 'path_file', 'info_bg', 'd_objects', 's_objects', 'active','path_image', 'platform_id'];
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     private $dias_ES = array("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo");
@@ -396,13 +396,51 @@ class Certificate extends Model
 
         return  abort(404);
     }
-
-    protected function storeRequest($title, $background, $objects, $certificate = null, $images_base64 = null)
+    protected function saveFont($data){
+        $font_name = $data['name'];
+        $_taxonomy_font_parent = new Taxonomy();
+        $_taxonomy_font_parent->group = 'certificate';
+        $_taxonomy_font_parent->type = 'font';
+        $_taxonomy_font_parent->name = $font_name;
+        $_taxonomy_font_parent->active = 1;
+        $_taxonomy_font_parent->save();
+        $fonts = ['font-normal','font-bold','font-italic','font-bold-italic'];
+        $_taxonomy_font_child = [];
+        foreach ($fonts as $font) {
+            if(isset($data[$font]) && $data[$font] && $data[$font] != 'null'){
+                $path_font =  Media::uploadFile($data[$font],null, false, 'ttf', 'font');
+                $_taxonomy_font_child[] = [
+                    'group'=> 'certificate',
+                    'type'=> 'font',
+                    'code' => $font,
+                    'name' => Str::slug($font_name).'-'.$font,
+                    'active'=>1,
+                    'parent_id' => $_taxonomy_font_parent->id,
+                    'path'=> $path_font,
+                    'extra_attributes'=> json_encode([
+                        'storage' => 's3'
+                    ]),
+                ];
+            }
+        }
+        if(count($_taxonomy_font_child)){
+            Taxonomy::insert($_taxonomy_font_child);
+        }
+    }
+    protected function storeRequest($title, $background, $objects, $certificate = null, $images_base64 = null,$font_id=null)
     {
         $e_statics = $objects->where('static', true);
         $e_dinamics = $objects->where('static', false);
 
         $compare = $certificate ? true : false;
+        //Custom FONTS
+        $custom_font = false;
+        $list_type_fonts = [];
+        if($font_id){
+            $custom_font = true;
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+        }
+        $local_paths_font = [];
 
         if ($background) {
 
@@ -421,16 +459,8 @@ class Certificate extends Model
 
                     case 'i-text':
                         //  === para el font ===
-                        $fontName = 'calisto-mt.ttf';
-                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold-italic.ttf';
-                        }else if($e_static['fontStyle'] === 'italic') {
-                            $fontName = 'calisto-mt-italic.ttf';
-                        }else if($e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold.ttf';
-                        }
-
-                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        $font = self::getPathFonth($e_static,$custom_font,$list_type_fonts);
+                        // $font = realpath('.').'/fonts/diplomas/'.$fontName;
                         //  === para el font ===
 
                         $rgb = Certificate::hex2rgb($e_static['fill']);
@@ -440,7 +470,7 @@ class Certificate extends Model
                         // resize font;
                         $divideSize = $e_static['fontSize'] / 3.3;
                         $fontsize = $e_static['fontSize'] - $divideSize;
-
+                        
                         imagettftext(
                             $im,
                             $fontsize,
@@ -451,7 +481,7 @@ class Certificate extends Model
                             $font,
                             utf8_decode($e_static['text'])
                         );
-
+                        
                         $info_s_objects[] = Certificate::pushTypeIText($e_static);
                     break;
                     case 'image':
@@ -477,7 +507,6 @@ class Certificate extends Model
             $info_d_objects = []; // d_objects[]
 
             foreach ($e_dinamics as $e_dinamic) {
-
                 if($e_dinamic['type']=='text'){
                     $info_d_objects [] = [
                         'type'=>$e_dinamic['type'],
@@ -498,8 +527,23 @@ class Certificate extends Model
                         'zoomX'=> $e_dinamic['zoomX'] ?? null,
                     ];
                 }
+                if($e_dinamic['type']=='qr_image'){
+                    $info_d_objects [] = [
+                        'id'=>'qr-validator',
+                        'type'=>$e_dinamic['type'],
+                        'fill'=>$e_dinamic['fill'],
+                        'left'=>$e_dinamic['left'],
+                        // 'left_calc'=>$e_dinamic['left'] - $x,
+                        'top'=>$e_dinamic['top'],
+                        // 'top_calc'=>$e_dinamic['top'] - $y,
+                        'height'=>$e_dinamic['height'],
+                        'width'=>$e_dinamic['width'],
+                        'scaleX' => $e_dinamic['scaleX'],
+                        'scaleY' => $e_dinamic['scaleY'],
+                        'zoomX'=> $e_dinamic['zoomX'] ?? null,
+                    ];
+                }
             }
-
             // === guarda imagen - media y retorna id ===
             $info_bg = Certificate::pushTypeImage($background, $nombre_plantilla, $compare, $images_base64);
 
@@ -522,6 +566,7 @@ class Certificate extends Model
             $diploma = $certificate ?? new Certificate;
             $diploma->media_id = $media->id;
             $diploma->title = $title;
+            $diploma->font_id = $font_id;
             $diploma->path_image = $path;
             $diploma->info_bg = json_encode($info_bg);
             $diploma->s_objects = json_encode($info_s_objects);
@@ -585,14 +630,22 @@ class Certificate extends Model
         imagecopymerge($dst_im, $copy, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct);
     }
 
-    protected function setDynamicsToImage($image, $e_dinamics, $background, $real_info = [])
+    protected function setDynamicsToImage($image, $e_dinamics, $background, $real_info = [],$font_id=null)
     {
         $x = $background['left'];
         $y = $background['top'];
-
+        //Custom FONTS
+        $custom_font = false;
+        $list_type_fonts = [];
+        if($font_id){
+            $custom_font = true;
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+        }
+        $local_paths_font = [];
         foreach ($e_dinamics as $e_dinamic)
         {
-            $font = realpath('.').'/fonts/diplomas/calisto-mt.ttf';
+             //  === para el font ===
+             
             if($e_dinamic['type']=='text'){
                 $rgb = Certificate::hex2rgb($e_dinamic['fill']);
                 $color = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
@@ -608,9 +661,10 @@ class Certificate extends Model
                 $left = $e_dinamic['left'] - $x;
                 $top = $e_dinamic['top'] - $y + $fontsize;
 
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']!='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-italic.ttf';
-                ($e_dinamic['fontStyle']!='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold.ttf';
-                ($e_dinamic['fontStyle']=='italic' && $e_dinamic['fontWeight']=='bold') && $font = realpath('.').'/fonts/diplomas/calisto-mt-bold-italic.ttf';
+                
+
+                 //  === para el font ===
+                 $font = self::getPathFonth($e_dinamic,$custom_font,$list_type_fonts);
 
                 //Eliminar emogis
                 $text = trim(Certificate::remove_emoji($text));
@@ -628,12 +682,29 @@ class Certificate extends Model
                     $top = $top + $fontsize + (0.2*$fontsize);
                 }
             }
+            if($e_dinamic['type']=='qr_image'){
+                $user_id = $real_info['user_id'] ?? 216;
+                $course_id = $real_info['course_id'] ?? 1312;
+                $text_qr = env('APP_URL').'/tools/ver_diploma/'.$user_id.'/'.$course_id;
+                $qr_code_string = generate_qr_code_in_base_64($text_qr,$e_dinamic['height'],$e_dinamic['width'],$e_dinamic['scaleX'],$e_dinamic['scaleY']);
+                $image2 = self::image_create($qr_code_string, $e_dinamic['scaleX'], $e_dinamic['scaleY'], $e_dinamic['width'], $e_dinamic['height']);
+                self::imagecopymerge_alpha(
+                    $image, // destino base
+                    $image2, // fuente base
+                    $e_dinamic['left']-$x,
+                    $e_dinamic['top']-$y,
+                    0,
+                    0,
+                    $e_dinamic['width']*$e_dinamic['scaleX'],
+                    $e_dinamic['height']*$e_dinamic['scaleY'],
+                    100);
+            }
         }
 
         return $image;
     }
     protected function duplicateCertificatesFromWorkspace($current_workspace,$new_workspace){
-        $certificates = Certificate::select('media_id', 'title',  'info_bg', 'd_objects', 's_objects', 'active')
+        $certificates = Certificate::select('media_id', 'title',  'info_bg','font_id','d_objects', 's_objects', 'active')
         ->withWhereHas('media', function($query) use($current_workspace){
             $query->select('id','title', 'description', 'file', 'ext', 'external_id', 'size', 'workspace_id')
             ->where('workspace_id', $current_workspace->id);
@@ -651,5 +722,41 @@ class Certificate extends Model
             $_certificate->fill($certificate);
             $_certificate->save();
         }
+    }
+    protected function getPathFonth($element,$custom_font,$list_type_fonts){
+        $font = '';
+        if($custom_font && count($list_type_fonts)){
+            $fontName = $list_type_fonts->where('code','font-normal')->first();
+            if ($element['fontStyle'] === 'italic' && $element['fontWeight'] === 'bold') {
+                $fontName = $list_type_fonts->where('code','font-bold-italic')->first() ?? $fontName;
+            }else if($element['fontStyle'] === 'italic') {
+                $fontName = $list_type_fonts->where('code','font-italic')->first() ?? $fontName;
+            }else if($element['fontWeight'] === 'bold') {
+                $fontName = $list_type_fonts->where('code','font-bold')->first() ?? $fontName;
+            }
+            if($fontName->extra_attributes['storage'] == 's3'){
+                $s3FontUrl = get_media_url($fontName->path,'s3');
+                $fontFilename = basename($fontName->path);
+                $fileContents = file_get_contents($s3FontUrl);
+                if(!Storage::disk('public')->exists($fontName->path)){
+                    Storage::disk('public')->put($fontName->path, $fileContents);
+                }
+                $font = storage_path('app/public/' . $fontName->path);
+                $local_paths_font[] = $font;
+            }else{
+                $font =  realpath('.').'/'.$fontName->path;
+            }
+        }else{
+            $fontName = 'calisto-mt.ttf';
+            if ($element['fontStyle'] === 'italic' && $element['fontWeight'] === 'bold') {
+                $fontName = 'calisto-mt-bold-italic.ttf';
+            }else if($element['fontStyle'] === 'italic') {
+                $fontName = 'calisto-mt-italic.ttf';
+            }else if($element['fontWeight'] === 'bold') {
+                $fontName = 'calisto-mt-bold.ttf';
+            }
+            $font = realpath('.').'/fonts/diplomas/'.$fontName;
+        }
+        return $font;
     }
 }

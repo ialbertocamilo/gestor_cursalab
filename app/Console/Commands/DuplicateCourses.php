@@ -10,7 +10,21 @@ use Illuminate\Support\Facades\DB;
 
 class DuplicateCourses extends Command
 {
-    const DATE_TIME = '2023-09-22 16:00';
+    const DATE_TIME = '2024-04-18 16:00';
+
+    const COURSES_NAMES = [
+
+        "FOCO Venta Empresa",
+        "FOCO Venta Empresa: Productos",
+        "Flujo de Redi - Asistente de Venta Empresa",
+        "Repaso Venta Empresa - mayo 2023",
+        "Repaso Venta Empresa - Febrero 2024",
+        "Repaso Venta Empresa - Abril 2024 - Lima",
+        "Repaso Venta Empresa - Abril 2024 - Norte 1",
+        "Repaso Venta Empresa - Abril 2024 - Norte 2",
+        "Repaso Venta Empresa - Abril 2024 - Centro",
+        "Repaso Venta Empresa - Abril 2024 - Sur"
+    ];
 
     /**
      * The name and signature of the console command.
@@ -43,6 +57,10 @@ class DuplicateCourses extends Command
 
         if ($this->argument('mode') === 'test') {
             $valid = $this->coursesAreValid($originCourses, $destinationCourses);
+
+            $this->info('Origin courses count: ' . count($originCourses));
+            $this->info('Destination courses count: ' . count($destinationCourses));
+
             if ($valid) {
                 $this->info('OK');
             }
@@ -124,6 +142,12 @@ class DuplicateCourses extends Command
      */
     public function loadCourses($workspaceId) {
 
+        $quotedCoursesNames = array_map(function ($item) {
+            return '"' . $item . '"';
+        }, self::COURSES_NAMES);
+
+        $coursesString = implode(', ', $quotedCoursesNames);
+
         return DB::select(DB::raw("select
             s.id school_id,
             c.id course_id,
@@ -139,13 +163,11 @@ class DuplicateCourses extends Command
                 SELECT school_id from school_subworkspace ss where subworkspace_id  in (SELECT id from workspaces where parent_id = :workspaceId)
             )
             and c.name in (
-                 'PIC: ABC de Tiendas',
-                 'PIC: Agora Club',
-                 'PIC: Club Pro',
-                 'PIC: Programa de Inducción Cultural - Tienda 2.0',
-                 'PIC: Sostenibilidad Tienda'
+                $coursesString
             )
-        "), ['workspaceId' => $workspaceId]);
+        "), [
+            'workspaceId' => $workspaceId
+        ]);
     }
 
 
@@ -163,6 +185,9 @@ class DuplicateCourses extends Command
         $destinationCoursesCount = count($destinationCourses);
         if ($originCoursesCount === $destinationCoursesCount) {
 
+            if ($originCoursesCount === 0) {
+                $errors[] = 'There no courses in origin with those names';
+            }
         } else {
             $errors[] = "Courses count does not match: origin $originCoursesCount - destination $destinationCoursesCount";
         }

@@ -287,6 +287,7 @@ class Media extends BaseModel
         $valid_ext4 = ['pdf'];
         $valid_ext5 = ['zip', 'scorm','h5p']; // todo verificar esto: Los zip se suben en el storage local (del proyecto)
         $valid_ext6 = ['xls', 'xlsx', 'ppt', 'pptx', 'doc', 'docx','txt'];
+        $valid_ext7 = ['ttf'];
         // $valid_ext7 = ['sdasd'];
         if (in_array(strtolower($ext), $valid_ext1)) {
             $path = 'images/' . $fileName;
@@ -319,6 +320,8 @@ class Media extends BaseModel
 
                 $uploaded = true;
             }
+        }else if (in_array(strtolower($ext), $valid_ext7)) {
+            $path = 'fonts/' . $fileName;
         }
         // else if (in_array(strtolower($ext), $valid_ext7)) {
         //     $path = 'h5p/' . $fileName;

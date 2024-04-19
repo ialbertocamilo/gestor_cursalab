@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\DiplomaSearchResource;
-use App\Models\Ambiente;
-use App\Models\Media;
-use App\Models\User;
-use App\Models\Course;
-use App\Models\SummaryCourse;
-use App\Models\{ Certificate as Diploma, Process, Stage};
-use Carbon\Carbon;
 use File;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Media;
+use App\Models\Course;
+use App\Models\Ambiente;
+use App\Models\Taxonomy;
+use App\Models\Certificate;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\SummaryCourse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Http\Resources\DiplomaSearchResource;
+use App\Models\{ Certificate as Diploma, Process, Stage};
 
 class DiplomaController extends Controller
 {
@@ -46,7 +48,23 @@ class DiplomaController extends Controller
         $image = Storage::disk('s3')->get($file);
         return "data:image/png;base64,".base64_encode($image);
     }
-
+    public function saveFont(Request $request){
+        $data = $request->all();
+        $hasStorageAvailable = Media::validateStorageByWorkspace([]);
+        if ($hasStorageAvailable) {
+            $message = Certificate::saveFont($data);
+            $response = [
+                'msg' => 'Fuente creado correctamente.',
+                'messages' => ['list' => []]
+            ];
+            return $this->success([
+                'msg' => 'Fuente creado correctamente.',
+            ]);
+        }
+        return response()->json([
+            'msg' => config('errors.limit-errors.limit-storage-allowed')
+        ], 403);
+    }
     public function searchDiploma(Diploma $diploma)
     {
         // === fondo de plantilla ===
@@ -55,9 +73,11 @@ class DiplomaController extends Controller
 
         // === partes de plantilla ===
         $s_objects_decoded = json_decode($diploma->s_objects);
+
         $s_objects_decoded = collect($s_objects_decoded);
 
         $array_medias = $s_objects_decoded->where('type', 'image');
+
         $array_text = $s_objects_decoded->where('type', 'i-text');
 
         foreach ($array_medias as $media_row ) {
@@ -86,8 +106,15 @@ class DiplomaController extends Controller
         $objects = collect($request->info['objects']);
         $background = $request->info['backgroundImage'];
 
-        $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
-
+        // $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
+        $status =  Diploma::storeRequest(
+                    title:$request->nombre_plantilla, 
+                    background: $background,
+                    objects:$objects,
+                    images_base64:$images_base64,
+                    font_id:$request->get('font_id')
+                );
+       
         if($status)
         {
             $model_id = $request->model_id;
@@ -116,8 +143,7 @@ class DiplomaController extends Controller
     {
         $objects = collect($request->info['objects']);
         $background = $request->info['backgroundImage'];
-
-        $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects);
+        $status = Diploma::storeRequest(title:$request->nombre_plantilla, background: $background,objects:$objects,font_id:$request->get('font_id'));
 
         if($status)
         {
@@ -147,19 +173,17 @@ class DiplomaController extends Controller
         $e_dinamics = $d_per;
         $x = $bg_info['left'];
         $y = $bg_info['top'];
-
         $pathImage = str_replace(" ", "%20", $pathImage);
-        $headers = get_headers(get_media_url($pathImage));
+        $headers = get_headers(get_media_url($pathImage,'s3'));
 
         if ($headers && strpos($headers[0], "200 OK") !== false) {
 
-            $image = file_get_contents(get_media_url($pathImage));
+            $image = file_get_contents(get_media_url($pathImage,'s3'));
             $image = imagecreatefromstring($image);
             $width = imagesx($image);
 
             $bg_info['image_width'] = $width;
-
-            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info);
+            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info,$real_info['font_id']);
             $preview = Diploma::jpg_to_base64($image);
 
             return $preview;
@@ -167,11 +191,33 @@ class DiplomaController extends Controller
 
         return abort(404);
     }
-
+    public function initData(){
+        $fonts = Taxonomy::select('id','name')
+                    ->with('children:id,name,code,parent_id')
+                    ->where('group','certificate')
+                    ->where('type','font')
+                    ->whereNull('parent_id')->get()->map(function($font_parent){
+                        $font_parent->only_regular_font =  $font_parent->children->count() == 1;
+                        unset($font_parent->children);
+                        return $font_parent;
+                    });
+        $is_super_user = boolval(auth()->user()->isA('super-user'));
+        return $this->success(['fonts'=>$fonts,'is_super_user'=>$is_super_user]);
+    }
     public function get_preview_data(Request $request)
     {
         $data = $request->get('info');
         $zoom = $request->get('zoom');
+        //Custom FONTS
+        $font_id = $request->get('font_id');
+        $custom_font = false;
+        $list_type_fonts = [];
+        if($font_id){
+            $custom_font = true;
+            $list_type_fonts = Taxonomy::select('code','path','extra_attributes')->where('group','certificate')->where('type','font')->where('parent_id',$font_id)->get();
+        }
+        $local_paths_font = [];
+
         $response = $request->get('response');
         $user_data = $request->get('user_data');
 
@@ -193,16 +239,7 @@ class DiplomaController extends Controller
                     case 'i-text':
 
                         //  === para el font ===
-                        $fontName = 'calisto-mt.ttf';
-                        if ($e_static['fontStyle'] === 'italic' && $e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold-italic.ttf';
-                        }else if($e_static['fontStyle'] === 'italic') {
-                            $fontName = 'calisto-mt-italic.ttf';
-                        }else if($e_static['fontWeight'] === 'bold') {
-                            $fontName = 'calisto-mt-bold.ttf';
-                        }
-
-                        $font = realpath('.').'/fonts/diplomas/'.$fontName;
+                        $font = Diploma::getPathFonth($e_static,$custom_font,$list_type_fonts);
                         //  === para el font ===
 
                         $rgb = Diploma::convertHexadecimalToRGB($e_static['fill']);
@@ -243,7 +280,7 @@ class DiplomaController extends Controller
                 }
             }
 
-            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $background);
+            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $background,[],$font_id);
 
             // //Añadir marca de agua al 10% de la imagen total
             // $ambiente = DB::table('config_general')->select('marca_agua')->first();
@@ -258,7 +295,9 @@ class DiplomaController extends Controller
             //     }
             // }
         }
-
+        foreach ($local_paths_font as $local_font) {
+            // unlink($local_font);
+        }
         $preview = Diploma::jpg_to_base64($image);
 
         if ($response == 'only-data') {
@@ -268,7 +307,7 @@ class DiplomaController extends Controller
         return response()->json(compact('preview'));
     }
 
-
+   
     public function destroy(Diploma $diploma)
     {
         $diploma->delete();
@@ -453,6 +492,8 @@ class DiplomaController extends Controller
             'old_template' => $editableTemplate ? false : true,
             'show_certification_date' => $course_to_export->show_certification_date,
             'courses' => removeUCModuleNameFromCourseName($course_to_export->name),
+            'course_id' => $course_to_export->id,
+            'user_id' => $user_id,
             'processes' => null,
             'grade' => (string) intval($grade),
             'course-average-grade' => (string) intval($grade),
@@ -462,6 +503,7 @@ class DiplomaController extends Controller
             'backgroundInfo' => $backgroundInfo ?? [],
             'dObjects' => $dObjects ?? [],
             'pathImage' => $pathImage ?? null,
+            'font_id' => $editableTemplate?->font_id
         );
     }
 }

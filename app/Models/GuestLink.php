@@ -11,7 +11,13 @@ use Illuminate\Support\Facades\Hash;
 class GuestLink extends BaseModel
 {
     protected $table = 'guest_links';
-    protected $filleable = ['id','url','workspace_id','subworkspace_id','expiration_date','admin_id','guest_id','activate_by_default','count_registers'];
+    protected $filleable = ['id','url','workspace_id','subworkspace_id','expiration_date',
+                        'admin_id','guest_id','activate_by_default','count_registers',
+                        'type_form','criteria_list'];
+
+    protected $casts = [
+        'criteria_list' => 'array'
+    ];
     public function workspace()
     {
         return $this->belongsTo(Workspace::class, 'workspace_id');
@@ -40,10 +46,12 @@ class GuestLink extends BaseModel
                 $expiration_date = null;
                 break;
         }
-        self::createLink($data['code'],$expiration_date,$user->id,null,$data['activate_by_default'],$data['subworkspace_id']);
+        self::createLink($data['code'],$expiration_date,$user->id,null,$data['activate_by_default'],$data['subworkspace_id'],$data['type_form'],$data['criteria_list']);
         return ['msg'=>'Se creó correctamente el enlace.','type_msg'=>'success'];
     }
-    protected function createLink($code,$expiration_date,$admin_id,$guest_id = null,$activate_by_default=false,$subworkspace_id=null){
+    protected function createLink($code,$expiration_date,$admin_id,$guest_id = null,
+                                $activate_by_default=false,$subworkspace_id=null,$type_form='default',$criteria_list=[]
+    ){
         $id_register_url = GuestLink::insertGetId([
             'url'=>$code,
             'workspace_id'=> get_current_workspace()->id,
@@ -51,7 +59,9 @@ class GuestLink extends BaseModel
             'subworkspace_id'=>$subworkspace_id,
             'admin_id' => $admin_id,
             'guest_id'=>$guest_id,
-            'activate_by_default'=>$activate_by_default
+            'activate_by_default'=>$activate_by_default,
+            'type_form' => $type_form,
+            'criteria_list' => json_encode($criteria_list)
         ]);
         // if (env('MULTIMARCA')) {
         if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
@@ -67,9 +77,9 @@ class GuestLink extends BaseModel
         $guest_link =  self::query()
             ->with(['workspace:id,logo'])
             ->where('url',$code)
-            ->select('guest_id','id as code_id','expiration_date','workspace_id','subworkspace_id')
+            ->select('guest_id','id as code_id','type_form','criteria_list','expiration_date','workspace_id','subworkspace_id')
             ->first();
-        if(!$guest_link || $guest_link->expiration_date < date("Y-m-d G:i")){
+        if(!$guest_link || ($guest_link->expiration_date && $guest_link->expiration_date < date("Y-m-d G:i"))){
             $message = $guest_link ? 'Link expirado' : 'El link es incorrecto';
             return ['exist_url'=>false,'fondo_invitados_app'=>get_media_url($ambiente?->fondo_invitados_app),'message'=>$message,'logo'=>get_media_url($ambiente?->logo)];
         }
@@ -79,12 +89,25 @@ class GuestLink extends BaseModel
                 : null ;
         }
         $data = $guest_link;
+        $data['show_criteria_section'] = true;
         if ($guest_link) {
             $data['fondo_invitados_app'] =  get_media_url($ambiente?->fondo_invitados_app,'s3');
             $data['logo'] =  get_media_url($guest_link?->workspace?->logo,'s3');
-            $criteria_workspace = self::getListCriterion($guest_link);
-            $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();;
-            $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
+            $criteria_workspace = self::getListCriterion($guest_link->workspace_id);
+            $data['personal_criteria_data'] = $criteria_workspace->where('criterion_code','<>','module')->where('personal_data',true)->values()->all();
+            $data['criteria_data'] = [];
+            switch ($guest_link->type_form) {
+                case 'default':
+                    $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->values()->all();
+                break;
+                case 'custom_criteria':
+                    $data['criteria_data'] = $criteria_workspace->where('personal_data',false)->whereIn('criterion_id',$guest_link->criteria_list)->values()->all();
+                break;
+                case 'without_criteria':
+                    $data['show_criteria_section'] = false;
+                    $data['criteria_data'] = [];
+                break;
+            }
             if(!$guest_link->subworkspace_id){
                 $data['criteria_data'] = array_merge($criteria_workspace->where('criterion_code','module')->values()->all(),$data['criteria_data']);
             }
@@ -185,26 +208,29 @@ class GuestLink extends BaseModel
     protected function initData(){
         $user = Auth::user();
         $share_url = trim( strtolower( $user->name ) );
+        $current_workspace = get_current_workspace();
         //Eliminar multiples espacios y cambiar el espacio por guion
         $url_app_web = config('app.web_url');
         $share_url = str_replace( ' ', '-', preg_replace( '/\s+/', ' ', $share_url ) );
-        $modules = Workspace::where('parent_id',get_current_workspace()->id)->select('id','name')->get();
+        $modules = Workspace::where('parent_id',$current_workspace->id)->select('id','name')->get();
+        $criteria = self::getListCriterion($current_workspace->id,true)->where('personal_data',false)->values()->all();
         return [
             'generic_url' => $share_url,
             'app_url' =>  $url_app_web.'register?c=',
-            'modules'=>$modules
+            'modules'=>$modules,
+            'criteria'=>$criteria
         ];;
     }
     //SUBFUNCTIONS
-    private static function getListCriterion($guest_link){
+    private static function getListCriterion($workspace_id,$without_values=false){
         $criterion_workspace = CriterionWorkspace::with([
             'criterion:id,code,name,field_id,can_be_create,parent_id',
             'criterion.field_type:id,code',
             // 'criterion.values:id,criterion_id,value_text'
         ])
         ->select('criterion_id','criterion_title','avaiable_in_personal_data_guest_form')
-        ->where('workspace_id',$guest_link->workspace_id)
-        ->where('required_in_user_creation',1)->get()->map(function($criterion_workspace) use ($guest_link){
+        ->where('workspace_id',$workspace_id)
+        ->where('required_in_user_creation',1)->get()->map(function($criterion_workspace) use ($workspace_id,$without_values){
             $can_be_create = false;
             $criterion_code = $criterion_workspace->criterion->code;
             $criterion_id = $criterion_workspace->criterion_id;
@@ -215,9 +241,9 @@ class GuestLink extends BaseModel
             if($criterion_code != 'module' && $criterion_code !='document'){
                 $can_be_create = boolval($criterion_workspace->criterion->can_be_create);
             }
-            if($criterion_type != 'date' && !$parent_id && $criterion_code !='document'){
-                $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($guest_link) {
-                    $q->where('id', $guest_link->workspace_id);
+            if($criterion_type != 'date' && !$parent_id && $criterion_code !='document' && !$without_values){
+                $values = CriterionValue::select('id','value_text')->whereHas('workspaces', function ($q) use ($workspace_id) {
+                    $q->where('id', $workspace_id);
                 })
                 ->where('criterion_id', $criterion_id)->orderBy('value_text')->get();
             }

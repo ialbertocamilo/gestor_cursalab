@@ -43,7 +43,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('quizzes:finish-summary-overdue')->everyTenMinutes();
 
         // Meetings
-        $schedule->command('meeting:update-status')->hourly();
+        $schedule->command('meeting:update-status')->everyTenMinutes();
         $schedule->command('meeting:update-attendance-detail')->everyFiveMinutes();
         $schedule->command('meeting:verify-finish-status')->everyTenMinutes();
         $schedule->command('meeting:update-url-start')->everyTenMinutes();

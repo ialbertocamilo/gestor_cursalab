@@ -20,4 +20,4 @@ Se mantiene frontend y backend en el mismo proyecto (gestor)
 
 ## New tags
 
-git add . && git commit -m "message commit" && git tag -a v2.1.1 -m "message tag" && git push && git push origin v2.1.1
+git add . && git commit -m "message commit" && git tag -a v2.1.1 -m "message tag" && git push origin main && git push origin main v2.1.1

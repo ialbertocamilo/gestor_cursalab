@@ -6,11 +6,13 @@ use Carbon\Carbon;
 use App\RegisterUrl;
 use App\Mail\EmailTemplate;
 use Illuminate\Support\Str;
+use App\Models\UsuarioMaster;
 use App\Models\Mongo\EmailsSent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Guest extends BaseModel {
@@ -40,6 +42,12 @@ class Guest extends BaseModel {
             $guest = Guest::where('id',$guest_id)->first();
             if($guest->user_id){
                 $user = User::where('id',$guest->user_id)->first();
+                if (env('MULTIMARCA') && env('APP_ENV') == 'production') {
+                    $usu_master = UsuarioMaster::where('dni', $user->dni)->first();
+                    if ($usu_master) {
+                        $usu_master->delete();
+                    }
+                }
                 $user->delete();
             }
             $guest->delete();
@@ -125,6 +133,12 @@ class Guest extends BaseModel {
             $user = User::storeRequest($data);
             $type_id_by_email = Taxonomy::where('group','guests')->where('type','type')->where('code','by-link')->first()?->id;
             Guest::insertGuest($user->email,$status_id_pending,$type_id_by_email,null,$current_workspace->id,$user->id);
+        }
+        if (env('MULTIMARCA') && env('APP_ENV') == 'production' && $user) {
+            $usuario_controller = new UsuarioController();
+            $dni_previo = $user->document;
+            $email_previo = $user->email;
+            $usuario_controller->crear_o_actualizar_usuario_en_master($dni_previo, $email_previo, $data);
         }
         $guest_link->increment('count_registers', 1);
         $title = 'Tu solicitud ha sido aceptada';

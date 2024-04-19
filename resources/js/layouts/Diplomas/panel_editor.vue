@@ -49,6 +49,21 @@
                 <v-icon>mdi-format-text</v-icon>
             </v-btn>
         </div>
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="Fuente de Texto">
+            <DefaultAutocomplete
+                :items="fonts"
+                label="Fuente de texto"
+                v-model="font_id"
+                item-text="name"
+                item-value="id"
+                dense
+                @input="changeFont"
+                :disabled="d_btn"
+                :openUp="true"
+                return-object
+            />
+        </div>
 
         <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Imagen">
@@ -58,7 +73,13 @@
             </v-btn>
             <input @change="emitir_add_image()" class="input_img" type="file" id="input_image">
         </div>
-
+        <div class="css-tooltip css-tooltip--bottom"
+             data-tooltip="QR de verificación">
+            <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_add_qr_image()"
+                    text>
+                <v-icon>mdi-qrcode</v-icon>
+            </v-btn>
+        </div>
         <!-- <div class="css-tooltip css-tooltip--bottom"
              data-tooltip="Previsualización">
             <v-btn class="btn-panel-editor" elevation="2" :disabled="d_btn" @click="emitir_prev()" text>
@@ -75,6 +96,7 @@
     </div>
 </template>
 <script>
+
 export default {
     props: {
         d_btn: {
@@ -88,6 +110,15 @@ export default {
         btn_course: {
             type: String,
             default: 'true'
+        },
+        fonts:{
+            type: Array,
+            default:[]
+        }
+    },
+    data(){
+        return {
+            font_id:null
         }
     },
     methods: {
@@ -100,8 +131,14 @@ export default {
         emitir_add_image(){
             this.$emit("emit_add_image");
         },
+        emitir_add_qr_image(){
+            this.$emit("emitir_add_qr_image");
+        },
         emitir_prev(){
             this.$emit("emit_prev");
+        },
+        changeFont(font){
+            this.$emit("emit_change_font",font);
         },
         emitir_delete(){
             this.$emit("emit_delete",'bg');
