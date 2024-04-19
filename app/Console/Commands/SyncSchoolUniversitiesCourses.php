@@ -152,7 +152,7 @@ class SyncSchoolUniversitiesCourses extends Command
         }
         $topic_requirement_id = null;
         if($topic->topic_requirement_id){
-            $topic_requirement_id = Topic::where('external_id',$topic->topic_requirement_id)->select('id')->first()?->id;
+            $topic_requirement_id = Topic::where('external_id',$topic->topic_requirement_id)->where('course_id',$_course->id)->select('id')->first()?->id;
         }
         $medias = [];
         $_medias = $topic->medias->sortBy('position')->toArray();
