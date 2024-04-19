@@ -55,9 +55,11 @@ class QuestionM extends Model
                     ->whereHas('course',function($q){
                         $q->where('external_code','cursalab-university');
                     })
+                    ->whereNotNull('type_evaluation_id')
                     ->select('id','course_id','type_evaluation_id','qualification_type_id')
                     ->get();
             foreach ($topics as $key => $topic) {
+                    //code...
                 $question_type_code = $topic->evaluation_type->code === 'qualified'
                 ? 'select-options'
                 : 'written-answer';
