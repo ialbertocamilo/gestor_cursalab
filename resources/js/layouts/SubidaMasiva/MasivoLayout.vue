@@ -31,8 +31,10 @@
                         />
                     </v-col>
                 </v-row>
-                <mUsuarios :number_socket="number_socket" :key="1" :url_template="url_template"
-                           :process="list_massive_processes[1]"
+                <mUsuarios :number_socket="number_socket"
+                           :key="1"
+                           :url_template="url_template"
+                           :process="list_massive_processes[process_id]"
                            v-show="process_id==1 || process_id==5"
                            @emitir-alert="show_alert_msg"
                            @download-excel-observations="downloadExcelObservations"

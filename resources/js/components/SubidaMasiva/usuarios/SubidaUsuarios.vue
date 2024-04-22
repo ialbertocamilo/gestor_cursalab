@@ -94,7 +94,13 @@ export default {
                 // console.log(data);
                 data.append("number_socket", this.number_socket || null);
                 percentLoader.innerHTML = ``;
-                await axios.post('/procesos-masivos/create-update-users', data).then((res) => {
+
+                let url = '/procesos-masivos/create-update-users';
+                if (this.process.id === 5) {
+                    url = '/procesos-masivos/update-users';
+                }
+
+                await axios.post(url, data).then((res) => {
                     const data = res.data.data;
                     if (data.errores.length > 0) {
                         this.$emit("download-excel-observations", {

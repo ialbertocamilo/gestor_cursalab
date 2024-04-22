@@ -612,9 +612,11 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             if($user->active){
                 $user->sendWelcomeEmail($from_massive,$current_workspace_id);
             }
-            $user->subworkspace_id = Workspace::query()
-                ->where('criterion_value_id', $data['criterion_list']['module'])
-                ->first()?->id;
+            if (isset($data['criterion_list']['module'])) {
+                $user->subworkspace_id = Workspace::query()
+                    ->where('criterion_value_id', $data['criterion_list']['module'])
+                    ->first()?->id;
+            }
 
             $criterion_list_final = [];
 
