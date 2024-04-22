@@ -38,6 +38,7 @@
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Checklist - ${$event.title}`)"
+                @segmentation="openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del checklist - ${resource.name}`)"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
@@ -158,11 +159,31 @@ export default {
                         method_name: 'edit'
                     },
                     {
-                        text: "Crear copia",
-                        icon: 'mdi mdi-content-copy',
+                        text: "Actividades",
+                        icon: 'mdi-book-variant',
                         type: 'action',
-                        method_name: 'duplicate'
+                        method_name: 'activities'
                     },
+                    {
+                        text: "Segmentación",
+                        icon: 'mdi mdi-account-group segmentation-icon',
+                        type: 'action',
+                        method_name: 'segmentation',
+                        // conditionalBadgeIcon: [{
+                        //     message: 'No tienes colaboradores participantes en el checklist',
+                        //     minValue: 0,
+                        //     propertyCond: 'segments_count',
+                        //     color: 'red',
+                        //     icon: 'fas fa-exclamation-triangle',
+                        //     iconSize: '12px'
+                        // },{
+                        //     message: 'Selecciona a los colaboradores que participarán en el checklist',
+                        //     minValue: 1,
+                        //     propertyCond: 'segments_count',
+                        //     color: '#7fbade',
+                        //     icon: 'mdi mdi-check-circle'
+                        // }]
+                    }
                 ],
                 more_actions: [
                     {
@@ -299,7 +320,7 @@ export default {
                 persistent: true,
             },
             modalActivities:{
-                open:true,
+                open:false,
                 ref: 'modalActivities',
                 base_endpoint: '/checklist',
                 confirmLabel: 'Guardar',
@@ -371,41 +392,41 @@ export default {
         async abrirModalCreateEditChecklist(checklist, edit = false) {
             let vue = this;
 
-            if(edit && checklist.id != null && checklist.id != 0) {
-                this.showLoader()
-                vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: checklist.id})
-                    .then((res) => {
-                        let res_checklist = res.data.data.checklist;
-                        if (res_checklist != null) {
+            // if(edit && checklist.id != null && checklist.id != 0) {
+            //     this.showLoader()
+            //     vue.$http.post(`/entrenamiento/checklists/search_checklist`, { id: checklist.id})
+            //         .then((res) => {
+            //             let res_checklist = res.data.data.checklist;
+            //             if (res_checklist != null) {
 
-                            vue.dataModalChecklist = res_checklist;
+            //                 vue.dataModalChecklist = res_checklist;
 
-                        }else{
-                            vue.$notification.warning(`No se pudo obtener datos del checklist`, {
-                                timer: 6,
-                                showLeftIcn: false,
-                                showCloseIcn: true
-                            });
-                            vue.closeModalCreateEditChecklist();
-                            vue.refreshDefaultTable(vue.dataTable, vue.filters);
-                        }
-                        this.hideLoader()
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        this.hideLoader()
-                    });
-            } else {
-                vue.dataModalChecklist = checklist;
-            }
+            //             }else{
+            //                 vue.$notification.warning(`No se pudo obtener datos del checklist`, {
+            //                     timer: 6,
+            //                     showLeftIcn: false,
+            //                     showCloseIcn: true
+            //                 });
+            //                 vue.closeModalCreateEditChecklist();
+            //                 vue.refreshDefaultTable(vue.dataTable, vue.filters);
+            //             }
+            //             this.hideLoader()
+            //         })
+            //         .catch((err) => {
+            //             console.log(err);
+            //             this.hideLoader()
+            //         });
+            // } else {
+            //     vue.dataModalChecklist = checklist;
+            // }
 
-            await vue.$refs.ModalCreateChecklist.resetValidation()
+            // await vue.$refs.ModalCreateChecklist.resetValidation()
 
-            // vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
-            // if (edit)
-            //     vue.$refs.ModalCreateChecklist.rep()
+            // // vue.$refs.ModalCreateChecklist.setActividadesHasErrorProp()
+            // // if (edit)
+            // //     vue.$refs.ModalCreateChecklist.rep()
 
-            vue.modal.crear_editar_checklist = true;
+            // vue.modal.crear_editar_checklist = true;
         },
         saveChecklist() {
             let vue = this;

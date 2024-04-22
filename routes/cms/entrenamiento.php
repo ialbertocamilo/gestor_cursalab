@@ -56,6 +56,7 @@ Route::controller(EntrenamientoController::class)->group(function() {
 Route::controller(ChecklistController::class)->group(function() {
 	Route::prefix('/checklist')->middleware('hasHability:checklist')->group(function () {
 		Route::prefix('/v2')->group(function () {
+			Route::get('/search', 'searchChecklist');
 			Route::get('/form-selects', 'getFormSelects');
 			Route::post('/store', 'storeChecklist');
 			Route::get('/{checklist}/edit', 'editChecklist');

@@ -5,8 +5,8 @@
         <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirm">
                 <template v-slot:content>
                     <v-form ref="checklistForm">
-                        <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step1">
-                            <v-card-text>
+                        <!-- <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step1"> -->
+                            <!-- <v-card-text> -->
                                 <v-row>
                                     <v-col cols="7">
                                         <DefaultInput 
@@ -144,7 +144,7 @@
                                         </DefaultSimpleSection>
                                     </v-col>
                                     <v-col cols="5" class="pt-1">
-                                        <v-col cols="12">
+                                        <v-col cols="12" class="px-0">
                                             <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 py-4" marginx="mx-0">
                                                 <template slot="content">
                                                     <DefaultSelect dense :items="selects.qualification_types" item-text="name"
@@ -153,7 +153,7 @@
                                                 </template>
                                             </DefaultSimpleSection>
                                         </v-col>
-                                        <v-col cols="12">
+                                        <v-col cols="12" class="px-0">
                                             <DefaultSimpleSection title="Comentarios" marginy="my-1" marginx="mx-0">
                                                 <template slot="content">
                                                     <div class="d-flex">
@@ -339,8 +339,8 @@
                                         </v-row>
                                     </template>
                                 </DefaultModalSectionExpand>
-                            </v-card-text>
-                        </v-card>
+                            <!-- </v-card-text> -->
+                        <!-- </v-card> -->
                     </v-form>
                 </template>
         </DefaultDialog>
@@ -509,19 +509,12 @@ export default {
                 formData.set(
                     'evaluation_types', JSON.stringify(vue.resource.evaluation_types)
                 );
-                await vue.$http
-                    .post(url, formData)
+                await axios.post(url, formData)
                     .then(({ data }) => {
-
-                        if(!data.data.still_has_storage){
-                            vue.showAlert(data.data.msg,'warning')
-                            return '';
-                        }
-                        vue.closeModal()
                         vue.showAlert(data.data.msg);
-                        console.log('entra');
                         vue.$emit('onConfirm')
                     }).catch((error) => {
+                        console.log('error',error);
                         if (error && error.errors) {
                             const errors = error.errors ? error.errors : error;
                             vue.show_http_errors(errors);

@@ -44,5 +44,9 @@ class ChecklistController extends Controller
             'msg'=>'checklist actualizado correctamente.'
         ]);
     }
-    
+ 
+    public function searchChecklist(Request $request){
+        $data = CheckList::gridCheckList($request->all());
+        return $this->success($data);
+    }
 }

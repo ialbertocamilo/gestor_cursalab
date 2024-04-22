@@ -7,7 +7,7 @@
             @onConfirm="confirmModal"
         >
             <template v-slot:content>
-                <div v-if="show_activities">
+                <div v-if="show_activities" style="position: relative;">
                     <v-row>
                         <v-col cols="12" class="d-flex align-items-center justify-space-between">
                             <div class="d-flex align-items-center">
@@ -36,7 +36,14 @@
                             </div>
                         </v-col>
                     </v-row>
-                    <v-row v-for="(activity,index) in activities" :key="activity.id" class="elevation-1 my-4">
+                    <v-row v-for="(activity,index_activity) in activities" :key="activity.id" class="elevation-1 my-4">
+                        <v-col cols="12" class="d-flex justify-end">
+                            <DefaultButton
+                                icon="mdi-delete"
+                                isIconButton
+                                @click="removeActivity(index_activity)"
+                            />
+                        </v-col>
                         <v-col cols="1" class="d-flex align-center justify-content-center ">
                             <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
                             </v-icon>
@@ -127,15 +134,20 @@
                                             <v-col cols="12" v-if="activity.checklist_response.code == 'custom_option'">
                                                 Respuestas personalizadas:
                                                 <v-divider></v-divider>
-                                                <div v-for="(option,index) in activity.custom_options" class="col col-12" :key="index">
+                                                <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
                                                     <DefaultInput
                                                         clearable
-                                                        v-model="activity.custom_options[index].value"
-                                                        :label="`Opción ${index+1}`"
+                                                        v-model="activity.custom_options[index_option].value"
+                                                        :label="`Opción ${index_option+1}`"
                                                         dense
                                                     />
+                                                    <DefaultButton
+                                                        icon="mdi-delete"
+                                                        isIconButton
+                                                        @click="deleteCustomOption(index_activity,index_option)"
+                                                    />
                                                 </div>
-                                                <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(index)">Agregar una respuesta personalizada +</span>
+                                                <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(index_activity)">Agregar una respuesta personalizada +</span>
                                             </v-col>
                                             <v-col cols="12" class="d-flex align-items-center">
                                                 <span>
@@ -178,6 +190,16 @@
                                 </v-expansion-panel>
                             </v-expansion-panels>
                         </v-row>
+                    </v-row>
+                    <v-row style="position: sticky; bottom: 0px;z-index: 10;right: 0;">
+                        <v-col cols="12" class="d-flex justify-end pb-0">
+                            <DefaultButton
+                                rounded
+                                label="Agregar una actividad para tu checklist"
+                                icon="mdi mdi-plus"
+                                @click="addActivity()"
+                            />
+                        </v-col>
                     </v-row>
                 </div>
                 <v-row v-else>
@@ -364,6 +386,41 @@ export default {
                 id:vue.resource.custom_options.length + 1,
                 value:''
             })
+        },
+        deleteCustomOption(index_activity,index_option){
+            let vue = this;
+            vue.activities[index_activity].custom_options.splice(index_option,1);
+        },
+        removeActivity(index_activity){
+            let vue = this;
+            vue.activities.splice(index_activity,1);
+        },
+        addActivity(){
+            let vue = this;
+            vue.activities.push({
+                id:'insert-'+vue.activities.length+1,
+                orden:vue.activities.length+1,
+                qualification_type:0,
+                description:'',
+                checklist_response:false,
+                photo_response:false,
+                computational_vision:false,
+                custom_options:[],
+                type_computational_vision:{
+                    type:'',
+                    value:''
+                },
+            })
+        },
+        downloadTemplate(){
+            let vue = this;
+            vue.descargarExcelwithValuesInArray({
+                headers:['TÍTULO','DESCRIPCIÓN','ACTIVIDAD 1','ACTIVIDAD 2','ACTIVIDAD 3','ACTIVIDAD 4'],
+                values:[],
+                comments:[],
+                filename: "Plantilla Checklist",
+                confirm:true
+            });
         }
     }
 }

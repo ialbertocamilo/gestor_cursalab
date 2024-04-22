@@ -14,5 +14,6 @@ Route::controller(RestChecklistController::class)->group(function () {
     Route::prefix('v2')->group(function () {
         Route::get('/trainer/init-data', 'getInitData');
         Route::get('/trainer/checklists', 'checklistsTrainer');
+        Route::get('/trainer/checklists/{checklist}/activities', 'activitiesByChecklist');
     });
 });

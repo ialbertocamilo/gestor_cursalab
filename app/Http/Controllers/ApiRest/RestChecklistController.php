@@ -218,140 +218,238 @@ class RestChecklistController extends Controller
         ];
     }
     public function checklistsTrainer(Request $request){
-        [
-            'checklists-geololization'=>[
-                "Ecnorza ZC"=>[
+
+        $list_checklists_geolocalization = [
+            [
+                "nombre" => "Ecnorza ZC",
+                "lista" => [
                     [
-                        'id'=>1,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Trabajo realizado por el usuario en su estación.',
-                        'status' => 'pendiente',
-                    ],
-                    [
-                        'id'=>1,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Trabajo realizado por el usuario en su estación.',
-                        'status' => 'pendiente',
-                    ],
-                    [
-                        'id'=>1,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Trabajo realizado por el usuario en su estación.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza AB"=>[
-                    [
-                        'id'=>2,
-                        'modality'=>'qualify_user',
-                        'type' => 'Por curso',
-                        'title'=> 'Reconoce los puntos de salida de seguridad en caso de sismo.',
-                        'status' => 'continuo',
-                    ]
-                ],
-                "Ecnorza AR"=>[
-                    [
-                        'id'=>3,
-                        'modality'=>'autoqualify',
-                        'type' => 'auditoria',
-                        'title'=> 'Gestión de inventario.',
-                        'status' => 'realizado',
+                        "id" => 1,
+                        "modality" => [
+                            'id'=> 5886,
+                            'name' => 'Entidad',
+                            'code'=>'qualify_entity',
+                            'color'=>'#9B98FE'
+                        ],
+                        "type" => [
+                            'id'=> 5077,
+                            'name' => 'Auditoria',
+                            'code'=>'libre',
+                            'color'=>'#CE98FE'
+                        ],
+                        "title" => "Trabajo realizado por el usuario en su estación.",
+                        "status" => [
+                            'code'=>'pending',
+                            'name'=>'Pendiente',
+                            'color'=>'#CDCDEB'
+                        ]
                     ]
                 ]
             ],
-            'checklists'=>[
-                "Ecnorza RT"=>[
+        ];
+
+        $list_checklists_libres = [
+            [
+                "lista" => [
                     [
-                        'id'=>4,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Capacitación y desarrollo 1.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza CK"=>[
+                        "id" => 2,
+                        "modality" => [
+                            'id'=> 5886,
+                            'name' => 'Entidad',
+                            'code'=>'qualify_entity',
+                            'color'=>'#9B98FE'
+                        ],
+                        "type" => [
+                            'id'=> 5077,
+                            'name' => 'Auditoria',
+                            'code'=>'libre',
+                            'color'=>'#CE98FE'
+                        ],
+                        "title" => "Trabajo realizado por el usuario en su estación.",
+                        "status" => "pendiente"
+                    ],
                     [
-                        'id'=>5,
-                        'modality'=>'qualify_user',
-                        'type' => 'Por curso',
-                        'title'=> 'Capacitación y desarrollo 2.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza LT"=>[
-                    [
-                        'id'=>6,
-                        'modality'=>'autoqualify',
-                        'type' => 'auditoria',
-                        'title'=> 'Capacitación y desarrollo 3.',
-                        'status' => 'pendiente',
+                        "id" => 3,
+                        "modality" => [
+                            'id'=> 5887,
+                            'name' => 'Usuario',
+                            'code'=>'qualify_user',
+                            'color'=>'#9B98FE'
+                        ],
+                        "type" => [
+                            'id'=> 5077,
+                            'name' => 'Curso',
+                            'code'=>'curso',
+                            'color'=>'#00E396'
+                        ],
+                        "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
+                        "status" => [
+                            'code'=>'Continuo',
+                            'name'=>'Continuo',
+                            'color'=>'#6E73DA'
+                        ]
                     ]
                 ]
             ]
         ];
-        return
-        [
-            'checklists-geololization'=>[
-                "Ecnorza ZC"=>[
+
+        $list_checklists_exclude_geolocalization = [
+            [
+                "nombre" => "Ecnorza AB",
+                "lista" => [
                     [
-                        'id'=>1,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Trabajo realizado por el usuario en su estación.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza AB"=>[
-                    [
-                        'id'=>2,
-                        'modality'=>'qualify_user',
-                        'type' => 'Por curso',
-                        'title'=> 'Reconoce los puntos de salida de seguridad en caso de sismo.',
-                        'status' => 'continuo',
-                    ]
-                ],
-                "Ecnorza AR"=>[
-                    [
-                        'id'=>3,
-                        'modality'=>'autoqualify',
-                        'type' => 'auditoria',
-                        'title'=> 'Gestión de inventario.',
-                        'status' => 'realizado',
+                        "id" => 4,
+                        "modality" => [
+                            'id'=> 5886,
+                            'name' => 'Entidad',
+                            'code'=>'qualify_entity',
+                            'color'=>'#9B98FE'
+                        ],
+                        "type" => [
+                            'id'=> 5077,
+                            'name' => 'Curso',
+                            'code'=>'curso',
+                            'color'=>'#00E396'
+                        ],
+                        "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
+                        "status" => [
+                            'code'=>'Continuo',
+                            'name'=>'Continuo',
+                            'color'=>'#6E73DA'
+                        ]
                     ]
                 ]
             ],
-            'checklists'=>[
-                "Ecnorza RT"=>[
+            [
+                "nombre" => "Ecnorza AR",
+                "lista" => [
                     [
-                        'id'=>4,
-                        'modality'=>'entityqualify_entity',
-                        'type' => 'auditoria',
-                        'title'=> 'Capacitación y desarrollo 1.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza CK"=>[
-                    [
-                        'id'=>5,
-                        'modality'=>'qualify_user',
-                        'type' => 'Por curso',
-                        'title'=> 'Capacitación y desarrollo 2.',
-                        'status' => 'pendiente',
-                    ]
-                ],
-                "Ecnorza LT"=>[
-                    [
-                        'id'=>6,
-                        'modality'=>'autoqualify',
-                        'type' => 'auditoria',
-                        'title'=> 'Capacitación y desarrollo 3.',
-                        'status' => 'pendiente',
+                        "id" => 5,
+                        "modality" => [
+                            'id'=> 5888,
+                            'name' => 'Autoev.',
+                            'code'=>'autoqualify',
+                            'color'=>'#9B98FE'
+                        ],
+                        "type" => [
+                            'id'=> 5077,
+                            'name' => 'Auditoria',
+                            'code'=>'libre',
+                            'color'=>'#CE98FE'
+                        ],
+                        "title" => "Gestión de inventario.",
+                        "status" => [
+                            'code'=>'realizado',
+                            'name'=>'Realizado 21 -03 - 2024',
+                            'color'=>'#25B374'
+                        ]
                     ]
                 ]
             ]
         ];
+        
+        return $this->success(compact('list_checklists_geolocalization','list_checklists_libres','list_checklists_exclude_geolocalization'));
+    }
+
+    public function activitiesByChecklist(Request $request){
+        $activities = [
+            [
+                'id'=>1021,
+                'name'=>'Actividad 01',
+                'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
+                'can_comment'=> true,
+                'can_upload_image'=>true,
+                'system_calification' => [
+                    [
+                        'id'=> 1293,
+                        'name'=>'Excelente',
+                        'color'=>'#00E396'
+                    ],
+                    [
+                        'id'=> 1294,
+                        'name'=>'En proceso',
+                        'color'=>'#FFD600'
+                    ],
+                    [
+                        'id'=> 1295,
+                        'name'=>'Deficiente',
+                        'color'=>'#FF4560'
+                    ]
+                ]
+            ],
+            [
+                'id'=>1022,
+                'name'=>'Actividad 01',
+                'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
+                'can_comment'=> true,
+                'can_upload_image'=>false,
+                'system_calification' => [
+                    [
+                        'id'=> 1293,
+                        'name'=>'Excelente',
+                        'color'=>'#00E396'
+                    ],
+                    [
+                        'id'=> 1294,
+                        'name'=>'En proceso',
+                        'color'=>'#FFD600'
+                    ],
+                    [
+                        'id'=> 1295,
+                        'name'=>'Deficiente',
+                        'color'=>'#FF4560'
+                    ]
+                ]
+            ],
+            [
+                'id'=>1023,
+                'name'=>'Actividad 01',
+                'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
+                'can_comment'=> true,
+                'can_upload_image'=>true,
+                'system_calification' => [
+                    [
+                        'id'=> 1293,
+                        'name'=>'Excelente',
+                        'color'=>'#00E396'
+                    ],
+                    [
+                        'id'=> 1294,
+                        'name'=>'En proceso',
+                        'color'=>'#FFD600'
+                    ],
+                    [
+                        'id'=> 1295,
+                        'name'=>'Deficiente',
+                        'color'=>'#FF4560'
+                    ]
+                ]
+            ],
+            [
+                'id'=>1024,
+                'name'=>'Actividad 01',
+                'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
+                'can_comment'=> false,
+                'can_upload_image'=>false,
+                'system_calification' => [
+                    [
+                        'id'=> 1293,
+                        'name'=>'Excelente',
+                        'color'=>'#00E396'
+                    ],
+                    [
+                        'id'=> 1294,
+                        'name'=>'En proceso',
+                        'color'=>'#FFD600'
+                    ],
+                    [
+                        'id'=> 1295,
+                        'name'=>'Deficiente',
+                        'color'=>'#FF4560'
+                    ]
+                ]
+            ],
+        ];
+        return $this->success(['activities'=>$activities]);
     }
 }
