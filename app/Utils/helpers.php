@@ -715,3 +715,7 @@ function currentPlatform(){
     $platform = Taxonomy::getFirstData('project', 'platform', $platform_code);
     return $platform;
 }
+
+function verifyBooleanValue($value){
+    return ($value === 'true' or $value === true or $value === 1 or $value === '1');
+}

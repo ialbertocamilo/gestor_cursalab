@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\EntrenamientoController;
 
 //Route::view('/', 'entrenamiento.entrenadores.index')->name('entrenadores');
@@ -36,7 +37,6 @@ Route::controller(EntrenamientoController::class)->group(function() {
 	Route::prefix('/checklists')->middleware('hasHability:checklist')->group(function () {
 		Route::view('/', 'entrenamiento.checklist.index')->name('entrenamiento.checklist');
 		// ->middleware('permission:entrenamiento.index');
-		Route::get('/form-selects', 'getFormSelects');
 
 		Route::get('/search', 'searchChecklist');
 		Route::get('/init-data', 'getInitData');
@@ -51,5 +51,17 @@ Route::controller(EntrenamientoController::class)->group(function() {
 		Route::delete('/{id}/destroy', 'deleteChecklist');
         Route::put('/{checklist}/status', 'status');
 	});
-
 });
+//apis to checklist v3
+Route::controller(ChecklistController::class)->group(function() {
+	Route::prefix('/checklist')->middleware('hasHability:checklist')->group(function () {
+		Route::prefix('/v2')->group(function () {
+			Route::get('/form-selects', 'getFormSelects');
+			Route::post('/store', 'storeChecklist');
+			Route::get('/{checklist}/edit', 'editChecklist');
+			Route::post('/{checklist}/update', 'updateChecklist');
+		});
+	});
+});
+
+?>

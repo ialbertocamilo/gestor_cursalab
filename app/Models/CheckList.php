@@ -14,6 +14,8 @@ class CheckList extends BaseModel
         'description',
         'active',
         'workspace_id',
+        'modality_id',
+        'extra_attributes',
         'type_id',
         'starts_at',
         'finishes_at',
@@ -21,7 +23,8 @@ class CheckList extends BaseModel
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'extra_attributes'=>'json'
     ];
 
     protected $hidden = [
@@ -50,6 +53,10 @@ class CheckList extends BaseModel
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
+    }
+    public function modality()
+    {
+        return $this->belongsTo(Taxonomy::class, 'modality_id');
     }
 
     /*======================================================= SCOPES ==================================================================== */
@@ -826,5 +833,18 @@ class CheckList extends BaseModel
             $_checklist->save();
             $_checklist->actividades()->createMany($actividades);
         }
+    }
+
+    protected function storeRequest($data, $user = null){
+        $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id');
+        $extra_attributes['evaluation_types_id'] = $evaluation_types;
+        if($user){
+            $user->update($data);
+        }else{
+            $data['platform_id'] = currentPlatform()->id;
+            $data['workspace_id'] = get_current_workspace()->id;
+            $user = self::create($data);
+        }
+        return $user;
     }
 }

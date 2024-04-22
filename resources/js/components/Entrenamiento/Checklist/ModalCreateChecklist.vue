@@ -2,17 +2,8 @@
 
 <template>
     <div>
-        <v-dialog :max-width="width" v-model="value" scrollable @click:outside="closeModal">
-            <v-card>
-                <v-card-title class="default-dialog-title">
-                    {{ checklist.id == 0 ? "Crear Checklist" : "Editar Checklist" }}
-                    <v-spacer/>
-                    <v-btn icon :ripple="false" color="white"
-                           @click="closeModal">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                </v-card-title>
-                <v-card-text class="pt-0">
+        <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirm">
+                <template v-slot:content>
                     <v-form ref="checklistForm">
                         <v-card style="height: 100%;overflow: auto;" class="bx_steps bx_step1">
                             <v-card-text>
@@ -32,9 +23,9 @@
                                             dense
                                             label="Seleccione el tipo de checklist"
                                             placeholder="Tipo de checklist"
-                                            v-model="resource.type_checklist"
-                                            :items="selects.type_checklist"
-                                            item-text="name"
+                                            v-model="resource.type_id"
+                                            :items="selects.types_checklist"
+                                            item-text="nombre"
                                             item-value="id"
                                             :rules="rules.required"
                                         />
@@ -189,7 +180,7 @@
                                                     <template slot="content">
                                                         <div class="d-flex">
                                                             <DefaultToggle class="ml-4 mb-2"
-                                                                v-model="resource.extra_attributes.visualiazation_results" dense
+                                                                v-model="resource.extra_attributes.visualization_results" dense
                                                                 :active-label="'Permite que al finalizar el checklist la entidad evaluada visualice sus resultados.'"
                                                                 :inactive-label="'Permite que al finalizar el checklist la entidad evaluada visualice sus resultados.'" />
                                                             <DefaultInfoTooltip
@@ -205,7 +196,7 @@
                                                     <template slot="content">
                                                         <div class="d-flex">
                                                             <DefaultToggle class="ml-4 mb-2"
-                                                                :disabled="!resource.extra_attributes.visualiazation_results"
+                                                                :disabled="!resource.extra_attributes.visualization_results"
                                                                 v-model="resource.extra_attributes.comments_if_checklist_completed" dense
                                                                 :active-label="'Se pueden agregar comentarios luego de haber terminado el checklist'"
                                                                 :inactive-label="'Se pueden agregar comentarios luego de haber terminado el checklist'" />
@@ -258,7 +249,7 @@
                                                                 dense
                                                                 :referenceComponent="'modalDateFilter'"
                                                                 :options="modalDateFilter"
-                                                                v-model="resource.extra_attributes.end_date_checklist"
+                                                                v-model="resource.finishes_at"
                                                                 label="Selecciona la fecha límite que tendrá tu checklist"
                                                             />
                                                         </div>
@@ -285,7 +276,7 @@
                                                                     class="my-0 mr-2 checkbox-label"
                                                                     label="Solicitar firma al supervisado"
                                                                     color="primary"
-                                                                    v-model="resource.extra_attributes.supervised_signature"
+                                                                    v-model="resource.extra_attributes.required_signature_supervised"
                                                                     hide-details="false"
                                                                 />
                                                             </v-col>
@@ -351,28 +342,8 @@
                             </v-card-text>
                         </v-card>
                     </v-form>
-                </v-card-text>
-    
-                <v-card-actions style="border-top: 1px solid rgba(0,0,0,.12)" class="actions_btn_modal">
-                    <ButtonsModal
-                        @cancel="cancel()"
-                        @confirm="confirm()"
-                        cancelLabel="Cancelar"
-                        confirmLabel="Guardar"
-                    />
-                </v-card-actions>
-            </v-card>
-            <DefaultAlertDialog
-                :ref="modalAlert.ref"
-                :options="modalAlert"
-                :confirmLabel="modalAlert.confirmLabel"
-                :hideCancelBtn="modalAlert.hideCancelBtn"
-                @onConfirm ="closeSimpleModal(modalAlert)"
-                @onCancel ="closeSimpleModal(modalAlert)"
-            >
-                <template v-slot:content> {{ modalAlert.contentText }}</template>
-            </DefaultAlertDialog>
-        </v-dialog>
+                </template>
+        </DefaultDialog>
         <ModalAddScaleEvaluation
             :ref="modalScalesChecklist.ref"
             :options="modalScalesChecklist"
@@ -391,6 +362,12 @@ import DefaultRichText from "../../globals/DefaultRichText";
 import DefaultCardAction from "../../globals/DefaultCardAction"
 import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
 import ModalAddScaleEvaluation from './ModalAddScaleEvaluation'
+
+const fields = [
+    'title', 'type_id','modality_id','finishes_at','image'
+];
+const file_fields = ['image'];
+
 export default {
     components: {
     draggable,
@@ -403,68 +380,36 @@ export default {
     props: {
         value: Boolean,
         width: String,
-        checklist: Object,
-        limitOne: {
-            type:Boolean,
-            default:false
-        },
-        tabs_title:{
-            type: String,
-            default: 'Segmentación'
+        options: {
+            required:true,
+            type:Object,
         },
     },
     data() {
         return {
+            current_modality:{
+
+            },
             modalDateFilter: {
                 open: false,
             },
             sections:{
                 showSectionAdvancedconfiguration:{ status: true },
             },
-            checklist_actions :[
-                {id:1,icon:'mdi mdi-home-city',code:'calificate_entity',name:'Calificar entidad',description:'Con este tipo de checklist se revisará a la entidad (tienda, oficina,etc)',color:'#57BFE3'},
-                {id:2,icon:'mdi mdi-clipboard-account',code:'calificate_user',name:'Calificar al usuario',description:'El supervisor podrá evaluar a personalmente a cada uno de los usuarios asignados',color:'#CE98FE'},
-                {id:3,icon:'mdi mdi-account-multiple-check',code:'autocalificate',name:'Autoevaluación',description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',color:'#547AE3'},
-            ],
-            checklist_actions_to_create:[
-                {id:1,icon:'mdi mdi-file-edit',code:'create_activities',name:'Crear actividades',description:'Crea las actividades de tu checklist desde cero tu mismo',color:'#F5539B'},
-                {id:2,icon:'mdi mdi-file-upload',code:'import_activities',name:'Importar actividades',description:'Sube tus actividades con una plantilla de excel',color:'#5357E0'},
-                {id:3,image:'/img/robot_jarvis.png',code:'ia_activities',name:'Ayuda con IA',description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',color:'#9B98FE'},
-            ],
-            checklist_type_response:[
-                {id:1,name:'Por escala de ev.'},
-                {id:2,name:'Selecciona'},
-                {id:3,name:'Desplegable'},
-            ],
             drag_evaluation_type: false,
             dialog: false,
-            file: null,
-            isLoading: false,
             rules: {
                 required: this.getRules(['required']),
             },
-            modalAlert: {
-                ref: 'modalAlert',
-                title: 'Alerta',
-                contentText: 'Este checklist debe de tener por lo menos una (1) actividad "Se califica al alumno"',
-                open: false,
-                endpoint: '',
-                confirmLabel:"Entendido",
-                hideCancelBtn:true,
-            },
             selects: {
-                type_checklist: [
-                    {"id": "libre", "name": "Libre"},
-                    {"id": "curso", "name": "Por curso"},
+                types_checklist: [
                 ],
                 qualification_types:[
                 ],
                 max_limit_create_evaluation_types:5,
                 criteria:[
-
                 ]
             },
-            type_checklist: "libre",
             tabs: null,
             steps: 0,
             // total: 0,
@@ -473,15 +418,19 @@ export default {
                 id: null,
                 name: null,
                 extra_attributes :{},
-                type_checklist: null,
+                type_id: null,
+                modality_id:null,
                 evaluation_types:[],
+                finishes_at:'',
             },
             resource: {
                 id: null,
                 name: null,
+                modality_id:null,
                 extra_attributes:{},
-                type_checklist: null,
+                type_id: null,
                 evaluation_types:[],
+                finishes_at:'',
             },
             modalScalesChecklist:{
                 open:false,
@@ -506,97 +455,87 @@ export default {
     async mounted() {
         let vue = this;
         await vue.loadLimitsGenerateIaDescriptions();
-        await vue.loadFormSelects();
     },
     methods: {
-        async loadFormSelects(){
+        async loadSelects(){
             let vue = this;
-            await axios.get('/entrenamiento/checklists/form-selects').then(({ data }) => {
+            await axios.get(`${vue.options.base_endpoint}/v2/form-selects`).then(({ data }) => {
                 vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
                 vue.selects.qualification_types = data.data.qualification_types;
                 vue.selects.max_limit_create_evaluation_types =  data.data.checklist_default_configuration.max_limit_create_evaluation_types;
                 vue.selects.criteria = data.data.criteria;
+                vue.selects.types_checklist  = data.data.types_checklist;
             })
+            if(!vue.resource.id){
+                const idx_type_id = vue.selects.types_checklist.findIndex(tc => tc.code == 'libre')
+                if (idx_type_id !== -1) {
+                    vue.resource.type_id = vue.selects.types_checklist[idx_type_id].id;
+                }
+            }
         },
         validateRequired(input) {
             return input != undefined && input != null && input != "";
         },
         closeModal() {
             let vue = this;
-            vue.resetValidation()
+            vue.resetValidation();
             vue.$emit("onClose");
         },
         resetValidation() {
             let vue = this;
         },
-        async confirm() {
+        loadData(resource){
             let vue = this;
-
-            this.showLoader()
-
+            if(!resource){
+                vue.current_modality = vue.options.modality
+                vue.resource.modality_id =  vue.current_modality.id;
+            }
+        },
+        async confirm() {
+            let vue = this;           
             const validateForm = vue.validateForm('checklistForm')
-            const edit = vue.options.action === 'edit'
-
-            let base = `${vue.options.base_endpoint}`
-            let url = edit
-                ? `${base}/${vue.resource.id}/update`
-                : `${base}/store`;
-
-            let method = edit ? 'PUT' : 'POST';
             if (validateForm) {
-                const formData = vue.createFormData();
+                vue.showLoader()
+                let base = `${vue.options.base_endpoint}`
+                let url = vue.resource.id
+                    ? `${base}/${vue.resource.id}/update`
+                    : `${base}/v2/store`;
+                const method = vue.resource.id ? 'PUT' : 'POST';
+                const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
+                formData.set(
+                    'extra_attributes', JSON.stringify(vue.resource.extra_attributes)
+                );
+                formData.set(
+                    'evaluation_types', JSON.stringify(vue.resource.evaluation_types)
+                );
                 await vue.$http
                     .post(url, formData)
                     .then(({ data }) => {
 
                         if(!data.data.still_has_storage){
                             vue.showAlert(data.data.msg,'warning')
-                            vue.openFormModal(vue.modalAlertStorageOptions, null, null, 'Alerta de almacenamiento');
                             return '';
                         }
                         vue.closeModal()
-                        vue.showAlert(data.data.msg)
+                        vue.showAlert(data.data.msg);
+                        console.log('entra');
                         vue.$emit('onConfirm')
                     }).catch((error) => {
                         if (error && error.errors) {
                             const errors = error.errors ? error.errors : error;
                             vue.show_http_errors(errors);
+                            vue.hideLoader()
+
                         }
                     })
+            }else{
+                vue.showAlert('Es necesario llenar los campos de título y tipo de checklist','warning')
             }
-
-            this.hideLoader()
-            // vue.checklist.list_segments = {
-            //     'segments' : vue.checklist.segments,
-            //     'model_type': "App\\Models\\Checklist",
-            //     'model_id': null,
-            //     'code': "direct-segmentation"
-            // };
-            // vue.checklist.list_segments_document = {
-            //     'segment_by_document' : vue.checklist.segmentation_by_document,
-            //     'model_type': "App\\Models\\Checklist",
-            //     'model_id': null,
-            //     'code': "segmentation-by-document"
-            // };
-            // const allIsValid = vue.moreValidaciones()
-
-            // if (allIsValid == 0)
-            //     vue.$emit("onConfirm");
+            vue.hideLoader()
         },
         moreValidaciones() {
             let vue = this
-            let errors = 0
-
-            let hasActividadEntrenadorUsuario = false;
-            vue.checklist.checklist_actividades.map(actividad=>{
-               if( actividad.type_name=='trainer_user') hasActividadEntrenadorUsuario=true;
-            });
-            if(!hasActividadEntrenadorUsuario){
-                this.modalAlert.open= true;
-               errors++
-            }
-            return errors > 0
         },
         cancel() {
             let vue = this;
@@ -870,7 +809,7 @@ span.v-stepper__step__step:after {
     background-color: #E4E4E4 !important;
     border-color: #E4E4E4 !important;
 }
-.bx_type_checklist .v-input__icon.v-input__icon--append,
+.bx_type_id .v-input__icon.v-input__icon--append,
 .bx_steps .v-input__icon.v-input__icon--append {
     margin: 0;
     padding: 0;

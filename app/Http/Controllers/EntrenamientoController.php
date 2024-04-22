@@ -270,19 +270,7 @@ class EntrenamientoController extends Controller
         return $this->success($data);
     }
 
-    public function getFormSelects(){
-        $checklist_default_configuration = get_current_workspace()->checklist_configuration;
-        $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
-        $criteria = [];
-        if(count($checklist_default_configuration->managers_criteria)){
-            $criteria = Criterion::select('id','name')->whereIn('id',$checklist_default_configuration->managers_criteria)->get();
-        }
-        unset($checklist_default_configuration->managers_criteria);
-        $data = compact(
-            'checklist_default_configuration','qualification_types','criteria'
-        );
-        return $this->success($data);
-    }
+    
     /**
      * Process request to toggle value of active status (1 or 0)
      *

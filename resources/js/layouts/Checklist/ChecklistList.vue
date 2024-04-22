@@ -41,7 +41,7 @@
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
-        <ModalSubidaMasivaChecklist
+        <!-- <ModalSubidaMasivaChecklist
             template_url="/templates/Plantilla_Checklist.xlsx"
             v-model="modal.asignar_ver_alumnos"
             :width="'40%'"
@@ -50,15 +50,14 @@
             @onConfirm = "optionsModalSubidaMasivaChecklist.open=false"
             @showSnackbar="mostrarSnackBar($event)"
             @refreshTable="refreshDefaultTable(dataTable, filters, 1)"
-        />
+        /> -->
 
         <ModalCreateChecklist
-            ref="ModalCreateChecklist"
-            v-model="modal.crear_editar_checklist"
-            :width="'60vw'"
-            @onClose="closeModalCreateEditChecklist"
-            @onConfirm="saveChecklist"
-            :checklist="dataModalChecklist"
+            :ref="modalChecklist.ref"
+            :options="modalChecklist"
+            width="60vw"
+            @onConfirm="closeSimpleModal(modalChecklist),openSimpleModal(modalChecklistConfiguration)"
+            @onClose="closeSimpleModal(modalChecklist)"
         />
 
         <DefaultDeleteModal
@@ -87,7 +86,7 @@
             :options="modalChecklistModality"
             width="900px"
             @onConfirm="openChecklistModal"
-            @onCancel="closeSimpleModal(modalChecklistModality.open = false)"
+            @onCancel="closeSimpleModal(modalChecklistModality)"
             :modalities="modalities"
         />
         <ChecklistConfigurationModal
@@ -102,9 +101,9 @@
             :ref="modalActivities.ref"
             v-model="modalActivities.open"
             :options="modalActivities"
-            width="900px"
-            @onConfirm="modalActivities.open=false"
-            @onCancel="modalActivities.open = false"
+            width="1000px"
+            @onConfirm="closeSimpleModal(modalActivities)"
+            @onCancel="closeSimpleModal(modalActivities)"
         />
         
     </section>
@@ -270,6 +269,15 @@ export default {
                 open: false,
                 title: 'Subir checklist'
             },
+            modalChecklist:{
+                open:false,
+                ref: 'ChecklistModal',
+                base_endpoint: '/entrenamiento/checklist',
+                confirmLabel: 'Guardar',
+                resource: 'checklist',
+                action: null,
+                persistent: true,
+            },
             modalChecklistModality:{
                 open:false,
                 ref: 'ChecklistModalityModal',
@@ -291,7 +299,7 @@ export default {
                 persistent: true,
             },
             modalActivities:{
-                open:false,
+                open:true,
                 ref: 'modalActivities',
                 base_endpoint: '/checklist',
                 confirmLabel: 'Guardar',
@@ -488,8 +496,9 @@ export default {
         openChecklistModal(modality){
             let vue = this;
             vue.openFormModal(vue.modalChecklistModality,'activity_card');
-            vue.modal.modality = modality;
-            vue.abrirModalCreateEditChecklist(vue.checklistCreateEditModal);
+            vue.modalChecklist.modality = modality;
+            vue.openFormModal(vue.modalChecklist);
+            // vue.abrirModalCreateEditChecklist(vue.checklistCreateEditModal);
         },
         changeConfiguration(){
             let vue = this;
