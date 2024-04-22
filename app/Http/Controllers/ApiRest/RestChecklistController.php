@@ -250,6 +250,7 @@ class RestChecklistController extends Controller
 
         $list_checklists_libres = [
             [
+                "nombre" => "Checklist libre",
                 "lista" => [
                     [
                         "id" => 2,
