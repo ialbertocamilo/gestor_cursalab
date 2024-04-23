@@ -141,7 +141,7 @@ class MediaController extends Controller
      * @param Request $request
      * @return void
      */
-    public function fileupload(Request $request): void
+    public function fileupload(Request $request)
     {
 
         // If file is not defined, stop method execution
@@ -150,7 +150,9 @@ class MediaController extends Controller
 
         // Upload file
 
-        Media::uploadFile($request->file('file'));
+        $media = Media::uploadFile(file:$request->file('file'),return_media:true);
+        $media['location'] = get_media_url($media->file,'s3');
+        return $this->success(['media'=>$media]);
     }
 
     /**

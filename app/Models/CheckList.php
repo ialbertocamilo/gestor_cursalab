@@ -40,7 +40,10 @@ class CheckList extends BaseModel
     {
         return $this->hasMany(CheckListItem::class, 'checklist_id', 'id');
     }
-
+    public function activities()
+    {
+        return $this->hasMany(CheckListItem::class, 'checklist_id', 'id');
+    }
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'checklist_relationships', 'checklist_id', 'course_id');
@@ -835,16 +838,83 @@ class CheckList extends BaseModel
         }
     }
 
-    protected function storeRequest($data, $user = null){
+    protected function storeRequest($data, $checklist = null){
         $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id');
         $extra_attributes['evaluation_types_id'] = $evaluation_types;
-        if($user){
-            $user->update($data);
+        if($checklist){
+            $checklist->update($data);
         }else{
             $data['platform_id'] = currentPlatform()->id;
             $data['workspace_id'] = get_current_workspace()->id;
-            $user = self::create($data);
+            $checklist = self::create($data);
         }
-        return $user;
+        return $checklist;
+    }
+
+    protected function saveActivities($checklist,$activities){
+        $activities_to_insert = [];
+        foreach ($activities as $data_activity) {
+            $activity = CheckListItem::updateOrCreate(
+                ['id' => $data_activity['id']],
+                [
+                    'activity' => $data_activity['activity'],
+                    'active' => 1,
+                    // 'type_id' => $data['type_id'],
+                    'checklist_id' => $checklist->id,
+                    'position' => $data_activity['position'],
+                    'checklist_response_id'=>$data_activity['checklist_response']['id'],
+                    'extra_attributes' => $data_activity['extra_attributes'],
+                ]
+            );
+            
+            if(isset($data_activity['custom_options']) && count($data_activity['custom_options'])>0 ){
+                $custom_options = $data_activity['custom_options'];
+                foreach ($custom_options as $option) {
+                    $option = Taxonomy::updateOrCreate(
+                        ['id' => $option['id'],'group' => 'checklist','type'=>'activity_option'],
+                        [
+                            'group' => 'checklist',
+                            'type'  => 'activity_option',
+                            'parent_id' => $activity->id,
+                            'name'=> $option['name']
+                        ]
+                    );
+                }
+            }
+        }
+    }
+
+    protected function getSegments( $_checklist )
+    {
+        $checklist = null;
+
+        $workspace = get_current_workspace();
+
+        if(!is_null($_checklist)) {
+
+            $criteria = Segment::getCriteriaByWorkspace(get_current_workspace());
+            $segments = Segment::getSegmentsByModel($criteria, CheckList::class, $_checklist->id);
+            
+            $checklist['segments'] = $segments;
+
+            if (is_array($segments)) {
+                $segments = collect($segments);
+            }
+
+            $segmentation_by_document_list = [];
+            $segmentation_by_document = $segments->map(function ($item) {
+                return ['segmentation_by_document'=> $item->segmentation_by_document];
+            });
+
+            foreach ($segmentation_by_document as $seg) {
+                foreach ($seg['segmentation_by_document'] as $value) {
+                    array_push($segmentation_by_document_list, $value);
+                }
+            }
+            $checklist['segmentation_by_document'] = ['segmentation_by_document'=> $segmentation_by_document_list];
+
+        }
+
+        return ['checklist' => $checklist];
     }
 }

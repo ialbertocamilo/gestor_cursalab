@@ -38,7 +38,8 @@
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Checklist - ${$event.title}`)"
-                @segmentation="openFormModal(vue.modalFormSegmentationOptions, resource, 'segmentation', `Segmentación del checklist - ${resource.name}`)"
+                @segmentation="openModalSegment($event)"
+                @activities="openFormModal(modalActivities,$event, null,'Crear Checklist > Actividades')"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
@@ -57,7 +58,7 @@
             :ref="modalChecklist.ref"
             :options="modalChecklist"
             width="60vw"
-            @onConfirm="closeSimpleModal(modalChecklist),openSimpleModal(modalChecklistConfiguration)"
+            @onConfirm="closeModalChecklist"
             @onClose="closeSimpleModal(modalChecklist)"
         />
 
@@ -106,7 +107,15 @@
             @onConfirm="closeSimpleModal(modalActivities)"
             @onCancel="closeSimpleModal(modalActivities)"
         />
-        
+        <SegmentFormModal
+            :options="modalFormSegmentationOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalFormSegmentationOptions.ref"
+            @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
+            @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+        />
     </section>
 </template>
 
@@ -123,6 +132,8 @@ import LogsModal from "../../components/globals/Logs";
 import ChecklistModality from "./ChecklistModality";
 import ChecklistConfigurationModal from './ChecklistConfigurationModal';
 import ActivitiesModal from './ActivitiesModal';
+// import ModalSegment from "./ModalSegment";
+import SegmentFormModal from "../Blocks/SegmentFormModal";
 
 export default {
     components: {
@@ -134,7 +145,8 @@ export default {
         ModalSubidaMasivaChecklist,
         ChecklistModality,
         ChecklistConfigurationModal,
-        ActivitiesModal
+        ActivitiesModal,
+        SegmentFormModal
     },
     data() {
         return {
@@ -160,7 +172,7 @@ export default {
                     },
                     {
                         text: "Actividades",
-                        icon: 'mdi-book-variant',
+                        icon: 'mdi mdi-book-variant',
                         type: 'action',
                         method_name: 'activities'
                     },
@@ -293,7 +305,7 @@ export default {
             modalChecklist:{
                 open:false,
                 ref: 'ChecklistModal',
-                base_endpoint: '/entrenamiento/checklist',
+                base_endpoint: '/entrenamiento/checklist/v2',
                 confirmLabel: 'Guardar',
                 resource: 'checklist',
                 action: null,
@@ -322,13 +334,30 @@ export default {
             modalActivities:{
                 open:false,
                 ref: 'modalActivities',
-                base_endpoint: '/checklist',
+                base_endpoint: '/entrenamiento/checklist/v2',
                 confirmLabel: 'Guardar',
                 resource: 'checklist',
                 title: '',
                 action: null,
                 persistent: true,
-            }
+            },
+            modalSegment: {
+                open: false,
+                reg:'ModalSegment',
+                ver_items: false,
+                asignar: false,
+                subida_masiva: false,
+                model_type:"App\Models\Checklist"
+            },
+            dataModalSegment: {},
+            modalFormSegmentationOptions: {
+                ref: 'SegmentFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/segments",
+                confirmLabel: "Guardar",
+                resource: "segmentación"
+            },
         }
     },
     mounted() {
@@ -521,10 +550,83 @@ export default {
             vue.openFormModal(vue.modalChecklist);
             // vue.abrirModalCreateEditChecklist(vue.checklistCreateEditModal);
         },
-        changeConfiguration(){
+        changeConfiguration(checklist){
             let vue = this;
-            vue.modalChecklistConfiguration.open = false
-            vue.openFormModal(vue.modalActivities, null, null,'Crear Checklist > Actividades');
+            console.log('Checklist',checklist);
+            vue.closeSimpleModal(vue.modalChecklistConfiguration);
+            vue.openFormModal(vue.modalActivities, checklist, null,'Crear Checklist > Actividades');
+        },
+        closeModalChecklist(configuration_data){
+            let vue = this;
+            vue.closeSimpleModal(vue.modalChecklist);
+            // configuration_data <- Checklist - nex_step
+            vue.openFormModal(vue.modalChecklistConfiguration,configuration_data);
+        },
+        closeModalSegment(){
+            vue.closeSimpleModal(vue.modalSegment);
+        },
+        confirmModalSegment(){
+            vue.closeSimpleModal(vue.modalSegment);
+        },
+        async openModalSegment(checklist, edit = false) {
+            let vue = this;
+
+            // this.showLoader()
+
+            // await vue.$http.get(`/entrenamiento/checklist/v2/segments/${checklist.id}`)
+            //     .then((res) => {
+            //         let res_checklist = res.data.data.checklist;
+            //         console.log(res);
+            //         console.log(res_checklist);
+            //         if (res_checklist != null) {
+
+            //             checklist.segmentation_by_document = res_checklist.segmentation_by_document;
+
+            //             if(res_checklist.segments != null && res_checklist.segments.length > 0)
+            //             {
+            //                 checklist.segments = res_checklist.segments;
+
+            //                 // if no direct segmentation exists, adds one
+
+            //                 if (!checklist.segments.find(s => s.type_code === 'direct-segmentation')) {
+            //                     checklist.segments.push({
+            //                         id: `new-segment-${Date.now()}`,
+            //                         type_code: 'direct-segmentation',
+            //                         criteria_selected: [],
+            //                         direct_segmentation: [null]
+            //                     })
+            //                 }
+
+            //             } else {
+            //                 checklist.segments = [{
+            //                     id: `new-segment-${Date.now()}`,
+            //                     type_code: 'direct-segmentation',
+            //                     criteria_selected: [],
+            //                     direct_segmentation: [null]
+            //                 }];
+            //             }
+
+            //             vue.dataModalSegment = {...checklist};
+
+            //         }else{
+            //             vue.$notification.warning(`No se pudo obtener datos del beneficio`, {
+            //                 timer: 6,
+            //                 showLeftIcn: false,
+            //                 showCloseIcn: true
+            //             });
+            //             vue.closeModalSegment();
+            //             vue.refreshDefaultTable(vue.dataTable, vue.filters);
+            //         }
+            //         this.hideLoader()
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //         this.hideLoader()
+            //     });
+
+            // await vue.$refs.ModalSegment.resetValidation()
+            vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`)
+            // vue.openFormModal(vue.modalSegment, checklist, 'segmentation', `Segmentación del checklist - ${checklist.name}`)
         }
     }
 };

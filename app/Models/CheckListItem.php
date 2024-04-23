@@ -14,12 +14,16 @@ class CheckListItem extends BaseModel
 
     protected $fillable = [
         'checklist_id',
+        'checklist_response_id',
+        'extra_attributes',
         'activity',
         'type_id',
         'active',
         'position'
     ];
-
+    protected $casts = [
+        'extra_attributes'=>'json'
+    ];
     protected $hidden = [
         'created_at', 'updated_at'
     ];
@@ -28,7 +32,14 @@ class CheckListItem extends BaseModel
     {
         return $this->belongsTo(CheckList::class, 'checklist_id');
     }
-
+    public function checklist_response()
+    {
+        return $this->belongsTo(Taxonomy::class, 'checklist_response_id');
+    }
+    public function custom_options()
+    {
+        return $this->hasMany(Taxonomy::class, 'parent_id')->where('group','checklist')->where('type','activity_option');
+    }
     public function type()
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');

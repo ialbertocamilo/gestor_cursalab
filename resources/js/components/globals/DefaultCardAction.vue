@@ -35,7 +35,9 @@
                 <v-card-title class="d-flex justify-content-center mb-3" style="font-weight: bold;">
                     {{ card_properties.name}}
                 </v-card-title>
-                <v-card-subtitle style="color:#2A3649" v-html="card_properties.description"></v-card-subtitle>
+                <v-card-subtitle style="color:#2A3649">
+                    <span v-html="card_properties.description"></span>
+                </v-card-subtitle>
             </div>
         </v-card>
     </v-hover>

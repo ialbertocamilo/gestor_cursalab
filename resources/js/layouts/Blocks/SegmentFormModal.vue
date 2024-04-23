@@ -237,6 +237,7 @@ export default {
             // total: 0,
             total: [],
             show_criteria_segmentation:true,
+            subworkspacesIds:[],
             errors: [],
             showConfigTokens: false,
             resourceDefault: {

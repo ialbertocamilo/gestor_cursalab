@@ -459,7 +459,7 @@ export default {
     methods: {
         async loadSelects(){
             let vue = this;
-            await axios.get(`${vue.options.base_endpoint}/v2/form-selects`).then(({ data }) => {
+            await axios.get(`${vue.options.base_endpoint}/form-selects`).then(({ data }) => {
                 vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
                 vue.selects.qualification_types = data.data.qualification_types;
@@ -500,7 +500,7 @@ export default {
                 let base = `${vue.options.base_endpoint}`
                 let url = vue.resource.id
                     ? `${base}/${vue.resource.id}/update`
-                    : `${base}/v2/store`;
+                    : `${base}/store`;
                 const method = vue.resource.id ? 'PUT' : 'POST';
                 const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
                 formData.set(
@@ -509,10 +509,12 @@ export default {
                 formData.set(
                     'evaluation_types', JSON.stringify(vue.resource.evaluation_types)
                 );
-                await axios.post(url, formData)
+                await vue.$http.post(url, formData)
                     .then(({ data }) => {
-                        vue.showAlert(data.data.msg);
-                        vue.$emit('onConfirm')
+                        vue.$emit('onConfirm',{
+                            checklist:data.data.checklist,
+                            next_step:'create_activities'
+                        })
                     }).catch((error) => {
                         console.log('error',error);
                         if (error && error.errors) {

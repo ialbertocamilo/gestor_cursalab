@@ -51,7 +51,13 @@ class SegmentController extends Controller
         if ($request->model_type === 'App\Models\Course') {
             $courseModules = Course::getModulesFromCourseSchools($request->model_id);
         }
-
+        if ($request->model_type === 'App\Models\Checklist') {
+            $criteria_entities = $workspace?->checklist_configuration?->entities_criteria;
+            if($criteria_entities && is_array($criteria_entities) && count($criteria_entities)>0){
+                $criteria = $criteria->where('code', 'module')
+                     ->merge($criteria->whereIn('id', $workspace->checklist_configuration->entities_criteria))->all();
+            }
+        }
         return $this->success(compact('criteria', 'segments', 'users_count', 'courseModules'));
     }
 
@@ -92,8 +98,15 @@ class SegmentController extends Controller
         if ($request->model_type === 'App\Models\Course') {
             $courseModules = Course::getModulesFromCourseSchools($request->model_id);
         }
-
-        // SegmentResource::collection($blocks);
+        // dd($request->model_type === 'App\Models\Checklist',$request->model_type,$workspace?->checklist_configuration?->entities_criteria);
+        if ($request->model_type === 'App\Models\Checklist') {
+            $criteria_entities = $workspace?->checklist_configuration?->entities_criteria;
+            if($criteria_entities && is_array($criteria_entities) && count($criteria_entities)>0){
+                $criteria = $criteria->where('code', 'module')
+                     ->merge($criteria->whereIn('id', $workspace->checklist_configuration->entities_criteria))->all();
+            }
+        }
+            // SegmentResource::collection($blocks);
 
         return $this->success(
             compact('criteria', 'segments', 'courseModules')

@@ -360,6 +360,7 @@ class RestChecklistController extends Controller
                 'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
                 'can_comment'=> true,
                 'can_upload_image'=>true,
+                'type_system_calification'=>'scale_evaluation',
                 'system_calification' => [
                     [
                         'id'=> 1293,

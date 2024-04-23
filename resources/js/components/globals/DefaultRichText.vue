@@ -20,10 +20,11 @@
                     force_br_newlines: true,
                     force_p_newlines: false,
                     forced_root_block: '',
-                    plugins: ['lists anchor', 'code', 'paste','link','image', 'emoticons'],
+                    plugins: ['lists anchor', 'code', 'paste','link','image','preview','emoticons'],
                     toolbar:
-                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? '| image ' : ''}`,
+                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? '| image | preview' : ''}`,
                     images_file_types: 'jpg,svg,webp,gif',
+                    images_upload_handler: images_upload_handler,
                     setup: function (editor) {
                         // if(showGenerateIaDescription){
                         editor.ui.registry.addButton('customButton', {
@@ -142,6 +143,21 @@ export default {
 
             vue.showAlertLength = st;
             vue.$emit('stateLength', st);
+        },
+        async images_upload_handler(blobInfo, success, failure) {
+            let formdata = new FormData();
+            formdata.append("file", blobInfo.blob(), blobInfo.filename());
+            formdata.append("model_id", null);
+
+            await axios
+                .post("/media/media/fileupload", formdata)
+                .then(({data}) => {
+                    success(data.data.media.location);
+                })
+                .catch((err) => {
+                    console.log(err)
+                    failure("upload failed!");
+                });
         },
         updateValue(value) {
             let vue = this

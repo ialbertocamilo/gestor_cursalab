@@ -53,7 +53,7 @@
                                 <DefaultRichText
                                     clearable
                                     :height="150"
-                                    v-model="activity.description"
+                                    v-model="activity.activity"
                                     label="Actividad de checklist"
                                     :ignoreHTMLinLengthCalculation="true"
                                     :key="`${showButtonIaGenerate}-editor`"
@@ -72,15 +72,15 @@
                                             <!-- <v-icon>{{ mdi-file-document-check  }}</v-icon>  -->
                                             Tipo de repuesta: {{ activity.checklist_response.name }}
                                         </v-chip>
-                                        <v-chip small v-if="activity.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                        <v-chip small v-if="activity.extra_attributes.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
                                             <i class="pr-1 mdi mdi-file-chart"></i>
                                             Será evaluable
                                         </v-chip>
-                                        <v-chip small v-if="activity.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                        <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
                                             <i class="pr-1 mdi mdi-image"></i>
                                             Se agregará foto
                                         </v-chip>
-                                        <v-chip small v-if="activity.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                        <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
                                             <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
                                             <i class="pr-1 mdi mdi-comment-outline"></i>
                                             Se agregará comentario
@@ -99,7 +99,8 @@
                                                     :items="checklist_type_response" 
                                                     dense 
                                                     item-text="name"
-                                                    show-required v-model="activity.checklist_response"
+                                                    show-required 
+                                                    v-model="activity.checklist_response"
                                                     return-object
                                                     label="Tipo de respuesta"
                                                 />
@@ -109,7 +110,7 @@
                                                     class="my-0 mr-2 checkbox-label"
                                                     label="Evaluable"
                                                     color="primary"
-                                                    v-model="activity.is_evaluable"
+                                                    v-model="activity.extra_attributes.is_evaluable"
                                                     hide-details="false"
                                                 />
                                             </v-col>
@@ -118,7 +119,7 @@
                                                     class="my-0 mr-2 checkbox-label"
                                                     label="Se usará foto como respuesta"
                                                     color="primary"
-                                                    v-model="activity.photo_response"
+                                                    v-model="activity.extra_attributes.photo_response"
                                                     hide-details="false"
                                                 />
                                             </v-col>
@@ -127,7 +128,7 @@
                                                     class="my-0 mr-2 checkbox-label"
                                                     label="Actividad acepta comentario"
                                                     color="primary"
-                                                    v-model="activity.comment_activity"
+                                                    v-model="activity.extra_attributes.comment_activity"
                                                     hide-details="false"
                                                 />
                                             </v-col>
@@ -137,7 +138,7 @@
                                                 <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
                                                     <DefaultInput
                                                         clearable
-                                                        v-model="activity.custom_options[index_option].value"
+                                                        v-model="activity.custom_options[index_option].name"
                                                         :label="`Opción ${index_option+1}`"
                                                         dense
                                                     />
@@ -160,13 +161,13 @@
                                                     class="my-0 mr-2 checkbox-label"
                                                     label="Aplicar visión computacional"
                                                     color="primary"
-                                                    v-model="activity.computational_vision"
+                                                    v-model="activity.extra_attributes.computational_vision"
                                                     hide-details="false"
                                                 />
                                             </v-col>
-                                            <v-col cols="4" v-if="activity.computational_vision ">
+                                            <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
                                                 <DefaultSelect 
-                                                    v-model="activity.type_computational_vision.type"
+                                                    v-model="activity.extra_attributes.type_computational_vision"
                                                     :items="types_computational_vision" 
                                                     dense 
                                                     item-text="name"
@@ -176,12 +177,12 @@
                                                 />  
                                             </v-col>
                                             <v-col cols="4"
-                                                v-if="activity.type_computational_vision.type && activity.type_computational_vision.type != 'simil'"
+                                                v-if="activity.extra_attributes.type_computational_vision && activity.extra_attributes.type_computational_vision != 'simil'"
                                             >
                                                 <DefaultInput
                                                     clearable
-                                                    v-model="activity.type_computational_vision.value"
-                                                    :label="`${activity.type_computational_vision.type == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
+                                                    v-model="activity.extra_attributes.type_computational_vision_value"
+                                                    :label="`${activity.extra_attributes.type_computational_vision == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
                                                     dense
                                                 />
                                             </v-col>
@@ -191,7 +192,8 @@
                             </v-expansion-panels>
                         </v-row>
                     </v-row>
-                    <v-row style="position: sticky; bottom: 0px;z-index: 10;right: 0;">
+                    <!-- style="position: sticky; bottom: 0px;z-index: 10;right: 0;" -->
+                    <v-row>
                         <v-col cols="12" class="d-flex justify-end pb-0">
                             <DefaultButton
                                 rounded
@@ -249,6 +251,9 @@ export default {
     },
     data() {
         return {
+            checklist:{
+
+            },
             modalities: [
                 {
                     icon:'mdi-file-edit',
@@ -278,72 +283,41 @@ export default {
                 {id:'counter',name:'Contador de objetos'},
             ],
             show_activities:false,
+            defaultActivities:[
+                {
+                    id:'insert-1',
+                    position:1,
+                    activity:'',
+                    checklist_response:false,
+                    custom_options:[],
+                    extra_attributes:{
+                        is_evaluable:false,
+                        comment_activity:false,
+                        photo_response:false,
+                        computational_vision:false,
+                        type_computational_vision:'',
+                        type_computational_value:'',
+                    },
+                },
+            ],
             activities:[
-                {
-                    id:1,
-                    orden:1,
-                    qualification_type:0,
-                    description:'',
-                    checklist_response:false,
-                    photo_response:false,
-                    computational_vision:false,
-                    custom_options:[],
-                    type_computational_vision:{
-                        type:'',
-                        value:''
-                    },
-                },
-                {
-                    id:2,
-                    orden:2,
-                    qualification_type:0,
-                    description:'',
-                    checklist_response:false,
-                    photo_response:false,
-                    computational_vision:false,
-                    custom_options:[],
-                    type_computational_vision:{
-                        type:'',
-                        value:''
-                    },
-                },
-                {
-                    id:3,
-                    orden:3,
-                    qualification_type:0,
-                    description:'',
-                    checklist_response:false,
-                    photo_response:false,
-                    computational_vision:false,
-                    custom_options:[],
-                    type_computational_vision:{
-                        type:'',
-                        value:''
-                    },
-                }
+                // {
+                //     id:'insert-1',
+                //     position:1,
+                //     activity:'',
+                //     checklist_response:false,
+                //     custom_options:[],
+                //     extra_attributes:{
+                //         is_evaluable:false,
+                //         comment_activity:false,
+                //         photo_response:false,
+                //         computational_vision:false,
+                //         type_computational_vision:'',
+                //         type_computational_value:'',
+                //     },
+                // },
             ],
-            resource:{
-                qualification_type:0,
-                description:'',
-                checklist_response:false,
-                photo_response:false,
-                computational_vision:false,
-                custom_options:[],
-                type_computational_vision:{
-                    type:'',
-                    value:''
-                },
-            },
-            checklist_actions :[
-                {id:1,icon:'mdi mdi-home-city',code:'calificate_entity',name:'Calificar entidad',description:'Con este tipo de checklist se revisará a la entidad (tienda, oficina,etc)',color:'#57BFE3'},
-                {id:2,icon:'mdi mdi-clipboard-account',code:'calificate_user',name:'Calificar al usuario',description:'El supervisor podrá evaluar a personalmente a cada uno de los usuarios asignados',color:'#CE98FE'},
-                {id:3,icon:'mdi mdi-account-multiple-check',code:'autocalificate',name:'Autoevaluación',description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',color:'#547AE3'},
-            ],
-            // {id:2,name:'Selecciona'},
-            checklist_type_response:[
-                {id:1,code:'scale_evaluation',name:'Por escala de ev.'},
-                {id:3,code:'custom_option',name:'Desplegable'},
-            ],
+            checklist_type_response:[],
             //Jarvis
             loading_description: false,
             limits_descriptions_generate_ia: {
@@ -364,27 +338,58 @@ export default {
         ,
         resetValidation() {
             let vue = this
-        }
-        ,
+        },
         async confirmModal() {
             let vue = this;
-            vue.$emit('onConfirm', )
+            vue.showLoader();
+            const url = `${vue.options.base_endpoint}/${vue.checklist.id}/activities/save`;
+            await vue.$http.post(url,vue.activities).then(({data})=>{
+                vue.hideLoader();
+                vue.resetValidation();
+                vue.$emit('onConfirm', )
+            }).catch(()=>{
+                vue.hideLoader();
+            })
         },
         resetSelects() {
-            let vue = this
+            let vue = this;
+            vue.activities = [...vue.defaultActivities];
         },
-        async loadData(card_name) {
+        async loadData(checklist) {
             let vue = this
-            return 0;
+            vue.checklist = checklist;
+            //Get activities by checklist
+            const url = `${vue.options.base_endpoint}/${checklist.id}/activities`;
+            vue.showLoader();
+            await vue.$http.get(url).then(({data})=>{
+                if(data.data.activities.length >0 ){
+                    vue.$nextTick(() => {
+                        vue.activities =  [...data.data.activities];
+                        vue.show_activities = true;
+                    });
+                }else{
+                    vue.$nextTick(() => {
+                        vue.activities = [...vue.defaultActivities];
+                        vue.show_activities = false;
+                    });
+                }
+                vue.hideLoader();
+            }).catch(()=>{
+                vue.hideLoader();
+            })
         },
         async loadSelects() {
-
+            let vue = this;
+            const url = `${vue.options.base_endpoint}/activity/form-selects`;
+            await vue.$http.get(url).then(({data})=>{
+                vue.checklist_type_response = data.data.checklist_type_response;
+            })
         },
         addCustomOption(index){
             let vue = this;
             vue.activities[index].custom_options.push({
-                id:vue.resource.custom_options.length + 1,
-                value:''
+                id:'insert'+(vue.activities[index].custom_options.length + 1),
+                name:''
             })
         },
         deleteCustomOption(index_activity,index_option){
@@ -398,17 +403,18 @@ export default {
         addActivity(){
             let vue = this;
             vue.activities.push({
-                id:'insert-'+vue.activities.length+1,
-                orden:vue.activities.length+1,
-                qualification_type:0,
-                description:'',
+                id:'insert-'+(vue.activities.length+1),
+                activity:'',
+                position: vue.activities.length,
                 checklist_response:false,
-                photo_response:false,
-                computational_vision:false,
                 custom_options:[],
-                type_computational_vision:{
-                    type:'',
-                    value:''
+                extra_attributes:{
+                    is_evaluable:false,
+                    photo_response:false,
+                    comment_activity:false,
+                    computational_vision:false,
+                    type_computational_vision:'',
+                    type_computational_value:'',
                 },
             })
         },
@@ -421,7 +427,7 @@ export default {
                 filename: "Plantilla Checklist",
                 confirm:true
             });
-        }
+        },
     }
 }
 </script>

@@ -61,30 +61,32 @@ export default {
             type: Object,
             required: true
         },
-        modalities: [],
         width: String
     },
     data() {
         return {
-           activity_card:{
-                icon:'mdi-file-account',
-                icon_color:'black',
-                name:'Asignar actividades',
-                description:'Procesos que desarrollaran los colaboradores dentro de su checklist',
-                show_border:true
-           },
-           segmentation_card:{
-                icon:'mdi-clipboard-file',
-                icon_color:'black',
-                name:'Segmentar',
-                description:'Selecciona criterios que filtraran a los colaboradores que realizaran el checklist'
-           },
-           supervisor_card:{
-                icon:'mdi-account-details',
-                icon_color:'black',
-                name:'Asignar supervisores',
-                description:'Selecciona a los colaboradores que supervisaran este checklist'
-           }
+            cheklist:{
+
+            },
+            activity_card:{
+                    icon:'mdi-file-account',
+                    icon_color:'black',
+                    name:'Asignar actividades',
+                    description:'<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>',
+                    show_border:true
+            },
+            segmentation_card:{
+                    icon:'mdi-clipboard-file',
+                    icon_color:'black',
+                    name:'Segmentar',
+                    description:'Selecciona criterios que filtraran a los colaboradores que realizaran el checklist'
+            },
+            supervisor_card:{
+                    icon:'mdi-account-details',
+                    icon_color:'black',
+                    name:'Asignar supervisores',
+                    description:'Selecciona a los colaboradores que supervisaran este checklist'
+            }
         };
     },
 
@@ -100,39 +102,43 @@ export default {
             let vue = this
         }
         ,
-        async confirmModal(modality_course) {
+        async confirmModal() {
             let vue = this;
-            vue.$emit('onConfirm', modality_course)
+            vue.$emit('onConfirm', vue.checklist)
         },
         resetSelects() {
             let vue = this
         },
-        async loadData(card_name) {
-            let vue = this
-            switch (card_name) {
-                case 'activity_card':
+        async loadData({checklist,next_step}) {
+            let vue = this;
+            vue.checklist = checklist;
+            const addText = '<br> <span class="text-center mt-4 color-default-primary">Siguiente proceso recomendado</span>';
+            switch (next_step) {
+                case 'create_activities':
                     vue.activity_card.show_border = true;
-                    vue.activity_card.description = vue.activity_card.description + '<br> <span class="text-center">Siguiente proceso recomendado</span>';
+                    vue.activity_card.description += addText;
                 break;
                 case 'segmentation_card':
-                    
+                    vue.segmentation_card.show_border = true;
+                    vue.segmentation_card.description += addText;
                 break;
                 case 'supervisor_card':
-                    
+                    vue.supervisor_card.show_border = true;
+                    vue.supervisor_card.description += addText;
+                break;
+                default:
+                    vue.activity_card.show_border = false;
+                    vue.segmentation_card.show_border = false;
+                    vue.supervisor_card.show_border = false;
                 break;
             }
-            // vue[card_name].show_border = true;
-            // console.log(vue[card_name]);
-            // vue[card_name].description = vue[card_name].description + '<br> <span class="text-center">Siguiente proceso recomendado</span>';
-            // console.log(vue[card_name].description);
-            return 0;
         },
         async loadSelects() {
 
         },
         clickCard(){
             let vue = this;
-            vue.$emit('onConfirm',vue.card_properties);
+            vue.$emit('onConfirm',vue.checklist);
         }
     }
 }
