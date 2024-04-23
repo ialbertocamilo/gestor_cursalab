@@ -413,17 +413,20 @@ class RestChecklistController extends Controller
                     [
                         'id'=> 1293,
                         'name'=>'Excelente',
-                        'color'=>'#00E396'
+                        'color'=>'#00E396',
+                        "percent" => "100%"
                     ],
                     [
                         'id'=> 1294,
                         'name'=>'En proceso',
-                        'color'=>'#FFD600'
+                        'color'=>'#FFD600',
+                        "percent" => "50%"
                     ],
                     [
                         'id'=> 1295,
                         'name'=>'Deficiente',
-                        'color'=>'#FF4560'
+                        'color'=>'#FF4560',
+                        "percent" => "10%"
                     ]
                 ]
             ],
@@ -437,17 +440,20 @@ class RestChecklistController extends Controller
                     [
                         'id'=> 1293,
                         'name'=>'Excelente',
-                        'color'=>'#00E396'
+                        'color'=>'#00E396',
+                        "percent" => "100%"
                     ],
                     [
                         'id'=> 1294,
                         'name'=>'En proceso',
-                        'color'=>'#FFD600'
+                        'color'=>'#FFD600',
+                        "percent" => "50%"
                     ],
                     [
                         'id'=> 1295,
                         'name'=>'Deficiente',
-                        'color'=>'#FF4560'
+                        'color'=>'#FF4560',
+                        "percent" => "10%"
                     ]
                 ]
             ],
