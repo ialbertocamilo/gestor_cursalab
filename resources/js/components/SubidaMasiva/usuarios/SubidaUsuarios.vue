@@ -1,10 +1,20 @@
 <template>
     <v-row>
         <v-col cols="12" md="5" height="200px" class="mt-100">
-            <v-card-text class="py-0">
+            <v-card-text
+                v-show="process.id === 1"
+                class="py-0">
                 <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
                 Se crea o actualiza los usuarios según los datos indicados en el Excel.
             </v-card-text>
+
+            <v-card-text
+                v-show="process.id === 6"
+                class="py-0">
+                <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
+                Se actualiza los usuarios según los datos indicados en el Excel.
+            </v-card-text>
+
             <v-card-title class="tit">Instructivo:</v-card-title>
             <v-card-text class="instructivo">
                 <ul>
@@ -96,7 +106,7 @@ export default {
                 percentLoader.innerHTML = ``;
 
                 let url = '/procesos-masivos/create-update-users';
-                if (this.process.id === 5) {
+                if (vue.process.id === 6) {
                     url = '/procesos-masivos/update-users';
                 }
 

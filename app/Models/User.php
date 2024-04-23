@@ -568,8 +568,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         }
     }
 
-    protected function storeRequest($data, $user = null, $update_password = true, $from_massive = false)
-    {
+    protected function storeRequest(
+        $data,
+        $user = null,
+        $update_password = true,
+        $from_massive = false,
+        $keepOldCriteria = false
+    ) {
         try {
 
             DB::beginTransaction();
@@ -664,13 +669,53 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
 
             $data['criterion_list_final'] = $criterion_list_final;
 
-            $user->criterion_values()
-                ->sync(array_values($data['criterion_list_final']) ?? []);
+            if ($keepOldCriteria) {
 
-            $data['criterion_list_final'][] = $user_document->id;
+                // Uppdate provided criteria values, keeping
+                // old criteria values
 
-            $user->criterion_values()
-                ->sync($data['criterion_list_final']);
+                $userCriterionValues = $user->criterion_values();
+
+                $newCriterionValues = CriterionValue::whereIn('id', $data['criterion_list_final'])->get();
+                $oldCriterionValues = $userCriterionValues->get();
+
+                // Remove only criterion values that are
+                // going to be replaced with the new ones
+
+                $matchedCriterionIds = $oldCriterionValues
+                    ->pluck('criterion_id')
+                    ->intersect(
+                        $newCriterionValues->pluck('criterion_id')
+                    );
+
+                $criterionValuesIds = $userCriterionValues
+                    ->whereIn('criterion_id', $matchedCriterionIds)
+                    ->pluck('id')
+                    ->toArray();
+
+                CriterionValueUser::query()
+                    ->whereIn('criterion_value_id', $criterionValuesIds)
+                    ->where('user_id', $user->id)
+                    ->delete();
+
+                // Insert the new values
+
+                $user->criterion_values()
+                    ->sync($data['criterion_list_final'], false);
+
+            } else {
+
+                // Completely replace old criteria with the new values
+
+                $user->criterion_values()
+                    ->sync(array_values($data['criterion_list_final']) ?? []);
+
+                $data['criterion_list_final'][] = $user_document->id;
+
+                $user->criterion_values()
+                    ->sync($data['criterion_list_final']);
+            }
+
 
             $user->save();
 

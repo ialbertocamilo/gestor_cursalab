@@ -122,7 +122,9 @@ class UserMassiveUpdate extends Massive implements ToCollection
                     //Insert user and criteria
                     UsuarioMaster::storeRequest($master_user_arr, $master_user);
                 }
-                User::storeRequest($data_user['user'], $user, false, true);
+                User::storeRequest(
+                    $data_user['user'], $user, false, true, true
+                );
                 $this->processed_users++;
             } else {
                 //set errors

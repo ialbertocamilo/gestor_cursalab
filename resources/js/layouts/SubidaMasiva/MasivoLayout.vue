@@ -34,8 +34,8 @@
                 <mUsuarios :number_socket="number_socket"
                            :key="1"
                            :url_template="url_template"
-                           :process="list_massive_processes[process_id]"
-                           v-show="process_id==1 || process_id==5"
+                           :process="list_massive_processes.find(obj => obj.id === process_id)"
+                           v-show="process_id==1 || process_id==6"
                            @emitir-alert="show_alert_msg"
                            @download-excel-observations="downloadExcelObservations"
                            @show-modal-limit-allowed-users="openModalLimitAllowedUsers($event)"/>
@@ -99,7 +99,7 @@ export default {
             process_id: 1,
             list_massive_processes: [
                 {id: 1, nombre: 'Creación/Actualización de usuarios', url_template: '/procesos-masivos/download-template-user'},
-                {id: 5, nombre: 'Actualización de usuarios', url_template: '/procesos-masivos/download-template-user'},
+                {id: 6, nombre: 'Actualización de usuarios', url_template: '/procesos-masivos/download-template-user'},
                 {id: 2, nombre: 'Activar Usuarios', url_template: '/templates/Plantilla_activar_usuarios.xlsx'},
                 {id: 3, nombre: 'Desactivar(Cesar) usuarios', url_template: '/templates/Plantilla_cesar_usuarios.xlsx'},
                 //   {id:4,nombre:'Subida de cursos',url_template:''},
