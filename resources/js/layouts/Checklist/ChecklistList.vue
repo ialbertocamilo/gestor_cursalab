@@ -27,7 +27,7 @@
                     </v-col>
                 </v-row>
             </v-card-text>
-
+            <!-- @segmentation="openModalSegment($event)" -->
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
@@ -38,8 +38,9 @@
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Checklist - ${$event.title}`)"
-                @segmentation="openModalSegment($event)"
+                @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del checklist - ${$event.title}`)"
                 @activities="openFormModal(modalActivities,$event, null,'Crear Checklist > Actividades')"
+                @supervisors="openFormModal(modalSupervisorOptions,$event,null,`Supervisores - ${$event.title}`)"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
@@ -116,6 +117,15 @@
             @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
             @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
+        <SupervisorSegmentationModal 
+            :options="modalSupervisorOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalSupervisorOptions.ref"
+            @onCancel="closeSimpleModal(modalSupervisorOptions)"
+            @onConfirm="closeFormModal(modalSupervisorOptions, dataTable, filters)"
+        />
     </section>
 </template>
 
@@ -134,6 +144,7 @@ import ChecklistConfigurationModal from './ChecklistConfigurationModal';
 import ActivitiesModal from './ActivitiesModal';
 // import ModalSegment from "./ModalSegment";
 import SegmentFormModal from "../Blocks/SegmentFormModal";
+import SupervisorSegmentationModal from "./SupervisorSegmentationModal";
 
 export default {
     components: {
@@ -146,7 +157,8 @@ export default {
         ChecklistModality,
         ChecklistConfigurationModal,
         ActivitiesModal,
-        SegmentFormModal
+        SegmentFormModal,
+        SupervisorSegmentationModal
     },
     data() {
         return {
@@ -195,7 +207,13 @@ export default {
                         //     color: '#7fbade',
                         //     icon: 'mdi mdi-check-circle'
                         // }]
-                    }
+                    },
+                    {
+                        text: "Supervisores",
+                        icon: 'mdi mdi-account',
+                        type: 'action',
+                        method_name: 'supervisors'
+                    },
                 ],
                 more_actions: [
                     {
@@ -358,6 +376,14 @@ export default {
                 confirmLabel: "Guardar",
                 resource: "segmentación"
             },
+            modalSupervisorOptions:{
+                ref: 'SupervisorFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/supervisor",
+                confirmLabel: "Guardar",
+                resource: "supervisor"
+            }
         }
     },
     mounted() {
@@ -554,11 +580,13 @@ export default {
             let vue = this;
             console.log('Checklist',checklist);
             vue.closeSimpleModal(vue.modalChecklistConfiguration);
+            vue.closeSimpleModal(vue.modalChecklistModality);
             vue.openFormModal(vue.modalActivities, checklist, null,'Crear Checklist > Actividades');
         },
         closeModalChecklist(configuration_data){
             let vue = this;
             vue.closeSimpleModal(vue.modalChecklist);
+            vue.refreshDefaultTable(vue.dataTable, vue.filters, 1);
             // configuration_data <- Checklist - nex_step
             vue.openFormModal(vue.modalChecklistConfiguration,configuration_data);
         },
@@ -625,7 +653,9 @@ export default {
             //     });
 
             // await vue.$refs.ModalSegment.resetValidation()
-            vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`)
+            console.log('1');
+            vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`);
+            console.log('2');
             // vue.openFormModal(vue.modalSegment, checklist, 'segmentation', `Segmentación del checklist - ${checklist.name}`)
         }
     }

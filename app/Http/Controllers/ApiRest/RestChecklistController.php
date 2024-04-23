@@ -452,6 +452,23 @@ class RestChecklistController extends Controller
                 ]
             ],
         ];
-        return $this->success(['activities'=>$activities]);
+        return $this->success([
+            'checklist'=>[
+                "title" => "Trabajo realizado por el usuario en su estación.",
+                "entity" =>[
+                    "name"=>"Ecnorsa ZC",
+                    "icon"=>"store",
+                ],
+                "required_geolocalization"=>true,
+                "type" => [
+                                'id'=> 5077,
+                                'name' => 'Auditoria',
+                                'code'=>'libre',
+                                'color'=>'#CE98FE'
+                ],
+                // "image"=>"/",
+                "activities"=>$activities
+            ]
+        ]);
     }
 }

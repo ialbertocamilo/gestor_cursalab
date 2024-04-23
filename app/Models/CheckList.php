@@ -15,6 +15,7 @@ class CheckList extends BaseModel
         'active',
         'workspace_id',
         'modality_id',
+        'supervisor_criteria',
         'extra_attributes',
         'type_id',
         'starts_at',
@@ -24,7 +25,8 @@ class CheckList extends BaseModel
 
     protected $casts = [
         'active' => 'boolean',
-        'extra_attributes'=>'json'
+        'extra_attributes'=>'json',
+        'supervisor_criteria'=>'array'
     ];
 
     protected $hidden = [

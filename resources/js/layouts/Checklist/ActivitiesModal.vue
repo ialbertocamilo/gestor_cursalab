@@ -20,7 +20,7 @@
                                     top
                                 />   
                             </div>
-                            <span>Tipo: <b>Calificar usuario</b></span>
+                            <!-- <span>Tipo: <b>Calificar usuario</b></span> -->
                             <div>
                                 <DefaultButton
                                     rounded

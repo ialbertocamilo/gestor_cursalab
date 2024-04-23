@@ -109,7 +109,8 @@ export default {
         'isCourseSegmentation',
         "options",
         'hideModule',
-        'showBtnDeleteSegment'
+        'showBtnDeleteSegment',
+        "model_type","model_id"
     ],
     data() {
         return {
@@ -151,10 +152,11 @@ export default {
             // vue.$nextTick(() => {
             //     vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
             // })
-
+            console.log(resource);
             let base = `${vue.options.base_endpoint}`;
             let url = `${base}/create`;
-
+            url = url + "?model_type=" + vue.model_type +
+                "&model_id=" + vue.model_id;
             await vue.$http.get(url).then(({data}) => {
                 let _data = data.data;
 

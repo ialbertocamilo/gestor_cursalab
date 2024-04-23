@@ -114,6 +114,8 @@
                                                 class="mx-5"
                                                 :options="options"
                                                 @borrar_segment="borrarBloque"
+                                                :model_type="model_type"
+                                                :model_id="resource.id"
                                             />
 
                                             <!-- <v-divider class="mx-12"/>
@@ -532,7 +534,6 @@ export default {
             // })
 
             vue.resource = resource;
-
             let base = `${vue.options.base_endpoint}`;
             let url = resource
                 ? `${base}/${resource.id}/edit`

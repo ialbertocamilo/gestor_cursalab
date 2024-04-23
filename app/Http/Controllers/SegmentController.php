@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\SegmentSearchUsersResource;
-use App\Imports\SegmentSearchByDocumentImport;
-use App\Models\CriterionValue;
-use App\Models\Criterion;
-use App\Models\SegmentValue;
-use App\Models\Taxonomy;
-use App\Models\Segment;
-
 use App\Models\User;
 use App\Models\Course;
+use App\Models\Segment;
+use App\Models\Taxonomy;
+use App\Models\CheckList;
+use App\Models\Criterion;
 use App\Models\Workspace;
+
+use App\Models\SegmentValue;
 use Illuminate\Http\Request;
-use App\Http\Requests\SegmentRequest;
-use App\Http\Resources\SegmentResource;
+use App\Models\CriterionValue;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Requests\SegmentRequest;
+use App\Http\Resources\SegmentResource;
+use App\Imports\SegmentSearchByDocumentImport;
+use App\Http\Resources\SegmentSearchUsersResource;
 
 // use App\Http\Controllers\ZoomApi;
 
@@ -55,7 +56,7 @@ class SegmentController extends Controller
             $criteria_entities = $workspace?->checklist_configuration?->entities_criteria;
             if($criteria_entities && is_array($criteria_entities) && count($criteria_entities)>0){
                 $criteria = $criteria->where('code', 'module')
-                     ->merge($criteria->whereIn('id', $workspace->checklist_configuration->entities_criteria))->all();
+                     ->merge($criteria->whereIn('id', $criteria_entities))->all();
             }
         }
         return $this->success(compact('criteria', 'segments', 'users_count', 'courseModules'));
@@ -99,11 +100,13 @@ class SegmentController extends Controller
             $courseModules = Course::getModulesFromCourseSchools($request->model_id);
         }
         // dd($request->model_type === 'App\Models\Checklist',$request->model_type,$workspace?->checklist_configuration?->entities_criteria);
-        if ($request->model_type === 'App\Models\Checklist') {
+        if ($request->model_type === 'App\Models\Checklist' && $request->model_id) {
             $criteria_entities = $workspace?->checklist_configuration?->entities_criteria;
-            if($criteria_entities && is_array($criteria_entities) && count($criteria_entities)>0){
+            $cheklist = CheckList::select('modality_id')->with('modality:id,name,code')->where('id',$request->model_id)->first();
+            if($cheklist?->modality?->code == 'qualify_entity' && $criteria_entities && is_array($criteria_entities) && count($criteria_entities)>0){
+                $criteria = collect($criteria);
                 $criteria = $criteria->where('code', 'module')
-                     ->merge($criteria->whereIn('id', $workspace->checklist_configuration->entities_criteria))->all();
+                     ->merge($criteria->whereIn('id', $criteria_entities))->all();
             }
         }
             // SegmentResource::collection($blocks);
