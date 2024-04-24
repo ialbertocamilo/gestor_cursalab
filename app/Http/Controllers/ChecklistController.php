@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Taxonomy;
 use App\Models\CheckList;
 use App\Models\Criterion;
@@ -27,28 +28,22 @@ class ChecklistController extends Controller
     }
     public function editChecklist(CheckList $checklist){
         $checklist->load('modality:id,name,code,extra_attributes');
-        // $checklist->evaluation_types  = 
+        $checklist->evaluation_types  = Taxonomy::select('id','name','code','extra_attributes')
+                                                ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
+                                                ->get();
         return $this->success([
             'checklist'=>$checklist
         ]);
     }
     public function storeChecklist(ChecklistStoreRequest $request){
-        $data = $request->validated();
-        $cheklist = CheckList::storeRequest($data);
-        return $this->success([
-            'msg'=>'checklist creado correctamente.',
-            'checklist' => [
-                'id'=>$cheklist->id,
-                'title'=>$cheklist->title
-            ]
-        ]);
+        $data = CheckList::storeRequest($request->validated());
+        $data['msg'] = 'Checklist creado correctamente.';
+        return $this->success($data);
     }
     public function updateChecklist(ChecklistStoreRequest $request,CheckList $checklist){
-        $data = $request->validated();
-        CheckList::storeRequest($data,$checklist);
-        return $this->success([
-            'msg'=>'checklist actualizado correctamente.'
-        ]);
+        $data = CheckList::storeRequest($request->validated(),$checklist);
+        $data['msg'] = 'Checklist actualizado correctamente.';
+        return $this->success($data);
     }
  
     public function searchChecklist(Request $request){
@@ -62,21 +57,36 @@ class ChecklistController extends Controller
     }
     public function listActivitiesByChecklist(CheckList $checklist){
         $checklist->load('activities','activities.checklist_response:id,name','activities.custom_options');
-        // $checklist = $checklist->
         return $this->success([
             'activities'=>$checklist->activities
         ]);
     }
     public function saveActivitiesByChecklist(CheckList $checklist,Request $request){
         $activities = $request->all(); 
-        CheckList::saveActivities($checklist,$activities);
-        return $this->success([
-            'msg'=>'Actividades creadas correctamente.'
-        ]);
+        $data = CheckList::saveActivities($checklist,$activities);
+        $data['msg'] = 'Actividades creadas correctamente.';
+        return $this->success($data);
     }
 
     public function getSegments(CheckList $checklist){
         $response = Checklist::getSegments($checklist);
         return $this->success($response);
+    }
+    public function supervisorSegmentation(CheckList $checklist){
+        $supervisor_assigned_directly = [];
+        if(count($checklist->supervisor_ids) > 0){
+            $supervisor_assigned_directly = User::select('id','fullname','document', 'name', 'lastname', 'surname')
+                                                ->whereIn('id',$checklist->supervisor_ids)
+                                                ->get();
+        }
+        return $this->success([
+            'supervisor_criteria'=>$checklist->supervisor_criteria,
+            'supervisor_assigned_directly'=>$supervisor_assigned_directly
+        ]);
+    }
+    public function saveSupervisorSegmentation(CheckList $checklist,Request $request){
+        $data = CheckList::updateSupervisors($checklist,$request->all());
+        $data['msg'] = 'Supervisores actualizados.';
+        return $this->success($data);
     }
 }

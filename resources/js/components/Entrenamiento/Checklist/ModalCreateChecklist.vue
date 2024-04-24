@@ -518,9 +518,10 @@ export default {
                 );
                 await vue.$http.post(url, formData)
                     .then(({ data }) => {
+                        console.log(data.data);
                         vue.$emit('onConfirm',{
-                            checklist:data.data.checklist,
-                            next_step:'create_activities'
+                            checklist: data.data.checklist,
+                            next_step: data.data.next_step
                         })
                     }).catch((error) => {
                         console.log('error',error);

@@ -346,7 +346,10 @@ export default {
             await vue.$http.post(url,vue.activities).then(({data})=>{
                 vue.hideLoader();
                 vue.resetValidation();
-                vue.$emit('onConfirm', )
+                vue.$emit('onConfirm',{
+                    checklist: data.data.checklist,
+                    next_step: data.data.next_step
+                });
             }).catch(()=>{
                 vue.hideLoader();
             })

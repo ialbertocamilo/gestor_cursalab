@@ -60,13 +60,15 @@ Route::controller(ChecklistController::class)->group(function() {
 			Route::get('/form-selects', 'getFormSelects');
 			Route::post('/store', 'storeChecklist');
 			Route::get('/{checklist}/edit', 'editChecklist');
-			Route::post('/{checklist}/update', 'updateChecklist');
+			Route::put('/{checklist}/update', 'updateChecklist');
 
 			Route::get('/activity/form-selects', 'formSelectsActivities');
 			Route::get('/{checklist}/activities', 'listActivitiesByChecklist');
 			Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
 
 			Route::get('/segments/{checklist}', 'getSegments')->name('checklist.getSegments');
+			Route::get('/{checklist}/supervisor-segmentation', 'supervisorSegmentation')->name('checklist.supervisorSegmentation');
+			Route::post('/{checklist}/save-supervisor-segmentation', 'saveSupervisorSegmentation')->name('checklist.saveSupervisorSegmentation');
 		});
 	});
 });

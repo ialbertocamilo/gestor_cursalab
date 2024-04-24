@@ -12,9 +12,9 @@
                     <v-tab>
                         Vincular por criterios
                     </v-tab>
-                    <!-- <v-tab>
+                    <v-tab>
                         Elegir supervisor(es)
-                    </v-tab> -->
+                    </v-tab>
                 </v-tabs>
                 <v-tabs-items v-model="tabs_sup">
                     <v-tab-item>
@@ -23,15 +23,14 @@
                                 <span class="text_default lbl_tit">Define los criterios que se aplicarán para hacer la relación entre los supervisores y los checklist.</span>
                             </v-col>
                             <v-col cols="11">
-                                <DefaultAutocompleteOrder
+                                <DefaultAutocomplete
                                     dense
                                     label="Criterios"
-                                    v-model="list_criteria_selected"
+                                    v-model="supervisor_criteria"
                                     :items="list_criteria"
                                     multiple
                                     item-text="name"
                                     item-id="id"
-                                    return-object
                                     :showSelectAll="true"
                                     :loading-state="true"
                                     :count-show-values="Infinity"
@@ -43,7 +42,7 @@
                             </v-col>
                         </v-row>
                     </v-tab-item>
-                    <!-- <v-tab-item>
+                    <v-tab-item>
                         <v-row justify="space-around">
                             <v-col cols="11" class="step_modalAsignacionXDni">
                                 <AsignacionXDni
@@ -58,7 +57,7 @@
                                 </AsignacionXDni>
                             </v-col>
                         </v-row>
-                    </v-tab-item> -->
+                    </v-tab-item>
                 </v-tabs-items>
             </template>
         </DefaultDialog>
@@ -66,10 +65,11 @@
 </template>
 
 <script>
+import AsignacionXDni from "../Supervisores/AsignacionXDni";
 
 
 export default {
-    components: {  },
+    components: { AsignacionXDni },
     props: {
         options: {
             type: Object,
@@ -86,33 +86,53 @@ export default {
             resource: {
                 
             },
-            list_criteria_selected:[],
-            list_criteria:[]
+            list_criteria:[],
+            supervisor_criteria:[],
+            supervisor_assigned_directly:[]
         };
     },
     methods: {
         closeModal() {
             let vue = this
-            vue.resetSelects()
-            vue.resetValidation()
+            vue.resetValidation();
             vue.$emit('onCancel')
-        }
-        ,
+        },
         resetValidation() {
             let vue = this
-        }
-        ,
+        },
         async confirmModal() {
-
             let vue = this
+            const url = `${vue.options.base_endpoint}/${vue.resource.id}/save-supervisor-segmentation`
+            vue.showLoader();
+            const segments_supervisors_direct = vue.$refs.AsignacionSupervisores ? vue.$refs.AsignacionSupervisores.usuarios_ok : [];
+            const supervisor_ids = segments_supervisors_direct.map((s) => s.id)
+            await vue.$http
+                .post(url, {
+                    supervisor_criteria:vue.supervisor_criteria,
+                    supervisor_ids
+                })
+                .then(({data}) => {
+                    vue.hideLoader();
+                    if(data.data.msg){
+                        vue.showAlert(data.data.msg);
+                    }
+                vue.resetSelects();
+                })
+                .catch(error => {
+                    if (error && error.errors) vue.errors = error.errors;
+                    vue.hideLoader();
+                });
             vue.$emit('onCancel')
         }
         ,
         resetSelects() {
-            let vue = this
+            let vue = this;
+            vue.list_criteria = [];
+            vue.supervisor_criteria = [];
         },
         async loadData(resource) {
-            let vue = this
+            let vue = this;
+            vue.resource = resource;
             // let url =  `/segments/${resource.id}/edit;`
             let url =  `/segments/${resource.id}/edit`;
 
@@ -134,31 +154,22 @@ export default {
                     });
                 }
             })
-            // let url = 'procesos/supervisors_users'
-            // let formData = JSON.stringify({
-            //             model_type: vue.model_type,
-            //             model_id: null,
-            //             code: vue.code,
-            //             segments: vue.segments,
-            //             segment_by_document: vue.segment_by_document,
-            //             segments_supervisors: vue.list_criteria_selected
-            //         });
 
-            // await vue.$http
-            //     .post(url, formData)
-            //     .then(({data}) => {
-            //         console.log(data);
-
-            //     })
-            //     .catch(error => {
-            //         if (error && error.errors) vue.errors = error.errors;
-            //         vue.hideLoader();
-            //     });
-           
+            url = `${vue.options.base_endpoint}/${resource.id}/supervisor-segmentation`
+            await vue.$http
+                .get(url)
+                .then(({data}) => {
+                    vue.supervisor_criteria = data.data.supervisor_criteria;
+                    vue.supervisor_assigned_directly = data.data.supervisor_assigned_directly;
+                })
+                .catch(error => {
+                    if (error && error.errors) vue.errors = error.errors;
+                    vue.hideLoader();
+                });
         },
         async loadSelects() {
             let vue = this;
-        },
+        }
     }
 }
 </script>

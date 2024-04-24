@@ -16,6 +16,7 @@ class CheckList extends BaseModel
         'workspace_id',
         'modality_id',
         'supervisor_criteria',
+        'supervisor_ids',
         'extra_attributes',
         'type_id',
         'starts_at',
@@ -26,7 +27,8 @@ class CheckList extends BaseModel
     protected $casts = [
         'active' => 'boolean',
         'extra_attributes'=>'json',
-        'supervisor_criteria'=>'array'
+        'supervisor_criteria'=>'array',
+        'supervisor_ids' => 'array'
     ];
 
     protected $hidden = [
@@ -841,8 +843,8 @@ class CheckList extends BaseModel
     }
 
     protected function storeRequest($data, $checklist = null){
-        $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id');
-        $extra_attributes['evaluation_types_id'] = $evaluation_types;
+        $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
+        $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
         if($checklist){
             $checklist->update($data);
         }else{
@@ -850,7 +852,11 @@ class CheckList extends BaseModel
             $data['workspace_id'] = get_current_workspace()->id;
             $checklist = self::create($data);
         }
-        return $checklist;
+        $next_step = self::nextStep($checklist);
+        return [
+            'next_step' => $next_step,
+            'checklist' => $checklist
+        ];
     }
 
     protected function saveActivities($checklist,$activities){
@@ -884,6 +890,11 @@ class CheckList extends BaseModel
                 }
             }
         }
+        $next_step = self::nextStep($checklist);
+        return [
+            'next_step' => $next_step,
+            'checklist' => $checklist
+        ];
     }
 
     protected function getSegments( $_checklist )
@@ -918,5 +929,34 @@ class CheckList extends BaseModel
         }
 
         return ['checklist' => $checklist];
+    }
+    protected function updateSupervisors($checklist,$data){
+        $checklist->supervisor_criteria = $data['supervisor_criteria'];
+        $checklist->supervisor_ids = $data['supervisor_ids'];
+        $checklist->save();
+        $next_step = self::nextStep($checklist);
+        return [
+            'next_step' => $next_step,
+            'checklist' => $checklist
+        ];
+    } 
+    protected function nextStep($checklist){
+        $next_step = '';
+        $hasActivities = $checklist->actividades()->first();
+        if(!$hasActivities){
+            $next_step = 'create_activities';
+            return $next_step;
+        }
+        $hasSegments = $checklist->segments()->first();
+        if(!$hasSegments){
+            $next_step = 'segmentation_card';
+            return $next_step;
+        }
+        $has_supervisors = count($checklist->supervisor_criteria)>0 ||count($checklist->supervisor_ids)>0;
+        if(!$has_supervisors){
+            $next_step = 'supervisor_card';
+            return $next_step;
+        }
+        return $next_step;
     }
 }

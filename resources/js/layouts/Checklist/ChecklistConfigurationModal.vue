@@ -68,6 +68,7 @@ export default {
             cheklist:{
 
             },
+            next_step:'',
             activity_card:{
                     icon:'mdi-file-account',
                     icon_color:'black',
@@ -104,7 +105,9 @@ export default {
         ,
         async confirmModal() {
             let vue = this;
-            vue.$emit('onConfirm', vue.checklist)
+            vue.$emit('onConfirm',{
+                checklist:vue.checklist
+            })
         },
         resetSelects() {
             let vue = this
@@ -112,6 +115,7 @@ export default {
         async loadData({checklist,next_step}) {
             let vue = this;
             vue.checklist = checklist;
+            vue.next_step = next_step;
             const addText = '<br> <span class="text-center mt-4 color-default-primary">Siguiente proceso recomendado</span>';
             const activity_card_description = '<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>';
             const segmentation_card_description = '<span>Selecciona criterios que filtraran a los colaboradores que realizaran el checklist</span>';
@@ -149,6 +153,7 @@ export default {
                     vue.activity_card.show_border = false;
                     vue.segmentation_card.show_border = false;
                     vue.supervisor_card.show_border = false;
+                    vue.next_step = ''; 
                 break;
             }
         },
@@ -157,7 +162,10 @@ export default {
         },
         clickCard(){
             let vue = this;
-            vue.$emit('onConfirm',vue.checklist);
+            vue.$emit('onConfirm',{
+                checklist:vue.checklist,
+                next_step : vue.next_step
+            });
         }
     }
 }
