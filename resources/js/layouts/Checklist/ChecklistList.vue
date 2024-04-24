@@ -127,11 +127,20 @@
             @onCancel="closeSimpleModal(modalSupervisorOptions)"
             @onConfirm="closeFormModal(modalSupervisorOptions, dataTable, filters)"
         />
+        <ActivitiesIAModal 
+            :options="modalActivitiesIAOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalActivitiesIAOptions.ref"
+            @onCancel="closeSimpleModal(modalActivitiesIAOptions)"
+            @onConfirm="closeFormModal(modalActivitiesIAOptions, dataTable, filters)"
+        />
     </section>
 </template>
 
 <script>
-
+// modalActivitiesIAOptions
 import ModalSubidaMasivaChecklist from "../../components/Entrenamiento/Checklist/ModalSubidaMasivaChecklist.vue";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist.vue";
 import ModalAsignarChecklistCurso from "../../components/Entrenamiento/Checklist/ModalAsignarChecklistCurso.vue";
@@ -146,6 +155,7 @@ import ActivitiesModal from './ActivitiesModal';
 
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import SupervisorSegmentationModal from "./SupervisorSegmentationModal";
+import ActivitiesIAModal from "./ActivitiesIAModal";
 
 export default {
     components: {
@@ -159,7 +169,8 @@ export default {
         ChecklistConfigurationModal,
         ActivitiesModal,
         SegmentFormModal,
-        SupervisorSegmentationModal
+        SupervisorSegmentationModal,
+        ActivitiesIAModal
     },
     data() {
         return {
@@ -384,6 +395,15 @@ export default {
                 base_endpoint: "/entrenamiento/checklist/v2",
                 confirmLabel: "Guardar",
                 resource: "supervisor"
+            },
+            modalActivitiesIAOptions:{
+                ref: 'ActvitiesIAFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Guardar",
+                resource: "checklist",
+                title:'Selecciona los cursos para conseguir información'
             }
         }
     },

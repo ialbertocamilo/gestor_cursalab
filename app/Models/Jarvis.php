@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use GuzzleHttp\Psr7\stream;
 use App\Models\Mongo\JarvisAttempt;
 use App\Models\Mongo\JarvisResponse;
 use Illuminate\Support\Facades\Http;
@@ -99,6 +100,42 @@ class Jarvis extends Model
             return $data['message'][0];
         }
     }
+    
+    protected function generateChecklistJarvis($request){
+        // $data['files']  = $request->file('files');
+        // dd($request->file('files'));
+        // $data = array_merge(self::getJarvisConfiguration(),$data);
+        $files = $request->file('files');
+        $multipart = [];
+        foreach ($files as $file) {
+            $multipart[] = [
+                'name' => 'attachments[]',
+                'contents' => file_get_contents($file),
+                'filename' => basename($file),
+                'headers' => ['Content-Type' => 'text/plain'] // Establecer el tipo MIME como texto plano
+            ];
+        }
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->attach($multipart)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist');
+        // $multipart = [];
+        // foreach ($files as $key => $file) {
+        //     $multipart[] = [
+        //         'name'     => $key,
+        //         'contents' => stream_for(fopen($file->path(), 'r'))
+        //     ];
+        // }
+
+        // 
+        if ($response->successful()) {
+            $data = $response->json();
+            dd($data);
+            // JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'descriptions');
+            // JarvisResponse::insertResponse([$data['description'][1]],'description');
+            return $data['description'][0];
+        }
+    }
+
     private function getJarvisConfiguration($_workspace=null){
         $workspace = $_workspace ?? get_current_workspace();
         $jarvis_configuration = is_array($workspace->jarvis_configuration) ? $workspace->jarvis_configuration : json_decode($workspace->jarvis_configuration,true);
