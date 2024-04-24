@@ -79,13 +79,13 @@ export default {
                     icon:'mdi-clipboard-file',
                     icon_color:'black',
                     name:'Segmentar',
-                    description:'Selecciona criterios que filtraran a los colaboradores que realizaran el checklist'
+                    description:'<span>Selecciona criterios que filtraran a los colaboradores que realizaran el checklist</span>'
             },
             supervisor_card:{
                     icon:'mdi-account-details',
                     icon_color:'black',
                     name:'Asignar supervisores',
-                    description:'Selecciona a los colaboradores que supervisaran este checklist'
+                    description:'<span>Selecciona a los colaboradores que supervisaran este checklist</span>'
             }
         };
     },
@@ -113,18 +113,37 @@ export default {
             let vue = this;
             vue.checklist = checklist;
             const addText = '<br> <span class="text-center mt-4 color-default-primary">Siguiente proceso recomendado</span>';
+            const activity_card_description = '<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>';
+            const segmentation_card_description = '<span>Selecciona criterios que filtraran a los colaboradores que realizaran el checklist</span>';
+            const supervisor_card_description = '<span>Selecciona a los colaboradores que supervisaran este checklist</span>';
             switch (next_step) {
                 case 'create_activities':
                     vue.activity_card.show_border = true;
-                    vue.activity_card.description += addText;
+                    vue.activity_card.description = activity_card_description+ addText;
+                    //clear text
+                    vue.segmentation_card.description = segmentation_card_description;
+                    vue.supervisor_card.description = supervisor_card_description;
+                    vue.segmentation_card.show_border = false;
+                    vue.supervisor_card.show_border = false;
+
                 break;
                 case 'segmentation_card':
                     vue.segmentation_card.show_border = true;
-                    vue.segmentation_card.description += addText;
+                    vue.segmentation_card.description = segmentation_card_description + addText;
+                    //clear text
+                    vue.activity_card.description = activity_card_description;
+                    vue.supervisor_card.description = supervisor_card_description;
+                    vue.activity_card.show_border = false;
+                    vue.supervisor_card.show_border = false;
                 break;
                 case 'supervisor_card':
                     vue.supervisor_card.show_border = true;
-                    vue.supervisor_card.description += addText;
+                    vue.supervisor_card.description = supervisor_card_description + addText;
+                    //clear text
+                    vue.activity_card.description = activity_card_description;
+                    vue.segmentation_card.description = segmentation_card_description;
+                    vue.activity_card.show_border = false;
+                    vue.segmentation_card.show_border = false;
                 break;
                 default:
                     vue.activity_card.show_border = false;

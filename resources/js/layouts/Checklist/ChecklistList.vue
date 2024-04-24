@@ -27,12 +27,11 @@
                     </v-col>
                 </v-row>
             </v-card-text>
-            <!-- @segmentation="openModalSegment($event)" -->
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
                 :filters="filters"
-                @edit="abrirModalCreateEditChecklist($event, true)"
+                @edit="openFormModal(modalChecklist, $event, null,`Editar Checklist - ${$event.title}`)"
                 @abrirModalCreateEditChecklist="openFormModal(modalChecklistModality, null, null,'Selecciona el tipo de actividad a realizar')"
                 @duplicate="duplicateChecklist($event)"
                 @delete="openFormModal(modalDeleteOptions,$event,'delete','Eliminar un <b>checklist</b>')"

@@ -26,6 +26,8 @@ class ChecklistController extends Controller
         return $this->success($data);
     }
     public function editChecklist(CheckList $checklist){
+        $checklist->load('modality:id,name,code,extra_attributes');
+        // $checklist->evaluation_types  = 
         return $this->success([
             'checklist'=>$checklist
         ]);
