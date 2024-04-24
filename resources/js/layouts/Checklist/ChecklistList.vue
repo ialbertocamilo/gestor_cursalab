@@ -116,7 +116,7 @@
             :model_id="null"
             :ref="modalFormSegmentationOptions.ref"
             @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-            @onConfirm="closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            @onConfirm="verifyNextStep,closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
         <SupervisorSegmentationModal 
             :options="modalSupervisorOptions"
@@ -526,6 +526,14 @@ export default {
         },
         confirmModalSegment(){
             vue.closeSimpleModal(vue.modalSegment);
+        },
+        async verifyNextStep(checklist){
+            let vue = this;
+            await vue.$http.get(`/entrenamiento/checklists/v2/${checklist.id}/verify-next-step`).then(({data})=>{
+                if(data.data.next_step){
+                    vue.openNextStepConfigurationModal(data.data);
+                }
+            })
         },
         openNextStepConfigurationModal(configuration_data){
             let vue = this;

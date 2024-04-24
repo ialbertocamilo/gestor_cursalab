@@ -89,4 +89,9 @@ class ChecklistController extends Controller
         $data['msg'] = 'Supervisores actualizados.';
         return $this->success($data);
     }
+
+    public function verifyNextStep(CheckList $checklist){
+        $data = CheckList::nextStep($checklist);
+        return $this->success($data);
+    }
 }

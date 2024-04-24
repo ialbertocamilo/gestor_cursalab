@@ -485,7 +485,7 @@ export default {
                 vue.$http
                     .post(url, formData)
                     .then(({data}) => {
-                        vue.$emit("onConfirm");
+                        vue.$emit("onConfirm",vue.resource);
                         vue.closeModal();
                         vue.showAlert(data.data.msg);
 

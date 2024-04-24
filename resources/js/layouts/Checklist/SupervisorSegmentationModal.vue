@@ -116,13 +116,16 @@ export default {
                     if(data.data.msg){
                         vue.showAlert(data.data.msg);
                     }
+                    vue.$emit('onConfirm',{
+                        checklist: data.data.checklist,
+                        next_step: data.data.next_step
+                    });
                 vue.resetSelects();
                 })
                 .catch(error => {
                     if (error && error.errors) vue.errors = error.errors;
                     vue.hideLoader();
                 });
-            vue.$emit('onCancel')
         }
         ,
         resetSelects() {
