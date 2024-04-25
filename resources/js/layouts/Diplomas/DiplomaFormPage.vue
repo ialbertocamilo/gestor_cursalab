@@ -221,7 +221,7 @@
             @onCancel="closeFormModal(modalFontsOptions)"
             @onConfirm="closeFormModal(modalFontsOptions),loadInitData()"
         />
-        
+
     </section>
 </template>
 <script>
@@ -404,6 +404,8 @@ export default {
             })
         },
         changeFont(font){
+            if (!font) return;
+
             let vue = this;
             vue.font_id = font.id;
             vue.only_regular_font = font.only_regular_font;
