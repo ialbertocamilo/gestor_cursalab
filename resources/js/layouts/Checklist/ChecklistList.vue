@@ -176,7 +176,7 @@ export default {
         return {
             modalities:[],
             dataTable: {
-                endpoint: '/entrenamiento/checklists/search',
+                endpoint: '/entrenamiento/checklist/v2/search',
                 ref: 'ChecklistTable',
                 custom_no_data_text:{
                     label:'Agregar un checklist',
@@ -184,10 +184,23 @@ export default {
                     action:'abrirModalCreateEditChecklist'
                 },
                 headers: [
-                    {text: "Título", value: "title", align: 'start', sortable: true},
+                    {text: "Título", value: "title", align: 'start', sortable: false},
+                    {text: "Modalidad", value: "modality.name", align: 'start', sortable: false},
+                    {text: "Tipo", value: "type.name", align: 'start', sortable: false},
+                    {text: "Fecha limite de vigencia", value: "finishes_at", align: 'start', sortable: true},
+                    {text: "Estado", value: "statusActions", align: 'start', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
+                statusActions:[
+
+                ],
                 actions: [
+                    // {
+                    //     text: "Estado",
+                    //     icon: 'fa fa-circle',
+                    //     type: 'action',
+                    //     method_name: 'statusActions'
+                    // },
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
@@ -198,42 +211,64 @@ export default {
                         text: "Actividades",
                         icon: 'mdi mdi-book-variant',
                         type: 'action',
-                        method_name: 'activities'
+                        method_name: 'activities',
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes actividades en el checklist',
+                            minValue: 0,
+                            propertyCond: 'activities_count',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },{
+                            message: 'Añades actividades en el checklist',
+                            minValue: 1,
+                            propertyCond: 'activities_count',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                     {
                         text: "Segmentación",
                         icon: 'mdi mdi-account-group segmentation-icon',
                         type: 'action',
                         method_name: 'segmentation',
-                        // conditionalBadgeIcon: [{
-                        //     message: 'No tienes colaboradores participantes en el checklist',
-                        //     minValue: 0,
-                        //     propertyCond: 'segments_count',
-                        //     color: 'red',
-                        //     icon: 'fas fa-exclamation-triangle',
-                        //     iconSize: '12px'
-                        // },{
-                        //     message: 'Selecciona a los colaboradores que participarán en el checklist',
-                        //     minValue: 1,
-                        //     propertyCond: 'segments_count',
-                        //     color: '#7fbade',
-                        //     icon: 'mdi mdi-check-circle'
-                        // }]
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes colaboradores participantes en el checklist',
+                            minValue: 0,
+                            propertyCond: 'segments_count',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },{
+                            message: 'Selecciona a los colaboradores que participarán en el checklist',
+                            minValue: 1,
+                            propertyCond: 'segments_count',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                     {
-                        text: "Supervisores",
+                        text: "Auditores",
                         icon: 'mdi mdi-account',
                         type: 'action',
-                        method_name: 'supervisors'
+                        method_name: 'supervisors',
+                        conditionalBadgeIcon: [{
+                            message: 'No tienes auditores participantes en el checklist',
+                            minValue: 0,
+                            propertyCond: 'supervisors_count',
+                            color: 'red',
+                            icon: 'fas fa-exclamation-triangle',
+                            iconSize: '12px'
+                        },{
+                            message: 'Selecciona a los auditores que participarán en el checklist',
+                            minValue: 1,
+                            propertyCond: 'supervisors_count',
+                            color: '#7fbade',
+                            icon: 'mdi mdi-check-circle'
+                        }]
                     },
                 ],
                 more_actions: [
-                    {
-                        text: "Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
                     {
                         text: "Eliminar",
                         icon: 'far fa-trash-alt',

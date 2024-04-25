@@ -71,8 +71,8 @@ export default {
         async confirmModal() {
             let vue = this;
             let formData = new FormData();
-            vue.files.map(rf => {
-                formData.append("files[]", rf);
+            vue.files.map((file) => {
+                formData.append("files[]", file);
             })
             await vue.$http.post('/jarvis/generate-checklist',formData).then(({data})=>{
                 console.log(data);

@@ -8,6 +8,7 @@ use App\Models\CheckList;
 use App\Models\Criterion;
 use Illuminate\Http\Request;
 use App\Http\Requests\ChecklistStoreRequest;
+use App\Http\Resources\ChecklistSearchResource;
 
 class ChecklistController extends Controller
 {
@@ -46,9 +47,10 @@ class ChecklistController extends Controller
         return $this->success($data);
     }
  
-    public function searchChecklist(Request $request){
-        $data = CheckList::gridCheckList($request->all());
-        return $this->success($data);
+    public function listChecklists(Request $request){
+        $paginatedChecklist = CheckList::listChecklists($request->all());
+        ChecklistSearchResource::collection($paginatedChecklist);
+        return $this->success($paginatedChecklist);
     }
 
     public function formSelectsActivities(){

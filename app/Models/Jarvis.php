@@ -102,29 +102,36 @@ class Jarvis extends Model
     }
     
     protected function generateChecklistJarvis($request){
-        // $data['files']  = $request->file('files');
-        // dd($request->file('files'));
-        // $data = array_merge(self::getJarvisConfiguration(),$data);
         $files = $request->file('files');
         $multipart = [];
-        foreach ($files as $file) {
-            $multipart[] = [
-                'name' => 'attachments[]',
-                'contents' => file_get_contents($file),
-                'filename' => basename($file),
-                'headers' => ['Content-Type' => 'text/plain'] // Establecer el tipo MIME como texto plano
-            ];
-        }
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->attach($multipart)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist');
-        // $multipart = [];
-        // foreach ($files as $key => $file) {
+        // foreach ($files as $file) {
         //     $multipart[] = [
-        //         'name'     => $key,
-        //         'contents' => stream_for(fopen($file->path(), 'r'))
+        //         'name' => 'attachments[]',
+        //         'contents' => file_get_contents($file),
+        //         'filename' => basename($file),
+        //         'headers' => ['Content-Type' => 'text/plain'] // Establecer el tipo MIME como texto plano
         //     ];
         // }
+        foreach ($files as $file) {
+            $fileContents = file_get_contents($file);
+            $filename = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+        
+            $multipart[] = [
+                'name' => 'attachments[]',
+                'contents' => $fileContents,
+                'filename' => $filename,
+                'headers' => ['Content-Type' => $mimeType]
+            ];
+        }
+        $params = self::getJarvisConfiguration();
+
+        $multipart[] =[
+            'token' =>$params['token']
+        ];
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->attach($multipart)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist',$params);
 
         // 
         if ($response->successful()) {

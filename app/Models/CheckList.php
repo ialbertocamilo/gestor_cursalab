@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\ApiRest\HelperController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiRest\HelperController;
 
 class CheckList extends BaseModel
 {
@@ -848,6 +849,7 @@ class CheckList extends BaseModel
         if($checklist){
             $checklist->update($data);
         }else{
+            $data['active'] = 0;
             $data['platform_id'] = currentPlatform()->id;
             $data['workspace_id'] = get_current_workspace()->id;
             $checklist = self::create($data);
@@ -942,7 +944,7 @@ class CheckList extends BaseModel
     } 
     protected function nextStep($checklist){
         $next_step = '';
-        $hasActivities = $checklist->actividades()->first();
+        $hasActivities = $checklist->activities()->first();
         if(!$hasActivities){
             $next_step = 'create_activities';
             return $next_step;
@@ -958,5 +960,36 @@ class CheckList extends BaseModel
             return $next_step;
         }
         return $next_step;
+    }
+
+    protected function listChecklists(){
+        $response['data'] = null;
+        $filtro = $data['filtro'] ?? $data['q'] ?? '';
+
+        $workspace = get_current_workspace();
+
+        $queryChecklist = CheckList::select('id','active','title','modality_id','type_id',
+                                            'supervisor_criteria','supervisor_ids',
+                                            DB::raw("DATE_FORMAT(finishes_at,'%d/%m/%Y') as finishes_at")
+                                    )
+                                    ->with(['modality:id,name,code','type:id,name,code'])
+                                    ->withCount(['activities','segments'])
+                                    ->FilterByPlatform()
+                                    ->where('workspace_id', $workspace->id);
+
+        $field = 'created_at';
+        $sort = 'DESC';
+
+        $queryChecklist->orderBy($field, $sort);
+
+        if (!is_null($filtro) && !empty($filtro)) {
+            $queryChecklist->where(function ($query) use ($filtro) {
+                $query->where('checklists.title', 'like', "%$filtro%");
+                $query->orWhere('checklists.description', 'like', "%$filtro%");
+            });
+        }
+        $checklists = $queryChecklist->paginate(request('paginate', 15));
+
+        return $checklists;
     }
 }
