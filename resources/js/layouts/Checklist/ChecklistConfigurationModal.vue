@@ -162,8 +162,9 @@ export default {
         },
         clickCard(){
             let vue = this;
+            console.log('checklist',vue.checklist);
             vue.$emit('onConfirm',{
-                checklist:vue.checklist,
+                checklist: vue.checklist,
                 next_step : vue.next_step
             });
         }

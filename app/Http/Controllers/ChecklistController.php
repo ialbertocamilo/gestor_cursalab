@@ -29,6 +29,8 @@ class ChecklistController extends Controller
     }
     public function editChecklist(CheckList $checklist){
         $checklist->load('modality:id,name,code,extra_attributes');
+        $checklist->load('type:id,name,code,extra_attributes');
+        $checklist->load('course:id,name');
         $checklist->evaluation_types  = Taxonomy::select('id','name','code','extra_attributes')
                                                 ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
                                                 ->get();
@@ -93,7 +95,20 @@ class ChecklistController extends Controller
     }
 
     public function verifyNextStep(CheckList $checklist){
-        $data = CheckList::nextStep($checklist);
-        return $this->success($data);
+        $next_step = CheckList::nextStep($checklist);
+        return $this->success([
+            'next_step' => $next_step,
+            'checklist' => $checklist
+        ]);
+    }
+    
+    public function status(CheckList $checklist, Request $request){
+        $checklist->update(['active' => !$checklist->active]);
+        return $this->success(['msg' => 'Estado actualizado correctamente.']);
+    }
+
+    public function searchCourses(Request $request){
+        $courses = Checklist::searchCourses($request);
+        return $this->success(['courses'=>$courses]);
     }
 }

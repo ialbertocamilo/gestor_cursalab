@@ -15,6 +15,7 @@ class CheckList extends BaseModel
         'description',
         'active',
         'workspace_id',
+        'course_id',
         'modality_id',
         'supervisor_criteria',
         'supervisor_ids',
@@ -52,6 +53,10 @@ class CheckList extends BaseModel
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'checklist_relationships', 'checklist_id', 'course_id');
+    }
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
     }
     public function segments()
     {
@@ -847,14 +852,16 @@ class CheckList extends BaseModel
         $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
         $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
         if($checklist){
+            unset($data['course']);
             $checklist->update($data);
+            $next_step = self::nextStep($checklist);
         }else{
             $data['active'] = 0;
             $data['platform_id'] = currentPlatform()->id;
             $data['workspace_id'] = get_current_workspace()->id;
             $checklist = self::create($data);
+            $next_step = 'create_activities';
         }
-        $next_step = self::nextStep($checklist);
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -991,5 +998,19 @@ class CheckList extends BaseModel
         $checklists = $queryChecklist->paginate(request('paginate', 15));
 
         return $checklists;
+    }
+
+    protected function searchCourses($request){
+        $current_workspace = get_current_workspace();
+        return Course::when($request->q, function($q) use ($request){
+                    $q->filtroName($request->q) ;
+                })
+                ->where('courses.active', 1)
+                ->whereRelation('workspaces', 'id', $current_workspace->id)
+                ->select(
+                    'courses.id',
+                    DB::raw('CONCAT(courses.id," - ",courses.name) as name')
+                )
+                ->paginate(10)->items();
     }
 }

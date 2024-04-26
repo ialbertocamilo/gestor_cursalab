@@ -37,7 +37,7 @@
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Checklist - ${$event.title}`)"
                 @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del checklist - ${$event.title}`)"
                 @activities="openFormModal(modalActivities,$event, null,'Crear Checklist > Actividades')"
-                @supervisors="openFormModal(modalSupervisorOptions,$event,null,`Supervisores - ${$event.title}`)"
+                @supervisors="openFormModal(modalSupervisorOptions,$event,null,`Vinculación de auditores - ${$event.title}`)"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
         </v-card>
@@ -57,6 +57,7 @@
             :options="modalChecklist"
             width="60vw"
             @onConfirm="
+                closeSimpleModal(modalChecklistModality),
                 closeSimpleModal(modalChecklist);
                 refreshDefaultTable(dataTable, filters, 1);
                 openNextStepConfigurationModal($event)
@@ -116,7 +117,7 @@
             :model_id="null"
             :ref="modalFormSegmentationOptions.ref"
             @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
-            @onConfirm="verifyNextStep,closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
+            @onConfirm="verifyNextStep($event),closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
         <SupervisorSegmentationModal 
             :options="modalSupervisorOptions"
@@ -125,7 +126,7 @@
             :model_id="null"
             :ref="modalSupervisorOptions.ref"
             @onCancel="closeSimpleModal(modalSupervisorOptions)"
-            @onConfirm="closeFormModal(modalSupervisorOptions, dataTable, filters)"
+            @onConfirm="openNextStepConfigurationModal($event),closeFormModal(modalSupervisorOptions, dataTable, filters)"
         />
         <ActivitiesIAModal 
             :options="modalActivitiesIAOptions"
@@ -135,6 +136,17 @@
             :ref="modalActivitiesIAOptions.ref"
             @onCancel="closeSimpleModal(modalActivitiesIAOptions)"
             @onConfirm="closeFormModal(modalActivitiesIAOptions, dataTable, filters)"
+        />
+        <DialogConfirm
+            :ref="finishConfigurationModal.ref"
+            v-model="finishConfigurationModal.open"
+            width="450px"
+            title="Checklist finalizado"
+            :subtitle="finishConfigurationModal.subtitle"
+            txt_btn_cancel="Activarlo más tarde"
+            txt_btn_confirm="Activar checklist"
+            @onConfirm="confirmUpdateStatus"
+            @onCancel="finishConfigurationModal.open = false"
         />
     </section>
 </template>
@@ -156,6 +168,7 @@ import ActivitiesModal from './ActivitiesModal';
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import SupervisorSegmentationModal from "./SupervisorSegmentationModal";
 import ActivitiesIAModal from "./ActivitiesIAModal";
+import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
     components: {
@@ -170,7 +183,8 @@ export default {
         ActivitiesModal,
         SegmentFormModal,
         SupervisorSegmentationModal,
-        ActivitiesIAModal
+        ActivitiesIAModal,
+        DialogConfirm
     },
     data() {
         return {
@@ -188,19 +202,15 @@ export default {
                     {text: "Modalidad", value: "modality.name", align: 'start', sortable: false},
                     {text: "Tipo", value: "type.name", align: 'start', sortable: false},
                     {text: "Fecha limite de vigencia", value: "finishes_at", align: 'start', sortable: true},
-                    {text: "Estado", value: "statusActions", align: 'start', sortable: false},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
-                statusActions:[
-
-                ],
                 actions: [
-                    // {
-                    //     text: "Estado",
-                    //     icon: 'fa fa-circle',
-                    //     type: 'action',
-                    //     method_name: 'statusActions'
-                    // },
+                    {
+                        text: "Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
+                    },
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
@@ -433,12 +443,23 @@ export default {
             },
             modalActivitiesIAOptions:{
                 ref: 'ActvitiesIAFormModal',
-                open: false,
+                open: true,
                 persistent: true,
                 base_endpoint: "/entrenamiento/checklist/v2",
                 confirmLabel: "Guardar",
                 resource: "checklist",
                 title:'Selecciona los cursos para conseguir información'
+            },
+            finishConfigurationModal:{
+                ref: 'finishConfigurationModal',
+                title: 'Checklist finalizado',
+                subtitle: `<img src="/images/innovation-flatline.png"></img>
+                            <br> 
+                            <span style="font-size: 18px;font-weight: bold;">Haz terminado de configurar tu checklist.</span>
+                            <br>
+                            <span style="font-size: 18px;">¿Deseas activar tu checklist?</span>`,
+                open: false,
+                endpoint: '/entrenamiento/checklist/v2'
             }
         }
     },
@@ -569,7 +590,7 @@ export default {
                     vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`)
                 break;
                 case 'supervisor_card':
-                    vue.openFormModal(vue.modalSupervisorOptions, checklist, null,`Supervisores - ${$checklist.title}`);
+                    vue.openFormModal(vue.modalSupervisorOptions, checklist, null,`Supervisores - ${checklist.title}`);
                 break;
                 default:
                 break;
@@ -584,15 +605,30 @@ export default {
         },
         async verifyNextStep(checklist){
             let vue = this;
-            await vue.$http.get(`/entrenamiento/checklists/v2/${checklist.id}/verify-next-step`).then(({data})=>{
-                if(data.data.next_step){
+            await vue.$http.get(`/entrenamiento/checklist/v2/${checklist.id}/verify-next-step`)
+                .then(({data})=>{
                     vue.openNextStepConfigurationModal(data.data);
-                }
-            })
+                });
         },
         openNextStepConfigurationModal(configuration_data){
             let vue = this;
-            vue.openFormModal(vue.modalChecklistConfiguration,configuration_data);
+            if(configuration_data.next_step){
+                vue.openFormModal(vue.modalChecklistConfiguration,configuration_data);
+            }else if(!configuration_data.checklist.active){
+                vue.finishConfigurationModal.endpoint = `/entrenamiento/checklist/v2/${configuration_data.checklist.id}/status`;
+                vue.openSimpleModal(vue.finishConfigurationModal);
+            }
+        },
+        async confirmUpdateStatus(){
+            let vue = this;
+            vue.showLoader();
+            await vue.$http.put(vue.finishConfigurationModal.endpoint)
+                .then(({data}) => {
+                    vue.hideLoader();
+                    vue.showAlert(data.data.msg);
+                    vue.refreshDefaultTable(vue.dataTable, vue.filters, 1)
+                    vue.closeSimpleModal(vue.finishConfigurationModal);
+                });
         }
     }
 };

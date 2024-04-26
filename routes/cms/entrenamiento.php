@@ -57,6 +57,8 @@ Route::controller(ChecklistController::class)->group(function() {
 	Route::prefix('/checklist')->middleware('hasHability:checklist')->group(function () {
 		Route::prefix('/v2')->group(function () {
 			Route::get('/search', 'listChecklists');
+			Route::get('/search-courses', 'searchCourses');
+
 			Route::get('/{checklist}/verify-next-step', 'verifyNextStep');
 			Route::get('/form-selects', 'getFormSelects');
 			Route::post('/store', 'storeChecklist');
@@ -70,6 +72,9 @@ Route::controller(ChecklistController::class)->group(function() {
 			Route::get('/segments/{checklist}', 'getSegments')->name('checklist.getSegments');
 			Route::get('/{checklist}/supervisor-segmentation', 'supervisorSegmentation')->name('checklist.supervisorSegmentation');
 			Route::post('/{checklist}/save-supervisor-segmentation', 'saveSupervisorSegmentation')->name('checklist.saveSupervisorSegmentation');
+
+			Route::put('/{checklist}/status', 'status');
+			
 		});
 	});
 });

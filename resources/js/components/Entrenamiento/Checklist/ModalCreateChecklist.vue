@@ -4,7 +4,7 @@
     <div>
         <DefaultDialog :options="options" :width="width" @onCancel="closeModal" @onConfirm="confirm">
                 <template v-slot:content>
-                    <v-form ref="checklistForm">
+                    <v-form ref="checklistForm" @submit.prevent="">
                         <v-row>
                             <v-col cols="7">
                                 <DefaultInput 
@@ -23,10 +23,45 @@
                                     placeholder="Tipo de checklist"
                                     v-model="resource.type_id"
                                     :items="selects.types_checklist"
+                                    :disabled="action=='edit'"
                                     item-text="nombre"
                                     item-value="id"
                                     :rules="rules.required"
+                                    @input="setTypeChecklist($event)"
                                 />
+                            </v-col>
+                            <v-col v-if="resource.type_id && resource.type.code == 'curso'" cols="12"  class="d-flex align-items-center">
+                                <span>Curso asociado al cheklist: </span>
+                                <button ref="span_element" style="display: none;"></button>
+                                <v-edit-dialog v-model="edit_course_dialog" :return-value="resource.course">
+                                    <v-text-field
+                                        style="width: 150px;"
+                                        class="ml-4"
+                                        v-model="resource.course.name"
+                                        :disabled="action=='edit'"
+                                        label="Curso"
+                                        value="name"
+                                        @click="edit_course_dialog = true"
+                                    ></v-text-field>
+                                    <template v-slot:input>
+                                        <v-autocomplete 
+                                            class="mt-4"
+                                            clearable 
+                                            outlined 
+                                            v-model="search_course" 
+                                            :items="selects.courses"
+                                            no-data-text="No hay datos para mostrar." 
+                                            label="Curso"
+                                            placeholder="Busca por el nombre o ID del curso."
+                                            item-value='id' item-text='name' :rules="rules.required" 
+                                            :search-input.sync="search"
+                                            :loading="searching_course"
+                                            :disabled="searching_course"
+                                            return-object
+                                            @change="updateCourseValue"
+                                        />
+                                    </template>
+                                </v-edit-dialog>
                             </v-col>
                             <v-col cols="7">
                                 <DefaultRichText
@@ -298,6 +333,18 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
+                                    <v-col cols="6">
+                                        <DefaultSimpleSection title="Plan de acción" marginy="my-1" marginx="mx-0">
+                                            <template slot="content">
+                                                <div class="d-flex">
+                                                    <DefaultToggle class="ml-4 mb-2"
+                                                        v-model="resource.extra_attributes.required_action_plan" dense
+                                                        :active-label="'Activar plan de acción'"
+                                                        :inactive-label="'Activar plan de acción'" />
+                                                </div>
+                                            </template>
+                                        </DefaultSimpleSection>
+                                    </v-col>
                                     <v-col cols="12">
                                         <span>Calificación de entidad</span>
                                     </v-col>
@@ -318,6 +365,8 @@
                                         </DefaultSimpleSection>
                                     </v-col>
                                     <v-col cols="6">
+                                    </v-col>
+                                    <v-col cols="6">
                                         <DefaultSimpleSection title="Selecciona el criterio del responsable" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex pb-3 px-4">
@@ -329,6 +378,24 @@
                                                         item-value="id"
                                                         show-required 
                                                         label="Selecciona el criterio del responsable"
+                                                        @input="getCriteriaValues($event)"
+                                                    />   
+                                                </div>
+                                            </template>
+                                        </DefaultSimpleSection>
+                                    </v-col>
+                                    <v-col cols="6" v-if="resource.extra_attributes.autocalificate_entity_criteria">
+                                        <DefaultSimpleSection title="Selecciona el valor del criterio del responsable" marginy="my-1" marginx="mx-0">
+                                            <template slot="content">
+                                                <div class="d-flex pb-3 px-4">
+                                                    <DefaultSelect 
+                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
+                                                        :items="selects.criteria_values" 
+                                                        dense 
+                                                        item-text="name"
+                                                        item-value="id"
+                                                        show-required 
+                                                        label="Selecciona el valor del criterio del responsable"
                                                     />   
                                                 </div>
                                             </template>
@@ -383,6 +450,12 @@ export default {
     },
     data() {
         return {
+            search:null,
+            action:null,
+            searching_course:false,
+            edit_course_dialog:false,
+            search_course:'',
+            debounceTimer: null,
             current_modality:{
 
             },
@@ -404,7 +477,11 @@ export default {
                 ],
                 max_limit_create_evaluation_types:5,
                 criteria:[
-                ]
+                ],
+                criteria_values:[
+
+                ],
+                courses:[]
             },
             tabs: null,
             steps: 0,
@@ -413,18 +490,30 @@ export default {
             resourceDefault: {
                 id: null,
                 name: null,
+                course :{
+                    id:null,
+                    name,
+                },
                 extra_attributes :{},
                 type_id: null,
+                type:{},
                 modality_id:null,
+                course_id:null,
                 evaluation_types:[],
                 finishes_at:'',
             },
             resource: {
                 id: null,
                 name: null,
+                course :{
+                    id:null,
+                    name,
+                },
                 modality_id:null,
+                course_id:null,
                 extra_attributes:{},
                 type_id: null,
+                type:{},
                 evaluation_types:[],
                 finishes_at:'',
             },
@@ -452,9 +541,44 @@ export default {
         let vue = this;
         await vue.loadLimitsGenerateIaDescriptions();
     },
+    watch: {
+        search(val) {
+            // Items have already been loaded
+            if (this.debounceTimer) {
+                clearTimeout(this.debounceTimer);
+            }
+            this.debounceTimer = setTimeout(() => {
+                this.searchCourses(val);
+            }, 800);
+        },
+    },
     methods: {
+        async searchCourses(value) {
+            let vue = this;
+            if (vue.searching_course || !value) return
+            vue.searching_course = true
+
+            let url = `${vue.options.base_endpoint}/search-courses?q=${value ? value : ''}`
+            await vue.$http.get(url)
+                .then(({ data }) => {
+                    console.log(data);
+                    vue.selects.courses = data.data.courses;
+                }).catch((error) => {
+                    console.log(error);
+                }).finally(() => (vue.searching_course = false))
+        },
+        updateCourseValue(value){
+            let vue = this;
+            vue.resource.course = value;
+            vue.edit_course_dialog = false;
+            vue.search_course = '';
+            console.log(this.$refs.span_element.click());
+            this.$refs.span_element.click();
+            vue.$emit('update:edit_course_dialog', false)
+        },
         async loadSelects(){
             let vue = this;
+            vue.showLoader();
             await axios.get(`${vue.options.base_endpoint}/form-selects`).then(({ data }) => {
                 vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
@@ -462,6 +586,7 @@ export default {
                 vue.selects.max_limit_create_evaluation_types =  data.data.checklist_default_configuration.max_limit_create_evaluation_types;
                 vue.selects.criteria = data.data.criteria;
                 vue.selects.types_checklist  = data.data.types_checklist;
+                vue.hideLoader();
             })
             if(!vue.resource.id){
                 const idx_type_id = vue.selects.types_checklist.findIndex(tc => tc.code == 'libre')
@@ -475,6 +600,9 @@ export default {
         },
         closeModal() {
             let vue = this;
+            if(vue.action == 'edit' ){
+                vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+            }
             vue.resetValidation();
             vue.$emit("onClose");
         },
@@ -483,6 +611,7 @@ export default {
         },
         async loadData(resource){
             let vue = this;
+            vue.action = (resource)  ? 'edit' : 'create';
             if(resource){
                 let base = `${vue.options.base_endpoint}`
                 const url =  `${base}/${resource.id}/edit`;
@@ -491,6 +620,9 @@ export default {
                         console.log(data.data);
                         vue.current_modality = data.data.checklist.modality
                         vue.resource = data.data.checklist;
+                        if(vue.resource.extra_attributes.autocalificate_entity_criteria){
+                            vue.getCriteriaValues(vue.resource.extra_attributes.autocalificate_entity_criteria);
+                        }
                     }).catch((error) => {
                         
                     })
@@ -516,9 +648,16 @@ export default {
                 formData.set(
                     'evaluation_types', JSON.stringify(vue.resource.evaluation_types)
                 );
+                if(vue.resource.course && vue.resource.type.code == 'curso'){
+                    formData.set(
+                        'course_id', JSON.stringify(vue.resource.course.id)
+                    );
+                }
                 await vue.$http.post(url, formData)
                     .then(({ data }) => {
-                        console.log(data.data);
+                        vue.$nextTick(() => {
+                            vue.resource = Object.assign({}, vue.resource, vue.resourceDefault)
+                        })
                         vue.$emit('onConfirm',{
                             checklist: data.data.checklist,
                             next_step: data.data.next_step
@@ -548,6 +687,20 @@ export default {
             await axios.get('/jarvis/limits?type=descriptions').then(({ data }) => {
                 this.limits_descriptions_generate_ia = data.data;
             })
+        },
+        async getCriteriaValues(criterion_id){
+            let vue = this;
+            await vue.$http.get(`/criterios/${criterion_id}/valores/search`, {
+                name: vue.resource.title,
+                type: 'checklist'
+            }).then(({ data }) => {
+                console.log(data);
+                vue.selects.criteria_values = data.data.data;
+            });
+        },
+        setTypeChecklist(type_id){
+            let vue = this;
+            this.resource.type = vue.selects.types_checklist.find(t => t.id == type_id);
         },
         async generateIaDescription() {
             const vue = this;

@@ -28,6 +28,7 @@ class ChecklistStoreRequest extends FormRequest
             'type_id'=> 'required',
             'modality_id'=> 'required',
             'extra_attributes'=>'required',
+            'course_id' => 'nullable',
             'description'=>'nullable',
             'finishes_at'=>'nullable',
             'image'=>'nullable',
@@ -48,7 +49,9 @@ class ChecklistStoreRequest extends FormRequest
         $extra_attributes = json_decode($this->extra_attributes, true) ?? [];
 
         $extra_attributes['qualification_type'] = $extra_attributes['qualification_type'];
-        $extra_attributes['autocalificate_entity_criteria'] = $extra_attributes['autocalificate_entity_criteria'] ?? '[]';
+        $extra_attributes['autocalificate_entity_criteria'] = $extra_attributes['autocalificate_entity_criteria'] ?? null;
+        $extra_attributes['autocalificate_entity_criteria_value'] = $extra_attributes['autocalificate_entity_criteria_value'] ?? null;
+
         $extra_attributes['visualiazation_results'] = verifyBooleanValue($extra_attributes['visualiazation_results'] ?? null);
         $extra_attributes['view_360'] = verifyBooleanValue($extra_attributes['view_360'] ?? null);
         $extra_attributes['comments_if_checklist_completed'] = verifyBooleanValue($extra_attributes['comments_if_checklist_completed'] ?? null);
@@ -58,7 +61,8 @@ class ChecklistStoreRequest extends FormRequest
         $extra_attributes['required_geolocation'] = verifyBooleanValue($extra_attributes['required_geolocation'] ?? null);
         $extra_attributes['autocalificate_entity'] = verifyBooleanValue($extra_attributes['autocalificate_entity'] ?? null);
         $extra_attributes['required_comments'] = verifyBooleanValue($extra_attributes['required_comments'] ?? null);
-
+        $extra_attributes['required_action_plan'] = verifyBooleanValue($extra_attributes['required_action_plan'] ?? null);
+        
         $this->merge(['extra_attributes' => $extra_attributes]);
         return $this->all();
     }

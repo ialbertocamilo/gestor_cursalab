@@ -18,6 +18,7 @@ class ChecklistSearchResource extends JsonResource
             'id'=>$this->id,
             'title'=>$this->title,
             'active' => $this->active,
+            'status' =>$this->active,
             'modality' => $this->modality,
             'type' => $this->type,
             'finishes_at' => $this->finishes_at ?? 'Sin vigencia',
