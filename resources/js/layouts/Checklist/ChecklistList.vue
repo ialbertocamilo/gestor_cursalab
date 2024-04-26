@@ -199,18 +199,13 @@ export default {
                 },
                 headers: [
                     {text: "Título", value: "title", align: 'start', sortable: false},
-                    {text: "Modalidad", value: "modality.name", align: 'start', sortable: false},
-                    {text: "Tipo", value: "type.name", align: 'start', sortable: false},
-                    {text: "Fecha limite de vigencia", value: "finishes_at", align: 'start', sortable: true},
+                    {text: "Modalidad", value: "checklist_modality", align: 'start', sortable: false},
+                    {text: "Tipo", value: "checklist_type", align: 'start', sortable: false},
+                    {text: "¿Es concurrente?", value: "replicate", align: 'start', sortable: false},
+                    {text: "Fecha límite de vigencia", value: "finishes_at", align: 'start', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
                 actions: [
-                    {
-                        text: "Estado",
-                        icon: 'fa fa-circle',
-                        type: 'action',
-                        method_name: 'status'
-                    },
                     {
                         text: "Editar",
                         icon: 'mdi mdi-pencil',
@@ -242,6 +237,7 @@ export default {
                         icon: 'mdi mdi-account-group segmentation-icon',
                         type: 'action',
                         method_name: 'segmentation',
+                        show_condition:'can_create_segmentation',
                         conditionalBadgeIcon: [{
                             message: 'No tienes colaboradores participantes en el checklist',
                             minValue: 0,
@@ -276,6 +272,12 @@ export default {
                             color: '#7fbade',
                             icon: 'mdi mdi-check-circle'
                         }]
+                    },
+                    {
+                        text: "Estado",
+                        icon: 'fa fa-circle',
+                        type: 'action',
+                        method_name: 'status'
                     },
                 ],
                 more_actions: [

@@ -13,7 +13,7 @@
                                     v-model="resource.title"
                                     label="Título de checklist"
                                     placeholder="Escribe el titulo del checklist aquí"
-                                    :rules="rules.required"
+                                    :rules="rules.title"
                                 />
                             </v-col>
                             <v-col cols="5">
@@ -178,13 +178,14 @@
                             </v-col>
                             <v-col cols="5" class="pt-1">
                                 <v-col cols="12" class="px-0">
-                                    <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 py-4" marginx="mx-0">
-                                        <template slot="content">
-                                            <DefaultSelect dense :items="selects.qualification_types" item-text="name"
+                                    <!-- <DefaultSimpleSection title="Escalas de evaluación" marginy="my-1 px-2 py-4" marginx="mx-0">
+                                        <template slot="content"> -->
+                                            <DefaultSelect 
+                                                :items="selects.qualification_types" item-text="name"
                                                 show-required v-model="resource.extra_attributes.qualification_type"
                                                 label="Sistema de calificación" :rules="rules.required" />
-                                        </template>
-                                    </DefaultSimpleSection>
+                                        <!-- </template> -->
+                                    <!-- </DefaultSimpleSection> -->
                                 </v-col>
                                 <v-col cols="12" class="px-0">
                                     <DefaultSimpleSection title="Comentarios" marginy="my-1" marginx="mx-0">
@@ -274,49 +275,16 @@
                                         </DefaultSimpleSection>
                                     </v-col>
                                     <v-col cols="6">
-                                        <DefaultSimpleSection title="Fecha límite de vigencia" marginy="my-1" marginx="mx-0">
-                                            <template slot="content">
-                                                <div class="d-flex  pb-3 px-4">
                                                     <DefaultInputDate
                                                         clearable
-                                                        dense
                                                         :referenceComponent="'modalDateFilter'"
                                                         :options="modalDateFilter"
                                                         v-model="resource.finishes_at"
-                                                        label="Selecciona la fecha límite que tendrá tu checklist"
+                                                        label="Fecha límite de vigencia"
+                                                        placeholder="Selecciona la fecha límite que tendrá tu proceso"
                                                     />
-                                                </div>
-                                            </template>
-                                        </DefaultSimpleSection>
                                     </v-col>
-                                    <v-col cols="12">
-                                        <DefaultSimpleSection title="Sistema de firma del checklist" marginy="my-1" marginx="mx-0">
-                                            <template slot="content">
-                                                <div class="row">
-                                                    <v-col cols="6" class="d-flex">
-                                                        <DefaultToggle class="ml-4 mb-2"
-                                                            v-model="resource.extra_attributes.required_signature_supervisor" dense
-                                                            :active-label="'Solicitar una firma al supervisor para finalizar checklist'"
-                                                            :inactive-label="'Solicitar una firma al supervisor para finalizar checklist'" />
-                                                        <DefaultInfoTooltip
-                                                            text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
-                                                            top
-                                                        />    
-                                                    </v-col>
-                                                    <v-col cols="6">
-                                                        <v-checkbox
-                                                            :disabled="!resource.extra_attributes.required_signature_supervisor"
-                                                            class="my-0 mr-2 checkbox-label"
-                                                            label="Solicitar firma al supervisado"
-                                                            color="primary"
-                                                            v-model="resource.extra_attributes.required_signature_supervised"
-                                                            hide-details="false"
-                                                        />
-                                                    </v-col>
-                                                </div>
-                                            </template>
-                                        </DefaultSimpleSection>
-                                    </v-col>
+                                    
                                     <v-col cols="6">
                                         <DefaultSimpleSection title="Geolocalización" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
@@ -348,6 +316,29 @@
                                     <v-col cols="12">
                                         <span>Calificación de entidad</span>
                                     </v-col>
+                                    
+                                    <v-col cols="6">
+                                                    <DefaultSelect 
+                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria"
+                                                        :items="selects.criteria" 
+                                                        item-text="name"
+                                                        item-value="id"
+                                                        show-required 
+                                                        label="Selecciona el criterio del responsable"
+                                                        @input="getCriteriaValues($event)"
+                                                    />   
+                                    </v-col>
+                                    <v-col cols="6">
+                                                    <DefaultSelect 
+                                                        v-if="resource.extra_attributes.autocalificate_entity_criteria"
+                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
+                                                        :items="selects.criteria_values" 
+                                                        item-text="name"
+                                                        item-value="id"
+                                                        show-required 
+                                                        label="Selecciona el valor del criterio del responsable"
+                                                    />   
+                                    </v-col>
                                     <v-col cols="6">
                                         <DefaultSimpleSection title="Autocalificación de entidad" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
@@ -364,39 +355,30 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
-                                    <v-col cols="6">
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <DefaultSimpleSection title="Selecciona el criterio del responsable" marginy="my-1" marginx="mx-0">
+                                    <v-col cols="12">
+                                        <DefaultSimpleSection title="Sistema de firma del checklist" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
-                                                <div class="d-flex pb-3 px-4">
-                                                    <DefaultSelect 
-                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria"
-                                                        :items="selects.criteria" 
-                                                        dense 
-                                                        item-text="name"
-                                                        item-value="id"
-                                                        show-required 
-                                                        label="Selecciona el criterio del responsable"
-                                                        @input="getCriteriaValues($event)"
-                                                    />   
-                                                </div>
-                                            </template>
-                                        </DefaultSimpleSection>
-                                    </v-col>
-                                    <v-col cols="6" v-if="resource.extra_attributes.autocalificate_entity_criteria">
-                                        <DefaultSimpleSection title="Selecciona el valor del criterio del responsable" marginy="my-1" marginx="mx-0">
-                                            <template slot="content">
-                                                <div class="d-flex pb-3 px-4">
-                                                    <DefaultSelect 
-                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
-                                                        :items="selects.criteria_values" 
-                                                        dense 
-                                                        item-text="name"
-                                                        item-value="id"
-                                                        show-required 
-                                                        label="Selecciona el valor del criterio del responsable"
-                                                    />   
+                                                <div class="row">
+                                                    <v-col cols="6" class="d-flex">
+                                                        <DefaultToggle class="ml-4 mb-2"
+                                                            v-model="resource.extra_attributes.required_signature_supervisor" dense
+                                                            :active-label="'Solicitar una firma al supervisor para finalizar checklist'"
+                                                            :inactive-label="'Solicitar una firma al supervisor para finalizar checklist'" />
+                                                        <DefaultInfoTooltip
+                                                            text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
+                                                            top
+                                                        />    
+                                                    </v-col>
+                                                    <v-col cols="6">
+                                                        <v-checkbox
+                                                            :disabled="!resource.extra_attributes.required_signature_supervisor"
+                                                            class="my-0 mr-2 checkbox-label"
+                                                            label="Solicitar firma al supervisado"
+                                                            color="primary"
+                                                            v-model="resource.extra_attributes.required_signature_supervised"
+                                                            hide-details="false"
+                                                        />
+                                                    </v-col>
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
@@ -469,6 +451,7 @@ export default {
             dialog: false,
             rules: {
                 required: this.getRules(['required']),
+                title: this.getRules(['required','max:25']),
             },
             selects: {
                 types_checklist: [
@@ -593,6 +576,9 @@ export default {
                 if (idx_type_id !== -1) {
                     vue.resource.type_id = vue.selects.types_checklist[idx_type_id].id;
                 }
+            }
+            if(vue.current_modality.code == 'qualify_entity'){
+                vue.selects.types_checklist = vue.selects.types_checklist.filter((tc) => tc.code =='libre')
             }
         },
         validateRequired(input) {

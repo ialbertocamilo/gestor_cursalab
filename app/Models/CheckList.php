@@ -977,9 +977,12 @@ class CheckList extends BaseModel
 
         $queryChecklist = CheckList::select('id','active','title','modality_id','type_id',
                                             'supervisor_criteria','supervisor_ids',
-                                            DB::raw("DATE_FORMAT(finishes_at,'%d/%m/%Y') as finishes_at")
+                                            DB::raw("
+                                            DATE_FORMAT(finishes_at,'%d/%m/%Y') as finishes_at,
+                                            extra_attributes->'$.replicate' as 'resplicate'
+                                            "),
                                     )
-                                    ->with(['modality:id,name,code','type:id,name,code'])
+                                    ->with(['modality:id,name,code,alias','type:id,name,code'])
                                     ->withCount(['activities','segments'])
                                     ->FilterByPlatform()
                                     ->where('workspace_id', $workspace->id);
