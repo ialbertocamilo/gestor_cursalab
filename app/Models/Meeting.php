@@ -437,7 +437,7 @@ class Meeting extends BaseModel
 
             DB::commit();
 
-            $meeting->notifyMeetingViaApp($attendants);
+            $meeting->notifyMeetingViaApp($attendants, $data['workspace_id']);
             $meeting->sendMeetingPushNotifications($attendants);
             $meeting->sendMeetingEmails();
 
@@ -453,7 +453,7 @@ class Meeting extends BaseModel
         return $meeting;
     }
 
-    protected function notifyMeetingViaApp($attendantsIds) {
+    protected function notifyMeetingViaApp($attendantsIds, $workspaceId) {
 
         // Get attendant's user ids
 
@@ -464,7 +464,7 @@ class Meeting extends BaseModel
         $userIds = $attendants->pluck('usuario_id')->toArray();
 
         UserNotification::createNotifications(
-            get_current_workspace()->id,
+            $workspaceId,
             $userIds,
             UserNotification::NEW_MEETING,
             [],
