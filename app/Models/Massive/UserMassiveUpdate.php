@@ -77,6 +77,17 @@ class UserMassiveUpdate extends Massive implements ToCollection
         $count_users = count($users);
         $counter = 0;
         foreach ($users as $user) {
+
+            // Validate if all values are empty
+
+            $allValuesAreEmpty = true;
+            foreach ($user->toArray() as $value) {
+                if ($value) {
+                    $allValuesAreEmpty = false;
+                }
+            }
+            if ($allValuesAreEmpty) continue;
+
             $percent = round(($counter / $count_users) * 100);
             $this->sendEchoPercentEvent($percent, $this->name_socket, $this->percent_sent) && $this->percent_sent[] = $percent;
             $counter++;
