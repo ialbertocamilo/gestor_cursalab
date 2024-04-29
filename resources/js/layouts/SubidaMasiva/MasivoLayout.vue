@@ -98,8 +98,8 @@ export default {
             loader_text: "Cargando",
             process_id: 1,
             list_massive_processes: [
-                {id: 1, nombre: 'Creación/Actualización de usuarios', url_template: '/procesos-masivos/download-template-user'},
-                {id: 6, nombre: 'Actualización de usuarios', url_template: '/procesos-masivos/download-template-user'},
+                {id: 1, nombre: 'Creación de usuarios', url_template: '/procesos-masivos/download-template-user'},
+                {id: 6, nombre: 'Actualización de usuarios', url_template: '/templates/Plantilla_actualizacion_usuarios.xlsx'},
                 {id: 2, nombre: 'Activar Usuarios', url_template: '/templates/Plantilla_activar_usuarios.xlsx'},
                 {id: 3, nombre: 'Desactivar(Cesar) usuarios', url_template: '/templates/Plantilla_cesar_usuarios.xlsx'},
                 //   {id:4,nombre:'Subida de cursos',url_template:''},
