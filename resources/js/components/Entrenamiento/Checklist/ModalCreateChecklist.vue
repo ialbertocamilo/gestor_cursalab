@@ -79,7 +79,7 @@
                                 />
                             </v-col>
                             <v-col cols="5">
-                                <DefaultSelectOrUploadMultimedia ref="inputLogo" v-model="resource.image"
+                                <DefaultSelectOrUploadMultimedia ref="inputLogo" v-model="resource.imagen"
                                     label="Imagen (500x350px)" :file-types="['image']"
                                     @onSelect="setFile($event, resource, 'imagen')" select-width="60vw" select-height="100%" />
                             </v-col>
@@ -409,9 +409,9 @@ import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
 import ModalAddScaleEvaluation from './ModalAddScaleEvaluation'
 
 const fields = [
-    'title', 'type_id','modality_id','finishes_at','image'
+    'title', 'type_id','modality_id','finishes_at','imagen'
 ];
-const file_fields = ['image'];
+const file_fields = ['imagen'];
 
 export default {
     components: {
@@ -484,6 +484,8 @@ export default {
                 course_id:null,
                 evaluation_types:[],
                 finishes_at:'',
+                imagen:null,
+                file_imagen: null,
             },
             resource: {
                 id: null,
@@ -499,6 +501,8 @@ export default {
                 type:{},
                 evaluation_types:[],
                 finishes_at:'',
+                imagen:null,
+                file_imagen: null,
             },
             modalScalesChecklist:{
                 open:false,

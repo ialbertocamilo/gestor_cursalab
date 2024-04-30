@@ -23,7 +23,8 @@ class CheckList extends BaseModel
         'type_id',
         'starts_at',
         'finishes_at',
-        'platform_id'
+        'platform_id',
+        'imagen'
     ];
 
     protected $casts = [
@@ -849,7 +850,7 @@ class CheckList extends BaseModel
     }
 
     protected function storeRequest($data, $checklist = null){
-        $data = Media::requestUploadFile($data, 'image');
+        $data = Media::requestUploadFile($data, 'imagen');
         $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
         $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
         if($checklist){
@@ -1087,7 +1088,7 @@ class CheckList extends BaseModel
                     "name"=>"Ecnorsa ZC",
                     "icon"=>"store",
                 ],
-                "image" => $checklist->image,
+                "imagen" => get_media_url($checklist->imagen,'s3'),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],

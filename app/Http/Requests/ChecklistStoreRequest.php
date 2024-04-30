@@ -26,13 +26,13 @@ class ChecklistStoreRequest extends FormRequest
         return [
             'title' => 'required',
             'type_id'=> 'required',
-            'image'=> 'nullable',
             'modality_id'=> 'required',
             'extra_attributes'=>'required',
             'course_id' => 'nullable',
             'description'=>'nullable',
             'finishes_at'=>'nullable',
-            'image'=>'nullable',
+            'imagen'=>'nullable',
+            'file_imagen' => 'nullable',
             'evaluation_types'=>'nullable',
         ];
     }
