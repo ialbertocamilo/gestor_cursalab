@@ -241,6 +241,7 @@ class RestChecklistController extends Controller
             $_checkist_data = [
                 "id" => $checklist->id,
                 "title" => $checklist->title,
+                "description" => $checklist->description,
                 "status" => 'pendiente',
                 "modality" => [
                     'id'=> $checklist->modality->id,
