@@ -1087,6 +1087,7 @@ class CheckList extends BaseModel
                     "icon"=>"store",
                 ],
                 "image" => $checklist->image,
+                "description" => $checklist->description,
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
                 "type" => $checklist->type,
