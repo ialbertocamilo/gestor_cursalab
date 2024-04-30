@@ -1051,6 +1051,7 @@ class CheckList extends BaseModel
         return [$list_checklists_geolocalization,$list_checklists_exclude_geolocalization,$list_checklists_libres];
     }
     protected function listActivities($checklist){
+        $user = auth()->user();
         $checklist->loadMissing([
             'type:id,name,code',
             'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position',
@@ -1085,6 +1086,8 @@ class CheckList extends BaseModel
                     "name"=>"Ecnorsa ZC",
                     "icon"=>"store",
                 ],
+                "image" => $checklist->image,
+                'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
                 "type" => $checklist->type,
                 "image"=>$checklist->image,
@@ -1099,8 +1102,6 @@ class CheckList extends BaseModel
             "title" => $checklist->title,
             "status" => 'pendiente',
             "description" => $checklist->description,
-            "image" => $checklist->image,
-            'supervisor' => $user->fullname,
             "modality" => [
                 'id' => $checklist->modality->id,
                 'name' => $checklist->modality->alias,
