@@ -379,7 +379,8 @@
                                         <v-row justify="center">
                                             <v-col cols="4" class="d-flex justify-content-center align-items-center">
                                                 <DefaultInputDate clearable :referenceComponent="'modalDateFilter1'"
-                                                    :options="modalDateFilter1" v-model="resource.publish_date_1"
+                                                    :options="modalDateFilter1"
+                                                    v-model="resource.publish_date_1"
                                                     label="Fecha de inicio" dense />
                                             </v-col>
                                             <v-col cols="2">
@@ -471,6 +472,7 @@ import DiplomaSelector from "../../components/Diplomas/DiplomaSelector";
 import DC3PersonModal from './DC3PersonModal';
 import RegistroTrainerModal from './RegistroTrainerModal';
 import DefaultRichText from "../../components/globals/DefaultRichText";
+import moment from "moment";
 export default {
     components: {
         DefaultRichText,
@@ -793,6 +795,22 @@ export default {
             }
 
         },
+        'resource.publish_date_1': function (newValue, oldValue) {
+            if (newValue)
+                this.validateCourseActivation()
+        },
+        'resource.publish_time_1': function (newValue, oldValue) {
+            if (newValue)
+                this.validateCourseActivation()
+        },
+        'resource.publish_date_2': function (newValue, oldValue) {
+            if (newValue)
+                this.validateCourseActivation()
+        },
+        'resource.publish_time_2': function (newValue, oldValue) {
+            if (newValue)
+                this.validateCourseActivation()
+        },
     },
     methods: {
 
@@ -837,25 +855,44 @@ export default {
                 vue.courseUpdateStatusModal.status_item_modal = !vue.resource.active
             }
         },
+        /**
+         * Validate whether course should be activated or not
+         * according course schedule
+         */
+        validateCourseActivation() {
+
+            if (this.resource.publish_date_1 ||
+                this.resource.publish_time_1 ||
+                this.resource.publish_date_2 ||
+                this.resource.publish_time_2) {
+
+                const currentDate = moment();
+
+                const _activate_at = this.getActivateAtDatetime();
+                const _deactivate_at = this.getDeactivateAtDatetime();
+                const activate_at = moment(_activate_at, 'YYYY-MM-DD HH:mm');
+                const deactivate_at = moment(_deactivate_at, 'YYYY-MM-DD HH:mm');
+
+                if (activate_at.isAfter(currentDate) && this.resource.active) {
+                    this.resource.active = false;
+                    this.modalStatusEdit();
+                }
+
+                if (currentDate.isAfter(deactivate_at) && this.resource.active) {
+                    this.resource.active = false;
+                    this.modalStatusEdit();
+                }
+            }
+        },
         confirmModal(validateForm = true) {
             let vue = this
 
             this.showLoader()
 
             // Get datetimes values
-            if (this.resource.publish_date_1) {
-                let time1 = this.resource.publish_time_1 || '00:01';
-                this.resource.activate_at = `${this.resource.publish_date_1} ${time1}`
-            } else {
-                this.resource.activate_at = null
-            }
 
-            if (this.resource.publish_date_2) {
-                let time2 = this.resource.publish_time_2 || '00:01';
-                this.resource.deactivate_at = `${this.resource.publish_date_2} ${time2}`
-            } else {
-                this.resource.deactivate_at = null
-            }
+            this.resource.activate_at = this.getActivateAtDatetime();
+            this.resource.deactivate_at = this.getDeactivateAtDatetime();
 
             vue.errors = []
             vue.loadingActionBtn = true
@@ -933,10 +970,26 @@ export default {
                     vue.handleValidationsBeforeUpdate(error, vue.courseValidationModal, vue.courseValidationModalDefault);
                     vue.loadingActionBtn = false
 
-                    if (e.response.data.msg) {
+                    if (error.response.data.msg) {
                         vue.showAlert(e.response.data.msg, 'warning')
                     }
                 })
+        },
+        getActivateAtDatetime() {
+            if (this.resource.publish_date_1) {
+                let time1 = this.resource.publish_time_1 || '00:01';
+                return `${this.resource.publish_date_1} ${time1}`
+            } else {
+                return null
+            }
+        },
+        getDeactivateAtDatetime() {
+            if (this.resource.publish_date_2) {
+                let time2 = this.resource.publish_time_2 || '00:01';
+                return `${this.resource.publish_date_2} ${time2}`
+            } else {
+                return null
+            }
         },
         setJSONReinicioProgramado(formData) {
             let vue = this

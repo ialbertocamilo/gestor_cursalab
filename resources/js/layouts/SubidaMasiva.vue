@@ -30,7 +30,13 @@
                     </div>
                 </v-col>
             </v-row>
-            <mUsuarios :key="1" v-show="s_masivo==1" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_usu" @update_q_error="onUpdate_q_error" />
+            <mUsuarios
+                :key="1"
+                v-show="s_masivo==1 || s_masivo==6"
+                :process="s_masivo"
+                emitir-alert="show_alert_msg"
+                :q_error="info_error.q_err_usu"
+                @update_q_error="onUpdate_q_error" />
             <mDesactivar :key="2" v-show="s_masivo==2" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_desct_usu" @update_q_error="onUpdate_q_error" />
             <mActivar :key="3" v-show="s_masivo==3" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_activ_usu" @update_q_error="onUpdate_q_error"  />
             <mCarreras :key="4" v-show="s_masivo==4" @emitir-alert="show_alert_msg" :q_error="info_error.q_err_cambio" @update_q_error="onUpdate_q_error" />
@@ -62,6 +68,7 @@ export default {
           {nombre:'Activar Usuarios',id:3},
           {nombre:'Actualización de usuarios',id:4},
           {nombre:'Subida de cursos',id:5},
+          {nombre:'Actualización de usuarios',id:6},
       ],
     };
   },
@@ -89,6 +96,9 @@ export default {
             case 5:
                 this.url_plantilla = '/templates/Plantilla_cursos_temas.xlsx';
             break;
+            case 6:
+                this.url_plantilla = '/templates/Plantilla_usuarios.xlsx';
+              break;
           }
       },
       onUpdate_q_error(obj){

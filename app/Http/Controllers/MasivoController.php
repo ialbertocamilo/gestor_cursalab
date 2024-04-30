@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Massive\UserMassiveUpdate;
 use DB;
 use App\Models\SectionUpload;
 use App\Models\User;
@@ -77,7 +78,7 @@ class MasivoController extends Controller
     // }
     public function downloadTemplateUser()
     {
-        ob_end_clean(); 
+        ob_end_clean();
         ob_start();
         return Excel::download(new UserMassiveTemplate, 'plantilla_usuarios.xlsx');
     }
@@ -88,31 +89,31 @@ class MasivoController extends Controller
             //code...
             $validator = $this->validateFile($request);
             if (!$validator) {
-                return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.'], 500);
+                return response()->json(['message' => 'Se encontró un error, por favor vuelva a cargar el archivo.'], 500);
             }
             $current_workspace = get_current_workspace();
-    
+
             $data = [
                 'number_socket' => $request->get('number_socket') ?? null
             ];
             $import = new UserMassive($data);
             Excel::import(new FirstPageImport($import), $request->file('file'));
-    
+
             $headers = $import->excelHeaders;
 
             // === guardar archivo log ===
-            $codes = [  'code_section' => 'massive-upload', 
+            $codes = [  'code_section' => 'massive-upload',
                         'code_type' => 'upload' ];
             SectionUpload::storeRequestLog($request, $codes);
             // === guardar archivo log ===
 
             if ($import->error_message):
-    
+
                 return $this->success([
                     'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
                     'users_to_activate' => number_format($import->rows_to_activate)
                 ], $import->error_message, 422);
-    
+
             else:
                 return $this->success([
                     'message' => "Usuarios creados correctamente.",
@@ -131,6 +132,46 @@ class MasivoController extends Controller
         // }
     }
 
+    public function updateUsers(Request $request)
+    {
+
+        $validator = $this->validateFile($request);
+        if (!$validator) {
+            return response()->json(['message' => 'Se encontró un error, por favor vuelva a cargar el archivo.'], 500);
+        }
+        $current_workspace = get_current_workspace();
+
+        $data = [
+            'number_socket' => $request->get('number_socket') ?? null
+        ];
+        $import = new UserMassiveUpdate($data, true);
+        Excel::import(new FirstPageImport($import), $request->file('file'));
+
+        $headers = $import->excelHeaders;
+
+        // === guardar archivo log ===
+        $codes = [  'code_section' => 'massive-upload',
+            'code_type' => 'upload' ];
+        SectionUpload::storeRequestLog($request, $codes);
+        // === guardar archivo log ===
+
+        if ($import->error_message) {
+
+            return $this->success([
+                'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
+                'users_to_activate' => number_format($import->rows_to_activate)
+            ], $import->error_message, 422);
+
+        } else {
+            return $this->success([
+                'message' => "Usuarios actualizados correctamente.",
+                'headers' => $headers,
+                'datos_procesados' => $import->processed_users,
+                'errores' => $import->errors
+            ]);
+        }
+    }
+
     public function activeUsers(Request $request)
     {
         try {
@@ -140,7 +181,7 @@ class MasivoController extends Controller
                 return response()->json(['message' => 'Se encontró un error, porfavor vuelva a cargar el archivo.']);
             }
             $current_workspace = get_current_workspace();
-    
+
             $data = [
                 'number_socket' => $request->get('number_socket') ?? null
             ];
@@ -148,20 +189,20 @@ class MasivoController extends Controller
             $import->identificator = 'document';
             $import->state_user_massive = 1;
             Excel::import(new FirstPageImport($import), $request->file('file'));
-        
+
             // === guardar archivo log ===
-            $codes = [  'code_section' => 'massive-upload', 
+            $codes = [  'code_section' => 'massive-upload',
                         'code_type' => 'upload' ];
             SectionUpload::storeRequestLog($request, $codes);
             // === guardar archivo log ===
 
             if ($import->error_message):
-    
+
                 return $this->success([
                     'workspace_limit' => number_format($current_workspace->getLimitAllowedUsers()),
                     'users_to_activate' => number_format($import->rows_to_activate)
                 ], $import->error_message, 422);
-    
+
             else:
                 return $this->success([
                     'message' => "Usuarios activados correctamente.",
@@ -195,9 +236,9 @@ class MasivoController extends Controller
             $import->identificator = 'document';
             $import->state_user_massive = 0;
             Excel::import(new FirstPageImport($import), $request->file('file'));
-            
+
             // === guardar archivo log ===
-            $codes = [  'code_section' => 'massive-upload', 
+            $codes = [  'code_section' => 'massive-upload',
                         'code_type' => 'upload' ];
             SectionUpload::storeRequestLog($request, $codes);
             // === guardar archivo log ===
