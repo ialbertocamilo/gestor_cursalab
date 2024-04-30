@@ -849,7 +849,7 @@ class CheckList extends BaseModel
     }
 
     protected function storeRequest($data, $checklist = null){
-        $data = Media::requestUploadFile($data, 'imagen');
+        $data = Media::requestUploadFile($data, 'image');
         $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
         $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
         if($checklist){
