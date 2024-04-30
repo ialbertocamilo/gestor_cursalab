@@ -237,8 +237,9 @@ class RestChecklistController extends Controller
 
     public function verifyPhoto(){
         return $this->success([
-            'status' => 'accepted',
-            'percent' => '95'
+            'color'=>'#00E396',
+            'percent' => '96',
+            'label' => 'Excelente',
         ]);
     }
 }

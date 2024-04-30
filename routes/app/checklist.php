@@ -16,6 +16,6 @@ Route::controller(RestChecklistController::class)->group(function () {
         Route::get('/trainer/checklists', 'checklistsTrainer');
         Route::get('/trainer/checklists/{checklist}/activities', 'activitiesByChecklist');
         
-        Route::get('/activity/{activity}/verify_photo', 'verifyPhoto');
+        Route::post('/activity/{activity}/verify_photo', 'verifyPhoto');
     });
 });
