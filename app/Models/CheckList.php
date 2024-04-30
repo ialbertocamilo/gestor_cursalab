@@ -1074,7 +1074,6 @@ class CheckList extends BaseModel
                 'can_comment'=> $extra_attributes['comment_activity'],
                 'can_upload_image'=> $extra_attributes['photo_response'],
                 'can_computational_vision' => $extra_attributes['computational_vision'],
-                // 'laksjdlad'<- tipo de sistema de calificación
                 'type_system_calification'=>$activity->checklist_response->code,
                 'system_calification' => $system_calification 
             ];
@@ -1109,6 +1108,7 @@ class CheckList extends BaseModel
                 'color' => $checklist->modality->color
             ],
             "type" => $checklist->type,
+            'url_maps' =>''
         ];
     }
     
@@ -1116,7 +1116,7 @@ class CheckList extends BaseModel
         $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
         $lat_long_entity = CriterionValue::select('value_text')->where('parent_id', $criterion_value_user_entity->id)->first()->value_text;
         [$reference_latitude, $reference_Longitude] = explode(',', $lat_long_entity);
-    
+        $_checkist_data['url_maps'] = "https://www.google.com/maps?q={$reference_latitude},{$reference_Longitude}";
         $distance = $this->calculateDistance($user_latitude, $user_longitude, $reference_latitude, $reference_Longitude);
         $withinRange = $distance <= 0.01;
         $entity = $withinRange ? $list_checklists_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first() : $list_checklists_exclude_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first();
