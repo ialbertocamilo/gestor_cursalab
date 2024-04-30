@@ -128,15 +128,6 @@
             @onCancel="closeSimpleModal(modalSupervisorOptions)"
             @onConfirm="openNextStepConfigurationModal($event),closeFormModal(modalSupervisorOptions, dataTable, filters)"
         />
-        <ActivitiesIAModal 
-            :options="modalActivitiesIAOptions"
-            width="55vw"
-            model_type="App\Models\Checklist"
-            :model_id="null"
-            :ref="modalActivitiesIAOptions.ref"
-            @onCancel="closeSimpleModal(modalActivitiesIAOptions)"
-            @onConfirm="closeFormModal(modalActivitiesIAOptions, dataTable, filters)"
-        />
         <DialogConfirm
             :ref="finishConfigurationModal.ref"
             v-model="finishConfigurationModal.open"
@@ -167,7 +158,6 @@ import ActivitiesModal from './ActivitiesModal';
 
 import SegmentFormModal from "../Blocks/SegmentFormModal";
 import SupervisorSegmentationModal from "./SupervisorSegmentationModal";
-import ActivitiesIAModal from "./ActivitiesIAModal";
 import DialogConfirm from "../../components/basicos/DialogConfirm";
 
 export default {
@@ -183,7 +173,6 @@ export default {
         ActivitiesModal,
         SegmentFormModal,
         SupervisorSegmentationModal,
-        ActivitiesIAModal,
         DialogConfirm
     },
     data() {
@@ -442,15 +431,6 @@ export default {
                 base_endpoint: "/entrenamiento/checklist/v2",
                 confirmLabel: "Guardar",
                 resource: "supervisor"
-            },
-            modalActivitiesIAOptions:{
-                ref: 'ActvitiesIAFormModal',
-                open: true,
-                persistent: true,
-                base_endpoint: "/entrenamiento/checklist/v2",
-                confirmLabel: "Guardar",
-                resource: "checklist",
-                title:'Selecciona los cursos para conseguir información'
             },
             finishConfigurationModal:{
                 ref: 'finishConfigurationModal',

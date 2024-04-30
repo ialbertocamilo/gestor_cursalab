@@ -956,10 +956,13 @@ class CheckList extends BaseModel
             $next_step = 'create_activities';
             return $next_step;
         }
-        $hasSegments = $checklist->segments()->first();
-        if(!$hasSegments){
-            $next_step = 'segmentation_card';
-            return $next_step;
+        $checklist->loadMissing('type:id,name,code');
+        if($checklist->type->code != 'curso'){
+            $hasSegments = $checklist->segments()->first();
+            if(!$hasSegments){
+                $next_step = 'segmentation_card';
+                return $next_step;
+            }
         }
         $has_supervisors = count($checklist->supervisor_criteria)>0 ||count($checklist->supervisor_ids)>0;
         if(!$has_supervisors){
@@ -1016,4 +1019,7 @@ class CheckList extends BaseModel
                 )
                 ->paginate(10)->items();
     }
+
+    /* FUNCTION APIS*/
+    
 }

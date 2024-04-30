@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Models\User;
+use App\Models\Segment;
 use App\Models\Taxonomy;
 use App\Models\CheckList;
+use App\Models\Workspace;
+use App\Models\SegmentValue;
 use Illuminate\Http\Request;
 use App\Models\ChecklistRpta;
+use App\Models\CriterionValue;
 use App\Models\SummaryChecklist;
 use App\Models\ChecklistRptaItem;
 use App\Models\EntrenadorUsuario;
@@ -218,140 +222,247 @@ class RestChecklistController extends Controller
         ];
     }
     public function checklistsTrainer(Request $request){
+        $user = auth()->user();
+        $user_latitude = $request->lat;
+        $user_longitude = $request->long;
+        
+        $checklists  = $user->getSegmentedByModelType(
+                            model:CheckList::class,
+                            withModelRelations:['modality:id,name,code,color,alias','type:id,name,color,code'],
+                            unset_criterion_values:false
+                        );
+        $list_checklists_geolocalization = collect();
+        $list_checklists_exclude_geolocalization = collect();
+        $list_checklists_libres = [];
+        $workspace_entity_criteria = Workspace::select('checklist_configuration')
+                                        ->where('id',$user->subworkspace->parent->id)
+                                        ->first()?->checklist_configuration?->entities_criteria;
+        foreach ($checklists as $checklist) {
+            $_checkist_data = [
+                "id" => $checklist->id,
+                "title" => $checklist->title,
+                "status" => 'pendiente',
+                "modality" => [
+                    'id'=> $checklist->modality->id,
+                    'name' => $checklist->modality->alias,
+                    'code'=>$checklist->modality->code,
+                    'color'=>$checklist->modality->color
+                ],
+                "type" =>$checklist->type,
+            ];
+            if($checklist->extra_attributes['required_geolocation']){
+                $criterion_value_user_entity =  $user->criterion_values->whereIn('criterion_id',$workspace_entity_criteria)->first();
+                $lat_long_entity = CriterionValue::select('value_text')->where('parent_id',$criterion_value_user_entity->id)->first()->value_text;
+                // $criterion_value_id = Segment::where('model_type',CheckList::class)->where('model_id',$checklist->id)
+                //             ->withWhereHas('values',function($q) use ($workspace_entity_criteria,$criterion_value_user_entity){
+                //                 $q->whereIn('criterion_id', $workspace_entity_criteria)->where('criterion_value_id',$criterion_value_user_entity->id);
+                //             })->first()->values()->first();
+                [$reference_latitude,$reference_Longitude] = explode(',',$lat_long_entity);
+                // Calcular la distancia entre las coordenadas del usuario y las coordenadas de referencia
+                $distance = $this->calculateDistance($user_latitude, $user_longitude, $reference_latitude, $reference_Longitude);
+                // Verificar si la distancia es menor o igual a 30 metros
+                $withinRange = $distance <= 0.30;
+                if($withinRange){
+                    $entity = $list_checklists_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first();
+                    if($entity){
+                        $entity['lista'][] = $_checkist_data;
+                        $list_checklists_geolocalization = $list_checklists_geolocalization->map(function ($item) use ($entity) {
+                            if ($item['nombre'] === $entity['nombre']) {
+                                return $entity;
+                            }
+                            return $item;
+                        });
+                    }else{
+                        $list_checklists_geolocalization->push([
+                            'nombre' => $criterion_value_user_entity->value_text,
+                            'lista' => [$_checkist_data]
+                        ]);
+                    }
+                }else{
+                    $entity = $list_checklists_exclude_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first();
+                    if($entity){
+                        $entity['lista'][] = $_checkist_data;
+                        $list_checklists_exclude_geolocalization = $list_checklists_exclude_geolocalization->map(function ($item) use ($entity) {
+                            if ($item['nombre'] === $entity['nombre']) {
+                                return $entity;
+                            }
+                            return $item;
+                        });
+                    }else{
+                        $list_checklists_exclude_geolocalization->push([
+                            'nombre' => $criterion_value_user_entity->value_text,
+                            'lista' => [$_checkist_data]
+                        ]);
+                    }
+                }
+            }else{
+                $entity = $list_checklists_exclude_geolocalization->where('nombre', 'Libre')->first();
+                if($entity){
+                    $entity['lista'][] = $_checkist_data;
+                    $list_checklists_exclude_geolocalization = $list_checklists_exclude_geolocalization->map(function ($item) use ($entity) {
+                        if ($item['nombre'] === $entity['nombre']) {
+                            return $entity;
+                        }
+                        return $item;
+                    });
+                }else{
+                    $list_checklists_exclude_geolocalization->push([
+                        'nombre' => 'Libre',
+                        'lista' => [$_checkist_data]
+                    ]);
+                }
+            }
+        }
+        // dd($list_checklists_geolocalization->toArray());
+        // $list_checklists_geolocalization = [
+        //     [
+        //         "nombre" => "Ecnorza ZC",
+        //         "lista" => [
+        //             [
+        //                 "id" => 1,
+        //                 "modality" => [
+        //                     'id'=> 5886,
+        //                     'name' => 'Entidad',
+        //                     'code'=>'qualify_entity',
+        //                     'color'=>'#9B98FE'
+        //                 ],
+        //                 "type" => [
+        //                     'id'=> 5077,
+        //                     'name' => 'Auditoria',
+        //                     'code'=>'libre',
+        //                     'color'=>'#CE98FE'
+        //                 ],
+        //                 "title" => "Trabajo realizado por el usuario en su estación.",
+        //                 "status" => [
+        //                     'code'=>'pending',
+        //                     'name'=>'Pendiente',
+        //                     'color'=>'#CDCDEB'
+        //                 ]
+        //             ]
+        //         ]
+        //     ],
+        // ];
 
-        $list_checklists_geolocalization = [
-            [
-                "nombre" => "Ecnorza ZC",
-                "lista" => [
-                    [
-                        "id" => 1,
-                        "modality" => [
-                            'id'=> 5886,
-                            'name' => 'Entidad',
-                            'code'=>'qualify_entity',
-                            'color'=>'#9B98FE'
-                        ],
-                        "type" => [
-                            'id'=> 5077,
-                            'name' => 'Auditoria',
-                            'code'=>'libre',
-                            'color'=>'#CE98FE'
-                        ],
-                        "title" => "Trabajo realizado por el usuario en su estación.",
-                        "status" => [
-                            'code'=>'pending',
-                            'name'=>'Pendiente',
-                            'color'=>'#CDCDEB'
-                        ]
-                    ]
-                ]
-            ],
-        ];
+        // $list_checklists_libres = [
+        //     [
+        //         "nombre" => "Checklist libre",
+        //         "lista" => [
+        //             [
+        //                 "id" => 2,
+        //                 "modality" => [
+        //                     'id'=> 5886,
+        //                     'name' => 'Entidad',
+        //                     'code'=>'qualify_entity',
+        //                     'color'=>'#9B98FE'
+        //                 ],
+        //                 "type" => [
+        //                     'id'=> 5077,
+        //                     'name' => 'Auditoria',
+        //                     'code'=>'libre',
+        //                     'color'=>'#CE98FE'
+        //                 ],
+        //                 "title" => "Trabajo realizado por el usuario en su estación.",
+        //                 "status" => "pendiente"
+        //             ],
+        //             [
+        //                 "id" => 3,
+        //                 "modality" => [
+        //                     'id'=> 5887,
+        //                     'name' => 'Usuario',
+        //                     'code'=>'qualify_user',
+        //                     'color'=>'#9B98FE'
+        //                 ],
+        //                 "type" => [
+        //                     'id'=> 5077,
+        //                     'name' => 'Curso',
+        //                     'code'=>'curso',
+        //                     'color'=>'#00E396'
+        //                 ],
+        //                 "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
+        //                 "status" => [
+        //                     'code'=>'Continuo',
+        //                     'name'=>'Continuo',
+        //                     'color'=>'#6E73DA'
+        //                 ]
+        //             ]
+        //         ]
+        //     ]
+        // ];
 
-        $list_checklists_libres = [
-            [
-                "nombre" => "Checklist libre",
-                "lista" => [
-                    [
-                        "id" => 2,
-                        "modality" => [
-                            'id'=> 5886,
-                            'name' => 'Entidad',
-                            'code'=>'qualify_entity',
-                            'color'=>'#9B98FE'
-                        ],
-                        "type" => [
-                            'id'=> 5077,
-                            'name' => 'Auditoria',
-                            'code'=>'libre',
-                            'color'=>'#CE98FE'
-                        ],
-                        "title" => "Trabajo realizado por el usuario en su estación.",
-                        "status" => "pendiente"
-                    ],
-                    [
-                        "id" => 3,
-                        "modality" => [
-                            'id'=> 5887,
-                            'name' => 'Usuario',
-                            'code'=>'qualify_user',
-                            'color'=>'#9B98FE'
-                        ],
-                        "type" => [
-                            'id'=> 5077,
-                            'name' => 'Curso',
-                            'code'=>'curso',
-                            'color'=>'#00E396'
-                        ],
-                        "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
-                        "status" => [
-                            'code'=>'Continuo',
-                            'name'=>'Continuo',
-                            'color'=>'#6E73DA'
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $list_checklists_exclude_geolocalization = [
-            [
-                "nombre" => "Ecnorza AB",
-                "lista" => [
-                    [
-                        "id" => 4,
-                        "modality" => [
-                            'id'=> 5886,
-                            'name' => 'Entidad',
-                            'code'=>'qualify_entity',
-                            'color'=>'#9B98FE'
-                        ],
-                        "type" => [
-                            'id'=> 5077,
-                            'name' => 'Curso',
-                            'code'=>'curso',
-                            'color'=>'#00E396'
-                        ],
-                        "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
-                        "status" => [
-                            'code'=>'Continuo',
-                            'name'=>'Continuo',
-                            'color'=>'#6E73DA'
-                        ]
-                    ]
-                ]
-            ],
-            [
-                "nombre" => "Ecnorza AR",
-                "lista" => [
-                    [
-                        "id" => 5,
-                        "modality" => [
-                            'id'=> 5888,
-                            'name' => 'Autoev.',
-                            'code'=>'autoqualify',
-                            'color'=>'#9B98FE'
-                        ],
-                        "type" => [
-                            'id'=> 5077,
-                            'name' => 'Auditoria',
-                            'code'=>'libre',
-                            'color'=>'#CE98FE'
-                        ],
-                        "title" => "Gestión de inventario.",
-                        "status" => [
-                            'code'=>'realizado',
-                            'name'=>'Realizado 21 -03 - 2024',
-                            'color'=>'#25B374'
-                        ]
-                    ]
-                ]
-            ]
-        ];
+        // $list_checklists_exclude_geolocalization = [
+        //     [
+        //         "nombre" => "Ecnorza AB",
+        //         "lista" => [
+        //             [
+        //                 "id" => 4,
+        //                 "modality" => [
+        //                     'id'=> 5886,
+        //                     'name' => 'Entidad',
+        //                     'code'=>'qualify_entity',
+        //                     'color'=>'#9B98FE'
+        //                 ],
+        //                 "type" => [
+        //                     'id'=> 5077,
+        //                     'name' => 'Curso',
+        //                     'code'=>'curso',
+        //                     'color'=>'#00E396'
+        //                 ],
+        //                 "title" => "Reconoce los puntos de salida de seguridad en caso de sismo.",
+        //                 "status" => [
+        //                     'code'=>'Continuo',
+        //                     'name'=>'Continuo',
+        //                     'color'=>'#6E73DA'
+        //                 ]
+        //             ]
+        //         ]
+        //     ],
+        //     [
+        //         "nombre" => "Ecnorza AR",
+        //         "lista" => [
+        //             [
+        //                 "id" => 5,
+        //                 "modality" => [
+        //                     'id'=> 5888,
+        //                     'name' => 'Autoev.',
+        //                     'code'=>'autoqualify',
+        //                     'color'=>'#9B98FE'
+        //                 ],
+        //                 "type" => [
+        //                     'id'=> 5077,
+        //                     'name' => 'Auditoria',
+        //                     'code'=>'libre',
+        //                     'color'=>'#CE98FE'
+        //                 ],
+        //                 "title" => "Gestión de inventario.",
+        //                 "status" => [
+        //                     'code'=>'realizado',
+        //                     'name'=>'Realizado 21 -03 - 2024',
+        //                     'color'=>'#25B374'
+        //                 ]
+        //             ]
+        //         ]
+        //     ]
+        // ];
         
         return $this->success(compact('list_checklists_geolocalization','list_checklists_libres','list_checklists_exclude_geolocalization'));
     }
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371; // Radio de la Tierra en kilómetros
 
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        $distance = $earthRadius * $c;
+
+        return $distance;
+    }
     public function activitiesByChecklist(Request $request){
         $activities = [
             [
@@ -436,6 +547,7 @@ class RestChecklistController extends Controller
                 'description'=> 'Identificar los riesgos específicos en el lugar de trabajo que requieren el uso de equipos de protección personal.',
                 'can_comment'=> false,
                 'can_upload_image'=>false,
+                // 'laksjdlad'<- tipo de sistema de calificación
                 'system_calification' => [
                     [
                         'id'=> 1293,

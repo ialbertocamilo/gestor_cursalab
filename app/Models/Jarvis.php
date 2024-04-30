@@ -103,6 +103,7 @@ class Jarvis extends Model
     
     protected function generateChecklistJarvis($request){
         $files = $request->file('files');
+        $number_activities = $request->number_activities;
         $multipart = [];
         // foreach ($files as $file) {
         //     $multipart[] = [
@@ -125,21 +126,27 @@ class Jarvis extends Model
             ];
         }
         $params = self::getJarvisConfiguration();
-
-        $multipart[] =[
-            'token' =>$params['token']
-        ];
+        // $multipart[] =[
+        //     'name' =>'token',
+        //     'contents' => $params['token']
+        // ];
+        // $multipart[] =[
+        //     'name' =>'model',
+        //     'contents' => $params['model']
+        // ];
         $response = Http::withOptions([
             'verify' => false,
-        ])->attach($multipart)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist',$params);
+        ])->attach($multipart)
+        ->attach('token', $params['token'])
+        ->attach('model', $params['model'])
+        ->attach('number_activities',$number_activities)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist',$params);
 
         // 
         if ($response->successful()) {
             $data = $response->json();
-            dd($data);
             // JarvisAttempt::increaseAttempt(get_current_workspace()?->id,'descriptions');
             // JarvisResponse::insertResponse([$data['description'][1]],'description');
-            return $data['description'][0];
+            return $data['description'];
         }
     }
 

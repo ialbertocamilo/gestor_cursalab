@@ -27,6 +27,45 @@
                    </v-row>
             </template>
         </DefaultDialog>
+        <DefaultDialog :options="modalConfirmOptions" width="46vw" @onCancel="closeSimpleModal(modalConfirmOptions)" @onConfirm="generateActivities()">
+            <template v-slot:content>
+                   <v-row>
+                        <v-col cols="12">
+                            <DefaultModalSectionExpand title="1. ¿Cómo funciona?"
+                                    :expand="sections.showHowWorks" :simple="true">
+                                    <template slot="content">
+                                        <ul>
+                                            <li>Crea la actividades para tu checklist con Inteligencia Artificial.</li>
+                                            <li>Puedes elegir la cantidad de actividades que deseas que contenga tu checklist.</li>
+                                            <li>Al dar clic en el botón Generar evaluación se crearán las actividades según la configuración indicada.</li>
+                                            <li>Podrás editar, eliminar y seleccionar las actividades de tu cheklist luego de generarse.</li>
+                                        </ul>
+                                    </template>
+                            </DefaultModalSectionExpand>
+                        </v-col>
+                        <v-col cols="12">
+                            <DefaultModalSectionExpand title="2. Indica la cantidad de actividades"
+                                    :expand="sections.configuration" :simple="true">
+                                    <template slot="content">
+                                        <v-form ref="formActivityIA" class="d-flex align-items-center">
+                                            <span>
+                                                Selecciona la cantidad de actividades a generar en tu checklist 
+                                            </span>
+                                            <span class="mr-4">Total</span>
+                                            <DefaultInput
+                                                clearable 
+                                                dense
+                                                numbersOnly
+                                                max="2"
+                                                v-model="number_activities"
+                                            />
+                                        </v-form>
+                                    </template>
+                            </DefaultModalSectionExpand>
+                        </v-col>
+                   </v-row>
+            </template>
+        </DefaultDialog>
     </div>
 </template>
 
@@ -53,7 +92,22 @@ export default {
             },
             files:[
                 
-            ]
+            ],
+            sections:{
+                showHowWorks:{ status: true },
+                configuration:{ status: true }
+            },
+            number_activities:10,
+            modalConfirmOptions:{
+                ref: 'ActvitiesConfirmIAFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Generar actividades con AI",
+                cancelLabel:'Resetear',
+                resource: "checklist",
+                title:'Selecciona los cursos para conseguir información'
+            }
         };
     },
     methods: {
@@ -68,14 +122,21 @@ export default {
             let vue = this
         }
         ,
-        async confirmModal() {
+        confirmModal(){
             let vue = this;
+            vue.openSimpleModal(vue.modalConfirmOptions);
+        },
+        async generateActivities() {
+            let vue = this;
+            vue.showLoader();
             let formData = new FormData();
             vue.files.map((file) => {
                 formData.append("files[]", file);
+                formData.append("number_activities", vue.number_activities);
             })
             await vue.$http.post('/jarvis/generate-checklist',formData).then(({data})=>{
-                console.log(data);
+                vue.hideLoader();
+                vue.$emit('activities',data.data);
             })
             // vue.$emit('onConfirm')
         }

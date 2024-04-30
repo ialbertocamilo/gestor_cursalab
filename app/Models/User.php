@@ -939,7 +939,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $model,
         $select=false,
         $unsetRelation=true,
-        $withModelRelations=[]
+        $withModelRelations=[],
+        $unset_criterion_values=true
     ){
         $user = $this;
         $with_default = [
@@ -984,7 +985,9 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
                 endif;
             }
         }
-        unset($user->criterion_values);
+        if($unset_criterion_values){
+            unset($user->criterion_values);
+        }
         // unset($user->subworkspace);
         // unset($user->subworkspace_id);
         return $match_segment;

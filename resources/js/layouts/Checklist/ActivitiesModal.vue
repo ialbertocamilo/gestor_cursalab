@@ -224,23 +224,33 @@
                     </v-col>
                     <v-col cols="4" v-for="(modality,index) in modalities" :key="index">
                         <DefaultCardAction 
-                            @clickCard="show_activities = true"
+                            @clickCard="verifyCardActivity"
                             :card_properties="modality" 
                         /> 
                     </v-col>
                 </v-row>
             </template>
         </DefaultDialog>
-
+        <ActivitiesIAModal 
+            :options="modalActivitiesIAOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalActivitiesIAOptions.ref"
+            @onCancel="closeSimpleModal(modalActivitiesIAOptions)"
+            @onConfirm="closeFormModal(modalActivitiesIAOptions, dataTable, filters)"
+            @activities="addActivities"
+        />
     </div>
 </template>
 
 <script>
 import DefaultCardAction from "../../components/globals/DefaultCardAction"
 import DefaultRichText from "../../components/globals/DefaultRichText";
+import ActivitiesIAModal from "./ActivitiesIAModal";
 
 export default {
-    components:{DefaultCardAction,DefaultRichText},
+    components:{DefaultCardAction,DefaultRichText,ActivitiesIAModal},
     props: {
         options: {
             type: Object,
@@ -260,6 +270,7 @@ export default {
                     color:'#F5539B',
                     icon_color:'white',
                     name:'Crear actividades',
+                    code:'create_activities',
                     description:'Crea las actividades de tu checklist desde cero tu mismo',
                 },
                 {
@@ -267,6 +278,7 @@ export default {
                     color:"#5357E0",
                     icon_color:'white',
                     name:'Importar actividades',
+                    code:'create_activities',
                     description:'Sube tus actividades con una plantilla de excel',
                 },
                 {
@@ -274,6 +286,7 @@ export default {
                     icon_color:'white',
                     color:'#9B98FE',
                     name:'Crear con IA',
+                    code:'create_ia_activities',
                     description:'Sube actividades para guiar a tus usuarios en sus primeros pasos.',
                 }
             ],
@@ -325,6 +338,15 @@ export default {
                 limit_descriptions_jarvis: 0
             },
             showButtonIaGenerate: true,
+            modalActivitiesIAOptions:{
+                ref: 'ActvitiesIAFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Continuar",
+                resource: "checklist",
+                title:'Selecciona los cursos para conseguir información'
+            },
         };
     },
 
@@ -431,6 +453,21 @@ export default {
                 confirm:true
             });
         },
+        verifyCardActivity(card){
+            let vue = this;
+            switch (card.code) {
+                case 'create_ia_activities':
+                    vue.modalActivitiesIAOptions.open = true;
+                break;
+                case 'create_activities':
+                    vue.show_activities = true;
+                break;
+            }
+            console.log(card);
+        },
+        addActivities(activities){
+            vue.modalActivitiesIAOptions.open = false;
+        }
     }
 }
 </script>

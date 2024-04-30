@@ -35,7 +35,7 @@
                                 <button ref="span_element" style="display: none;"></button>
                                 <v-edit-dialog v-model="edit_course_dialog" :return-value="resource.course">
                                     <v-text-field
-                                        style="width: 150px;"
+                                        style="width: 280px;"
                                         class="ml-4"
                                         v-model="resource.course.name"
                                         :disabled="action=='edit'"
