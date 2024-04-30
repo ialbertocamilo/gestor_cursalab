@@ -409,7 +409,7 @@ import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
 import ModalAddScaleEvaluation from './ModalAddScaleEvaluation'
 
 const fields = [
-    'title', 'type_id','modality_id','finishes_at','imagen'
+    'title', 'type_id','modality_id','description','finishes_at','imagen'
 ];
 const file_fields = ['imagen'];
 

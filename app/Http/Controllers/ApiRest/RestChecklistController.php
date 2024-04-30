@@ -234,4 +234,11 @@ class RestChecklistController extends Controller
         $data = Checklist::listActivities($checklist);
         return $this->success($data);
     }
+
+    public function verifyPhoto(){
+        return $this->success([
+            'status' => 'accepted',
+            'percent' => '95'
+        ]);
+    }
 }
