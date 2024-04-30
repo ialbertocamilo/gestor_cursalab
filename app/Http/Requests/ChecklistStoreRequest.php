@@ -26,6 +26,7 @@ class ChecklistStoreRequest extends FormRequest
         return [
             'title' => 'required',
             'type_id'=> 'required',
+            'image'=> 'nullable',
             'modality_id'=> 'required',
             'extra_attributes'=>'required',
             'course_id' => 'nullable',
