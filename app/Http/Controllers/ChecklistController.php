@@ -60,7 +60,7 @@ class ChecklistController extends Controller
         return $this->success(['checklist_type_response'=>$checklist_type_response]);
     }
     public function listActivitiesByChecklist(CheckList $checklist){
-        $checklist->load('activities','activities.checklist_response:id,name','activities.custom_options');
+        $checklist->load('activities','activities.checklist_response:id,name','activities.custom_options:id,group,type,name,code');
         return $this->success([
             'activities'=>$checklist->activities
         ]);

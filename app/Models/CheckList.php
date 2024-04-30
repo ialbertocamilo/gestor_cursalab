@@ -1021,5 +1021,148 @@ class CheckList extends BaseModel
     }
 
     /* FUNCTION APIS*/
+    protected function listsChecklistsToTrainer($request){
+        $user = auth()->user();
+        $user_latitude = $request->lat;
+        $user_longitude = $request->long;
+
+        $checklists = $user->getSegmentedByModelType(
+            model: CheckList::class,
+            withModelRelations: ['modality:id,name,code,color,alias', 'type:id,name,color,code'],
+            unset_criterion_values: false
+        );
+
+        $list_checklists_geolocalization = collect();
+        $list_checklists_exclude_geolocalization = collect();
+        $list_checklists_libres = [];
+        $workspace_entity_criteria = Workspace::select('checklist_configuration')
+            ->where('id', $user->subworkspace->parent->id)
+            ->first()?->checklist_configuration?->entities_criteria;
+
+        foreach ($checklists as $checklist) {
+            $_checkist_data = $this->buildChecklistData($checklist,$user);
+
+            if ($checklist->extra_attributes['required_geolocation']) {
+                $this->processChecklistWithGeolocation($user, $workspace_entity_criteria, $_checkist_data, $list_checklists_geolocalization, $list_checklists_exclude_geolocalization, $user_latitude, $user_longitude);
+            } else {
+                $this->processChecklistWithoutGeolocation($_checkist_data, $list_checklists_libres);
+            }
+        }
+        return [$list_checklists_geolocalization,$list_checklists_exclude_geolocalization,$list_checklists_libres];
+    }
+    protected function listActivities($checklist){
+        $checklist->loadMissing([
+            'type:id,name,code',
+            'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position',
+            'activities.checklist_response:id,code',
+        ]);
+        $activities = [];
+        foreach ($checklist->activities as $index => $activity) {
+            $extra_attributes = $activity->extra_attributes;
+            if($activity->checklist_response->code == 'scale_evaluation'){
+                $system_calification = Taxonomy::select(
+                                            'id', 'name', 'color', DB::raw("JSON_UNQUOTE(extra_attributes->'$.percent') as percent")
+                                        )
+                                        ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])->get();
+            }else{
+                $system_calification = $activity->custom_options()->select('id','name','color')->get();
+            }
+            $activities[]  = [
+                'id'=>$activity->id,
+                'name'=>'Actividad '.($index+1),
+                'description'=> $activity->activity,
+                'can_comment'=> $extra_attributes['comment_activity'],
+                'can_upload_image'=> $extra_attributes['photo_response'],
+                'can_computational_vision' => $extra_attributes['computational_vision'],
+                // 'laksjdlad'<- tipo de sistema de calificación
+                'type_system_calification'=>$activity->checklist_response->code,
+                'system_calification' => $system_calification 
+            ];
+        }
+        return [
+            'checklist'=>[
+                "title" => $checklist->name,
+                "entity" =>[
+                    "name"=>"Ecnorsa ZC",
+                    "icon"=>"store",
+                ],
+                "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
+                "type" => $checklist->type,
+                "image"=>$checklist->image,
+                "activities"=>$activities
+            ]
+            ];
+    }
+    //SUBFUNCTIONS
+    function buildChecklistData($checklist,$user) {
+        return [
+            "id" => $checklist->id,
+            "title" => $checklist->title,
+            "status" => 'pendiente',
+            "description" => $checklist->description,
+            "image" => $checklist->image,
+            'supervisor' => $user->fullname,
+            "modality" => [
+                'id' => $checklist->modality->id,
+                'name' => $checklist->modality->alias,
+                'code' => $checklist->modality->code,
+                'color' => $checklist->modality->color
+            ],
+            "type" => $checklist->type,
+        ];
+    }
     
+    function processChecklistWithGeolocation($user, $workspace_entity_criteria, $_checkist_data, &$list_checklists_geolocalization, &$list_checklists_exclude_geolocalization, $user_latitude, $user_longitude) {
+        $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
+        $lat_long_entity = CriterionValue::select('value_text')->where('parent_id', $criterion_value_user_entity->id)->first()->value_text;
+        [$reference_latitude, $reference_Longitude] = explode(',', $lat_long_entity);
+    
+        $distance = $this->calculateDistance($user_latitude, $user_longitude, $reference_latitude, $reference_Longitude);
+        $withinRange = $distance <= 0.01;
+        $entity = $withinRange ? $list_checklists_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first() : $list_checklists_exclude_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first();
+        if($withinRange){
+            $this->updateChecklistsList($entity, $_checkist_data, $list_checklists_geolocalization, $criterion_value_user_entity->value_text);
+        }else{
+            $this->updateChecklistsList($entity, $_checkist_data, $list_checklists_exclude_geolocalization, $criterion_value_user_entity->value_text);
+        }
+    }
+    
+    function processChecklistWithoutGeolocation($_checkist_data, &$list_checklists_libres) {
+        $entity = $list_checklists_libres->where('nombre', 'Libre')->first();
+        $this->updateChecklistsList($entity, $_checkist_data, $list_checklists_libres, 'Libre');
+    }
+    
+    function updateChecklistsList($entity, $_checkist_data, &$listToUpdate, $entityName) {
+        if ($entity) {
+            $entity['lista'][] = $_checkist_data;
+            $listToUpdate = $listToUpdate->map(function ($item) use ($entity) {
+                if ($item['nombre'] === $entity['nombre']) {
+                    return $entity;
+                }
+                return $item;
+            });
+        } else {
+            $listToUpdate->push([
+                'nombre' => $entityName,
+                'lista' => [$_checkist_data]
+            ]);
+        }
+    }
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371; // Radio de la Tierra en kilómetros
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        $distance = $earthRadius * $c;
+
+        return $distance;
+    }
 }
