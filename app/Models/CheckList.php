@@ -72,7 +72,10 @@ class CheckList extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'modality_id');
     }
-
+    public function getImagenAttribute($image){
+        $default_image = 'https://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/images/default_image_checklist.png';
+        return is_null($image) ? $default_image : $image; 
+    }
     /*======================================================= SCOPES ==================================================================== */
 
     public function scopeActive($q, $estado)
@@ -87,7 +90,7 @@ class CheckList extends BaseModel
                     : Taxonomy::getFirstData('project', 'platform', 'training')->id;
         $q->where('platform_id',$type_id);
     }
-
+    
     /*=================================================================================================================================== */
 
     protected function gridCheckList($data)
