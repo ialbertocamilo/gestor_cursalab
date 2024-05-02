@@ -119,7 +119,16 @@
             @onCancel="closeSimpleModal(modalFormSegmentationOptions)"
             @onConfirm="verifyNextStep($event),closeFormModal(modalFormSegmentationOptions, dataTable, filters)"
         />
-        <SupervisorSegmentationModal 
+        <SegmentFormModal
+            :options="modalSupervisorOptions"
+            width="55vw"
+            model_type="App\Models\ChecklistSupervisor"
+            :model_id="null"
+            :ref="modalSupervisorOptions.ref"
+            @onCancel="closeSimpleModal(modalSupervisorOptions)"
+            @onConfirm="verifyNextStep($event),closeFormModal(modalSupervisorOptions, dataTable, filters)"
+        />
+        <!-- <SupervisorSegmentationModal 
             :options="modalSupervisorOptions"
             width="55vw"
             model_type="App\Models\Checklist"
@@ -127,7 +136,7 @@
             :ref="modalSupervisorOptions.ref"
             @onCancel="closeSimpleModal(modalSupervisorOptions)"
             @onConfirm="openNextStepConfigurationModal($event),closeFormModal(modalSupervisorOptions, dataTable, filters)"
-        />
+        /> -->
         <DialogConfirm
             :ref="finishConfigurationModal.ref"
             v-model="finishConfigurationModal.open"
