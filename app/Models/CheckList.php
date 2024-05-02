@@ -1036,7 +1036,7 @@ class CheckList extends BaseModel
 
         $list_checklists_geolocalization = collect();
         $list_checklists_exclude_geolocalization = collect();
-        $list_checklists_libres = [];
+        $list_checklists_libres = collect();
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
             ->where('id', $user->subworkspace->parent->id)
             ->first()?->checklist_configuration?->entities_criteria;
