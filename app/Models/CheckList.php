@@ -1094,7 +1094,6 @@ class CheckList extends BaseModel
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
                 "type" => $checklist->type,
-                "image"=>$checklist->image,
                 "activities"=>$activities
             ]
             ];
