@@ -1087,6 +1087,7 @@ class CheckList extends BaseModel
         }
         return [
             'checklist'=>[
+                'id' => $checklist->id,
                 "title" => $checklist->title,
                 "entity" =>[
                     "name"=>"Ecnorsa ZC",

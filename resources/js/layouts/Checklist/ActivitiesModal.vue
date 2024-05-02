@@ -162,8 +162,14 @@
                                                     label="Aplicar visión computacional"
                                                     color="primary"
                                                     v-model="activity.extra_attributes.computational_vision"
+                                                    :disabled="!is_checklist_premiun"
                                                     hide-details="false"
                                                 />
+                                                <div v-if="!is_checklist_premiun" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                        <span class="d-flex beta_upgrade">
+                                                            <img src="/img/premiun.svg"> Upgrade
+                                                        </span>
+                                                    </div>
                                             </v-col>
                                             <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
                                                 <DefaultSelect 
@@ -261,6 +267,7 @@ export default {
     },
     data() {
         return {
+            is_checklist_premiun:false,
             checklist:{
 
             },
@@ -408,6 +415,7 @@ export default {
             const url = `${vue.options.base_endpoint}/activity/form-selects`;
             await vue.$http.get(url).then(({data})=>{
                 vue.checklist_type_response = data.data.checklist_type_response;
+                vue.is_checklist_premiun = data.data.is_checklist_premiun;
             })
         },
         addCustomOption(index){
@@ -476,5 +484,9 @@ export default {
     height: 100%;
     cursor: pointer;
 }
-
+.beta_upgrade{
+    border: 1px solid #FFB700;
+    border-radius: 8px;
+    padding: 1px 4px;
+}
 </style>

@@ -290,13 +290,21 @@
                                             <template slot="content">
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
-                                                        v-model="resource.extra_attributes.required_geolocation" dense
+                                                        v-model="resource.extra_attributes.required_geolocation" 
+                                                        dense
+                                                        :disabled="!is_checklist_premiun"
                                                         :active-label="'Activar geolocalización'"
                                                         :inactive-label="'Activar geolocalización'" />
                                                     <DefaultInfoTooltip
+                                                        v-if="is_checklist_premiun"
                                                         text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
                                                         top
-                                                    />    
+                                                    /> 
+                                                    <div v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                        <span class="d-flex beta_upgrade">
+                                                            <img src="/img/premiun.svg"> Upgrade
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
@@ -306,9 +314,16 @@
                                             <template slot="content">
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
-                                                        v-model="resource.extra_attributes.required_action_plan" dense
+                                                        v-model="resource.extra_attributes.required_action_plan" 
+                                                        :disabled="!is_checklist_premiun"
+                                                        dense
                                                         :active-label="'Activar plan de acción'"
                                                         :inactive-label="'Activar plan de acción'" />
+                                                        <div v-if="!is_checklist_premiun" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                            <span class="d-flex beta_upgrade">
+                                                                <img src="/img/premiun.svg"> Upgrade
+                                                            </span>
+                                                        </div>
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
@@ -317,27 +332,34 @@
                                         <span>Calificación de entidad</span>
                                     </v-col>
                                     
-                                    <v-col cols="6">
-                                                    <DefaultSelect 
-                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria"
-                                                        :items="selects.criteria" 
-                                                        item-text="name"
-                                                        item-value="id"
-                                                        show-required 
-                                                        label="Selecciona el criterio del responsable"
-                                                        @input="getCriteriaValues($event)"
-                                                    />   
+                                    <v-col cols="6" class="d-flex align-items-center">
+                                        <DefaultSelect 
+                                            v-model="resource.extra_attributes.autocalificate_entity_criteria"
+                                            :items="selects.criteria" 
+                                            item-text="name"
+                                            item-value="id"
+                                            show-required 
+                                            label="Selecciona el criterio del responsable"
+                                            :disabled="!is_checklist_premiun"
+                                            @input="getCriteriaValues($event)"
+                                        />   
+                                        <div v-if="!is_checklist_premiun" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                            <span class="d-flex beta_upgrade">
+                                                <img src="/img/premiun.svg"> Upgrade
+                                            </span>
+                                        </div>
                                     </v-col>
                                     <v-col cols="6">
-                                                    <DefaultSelect 
-                                                        v-if="resource.extra_attributes.autocalificate_entity_criteria"
-                                                        v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
-                                                        :items="selects.criteria_values" 
-                                                        item-text="name"
-                                                        item-value="id"
-                                                        show-required 
-                                                        label="Selecciona el valor del criterio del responsable"
-                                                    />   
+                                        <DefaultSelect 
+                                            v-if="resource.extra_attributes.autocalificate_entity_criteria"
+                                            v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
+                                            :items="selects.criteria_values" 
+                                            :disabled="!is_checklist_premiun"
+                                            item-text="name"
+                                            item-value="id"
+                                            show-required 
+                                            label="Selecciona el valor del criterio del responsable"
+                                        />   
                                     </v-col>
                                     <v-col cols="6">
                                         <DefaultSimpleSection title="Autocalificación de entidad" marginy="my-1" marginx="mx-0">
@@ -345,12 +367,19 @@
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
                                                         v-model="resource.extra_attributes.autocalificate_entity" dense
+                                                        :disabled="!is_checklist_premiun"
                                                         :active-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'"
                                                         :inactive-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'" />
                                                     <DefaultInfoTooltip
+                                                        v-if="is_checklist_premiun"
                                                         text="Tanto la entidad física como los usuarios podrán ver el resultado de sus checklist al finalizar el proceso"
                                                         top
                                                     />    
+                                                    <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                        <span class="d-flex beta_upgrade">
+                                                            <img src="/img/premiun.svg"> Upgrade
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
@@ -362,12 +391,19 @@
                                                     <v-col cols="6" class="d-flex">
                                                         <DefaultToggle class="ml-4 mb-2"
                                                             v-model="resource.extra_attributes.required_signature_supervisor" dense
+                                                            :disabled="!is_checklist_premiun"
                                                             :active-label="'Solicitar una firma al supervisor para finalizar checklist'"
                                                             :inactive-label="'Solicitar una firma al supervisor para finalizar checklist'" />
                                                         <DefaultInfoTooltip
+                                                            v-if="is_checklist_premiun"
                                                             text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
                                                             top
                                                         />    
+                                                        <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                            <span class="d-flex beta_upgrade">
+                                                                <img src="/img/premiun.svg"> Upgrade
+                                                            </span>
+                                                        </div>
                                                     </v-col>
                                                     <v-col cols="6">
                                                         <v-checkbox
@@ -432,6 +468,7 @@ export default {
     },
     data() {
         return {
+            is_checklist_premiun:false,
             search:null,
             action:null,
             searching_course:false,
@@ -573,6 +610,7 @@ export default {
                 vue.selects.max_limit_create_evaluation_types =  data.data.checklist_default_configuration.max_limit_create_evaluation_types;
                 vue.selects.criteria = data.data.criteria;
                 vue.selects.types_checklist  = data.data.types_checklist;
+                vue.is_checklist_premiun = data.data.is_checklist_premiun;
                 vue.hideLoader();
             })
             if(!vue.resource.id){
@@ -1038,5 +1076,21 @@ span.v-stepper__step__step:after {
 }
 .checkbox-label .v-label{
     margin:auto !important;
+}
+.tag_beta_upgrade {
+    padding: 2px 6px 2px 6px;
+    border-radius: 8px;
+    background: #FFF;
+    color: #5458EA;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    margin-left: 8px !important;
+    margin-top: -8px !important;
+}
+.beta_upgrade{
+    border: 1px solid #FFB700;
+    border-radius: 8px;
+    padding: 1px 4px;
 }
 </style>
