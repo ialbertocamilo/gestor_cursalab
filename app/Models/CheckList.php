@@ -971,10 +971,10 @@ class CheckList extends BaseModel
         }
         $has_supervisors = count($checklist->supervisor_criteria)>0 ||count($checklist->supervisor_ids)>0;
         // $has_supervisors = $checklist->auditors()->first();
-        if(!$has_supervisors){
-            $next_step = 'supervisor_card';
-            return $next_step;
-        }
+        // if(!$has_supervisors){
+        //     $next_step = 'supervisor_card';
+        //     return $next_step;
+        // }
         return $next_step;
     }
 
