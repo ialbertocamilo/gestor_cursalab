@@ -55,7 +55,7 @@ class ChecklistAudit extends BaseModel
             $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
             $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
             $photo = '';
-            if($data['file_photo']){
+            if($activity['file_photo']){
                 // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
                 $str_random = Str::random(5);
                 $name_image = $activity['id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
