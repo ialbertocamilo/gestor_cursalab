@@ -1055,7 +1055,7 @@ class CheckList extends BaseModel
     protected function listActivities($checklist){
         $user = auth()->user();
         $checklist->loadMissing([
-            'type:id,name,code',
+            'type:id,name,code,color',
             'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position',
             'activities.checklist_response:id,code',
         ]);

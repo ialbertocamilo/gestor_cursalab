@@ -242,7 +242,8 @@ class RestChecklistController extends Controller
             'message' => 'Actividad guardad correctamente.'
         ]);
     }
-    public function verifyPhoto(){
+    public function verifyPhoto(Request $request){
+        // dd($request->upload_image);
         return $this->success([
             'color'=>'#00E396',
             'percent' => '96',
