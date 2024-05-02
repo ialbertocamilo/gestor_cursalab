@@ -434,12 +434,12 @@ export default {
                 resource: "segmentación"
             },
             modalSupervisorOptions:{
-                ref: 'SupervisorFormModal',
+                ref: 'AuditorFormModal',
                 open: false,
                 persistent: true,
-                base_endpoint: "/entrenamiento/checklist/v2",
+                base_endpoint: "/segments",
                 confirmLabel: "Guardar",
-                resource: "supervisor"
+                resource: "Auditor"
             },
             finishConfigurationModal:{
                 ref: 'finishConfigurationModal',
