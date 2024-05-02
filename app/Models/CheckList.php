@@ -74,7 +74,7 @@ class CheckList extends BaseModel
     }
     public function getImagenAttribute(){
         $default_image = 'https://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/images/default_image_checklist.png';
-        return is_null($this->image) ? $default_image : $this->image; 
+        return is_null($this->imagen) ? $default_image : $this->imagen; 
     }
     /*======================================================= SCOPES ==================================================================== */
 
