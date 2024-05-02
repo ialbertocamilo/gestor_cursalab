@@ -1104,7 +1104,11 @@ class CheckList extends BaseModel
         return [
             "id" => $checklist->id,
             "title" => $checklist->title,
-            "status" => 'pendiente',
+            "status" => [
+                'code' => 'pendiente',
+                'label' => 'Pendiente',
+                'color' => '#25B374'
+            ],
             "description" => $checklist->description,
             "modality" => [
                 'id' => $checklist->modality->id,
