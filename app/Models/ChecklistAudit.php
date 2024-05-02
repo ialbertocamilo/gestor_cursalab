@@ -54,7 +54,14 @@ class ChecklistAudit extends BaseModel
         foreach ($activities as $activity) {
             $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
             $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
-            $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
+            $photo = '';
+            if($data['file_photo']){
+                // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
+                $str_random = Str::random(5);
+                $name_image = $activity['id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+                $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+                Media::uploadMediaBase64(name:'', path:$photo, base64:$activity['file_photo'],save_in_media:false,status:'private');
+            }
             $_checklist_audit = [
                 'identifier_request'=> $data['identifier_request'],
                 'qualification_id'=> $activity['qualification_id'],
