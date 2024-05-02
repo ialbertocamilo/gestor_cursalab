@@ -66,7 +66,7 @@ class ChecklistAudit extends BaseModel
                 'identifier_request'=> $data['identifier_request'],
                 'qualification_id'=> $activity['qualification_id'],
                 'signature_supervisor' => $path_signature,
-                'photo'=> $activity['photo']?->file,
+                'photo'=> $photo,
                 'checklist_id'=>$checklist->id,
                 'checklist_activity_id'=>$activity['id'],
                 'auditor_id' => $user->id,
