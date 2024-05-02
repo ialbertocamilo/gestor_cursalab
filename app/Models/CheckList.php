@@ -72,9 +72,9 @@ class CheckList extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'modality_id');
     }
-    public function getImagenAttribute(){
+    public function getImagenAttribute($imagen){
         $default_image = 'https://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/images/default_image_checklist.png';
-        return is_null($this->imagen) ? $default_image : $this->imagen; 
+        return is_null($imagen) ? $default_image : $imagen; 
     }
     /*======================================================= SCOPES ==================================================================== */
 
