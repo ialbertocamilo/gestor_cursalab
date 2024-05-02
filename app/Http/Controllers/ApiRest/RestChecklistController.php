@@ -10,6 +10,7 @@ use App\Models\Workspace;
 use App\Models\SegmentValue;
 use Illuminate\Http\Request;
 use App\Models\ChecklistRpta;
+use App\Models\ChecklistAudit;
 use App\Models\CriterionValue;
 use App\Models\SummaryChecklist;
 use App\Models\ChecklistRptaItem;
@@ -234,7 +235,13 @@ class RestChecklistController extends Controller
         $data = Checklist::listActivities($checklist);
         return $this->success($data);
     }
-
+    public function saveActivities(Checklist $checklist,Request $request){
+        $data = $request->all();
+        ChecklistAudit::saveActivitiesAudits($checklist,$data);
+        return $this->success([
+            'message' => 'Actividad guardad correctamente.'
+        ]);
+    }
     public function verifyPhoto(){
         return $this->success([
             'color'=>'#00E396',

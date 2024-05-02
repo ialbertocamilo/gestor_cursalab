@@ -1088,6 +1088,7 @@ class CheckList extends BaseModel
                     "name"=>"Ecnorsa ZC",
                     "icon"=>"store",
                 ],
+                'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
                 "imagen" => get_media_url($checklist->imagen,'s3'),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
