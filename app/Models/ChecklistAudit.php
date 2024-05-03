@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Models\BaseModel;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,11 @@ class ChecklistAudit extends BaseModel
         'date_audit' => 'timestamp',
     ];
 
+    public function getDateAuditAttribute($value)
+    {
+        $date = Carbon::parse($value);
+        $this->attributes['date_audit'] = $date->format('d-m-Y');
+    }
 
     protected function saveActivitiesAudits($checklist,$data){
         $user = auth()->user();

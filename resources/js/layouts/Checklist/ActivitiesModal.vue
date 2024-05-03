@@ -59,9 +59,9 @@
                             <v-expansion-panels flat class="custom-expansion-block">
                                 <v-expansion-panel >
                                     <v-expansion-panel-header flat>
-                                        <span style="color:#5458EA">
+                                        <span style="color:#5458EA" class="d-flex">
                                             <i class="pr-1 mdi mdi-cog"></i>
-                                            Configuración
+                                            Configuración avanzada
                                         </span>
                                         <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
                                             <i class="pr-1 mdi mdi-file-document-check"></i>
