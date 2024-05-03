@@ -875,6 +875,7 @@ class CheckList extends BaseModel
 
     protected function saveActivities($checklist,$activities){
         $activities_to_insert = [];
+        $activities_id = [];
         foreach ($activities as $data_activity) {
             $activity = CheckListItem::updateOrCreate(
                 ['id' => $data_activity['id']],
@@ -888,7 +889,7 @@ class CheckList extends BaseModel
                     'extra_attributes' => $data_activity['extra_attributes'],
                 ]
             );
-            
+            $activities_id[] = $activity->id;
             if(isset($data_activity['custom_options']) && count($data_activity['custom_options'])>0 ){
                 $custom_options = $data_activity['custom_options'];
                 foreach ($custom_options as $option) {
@@ -904,6 +905,7 @@ class CheckList extends BaseModel
                 }
             }
         }
+        CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
         $next_step = self::nextStep($checklist);
         return [
             'next_step' => $next_step,
@@ -969,9 +971,9 @@ class CheckList extends BaseModel
                 return $next_step;
             }
         }
-        $checklistSupervisor = ChecklistSupervisor::where('id',$this->id)->first();
+        $checklistSupervisor = ChecklistSupervisor::where('id',$checklist->id)->first();
 
-        if(!$supervisors->segments($checklist->id)->first()){
+        if(!$checklistSupervisor->segments($checklist->id)->first()){
             $next_step = 'supervisor_card';
             return $next_step;
         }
@@ -1121,7 +1123,7 @@ class CheckList extends BaseModel
         
         $status = $audit ? [
                     'code' => 'realizado',
-                    'name' => 'Realizado'.$audit->date_audit,
+                    'name' => 'Realizado '.$audit->date_audit,
                     'color' => '#25B374'
                 ] : [
                     'code' => 'pendiente',

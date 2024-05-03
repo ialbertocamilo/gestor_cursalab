@@ -63,24 +63,26 @@
                                             <i class="pr-1 mdi mdi-cog"></i>
                                             Configuración avanzada
                                         </span>
-                                        <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
-                                            <i class="pr-1 mdi mdi-file-document-check"></i>
-                                            <!-- <v-icon>{{ mdi-file-document-check  }}</v-icon>  -->
-                                            Tipo de repuesta: {{ activity.checklist_response.name }}
-                                        </v-chip>
-                                        <v-chip small v-if="activity.extra_attributes.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
-                                            <i class="pr-1 mdi mdi-file-chart"></i>
-                                            Será evaluable
-                                        </v-chip>
-                                        <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                            <i class="pr-1 mdi mdi-image"></i>
-                                            Se agregará foto
-                                        </v-chip>
-                                        <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                            <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
-                                            <i class="pr-1 mdi mdi-comment-outline"></i>
-                                            Se agregará comentario
-                                        </v-chip>
+                                        <div class="d-flex">
+                                            <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
+                                                <i class="pr-1 mdi mdi-file-document-check"></i>
+                                                <!-- <v-icon>{{ mdi-file-document-check  }}</v-icon>  -->
+                                                Tipo de repuesta: {{ activity.checklist_response.name }}
+                                            </v-chip>
+                                            <v-chip small v-if="activity.extra_attributes.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                                <i class="pr-1 mdi mdi-file-chart"></i>
+                                                Será evaluable
+                                            </v-chip>
+                                            <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                <i class="pr-1 mdi mdi-image"></i>
+                                                Se agregará foto
+                                            </v-chip>
+                                            <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
+                                                <i class="pr-1 mdi mdi-comment-outline"></i>
+                                                Se agregará comentario
+                                            </v-chip>
+                                        </div>
                                         <v-spacer></v-spacer>
                                         <DefaultButton
                                             icon="mdi-delete"
@@ -422,6 +424,10 @@ export default {
                 vue.checklist_type_response = data.data.checklist_type_response;
                 vue.is_checklist_premiun = data.data.is_checklist_premiun;
             })
+            if(!vue.activities[0].checklist_response){
+                const checklist_response = vue.checklist_type_response.find(ctr => ctr.code == 'scale_evaluation');
+                vue.activities[0].checklist_response = checklist_response;
+            }
         },
         addCustomOption(index){
             let vue = this;
@@ -440,11 +446,12 @@ export default {
         },
         addActivity(){
             let vue = this;
+            const checklist_response = vue.checklist_type_response.find(ctr => ctr.code == 'scale_evaluation');
             vue.activities.push({
                 id:'insert-'+(vue.activities.length+1),
                 activity:'',
                 position: vue.activities.length,
-                checklist_response:false,
+                checklist_response:checklist_response,
                 custom_options:[],
                 extra_attributes:{
                     is_evaluable:false,
