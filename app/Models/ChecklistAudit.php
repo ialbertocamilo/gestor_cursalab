@@ -33,7 +33,7 @@ class ChecklistAudit extends BaseModel
     public function getDateAuditAttribute($value)
     {
         $date = Carbon::parse($value);
-        $this->attributes['date_audit'] = $date->format('d-m-Y');
+        return $date->format('d-m-Y');
     }
 
     protected function saveActivitiesAudits($checklist,$data){
