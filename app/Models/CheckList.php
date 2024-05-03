@@ -1111,7 +1111,8 @@ class CheckList extends BaseModel
         $audit  = ChecklistAudit::select('date_audit')
                                 ->where('checklist_id',$checklist->id)
                                 ->when($checklist->extra_attributes['replicate'],function($q){
-                                    $q->whereDate('date_audit','=',now()->format('Y-m-d'));
+                                    $now = now()->format('Y-m-d');
+                                    $q->whereDate('date_audit','=',$now);
                                 })
                                 ->when($checklist->extra_attributes['view_360'], function($q) use($user){
                                     $q->where('auditor_id',$user->id);
