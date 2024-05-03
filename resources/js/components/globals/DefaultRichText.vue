@@ -251,6 +251,7 @@ export default {
             vue.modalPreviewMultimedia.open= true;
         },
         loadImage(image){
+            let vue = this;
             this.updateValue(`<img src="${image.url}" />`);
             vue.modalPreviewMultimedia.open= false;
         }
