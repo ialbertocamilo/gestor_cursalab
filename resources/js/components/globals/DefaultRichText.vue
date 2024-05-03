@@ -252,7 +252,7 @@ export default {
         },
         loadImage(image){
             let vue = this;
-            this.updateValue(`<img src="${image.url}" />`);
+            this.updateValue(`<img src="${image.url}" style="height: 150px;width: auto;"  />`);
             vue.modalPreviewMultimedia.open= false;
         }
     }
