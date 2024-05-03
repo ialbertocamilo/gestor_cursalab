@@ -101,9 +101,9 @@ class ActivityController extends Controller
             'model_id' => $data['project'] ?? null,
             'model_type' => Project::class,
             'type_id' => $type_activity?->id ?? null,
-            'activity_requirement_id' => $request->project['requirement']
+            'activity_requirement_id' => $request->project['requirement'] ?? null
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')
@@ -161,7 +161,7 @@ class ActivityController extends Controller
             'position' => $request->position ?? 1,
             'activity_requirement_id' => $request->requirement
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')
@@ -261,7 +261,7 @@ class ActivityController extends Controller
             'position' => $request->position ?? 1,
             'activity_requirement_id' => $request->requirement
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')
@@ -493,7 +493,7 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')
@@ -630,7 +630,7 @@ class ActivityController extends Controller
             'activity_requirement_id' => $request->requirement,
             'position' => $request->position ?? 1
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')
@@ -931,7 +931,7 @@ class ActivityController extends Controller
             'type_id' => $type_activity?->id ?? null,
             'activity_requirement_id' => $request->requirement
         ];
-        
+
         // position
         $last_position =  Activity::where('stage_id', $stage->id)
                         ->orderBy('position','desc')

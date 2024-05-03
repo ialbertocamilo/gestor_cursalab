@@ -473,7 +473,7 @@ export default {
                         method_name: "logs"
                     },
                     {
-                      text: "Reusar segmentación",
+                      text: "Reutilizar segmentación",
                       icon: "mdi mdi-account-switch",
                       type: "action",
                       show_condition: 'segments_count',

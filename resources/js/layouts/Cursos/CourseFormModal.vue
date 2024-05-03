@@ -4,17 +4,19 @@
 
             <v-form ref="CursoForm">
                 <DefaultErrors :errors="errors"/>
-                <v-row v-if="$root.isSuperUser">
-                    <v-col cols="12">
-                        <v-chip>
-                            ID: {{ resource.id }}
-                        </v-chip>
-                    </v-col>
-                </v-row>
                 <v-row>
-                    <v-col cols="6" class="pb-0">
-                        <DefaultInput label="Nombre del curso" placeholder="Ingrese un nombre" v-model="resource.name"
-                            :rules="rules.name" show-required emojiable dense />
+                    <v-col cols="6" class="pb-0 d-flex align-items-start">
+                        <DefaultInput
+                            label="Nombre del curso"
+                            placeholder="Ingrese un nombre"
+                            v-model="resource.name"
+                            :rules="rules.name"
+                            show-required emojiable dense />
+
+                        <IDChip
+                            :cssClass="'mt-1'"
+                            :ID="resource.id"
+                            :description="'Código identificador único del curso'" />
                     </v-col>
                     <v-col cols="6" class="pb-0">
                         <DefaultAutocomplete show-required :rules="rules.lista_escuelas" label="Escuelas a las que pertenece"
@@ -473,8 +475,10 @@ import DC3PersonModal from './DC3PersonModal';
 import RegistroTrainerModal from './RegistroTrainerModal';
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import moment from "moment";
+import IDChip from "../../components/globals/IDChip.vue";
 export default {
     components: {
+        IDChip,
         DefaultRichText,
         editor, CursoValidacionesModal, DialogConfirm, DiplomaSelector, DC3PersonModal, RegistroTrainerModal,
     },

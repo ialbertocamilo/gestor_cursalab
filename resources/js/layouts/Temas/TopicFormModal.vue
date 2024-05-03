@@ -9,15 +9,10 @@
         <template v-slot:content>
 
             <v-form ref="TemaForm">
-                <v-row v-if="$root.isSuperUser">
-                    <v-col cols="12">
-                        <v-chip>
-                            ID: {{ resource.id }}
-                        </v-chip>
-                    </v-col>
-                </v-row>
                 <v-row>
-                    <v-col :cols="selects.course_code_modality != 'asynchronous' ? 4 : 6">
+                    <v-col
+                        :cols="selects.course_code_modality != 'asynchronous' ? 4 : 6"
+                        class="d-flex align-items-start">
                         <DefaultInput
                             dense
                             label="Nombre del tema"
@@ -27,6 +22,11 @@
                             :rules="rules.name"
                             emojiable
                         />
+
+                      <IDChip
+                          :cssClass="'mt-1'"
+                          :ID="resource.id"
+                          :description="'Código identificador único del tema'" />
                     </v-col>
                     <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
                         <DefaultAutocomplete
@@ -212,20 +212,20 @@
                                                     <a title="Ver multimedia" class="" :href="getFullResourceLink(media)" target="_blank">
                                                         <v-tooltip v-if="is_offline && types_exclude_offline.find(m => m == media.type_id)" top>
                                                             <template v-slot:activator="{ on, attrs }">
-                                                                <i 
-                                                                    style="position:relative" 
+                                                                <i
+                                                                    style="position:relative"
                                                                     :class="mixin_multimedias.find(el => el.type === media.type_id).icon || 'mdi mdi-loading'"
                                                                     v-bind="attrs"
                                                                     v-on="on"
                                                                 >
-                                                                    <v-icon 
+                                                                    <v-icon
                                                                         v-if="is_offline && types_exclude_offline.find(m => m == media.type_id)"
                                                                         style="font-size: 16px !important; position: absolute; bottom: -4px;  color: red;right: -8px;"
                                                                     >
                                                                         mdi mdi-cloud-remove
                                                                     </v-icon>
                                                                 </i>
-                                                                
+
                                                             </template>
                                                             <span>Este archivo multimedia no se podrá visualizar en la vista sin conexión.</span>
                                                         </v-tooltip>
@@ -684,8 +684,10 @@ const fields = ['name', 'description', 'content', 'imagen', 'position', 'assessa
 
 const file_fields = ['imagen'];
 import QRCode from "qrcode";
+import IDChip from "../../components/globals/IDChip.vue";
 export default {
-    components: {editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox,
+    components: {
+      IDChip, editor: Editor, GmapMap,TemaMultimediaTypes, MultimediaBox,
         draggable, TemaValidacionesModal, DialogConfirm,
         DefaultRichText,ConvertMediaToIaModal,TagModal,SegmentFormModal
     },
@@ -989,7 +991,7 @@ export default {
                     vue.showAlert("Debe seleccionar al menos un multimedia", 'warning')
                 return
             }
-            
+
             if (vue.resource && vue.resource.id) {
 
                 if (vue.resource.hide_evaluable !== vue.resource.assessable || vue.resource.hide_tipo_ev !== vue.resource.type_evaluation_id) {
@@ -1060,7 +1062,7 @@ export default {
             vue.showLoader()
             const validForm = vue.validateForm('TemaForm')
             const hasMultimedia = vue.resource.media.length > 0
-            
+
             if (!validForm || (!hasMultimedia && vue.selects.course_code_modality == 'asynchronous')) {
                 vue.hideLoader()
                 vue.loadingActionBtn = false
@@ -1084,10 +1086,10 @@ export default {
                 vue.closeModal();
                 return;
             }
-            if(hasMultimedia 
+            if(hasMultimedia
                 && !vue.loadPreferencesBycode(vue.modalInfoOffline.preference_code)
-                && !vue.modalInfoOffline.was_opened 
-                && vue.resource.media.find( m => ['youtube','vimeo','scorm','link','genially','H5P'].includes(m.type_id) ) 
+                && !vue.modalInfoOffline.was_opened
+                && vue.resource.media.find( m => ['youtube','vimeo','scorm','link','genially','H5P'].includes(m.type_id) )
             ){
                 vue.hideLoader()
                 vue.modalInfoOffline.was_opened = true;

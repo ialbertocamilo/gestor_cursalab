@@ -161,7 +161,7 @@
                 @onCancel="closeFormModal(courseValidationModal);  closeFormModal(deleteConfirmationDialog)"
                 @onConfirm="confirmValidationModal(courseValidationModal,  null, confirmDelete(false))"
                 :resource="{}"
-            /> 
+            />
 
             <DialogConfirm
                 :ref="courseUpdateStatusModal.ref"
@@ -443,11 +443,11 @@ export default {
                         method_name: "logs"
                     },
                     {
-                      text: "Reusar segmentación",
+                      text: "Reutilizar segmentación",
                       icon: "mdi mdi-account-switch",
                       type: "action",
-                        show_condition: 'segments_count',
-                        method_name: "openMultipleSegmentationModal"
+                      show_condition: 'segments_count',
+                      method_name: "openMultipleSegmentationModal"
                     },
                     {
                         text: "Eliminar",
