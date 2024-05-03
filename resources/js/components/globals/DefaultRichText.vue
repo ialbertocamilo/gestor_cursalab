@@ -22,19 +22,25 @@
                     forced_root_block: '',
                     plugins: ['lists anchor', 'code', 'paste','link','image','preview','emoticons'],
                     toolbar:
-                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? '| image | preview' : ''}`,
+                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? `| ${customSelectorImage ? 'selectorImage' : 'image'}  | preview` : ''}`,
                     images_file_types: 'jpg,svg,webp,gif',
                     images_upload_handler: images_upload_handler,
                     setup: function (editor) {
                         // if(showGenerateIaDescription){
                         editor.ui.registry.addButton('customButton', {
-                            text: getIconText(), // Ruta de la imagen para el botón personalizado
+                            text: getIconText('jarvis'), // Ruta de la imagen para el botón personalizado
                             tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
                             onAction: function (_) {
                                 generateIaDescription();
                             },
                         });
-                        // }
+                        editor.ui.registry.addButton('selectorImage', {
+                            text: getIconText('multimedia'), // Ruta de la imagen para el botón personalizado
+                            tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                            onAction: function (_) {
+                                openModalMedia();
+                            },
+                        });
                     }
                 }"
                 @input="updateValue"
@@ -55,14 +61,22 @@
              v-text="`El campo debe tener menos de ${maxLength} caracteres`"
              style="color: #FF5252; font-size: 12px"
         />
+        <SelectMultimedia
+            :ref="modalPreviewMultimedia.ref"
+            :options="modalPreviewMultimedia"
+            width="85vw"
+            @onClose="closeSimpleModal(modalPreviewMultimedia)"
+            @onConfirm="loadImage"
+            :custom-filter="fileTypes"
+        />
     </div>
 </template>
 
 <script>
 import Editor from "@tinymce/tinymce-vue";
-
+import SelectMultimedia from '../forms/SelectMultimedia';
 export default {
-    components: {Editor,},
+    components: {Editor,SelectMultimedia},
     props: {
         value: {
             required: true
@@ -107,12 +121,24 @@ export default {
         loading:{
             type:Boolean,
             default:false
-        }
+        },
+        customSelectorImage:{
+            type:Boolean,
+            default:false
+        },
     },
     data() {
         return {
             localText: null,
             showAlertLength: false,
+            modalPreviewMultimedia: {
+                ref: 'modalSelectPreviewMultimedia',
+                open: false,
+                title: 'Buscar multimedia',
+                confirmLabel: 'Seleccionar',
+                cancelLabel: 'Cerrar'
+            },
+            fileTypes: ['image']
         }
     },
     created() {
@@ -194,14 +220,21 @@ export default {
             vue.localText = ''
             vue.updateValue()
         },
-        getIconText(){
-            return `
-            <div>
-                <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
-                <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/
-                <span id="limit_descriptions_jarvis">0</span></span>
-            </div>
-            `
+        getIconText(icon){
+            switch (icon) {
+                case 'jarvis':
+                return `
+                    <div>
+                        <image src="/img/ia_convert.svg" class="mt-2" style="width: 22px;cursor: pointer;"/ >
+                        <span class="badge_custom"><span id="ia_descriptions_generated">0</span>/
+                        <span id="limit_descriptions_jarvis">0</span></span>
+                    </div>
+                    `
+                case 'multimedia':
+                    return `<i class='mdi mdi-file-image'></i>`
+                    break;
+            }
+           
         },
         // changeLimits(ia_descriptions_generated,limit_descriptions_jarvis){
         //     let html_ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -212,6 +245,15 @@ export default {
         generateIaDescription(){
             this.$emit('generateIaDescription')
         },
+        openModalMedia(){
+            let vue = this;
+            vue.$refs[vue.modalPreviewMultimedia.ref].getData()
+            vue.modalPreviewMultimedia.open= true;
+        },
+        loadImage(image){
+            this.updateValue(`<img src="${image.url}" />`);
+            vue.modalPreviewMultimedia.open= false;
+        }
     }
 }
 </script>

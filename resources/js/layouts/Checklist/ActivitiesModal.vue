@@ -37,9 +37,6 @@
                         </v-col>
                     </v-row>
                     <v-row v-for="(activity,index_activity) in activities" :key="activity.id" class="elevation-1 my-4 px-0">
-                        <!-- <v-col cols="12" class="d-flex justify-end">
-                            
-                        </v-col> -->
                         <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
                             <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
                             </v-icon>
@@ -54,6 +51,7 @@
                                     :ignoreHTMLinLengthCalculation="true"
                                     :key="`${showButtonIaGenerate}-editor`"
                                     ref="descriptionRichText1"
+                                    customSelectorImage
                                 />
                             </v-col>
                             <v-expansion-panels flat class="custom-expansion-block">
