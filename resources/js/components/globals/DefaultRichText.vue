@@ -252,7 +252,8 @@ export default {
         },
         loadImage(image){
             let vue = this;
-            this.updateValue(`<img src="${image.url}" style="height: 150px;width: auto;"  />`);
+            const text_value = this.localText+`<br><img src="${image.url}" style="height: 150px;width: auto;"  />`
+            this.updateValue(text_value);
             vue.modalPreviewMultimedia.open= false;
         }
     }
