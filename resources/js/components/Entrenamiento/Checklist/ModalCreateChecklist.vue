@@ -361,7 +361,7 @@
                                             label="Selecciona el valor del criterio del responsable"
                                         />   
                                     </v-col>
-                                    <v-col cols="6">
+                                    <!-- <v-col cols="6">
                                         <DefaultSimpleSection title="Autocalificación de entidad" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex">
@@ -383,7 +383,7 @@
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
-                                    </v-col>
+                                    </v-col> -->
                                     <v-col cols="12">
                                         <DefaultSimpleSection title="Sistema de firma del checklist" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
@@ -1092,5 +1092,6 @@ span.v-stepper__step__step:after {
     border: 1px solid #FFB700;
     border-radius: 8px;
     padding: 1px 4px;
+    cursor: pointer;
 }
 </style>

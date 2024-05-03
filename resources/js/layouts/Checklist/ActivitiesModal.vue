@@ -36,19 +36,15 @@
                             </div>
                         </v-col>
                     </v-row>
-                    <v-row v-for="(activity,index_activity) in activities" :key="activity.id" class="elevation-1 my-4">
-                        <v-col cols="12" class="d-flex justify-end">
-                            <DefaultButton
-                                icon="mdi-delete"
-                                isIconButton
-                                @click="removeActivity(index_activity)"
-                            />
-                        </v-col>
-                        <v-col cols="1" class="d-flex align-center justify-content-center ">
+                    <v-row v-for="(activity,index_activity) in activities" :key="activity.id" class="elevation-1 my-4 px-0">
+                        <!-- <v-col cols="12" class="d-flex justify-end">
+                            
+                        </v-col> -->
+                        <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
                             <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
                             </v-icon>
                         </v-col>
-                        <v-row class="col-11">
+                        <v-row class="col-11 px-0 mx-0" >
                             <v-col cols="12">
                                 <DefaultRichText
                                     clearable
@@ -85,6 +81,12 @@
                                             <i class="pr-1 mdi mdi-comment-outline"></i>
                                             Se agregará comentario
                                         </v-chip>
+                                        <v-spacer></v-spacer>
+                                        <DefaultButton
+                                            icon="mdi-delete"
+                                            isIconButton
+                                            @click="removeActivity(index_activity)"
+                                        />
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content class="row">
                                         <v-row>
@@ -321,6 +323,9 @@ export default {
                 },
             ],
             activities:[
+                {
+                    checklist_response:false,
+                }
                 // {
                 //     id:'insert-1',
                 //     position:1,
@@ -488,5 +493,6 @@ export default {
     border: 1px solid #FFB700;
     border-radius: 8px;
     padding: 1px 4px;
+    cursor: pointer;
 }
 </style>

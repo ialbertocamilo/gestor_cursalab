@@ -969,12 +969,12 @@ class CheckList extends BaseModel
                 return $next_step;
             }
         }
-        $has_supervisors = count($checklist->supervisor_criteria)>0 ||count($checklist->supervisor_ids)>0;
-        // $has_supervisors = $checklist->auditors()->first();
-        // if(!$has_supervisors){
-        //     $next_step = 'supervisor_card';
-        //     return $next_step;
-        // }
+        $checklistSupervisor = ChecklistSupervisor::where('id',$this->id)->first();
+
+        if(!$supervisors->segments($checklist->id)->first()){
+            $next_step = 'supervisor_card';
+            return $next_step;
+        }
         return $next_step;
     }
 
@@ -1031,9 +1031,9 @@ class CheckList extends BaseModel
         $user = auth()->user();
         $user_latitude = $request->lat;
         $user_longitude = $request->long;
-
+        $filter = $request->filter;
         $checklists = $user->getSegmentedByModelType(
-            model: CheckList::class,
+            model: ChecklistSupervisor::class,
             withModelRelations: ['modality:id,name,code,color,alias', 'type:id,name,color,code'],
             unset_criterion_values: false
         );
@@ -1047,7 +1047,9 @@ class CheckList extends BaseModel
 
         foreach ($checklists as $checklist) {
             $_checkist_data = $this->buildChecklistData($checklist,$user);
-
+            if($_checkist_data['status']['code'] != $filter){
+                continue;
+            }
             if ($checklist->extra_attributes['required_geolocation']) {
                 $this->processChecklistWithGeolocation($user, $workspace_entity_criteria, $_checkist_data, $list_checklists_geolocalization, $list_checklists_exclude_geolocalization, $user_latitude, $user_longitude);
             } else {
@@ -1105,14 +1107,34 @@ class CheckList extends BaseModel
     }
     //SUBFUNCTIONS
     function buildChecklistData($checklist,$user) {
+        $date = now();
+        $status =[
+            'code' => 'pendiente',
+            'name' => 'Pendiente',
+            'color' => '#CDCDEB'
+        ];
+
+        $audit  = ChecklistAudit::select('date_audit')
+                                ->where('checklist_id',$checklist->id)
+                                ->when($checklist->extra_attributes['replicate'],function($q){
+                                    $q->whereDate('date_audit','=',$now->format('Y-m-d'));
+                                })
+                                ->when($checklist->extra_attributes['view_360'], function($q) use($user){
+                                    $q->where('auditor_id',$user->id);
+                                })
+                                ->first();
+        if($audit){
+            $status =[
+                'code' => 'realizado',
+                'name' => 'Realizado'.$audit->date_audit->format('Y-m-d'),
+                'color' => '#25B374'
+            ];
+        }
+        
         return [
             "id" => $checklist->id,
             "title" => $checklist->title,
-            "status" => [
-                'code' => 'pendiente',
-                'name' => 'Pendiente',
-                'color' => '#25B374'
-            ],
+            "status" => $status,
             "description" => $checklist->description,
             "modality" => [
                 'id' => $checklist->modality->id,
