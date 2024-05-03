@@ -1121,7 +1121,7 @@ class CheckList extends BaseModel
         
         $status = $audit ? [
                     'code' => 'realizado',
-                    'name' => 'Realizado'.$audit->date_audit->format('Y-m-d'),
+                    'name' => 'Realizado'.$audit->date_audit,
                     'color' => '#25B374'
                 ] : [
                     'code' => 'pendiente',
