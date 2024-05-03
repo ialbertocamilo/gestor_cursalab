@@ -1107,12 +1107,6 @@ class CheckList extends BaseModel
     }
     //SUBFUNCTIONS
     function buildChecklistData($checklist,$user) {
-        $date = now();
-        $status =[
-            'code' => 'pendiente',
-            'name' => 'Pendiente',
-            'color' => '#CDCDEB'
-        ];
 
         $audit  = ChecklistAudit::select('date_audit')
                                 ->where('checklist_id',$checklist->id)
@@ -1123,14 +1117,17 @@ class CheckList extends BaseModel
                                     $q->where('auditor_id',$user->id);
                                 })
                                 ->first();
-        if($audit){
-            $status =[
-                'code' => 'realizado',
-                'name' => 'Realizado'.$audit->date_audit->format('Y-m-d'),
-                'color' => '#25B374'
-            ];
-        }
         
+        $status = $audit ? [
+                    'code' => 'realizado',
+                    'name' => 'Realizado'.$audit->date_audit->format('Y-m-d'),
+                    'color' => '#25B374'
+                ] : [
+                    'code' => 'pendiente',
+                    'name' => 'Pendiente',
+                    'color' => '#CDCDEB'
+                ];
+
         return [
             "id" => $checklist->id,
             "title" => $checklist->title,
