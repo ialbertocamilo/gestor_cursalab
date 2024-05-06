@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ActivityChecklistImport;
 use App\Http\Controllers\ApiRest\HelperController;
 
 class CheckList extends BaseModel
@@ -714,7 +716,11 @@ class CheckList extends BaseModel
             'feedback_disponible' => $feedback_disponible
         ];
     }
-
+    protected function uploadMassive($request){
+        $import = new ActivityChecklistImport();
+        Excel::import($import, $request->file('archivo'));
+        return $import->activities;
+    }
     protected function getStudentChecklistInfoById($checklist_id, $student_id = null, $trainer_id = null){
         $alumno_id = $student_id ? $student_id : Auth::user()?->id;
         

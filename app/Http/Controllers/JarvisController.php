@@ -27,4 +27,10 @@ class JarvisController extends Controller
         $checklist = Jarvis::generateChecklistJarvis($request);
         return $this->success($checklist);
     }
+
+    public function searchCoursesTranscribed(Request $request){
+        $name = $request->name;
+        $courses = Jarvis::searchCoursesTranscribed($name);
+        return $this->success($courses);
+    }
 }

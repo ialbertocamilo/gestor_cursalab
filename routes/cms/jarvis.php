@@ -8,5 +8,6 @@ Route::controller(JarvisController::class)->group(function () {
     Route::post('/generate-checklist', 'generateChecklistJarvis');
 
     Route::get('/limits', 'getLimitsByWorkspace');
+    Route::get('/search-courses-transcribed','searchCoursesTranscribed');
 
 });

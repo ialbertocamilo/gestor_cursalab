@@ -35,14 +35,14 @@
                             </v-icon>
                         </v-btn>
                     </div>
-                    <!-- <DefaultButton 
+                    <!-- <DefaultButton
                         v-else
                         :min_content="false"
                         label="Deseo filtrar por criterios"
                         :outlined="true"
                         @click="showSectionCriteria()"
                     /> -->
-                    <DefaultButton 
+                    <DefaultButton
                         v-else
                         :min_content="false"
                         label="Deseo filtrar por criterios"
@@ -138,14 +138,14 @@
                                 </v-col>
                                 <v-col cols="6">
                                     <div class="d-flex justify-content-between mx-2">
-                                        <div class="lbl_lists"><span>Colaboradores segmentados</span></div>
+                                        <div class="lbl_lists"><span>Usuarios segmentados</span></div>
                                         <div class="d-flex justify-content-between">
                                             <div class="lbl_lists"><span>Retirar</span></div>
                                         </div>
                                     </div>
                                     <div class="box_seleccionados">
                                         <div class="bx_message" v-if="segment_by_document.segmentation_by_document == null">
-                                            <span class="text_default">Colaboradores segmentados</span>
+                                            <span class="text_default">Usuarios segmentados</span>
                                         </div>
                                         <ul v-else>
                                             <li v-for="user in segment_by_document.segmentation_by_document" :key="user.id" class="d-flex align-center justify-content-between">
@@ -308,7 +308,7 @@ export default {
             let vue = this;
             if(vue.show_section_criteria){
                 vue.options.confirmLabel = 'Guardar';
-                await vue.getListUsersByCriteria();  
+                await vue.getListUsersByCriteria();
                 return;
             }
             await vue.saveSegments();
@@ -381,7 +381,7 @@ export default {
             vue.select_all = false;
             vue.modulesIds = [];
             vue.modulesSchools = []
-            vue.show_section_criteria  = false;  
+            vue.show_section_criteria  = false;
             vue.criterion_list = [];
             vue.criterion_values_selected = [];
         },
@@ -421,7 +421,7 @@ export default {
                     resource.criterion_list[criterion.code] = criterion_default_value;
                 }
                 // _data.criteria.forEach(criterion => {
-                    
+
                 //     // Object.assign(vue.resource.criterion_list, {[`${criterion.code}`]: criterion_default_value})
                 // })
                 vue.resource.criterion_list = resource.criterion_list;

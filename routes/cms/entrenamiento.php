@@ -66,6 +66,7 @@ Route::controller(ChecklistController::class)->group(function() {
 			Route::put('/{checklist}/update', 'updateChecklist');
 
 			Route::get('/activity/form-selects', 'formSelectsActivities');
+			Route::post('/activity/upload-massive', 'uploadMassive');
 			Route::get('/{checklist}/activities', 'listActivitiesByChecklist');
 			Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
 

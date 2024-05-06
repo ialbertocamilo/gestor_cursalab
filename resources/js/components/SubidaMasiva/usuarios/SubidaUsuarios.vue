@@ -1,12 +1,25 @@
 <template>
     <v-row>
         <v-col cols="12" md="5" height="200px" class="mt-100">
-            <v-card-text class="py-0">
+            <v-card-text
+                v-show="process.id === 1"
+                class="py-0">
                 <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
                 Se crea o actualiza los usuarios según los datos indicados en el Excel.
             </v-card-text>
+
+            <v-card-text
+                v-show="process.id === 6"
+                class="py-0">
+                <!-- Se crea o actualiza los datos de usuarios según el valor de la columna de acción. -->
+                Se actualiza los usuarios según los datos indicados en el Excel.
+            </v-card-text>
+
             <v-card-title class="tit">Instructivo:</v-card-title>
-            <v-card-text class="instructivo">
+            <!-- Instructions for inserts -->
+            <v-card-text
+                v-show="process.id === 1"
+                class="instructivo">
                 <ul>
                     <li class="mt-2">
                         La máxima cantidad de filas por Excel es de <b>500</b>.
@@ -22,6 +35,26 @@
                     </li>
                     <li class="mt-2">
                         Colocar en la columna <b>Módulo</b> los módulos existentes.
+                    </li>
+                </ul>
+            </v-card-text>
+
+            <!-- Instructions for updates -->
+            <v-card-text
+                v-show="process.id === 6"
+                class="instructivo">
+                <ul>
+                    <li class="mt-2">
+                        La máxima cantidad de filas por Excel es de <b>500</b>.
+                    </li>
+                    <li class="mt-2">
+                        Ingresa la columna "documento" (obligatoria) y adicional las columnas que desees actualizar.
+                    </li>
+                    <li class="mt-2">
+                        Recuerda que al colocar como título los nombres de los criterios que deseas actualizar, estos deben ser iguales a los que se encuentran en la sección "criterios".
+                    </li>
+                    <li class="mt-2">
+                        Para los campos de las fechas se puede usar dos formatos: <b>yyyy / mm / dd</b> o <b>dd / mm / yyyy</b>.
                     </li>
                 </ul>
             </v-card-text>
@@ -94,7 +127,13 @@ export default {
                 // console.log(data);
                 data.append("number_socket", this.number_socket || null);
                 percentLoader.innerHTML = ``;
-                await axios.post('/procesos-masivos/create-update-users', data).then((res) => {
+
+                let url = '/procesos-masivos/create-update-users';
+                if (vue.process.id === 6) {
+                    url = '/procesos-masivos/update-users';
+                }
+
+                await axios.post(url, data).then((res) => {
                     const data = res.data.data;
                     if (data.errores.length > 0) {
                         this.$emit("download-excel-observations", {

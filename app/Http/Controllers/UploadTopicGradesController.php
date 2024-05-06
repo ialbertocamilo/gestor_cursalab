@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Error;
 use App\Models\SectionUpload;
 use App\Models\School;
 use App\Models\Taxonomy;
@@ -65,12 +66,12 @@ class UploadTopicGradesController extends Controller
             //code...
             $data = $request->validated();
     //        if (count($data['topics'] ? []) === 0) return $this->error('No se ha seleccionado ningún tema.');
-    
+
             $import = new MassiveUploadTopicGrades($data);
             Excel::import($import, $data['file']);
 
             // === guardar archivo log ===
-            $codes = [ 'code_section' => 'upload-notes', 
+            $codes = [ 'code_section' => 'upload-notes',
                        'code_type' => 'upload' ];
             SectionUpload::storeRequestLog($request, $codes);
             // === guardar archivo log ===
@@ -80,6 +81,7 @@ class UploadTopicGradesController extends Controller
             return $this->success(compact('info', 'msg'));
         } catch (\Throwable $exception) {
             //throw $th;
+
             Error::storeAndNotificateException($exception, $request);
             return response()->json(['message' => 'Ha ocurrido un problema. Contáctate con el equipo de soporte.'], 500);
         }

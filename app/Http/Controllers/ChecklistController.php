@@ -16,7 +16,7 @@ class ChecklistController extends Controller
         $checklist_default_configuration = get_current_workspace()->checklist_configuration;
         $qualification_types = Taxonomy::getDataForSelect('system', 'qualification-type');
         $types_checklist = Taxonomy::getDataForSelect('checklist', 'type_checklist');
-        $is_checklist_premiun = boolval(get_current_workspace()->functionalities()->where('code','checklist-premiun')->first());
+        $is_checklist_premium = boolval(get_current_workspace()->functionalities()->where('code','checklist-premium')->first());
 
         $criteria = [];
         if(count($checklist_default_configuration->managers_criteria)){
@@ -24,7 +24,7 @@ class ChecklistController extends Controller
         }
         unset($checklist_default_configuration->managers_criteria);
         $data = compact(
-            'checklist_default_configuration','qualification_types','criteria','types_checklist','is_checklist_premiun'
+            'checklist_default_configuration','qualification_types','criteria','types_checklist','is_checklist_premium'
         );
         return $this->success($data);
     }
@@ -58,8 +58,8 @@ class ChecklistController extends Controller
 
     public function formSelectsActivities(){
         $checklist_type_response = Taxonomy::getDataForSelect('checklist', 'type_response_activity');
-        $is_checklist_premiun = boolval(get_current_workspace()->functionalities()->where('code','checklist-premiun')->first());
-        return $this->success(['checklist_type_response'=>$checklist_type_response,'is_checklist_premiun'=>$is_checklist_premiun]);
+        $is_checklist_premium = boolval(get_current_workspace()->functionalities()->where('code','checklist-premium')->first());
+        return $this->success(['checklist_type_response'=>$checklist_type_response,'is_checklist_premium'=>$is_checklist_premium]);
     }
     public function listActivitiesByChecklist(CheckList $checklist){
         $checklist->load('activities','activities.checklist_response:id,name','activities.custom_options:id,group,type,name,code');
@@ -112,5 +112,10 @@ class ChecklistController extends Controller
     public function searchCourses(Request $request){
         $courses = Checklist::searchCourses($request);
         return $this->success(['courses'=>$courses]);
+    }
+
+    public function uploadMassive(Request $request){
+        $activities = Checklist::uploadMassive($request);
+        return $this->success(['activities'=>$activities]);
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Course;
 use GuzzleHttp\Psr7\stream;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mongo\JarvisAttempt;
 use App\Models\Mongo\JarvisResponse;
 use Illuminate\Support\Facades\Http;
@@ -80,17 +82,7 @@ class Jarvis extends Model
     protected function generateQuestionsJarvis($request){
         $params = $request->all();
         $params = array_merge(self::getJarvisConfiguration(),$params);
-        $media_topics = MediaTema::where('topic_id',$params['topic_id'])->where('ia_convert',1)->whereNotNull('path_convert')->get();
-        $text_grouped = [];
-        foreach ($media_topics as $media) {
-            $text = Storage::disk('s3')->get($media->path_convert);
-            $text_grouped[]=[
-                'media_title' => $media->title,
-                'media_topic_id' => $media->id,
-                'text' => $text
-            ];
-        }
-        $params['text_grouped'] = $text_grouped;
+        $params['text_grouped'] = self::getTextFromMediaTopics($params['topic_id']);
         $response = Http::withOptions(['verify' => false])->timeout(900)->post($this->jarvis_base_url.'/generate-questions', $params);
         if ($response->successful()) {
             $data = $response->json();
@@ -105,19 +97,10 @@ class Jarvis extends Model
         $files = $request->file('files');
         $number_activities = $request->number_activities;
         $multipart = [];
-        // foreach ($files as $file) {
-        //     $multipart[] = [
-        //         'name' => 'attachments[]',
-        //         'contents' => file_get_contents($file),
-        //         'filename' => basename($file),
-        //         'headers' => ['Content-Type' => 'text/plain'] // Establecer el tipo MIME como texto plano
-        //     ];
-        // }
         foreach ($files as $file) {
             $fileContents = file_get_contents($file);
             $filename = $file->getClientOriginalName();
             $mimeType = $file->getMimeType();
-        
             $multipart[] = [
                 'name' => 'attachments[]',
                 'contents' => $fileContents,
@@ -126,18 +109,23 @@ class Jarvis extends Model
             ];
         }
         $params = self::getJarvisConfiguration();
-        // $multipart[] =[
-        //     'name' =>'token',
-        //     'contents' => $params['token']
-        // ];
-        // $multipart[] =[
-        //     'name' =>'model',
-        //     'contents' => $params['model']
-        // ];
+        $course_ids = $request->get('course_ids');
+        $text_grouped = [];
+        foreach ($course_ids as $course_id) {
+            $topics_id = Topic::select('id')->where('course_id',$course_id)
+            ->whereHas('medias',function($mt){
+                $mt->whereNotNull('path_convert');
+            })->get()->pluck('id');
+            foreach ($topics_id as $topic_id) {
+                $text = self::getTextFromMediaTopics($topic_id);
+                $text_grouped = array_merge($text_grouped,$text);
+            }
+        }
         $response = Http::withOptions([
             'verify' => false,
         ])->attach($multipart)
         ->attach('token', $params['token'])
+        ->attach('text_grouped', json_encode($text_grouped))
         ->attach('model', $params['model'])
         ->attach('number_activities',$number_activities)->timeout(900)->post(env('JARVIS_BASE_URL').'/generate_checklist',$params);
 
@@ -149,7 +137,47 @@ class Jarvis extends Model
             return $data['description'];
         }
     }
+    protected function searchCoursesTranscribed($name){
+        $workspace = get_current_workspace();
 
+        $courses = Course::select('id',DB::raw('CONCAT(id," - ",name) as name'))->FilterByPlatform()->whereHas('workspaces', function ($t) use ($workspace) {
+                $t->where('workspace_id', $workspace->id);
+            })
+            ->where(function ($query) use ($name) {
+                $query->where('name', 'like', "%$name%")
+                    ->orWhere('id', $name);
+            })
+            ->whereHas('topics.medias',function($mt){
+                $mt->whereNotNull('path_convert');
+            })
+            ->get()->map(function($course){
+                $course->medias_count = Topic::select('id')->where('course_id',$course->id)
+                ->whereHas('medias',function($mt){
+                    $mt->whereNotNull('path_convert');
+                })->withCount([
+                    'medias'=> function($mt){
+                        $mt->whereNotNull('path_convert');
+                    }
+                ])->get()->sum('medias_count');
+                return $course;
+            });
+        return $courses;
+    }
+    /* ---------------------------------------------------------PRIVATE FUNCTIONS-------------------------------------------------------------------------------------*/
+    
+    private function getTextFromMediaTopics($topic_id){
+        $media_topics = MediaTema::where('topic_id',$topic_id)->where('ia_convert',1)->whereNotNull('path_convert')->get();
+        $text_grouped = [];
+        foreach ($media_topics as $media) {
+            $text = Storage::disk('s3')->get($media->path_convert);
+            $text_grouped[]=[
+                'media_title' => $media->title,
+                'media_topic_id' => $media->id,
+                'text' => $text
+            ];
+        }
+        return $text_grouped;
+    }
     private function getJarvisConfiguration($_workspace=null){
         $workspace = $_workspace ?? get_current_workspace();
         $jarvis_configuration = is_array($workspace->jarvis_configuration) ? $workspace->jarvis_configuration : json_decode($workspace->jarvis_configuration,true);
@@ -170,4 +198,6 @@ class Jarvis extends Model
         $post_number = str(mt_rand(1000, 9999));
         return $this->jarvis_folder.'/'.'wk_id_'.$workspace_id . '_tp_id_' . $topic_id . '_mt_id_' . $media_topic_id . '_rnd_' . $post_number.'.txt';
     }
+
+    /* -----------------------------------------------------END PRIVATE FUNCTIONS-------------------------------------------------------------------------------------*/
 }

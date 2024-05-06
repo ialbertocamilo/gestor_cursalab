@@ -197,19 +197,19 @@ export default {
                 });
 
                 if (subworkspaces_id.includes(vue.select.modulo) && !alreadyAdded.includes(s.id)) {
-                
+
                     alreadyAdded.push(s.id)
                     return true
-                } 
+                }
 
                 return false
                 // s.subworkspaces.each(sw => {
 
                 //     if (sw.id == vue.select.modulo && !alreadyAdded.includes(s.id)) {
-                    
+
                 //         alreadyAdded.push(s.id)
                 //         return true
-                //     } 
+                //     }
 
                 //     return false
                 // })
@@ -253,9 +253,9 @@ export default {
             vue.showLoader()
             let formData = new FormData();
             formData.append("file", vue.archivo);
-            const process_data = {  school: vue.select.school, 
-                                    course: vue.select.course, 
-                                    evaluation_type: vue.select.evaluation_type, 
+            const process_data = {  school: vue.select.school,
+                                    course: vue.select.course,
+                                    evaluation_type: vue.select.evaluation_type,
                                     topics: vue.select.topics };
             formData.append("process", JSON.stringify(process_data));
             formData.append("course", vue.select.course);

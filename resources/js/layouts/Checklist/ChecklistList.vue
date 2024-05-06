@@ -17,7 +17,7 @@
                         <DefaultInput
                             clearable dense
                             v-model="filters.q"
-                            label="Buscar por título o descripción..."
+                            label="Buscar por título..."
                             append-icon="mdi-magnify"
                             @clickAppendIcon="refreshDefaultTable(dataTable, filters, 1)"
                             @onEnter="refreshDefaultTable(dataTable, filters, 1)"
@@ -402,7 +402,7 @@ export default {
                 base_endpoint: '/checklist',
                 confirmLabel: 'Guardar',
                 resource: 'checklist',
-                title: '',
+                title: '¡Haz creado la base del checklist!',
                 action: null,
                 persistent: true,
             },

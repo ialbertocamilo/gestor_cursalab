@@ -1,20 +1,20 @@
 <template>
     <div>
+        <!-- :customTitle="true" -->
         <DefaultDialog 
             :options="options" 
             :width="width" 
             :showCardActions="false" 
             @onCancel="closeModal"
             @onConfirm="confirmModal"
-            :customTitle="true"
         >
-            <template v-slot:card-title>
+            <!-- <template v-slot:card-title>
                 <v-row>
                     <v-col cols="12" class="ml-6 mt-2">
                         <span style="font-size: 20px;"><b>¡Haz creado la base del checklist!</b></span>
                     </v-col>
                 </v-row>
-            </template>
+            </template> -->
             <template v-slot:content>
                 <v-row>
                     <v-col cols="12" align="center">
@@ -71,21 +71,21 @@ export default {
             next_step:'',
             activity_card:{
                     icon:'mdi-file-account',
-                    icon_color:'black',
+                    color:"#57BFE3",
                     name:'Asignar actividades',
                     description:'<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>',
                     show_border:true
             },
             segmentation_card:{
                     icon:'mdi-clipboard-file',
-                    icon_color:'black',
-                    name:'Segmentar',
+                    color:"#CE98FE",
+                    name:'Indica los evaluados',
                     description:'<span>Selecciona criterios que filtraran a los colaboradores que realizaran el checklist</span>'
             },
             supervisor_card:{
                     icon:'mdi-account-details',
-                    icon_color:'black',
-                    name:'Asignar supervisores',
+                    color:"#547AE3",
+                    name:'Asigna supervisores',
                     description:'<span>Selecciona a los colaboradores que supervisaran este checklist</span>'
             }
         };

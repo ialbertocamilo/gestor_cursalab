@@ -21,7 +21,7 @@
                 <div class="bx_items_activitys">
                     <div class="bx_item_activity" @click="selectActivityModal('tareas')" @mouseover="item_tareas = true" @mouseleave="item_tareas = false">
                         <div class="img"><img src="/img/induccion/activities/tareas.svg"></div>
-                        <h5>Asignación de tareas</h5>
+                        <h5>Subida y/o firma de documentos</h5>
                         <p>Con esta actividad se podrá subir documentos, fotos, etc, al sistema.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectActivityModal('sesiones')">
@@ -31,7 +31,7 @@
                     </div>
                     <div class="bx_item_activity" @click="selectActivityModal('temas')">
                         <div class="img"><img src="/img/induccion/activities/temas.svg"></div>
-                        <h5>Creación de contenido</h5>
+                        <h5>Subir curso o contenido</h5>
                         <p>Con esta actividad podrás guiar a tus trabajadores en sus primeros pasos.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectActivityModal('evaluaciones')">

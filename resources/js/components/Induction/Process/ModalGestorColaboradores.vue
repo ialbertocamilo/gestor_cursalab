@@ -44,12 +44,12 @@
                                 <v-row>
                                     <v-col cols="6">
                                         <div class="d-flex justify-content-between mx-2">
-                                            <div class="lbl_lists"><span>Colaboradores segmentados</span></div>
+                                            <div class="lbl_lists"><span>Usuarios segmentados</span></div>
                                             <div class="lbl_lists"><span>Agregar</span></div>
                                         </div>
                                         <div class="box_resultados">
                                             <div class="bx_message" v-if="list_filter_segmentados == null">
-                                                <span class="text_default">Colaboradores segmentados</span>
+                                                <span class="text_default">Usuarios segmentados</span>
                                             </div>
                                             <ul v-else>
                                                 <li v-for="user in list_filter_segmentados" :key="user.id" class="d-flex align-center justify-content-between">
@@ -66,7 +66,7 @@
                                     </v-col>
                                     <v-col cols="6">
                                         <div class="d-flex justify-content-between mx-2">
-                                            <div class="lbl_lists"><span>Colaboradores registrados</span></div>
+                                            <div class="lbl_lists"><span>Usuarios registrados</span></div>
                                             <div class="d-flex justify-content-end">
                                                 <div class="lbl_lists mr-2"><span>Confirmar</span></div>
                                                 <div class="lbl_lists"><span>Retirar</span></div>
@@ -74,7 +74,7 @@
                                         </div>
                                         <div class="box_seleccionados">
                                             <div class="bx_message" v-if="list_filter_users == null">
-                                                <span class="text_default">Colaboradores registrados</span>
+                                                <span class="text_default">Usuarios registrados</span>
                                             </div>
                                             <ul v-else>
                                                 <li v-for="user in list_filter_users" :key="user.id" class="d-flex align-center justify-content-between">

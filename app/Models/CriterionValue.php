@@ -73,7 +73,7 @@ class CriterionValue extends BaseModel
 
     protected function getListForSelectValues($criterion_id, $workspace_id) {
         $criteria = self::query();
-        
+
         return $criteria->with('parents:id,criterion_id,value_text')
                         ->whereHas('workspaces', function ($q) use ($workspace_id) {
                             $q->where('id', $workspace_id);
@@ -235,5 +235,6 @@ class CriterionValue extends BaseModel
 
         return DB::select(DB::raw($query), ['criteriaCount' => count($criteriaIds)]);
     }
+
 
 }

@@ -164,12 +164,12 @@
                                                     label="Aplicar visión computacional"
                                                     color="primary"
                                                     v-model="activity.extra_attributes.computational_vision"
-                                                    :disabled="!is_checklist_premiun"
+                                                    :disabled="!is_checklist_premium"
                                                     hide-details="false"
                                                 />
-                                                <div v-if="!is_checklist_premiun" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                         <span class="d-flex beta_upgrade">
-                                                            <img src="/img/premiun.svg"> Upgrade
+                                                            <img src="/img/premium.svg"> Upgrade
                                                         </span>
                                                     </div>
                                             </v-col>
@@ -249,6 +249,16 @@
             @onConfirm="closeFormModal(modalActivitiesIAOptions, dataTable, filters)"
             @activities="addActivities"
         />
+        <ModalUploadMassiveActivities 
+            :options="modalUploadMassiveActivitiesOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalUploadMassiveActivitiesOptions.ref"
+            @onCancel="closeSimpleModal(modalUploadMassiveActivitiesOptions)"
+            @onConfirm="closeFormModal(modalUploadMassiveActivitiesOptions, dataTable, filters)"
+            @activities="addActivities"
+        />
     </div>
 </template>
 
@@ -256,9 +266,10 @@
 import DefaultCardAction from "../../components/globals/DefaultCardAction"
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ActivitiesIAModal from "./ActivitiesIAModal";
+import ModalUploadMassiveActivities from "./ModalUploadMassiveActivities";
 
 export default {
-    components:{DefaultCardAction,DefaultRichText,ActivitiesIAModal},
+    components:{DefaultCardAction,DefaultRichText,ActivitiesIAModal,ModalUploadMassiveActivities},
     props: {
         options: {
             type: Object,
@@ -269,7 +280,7 @@ export default {
     },
     data() {
         return {
-            is_checklist_premiun:false,
+            is_checklist_premium:false,
             checklist:{
 
             },
@@ -287,7 +298,7 @@ export default {
                     color:"#5357E0",
                     icon_color:'white',
                     name:'Importar actividades',
-                    code:'create_activities',
+                    code:'create_massive_activities',
                     description:'Sube tus actividades con una plantilla de excel',
                 },
                 {
@@ -359,6 +370,15 @@ export default {
                 resource: "checklist",
                 title:'Selecciona los cursos para conseguir información'
             },
+            modalUploadMassiveActivitiesOptions:{
+                ref: 'UploadMassiveActivities',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Confirmar",
+                resource: "checklist",
+                title:'Importar Actividades'
+            },
         };
     },
 
@@ -420,7 +440,7 @@ export default {
             const url = `${vue.options.base_endpoint}/activity/form-selects`;
             await vue.$http.get(url).then(({data})=>{
                 vue.checklist_type_response = data.data.checklist_type_response;
-                vue.is_checklist_premiun = data.data.is_checklist_premiun;
+                vue.is_checklist_premium = data.data.is_checklist_premium;
             })
             if(!vue.activities[0].checklist_response){
                 const checklist_response = vue.checklist_type_response.find(ctr => ctr.code == 'scale_evaluation');
@@ -442,19 +462,25 @@ export default {
             let vue = this;
             vue.activities.splice(index_activity,1);
         },
-        addActivity(){
+        addActivity({
+            activity='',
+            is_evaluable=false,
+            photo_response=false,
+            comment_activity=false,
+            code_evaluation='scale_evaluation'
+        }){
             let vue = this;
-            const checklist_response = vue.checklist_type_response.find(ctr => ctr.code == 'scale_evaluation');
+            const checklist_response = vue.checklist_type_response.find(ctr => ctr.code == code_evaluation);
             vue.activities.push({
                 id:'insert-'+(vue.activities.length+1),
-                activity:'',
+                activity:activity,
                 position: vue.activities.length,
                 checklist_response:checklist_response,
                 custom_options:[],
                 extra_attributes:{
-                    is_evaluable:false,
-                    photo_response:false,
-                    comment_activity:false,
+                    is_evaluable:is_evaluable,
+                    photo_response:photo_response,
+                    comment_activity:comment_activity,
                     computational_vision:false,
                     type_computational_vision:'',
                     type_computational_value:'',
@@ -475,16 +501,30 @@ export default {
             let vue = this;
             switch (card.code) {
                 case 'create_ia_activities':
+                    if(!vue.is_checklist_premium){
+                        vue.showAlert('Es necesario ser premium para usar esta funcionalidad','warning');
+                        break;
+                    }
                     vue.modalActivitiesIAOptions.open = true;
                 break;
                 case 'create_activities':
                     vue.show_activities = true;
                 break;
+                case 'create_massive_activities':
+                    vue.modalUploadMassiveActivitiesOptions.open = true;
+                break;
             }
             console.log(card);
         },
         addActivities(activities){
+            let vue = this;
             vue.modalActivitiesIAOptions.open = false;
+            vue.modalUploadMassiveActivitiesOptions.open = false;
+            vue.show_activities = true;
+            vue.activities = [];
+            activities.map((activity)=>{
+                vue.addActivity(activity);
+            })
         }
     }
 }

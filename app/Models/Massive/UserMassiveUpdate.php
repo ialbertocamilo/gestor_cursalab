@@ -17,9 +17,10 @@ use App\Models\NationalOccupationCatalog;
 use App\Http\Controllers\UsuarioController;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class UserMassive extends Massive implements ToCollection
+class UserMassiveUpdate extends Massive implements ToCollection
 {
     public $errors = [];
+    public $isUpdate = false;
     public $processed_users = 0;
     public $current_workspace = null;
     private $subworkspaces = [];
@@ -32,10 +33,11 @@ class UserMassive extends Massive implements ToCollection
         'active',
         'inactive'
     ];
-    public function __construct($data = [])
+    public function __construct($data = [], $isUpdate = false)
     {
         $this->name_socket = $this->formatNameSocket('upload-massive', $data['number_socket'] ?? null);
         $this->percent_sent = [];
+        $this->isUpdate = $isUpdate;
     }
 
     public function collection(Collection $rows)
@@ -54,25 +56,20 @@ class UserMassive extends Massive implements ToCollection
             ->select('id', 'name', 'code', 'parent_id', 'multiple', 'required', 'field_id','can_be_create')
             ->orderBy('position')
             ->get();
-        //Verify statics headers
-        if(!$this->headersIsComplete($rows[0]->toArray())){
+
+        // In updates the only required column is "document"
+
+        if (!in_array('DOCUMENTO', $rows[0]->toArray())) {
             return;
         }
+
         //Get headers
         $headers = $this->process_header($rows[0], $criteria);
 
         $rows->shift();
         $this->rows = $rows;
 
-        //        $this->sortRows();
-        if (!$this->validateLimitAllowedUsers()):
-            $message = config('errors.limit-errors.limit-user-allowed');
-            $this->current_workspace->sendEmailByLimit();
-            $this->error_message = $message;
-            return;
-        endif;
         $this->process_user($rows, $headers, $criteria);
-        $this->current_workspace->sendEmailByLimit();
     }
 
     private function process_user($users, $headers, $criteria)
@@ -80,6 +77,17 @@ class UserMassive extends Massive implements ToCollection
         $count_users = count($users);
         $counter = 0;
         foreach ($users as $user) {
+
+            // Validate if all values are empty
+
+            $allValuesAreEmpty = true;
+            foreach ($user->toArray() as $value) {
+                if ($value) {
+                    $allValuesAreEmpty = false;
+                }
+            }
+            if ($allValuesAreEmpty) continue;
+
             $percent = round(($counter / $count_users) * 100);
             $this->sendEchoPercentEvent($percent, $this->name_socket, $this->percent_sent) && $this->percent_sent[] = $percent;
             $counter++;
@@ -125,7 +133,9 @@ class UserMassive extends Massive implements ToCollection
                     //Insert user and criteria
                     UsuarioMaster::storeRequest($master_user_arr, $master_user);
                 }
-                User::storeRequest($data_user['user'], $user, false, true);
+                User::storeRequest(
+                    $data_user['user'], $user, false, true, true
+                );
                 $this->processed_users++;
             } else {
                 //set errors
@@ -269,14 +279,16 @@ class UserMassive extends Massive implements ToCollection
                         'message' => ($this->messageInSpanish) ? 'Este username es usado por otro usuario.' : 'The field username must be unique.'
                     ];
                 }
-                if ($user['email'] != '' && !is_null($user_username_email->email)
+                if (isset($user['email']) && !is_null($user_username_email->email)
                     && mb_strtolower($user_username_email->email) == mb_strtolower($user['email'])) {
 
-                    $has_error = true;
-                    $errors_index[] = [
-                        'index' => $email_index,
-                        'message' => ($this->messageInSpanish) ? 'Este email es usado por otro usuario.' : 'The field email must be unique.'
-                    ];
+                    if (!$user['email']) {
+                        $has_error = true;
+                        $errors_index[] = [
+                            'index' => $email_index,
+                            'message' => ($this->messageInSpanish) ? 'Este email es usado por otro usuario.' : 'The field email must be unique.'
+                        ];
+                    }
                 }
             }
         }
@@ -289,25 +301,6 @@ class UserMassive extends Massive implements ToCollection
         $user['criterion_list_final'] = [];
 
         foreach ($data_criteria as $dc) {
-            //Validación de requerido
-            if($dc['criterion_code'] == 'gender' && empty($dc['value_excel'])){
-                $has_error = true;
-                $errors_index[] =[
-                    'index' => $dc['index'],
-                    'message' => ($this->messageInSpanish) ? 'El criterio género es requerido.' : 'The field ' . $dc['criterion_code'] . ' is required.'
-                ];
-            }
-
-            // Module validation: The value is always required
-
-            if ($dc['criterion_code'] == 'module' && empty($dc['value_excel'])) {
-                $has_error = true;
-                $errors_index[] = [
-                    'index' => $dc['index'],
-                    'message' => 'El criterio módulo es obligatorio'
-                ];
-                continue;
-            }
 
             if (!empty($dc['value_excel'])) {
                 $criterion = $criteria->where('id', $dc['criterion_id'])->first();

@@ -16,5 +16,7 @@ return [
         'El progreso del usuario se verá reflejado en los reportes luego de unos minutos.',
         'La cantidad máxima es de 6000 (seis mil) filas por excel',
         'Si se encuentra algún error, se podrá descargar un excel con la lista de errores.',
+        'Para los campos de las fechas se puede usar dos formatos: dd/mm/yyyy ó dd/mm/yyyy hh:mm, tomando en cuenta que la hora esta expresada en formato
+         24 horas, ejemplo: 23/12/2024 14:33'
     ]
 ];
