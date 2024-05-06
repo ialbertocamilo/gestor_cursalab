@@ -160,8 +160,7 @@ class Workspace extends BaseModel
     }
     public function setChecklistConfigurationAttribute($value)
     {
-        $value = is_array($value) ? $value : json_decode($value);
-
+        $value = is_array($value) ? (object) $value : json_decode($value);
         $evaluation_type_ids = [];
         foreach ($value->evaluation_types as $index => $evaluation_type) {
             $code = Str::slug($evaluation_type->name);

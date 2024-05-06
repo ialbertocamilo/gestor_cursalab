@@ -1100,7 +1100,7 @@ class CheckList extends BaseModel
                 'id' => $checklist->id,
                 "title" => $checklist->title,
                 "entity" =>[
-                    "name"=>"Ecnorsa ZC",
+                    "name"=>"Pardos",
                     "icon"=>"store",
                 ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
