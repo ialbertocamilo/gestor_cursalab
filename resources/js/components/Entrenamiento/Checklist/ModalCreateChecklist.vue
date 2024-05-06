@@ -263,13 +263,20 @@
                                             <template slot="content">
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
+                                                        :disabled="!is_checklist_premium"
                                                         v-model="resource.extra_attributes.replicate" dense
                                                         :active-label="'Este checklist se replicará'"
                                                         :inactive-label="'Este checklist se replicará'" />
                                                     <DefaultInfoTooltip
+                                                        v-if="is_checklist_premium"
                                                         text="Este checklist se repetirá de manera indefinida."
                                                         top
-                                                    />    
+                                                    /> 
+                                                    <div v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                        <span class="d-flex beta_upgrade">
+                                                            <img src="/img/premium.svg"> Upgrade
+                                                        </span>
+                                                    </div> 
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
