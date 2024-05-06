@@ -159,7 +159,7 @@
                                             </transition-group>
                                         </draggable>
 
-                                        <div class="my-2">
+                                        <!-- <div class="my-2">
                                             <DefaultButton
                                                 label="Agregar escala"
                                                 icon="mdi-plus"
@@ -172,7 +172,7 @@
                                                     'Agregar escala'
                                                 )"
                                             />
-                                        </div>
+                                        </div> -->
                                     </template>
                                 </DefaultSimpleSection>
                             </v-col>
