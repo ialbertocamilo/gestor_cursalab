@@ -65,7 +65,8 @@ export default {
     },
     methods: {
         closeModal() {
-            let vue = this
+            let vue = this;
+            vue.$emit('onCancel');
         }
         ,
         resetValidation() {

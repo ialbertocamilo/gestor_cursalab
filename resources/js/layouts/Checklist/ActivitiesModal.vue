@@ -207,7 +207,7 @@
                                 rounded
                                 label="Agregar una actividad para tu checklist"
                                 icon="mdi mdi-plus"
-                                @click="addActivity()"
+                                @click="addActivity({})"
                             />
                         </v-col>
                     </v-row>
