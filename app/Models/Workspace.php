@@ -160,7 +160,8 @@ class Workspace extends BaseModel
     }
     public function setChecklistConfigurationAttribute($value)
     {
-        $value = json_decode($value);
+        $value = is_array($value) ? $value : json_decode($value);
+
         $evaluation_type_ids = [];
         foreach ($value->evaluation_types as $index => $evaluation_type) {
             $code = Str::slug($evaluation_type->name);
@@ -171,8 +172,8 @@ class Workspace extends BaseModel
                 'color' => $evaluation_type->color,
                 'active' => 1,
                 'extra_attributes'=>json_encode([
-                    'percent'=> $evaluation_type->extra_attributes->percent,
-                    'emoji'=> $evaluation_type->extra_attributes->emoji,
+                    'percent'=> $evaluation_type->extra_attributes?->percent,
+                    'emoji'=> $evaluation_type->extra_attributes?->emoji,
                 ])
             ];
             if(isset($evaluation_type->workspace_id) && $evaluation_type->workspace_id && $evaluation_type->id){
