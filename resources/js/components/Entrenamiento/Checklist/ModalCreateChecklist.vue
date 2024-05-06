@@ -274,7 +274,7 @@
                                                     /> 
                                                     <div v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                         <span class="d-flex beta_upgrade">
-                                                            <img src="/img/premium.svg"> Upgrade
+                                                            <img src="/img/premiun.svg"> Upgrade
                                                         </span>
                                                     </div> 
                                                 </div>
@@ -309,7 +309,7 @@
                                                     /> 
                                                     <div v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                         <span class="d-flex beta_upgrade">
-                                                            <img src="/img/premium.svg"> Upgrade
+                                                            <img src="/img/premiun.svg"> Upgrade
                                                         </span>
                                                     </div>
                                                 </div>
@@ -328,7 +328,7 @@
                                                         :inactive-label="'Activar plan de acción'" />
                                                         <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                             <span class="d-flex beta_upgrade">
-                                                                <img src="/img/premium.svg"> Upgrade
+                                                                <img src="/img/premiun.svg"> Upgrade
                                                             </span>
                                                         </div>
                                                 </div>
@@ -352,7 +352,7 @@
                                         />   
                                         <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                             <span class="d-flex beta_upgrade">
-                                                <img src="/img/premium.svg"> Upgrade
+                                                <img src="/img/premiun.svg"> Upgrade
                                             </span>
                                         </div>
                                     </v-col>
@@ -384,7 +384,7 @@
                                                     />    
                                                     <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                         <span class="d-flex beta_upgrade">
-                                                            <img src="/img/premium.svg"> Upgrade
+                                                            <img src="/img/premiun.svg"> Upgrade
                                                         </span>
                                                     </div>
                                                 </div>
@@ -408,7 +408,7 @@
                                                         />    
                                                         <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                             <span class="d-flex beta_upgrade">
-                                                                <img src="/img/premium.svg"> Upgrade
+                                                                <img src="/img/premiun.svg"> Upgrade
                                                             </span>
                                                         </div>
                                                     </v-col>

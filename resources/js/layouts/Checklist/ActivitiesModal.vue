@@ -169,7 +169,7 @@
                                                 />
                                                 <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
                                                         <span class="d-flex beta_upgrade">
-                                                            <img src="/img/premium.svg"> Upgrade
+                                                            <img src="/img/premiun.svg"> Upgrade
                                                         </span>
                                                     </div>
                                             </v-col>
