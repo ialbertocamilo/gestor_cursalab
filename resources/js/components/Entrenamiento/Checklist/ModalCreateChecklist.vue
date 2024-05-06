@@ -495,7 +495,7 @@ export default {
             dialog: false,
             rules: {
                 required: this.getRules(['required']),
-                title: this.getRules(['required','max:25']),
+                title: this.getRules(['required','max:50']),
             },
             selects: {
                 types_checklist: [
