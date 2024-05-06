@@ -658,6 +658,7 @@ export default {
                         if(vue.resource.extra_attributes.autocalificate_entity_criteria){
                             vue.getCriteriaValues(vue.resource.extra_attributes.autocalificate_entity_criteria);
                         }
+                        
                     }).catch((error) => {
                         
                     })
@@ -665,6 +666,12 @@ export default {
                 vue.current_modality = vue.options.modality
                 vue.resource.modality_id =  vue.current_modality.id;
             }
+            setTimeout(() => {
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
+                ia_descriptions_generated.textContent = parseInt(vue.limits_descriptions_generate_ia.ia_descriptions_generated);
+                limit_descriptions_jarvis.textContent = parseInt(vue.limits_descriptions_generate_ia.limit_descriptions_jarvis);
+            }, 1500);
         },
         async confirm() {
             let vue = this;           
@@ -719,8 +726,9 @@ export default {
             vue.$emit("onClose");
         },
         async loadLimitsGenerateIaDescriptions() {
+            let vue = this;
             await axios.get('/jarvis/limits?type=descriptions').then(({ data }) => {
-                this.limits_descriptions_generate_ia = data.data;
+                vue.limits_descriptions_generate_ia = data.data;
             })
         },
         async getCriteriaValues(criterion_id){
@@ -737,24 +745,26 @@ export default {
             let vue = this;
             this.resource.type = vue.selects.types_checklist.find(t => t.id == type_id);
         },
-        async generateIaDescription() {
+        async generateIaDescription(){
             const vue = this;
-            let url = `/jarvis/generate-description-jarvis`;
-            if (vue.loading_description || !vue.resource.title) {
+            let url = `/jarvis/generate-description-jarvis` ;
+            if(vue.loading_description || !vue.resource.title){
                 const message = vue.loading_description ? 'Se está generando la descripción, espere un momento' : 'Es necesario colocar un nombre al checklist para poder generar la descripción';
                 vue.showAlert(message, 'warning', '')
                 return ''
             }
-            if (vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis) {
+            if(vue.limits_descriptions_generate_ia.ia_descriptions_generated >= vue.limits_descriptions_generate_ia.limit_descriptions_jarvis){
                 vue.showAlert('Ha sobrepasado el limite para poder generar descripciones con IA', 'warning', '')
                 return ''
             }
             vue.loading_description = true;
-            await axios.post(url, {
-                name: vue.resource.title,
-                type: 'checklist'
-            }).then(({ data }) => {
-                vue.limits_descriptions_generate_ia.ia_descriptions_generated += 1;
+            await axios.post(url,{
+                name : vue.resource.title,
+                type:'checklist'
+            }).then(({data})=>{
+                let ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
+                ia_descriptions_generated.textContent = parseInt(ia_descriptions_generated.textContent) + 1;
+
                 let characters = data.data.description.split('');
                 vue.resource.description = ''; // Limpiar el contenido anterior
                 function updateDescription(index) {
@@ -763,12 +773,12 @@ export default {
                         setTimeout(() => {
                             updateDescription(index + 1);
                         }, 10);
-                    } else {
+                    }else{
                         vue.loading_description = false;
                     }
                 }
                 updateDescription(0);
-            }).catch(() => {
+            }).catch(()=>{
                 vue.loading_description = false;
             })
         },
