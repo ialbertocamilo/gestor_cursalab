@@ -303,7 +303,7 @@
                                         <div class="col-12">
                                             <DefaultAutocomplete
                                                 clearable
-                                                :items="resource.criteria_workspace.filter(cw => cw.code != 'module')"
+                                                :items="resource.criteria_workspace"
                                                 item-text="name"
                                                 item-value="criterion_id"
                                                 v-model="resource.checklist_configuration.entities_criteria"
@@ -315,7 +315,7 @@
                                         <div class="col-12">
                                             <DefaultAutocomplete
                                                 clearable
-                                                :items="resource.criteria_workspace.filter(cw => cw.code != 'module')"
+                                                :items="resource.criteria_workspace"
                                                 item-text="name"
                                                 item-value="criterion_id"
                                                 v-model="resource.checklist_configuration.managers_criteria"
