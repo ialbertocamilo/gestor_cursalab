@@ -1040,10 +1040,22 @@ class CheckList extends BaseModel
         $user_latitude = $request->lat;
         $user_longitude = $request->long;
         $filter = $request->filter;
+        $filters = [] ;
+        if($request->search){
+            $filters = [
+                [
+                    'statement'=>'where',
+                    'field'=>'title',
+                    'value'=>'%'.$request->search.'%',
+                    'operator'=>'like',
+                ],
+            ];
+        }
         $checklists = $user->getSegmentedByModelType(
             model: ChecklistSupervisor::class,
             withModelRelations: ['modality:id,name,code,color,alias', 'type:id,name,color,code'],
-            unset_criterion_values: false
+            unset_criterion_values: false,
+            filters:$filters
         );
 
         $list_checklists_geolocalization = collect();

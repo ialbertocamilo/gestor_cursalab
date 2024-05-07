@@ -23,7 +23,7 @@ class ChecklistSearchResource extends JsonResource
             'active' => $this->active,
             'status' =>$this->active,
             'modality' => $this->modality,
-            'checklist_modality' => $this->modality->alias,
+            'checklist_modality' => $this->modality?->alias,
             'replicate' => $this->replicate ? 'Sí' : 'No',
             'type' => $this->type,
             'checklist_type' => $this->type->name,

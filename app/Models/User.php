@@ -987,7 +987,8 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
         $select=false,
         $unsetRelation=true,
         $withModelRelations=[],
-        $unset_criterion_values=true
+        $unset_criterion_values=true,
+        $filters=[]
     ){
         $user = $this;
         $with_default = [
@@ -1019,6 +1020,21 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             $q->select($select)->addSelect('workspace_id');
         })->with(array_merge($default_model_relations,$withModelRelations))->where('workspace_id', $workspace->id)
         ->whereRelation('segments', 'active', ACTIVE)
+        ->when(count($filters)>0,function($query) use ($filters){
+            foreach ($filters as $filter) {
+                $statement = $filter['statement'] ?? null;
+                $field = $filter['field'] ?? null;
+                $value = $filter['value'] ?? null;
+                $operator = $filter['operator'] ?? '=';
+                if($field && $operator){
+                    /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
+                    ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+                }else if($statement && $value){
+                    /*Example: $query->filterText($value)*/
+                    $query->$statement($value);
+                }
+            }
+        })
         ->where('active', ACTIVE)->get();
         $match_segment = [];
         $user_criteria = $user->criterion_values()->with('criterion.field_type')->get()->groupBy('criterion_id');
