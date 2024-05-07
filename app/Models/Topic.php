@@ -152,7 +152,7 @@ class Topic extends BaseModel
 
     protected static function search_preguntas($request, $topic)
     {
-        $question_type_code = $topic->evaluation_type->code === 'qualified'
+        $question_type_code = $topic?->evaluation_type?->code === 'qualified'
             ? 'select-options'
             : 'written-answer';
         //        info($question_type_code);
