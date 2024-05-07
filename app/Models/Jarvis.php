@@ -98,16 +98,18 @@ class Jarvis extends Model
         $files = $request->file('files');
         $number_activities = $request->number_activities;
         $multipart = [];
-        foreach ($files as $file) {
-            $fileContents = file_get_contents($file);
-            $filename = $file->getClientOriginalName();
-            $mimeType = $file->getMimeType();
-            $multipart[] = [
-                'name' => 'attachments[]',
-                'contents' => $fileContents,
-                'filename' => $filename,
-                'headers' => ['Content-Type' => $mimeType]
-            ];
+        if(is_array($files)){
+            foreach ($files as $file) {
+                $fileContents = file_get_contents($file);
+                $filename = $file->getClientOriginalName();
+                $mimeType = $file->getMimeType();
+                $multipart[] = [
+                    'name' => 'attachments[]',
+                    'contents' => $fileContents,
+                    'filename' => $filename,
+                    'headers' => ['Content-Type' => $mimeType]
+                ];
+            }
         }
         $params = self::getJarvisConfiguration();
         $course_ids = $request->get('course_ids');
