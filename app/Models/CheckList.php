@@ -1095,12 +1095,17 @@ class CheckList extends BaseModel
                 'system_calification' => $system_calification 
             ];
         }
+        $workspace_entity_criteria = Workspace::select('checklist_configuration')
+        ->where('id', $user->subworkspace->parent->id)
+        ->first()?->checklist_configuration?->entities_criteria;
+
+        $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
         return [
             'checklist'=>[
                 'id' => $checklist->id,
                 "title" => $checklist->title,
                 "entity" =>[
-                    "name"=>"Pardos",
+                    "name"=> $criterion_value_user_entity?->value_text,
                     "icon"=>"store",
                 ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
