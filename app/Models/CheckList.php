@@ -1164,7 +1164,7 @@ class CheckList extends BaseModel
         [$reference_latitude, $reference_Longitude] = explode(',', $lat_long_entity);
         $_checkist_data['url_maps'] = "https://www.google.com/maps?q={$reference_latitude},{$reference_Longitude}";
         $distance = $this->calculateDistance($user_latitude, $user_longitude, $reference_latitude, $reference_Longitude);
-        $withinRange = $distance <= 0.01;
+        $withinRange = $distance <= 0.05;
         $entity = $withinRange ? $list_checklists_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first() : $list_checklists_exclude_geolocalization->where('nombre', $criterion_value_user_entity->value_text)->first();
         if($withinRange){
             $this->updateChecklistsList($entity, $_checkist_data, $list_checklists_geolocalization, $criterion_value_user_entity->value_text);
