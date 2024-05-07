@@ -90,6 +90,7 @@ class Jarvis extends Model
             JarvisResponse::insertResponse($data['message'][1],'evaluation');
             info($data['message'][0]);
             return $data['message'][0];
+            
         }
     }
     
