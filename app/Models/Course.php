@@ -1387,7 +1387,7 @@ class Course extends BaseModel
                         ->where(function ($q) use ($values) {
                             foreach ($values as $value) {
 
-                                // When value is a date range
+                                // When condition is a date range
 
                                 if ($value->starts_at && $value->finishes_at) {
                                     $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
@@ -1395,10 +1395,29 @@ class Course extends BaseModel
 
                                     $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
 
-                                } else if ($value->days_less_than || $value->days_greater_than) {
+                                } else if ($value->days_greater_than) {
 
+                                    // When condition is days count
+                                    // relative to date value
 
+                                    $duration = $value->days_duration ?: 0;
+                                    $startLimit = $value->days_greater_than;
+                                    $endLimit = $startLimit + $duration;
+                                    $condition = "datediff(now(), value_date) >= $startLimit";
+                                    $condition .= $startLimit != $endLimit
+                                        ? " and datediff(now(), value_date) <= $endLimit"
+                                        : '';
+                                    $q->orWhereRaw("($condition)");
+
+                                } else if ($value->days_less_than) {
+
+                                    // When condition is days count
+                                    // relative to date value
+
+                                    $startLimit = $value->days_less_than;
+                                    $q->orWhereRaw("datediff(now(), value_date) <= $startLimit");
                                 }
+
                             }
                         })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');

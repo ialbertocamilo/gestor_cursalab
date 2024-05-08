@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Resources\SegmentSearchUsersResource;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -357,13 +358,15 @@ class Segment extends BaseModel{
 
                 if ($criterion_code === 'date') :
 
-                    $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
-                    $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
+                    if ($g['starts_at']) {
+                        $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
+                        $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
 
-                    $new['date_range'] = [$starts_at, $finishes_at];
-                    $new['start_date'] = $starts_at;
-                    $new['end_date'] = $finishes_at;
-                    $new['name'] = "{$starts_at} - {$finishes_at}";
+                        $new['date_range'] = [$starts_at, $finishes_at];
+                        $new['start_date'] = $starts_at;
+                        $new['end_date'] = $finishes_at;
+                        $new['name'] = "{$starts_at} - {$finishes_at}";
+                    }
                 endif;
 
                 if ($criterion_code === 'default') :
@@ -675,17 +678,40 @@ class Segment extends BaseModel{
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)
     {
         $hasAValidDateRange = false;
+        $now = Carbon::now();
 
         foreach ($segment_values as $date_range) {
 
-            if (!$date_range['starts_at'] && !$date_range['finishes_at']) continue;
-
-            $starts_at = carbonFromFormat($date_range['starts_at']);
-            $finishes_at = carbonFromFormat($date_range['finishes_at']);
-
             $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d");
 
-            $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
+            if ($date_range['starts_at'] && $date_range['finishes_at']) {
+                $starts_at = carbonFromFormat($date_range['starts_at']);
+                $finishes_at = carbonFromFormat($date_range['finishes_at']);
+
+                $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
+
+            } else if ($date_range['days_greater_than']) {
+
+                // When condition is days count
+                // relative to date value
+
+                $duration = $date_range['duration'] ?: 0;
+                $startLimit = $date_range['days_greater_than'];
+                $endLimit = $startLimit + $duration;
+
+                $difference = $user_date_criterion_value->diffInDays($now);
+                $hasAValidDateRange = $startLimit != $endLimit
+                    ? $difference >= $startLimit
+                    : $difference >= $startLimit &&  $difference <= $endLimit;
+
+            } else if ($date_range['days_less_than']) {
+
+                // When condition is days count
+                // relative to date value
+
+                $startLimit = $date_range['days_less_than'];
+                $hasAValidDateRange = $user_date_criterion_value->diffInDays($now) <= $startLimit;
+            }
 
             if ($hasAValidDateRange) break;
         }

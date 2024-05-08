@@ -1210,7 +1210,7 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             // if (!$valid_rule) continue;
 
                 // $course_segment_criteria = $segment_values->where('segment_id', $segment->id)->groupBy('criterion_id');
-                $course_segment_criteria = $segment->values->groupBy('criterion_id');
+                $course_segment_criteria = $segment->values()->select('*')->get()->groupBy('criterion_id');
 
                 if ($segment->type?->code == 'segmentation-by-document') {
 
