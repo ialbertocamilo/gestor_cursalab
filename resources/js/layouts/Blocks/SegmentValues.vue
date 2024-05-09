@@ -1,8 +1,10 @@
 <template>
     <div>
-        <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'date'">
+        <v-row  v-if="criterion.field_type.code === 'date'"
+                style="padding: 10px 12px !important" >
         <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
             <v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
+                <!--
                 <date-picker
                     confirm
                     confirm-text="Agregar rango"
@@ -16,6 +18,32 @@
                     style="width: 100% !important"
                     value-type="YYYY-MM-DD"
                 ></date-picker>
+                -->
+                <b-button
+                    variant="outline-secondary"
+                    id="popover-target-1">
+                    Hover Me
+                </b-button>
+                <b-popover
+                    target="popover-target-1"
+                    triggers="click"
+                    placement="top">
+
+                    <date-picker
+                        confirm
+                        confirm-text="Agregar rango"
+                        attach
+                        inline
+                        v-model="value1"
+                        type="date"
+                        range
+                        :placeholder="criterion.name"
+                        :lang="lang"
+                        @confirm="agregarRango()"
+                        style="width: 100% !important"
+                        value-type="YYYY-MM-DD"
+                    ></date-picker>
+                </b-popover>
             </v-col>
 
             <v-col cols="12" md="9" lg="9" class="p-0 vertical-align">
@@ -58,8 +86,9 @@
         </v-row>
 
         <v-row
+            v-else
             :class="criterion.code === 'module' ? 'module' : ''"
-            style="padding: 10px 0px 10px 0px !important" v-else>
+            style="padding: 10px 0px 10px 0px !important">
 
             <v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 
@@ -183,4 +212,13 @@ export default {
     border: 2px solid #d7d6d8 !important;
 }
 
+</style>
+
+<style scoped>
+.popover {
+    background: white !important;
+    border: none !important;
+    box-shadow: 0 5px 10px rgba(200,200,200,0.5);
+    max-width: 475px !important;
+}
 </style>
