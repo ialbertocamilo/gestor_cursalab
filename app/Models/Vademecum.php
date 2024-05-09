@@ -368,7 +368,10 @@ class Vademecum extends Model
         })->get();
         foreach ($vademecums as $vademecum) {
             $category = $vademecum->category->toArray();
-            $subcategory = $vademecum->subcategory->toArray();
+            if ($vademecum->subcategory) {
+                $subcategory = $vademecum->subcategory->toArray();
+            }
+
             $vademecum = $vademecum->toArray();
             $_category = New Taxonomy();
             unset($category->id);
@@ -376,13 +379,15 @@ class Vademecum extends Model
             $_category->fill($category);
             $_category->save();
 
-            $_subcategory = new Taxonomy();
-            unset($subcategory['id']);
-            $subcategory['workspace_id'] = $workspace->id;
-            $subcategory['parent_id'] = $_category->id;
-            $_subcategory->fill($subcategory);
-            $_subcategory->save();
-            
+            if ($subcategory) {
+                $_subcategory = new Taxonomy();
+                unset($subcategory['id']);
+                $subcategory['workspace_id'] = $workspace->id;
+                $subcategory['parent_id'] = $_category->id;
+                $_subcategory->fill($subcategory);
+                $_subcategory->save();
+            }
+
             $_vademecum = new Vademecum();
             unset($vademecum['id']);
             $vademecum['category_id'] = $_category->id;

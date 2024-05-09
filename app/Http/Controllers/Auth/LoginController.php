@@ -93,7 +93,7 @@ class LoginController extends Controller
             $user = auth()->user();
             $user->resetToNullResetPass();
 
-            session()->forget('init_reset'); 
+            session()->forget('init_reset');
         }
 
         // resetear sessions
@@ -155,7 +155,7 @@ class LoginController extends Controller
                 $request->session()->regenerateToken();
 
                 return redirect('/plataforma-suspendida');
-            
+
             } else {
 
                 $roles = Role::getRolesAdminNames();
@@ -174,12 +174,14 @@ class LoginController extends Controller
                     if ($request->hasSession()) {
                         $request->session()->put('auth.password_confirmed_at', time());
                     }
-                    if(config('slack.routes.demo')){
+
+                    $email = $user->email_gestor;
+                    if(config('slack.routes.demo') && !str_contains($email, 'cursalab.io')){
                         $message = "[{$customer}] Cursalab 2.0";
                         $attachments = [
                             [
                                 "color" => "#36a64f",
-                                "text" => 'El usuario con email: '.$user->email_gestor. ' se ha logueado'
+                                "text" => "El usuario con email: $email se ha logueado"
                             ]
                         ];
                         messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
@@ -196,7 +198,7 @@ class LoginController extends Controller
                         // verificacion de doble autenticacion
 
                     } else {
-                        
+
                         // === reset password ===
                         if($user->checkIfCanResetPassword()) {
                             return $this->showResetPassword();
@@ -216,8 +218,8 @@ class LoginController extends Controller
             }
         }
 
-        // verificar intentos   
-        $user->checkTimeToReset($request->email); 
+        // verificar intentos
+        $user->checkTimeToReset($request->email);
         if(config('slack.routes.demo')){
             $message = "[{$customer}] Cursalab 2.0";
             $attachments = [
@@ -260,7 +262,7 @@ class LoginController extends Controller
         $user = $this->guard()->user();
         session()->put('init_reset', $user->id);
 
-        // crear token 
+        // crear token
         $currentEntropy = env('RESET_PASSWORD_TOKEN_ENTROPY_GESTOR');
         $token = bin2hex(random_bytes($currentEntropy));
 
@@ -284,7 +286,7 @@ class LoginController extends Controller
         $user = auth()->user();
 
         // si es igual al email y/o contraseña existente
-        if(Auth::attempt([ 'email_gestor' => $user->email_gestor, 
+        if(Auth::attempt([ 'email_gestor' => $user->email_gestor,
                            'password' => $currentPassword]) ||  $user->email_gestor === $currentPassword) {
             throw ValidationException::withMessages([
                 'password' => 'La contraseña ya ha sido utilizada anteriormente.'
@@ -344,7 +346,7 @@ class LoginController extends Controller
     {
         $user = $this->guard()->user();
         $user->generateCode2FA();
-         
+
         return back()->with('resend', 'Re-enviamos');
     }
 
