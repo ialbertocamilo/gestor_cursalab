@@ -20,15 +20,28 @@
                 ></date-picker>
                 -->
                 <b-button
+                    style="margin-top: 2px;"
                     variant="outline-secondary"
                     id="popover-target-1">
-                    Hover Me
+                    {{ criterion.name }}
                 </b-button>
                 <b-popover
                     target="popover-target-1"
                     triggers="click"
                     placement="top">
 
+                    <div>
+                        <button
+                            type="button"
+                            class="tab">
+                            Calendario
+                        </button>
+                        <button
+                            type="button"
+                            class="tab outline">
+                            Vinculación de tiempo
+                        </button>
+                    </div>
                     <date-picker
                         confirm
                         confirm-text="Agregar rango"
@@ -53,7 +66,6 @@
                     outlined
                     color="#796aee"
                     hide-details="auto"
-                    :label="criterion.name"
                     :menu-props="{ top: true, offsetY: true }"
 
                     return-object
@@ -220,5 +232,20 @@ export default {
     border: none !important;
     box-shadow: 0 5px 10px rgba(200,200,200,0.5);
     max-width: 475px !important;
+}
+
+button.tab {
+    height: 28px;
+    background: #796aee;
+    color: white;
+    border: 1px solid #796aee;
+    border-radius: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+button.tab.outline {
+    background: white;
+    color: #796aee;
 }
 </style>
