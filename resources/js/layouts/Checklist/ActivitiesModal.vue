@@ -183,6 +183,7 @@
                                                     item-value="id"
                                                     show-required 
                                                     label="Selecciona una opción"
+                                                    :openUp="true"
                                                 />  
                                             </v-col>
                                             <v-col cols="4"

@@ -171,13 +171,17 @@ class MediaController extends Controller
             is_array($data['file']) ? $data['file'] : [$data['file']]
         );
         if ($hasStorageAvailable) {
-
+            $medias_saved = [];
             foreach ($data['file'] as $file) {
-                Media::uploadFile($file);
+                $name = isset($request['title']) ? $request['title'] : null;
+                $media_saved = Media::uploadFile(file:$file,name:$name,return_media:true);
+                $media_saved['url'] = get_media_url($media_saved['file']);
+                $medias_saved[] = $media_saved;
             }
 
             return $this->success([
-                'msg' => 'Archivo(s) subido(s) correctamente.'
+                'msg' => 'Archivo(s) subido(s) correctamente.',
+                'medias_saved' => $medias_saved
             ]);
 
         } else {

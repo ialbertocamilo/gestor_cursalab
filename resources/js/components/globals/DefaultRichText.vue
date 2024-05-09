@@ -10,7 +10,7 @@
             <!-- api key test: nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug-->
             <!-- api key prod:  6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85-->
             <editor
-                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                 v-model="localText"
                 :init="{
                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -22,7 +22,7 @@
                     forced_root_block: '',
                     plugins: ['lists anchor', 'code', 'paste','link','image','preview','emoticons'],
                     toolbar:
-                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? `| ${customSelectorImage ? 'selectorImage' : 'image'}  | preview` : ''}`,
+                        ` undo redo | styleselect | ${showGenerateIaDescription ? ' customButton | ' : ''} emoticons |bold italic underline | alignleft aligncenter alignright alignjustify |bullist numlist | code | link ${showIconAddImage ? `| ${customSelectorImage ? 'selectorImage | uploadImage' : 'image'}  | preview` : ''}`,
                     images_file_types: 'jpg,svg,webp,gif',
                     images_upload_handler: images_upload_handler,
                     setup: function (editor) {
@@ -36,9 +36,16 @@
                         });
                         editor.ui.registry.addButton('selectorImage', {
                             text: getIconText('multimedia'), // Ruta de la imagen para el botón personalizado
-                            tooltip: 'Generar descripción con IA', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                            tooltip: 'Seleccionar imagen', // Texto que se muestra cuando se pasa el ratón sobre la imagen
                             onAction: function (_) {
                                 openModalMedia();
+                            },
+                        });
+                        editor.ui.registry.addButton('uploadImage', {
+                            text: getIconText('upload-image'), // Ruta de la imagen para el botón personalizado
+                            tooltip: 'Subir imagen', // Texto que se muestra cuando se pasa el ratón sobre la imagen
+                            onAction: function (_) {
+                                openUploadlMedia();
                             },
                         });
                     }
@@ -69,6 +76,41 @@
             @onConfirm="loadImage"
             :custom-filter="fileTypes"
         />
+        <DefaultDialog
+            :options="modalOptions"
+            width="500px"
+            @onCancel="closeSimpleModal(modalOptions)"
+            @onConfirm="uploadImage()"
+        >
+            <template v-slot:content>
+                <v-form ref="TemaMultimediaTextForm" @submit.prevent="null">
+                    <v-row>
+                        <v-col cols="12">
+                            <DefaultInput
+                                label="Título"
+                                placeholder="Ingresar título"
+                                v-model="resource.title"
+                                :rules="rules.titulo"
+                                dense
+                            />
+                        </v-col>
+                        <v-col cols="12">
+                            <DefaultSelectOrUploadMultimedia
+                                ref="inputLogo"
+                                v-model="resource.multimedia"
+                                label="Sube una imagen"
+                                :file-types="['image']"
+                                @onSelect="setMultimedia"
+                                select-width="55vw"
+                                select-height="55vh"
+                                :showButton="false"
+                            />
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </template>
+        </DefaultDialog>
+        
     </div>
 </template>
 
@@ -129,7 +171,7 @@ export default {
     },
     data() {
         return {
-            localText: null,
+            localText: '',
             showAlertLength: false,
             modalPreviewMultimedia: {
                 ref: 'modalSelectPreviewMultimedia',
@@ -138,7 +180,22 @@ export default {
                 confirmLabel: 'Seleccionar',
                 cancelLabel: 'Cerrar'
             },
-            fileTypes: ['image']
+            fileTypes: ['image'],
+            modalOptions: {
+                ref: 'mediaFormModal',
+                open: false,
+                base_endpoint: '/media',
+                resource: 'Media',
+                confirmLabel: 'Guardar',
+                showCloseIcon: true,
+            },
+            resource:{
+                title:'',
+                multimedia:null
+            },
+            rules: {
+                titulo: this.getRules(['required']),
+            }
         }
     },
     created() {
@@ -230,8 +287,12 @@ export default {
                         <span id="limit_descriptions_jarvis">0</span></span>
                     </div>
                     `
+                    break
                 case 'multimedia':
                     return `<i class='mdi mdi-file-image'></i>`
+                    break;
+                case 'upload-image':
+                    return `<i class='mdi mdi-file-upload'></i>`
                     break;
             }
            
@@ -255,6 +316,32 @@ export default {
             const text_value = this.localText+`<br><img src="${image.url}" style="height: 150px;width: auto;"  />`
             this.updateValue(text_value);
             vue.modalPreviewMultimedia.open= false;
+        },
+        openUploadlMedia(){
+            let vue = this;
+            vue.modalOptions.open = true;
+        },
+        setMultimedia(multimedia) {
+            let vue = this
+            vue.resource.multimedia = multimedia
+        },
+        uploadImage(){
+            let vue = this;
+            let formData = new FormData(); 
+            if(!vue.resource.title || !vue.resource.multimedia){
+                vue.showAlert('Es necesario añadir un título y una imagen.','warning');
+                return;
+            }
+            vue.showLoader();
+            formData.append(`file[]`, vue.resource.multimedia);
+            formData.append(`title`, vue.resource.title);
+            vue.$http.post('/multimedia/upload', formData)
+                    .then(({data}) => {
+                        const text_value = vue.localText+`<br><img src="${data.data.medias_saved[0].url}" style="height: 150px;width: auto;"  />`
+                        vue.updateValue(text_value);
+                    })
+            vue.hideLoader();
+            vue.closeSimpleModal(vue.modalOptions);
         }
     }
 }
