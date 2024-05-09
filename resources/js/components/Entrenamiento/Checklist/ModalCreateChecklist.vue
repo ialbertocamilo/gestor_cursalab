@@ -196,7 +196,7 @@
                                                     :active-label="'Activar comentarios dentro de las actividades del checklist'"
                                                     :inactive-label="'Activar comentarios dentro de las actividades del checklist'" />
                                                 <DefaultInfoTooltip
-                                                    text="Se agregarán comentarios a las actividades del checklist que puede brindar al supervisor"
+                                                    text="Se agregarán comentarios a las actividades del checklist que puede brindar el auditor"
                                                     top
                                                 />
                                             </div>
@@ -235,7 +235,7 @@
                                                         :active-label="'Se pueden agregar comentarios luego de haber terminado el checklist'"
                                                         :inactive-label="'Se pueden agregar comentarios luego de haber terminado el checklist'" />
                                                     <DefaultInfoTooltip
-                                                        text="Al finalizar el checklist el supervisor podrá responder comentarios de sus colaboradores."
+                                                        text="Al finalizar el checklist el auditor podrá responder comentarios de sus colaboradores."
                                                         top
                                                     />    
                                                 </div>
@@ -248,8 +248,8 @@
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
                                                         v-model="resource.extra_attributes.view_360" dense
-                                                        :active-label="'Este checklist podrá ser calificado por mas de un supervisor'"
-                                                        :inactive-label="'Este checklist podrá ser calificado por mas de un supervisor'" />
+                                                        :active-label="'Este checklist podrá ser calificado por mas de un auditor'"
+                                                        :inactive-label="'Este checklist podrá ser calificado por mas de un auditor'" />
                                                     <DefaultInfoTooltip
                                                         text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
                                                         top
@@ -399,8 +399,8 @@
                                                         <DefaultToggle class="ml-4 mb-2"
                                                             v-model="resource.extra_attributes.required_signature_supervisor" dense
                                                             :disabled="!is_checklist_premium"
-                                                            :active-label="'Solicitar una firma al supervisor para finalizar checklist'"
-                                                            :inactive-label="'Solicitar una firma al supervisor para finalizar checklist'" />
+                                                            :active-label="'Solicitar una firma al auditor para finalizar checklist'"
+                                                            :inactive-label="'Solicitar una firma al auditor para finalizar checklist'" />
                                                         <DefaultInfoTooltip
                                                             v-if="is_checklist_premium"
                                                             text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
