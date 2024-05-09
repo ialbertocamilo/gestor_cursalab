@@ -174,6 +174,7 @@ class LoginController extends Controller
                     if ($request->hasSession()) {
                         $request->session()->put('auth.password_confirmed_at', time());
                     }
+
                     $email = $user->email_gestor;
                     if(config('slack.routes.demo') && !str_contains($email, 'cursalab.io')){
                         $message = "[{$customer}] Cursalab 2.0";
