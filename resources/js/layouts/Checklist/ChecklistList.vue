@@ -199,7 +199,7 @@ export default {
                     {text: "Título", value: "title", align: 'start', sortable: false},
                     {text: "Modalidad", value: "checklist_modality", align: 'start', sortable: false},
                     {text: "Tipo", value: "checklist_type", align: 'start', sortable: false},
-                    {text: "¿Es concurrente?", value: "replicate", align: 'start', sortable: false},
+                    {text: "¿Es recurrente?", value: "replicate", align: 'start', sortable: false},
                     {text: "Fecha límite de vigencia", value: "finishes_at", align: 'start', sortable: true},
                     {text: "Opciones", value: "actions", align: 'center', sortable: false},
                 ],
@@ -444,9 +444,9 @@ export default {
             finishConfigurationModal:{
                 ref: 'finishConfigurationModal',
                 title: 'Checklist finalizado',
-                subtitle: `<img src="/images/innovation-flatline.png"></img>
+                subtitle: `<img src="/images/innovation-flatline.png" />
                             <br> 
-                            <span style="font-size: 18px;font-weight: bold;">Haz terminado de configurar tu checklist.</span>
+                            <span style="font-size: 18px;font-weight: bold;">Has terminado de configurar tu checklist.</span>
                             <br>
                             <span style="font-size: 18px;">¿Deseas activar tu checklist?</span>`,
                 open: false,

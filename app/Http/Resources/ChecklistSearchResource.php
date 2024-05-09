@@ -16,7 +16,6 @@ class ChecklistSearchResource extends JsonResource
     public function toArray($request)
     {
         $checklistSupervisor = ChecklistSupervisor::where('id',$this->id)->first();
-        
         return [
             'id'=>$this->id,
             'title'=>$this->title,
@@ -24,7 +23,7 @@ class ChecklistSearchResource extends JsonResource
             'status' =>$this->active,
             'modality' => $this->modality,
             'checklist_modality' => $this->modality?->alias,
-            'replicate' => $this->replicate ? 'Sí' : 'No',
+            'replicate' => $this->replicate=='true' ? 'Sí' : 'No',
             'type' => $this->type,
             'checklist_type' => $this->type->name,
             'finishes_at' => $this->finishes_at ?? 'Sin vigencia',

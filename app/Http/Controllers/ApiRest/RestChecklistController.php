@@ -239,7 +239,7 @@ class RestChecklistController extends Controller
         $data = $request->all();
         ChecklistAudit::saveActivitiesAudits($checklist,$data);
         return $this->success([
-            'message' => 'Actividad guardad correctamente.'
+            'message' => 'Actividad guardada correctamente.'
         ]);
     }
     public function verifyPhoto(Request $request){
@@ -248,6 +248,13 @@ class RestChecklistController extends Controller
             'color'=>'#00E396',
             'percent' => '96',
             'label' => 'Excelente',
+        ]);
+    }
+
+    public function listProgress(Checklist $checklist){
+        $activity_progress = ChecklistAudit::listProgress($checklist);
+        return $this->success([
+            'activity_progress' => $activity_progress
         ]);
     }
 }

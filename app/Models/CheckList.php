@@ -33,7 +33,8 @@ class CheckList extends BaseModel
         'active' => 'boolean',
         'extra_attributes'=>'json',
         'supervisor_criteria'=>'array',
-        'supervisor_ids' => 'array'
+        'supervisor_ids' => 'array',
+        'finishes_at' => 'date'
     ];
 
     protected $hidden = [
@@ -77,6 +78,16 @@ class CheckList extends BaseModel
     public function getImagenAttribute($imagen){
         $default_image = 'https://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/images/default_image_checklist.png';
         return is_null($imagen) ? $default_image : $imagen; 
+    }
+    public function getFinishesAtAttribute($finishes_at){
+        if (is_string($finishes_at)) {
+            $finishes_at = new \DateTime($finishes_at);
+        }
+        if ($finishes_at instanceof \DateTime) {
+            return $finishes_at->format('Y-m-d');
+        }
+
+        return null;
     }
     /*======================================================= SCOPES ==================================================================== */
 
@@ -994,9 +1005,10 @@ class CheckList extends BaseModel
 
         $queryChecklist = CheckList::select('id','active','title','modality_id','type_id',
                                             'supervisor_criteria','supervisor_ids',
+                                            'extra_attributes',
                                             DB::raw("
                                             DATE_FORMAT(finishes_at,'%d/%m/%Y') as finishes_at,
-                                            extra_attributes->'$.replicate' as 'resplicate'
+                                            extra_attributes->'$.replicate' as 'replicate'
                                             "),
                                     )
                                     ->with(['modality:id,name,code,alias','type:id,name,code'])

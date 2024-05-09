@@ -11,7 +11,7 @@
                             label="Descargar plantilla"
                             icon="mdi-download"
                             :outlined="true"
-                            @click="downloadTemplate()"/>
+                            @click="openLink(vue.template_url)"/>
                 </div>
                 <div class="text-center mb-4">
                     <span class="font-weight-black">Sube el archivo</span> con las columnas indicadas en la plantilla. Asegúrate de que todas las casillas
@@ -104,10 +104,6 @@ export default {
         },
         async loadSelects() {
             let vue = this;
-        },
-        downloadTemplate(){
-            let vue = this;
-            location.href = vue.template_url;
         },
         descargarErrores() {
             let vue = this

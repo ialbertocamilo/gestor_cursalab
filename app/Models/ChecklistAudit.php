@@ -35,7 +35,18 @@ class ChecklistAudit extends BaseModel
         $date = Carbon::parse($value);
         return $date->format('d-m-Y');
     }
-
+    public function model()
+    {
+        return $this->morphTo();
+    }
+    public function activity()
+    {
+        return $this->belongsTo(CheckListItem::class, 'checklist_activity_id');
+    }
+    public function qualification()
+    {
+        return $this->belongsTo(Taxonomy::class, 'qualification_id');
+    }
     protected function saveActivitiesAudits($checklist,$data){
         $user = auth()->user();
         $checklist->load('type:id,name,code');
@@ -82,5 +93,51 @@ class ChecklistAudit extends BaseModel
             ];
             ChecklistAudit::insert($_checklist_audit);
         } 
+    }
+
+    protected function listProgress($checklist){
+        $user = auth()->user();
+        $checklist->loadMissing('modality:id,name,icon,alias');
+        $audits = ChecklistAudit::select('id','qualification_id','photo','checklist_activity_id','model_type','model_id')
+                                ->where('auditor_id',$user->id)
+                                ->where('checklist_id',$checklist->id)
+                                ->with([
+                                    'activity:id,activity,extra_attributes,checklist_response_id',
+                                    'activity.checklist_response:id,code',
+                                    'model:id,value_text',
+                                    'qualification:id,name',
+                                ])
+                                ->get();
+        $entity_name = '';
+        $entity_icon = '';
+        $activities = [];
+        foreach ($audits as $index => $audit) {
+            if(!$entity_name){
+                $entity_name =  $audit->model->value_text;
+            }
+            if(!$entity_icon){
+                $entity_icon =  $audit->model_type == 'App\\Models\\CriterionValue' ? 'store' : 'user';
+            }
+            $activities[] = [
+                "id" => $audit->checklist_activity_id,
+                'name'=>'Actividad '.($index+1),
+                "description" => $audit->activity?->activity,
+                'can_comment'=> $audit->activity->extra_attributes['comment_activity'],
+                'photo' => get_media_url($audit->photo),
+                'type_system_calification'=>$audit->activity->checklist_response->code,
+                'qualification' => $audit->qualification,
+            ];
+        }
+        return [
+            "checklist"=>[
+                "id" => $checklist->id,
+                "title"  => $checklist->title,
+                "entity" => [
+                    "name" => $entity_name,
+                    "icon" => $entity_icon
+                ],
+                'activities' => $activities
+            ]
+        ];
     }
 }

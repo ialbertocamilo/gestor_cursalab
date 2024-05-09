@@ -27,11 +27,12 @@
                                     outlined
                                     label="Subida masiva de actividades"
                                     icon="mdi mdi-plus"
+                                    @click="openSimpleModal(modalUploadMassiveActivitiesOptions)"
                                 />
                                 <DefaultButton
                                     icon="mdi-file-download"
                                     isIconButton
-                                    @click="downloadTemplate()"
+                                    @click="openLink('/templates/Plantilla Checklist.xlsx')"
                                 />
                             </div>
                         </v-col>
@@ -521,7 +522,7 @@ export default {
             vue.modalActivitiesIAOptions.open = false;
             vue.modalUploadMassiveActivitiesOptions.open = false;
             vue.show_activities = true;
-            vue.activities = [];
+            vue.activities = vue.activities.filter(a => a.activity != '');
             activities.map((activity)=>{
                 vue.addActivity(activity);
             })
