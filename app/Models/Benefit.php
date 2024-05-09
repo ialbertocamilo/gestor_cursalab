@@ -166,6 +166,9 @@ class Benefit extends BaseModel
 
         $data['cupos'] = ( $data['cupos'] == 'ilimitado') ? null : $data['cupos'];
 
+        $data['poll_id'] = isset($data['poll_id']) ? (int)$data['poll_id'] : null;
+        $data['fecha_encuesta'] = $data['fecha_encuesta'] ?? null;
+
         try {
             $workspace = get_current_workspace();
             $data['workspace_id'] = $workspace?->id;
@@ -354,6 +357,7 @@ class Benefit extends BaseModel
 
         if( !is_null($benefit) ) {
             $benefit->inicio_inscripcion = Carbon::parse($benefit->inicio_inscripcion)->format('Y-m-d');
+            $benefit->fecha_encuesta = Carbon::parse($benefit->fecha_encuesta)->format('Y-m-d');
             $benefit->fin_inscripcion = Carbon::parse($benefit->fin_inscripcion)->format('Y-m-d');
             $benefit->fecha_liberacion = Carbon::parse($benefit->fecha_liberacion)->format('Y-m-d');
             $benefit->direccion = (!is_null($benefit->direccion)) ? json_decode($benefit->direccion) : null;
