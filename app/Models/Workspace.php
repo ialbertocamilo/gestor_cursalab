@@ -164,6 +164,11 @@ class Workspace extends BaseModel
         $evaluation_type_ids = [];
         foreach ($value->evaluation_types as $index => $evaluation_type) {
             $evaluation_type = (object) $evaluation_type;
+            if ($evaluation_type) {
+                if ($evaluation_type->extra_attributes) {
+                    $evaluation_type->extra_attributes = (object) $evaluation_type->extra_attributes;
+                }
+            }
             $code = Str::slug($evaluation_type->name);
             $data = [
                 'position' => $index+1,
