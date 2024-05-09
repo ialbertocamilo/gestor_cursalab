@@ -255,17 +255,20 @@ class UserMassiveUpdate extends Massive implements ToCollection
                 }
 
 
-                if ($user['email'] != '' && !is_null($user_username_email->email ?? null)
-                    && mb_strtolower($user_username_email->email ?? '') == mb_strtolower($user['email'])
-                    || $user['email'] != '' && !is_null($master_username_email)
-                    && mb_strtolower($master_username_email->email ?? '') == mb_strtolower($user['email'])) {
+                if (isset($user['email'])) {
+                    if ($user['email'] != '' && !is_null($user_username_email->email ?? null)
+                        && mb_strtolower($user_username_email->email ?? '') == mb_strtolower($user['email'])
+                        || $user['email'] != '' && !is_null($master_username_email)
+                        && mb_strtolower($master_username_email->email ?? '') == mb_strtolower($user['email'])) {
 
-                    $has_error = true;
-                    $errors_index[] = [
-                        'index' => $email_index,
-                        'message' => 'Este email es usado por otro usuario.'
-                    ];
+                        $has_error = true;
+                        $errors_index[] = [
+                            'index' => $email_index,
+                            'message' => 'Este email es usado por otro usuario.'
+                        ];
+                    }
                 }
+
             }
         } else {
             if ($user_username_email ) {

@@ -160,9 +160,15 @@ class Workspace extends BaseModel
     }
     public function setChecklistConfigurationAttribute($value)
     {
-        $value = is_array($value) ? (object) $value : json_decode($value);
+        $value = is_array($value) ? (object) $value : json_decode($value, false);
         $evaluation_type_ids = [];
         foreach ($value->evaluation_types as $index => $evaluation_type) {
+            $evaluation_type = (object) $evaluation_type;
+            if ($evaluation_type) {
+                if ($evaluation_type->extra_attributes) {
+                    $evaluation_type->extra_attributes = (object) $evaluation_type->extra_attributes;
+                }
+            }
             $code = Str::slug($evaluation_type->name);
             $data = [
                 'position' => $index+1,
@@ -175,6 +181,7 @@ class Workspace extends BaseModel
                     'emoji'=> $evaluation_type?->extra_attributes?->emoji ?? null,
                 ])
             ];
+
             if(isset($evaluation_type->workspace_id) && $evaluation_type->workspace_id && $evaluation_type->id){
                 Taxonomy::where('id',$evaluation_type->id)->update($data);
                 $evaluation_type_ids[] = $evaluation_type->id;
@@ -839,15 +846,15 @@ class Workspace extends BaseModel
             'medias', // OK
             'polls.questions', //
         ];
-        
-        
+
+
         $workspace = $this->replicate();
         $workspace->push();
 
         $workspace->update($data);
 
         $workspace->push();
-       
+
         $this->load($relationships);
 
         $_crit_module = Criterion::where('code', 'module')->first();
@@ -860,7 +867,7 @@ class Workspace extends BaseModel
         }
 
         $workspace->refresh();
-        
+
         $evaluation_types = collect(Taxonomy::getSelectData(
             group:'checklist',
             type:'system_calification',
@@ -1003,7 +1010,7 @@ class Workspace extends BaseModel
         $workspace->medias()->createMany($this->medias->toArray());
 
         $modules_id = $this->subworkspaces->pluck('criterion_value_id')->toArray();
-        
+
         //Duplicate Announcement
         $_announcements = Announcement::whereRelationIn('criterionValues', 'criterion_value_id', $modules_id)->get();
 

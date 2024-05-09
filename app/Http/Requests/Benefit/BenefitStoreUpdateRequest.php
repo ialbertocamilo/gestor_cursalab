@@ -50,6 +50,7 @@ class BenefitStoreUpdateRequest extends FormRequest
             'speaker' => 'nullable',
             'ubicacion_mapa' => 'nullable',
             'fecha_encuesta' => 'nullable',
+            'poll_id' => 'nullable',
 
             'promotor_imagen_multimedia' => 'nullable',
             'image' => 'nullable',

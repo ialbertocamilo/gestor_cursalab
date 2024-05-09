@@ -25,20 +25,31 @@ class RedirectIfAuthenticated
 
         if(Session::has('init_2fa')) $guards = []; // guards a vacio
         if(Session::has('init_reset')) $guards = []; // guards a vacio
-        
+
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
 
-                if(config('slack.routes.demo')){
-                    $message = "[{$customer}] Cursalab 2.0";
-                    $attachments = [
-                        [
-                            "color" => "#36a64f",
-                            "text" => 'El usuario con email: '.Auth::user()->email_gestor.' retornó a la plataforma'
-                        ]
-                    ];
-                    messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+                $email = Auth::user()->email_gestor;
+
+                // Log logged user in Slack when is not a cursalab.io email
+
+                if (strpos($email, 'cursalab.io') !== false) {
+
+                } else {
+
+                    if (config('slack.routes.demo')) {
+                        $message = "[{$customer}] Cursalab 2.0";
+                        $attachments = [
+                            [
+                                "color" => "#36a64f",
+                                "text" => "El usuario con email: $email retornó a la plataforma"
+                            ]
+                        ];
+                        messageToSlackByChannel($message,$attachments,config('slack.routes.demo'));
+                    }
                 }
+
+
                 return redirect('/home');
             }
         }

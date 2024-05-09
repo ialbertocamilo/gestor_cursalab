@@ -626,19 +626,22 @@
                                                     <DefaultAutocomplete
                                                         :rules="rules.lista_encuestas"
                                                         dense
+                                                        :clearable="true"
                                                         label="Encuesta"
                                                         placeholder="Agrega una encuesta"
-                                                        v-model="resource.lista_encuestas"
+                                                        v-model="resource.poll_id"
                                                         :items="selects.lista_encuestas"
                                                         item-text="name"
                                                         item-value="id"
                                                     />
                                                 </div>
                                                 <div class="box_button_encuesta">
+                                                    <!--
                                                     <v-btn color="primary" outlined @click="addLinkExterno">
                                                         <div class="img mr-1"><img src="/img/benefits/icono_link.svg"></div>
                                                         Link externo
                                                     </v-btn>
+                                                    -->
                                                 </div>
                                             </div>
                                         </v-col>
@@ -647,6 +650,7 @@
                                                 <DefaultInputDate
                                                     clearable
                                                     dense
+                                                    :top="true"
                                                     :referenceComponent="'modalDateEncuesta'"
                                                     :options="modalDateEncuesta"
                                                     v-model="resource.fecha_encuesta"
@@ -764,6 +768,7 @@ const fields = [
     'lista_grupo',
     'group',
     'fecha_encuesta',
+    'poll_id',
     'promotor_imagen'
 ];
 const file_fields = ['image','promotor_imagen'];
@@ -888,6 +893,7 @@ export default {
                 fecha_liberacion: null,
                 fecha_encuesta: null,
                 correo: null,
+                poll_id: null,
                 list_types: [],
                 lista_encuestas: [],
                 list_silabos: [],
@@ -1211,6 +1217,11 @@ export default {
             if (!vue.isModuleOptionActive('implementos'))
                 vue.lista_implementos = [];
 
+            if (!vue.isModuleOptionActive('encuesta')) {
+                vue.resource.poll_id = null;
+                vue.resource.fecha_encuesta = null;
+            }
+
             // Preperate data
 
             const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
@@ -1420,6 +1431,11 @@ export default {
                                 vue.lista_implementos.push(newImplement)
                             });
                         }
+
+                        if (response.poll_id) {
+                            vue.options_modules[8].active = true
+                        }
+
                         vue.resource = Object.assign({}, response)
                     })
             }
