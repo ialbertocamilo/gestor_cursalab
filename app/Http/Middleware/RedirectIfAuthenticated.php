@@ -33,9 +33,7 @@ class RedirectIfAuthenticated
 
                 // Log logged user in Slack when is not a cursalab.io email
 
-                if (strpos($email, 'cursalab.io') !== false) {
-
-                } else {
+                if (!str_contains($email, 'cursalab.io')) {
 
                     if (config('slack.routes.demo')) {
                         $message = "[{$customer}] Cursalab 2.0";
