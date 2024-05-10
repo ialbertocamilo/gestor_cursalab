@@ -30,19 +30,31 @@
                     triggers="click"
                     placement="top">
 
+
+                    <!--
+                    Tabs
+                    ========================================-->
+
                     <div>
                         <button
+                            @click="calendarIsActive = true"
                             type="button"
-                            class="tab">
+                            :class="['tab', calendarIsActive ? '' : 'outline']">
                             Calendario
                         </button>
                         <button
+                            @click="calendarIsActive = false"
                             type="button"
-                            class="tab outline">
+                            :class="['tab', calendarIsActive ? 'outline' : '']">
                             Vinculación de tiempo
                         </button>
                     </div>
+
+                    <!--
+                    Tab content: calendar
+                    ========================================-->
                     <date-picker
+                        v-if="calendarIsActive"
                         confirm
                         confirm-text="Agregar rango"
                         attach
@@ -56,6 +68,15 @@
                         style="width: 100% !important"
                         value-type="YYYY-MM-DD"
                     ></date-picker>
+
+                    <!--
+                    Tab content: relative date range selector
+                    ========================================-->
+
+                    <div v-if="!calendarIsActive"
+                        class="relative-range">
+                        Relative time selector goes here
+                    </div>
                 </b-popover>
             </v-col>
 
@@ -132,6 +153,7 @@ export default {
     props: ["criterion"],
     data() {
         return {
+            calendarIsActive: true,
             search: null,
             debounce: null,
             value1: [new Date().toISOString().substr(0, 10), new Date().toISOString().substr(0, 10)],
@@ -226,12 +248,20 @@ export default {
 
 </style>
 
-<style scoped>
+<style>
 .popover {
     background: white !important;
     border: none !important;
     box-shadow: 0 5px 10px rgba(200,200,200,0.5);
     max-width: 475px !important;
+}
+
+.popover-body {
+    padding: 0 !important;
+}
+
+.popover-body .mx-datepicker-main {
+    border: none !important;
 }
 
 button.tab {
@@ -242,6 +272,7 @@ button.tab {
     border-radius: 4px;
     padding-left: 12px;
     padding-right: 12px;
+    margin: 10px 0 10px 10px;
 }
 
 button.tab.outline {
