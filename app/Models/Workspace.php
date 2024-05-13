@@ -47,6 +47,7 @@ class Workspace extends BaseModel
         'registro_capacitacion',
         'checklist_configuration',
         'course_configuration',
+        'benefits_configuration'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -114,6 +115,16 @@ class Workspace extends BaseModel
         'checklist_configuration' => 'json',
         'course_configuration'=>'json',
     ];
+
+    public function setBenefitsConfigurationAttribute($value)
+    {
+        $this->attributes['benefits_configuration'] = json_encode($value);
+    }
+
+    public function getBenefitsConfigurationAttribute($value)
+    {
+        return $value ? json_decode($value) : json_decode('{}');
+    }
 
     public function setRegistroCapacitacionAttribute($value)
     {

@@ -40,7 +40,8 @@ class SubWorkspaceRequest extends FormRequest
             'file_plantilla_diploma' => 'nullable',
             'certificate_template_id' => 'nullable',
             'show_logo_in_app' => 'nullable',
-            'registro_capacitacion' => 'nullable'
+            'registro_capacitacion' => 'nullable',
+            'benefits_configuration' => 'nullable'
         ];
 
         return $reglas;
@@ -50,6 +51,7 @@ class SubWorkspaceRequest extends FormRequest
     {
         $data['reinicios_programado'] = $this->reinicios_programado ? json_decode($this->reinicios_programado, true) : [];
         $data['registro_capacitacion'] = $this->registro_capacitacion ? json_decode($this->registro_capacitacion, true) : [];
+        $data['benefits_configuration'] = $this->benefits_configuration ? json_decode($this->benefits_configuration, true) : [];
         $data['mod_evaluaciones'] = $this->mod_evaluaciones ? json_decode($this->mod_evaluaciones, true) : [];
         $data['contact_support'] = $this->contact_support ? json_decode($this->contact_support, true) : [];
 

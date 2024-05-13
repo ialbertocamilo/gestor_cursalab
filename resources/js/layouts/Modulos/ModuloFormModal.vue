@@ -105,6 +105,33 @@
                     </v-col>
                 </v-row>
 
+                <v-row v-if="has_benefits_functionality"
+                    justify="space-around" class="menuable">
+                    <v-col cols="12">
+                        <DefaultModalSectionExpand
+                            v-if="resource.benefits_configuration"
+                            title="Configuración de beneficios"
+                            :expand="sections.showSectionBenefits"
+                            class="mt-4"
+                        >
+                            <template slot="content">
+                                <v-row justify="start">
+                                    <v-col cols="6">
+                                        <DefaultInput
+                                            clearable
+                                            v-model="resource.benefits_configuration.default_group_name"
+                                            label="Nombre del grupo por defecto"
+                                            dense
+                                            show-required
+                                            placeholder=""
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </template>
+                        </DefaultModalSectionExpand>
+                    </v-col>
+                </v-row>
+
                 <v-row justify="space-around" class="menuable">
                     <v-col cols="12">
 
@@ -351,6 +378,7 @@ export default {
                 showSectionCertificate: {status: true},
                 showSectionSoporte: {status: true},
                 showSectionRegistroCapacitacion: {status: true},
+                showSectionBenefits: {status: true}
             },
             resourceDefault: {
                 id: null,
@@ -371,10 +399,9 @@ export default {
                 nro_intentos: null,
                 certificate_template_id: null,
                 registro_capacitacion: {
-                    company: {
-
-                    }
+                    company: { }
                 },
+                benefits_configuration : {}
             },
             rules: {
                 name: this.getRules(['required']),
@@ -400,6 +427,7 @@ export default {
                 workspace_criteria: []
             },
             has_registro_capacitacion_functionality: false,
+            has_benefits_functionality: false,
             error_reinicios: false
         }
     },
@@ -455,6 +483,7 @@ export default {
 
                 const formData = vue.getMultipartFormData(method, vue.resource, fields, file_fields);
                 formData.set('registro_capacitacion', JSON.stringify(vue.resource.registro_capacitacion))
+                formData.set('benefits_configuration', JSON.stringify(vue.resource.benefits_configuration))
 
                 vue.getActiveOnly(formData)
                 vue.getJSONReinicioProgramado(formData)
@@ -550,6 +579,7 @@ export default {
                     vue.selects.side_menu = data.data.side_menu
                     vue.selects.workspace_criteria = data.data.workspace_criteria
                     vue.has_registro_capacitacion_functionality = data.data.has_registro_capacitacion_functionality
+                    vue.has_benefits_functionality = data.data.has_benefits_functionality
                     if (resource) {
                         vue.resource = Object.assign({}, data.data.modulo)
                     }

@@ -1507,8 +1507,29 @@ class Benefit extends BaseModel
 
     protected function config($data)
     {
-        $tab = Taxonomy::where('group','benefit')->where('type','group')->where('code','ir-academy')->select('name')->first();
-        $tab_name = $tab?->name ?? 'IR Academy';
+
+        // Get benefits configuration from user's workspace
+
+        $user = auth()->user();
+        $benefitsConfiguration = $user->subworkspace?->benefits_configuration;
+
+        // If default benefit group does not have a name,
+        // get default name from taxonomies
+
+        $tab_name = null;
+        if (isset($benefitsConfiguration->default_group_name)) {
+            $tab_name = $benefitsConfiguration->default_group_name;
+        }
+
+        if (!$tab_name) {
+            $tab = Taxonomy::query()
+                ->where('group','benefit')
+                ->where('type','group')
+                ->where('code','ir-academy')
+                ->select('name')->first();
+            $tab_name = $tab?->name ?? 'IR Academy';
+        }
+
         $response = [
             "buscador" => [
                 "filtros_status" => [
