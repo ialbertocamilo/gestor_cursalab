@@ -15,6 +15,7 @@ class ActivityChecklistImport implements ToCollection
     public function collection(Collection $collection)
     {
         for ($i=2; $i < count($collection); $i++) { 
+            
             $activity =  $collection[$i][0];
             if($activity){
                 $code_evaluation = isset($collection[$i][1]) && ( strtolower($collection[$i][1]) == 'opción única' || strtolower($collection[$i][1]) == 'opción unica')
