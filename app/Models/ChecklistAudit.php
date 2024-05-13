@@ -15,14 +15,12 @@ class ChecklistAudit extends BaseModel
         'id',
         'identifier_request',
         'signature_supervisor',
-        'qualification_id',
-        'photo',
         'checklist_id',
-        'checklist_activity_id',
+        'action_plan',
         'auditor_id',
         'model_type',
         'model_id',
-        'date_audit'
+        'date_audit',
     ];
 
     protected $casts = [
@@ -30,6 +28,10 @@ class ChecklistAudit extends BaseModel
         'date_audit' => 'timestamp',
     ];
 
+    public function audit_activities()
+    {
+        return $this->hasMany(CheckListActivityAudit::class, 'checklist_audit_id');
+    }
     public function getDateAuditAttribute($value)
     {
         $date = Carbon::parse($value);
@@ -39,14 +41,7 @@ class ChecklistAudit extends BaseModel
     {
         return $this->morphTo();
     }
-    public function activity()
-    {
-        return $this->belongsTo(CheckListItem::class, 'checklist_activity_id');
-    }
-    public function qualification()
-    {
-        return $this->belongsTo(Taxonomy::class, 'qualification_id');
-    }
+   
     protected function saveActivitiesAudits($checklist,$data){
         $user = auth()->user();
         $checklist->load('type:id,name,code');
@@ -68,9 +63,21 @@ class ChecklistAudit extends BaseModel
             Media::uploadMediaBase64(name:'', path:$path_signature, base64:$data['signature'],save_in_media:false,status:'private');
         }
 
+        $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
+        $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
+        $date_audit = now();
+        $checklist_audit = ChecklistAudit::create([
+            'identifier_request' => $data['identifier_request'],
+            'signature_supervisor' => $path_signature,
+            'checklist_id' => $checklist->id,
+            'model_type' => $model_type,
+            'model_id' => $model_id,
+            'action_plan' => $data['action_plan'] ?? null,
+            'auditor_id' => $user->id,
+            'date_audit' => $date_audit,
+        ]);
+
         foreach ($activities as $activity) {
-            $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
-            $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
             $photo = '';
             if($activity['file_photo']){
                 // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
@@ -80,52 +87,48 @@ class ChecklistAudit extends BaseModel
                 Media::uploadMediaBase64(name:'', path:$photo, base64:$activity['file_photo'],save_in_media:false,status:'private');
             }
             $_checklist_audit = [
+                'checklist_audit_id' => $checklist_audit->id,
                 'identifier_request'=> $data['identifier_request'],
                 'qualification_id'=> $activity['qualification_id'],
-                'signature_supervisor' => $path_signature,
                 'photo'=> $photo,
                 'checklist_id'=>$checklist->id,
                 'checklist_activity_id'=>$activity['id'],
                 'auditor_id' => $user->id,
-                'model_type' => $model_type,
-                'model_id' => $model_id,
-                'date_audit' => now(),
+                'date_audit' => $date_audit,
             ];
-            ChecklistAudit::insert($_checklist_audit);
+            ChecklistActivityAudit::insert($_checklist_audit);
         } 
     }
 
     protected function listProgress($checklist){
         $user = auth()->user();
         $checklist->loadMissing('modality:id,name,icon,alias');
-        $audits = ChecklistAudit::select('id','qualification_id','photo','checklist_activity_id','model_type','model_id')
+        $checklist_audit = ChecklistAudit::select('id','model_type','model_id')
                                 ->where('auditor_id',$user->id)
                                 ->where('checklist_id',$checklist->id)
+                                ->when($checklist->extra_attributes['replicate'],function($q){
+                                    $now = now()->format('Y-m-d');
+                                    $q->whereDate('date_audit','=',$now);
+                                })
                                 ->with([
-                                    'activity:id,activity,extra_attributes,checklist_response_id',
-                                    'activity.checklist_response:id,code',
+                                    'audit_activities.activity:id,activity,extra_attributes,checklist_response_id',
+                                    'audit_activities.activity.checklist_response:id,code',
+                                    'audit_activities.qualification:id,name',
                                     'model:id,value_text',
-                                    'qualification:id,name',
                                 ])
-                                ->get();
-        $entity_name = '';
-        $entity_icon = '';
+                                ->first();
+        $entity_name =  $checklist_audit->model?->value_text;
+        $entity_icon = $checklist_audit->model_type == 'App\\Models\\CriterionValue' ? 'store' : 'user';
         $activities = [];
-        foreach ($audits as $index => $audit) {
-            if(!$entity_name){
-                $entity_name =  $audit->model->value_text;
-            }
-            if(!$entity_icon){
-                $entity_icon =  $audit->model_type == 'App\\Models\\CriterionValue' ? 'store' : 'user';
-            }
+        foreach ($checklist_audit->audit_activities as $index => $audit_activity) {
             $activities[] = [
-                "id" => $audit->checklist_activity_id,
+                "id" => $audit_activity->checklist_activity_id,
                 'name'=>'Actividad '.($index+1),
-                "description" => $audit->activity?->activity,
-                'can_comment'=> $audit->activity->extra_attributes['comment_activity'],
-                'photo' => get_media_url($audit->photo),
-                'type_system_calification'=>$audit->activity->checklist_response->code,
-                'qualification' => $audit->qualification,
+                "description" => $audit_activity->activity?->activity,
+                'can_comment'=> $audit_activity->activity->extra_attributes['comment_activity'],
+                'photo' => get_media_url($audit_activity->photo),
+                'type_system_calification'=>$audit_activity->activity->checklist_response->code,
+                'qualification' => $audit_activity->qualification,
             ];
         }
         return [
