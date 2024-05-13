@@ -86,7 +86,7 @@ class ResetPasswordController extends Controller
         $loginController = new LoginController();
         Auth::loginUsingId($user->id);
         $loginController->authenticated($request,$user,false);
-        return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida.');       
+        return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida.');
     }
     // Sobrescribe el método sendResetResponse() para realizar la redirección
     protected function sendResetResponse($view)
@@ -127,7 +127,7 @@ class ResetPasswordController extends Controller
             return redirect('/login');
         }
 
-        $is_new_pass = $user->last_pass_updated_at ? 'Expiró la vigencia de '.env('RESET_PASSWORD_DAYS').' días para tu contraseña. Por seguridad debes actualizarla.' : 'Por seguridad debes actualizar tu contraseña a una nueva.';
+        $is_new_pass = $user->last_pass_updated_at ? 'Expiró la vigencia de '.env('RESET_PASSWORD_DAYS_GESTOR').' días para tu contraseña. Por seguridad debes actualizarla.' : 'Por seguridad debes actualizar tu contraseña a una nueva.';
 
         return view('auth.passwords.reset_pass', [ 'token' => $currentToken,
                                                    'message' => $is_new_pass ]);
