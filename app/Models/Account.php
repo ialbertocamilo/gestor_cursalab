@@ -202,7 +202,9 @@ class Account extends BaseModel
 
                 $data['url'] = $result['join_url'] ?? $meeting->url;
                 $data['identifier'] = $result['id'] ?? $meeting->identifier;
-                $data['password'] = $result['password'] ?? $meeting->password;
+                $data['password'] = $result['password'] ?? (
+                    $meeting ? $meeting->password : null
+                );
 
                 // dd($data);
                 break;
