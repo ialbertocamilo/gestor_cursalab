@@ -367,6 +367,21 @@ class Segment extends BaseModel{
                         $new['end_date'] = $finishes_at;
                         $new['name'] = "{$starts_at} - {$finishes_at}";
                     }
+
+                    if ($g['days_greater_than'] || $g['days_less_than']) {
+
+                        if ($g['days_duration']) {
+                            $durationDescription = "(Durante {$g['days_duration']} días)";
+                        }
+
+                        $new['name'] = $g['days_greater_than'] > 0
+                            ? "Mayor a {$g['days_greater_than']} días. $durationDescription"
+                            : "Menor a {$g['days_less_than']} días";
+
+                        $new['greaterThan'] = $g['days_greater_than'];
+                        $new['duration'] = $g['days_duration'];
+                        $new['lessThan'] = $g['days_less_than'];
+                    }
                 endif;
 
                 if ($criterion_code === 'default') :
@@ -555,16 +570,42 @@ class Segment extends BaseModel{
 
         foreach ($criterion['values_selected'] ?? [] as $value) {
 
-            $start_date = $value['start_date'];
-            $end_date = $value['end_date'];
+            if (isset($value['start_date']) && isset($value['end_date'])) {
+                $start_date = $value['start_date'];
+                $end_date = $value['end_date'];
 
-            $temp[] = [
-                'id' => $value['segment_value_id'] ?? null,
-                'criterion_id' => $criterion['id'],
-                'starts_at' => $start_date,
-                'finishes_at' => $end_date,
-                'type_id' => NULL,
-            ];
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_id' => $criterion['id'],
+                    'starts_at' => $start_date,
+                    'finishes_at' => $end_date,
+                    'type_id' => NULL,
+                ];
+
+            } else if (isset($value['greaterThan']) || isset($value['lessThan'])) {
+
+                $greaterThan = (int)$value['greaterThan'] > 0
+                    ? (int)$value['greaterThan']
+                    : null;
+
+                $duration = (int)$value['greaterThan'] > 0
+                    ? (int)$value['duration']
+                    : null;
+
+                $lessThan = (int)$value['lessThan'] > 0
+                    ? (int)$value['lessThan']
+                    : null;
+
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_id' => $criterion['id'],
+                    'days_greater_than' => $greaterThan,
+                    'days_duration' => $duration,
+                    'days_less_than' => $lessThan,
+                    'type_id' => NULL,
+                ];
+            }
+
         }
 
         return $temp;

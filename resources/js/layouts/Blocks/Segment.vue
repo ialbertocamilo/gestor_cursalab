@@ -1,5 +1,5 @@
 <template>
-    <div class="px-4">
+    <div class="px-4" id="popover-container">
         <v-dialog persistent max-width="400" v-model="dialog_eliminar">
             <v-card>
                 <v-card-title class="default-dialog-title">
@@ -61,7 +61,8 @@
 
         <v-divider class="mx-3"/>
 
-        <v-col cols="12" md="12" lg="12">
+        <v-col
+               cols="12" md="12" lg="12">
             <span class="mb-2">Selecciona valores:</span>
 
             <segment-values

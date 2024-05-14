@@ -1,9 +1,11 @@
 <template>
     <div>
         <v-row  v-if="criterion.field_type.code === 'date'"
+
                 style="padding: 10px 12px !important" >
         <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
-            <v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
+            <v-col cols="12" md="3" lg="3"
+                   class="p-0 vertical-align">
                 <!--
                 <date-picker
                     confirm
@@ -26,10 +28,11 @@
                     {{ criterion.name }}
                 </b-button>
                 <b-popover
+                    id="relative-range-popover"
                     target="popover-target-1"
                     triggers="click"
-                    placement="top">
-
+                    container="#popover-container"
+                    placement="topright">
 
                     <!--
                     Tabs
@@ -74,8 +77,73 @@
                     ========================================-->
 
                     <div v-if="!calendarIsActive"
-                        class="relative-range">
-                        Relative time selector goes here
+                        class="relative-range p-3">
+                        <div class="row">
+                            <div class="col-9 pr-0 mr-0">
+                                <div class="label-wrapper">
+                                    <input type="radio"
+                                           v-model="relativeDateType"
+                                           value="greater-than"
+                                           name="relative-range">
+                                    Se vincula a usuarios con un tiempo mayor a
+                                </div>
+                                <div class="label-wrapper mt-2 optional">
+                                    Opcional: Duración de la segmentación
+                                </div>
+                            </div>
+                            <div class="col-3 pl-0 ml-0">
+                                <div class="input-wrapper">
+                                    <input
+                                        :disabled="relativeDateType === 'less-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="greaterThan"/>
+                                    <span>Días</span>
+                                </div>
+                                <div class="input-wrapper mt-2">
+                                    <input
+                                        :disabled="relativeDateType === 'less-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="duration"/>
+                                    <span>Días</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row line">
+                            <div class="col-9 pr-0 mr-0">
+                                <div class="label-wrapper">
+                                    <input type="radio"
+                                           v-model="relativeDateType"
+                                           value="less-than"
+                                           name="relative-range">
+                                    Se vincula a usuarios con un tiempo menor a
+                                </div>
+                            </div>
+                            <div class="col-3 pl-0 ml-0">
+                                <div class="input-wrapper">
+                                    <input
+                                        :disabled="relativeDateType === 'greater-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="lessThan"/>
+                                    <span>Días</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row line">
+                            <div class="col-12 d-flex justify-content-center">
+                                <DefaultButton
+                                    label=""
+                                    icon="mdi-plus-circle"
+                                    isIconButton
+                                    @click="addRelativeRange()"
+                                />
+                            </div>
+                        </div>
+
                     </div>
                 </b-popover>
             </v-col>
@@ -153,6 +221,10 @@ export default {
     props: ["criterion"],
     data() {
         return {
+            relativeDateType: 'greater-than',
+            greaterThan: 0,
+            lessThan: 0,
+            duration: 0,
             calendarIsActive: true,
             search: null,
             debounce: null,
@@ -161,10 +233,39 @@ export default {
             date_range_selected: []
         };
     },
+    watch: {
+        relativeDateType(newValue, oldValue) {
+
+            if (newValue === 'greater-than') {
+                this.lessThan = 0;
+            } else {
+                this.greaterThan = 0;
+                this.duration = 0;
+            }
+        }
+    },
     methods: {
         cleanSelectedDates(){
             let vue = this;
             vue.value1 = [null, null];
+        },
+        restrictInput(event) {
+
+            // Get the pressed key
+            const key = event.key;
+
+            const isNumeric = /^\d+$/.test(key);
+            const isSpecialKey =
+                event.keyCode === 8 || // Backspace
+                event.keyCode === 46 || // Delete
+                event.keyCode === 37 || // Left arrow
+                event.keyCode === 39; // Right arrow
+
+            // If the key is not a number and not a special key, prevent default behavior
+
+            if (!isNumeric && !isSpecialKey) {
+                event.preventDefault();
+            }
         },
         agregarRango() {
             let vue = this;
@@ -188,8 +289,50 @@ export default {
             vue.cleanSelectedDates();
 
             vue.$emit("addDateRange", data);
-        },
 
+            this.$root.$emit('bv::hide::popover')
+        },
+        addRelativeRange() {
+
+            // Generate range values
+
+            let durationDescription = ''
+            if (this.duration) {
+                durationDescription = `(Durante ${this.duration} días)`;
+            }
+
+            const name = this.relativeDateType === 'greater-than'
+                ? `Mayor a ${this.greaterThan} días. ${durationDescription}`
+                : `Menor a ${this.lessThan} días`;
+
+            const newDateRange = {
+                id: `new-relative-range-${Date.now()}`,
+                name: name,
+                greaterThan: this.greaterThan,
+                lessThan: this.lessThan,
+                duration: this.duration
+            };
+
+            // Add value to list
+
+            this.date_range_selected.push(newDateRange);
+
+            let data = {
+                date_range_selected: this.date_range_selected,
+                new_date_range: newDateRange,
+                criterion_code: this.criterion.code,
+            };
+
+            this.$emit("addDateRange", data);
+
+            // Reset values and close popover
+
+            this.greaterThan = 0;
+            this.lessThan = 0;
+            this.duration = 0;
+
+            this.$root.$emit('bv::hide::popover')
+        }
     },
 };
 </script>
@@ -246,9 +389,7 @@ export default {
     border: 2px solid #d7d6d8 !important;
 }
 
-</style>
 
-<style>
 .popover {
     background: white !important;
     border: none !important;
@@ -258,6 +399,7 @@ export default {
 
 .popover-body {
     padding: 0 !important;
+    width: 475px !important;
 }
 
 .popover-body .mx-datepicker-main {
@@ -279,4 +421,47 @@ button.tab.outline {
     background: white;
     color: #796aee;
 }
+
+#relative-range-popover {
+    left: -40px !important;
+}
+
+.relative-range input[type=radio] {
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+}
+
+.relative-range .optional {
+    margin-left: 20px;
+}
+
+.relative-range .input-wrapper {
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 3px 0 3px;
+}
+
+.relative-range .label-wrapper {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+.relative-range .input-wrapper span {
+    font-size: 10px;
+}
+
+.relative-range input[type=text] {
+    height: 40px;
+    width: 50px;
+}
+
+.line {
+    border-top: 1px solid #eaeaea;
+}
+
 </style>
