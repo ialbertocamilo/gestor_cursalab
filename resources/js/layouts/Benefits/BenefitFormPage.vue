@@ -436,7 +436,12 @@
                                         <v-col cols="8">
                                             <div class="box_search_direction_map">
                                                 <span class="lbl_search_direction">Dirección</span>
-                                                <GmapAutocomplete ref="autocompleteMap" :position.sync="markers[0].position" @place_changed="setPlace" class="custom-default-input  my-2 pl-2" placeholder="Ingresa la dirección donde se realizara el curso"/>
+                                                <GmapAutocomplete
+                                                    ref="autocompleteMap"
+                                                    :position.sync="markers[0].position"
+                                                    @place_changed="setPlace"
+                                                    class="custom-default-input  my-2 pl-2"
+                                                    placeholder="Ingresa la dirección donde se realizara el curso"/>
                                             </div>
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-content-center align-items-center bx_benefit_accesible">
@@ -1104,8 +1109,8 @@ export default {
             if (this.currentPlace) {
                 this.ubicacion_mapa = {...this.currentPlace}
                 const marker = {
-                lat: this.currentPlace.geometry.location.lat(),
-                lng: this.currentPlace.geometry.location.lng(),
+                lat: this.currentPlace.geometry ? this.currentPlace.geometry.location.lat() : this.currentPlace.location.lat,
+                lng: this.currentPlace.geometry ? this.currentPlace.geometry.location.lng() : this.currentPlace.location.lng,
                 };
                 this.markers = [{ position: marker }];
                 this.center = marker;
@@ -1220,6 +1225,11 @@ export default {
             if (!vue.isModuleOptionActive('encuesta')) {
                 vue.resource.poll_id = null;
                 vue.resource.fecha_encuesta = null;
+            }
+
+            if (!vue.isModuleOptionActive('ubicacion')) {
+                vue.ubicacion_mapa = null;
+                vue.resource.referencia = null;
             }
 
             // Preperate data
@@ -1364,6 +1374,7 @@ export default {
                         if(response.direccion != null && response.direccion.address != null) {
                             setTimeout(() => {
                                 vue.$refs.autocompleteMap.$refs.input.value = response.direccion.address
+                                vue.setPlace(response.direccion)
                             }, 2000);
                         }
 

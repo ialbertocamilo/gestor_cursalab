@@ -220,7 +220,7 @@ class WorkspaceController extends Controller
             'openia_model' => $workspace->jarvis_configuration['openia_model'] ?? 'gpt-3.5-turbo',
             'context_jarvis' => $workspace->jarvis_configuration['context_jarvis'] ?? ''
         ];
-        
+
         $workspace->reminders_configuration = [
             'chunk' => $workspace->reminders_configuration['chunk'] ?? 0,
             'interval' => $workspace->reminders_configuration['interval'] ?? 0,
@@ -506,9 +506,32 @@ class WorkspaceController extends Controller
             ->where('functionality_id', $functionality->id)
             ->first();
 
+        $_benefitFunctionality = Taxonomy::getFirstData('system', 'functionality', 'benefits');
+        $benefitFunctionality = WorkspaceFunctionality::query()
+            ->where('workspace_id', $subworkspace->parent_id)
+            ->where('functionality_id', $_benefitFunctionality->id)
+            ->first();
+
+        // Initialize default benefit group name when is not set
+
+        if (!isset($subworkspace->benefits_configuration?->default_group_name)) {
+
+            $defaultBenefitGroup = Taxonomy::query()
+                ->where('group','benefit')
+                ->where('type','group')
+                ->where('code','ir-academy')
+                ->select('name')
+                ->first();
+
+            $subworkspace->benefits_configuration = (object)[
+                'default_group_name' => $defaultBenefitGroup?->name
+            ];
+        }
+
         return $this->success([
             'modulo' => $subworkspace,
             'has_registro_capacitacion_functionality' => $registroCapacitacionFunctionality ? true : false,
+            'has_benefits_functionality' => (bool)$benefitFunctionality,
             'main_menu' => $formSelects['main_menu'],
             'side_menu' => $formSelects['side_menu'],
             'workspace_criteria' => $formSelects['workspace_criteria'],
