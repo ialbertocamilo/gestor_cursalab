@@ -136,7 +136,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     Route::view('/reset_password', 'usuarios.reset-pass');
     Route::post('/user_password_reset', [UsuarioController::class, 'updatePasswordUser'])->name('usuarios.user_password_reset');
 
-    Route::prefix('/')->middleware('checkrol:admin')->group(base_path('routes/cms/temp.php'));
+    Route::prefix('/')->group(base_path('routes/cms/temp.php'));
     Route::prefix('intentos-masivos')->middleware('hasHability:attemps-massive')->group(base_path('routes/cms/intentos-masivos.php'));
     Route::prefix('notificaciones-push')->middleware('hasHability:push-notification')->group(base_path('routes/cms/notificaciones-push.php'));
     Route::prefix('votacion')->middleware('hasHability:create-campaign')->group(base_path('routes/cms/votacion-views.php'));
