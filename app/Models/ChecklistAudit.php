@@ -99,7 +99,44 @@ class ChecklistAudit extends BaseModel
             ChecklistActivityAudit::insert($_checklist_audit);
         } 
     }
+    protected function saveActivitiy($checklist,$data){
+        return [
+            'message' => 'Se guardo la actividad correctamente'
+        ];
+        // $user = auth()->user();
+        // $checklist->load('type:id,name,code');
+        // $checklist->load('modality:id,name,code');
+        // $activities = $data['activities'];
+        // $criterion_value_user_entity = null;
+        // if($checklist->modality->code == 'qualify_entity'){
+        //     $workspace_entity_criteria = Workspace::select('checklist_configuration')
+        //         ->where('id', $user->subworkspace->parent->id)
+        //         ->first()?->checklist_configuration?->entities_criteria;
+        //     $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
+        // }
 
+        // $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
+        // $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
+        // $date_audit = now();
+        // $checklist_audit = ChecklistAudit::createOrIgnore([
+        //     ['identifier_request' => $data['identifier_request'],
+        //     'checklist_id' => $checklist->id,
+        //     'auditor_id' => $user->id,
+        //     'date_audit' => $date_audit,]
+        // ]);
+
+        // $_checklist_audit = [
+        //     'checklist_audit_id' => $checklist_audit->id,
+        //     'identifier_request'=> $data['identifier_request'],
+        //     'qualification_id'=> $activity['qualification_id'],
+        //     'photo'=> $photo,
+        //     'checklist_id'=>$checklist->id,
+        //     'checklist_activity_id'=>$activity['id'],
+        //     'auditor_id' => $user->id,
+        //     'date_audit' => $date_audit,
+        // ];
+        // ChecklistActivityAudit::insert($_checklist_audit);
+    }
     protected function listProgress($checklist){
         $user = auth()->user();
         $checklist->loadMissing('modality:id,name,icon,alias');

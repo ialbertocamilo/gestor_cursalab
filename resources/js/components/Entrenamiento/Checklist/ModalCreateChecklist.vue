@@ -248,8 +248,8 @@
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
                                                         v-model="resource.extra_attributes.view_360" dense
-                                                        :active-label="'Este checklist podrá ser calificado por mas de un auditor'"
-                                                        :inactive-label="'Este checklist podrá ser calificado por mas de un auditor'" />
+                                                        :active-label="'Este checklist podrá ser calificado por más de un auditor'"
+                                                        :inactive-label="'Este checklist podrá ser calificado por más de un auditor'" />
                                                     <DefaultInfoTooltip
                                                         text="Solo se podrá realizar actividades si se encuentra ubicado en su centro laboral asignado"
                                                         top

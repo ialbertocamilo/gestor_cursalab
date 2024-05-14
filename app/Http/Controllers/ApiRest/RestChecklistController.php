@@ -257,4 +257,15 @@ class RestChecklistController extends Controller
             'activity_progress' => $activity_progress
         ]);
     }
+
+    public function listUsers(Checklist $checklist){
+        $data = Checklist::listUsers($checklist);
+        return $this->success($data);
+    }
+
+    public function saveActivity(Checklist $checklist,Request $request){
+        $data = $request->all();
+        $response = ChecklistAudit::saveActivitiy($checklist,$data);
+        return $this->success($response);
+    }
 }

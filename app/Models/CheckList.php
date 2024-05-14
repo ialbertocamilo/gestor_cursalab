@@ -1116,7 +1116,14 @@ class CheckList extends BaseModel
                 'can_upload_image'=> $extra_attributes['photo_response'],
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=>$activity->checklist_response->code,
-                'system_calification' => $system_calification 
+                'system_calification' => $system_calification,
+                'comments' => [
+                    ['comment'=>'Comentario principal','user'=>'Aldo'],
+                    ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
+                    ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
+                ],
+                'photo' => '',
+                'qualification_id'=> 10,
             ];
         }
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
@@ -1141,6 +1148,55 @@ class CheckList extends BaseModel
                 "activities"=>$activities
             ]
             ];
+    }
+    protected function listUsers($checklist){
+        $_course =new Course();
+        $checklist->loadMissing('segments');
+        $checklist->loadMissing('type:id,name,code,color,icon');
+        $users = $_course->usersSegmented(
+                            course_segments:$checklist->segments,
+                            addSelect:['name','lastname','surname']
+                        );
+
+        foreach ($users as $user) {
+            $user['status'] = [
+                'code' => 'pendiente',
+                'color' => '#5458EA',
+                'icon' => 'mdi-account'
+            ];
+        }
+        return [
+            'checklist' =>[
+                "id" => $checklist->id,
+                "title" => $checklist->title,
+                "description" => $checklist->description,
+                "modality" => [
+                    'id' => $checklist->modality->id,
+                    'name' => $checklist->modality->alias,
+                    'code' => $checklist->modality->code,
+                    'color' => $checklist->modality->color
+                ],
+                "type" => $checklist->type,
+                "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
+                "imagen" => get_media_url($checklist->imagen,'s3'),
+            ],
+            'users' => $users,
+            'users_assigned'=>200,
+            'status' => [
+                [
+                    'name' => 'pendiente',
+                    'code' => 'pending',
+                    'quantity' => 100,
+                    'percent' => '50%'
+                ] ,
+                [
+                    'name' => 'Realizado',
+                    'code' => 'done',
+                    'quantity' => 100,
+                    'percent' => '50%'
+                ] 
+            ] 
+        ];
     }
     //SUBFUNCTIONS
     function buildChecklistData($checklist,$user) {

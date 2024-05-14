@@ -15,8 +15,14 @@ Route::controller(RestChecklistController::class)->group(function () {
         Route::get('/trainer/init-data', 'getInitData');
         Route::get('/trainer/checklists', 'checklistsTrainer');
         Route::get('/trainer/checklists/{checklist}/activities', 'activitiesByChecklist');
+        Route::get('/trainer/checklists/{checklist}/users', 'listUsers');
+        Route::post('/trainer/checklists/{checklist}/save_activity', 'saveActivity');
+
         Route::post('/checklist/{checklist}/save_activities', 'saveActivities');
+
         Route::get('/checklist/{checklist}/list_progress', 'listProgress');
         Route::post('/activity/{activity}/verify_photo', 'verifyPhoto');
+
+
     });
 });
