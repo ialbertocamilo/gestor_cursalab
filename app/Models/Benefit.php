@@ -132,7 +132,9 @@ class Benefit extends BaseModel
             $data['promotor_imagen'] = $promotor_imagen_multimedia ?? null;
         }
 
-        $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa'])) ? json_decode($data['ubicacion_mapa']) : null;
+        $data_maps = (isset($data['ubicacion_mapa']) && !is_null($data['ubicacion_mapa']))
+            ? json_decode($data['ubicacion_mapa'])
+            : null;
 
         if($data_maps) {
             $geometry = $data_maps->geometry ?? null;
@@ -143,6 +145,8 @@ class Benefit extends BaseModel
             $json_maps['ubicacion'] = $data_maps->ubicacion ?? null;
 
             $data['direccion'] = json_encode($json_maps);
+        } else {
+            $data['direccion'] = null;
         }
 
         $list_links = (isset($data['list_links']) && !is_null($data['list_links'])) ? json_decode($data['list_links']) : null;
