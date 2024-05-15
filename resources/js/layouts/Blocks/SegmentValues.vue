@@ -22,14 +22,16 @@
                 ></date-picker>
                 -->
                 <b-button
+                    v-if="popoverId"
                     :style="{marginTop: popoverIsShown ? '60px' : '2px'}"
                     variant="outline-secondary"
-                    id="popover-target-1">
+                    :id="popoverId">
                     {{ criterion.name }}
                 </b-button>
                 <b-popover
+                    v-if="popoverId"
                     id="relative-range-popover"
-                    target="popover-target-1"
+                    :target="popoverId"
                     triggers="click"
                     container="#popover-container"
                     placement="topright"
@@ -223,6 +225,7 @@ export default {
     props: ["criterion"],
     data() {
         return {
+            popoverId: null,
             popoverIsShown: false,
             relativeDateType: 'greater-than',
             greaterThan: 0,
@@ -246,6 +249,9 @@ export default {
                 this.duration = 0;
             }
         }
+    },
+    mounted () {
+        this.popoverId = 'popover-target' + Math.floor((new Date()).getTime() / 1000)
     },
     methods: {
         popoverShown() {
