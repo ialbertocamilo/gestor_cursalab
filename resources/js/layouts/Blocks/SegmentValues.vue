@@ -22,7 +22,7 @@
                 ></date-picker>
                 -->
                 <b-button
-                    :style="{marginTop: popoverIsShown ? '50px' : '2px'}"
+                    :style="{marginTop: popoverIsShown ? '60px' : '2px'}"
                     variant="outline-secondary"
                     id="popover-target-1">
                     {{ criterion.name }}
