@@ -22,7 +22,7 @@
                 ></date-picker>
                 -->
                 <b-button
-                    style="margin-top: 2px;"
+                    :style="{marginTop: popoverIsShown ? '50px' : '2px'}"
                     variant="outline-secondary"
                     id="popover-target-1">
                     {{ criterion.name }}
@@ -32,7 +32,9 @@
                     target="popover-target-1"
                     triggers="click"
                     container="#popover-container"
-                    placement="topright">
+                    placement="topright"
+                    @show="popoverShown()"
+                    @hide="popoverHidden()">
 
                     <!--
                     Tabs
@@ -134,7 +136,7 @@
                         </div>
 
                         <div class="row line">
-                            <div class="col-12 d-flex justify-content-center">
+                            <div class="col-12 d-flex justify-content-center p-0">
                                 <DefaultButton
                                     label=""
                                     icon="mdi-plus-circle"
@@ -221,6 +223,7 @@ export default {
     props: ["criterion"],
     data() {
         return {
+            popoverIsShown: false,
             relativeDateType: 'greater-than',
             greaterThan: 0,
             lessThan: 0,
@@ -245,6 +248,12 @@ export default {
         }
     },
     methods: {
+        popoverShown() {
+            this.popoverIsShown = true;
+        },
+        popoverHidden() {
+            this.popoverIsShown = false;
+        },
         cleanSelectedDates(){
             let vue = this;
             vue.value1 = [null, null];
@@ -424,6 +433,7 @@ button.tab.outline {
 
 #relative-range-popover {
     left: -40px !important;
+    //top: 50px !important;
 }
 
 .relative-range input[type=radio] {
