@@ -108,13 +108,14 @@ class DiplomaController extends Controller
 
         // $status = Diploma::storeRequest($request->nombre_plantilla, $background, $objects, $diploma, $images_base64);
         $status =  Diploma::storeRequest(
-                    title:$request->nombre_plantilla, 
+                    title:$request->nombre_plantilla,
                     background: $background,
                     objects:$objects,
+                    certificate: $diploma,
                     images_base64:$images_base64,
                     font_id:$request->get('font_id')
                 );
-       
+
         if($status)
         {
             $model_id = $request->model_id;
@@ -307,7 +308,7 @@ class DiplomaController extends Controller
         return response()->json(compact('preview'));
     }
 
-   
+
     public function destroy(Diploma $diploma)
     {
         $diploma->delete();
@@ -354,7 +355,7 @@ class DiplomaController extends Controller
             if ($data['old_template'] === false) {
                 $data['image'] = $this->get_diploma($data['pathImage'], $data['dObjects'], $data['backgroundInfo'], $data);
             }
-            
+
             return view('certificate_template', compact('data', 'config', 'download'));
 
         } catch (\Throwable $th) {
@@ -365,7 +366,7 @@ class DiplomaController extends Controller
             return view('error', compact('errorMessage'));
         }
     }
-    
+
     private function getDiplomaProcessData($user_id, $process_id)
     {
         $user = User::with('subworkspace')
@@ -384,7 +385,7 @@ class DiplomaController extends Controller
             $backgroundInfo = json_decode($editableTemplate->info_bg, true);
             $dObjects = json_decode($editableTemplate->d_objects, true);
             $pathImage = $editableTemplate->path_image;
-        } 
+        }
 
         $fecha = $user->summary_process()->where('process_id', $process_id)->first()?->completed_process_date;
 
