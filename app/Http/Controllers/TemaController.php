@@ -85,7 +85,7 @@ class TemaController extends Controller
         $has_permission_to_use_tags = boolval(get_current_workspace()->functionalities()->get()->where('code','show-tags-topics')->first());
         $workspace_id = get_current_workspace()->id;
         // $dinamyc_link = Taxonomy::getFirstData(group:'system', type:'env', code:'dynamic-link-multi')?->name;
-        $dinamyc_link = 'https://app.cursalab.io';
+        $dinamyc_link = 'https://cursalabmulti.page.link/multi';
         $gestor_url = env('APP_URL');
         if(Str::contains($gestor_url, 'inretail') ){
             $dinamyc_link = 'https://inretail.cursalab.io';
