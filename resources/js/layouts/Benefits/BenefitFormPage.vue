@@ -802,6 +802,7 @@ export default {
                 position: { lat: -12.0529046, lng: -77.0253457 }
             }],
             ubicacion_mapa: null,
+            previous_ubicacion_mapa: null,
             // para el desplegable
             menu: false,
             options_modules: [
@@ -1279,12 +1280,15 @@ export default {
                     data_maps.formatted_address = vue.ubicacion_mapa.formatted_address
                     data_maps.url = vue.ubicacion_mapa.url
 
-                    for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
-                        if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
-                            data_maps.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
-                            break;
+                    if (vue.ubicacion_mapa.address_components) {
+                        for (let j = 0; j < vue.ubicacion_mapa.address_components.length; j++) {
+                            if (vue.ubicacion_mapa.address_components[j].types[0] == "locality") {
+                                data_maps.ubicacion = vue.ubicacion_mapa.address_components[j].long_name;
+                                break;
+                            }
                         }
                     }
+
 
                     let formdata2 = new FormData();
                     formdata2.append('image', file_image_maps, 'maps_'+ vue.resource.title.replace(/\s/g, '_'))
@@ -1318,6 +1322,10 @@ export default {
             }
             else
             {
+
+                if (vue.isModuleOptionActive('ubicacion'))
+                    formData.append('ubicacion_mapa', vue.previous_ubicacion_mapa)
+
                 vue.$http.post(url, formData)
                         .then(async ({data}) => {
                             this.hideLoader()
@@ -1375,6 +1383,7 @@ export default {
                             setTimeout(() => {
                                 vue.$refs.autocompleteMap.$refs.input.value = response.direccion.address
                                 vue.setPlace(response.direccion)
+                                vue.previous_ubicacion_mapa = response.direccion;
                             }, 2000);
                         }
 

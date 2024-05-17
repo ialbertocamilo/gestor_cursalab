@@ -144,7 +144,17 @@ class Benefit extends BaseModel
             $json_maps['image'] = $data_maps->image_map ?? null;
             $json_maps['ubicacion'] = $data_maps->ubicacion ?? null;
 
-            $data['direccion'] = json_encode($json_maps);
+            if ($benefit->direccion) {
+                if (json_decode($benefit->direccion)->address != $json_maps['address']) {
+                    if ($json_maps['address'] != null) {
+                        $data['direccion'] = json_encode($json_maps);
+                    }
+                }
+
+            } else {
+                $data['direccion'] = json_encode($json_maps);
+            }
+
         } else {
             $data['direccion'] = null;
         }
