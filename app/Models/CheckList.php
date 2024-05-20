@@ -1158,12 +1158,14 @@ class CheckList extends BaseModel
                     [
                         'id'=> 1,
                         'name' => 'Temática 1',
-                        'count_activities' => count($activities)
+                        'count_activities' => count($activities),
+                        'finished' => false,
                     ],
                     [
                         'id'=> 2,
                         'name' => 'Temática 2',
-                        'count_activities' => count($activities)
+                        'count_activities' => count($activities),
+                        'finished' => true,
                     ],
                 ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
