@@ -231,8 +231,8 @@ class RestChecklistController extends Controller
         return $this->success(compact('list_checklists_geolocalization','list_checklists_libres','list_checklists_exclude_geolocalization'));
     }
     
-    public function activitiesByChecklist(Checklist $checklist){
-        $data = Checklist::listActivities($checklist);
+    public function activitiesByChecklist(Checklist $checklist,Request $request){
+        $data = Checklist::listActivities($checklist,$request);
         return $this->success($data);
     }
     public function saveActivities(Checklist $checklist,Request $request){

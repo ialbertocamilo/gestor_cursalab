@@ -1090,7 +1090,10 @@ class CheckList extends BaseModel
         }
         return [$list_checklists_geolocalization,$list_checklists_exclude_geolocalization,$list_checklists_libres];
     }
-    protected function listActivities($checklist){
+    protected function listActivities($checklist,$request){
+        $theme_id = $request?->theme_id;
+        $user_id = $request?->user_id;
+
         $user = auth()->user();
         $checklist->loadMissing([
             'type:id,name,code,color',
@@ -1145,7 +1148,14 @@ class CheckList extends BaseModel
         ->first()?->checklist_configuration?->entities_criteria;
 
         $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
+        $user_checklist = null;
+        if($user_id){
+            $user_checklist = User::select('name','lastname','surname')->where('id',$user_id)->first();
+        }
         return [
+            'user'=>[
+                'fullname' => $user_checklist?->fullname
+            ],
             'checklist'=>[
                 'id' => $checklist->id,
                 "title" => $checklist->title,
