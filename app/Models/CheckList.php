@@ -1136,10 +1136,9 @@ class CheckList extends BaseModel
                 'qualification_id'=> $progress?->qualification_id ?? null,
             ];
         }
-        $themes = [
+        $theme = [
             'name' => 'Temática 1',
             'area' => 'Area 1',
-            'activities' => $activities
         ];
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
         ->where('id', $user->subworkspace->parent->id)
@@ -1173,7 +1172,8 @@ class CheckList extends BaseModel
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
                 "type" => $checklist->type,
-                "themes"=>$themes
+                "theme"=>$theme,
+                'activities' => $activities
             ]
             ];
     }
