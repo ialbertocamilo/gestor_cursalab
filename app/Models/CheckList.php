@@ -1106,7 +1106,11 @@ class CheckList extends BaseModel
                                 ->when($checklist->extra_attributes['view_360'], function($q) use($user){
                                     $q->where('auditor_id',$user->id);
                                 })->get();
-            
+        $has_themes = true;
+        $theme = [
+            'name' => 'Temática 1',
+            'area' => 'Area 1',
+        ];
         foreach ($checklist->activities as $index => $activity) {
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
@@ -1120,7 +1124,7 @@ class CheckList extends BaseModel
             $progress = $activities_progress->where('checklist_activity_id',$activity->id)->first();
             $activities[]  = [
                 'id'=>$activity->id,
-                'name'=>'Actividad '.($index+1),
+                'name'=> $has_themes ? $theme['name'].' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
                 'description'=> $activity->activity,
                 'can_comment'=> $extra_attributes['comment_activity'],
                 'can_upload_image'=> $extra_attributes['photo_response'],
@@ -1136,10 +1140,6 @@ class CheckList extends BaseModel
                 'qualification_id'=> $progress?->qualification_id ?? null,
             ];
         }
-        $theme = [
-            'name' => 'Temática 1',
-            'area' => 'Area 1',
-        ];
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
         ->where('id', $user->subworkspace->parent->id)
         ->first()?->checklist_configuration?->entities_criteria;
