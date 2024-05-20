@@ -1097,7 +1097,16 @@ class CheckList extends BaseModel
             'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position',
             'activities.checklist_response:id,code',
         ]);
+
         $activities = [];
+        
+        $activities_progress = ChecklistActivityAudit::select('id','checklist_activity_id','qualification_id','photo')
+                                ->where('checklist_id',$checklist->id)
+                                ->whereIn('checklist_activity_id',$checklist->activities->pluck('id'))
+                                ->when($checklist->extra_attributes['view_360'], function($q) use($user){
+                                    $q->where('auditor_id',$user->id);
+                                })->get();
+            
         foreach ($checklist->activities as $index => $activity) {
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
@@ -1108,6 +1117,7 @@ class CheckList extends BaseModel
             }else{
                 $system_calification = $activity->custom_options()->select('id','name','color')->get();
             }
+            $progress = $activities_progress->where('checklist_activity_id',$activity->id)->first();
             $activities[]  = [
                 'id'=>$activity->id,
                 'name'=>'Actividad '.($index+1),
@@ -1122,10 +1132,15 @@ class CheckList extends BaseModel
                     ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
                     ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
                 ],
-                'photo' => '',
-                'qualification_id'=> 10,
+                'photo' => get_media_url($progress?->photo) ?? null ,
+                'qualification_id'=> $progress?->qualification_id ?? null,
             ];
         }
+        $themes = [
+            'name' => 'Temática 1',
+            'area' => 'Area 1',
+            'activities' => $activities
+        ];
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
         ->where('id', $user->subworkspace->parent->id)
         ->first()?->checklist_configuration?->entities_criteria;
@@ -1139,13 +1154,26 @@ class CheckList extends BaseModel
                     "name"=> $criterion_value_user_entity?->value_text,
                     "icon"=>"store",
                 ],
+                'has_themes' => true,
+                'list_themes'=>[
+                    [
+                        'id'=> 1,
+                        'name' => 'Temática 1',
+                        'count_activities' => count($activities)
+                    ],
+                    [
+                        'id'=> 2,
+                        'name' => 'Temática 2',
+                        'count_activities' => count($activities)
+                    ],
+                ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
                 "imagen" => get_media_url($checklist->imagen,'s3'),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
                 "type" => $checklist->type,
-                "activities"=>$activities
+                "themes"=>$themes
             ]
             ];
     }
