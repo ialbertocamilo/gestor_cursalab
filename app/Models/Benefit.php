@@ -238,6 +238,7 @@ class Benefit extends BaseModel
                                 ->delete();
                         }
                     }
+
                 } else {
                     BenefitProperty::query()
                         ->where('benefit_id', $benefit->id)
