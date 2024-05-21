@@ -203,6 +203,12 @@ class Benefit extends BaseModel
             if(!is_null($list_silabos)) {
 
                 if (count($list_silabos) > 0) {
+
+                    $currentSilabos =  BenefitProperty::query()
+                        ->where('benefit_id', $benefit->id)
+                        ->where('type_id', $property_silabo->id)
+                        ->get();
+
                     foreach ($list_silabos as $key => $silabo) {
                         BenefitProperty::updateOrCreate(
                             ['id' => str_contains($silabo->id, 'n-') ? null : $silabo->id],
@@ -217,6 +223,20 @@ class Benefit extends BaseModel
                                 'position' => $key + 1,
                             ]
                         );
+
+                        // Delete silabos which has been removed
+                        // from the list
+                        $silabosToDelete = $currentSilabos
+                            ->whereNotIn('id', collect($list_silabos)
+                            ->pluck('id'));
+
+                        if ($silabosToDelete->pluck('id')->count() > 0 ) {
+                            BenefitProperty::query()
+                                ->where('benefit_id', $benefit->id)
+                                ->where('type_id', $property_silabo->id)
+                                ->whereIn('id', $silabosToDelete->pluck('id'))
+                                ->delete();
+                        }
                     }
                 } else {
                     BenefitProperty::query()
