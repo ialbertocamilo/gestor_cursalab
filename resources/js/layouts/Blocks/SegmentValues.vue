@@ -1,8 +1,10 @@
 <template>
     <div>
         <v-row  v-if="criterion.field_type.code === 'date'"
-
-                style="padding: 10px 12px !important" >
+                :style="{
+                  paddingTop: popoverIsShown ? '60px' : '10px',
+                  paddingRight: '12px !important',
+                  paddingLeft: '12px !important'}" >
         <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
             <v-col cols="12" md="3" lg="3"
                    class="p-0 vertical-align position-relative">
