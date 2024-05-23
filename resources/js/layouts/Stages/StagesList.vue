@@ -1019,7 +1019,7 @@ export default {
         addNewActivity( stage_id = null, school_id = null, activities = [] )
         {
             let vue = this
-            
+
             if(activities.length >= 8)
             {
                 vue.statusValidateStageModal.title_modal = 'Límite de actividades por etapa',
@@ -1223,14 +1223,14 @@ export default {
                 vue.statusStageModal.title_modal = Boolean(stage.active) ? 'Desactivar etapa' : 'Activar etapa'
             }
             else {
-                if(stage.activities.length <= 3) {
+                if(stage.activities.length <= 1) {
                     vue.statusValidateStageModal.open = true
                     vue.statusValidateStageModal.title_modal = 'No se puede activar esta etapa',
                     vue.statusValidateStageModal.content_modal = {
                         confirm: {
-                            title: '¡Debes tener al menos 4 actividades asignada por etapa!',
+                            title: '¡Debes tener al menos 2 actividades asignada por etapa!',
                             details: [
-                                'Para poder activar una etapa esta debe tener por lo menos 4 actividades asignadas.'
+                                'Para poder activar una etapa esta debe tener por lo menos 2 actividades asignadas.'
                             ],
                         }
                     }
