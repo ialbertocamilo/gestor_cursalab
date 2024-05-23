@@ -5,42 +5,19 @@
                 style="padding: 10px 12px !important" >
         <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
             <v-col cols="12" md="3" lg="3"
-                   class="p-0 vertical-align">
-                <!--
-                <date-picker
-                    confirm
-                    confirm-text="Agregar rango"
-                    attach
-                    v-model="value1"
-                    type="date"
-                    range
-                    :placeholder="criterion.name"
-                    :lang="lang"
-                    @confirm="agregarRango()"
-                    style="width: 100% !important"
-                    value-type="YYYY-MM-DD"
-                ></date-picker>
-                -->
+                   class="p-0 vertical-align position-relative">
+
                 <b-button
-                    v-if="popoverId"
-                    :style="{marginTop: popoverIsShown ? '60px' : '2px'}"
-                    variant="outline-secondary"
-                    :id="popoverId">
+                    @click="popoverIsShown = !popoverIsShown"
+                    variant="outline-secondary">
                     {{ criterion.name }}
                 </b-button>
-                <b-popover
-                    v-if="popoverId"
-                    id="relative-range-popover"
-                    :target="popoverId"
-                    triggers="click"
-                    container="#popover-container"
-                    placement="topright"
-                    @show="popoverShown()"
-                    @hide="popoverHidden()">
 
+                <div class="custom-popover"
+                     v-if="popoverIsShown">
                     <!--
-                    Tabs
-                    ========================================-->
+                       Tabs
+                       ========================================-->
 
                     <div>
                         <button
@@ -81,7 +58,7 @@
                     ========================================-->
 
                     <div v-if="!calendarIsActive"
-                        class="relative-range p-3">
+                         class="relative-range p-3">
                         <div class="row">
                             <div class="col-9 pr-0 mr-0">
                                 <div class="label-wrapper">
@@ -140,15 +117,28 @@
                         <div class="row line">
                             <div class="col-12 d-flex justify-content-center p-0">
                                 <DefaultButton
-                                    label=""
-                                    icon="mdi-plus-circle"
-                                    isIconButton
+                                    :outlined="true"
+                                    class="mt-3 relative-range-button"
+                                    label="Agregar rango"
                                     @click="addRelativeRange()"
                                 />
                             </div>
                         </div>
 
                     </div>
+                </div>
+
+                <b-popover
+                    v-if="popoverId"
+                    id="relative-range-popover"
+                    :target="popoverId"
+                    triggers="click"
+                    container=".v-dialog"
+                    placement="topright"
+                    @show="popoverShown()"
+                    @hide="popoverHidden()">
+
+
                 </b-popover>
             </v-col>
 
@@ -227,6 +217,7 @@ export default {
         return {
             popoverId: null,
             popoverIsShown: false,
+            styleElement: null,
             relativeDateType: 'greater-than',
             greaterThan: 0,
             lessThan: 0,
@@ -247,6 +238,19 @@ export default {
             } else {
                 this.greaterThan = 0;
                 this.duration = 0;
+            }
+        },
+        popoverIsShown(newValue, oldValue) {
+
+            if (newValue) {
+                this.styleElement = document.createElement('style');
+                this.styleElement.innerHTML = '.v-window__next, .v-window__prev { display: none; }';
+                document.head.appendChild(this.styleElement);
+            } else {
+                if (this.styleElement) {
+                    this.styleElement.remove();
+                    this.styleElement = null;
+                }
             }
         }
     },
@@ -308,6 +312,8 @@ export default {
             this.$root.$emit('bv::hide::popover')
         },
         addRelativeRange() {
+
+            this.popoverIsShown = false;
 
             // Generate range values
 
@@ -405,11 +411,15 @@ export default {
 }
 
 
-.popover {
+.custom-popover {
     background: white !important;
     border: none !important;
     box-shadow: 0 5px 10px rgba(200,200,200,0.5);
-    max-width: 475px !important;
+    width: 475px !important;
+
+    max-height: 361px;
+    position: absolute;
+    bottom: 40px;
 }
 
 .popover-body {
@@ -476,8 +486,14 @@ button.tab.outline {
     width: 50px;
 }
 
+.relative-range-button {
+    height: 30px !important;
+}
+
 .line {
     border-top: 1px solid #eaeaea;
 }
+
+
 
 </style>

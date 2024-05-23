@@ -1,5 +1,5 @@
 <template>
-    <div class="px-4" id="popover-container">
+    <div class="px-4">
         <v-dialog persistent max-width="400" v-model="dialog_eliminar">
             <v-card>
                 <v-card-title class="default-dialog-title">
