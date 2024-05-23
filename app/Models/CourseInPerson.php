@@ -52,7 +52,7 @@ class CourseInPerson extends Model
     protected function listCoursesByTypeCode($request,$modality_code){
         $code = $request->code;
         $user = $request->user;
-        
+
         $assigned_courses = $user->getCurrentCourses(withRelations: 'soft',only_ids_courses:true,modality_code:$modality_code);
         $operator = '';
         switch ($code) {
@@ -138,7 +138,7 @@ class CourseInPerson extends Model
         return $data;
     }
 
-   
+
     protected function listUsersBySession($course_id,$topic_id,$code,$search_user,$maskDocument=true,$signature=false){
         $topic =    Topic::select('id', 'name','course_id','modality_in_person_properties')
                         ->where('id',$topic_id)
@@ -326,7 +326,7 @@ class CourseInPerson extends Model
                 'message' => 'No eres el host de la sesión.'
             ];
         }
-        $is_evaluation_started = true; 
+        $is_evaluation_started = true;
         if (!isset($modality_in_person_properties->evaluation)) {
             $is_evaluation_started = false;
             return [
@@ -351,7 +351,7 @@ class CourseInPerson extends Model
         return [
             'is_evaluation_started' => $is_evaluation_started,
             'evaluation' => $modality_in_person_properties->evaluation
-        ]; 
+        ];
     }
     protected function getListMenu($topic_id){
         $user = auth()->user();
@@ -386,7 +386,7 @@ class CourseInPerson extends Model
         return $data;
     }
 
-    
+
 
     protected function takeAssistance($topic_id,$data){
         $user_ids = $data['user_ids'];
@@ -428,7 +428,7 @@ class CourseInPerson extends Model
         }
         TopicAssistanceUser::insertUpdateMassive($users_to_create,'insert');
         TopicAssistanceUser::insertUpdateMassive($users_to_update,'update');
-        
+
         return ['message' => 'Se ha asignado la asistencia correctamente.'];
     }
 
@@ -518,7 +518,7 @@ class CourseInPerson extends Model
         $poll = $topic->course->polls->first();
         if(!$poll){
             return ['message'=>'Esta sesión no tiene una encuesta asignada'];
-        }          
+        }
         $modality_in_person_properties = $topic->modality_in_person_properties;
         if($topic && isset($modality_in_person_properties->poll_started)){
             return ['message'=>'La encuesta ya ha sido iniciada.'];
@@ -543,7 +543,7 @@ class CourseInPerson extends Model
                     ->first();
 
         $is_accessible = $topic->isAccessiblePoll();
-        
+
         if($is_accessible){
             $poll = $topic->poll;
         }
@@ -575,7 +575,7 @@ class CourseInPerson extends Model
         return [
             'qr'=>$topic->path_qr,
             // 'link'=>config('app.web_url').'/sesiones',
-            'show_modal_double_assistance' => $show_modal_double_assistance, 
+            'show_modal_double_assistance' => $show_modal_double_assistance,
             'nota'=> $required_signature ? 'Ingresa al QR recuerda firmar; esta firma se colocará en el reporte de asistencias.' : '',
         ];
     }
@@ -712,7 +712,7 @@ class CourseInPerson extends Model
                 $menus = $this->modifyMenus($menus,'certificate');
             }
         }
-        //Obtener 
+        //Obtener
         $action_button = null;
         //Si tiene evaluación, verificar el estado
         // $is_accessible_evaluation = $topic->isAccessibleEvaluation();
@@ -841,14 +841,14 @@ class CourseInPerson extends Model
             }
             $show_modal_signature_registro_capacitación = !boolval($registroCapacitacionPath) && $summary?->advanced_percentage == 100;
         }
-        
+
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
     }
 
     private function listHostMenu($topic,$user){
         $menus = config('course-in-person.host');
-        
+
         $last_session = Topic::select('id')->where('course_id',$topic->course_id)
                         ->where('active',ACTIVE)
                         ->orderBy(DB::raw("CONCAT(modality_in_person_properties->'$.start_date', ' ', modality_in_person_properties->'$.start_time')"), 'DESC')
@@ -873,7 +873,7 @@ class CourseInPerson extends Model
                 $zoom_status['name'] = $zoom_status['name'].': '.Carbon::parse($meeting->starts_at)->format('Y-m-d H:i');
             }
             array_unshift($menus,  [
-                'title' => 'Iniciar sesión zoom',
+                'title' => 'Ingresar a sesión Zoom',
                 'code' => 'zoom',
                 'description' => 'Ingresa a la sesión zoom asignada a este tema.',
                 'show' => $is_on_time,
@@ -892,7 +892,7 @@ class CourseInPerson extends Model
             $menus = $this->modifyMenus($menus,'evaluation','unset');
             $unset_evaluation = true;
         }
-        
+
         /*************************************************************VERIFICAR LOS ESTADOS*****************************/
         $action_button = null;
         if($topic->course->modality->code == 'in-person'){
@@ -949,7 +949,7 @@ class CourseInPerson extends Model
                 ];
             }
         }
-        
+
         if($topic->course->polls->first() && $last_session->id == $topic->id){
             $is_accessible_poll = $topic->isAccessiblePoll();
             $menus = $this->modifyMenus(
@@ -977,7 +977,7 @@ class CourseInPerson extends Model
         /*-------------------------------------------------------------------FINALIZAR CAMBIAR ESTADO----------------------------------------------- */
         $show_modal_signature_registro_capacitación = false;
         $required_signature = false;
-        
+
         $has_media = boolval($topic->medias()->first());
         return compact('menus','required_signature','show_modal_signature_registro_capacitación','zoom','has_media','action_button');
     }
