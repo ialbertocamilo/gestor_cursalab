@@ -53,31 +53,45 @@ Route::controller(EntrenamientoController::class)->group(function() {
 	});
 });
 //apis to checklist v3
-Route::controller(ChecklistController::class)->group(function() {
-	Route::prefix('/checklist')->middleware('hasHability:checklist')->group(function () {
-		Route::prefix('/v2')->group(function () {
-			Route::get('/search', 'listChecklists');
-			Route::get('/search-courses', 'searchCourses');
+Route::controller(ChecklistController::class)
+	->prefix('/checklist/v2')
+	->middleware('hasHability:checklist')->group(function() {
+		/*ACTIVITIES*/
+		// Route::get('/{checklist}/activities', 'formSelectsActivities')->name('activities.list');
+		Route::view('/{checklist}/activities', 'entrenamiento.checklist.activities')->name('checklist.activities');
 
-			Route::get('/{checklist}/verify-next-step', 'verifyNextStep');
-			Route::get('/form-selects', 'getFormSelects');
-			Route::post('/store', 'storeChecklist');
-			Route::get('/{checklist}/edit', 'editChecklist');
-			Route::put('/{checklist}/update', 'updateChecklist');
-
-			Route::get('/activity/form-selects', 'formSelectsActivities');
-			Route::post('/activity/upload-massive', 'uploadMassive');
-			Route::get('/{checklist}/activities', 'listActivitiesByChecklist');
-			Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
-
-			Route::get('/segments/{checklist}', 'getSegments')->name('checklist.getSegments');
-			Route::get('/{checklist}/supervisor-segmentation', 'supervisorSegmentation')->name('checklist.supervisorSegmentation');
-			Route::post('/{checklist}/save-supervisor-segmentation', 'saveSupervisorSegmentation')->name('checklist.saveSupervisorSegmentation');
-
-			Route::put('/{checklist}/status', 'status');
-			
-		});
-	});
+		Route::get('/{checklist}/activities-by-areas', 'activitiesByArea')->name('checklist.activities');
+		Route::get('/{checklist}/activity/form-selects', 'formSelectsActivities');
+		Route::post('/activity/upload-massive', 'uploadMassive');
+		Route::get('/{checklist}/activities/list', 'listActivitiesByChecklist');
+		Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
+		Route::post('/{checklist}/activity/save', 'saveActivityByChecklist');
+		Route::delete('/{checklist}/activity/{activity}/destroy', 'deleteActivity');
+		/*ACTIVITIES*/
+		/* SEGMENTATION*/
+		Route::get('/segments/{checklist}', 'getSegments')->name('checklist.getSegments');
+		Route::get('/{checklist}/supervisor-segmentation', 'supervisorSegmentation')->name('checklist.supervisorSegmentation');
+		Route::post('/{checklist}/save-supervisor-segmentation', 'saveSupervisorSegmentation')->name('checklist.saveSupervisorSegmentation');
+		/* SEGMENTATION*/
+		/*CHECKLIST*/
+		Route::get('/search', 'listChecklists');
+		Route::get('/search-courses', 'searchCourses');
+		Route::get('/{checklist}/verify-next-step', 'verifyNextStep');
+		Route::get('/form-selects', 'getFormSelects');
+		Route::post('/store', 'storeChecklist');
+		Route::get('/{checklist}/edit', 'editChecklist');
+		Route::put('/{checklist}/update', 'updateChecklist');
+		Route::put('/{checklist}/status', 'status');
+		Route::get('/{checklist}/change-agrupation', 'changeAgrupation');
+		/* CHECKLIST*/
+		/* TEMATICAS*/
+		Route::post('/{checklist}/tematica/save','saveTematica');
+		Route::post('/{checklist}/tematica/edit','editTematica');
+		/* TEMATICAS*/
+		/* AREAS*/
+		Route::get('/areas', 'listAreas');
+		Route::post('/save-area','saveArea');
+		/* AREAS*/
 });
 
 ?>

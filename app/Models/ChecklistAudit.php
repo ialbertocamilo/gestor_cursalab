@@ -21,6 +21,8 @@ class ChecklistAudit extends BaseModel
         'model_type',
         'model_id',
         'date_audit',
+        'starts_at',
+        'finishes_at'
     ];
 
     protected $casts = [
@@ -99,44 +101,144 @@ class ChecklistAudit extends BaseModel
             ChecklistActivityAudit::insert($_checklist_audit);
         } 
     }
-    protected function saveActivitiy($checklist,$data){
+    protected function saveActivity(Checklist $checklist, array $data,$action_request): array
+    {
+        $user = auth()->user();
+        $checklist->load(['type:id,name,code', 'modality:id,name,code']);
+        $criterionValueUserEntity = $this->getCriterionValueUserEntity($checklist, $user);
+
+        $modelType = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+        $dateAudit = now();
+        $modelId = $checklist->modality->code === 'qualify_entity' ? $criterionValueUserEntity->id : $user->id;
+        
+        $checklistActivityAuditToUpdate = [];
+        $checklistActivityAuditToCreate = [];
+
+        if ($checklist->modality->code === 'qualify_user') {
+            foreach ($data['users_id'] as $userId) {
+                $this->processAudit($action_request,$checklist, $data, $user, $modelType, $userId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
+            }
+        } else {
+            $this->processAudit($action_request,$checklist, $data, $user, $modelType, $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
+        }
+        ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
+        ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToUpdate,'update');
         return [
-            'message' => 'Se guardo la actividad correctamente'
+            'message' => 'Actividad actualizada.'
         ];
-        // $user = auth()->user();
-        // $checklist->load('type:id,name,code');
-        // $checklist->load('modality:id,name,code');
-        // $activities = $data['activities'];
-        // $criterion_value_user_entity = null;
-        // if($checklist->modality->code == 'qualify_entity'){
-        //     $workspace_entity_criteria = Workspace::select('checklist_configuration')
-        //         ->where('id', $user->subworkspace->parent->id)
-        //         ->first()?->checklist_configuration?->entities_criteria;
-        //     $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
-        // }
-
-        // $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
-        // $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
-        // $date_audit = now();
-        // $checklist_audit = ChecklistAudit::createOrIgnore([
-        //     ['identifier_request' => $data['identifier_request'],
-        //     'checklist_id' => $checklist->id,
-        //     'auditor_id' => $user->id,
-        //     'date_audit' => $date_audit,]
-        // ]);
-
-        // $_checklist_audit = [
-        //     'checklist_audit_id' => $checklist_audit->id,
-        //     'identifier_request'=> $data['identifier_request'],
-        //     'qualification_id'=> $activity['qualification_id'],
-        //     'photo'=> $photo,
-        //     'checklist_id'=>$checklist->id,
-        //     'checklist_activity_id'=>$activity['id'],
-        //     'auditor_id' => $user->id,
-        //     'date_audit' => $date_audit,
-        // ];
-        // ChecklistActivityAudit::insert($_checklist_audit);
     }
+
+    protected function getCriterionValueUserEntity(Checklist $checklist, User $user): ?CriterionValue
+    {
+        if ($checklist->modality->code !== 'qualify_entity') {
+            return null;
+        }
+
+        $workspaceEntityCriteria = Workspace::select('checklist_configuration')
+            ->where('id', $user->subworkspace->parent->id)
+            ->first()?->checklist_configuration?->entities_criteria;
+
+        return $user->criterion_values->whereIn('criterion_id', $workspaceEntityCriteria)->first();
+    }
+
+    protected function processAudit($action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate): void
+    {
+        $dateAudit = $dateAudit->format('Y-m-d H:i:s');
+        $checklist_audit = ChecklistAudit::where('checklist_id',$checklist->id)
+                    ->where('auditor_id',$user->id)
+                    ->where('model_type',$modelType)
+                    ->where('model_id',$modelId)
+                    ->when($checklist->extra_attributes['view_360'], function($q) use($user){
+                        $q->where('auditor_id',$user->id);
+                    })
+                    ->whereNull('finishes_at')->first();
+        $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user);
+        if(!$checklist_audit){
+            $checklist_audit = ChecklistAudit::insert([
+                'checklist_id' => $checklist->id,
+                'auditor_id' => $user->id,
+                'date_audit' => $date_audit,
+                'model_type' => $model_type,
+                'model_id' => $model_id,
+                'starts_at' => $dateAudit
+            ]);
+        }
+        $checklistActivityAudit = ChecklistActivityAudit::where([
+            'checklist_audit_id' => $checklist_audit->id,
+            'checklist_id' => $checklist->id,
+            'checklist_activity_id' => $data['activity_id'],
+        ])->first();
+
+        if ($checklistActivityAudit) {
+            $checklistActivityAudit = $checklistActivityAudit->toArray();
+            // $checklistActivityAudit['date_audit'] = $dateAudit;
+            $checklist_activity_update = [
+                'id' => $checklistActivityAudit['id'],
+                'date_audit' => $dateAudit,
+            ];
+            switch ($action_request) {
+                case 'qualification':
+                    $historicQualification = [
+                        'qualification_id' => $data['qualification_id'],
+                        'date_audit' => $dateAudit
+                    ];
+                    $checklist_activity_update['qualification_id'] = $data['qualification_id'];
+                    $checklist_activity_update['historic_qualification'][] = $historicQualification;
+                    $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
+                    break;
+                case 'insert-photo':
+                    if(isset($data['file_photo'])){
+                        // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
+                        $str_random = Str::random(5);
+                        $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+                        $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+                        Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
+                        if(is_array($checklistActivityAudit['photo'])){
+                            $checklist_activity_update['photo'][] = [
+                                'url'=>$photo,
+                                'datetime' => $dateAudit
+                            ];
+                        }else{
+                            $checklist_activity_update['photo'] = [];
+                            $checklist_activity_update['photo'][] = [
+                                'url'=>$photo,
+                                'datetime' => $dateAudit
+                            ];
+                        }
+                        $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo'] );
+                    }
+                break;
+                default:
+                    break;
+            }
+            $checklistActivityAuditToUpdate[] = $checklist_activity_update;
+        } else {
+            $photos = [];
+            if(isset($data['file_photo'])){
+                // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
+                $str_random = Str::random(5);
+                $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+                $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+                Media::uploadMediaBase64(name:'', path:$photo, base64:$activity['file_photo'],save_in_media:false,status:'private');
+                $photos[] = [
+                    'url'=>$photo,
+                    'datetime' => $dateAudit
+                ];
+            }
+            $checklistActivityAuditToCreate[] = [
+                'checklist_audit_id' => $checklist_audit->id,
+                'qualification_id' => $data['qualification_id'] ?? null,
+                'qualification_id' => $data['qualification_id'] ?? null,
+                'photo' => json_encode($photos),
+                'checklist_id' => $checklist->id,
+                'checklist_activity_id' => $data['activity_id'],
+                'auditor_id' => $user->id,
+                'date_audit' => $dateAudit,
+                'historic_qualification' => json_encode([$historicQualification]),
+            ];
+        }
+    }
+
     protected function listProgress($checklist){
         $user = auth()->user();
         $checklist->loadMissing('modality:id,name,icon,alias');
@@ -179,5 +281,19 @@ class ChecklistAudit extends BaseModel
                 'activities' => $activities
             ]
         ];
+    }
+
+    protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false){
+        return ChecklistAudit::where('checklist_id',$checklist->id)
+                                ->where('model_type',$model_type)
+                                ->where('model_id',$model_id)
+                                ->when($checklist->extra_attributes['view_360'], function($q) use($user){
+                                    $q->where('auditor_id',$user->id);
+                                })
+                                ->whereNull('finishes_at')
+                                ->when($with_audit_activities, function($q){
+                                    $q->with('audit_activities:checklist_activity_id,qualification_id,photo');
+                                })
+                                ->first();
     }
 }

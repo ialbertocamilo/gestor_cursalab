@@ -2,7 +2,7 @@
     <v-combobox
         attach
         hide-details="auto"
-        outlined multiple
+        outlined 
         :item-text="itemText"
         item-value="id"
         :rules="rules"
@@ -27,13 +27,14 @@
                             {{ searchTag }}
                         </v-chip>
                     </v-list-item-title>
-                    <v-list-item-subtitle
-                        v-text="'Presiona TAB o ENTER para agregar el tag'"/>
+                    <v-list-item-subtitle>
+                        {{ messageToCreate }}
+                    </v-list-item-subtitle>
                 </v-list-item-content>
             </v-list-item>
         </template>
         <template v-slot:selection="{ attrs, item, parent, selected, index }"
-                  v-if="multiple">
+                  >
             <v-chip
                 v-bind="attrs"
                 :input-value="selected"
@@ -101,6 +102,10 @@ export default {
         itemText: {
             type: String,
             default: 'nombre'
+        },
+        messageToCreate:{
+            type:String,
+            default:'Presiona TAB o ENTER para agregar el tag'
         }
     },
     created() {

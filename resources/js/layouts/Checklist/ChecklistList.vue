@@ -25,6 +25,7 @@
                     </v-col>
                 </v-row>
             </v-card-text>
+            <!-- @activities="openFormModal(modalActivities,$event, null,'Crear Checklist > Actividades')" -->
             <DefaultTable
                 :ref="dataTable.ref"
                 :data-table="dataTable"
@@ -36,7 +37,6 @@
                 @status="openFormModal(modalStatusOptions, $event, 'status', 'Cambio de estado de un <b>checklist</b>')"
                 @logs="openFormModal(modalLogsOptions,$event,'logs',`Logs del Checklist - ${$event.title}`)"
                 @segmentation="openFormModal(modalFormSegmentationOptions, $event, 'segmentation', `Segmentación del checklist - ${$event.title}`)"
-                @activities="openFormModal(modalActivities,$event, null,'Crear Checklist > Actividades')"
                 @supervisors="openFormModal(modalSupervisorOptions,$event,null,`Vinculación de auditores - ${$event.title}`)"
             />
             <!-- @alumnos="openFormModal(modalOptions, $event, 'ver_alumnos', 'Alumnos')" -->
@@ -213,8 +213,9 @@ export default {
                     {
                         text: "Actividades",
                         icon: 'mdi mdi-book-variant',
-                        type: 'action',
-                        method_name: 'activities',
+                        // method_name: 'activities',
+                        type: 'route',
+                        route: 'activities_route',
                         conditionalBadgeIcon: [{
                             message: 'No tienes actividades en el checklist',
                             minValue: 0,

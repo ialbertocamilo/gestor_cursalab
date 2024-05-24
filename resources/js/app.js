@@ -112,6 +112,8 @@ Vue.component("posteos-compatibles", require("./layouts/Compatibles.vue"));
 Vue.component("entrenadores-layout", require("./layouts/Entrenadores/EntrenadoresListPage.vue"));
 // Vue.component("entrenadores-layout", require("./layouts/Entrenadores/EntrenadoresLayout3.vue"));
 Vue.component("checklist-layout", require("./layouts/Checklist/ChecklistList.vue"));
+Vue.component('checklist-activities-layout',require("./layouts/Checklist/ActivitiesList.vue"))
+
 // Vue.component("checklist-layout", require("./layouts/Checklist/ChecklistLayout.vue"));
 Vue.component("evaluacion-form", require("./components/Evaluaciones/Evaluacion"));
 

@@ -265,7 +265,8 @@ class RestChecklistController extends Controller
 
     public function saveActivity(Checklist $checklist,Request $request){
         $data = $request->all();
-        $response = ChecklistAudit::saveActivitiy($checklist,$data);
+        $action_request = $request->action_request;
+        $response = ChecklistAudit::saveActivity($checklist,$data,$action_request);
         return $this->success($response);
     }
 }

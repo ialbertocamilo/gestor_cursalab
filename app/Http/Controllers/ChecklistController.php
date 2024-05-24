@@ -7,6 +7,7 @@ use App\Models\Taxonomy;
 use App\Models\CheckList;
 use App\Models\Criterion;
 use Illuminate\Http\Request;
+use App\Models\CheckListItem;
 use App\Http\Requests\ChecklistStoreRequest;
 use App\Http\Resources\ChecklistSearchResource;
 
@@ -32,9 +33,9 @@ class ChecklistController extends Controller
         $checklist->load('modality:id,name,code,extra_attributes');
         $checklist->load('type:id,name,code,extra_attributes');
         $checklist->load('course:id,name');
-        $checklist->evaluation_types  = Taxonomy::select('id','name','code','extra_attributes')
+        $checklist->evaluation_types  = isset($checklist->extra_attributes['evaluation_types_id']) ? Taxonomy::select('id','name','code','extra_attributes')
                                                 ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
-                                                ->get();
+                                                ->get() : [];
         return $this->success([
             'checklist'=>$checklist
         ]);
@@ -56,13 +57,12 @@ class ChecklistController extends Controller
         return $this->success($paginatedChecklist);
     }
 
-    public function formSelectsActivities(){
-        $checklist_type_response = Taxonomy::getDataForSelect('checklist', 'type_response_activity');
-        $is_checklist_premium = boolval(get_current_workspace()->functionalities()->where('code','checklist-premium')->first());
-        return $this->success(['checklist_type_response'=>$checklist_type_response,'is_checklist_premium'=>$is_checklist_premium]);
+    public function formSelectsActivities(CheckList $checklist){
+        $data = CheckListItem::formSelectsActivities($checklist);
+        return $this->success($data);
     }
     public function listActivitiesByChecklist(CheckList $checklist){
-        $checklist->load('activities','activities.checklist_response:id,name','activities.custom_options:id,group,type,name,code');
+        $checklist->load('activities','activities.checklist_response:id,name,code','activities.custom_options:id,group,type,name,code');
         return $this->success([
             'activities'=>$checklist->activities
         ]);
@@ -73,7 +73,16 @@ class ChecklistController extends Controller
         $data['msg'] = 'Actividades creadas correctamente.';
         return $this->success($data);
     }
-
+    public function saveActivityByChecklist(CheckList $checklist,Request $request){
+        $activity = $request->get('activity'); 
+        $data = CheckListItem::saveActivity($checklist,$activity);
+        $data['msg'] = 'Actividad actualizada correctamente.';
+        return $this->success($data);
+    }
+    public function deleteActivity(CheckList $checklist,CheckListItem $activity){
+        $activity->delete();
+        return $this->success(['msg'=>'Actividad eliminada correctamente.']);
+    }
     public function getSegments(CheckList $checklist){
         $response = Checklist::getSegments($checklist);
         return $this->success($response);
@@ -117,5 +126,35 @@ class ChecklistController extends Controller
     public function uploadMassive(Request $request){
         $activities = Checklist::uploadMassive($request);
         return $this->success(['activities'=>$activities]);
+    }
+
+    public function listAreas(){
+        $areas = Taxonomy::getDataForSelectWorkspace('checklist','areas');
+        return $this->success(['areas'=>$areas]);
+    }
+
+    public function saveArea(Request $request){
+        CheckListItem::saveArea($request->all());
+    }
+    public function activitiesByArea(Checklist $checklist){
+        $data = CheckListItem::groupByAreas($checklist);
+        return $this->success($data);
+    }
+    public function saveTematica(Checklist $checklist,Request $request){
+        $area_id = $request->get('area_id');
+        $workspace = get_current_workspace();
+        $data = CheckListItem::saveTematica($checklist->id,$area_id,$workspace);
+        return $this->success(['msg'=>'Se creó temática correctamente']);
+    }
+
+    public function editTematica(Checklist $checklist,Request $request){
+        $tematica = $request->get('tematica');
+        $data = CheckListItem::editTematica($tematica);
+        return $this->success(['msg'=>'Se edito la temática correctamente']);
+    }
+
+    public function changeAgrupation(Checklist $checklist){
+        CheckListItem::changeAgrupation($checklist);
+        return $this->success(['msg'=>'Se cambió el tipo de agrupación']);
     }
 }

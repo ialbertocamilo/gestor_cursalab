@@ -5,6 +5,8 @@
         :label="localBoolean ? labelTrue : labelFalse"
         @change="updateValue"
         :disabled="disabled"
+        :dense="dense"
+        :hide-details="hideDetails"
     ></v-checkbox>
 </template>
 
@@ -26,6 +28,14 @@ export default {
         disabled:{
             type: Boolean,
             default: false
+        },
+        dense:{
+            type:Boolean,
+            default:false
+        },
+        hideDetails:{
+            type:Boolean,
+            default:false
         }
     },
     data() {

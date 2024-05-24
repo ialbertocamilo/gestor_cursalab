@@ -1102,13 +1102,14 @@ class CheckList extends BaseModel
         ]);
 
         $activities = [];
-        
-        $activities_progress = ChecklistActivityAudit::select('id','checklist_activity_id','qualification_id','photo')
-                                ->where('checklist_id',$checklist->id)
-                                ->whereIn('checklist_activity_id',$checklist->activities->pluck('id'))
-                                ->when($checklist->extra_attributes['view_360'], function($q) use($user){
-                                    $q->where('auditor_id',$user->id);
-                                })->get();
+        $activities_progress = collect();
+        if ($checklist->modality->code != 'qualify_user') {
+            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+            $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,true);
+            $activities_progress = $checklist_audit?->audit_activities ?? collect();
+        }
         $has_themes = true;
         $theme = [
             'name' => 'Temática 1',
@@ -1125,6 +1126,14 @@ class CheckList extends BaseModel
                 $system_calification = $activity->custom_options()->select('id','name','color')->get();
             }
             $progress = $activities_progress->where('checklist_activity_id',$activity->id)->first();
+            $photos = $progress?->photo;
+            $list_photos = [];
+            if($photos && count($photos) > 0){
+                foreach ($photos as $photo) {
+                    $photo['url'] = get_media_url($photo['url']);
+                    $list_photos[] = $photo; 
+                }
+            }
             $activities[]  = [
                 'id'=>$activity->id,
                 'name'=> $has_themes ? $theme['name'].' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
@@ -1139,7 +1148,7 @@ class CheckList extends BaseModel
                     ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
                     ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
                 ],
-                'photo' => get_media_url($progress?->photo) ?? null ,
+                'photo' => $list_photos,
                 'qualification_id'=> $progress?->qualification_id ?? null,
             ];
         }
@@ -1182,7 +1191,8 @@ class CheckList extends BaseModel
                 "imagen" => get_media_url($checklist->imagen,'s3'),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
-                "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
+                "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
+                'required_action_plan' => $checklist->extra_attributes['required_action_plan'],
                 "type" => $checklist->type,
                 "theme"=>$theme,
                 'activities' => $activities
