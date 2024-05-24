@@ -1235,6 +1235,7 @@ export default {
                         }
                     }
                 }
+
                 else {
                     let sum_act = 0;
                     stage.activities.forEach(element => {
