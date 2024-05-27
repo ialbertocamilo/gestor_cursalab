@@ -1107,7 +1107,7 @@ class CheckList extends BaseModel
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
             $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
             $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
-            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,true);
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
             $activities_progress = $checklist_audit?->audit_activities ?? collect();
         }
         $has_themes = isset($checklist->extra_attributes['gruped_by_areas_and_tematicas'])
