@@ -370,6 +370,7 @@ class Segment extends BaseModel{
 
                     if ($g['days_greater_than'] || $g['days_less_than']) {
 
+                        $durationDescription = '';
                         if ($g['days_duration']) {
                             $durationDescription = "(Durante {$g['days_duration']} días)";
                         }
