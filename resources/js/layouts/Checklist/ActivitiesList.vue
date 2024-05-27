@@ -180,7 +180,7 @@
                                                                                         <v-row class="ml-12">
                                                                                             <v-col cols="12">
                                                                                                 <draggable v-model="tematica.activities" @start="drag=true"
-                                                                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(area, $event)">
+                                                                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(acitivity, $event)">
                                                                                                     <transition-group type="transition" name="flip-list" tag="div">
                                                                                                         <div v-for="(activity,index_activity) in tematica.activities"
                                                                                                             :key="'act_'+activity.id">
@@ -215,7 +215,7 @@
                                                                                                                                             <i class="pr-1 mdi mdi-file-document-check"></i>
                                                                                                                                             Tipo de repuesta: {{ activity.checklist_response.name }}
                                                                                                                                         </v-chip>
-                                                                                                                                        <v-chip small v-if="activity.extra_attributes.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                                                                                                                        <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
                                                                                                                                             <i class="pr-1 mdi mdi-file-chart"></i>
                                                                                                                                             Será evaluable
                                                                                                                                         </v-chip>
@@ -263,7 +263,7 @@
                                                                                                                                                 label="Tipo de respuesta"
                                                                                                                                             />
                                                                                                                                         </v-col>
-                                                                                                                                        <v-col cols="2" class="d-flex align-items-center">
+                                                                                                                                        <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
                                                                                                                                             <v-checkbox
                                                                                                                                                 class="my-0 mr-2 checkbox-label"
                                                                                                                                                 label="Evaluable"
@@ -408,11 +408,11 @@
                 </v-row>
                 <v-row v-else>
                     <v-col cols="12">
-                        <draggable v-model="activities" @start="drag=true"
-                                @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(area, $event)">
+                        <draggable v-model="activities" @start="drag_only_activities=true"
+                                @end="drag_only_activities=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(activities, $event)">
                             <transition-group type="transition" name="flip-list" tag="div">
                                 <div v-for="(activity,index_activity) in activities"
-                                    :key="'act_'+activity.id">
+                                    :key="'act_only'+activity.id">
                                     <div class="item-draggable areas areas_tematicas">
                                         <v-row class="elevation-2 my-2">
                                             <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
@@ -421,6 +421,7 @@
                                             </v-col>
                                             <v-row class="col-11 px-0 mx-0" >
                                                 <v-col cols="12" class="px-0">
+                                                    {{ activity.activity }}
                                                     <DefaultRichText
                                                         clearable
                                                         :height="150"
@@ -428,7 +429,7 @@
                                                         label="Actividad de checklist"
                                                         :ignoreHTMLinLengthCalculation="true"
                                                         :key="`${activity.id}-editor`"
-                                                        ref="descriptionRichText1"
+                                                        :ref="`descriptionRichText1-${activity.id}`"
                                                         customSelectorImage
                                                     />
                                                 </v-col>
@@ -444,7 +445,7 @@
                                                                     <i class="pr-1 mdi mdi-file-document-check"></i>
                                                                     Tipo de repuesta: {{ activity.checklist_response.name }}
                                                                 </v-chip>
-                                                                <v-chip small v-if="activity.extra_attributes.is_evaluable" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                                                <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
                                                                     <i class="pr-1 mdi mdi-file-chart"></i>
                                                                     Será evaluable
                                                                 </v-chip>
@@ -492,7 +493,7 @@
                                                                         label="Tipo de respuesta"
                                                                     />
                                                                 </v-col>
-                                                                <v-col cols="2" class="d-flex align-items-center">
+                                                                <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
                                                                     <v-checkbox
                                                                         class="my-0 mr-2 checkbox-label"
                                                                         label="Evaluable"
@@ -686,6 +687,7 @@ export default {
     data() {
         return {
             panel: [],
+            drag_only_activities:false,
             gruped_by_areas_and_tematicas : false,
             panel_tematica:[],
             breadcrumbs: [
@@ -842,11 +844,11 @@ export default {
             ]
         }
     },
-    mounted() {
+   async mounted() {
         let vue = this;
         vue.setChecklistSinceUrl();
-        vue.loadSelects();
-        vue.loadData();
+        await vue.loadSelects();
+        await vue.loadData();
     },
     methods: {
         async loadSelects(){
@@ -869,9 +871,9 @@ export default {
             const checklist_id = window.location.pathname.split('/')[4];
             vue.checklist_id = checklist_id;
         },
-        loadData(){
+        async loadData(){
             let vue = this;
-            vue.$http.get(`/entrenamiento/checklist/v2/${vue.checklist_id}/activities-by-areas`).then(({data})=>{
+            await vue.$http.get(`/entrenamiento/checklist/v2/${vue.checklist_id}/activities-by-areas`).then(({data})=>{
                 if(vue.gruped_by_areas_and_tematicas){
                     vue.areas = data.data;
                 }else{
@@ -989,6 +991,23 @@ export default {
                 vue.loadSelects();
                 vue.loadData();
                 vue.$emit('onConfirm')
+            })
+        },
+        async changePositionActivity(activities,event){
+            let vue = this
+            if (activities.length > 0) {
+                let index = 0
+                activities.forEach(element => {
+                    index = index + 1
+                    element.position = index
+                });
+                vue.activities = activities
+            }
+            await vue.$http.post(`/entrenamiento/checklist/v2/${vue.checklist_id}/activity/change-position`,{
+                activities:activities
+            }).then(()=>{
+                // vue.loadData();
+                vue.showAlert('Se actualizó la posición correctamente.','success');
             })
         }
     }

@@ -576,7 +576,7 @@ export default {
             vue.closeSimpleModal(vue.modalChecklistModality);
             switch (next_step) {
                 case 'create_activities':
-                    vue.openFormModal(vue.modalActivities, checklist, null,'Crear Checklist > Actividades');
+                    window.location.href = `/entrenamiento/checklist/v2/${checklist.id}/activities`;
                 break;
                 case 'segmentation_card':
                     vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`)

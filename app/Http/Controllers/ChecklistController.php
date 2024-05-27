@@ -142,7 +142,10 @@ class ChecklistController extends Controller
         CheckListItem::editArea($request->all());
         return $this->success(['msg' => 'Área actualizada correctamente.']);
     }
-
+    public function chengePositionActivities(Checklist $checklist,Request $request){
+        CheckListItem::chengePositionActivities($checklist,$request->get('activities'));
+        return $this->success(['msg' => 'Posición actualizado correctamente.']);
+    }
     public function activitiesByArea(Checklist $checklist){
         $data = CheckListItem::groupByAreas($checklist);
         return $this->success($data);

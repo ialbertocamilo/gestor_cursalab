@@ -66,6 +66,7 @@ Route::controller(ChecklistController::class)
 		Route::get('/{checklist}/activities/list', 'listActivitiesByChecklist');
 		Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
 		Route::post('/{checklist}/activity/save', 'saveActivityByChecklist');
+		Route::post('/{checklist}/activity/change-position', 'chengePositionActivities');
 		Route::delete('/{checklist}/activity/{activity}/destroy', 'deleteActivity');
 		/*ACTIVITIES*/
 		/* SEGMENTATION*/

@@ -1097,11 +1097,11 @@ class CheckList extends BaseModel
         $user = auth()->user();
         $checklist->loadMissing([
             'type:id,name,code,color',
-            'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position',
+            'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position,tematica_id,area_id',
             'activities.checklist_response:id,code',
         ]);
 
-        $activities = [];
+        $_activities = [];
         $activities_progress = collect();
         if ($checklist->modality->code != 'qualify_user') {
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
@@ -1110,12 +1110,24 @@ class CheckList extends BaseModel
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,true);
             $activities_progress = $checklist_audit?->audit_activities ?? collect();
         }
-        $has_themes = true;
-        $theme = [
-            'name' => 'Temática 1',
-            'area' => 'Area 1',
-        ];
-        foreach ($checklist->activities as $index => $activity) {
+        $has_themes = isset($checklist->extra_attributes['gruped_by_areas_and_tematicas'])
+                    ? $checklist->extra_attributes['gruped_by_areas_and_tematicas'] 
+                    : false;
+
+        $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active')->get(); 
+        $_activities = $checklist->activities;
+        if($has_themes){
+            if($request->theme_id){
+                $_activities = $checklist->activities->where('tematica_id',$theme_id)->values();
+            }else{
+                $_activities = $checklist->activities->where('tematica_id',$taxonomy_tematicas->first()->id);
+            }
+        }
+        foreach ($taxonomy_tematicas as $tematica) {
+            $tematica->count_activities = $checklist->activities->where('tematica_id',$tematica->id)->count();
+            $tematica->finished = false;
+        }
+        foreach ($_activities as $index => $activity) {
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
                 $system_calification = Taxonomy::select(
@@ -1134,9 +1146,10 @@ class CheckList extends BaseModel
                     $list_photos[] = $photo; 
                 }
             }
+            $theme = $taxonomy_tematicas->where('id',$activity->tematica_id)->first();
             $activities[]  = [
                 'id'=>$activity->id,
-                'name'=> $has_themes ? $theme['name'].' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
+                'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
                 'description'=> $activity->activity,
                 'can_comment'=> $extra_attributes['comment_activity'],
                 'can_upload_image'=> $extra_attributes['photo_response'],
@@ -1161,6 +1174,7 @@ class CheckList extends BaseModel
         if($user_id){
             $user_checklist = User::select('name','lastname','surname')->where('id',$user_id)->first();
         }
+        
         return [
             'user'=>[
                 'fullname' => $user_checklist?->fullname
@@ -1172,21 +1186,22 @@ class CheckList extends BaseModel
                     "name"=> $criterion_value_user_entity?->value_text,
                     "icon"=>"store",
                 ],
-                'has_themes' => true,
-                'list_themes'=>[
-                    [
-                        'id'=> 1,
-                        'name' => 'Temática 1',
-                        'count_activities' => count($activities),
-                        'finished' => false,
-                    ],
-                    [
-                        'id'=> 2,
-                        'name' => 'Temática 2',
-                        'count_activities' => count($activities),
-                        'finished' => true,
-                    ],
-                ],
+                'has_themes' => $has_themes,
+                'list_themes' => $taxonomy_tematicas,
+                // 'list_themes'=>[
+                //     [
+                //         'id'=> 1,
+                //         'name' => 'Temática 1',
+                //         'count_activities' => count($activities),
+                //         'finished' => false,
+                //     ],
+                //     [
+                //         'id'=> 2,
+                //         'name' => 'Temática 2',
+                //         'count_activities' => count($activities),
+                //         'finished' => true,
+                //     ],
+                // ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
                 "imagen" => get_media_url($checklist->imagen,'s3'),
                 "description" => $checklist->description,
@@ -1207,6 +1222,18 @@ class CheckList extends BaseModel
                             course_segments:$checklist->segments,
                             addSelect:['name','lastname','surname']
                         );
+        $checklist->load('activities:id,checklist_id');
+        $count_activities = count($checklist->activities);
+        $completed = ChecklistAudit::select('id')->withCount(['audit_activities'])
+                    ->where('checklist_id',$checklist->id)
+                    ->whereIn('model_id',$users->pluck('id'))
+                    ->get()->filter(function($audit) use ($count_activities) {
+                        return $audit->audit_activities_count == $count_activities;
+                    });;
+        $count_users_completed = count($completed);
+        $percent_completed =  count($users)>0 ?  round($count_users_completed/count($users) * 100,2) : 0;
+        $count_users_pending = count($users) - $count_users_completed;
+        $percent_pending = count($users)>0 ? round($count_users_pending/count($users) * 100,2) : 0;
 
         foreach ($users as $user) {
             $user['status'] = [
@@ -1231,19 +1258,19 @@ class CheckList extends BaseModel
                 "imagen" => get_media_url($checklist->imagen,'s3'),
             ],
             'users' => $users,
-            'users_assigned'=>200,
+            'users_assigned'=> count($users),
             'status' => [
                 [
                     'name' => 'pendiente',
                     'code' => 'pending',
-                    'quantity' => 100,
-                    'percent' => '50%'
+                    'quantity' => $count_users_pending,
+                    'percent' => $percent_pending.'%'
                 ] ,
                 [
                     'name' => 'Realizado',
                     'code' => 'done',
-                    'quantity' => 100,
-                    'percent' => '50%'
+                    'quantity' =>  $count_users_completed,
+                    'percent' => $percent_completed.'%'
                 ] 
             ] 
         ];

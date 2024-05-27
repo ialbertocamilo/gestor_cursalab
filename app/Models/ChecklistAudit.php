@@ -113,11 +113,12 @@ class ChecklistAudit extends BaseModel
         
         $checklistActivityAuditToUpdate = [];
         $checklistActivityAuditToCreate = [];
-
         if ($checklist->modality->code === 'qualify_user') {
-            foreach ($data['users_id'] as $userId) {
-                $this->processAudit($action_request,$checklist, $data, $user, $modelType, $userId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
-            }
+            // if(isset($data['users_id'])){
+                foreach ($data['user_ids'] as $userId) {
+                    $this->processAudit($action_request,$checklist, $data, $user, $modelType, $userId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
+                }
+            // }
         } else {
             $this->processAudit($action_request,$checklist, $data, $user, $modelType, $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
         }
@@ -154,12 +155,12 @@ class ChecklistAudit extends BaseModel
                     ->whereNull('finishes_at')->first();
         $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user);
         if(!$checklist_audit){
-            $checklist_audit = ChecklistAudit::insert([
+            $checklist_audit = ChecklistAudit::create([
                 'checklist_id' => $checklist->id,
                 'auditor_id' => $user->id,
-                'date_audit' => $date_audit,
-                'model_type' => $model_type,
-                'model_id' => $model_id,
+                'date_audit' => $dateAudit,
+                'model_type' => $modelType,
+                'model_id' => $modelId,
                 'starts_at' => $dateAudit
             ]);
         }
@@ -209,7 +210,7 @@ class ChecklistAudit extends BaseModel
                     }
                 break;
                 default:
-                    break;
+                break;
             }
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
         } else {
@@ -219,7 +220,7 @@ class ChecklistAudit extends BaseModel
                 $str_random = Str::random(5);
                 $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
                 $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
-                Media::uploadMediaBase64(name:'', path:$photo, base64:$activity['file_photo'],save_in_media:false,status:'private');
+                Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
                 $photos[] = [
                     'url'=>$photo,
                     'datetime' => $dateAudit
@@ -234,7 +235,10 @@ class ChecklistAudit extends BaseModel
                 'checklist_activity_id' => $data['activity_id'],
                 'auditor_id' => $user->id,
                 'date_audit' => $dateAudit,
-                'historic_qualification' => json_encode([$historicQualification]),
+                'historic_qualification' => isset($data['qualification_id']) ? json_encode([[
+                    'qualification_id' => $data['qualification_id'],
+                    'date_audit' => $dateAudit
+                ]]) : '[]',
             ];
         }
     }

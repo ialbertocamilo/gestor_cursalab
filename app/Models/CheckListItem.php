@@ -60,6 +60,16 @@ class CheckListItem extends BaseModel
     }
 
     /*=================================================================================================================================== */
+    protected function chengePositionActivities($checklist,$activities){
+        $_activities = [];
+        foreach ($activities as $activity) {
+            $_activities[] = [
+                'id'=>$activity['id'],
+                'position'=>$activity['position'],
+            ];
+        }
+        batch()->update(new CheckListItem, $_activities, 'id');
+    }
     protected function guardarActividadByID($data)
     {
         $response['error'] = false;
@@ -164,12 +174,14 @@ class CheckListItem extends BaseModel
                     foreach ($activities_grouped_by_tematicas as $tematica_id => $activities_grouped_by_tematica) {
                         if($tematica_id){
                             $tematica = $taxonomy_tematicas->where('id',$tematica_id)->first();
-                            $tematicas[] = [
-                                'id' => $tematica->id,
-                                'name' => $tematica->name,
-                                'active' => $tematica->active,
-                                'activities' => $activities_grouped_by_tematica,
-                            ];
+                            if($tematica){
+                                $tematicas[] = [
+                                    'id' => $tematica->id,
+                                    'name' => $tematica->name,
+                                    'active' => $tematica->active,
+                                    'activities' => $activities_grouped_by_tematica,
+                                ];
+                            }
                         }
                     }
                     $data[] = [
@@ -182,6 +194,7 @@ class CheckListItem extends BaseModel
             }
         }else{
             $data['activities'] = $checklist->activities;
+            // ->sortBy('position')->values()->all();
         }
         return $data;
     }
