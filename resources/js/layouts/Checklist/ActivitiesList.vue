@@ -897,7 +897,7 @@ export default {
                     activity:activity
                 }).then(({data})=>{
                     vue.hideLoader();
-                    vue.loadData();
+                    // vue.loadData();
                     vue.showAlert('Se guardó la actividad correctamente.','success');
                 })
             }

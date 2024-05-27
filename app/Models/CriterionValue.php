@@ -103,7 +103,9 @@ class CriterionValue extends BaseModel
         $sort = $request->sortDesc == 'true' ? 'DESC' : 'ASC';
 
         $q->orderBy($field, $sort);
-
+        if($request->all){
+            return $q->get();
+        }
         return $q->paginate($request->paginate);
     }
 

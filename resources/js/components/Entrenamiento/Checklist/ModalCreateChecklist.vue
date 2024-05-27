@@ -335,11 +335,11 @@
                                             </template>
                                         </DefaultSimpleSection>
                                     </v-col>
-                                    <v-col cols="12">
+                                    <v-col cols="12" v-if="current_modality.code == 'qualify_entity'">
                                         <span>Calificación de entidad</span>
                                     </v-col>
                                     
-                                    <v-col cols="6" class="d-flex align-items-center">
+                                    <v-col cols="6" class="d-flex align-items-center" v-if="current_modality.code == 'qualify_entity'">
                                         <DefaultSelect 
                                             v-model="resource.extra_attributes.autocalificate_entity_criteria"
                                             :items="selects.criteria" 
@@ -356,13 +356,13 @@
                                             </span>
                                         </div>
                                     </v-col>
-                                    <v-col cols="6">
-                                        <DefaultSelect 
+                                    <v-col cols="6" v-if="current_modality.code == 'qualify_entity'">
+                                        <DefaultAutocomplete 
                                             v-if="resource.extra_attributes.autocalificate_entity_criteria"
                                             v-model="resource.extra_attributes.autocalificate_entity_criteria_value"
                                             :items="selects.criteria_values" 
                                             :disabled="!is_checklist_premium"
-                                            item-text="name"
+                                            item-text="value_text"
                                             item-value="id"
                                             show-required 
                                             label="Selecciona el valor del criterio del responsable"
@@ -733,12 +733,12 @@ export default {
         },
         async getCriteriaValues(criterion_id){
             let vue = this;
-            await vue.$http.get(`/criterios/${criterion_id}/valores/search`, {
+            await vue.$http.get(`/criterios/${criterion_id}/valores/search?all=true`, {
                 name: vue.resource.title,
                 type: 'checklist'
             }).then(({ data }) => {
                 console.log(data);
-                vue.selects.criteria_values = data.data.data;
+                vue.selects.criteria_values = data.data;
             });
         },
         setTypeChecklist(type_id){
