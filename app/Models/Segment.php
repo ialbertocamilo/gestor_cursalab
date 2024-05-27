@@ -742,7 +742,8 @@ class Segment extends BaseModel{
                 $endLimit = $startLimit + $duration;
 
                 $difference = $user_date_criterion_value->diffInDays($now);
-                $hasAValidDateRange = $startLimit != $endLimit
+
+                $hasAValidDateRange = $startLimit === $endLimit
                     ? $difference >= $startLimit
                     : $difference >= $startLimit &&  $difference <= $endLimit;
 
