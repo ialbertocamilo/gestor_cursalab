@@ -32,7 +32,7 @@ class ChecklistAudit extends BaseModel
 
     public function audit_activities()
     {
-        return $this->hasMany(CheckListActivityAudit::class, 'checklist_audit_id');
+        return $this->hasMany(ChecklistActivityAudit::class, 'checklist_audit_id');
     }
     public function getDateAuditAttribute($value)
     {
