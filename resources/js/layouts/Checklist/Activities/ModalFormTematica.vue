@@ -6,7 +6,7 @@
                     <v-row>
                         <v-col cols="12">
                             <DefaultInput
-                                label="Nueva Area"
+                                label="Nueva Temática"
                                 v-model="resource.name"
                                 placeholder="Escribe una temática"
                                 show-required
@@ -22,11 +22,7 @@
 </template>
 
 <script>
-import DefaultDeleteModal from "../../Default/DefaultDeleteModal";
-import DefaultCheckbox from "../../../components/globals/DefaultCheckBox";
-
 export default {
-    components:{DefaultDeleteModal,DefaultCheckbox},
     props: {
         options: {
             type: Object,

@@ -91,6 +91,7 @@ Route::controller(ChecklistController::class)
 		/* AREAS*/
 		Route::get('/areas', 'listAreas');
 		Route::post('/save-area','saveArea');
+		Route::post('/area/edit','editArea');
 		/* AREAS*/
 });
 

@@ -135,7 +135,14 @@ class ChecklistController extends Controller
 
     public function saveArea(Request $request){
         CheckListItem::saveArea($request->all());
+        return $this->success(['msg' => 'Área creada correctamente.']);
     }
+
+    public function editArea(Request $request){
+        CheckListItem::editArea($request->all());
+        return $this->success(['msg' => 'Área actualizada correctamente.']);
+    }
+
     public function activitiesByArea(Checklist $checklist){
         $data = CheckListItem::groupByAreas($checklist);
         return $this->success($data);

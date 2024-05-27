@@ -87,11 +87,43 @@ class CheckListItem extends BaseModel
                     'group' => 'checklist',
                     'type' => 'areas',
                     'name' => $_area['name'],
-                    'parent_id' => $data['checklist_id'],
+                    // 'parent_id' => $data['checklist_id'],
                     'active' => 1,
                 ]
             );
             self::saveTematica($data['checklist_id'],$area->id,$workspace);
+        }
+    }
+    protected function editArea($data){
+        switch ($data['type_edition']) {
+            case 'edit_area':
+                    Taxonomy::where('id',$data['area']['id'])->update([
+                       'name' =>  $data['area']['name']
+                    ]);
+                break;
+            case 'create_area':
+                $workspace = get_current_workspace();
+                $area = Taxonomy::create(
+                    [
+                        'workspace_id' => $workspace->id,
+                        'group' => 'checklist',
+                        'type' => 'areas',
+                        'name' => $data['area']['name'],
+                        'active' => 1,
+                    ]
+                );
+                Taxonomy::where('group','checklist')
+                        ->where('type','tematicas')
+                        ->where('parent_id',$data['area']['id'])->update([
+                            'parent_id' => $area->id
+                        ]);
+                self::where('area_id',$data['area']['id'])->where('checklist_id',$data['checklist_id'])->update([
+                    'area_id' => $area->id
+                ]);
+                break;
+            default:
+                # code...
+                break;
         }
     }
     protected function saveTematica($checklist_id,$area_id,$workspace){
@@ -135,6 +167,7 @@ class CheckListItem extends BaseModel
                             $tematicas[] = [
                                 'id' => $tematica->id,
                                 'name' => $tematica->name,
+                                'active' => $tematica->active,
                                 'activities' => $activities_grouped_by_tematica,
                             ];
                         }

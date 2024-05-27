@@ -66,7 +66,7 @@
                         <draggable v-model="areas" @start="drag=true"
                                     @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionArea(areas, $event)">
                                 <transition-group type="transition" name="flip-list" tag="div" key="transition-area">
-                                    <v-expansion-panels key="expansion-area" v-model="panel" multiple>
+                                    <v-expansion-panels key="expansion-area" v-model="panel" multiple flat>
                                         <v-expansion-panel
                                             v-for="(area,index_area) in areas"
                                             :key="area.id"
@@ -94,7 +94,7 @@
                                                         </v-col>
                                                         <v-col cols="3" class="bx_actions_area">
                                                             <div>
-                                                                <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="verifyStep">
+                                                                <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="openFormModal(modalAreaEditOptions,area,null,'Edición de áreas')">
                                                                     <v-icon class="ml-0 icon_size">
                                                                         mdi mdi-pencil
                                                                     </v-icon>
@@ -126,7 +126,7 @@
                                                             <draggable v-model="areas.tematicas" @start="drag=true"
                                                                     @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(area, $event)">
                                                                 <transition-group type="transition" name="flip-list" tag="div">
-                                                                    <v-expansion-panels key="expansion-area" v-model="panel_tematica" multiple>
+                                                                    <v-expansion-panels key="expansion-area" v-model="panel_tematica" multiple flat>
                                                                         <v-expansion-panel
                                                                             v-for="(tematica,index_tematica) in area.tematicas"
                                                                             :key="'act_'+tematica.id"
@@ -141,7 +141,7 @@
                                                                                                 </div>
                                                                                                 <div>
                                                                                                     <div class="d-flex align-items-center">
-                                                                                                        <span class="text_default">{{ tematica.name }}</span>
+                                                                                                        <span class="text_default fw-bold">{{ tematica.name }}</span>
                                                                                                     </div>
                                                                                                 </div>
                                                                                             </v-col>
@@ -150,7 +150,7 @@
                                                                                             </v-col>
                                                                                             <v-col cols="3" class="bx_actions_area">
                                                                                                 <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="openFormModal(modalTematicaOptions,tematica,null,'Editar temática')">
+                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openFormModal(modalTematicaOptions,tematica,null,'Editar temática')">
                                                                                                         <v-icon class="ml-0 icon_size">
                                                                                                             mdi mdi-pencil
                                                                                                         </v-icon>
@@ -158,15 +158,15 @@
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div>
-                                                                                                    <div class="btn_action"  :class="{'disabled': !area.active}">
+                                                                                                    <div class="btn_action"  :class="{'disabled': !tematica.active}">
                                                                                                         <v-icon class="ml-0 icon_size">
-                                                                                                            {{area.active ? 'fas fa-circle' : 'far fa-circle'}}
+                                                                                                            {{tematica.active ? 'fas fa-circle' : 'far fa-circle'}}
                                                                                                         </v-icon>
-                                                                                                        <span class="text_default">{{area.active ? 'Activo' : 'Inactivo'}}</span>
+                                                                                                        <span class="text_default">{{tematica.active ? 'Activo' : 'Inactivo'}}</span>
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !area.active}">
+                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}">
                                                                                                         <v-icon class="ml-0 icon_size">
                                                                                                             mdi mdi-trash-can
                                                                                                         </v-icon>
@@ -650,6 +650,13 @@
                 @onConfirm="closeFormModal(modalTematicaOptions);loadData()"
                 @onCancel="closeFormModal(modalTematicaOptions)"
             />
+            <ModalEditArea 
+                :options="modalAreaEditOptions"
+                :ref="modalAreaEditOptions.ref"
+                width="500px"
+                @onConfirm="closeFormModal(modalAreaEditOptions);loadData()"
+                @onCancel="closeFormModal(modalAreaEditOptions)"
+            />
             <ModalCreateChecklist
                 :ref="modalChecklist.ref"
                 :options="modalChecklist"
@@ -668,14 +675,14 @@
 import DefaultDeleteModal from "../Default/DefaultDeleteModal";
 import ModalFormArea from "./Activities/ModalFormArea";
 import ModalFormTematica from "./Activities/ModalFormTematica";
-
+import ModalEditArea from './Activities/ModalEditArea';
 import ModalAddActivity from "./Activities/ModalAddActivity";
 
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist";
 
 export default {
-    components: {DefaultDeleteModal,ModalFormArea,DefaultRichText,ModalCreateChecklist,ModalAddActivity,ModalFormTematica},
+    components: {DefaultDeleteModal,ModalFormArea,DefaultRichText,ModalCreateChecklist,ModalAddActivity,ModalFormTematica,ModalEditArea},
     data() {
         return {
             panel: [],
@@ -795,6 +802,15 @@ export default {
                 open: false,
                 showCloseIcon: true,
                 title:'Gestión de Áreas',
+                base_endpoint: '/entrenamiento/checklist/v2/',
+                confirmLabel:'Guardar',
+                persistent: true
+            },
+            modalAreaEditOptions:{
+                ref: 'modalAreaEditOptions',
+                open: false,
+                showCloseIcon: true,
+                title:'Edición de áreas',
                 base_endpoint: '/entrenamiento/checklist/v2/',
                 confirmLabel:'Guardar',
                 persistent: true
