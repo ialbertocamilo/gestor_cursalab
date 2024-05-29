@@ -11,7 +11,8 @@ class SegmentValue extends BaseModel
 
     protected $fillable = [
         'segment_id', 'criterion_id', 'criterion_value_id', 'type_id',
-        'starts_at', 'finishes_at', 'days_less_than', 'days_greater_than', 'days_duration'
+        'starts_at', 'finishes_at',
+        'days_less_than', 'days_greater_than', 'days_duration'
     ];
 
     public function segment()
