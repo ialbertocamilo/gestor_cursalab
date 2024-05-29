@@ -126,7 +126,7 @@ class RestQuizController extends Controller
         $data_ev['nombre_tema'] = $topic->name;
         $data_ev['nombre_curos'] = $topic->course->name;
         $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
-        $data_ev['image_qr'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
+        $data_ev['validator'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 
