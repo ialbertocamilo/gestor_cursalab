@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Resources\SegmentSearchUsersResource;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -357,13 +358,31 @@ class Segment extends BaseModel{
 
                 if ($criterion_code === 'date') :
 
-                    $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
-                    $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
+                    if ($g['starts_at']) {
+                        $starts_at = carbonFromFormat($g['starts_at'])->format('Y-m-d');
+                        $finishes_at = carbonFromFormat($g['finishes_at'])->format('Y-m-d');
 
-                    $new['date_range'] = [$starts_at, $finishes_at];
-                    $new['start_date'] = $starts_at;
-                    $new['end_date'] = $finishes_at;
-                    $new['name'] = "{$starts_at} - {$finishes_at}";
+                        $new['date_range'] = [$starts_at, $finishes_at];
+                        $new['start_date'] = $starts_at;
+                        $new['end_date'] = $finishes_at;
+                        $new['name'] = "{$starts_at} - {$finishes_at}";
+                    }
+
+                    if ($g['days_greater_than'] || $g['days_less_than']) {
+
+                        $durationDescription = '';
+                        if ($g['days_duration']) {
+                            $durationDescription = "(Durante {$g['days_duration']} días)";
+                        }
+
+                        $new['name'] = $g['days_greater_than'] > 0
+                            ? "Mayor a {$g['days_greater_than']} días. $durationDescription"
+                            : "Menor a {$g['days_less_than']} días";
+
+                        $new['greaterThan'] = $g['days_greater_than'];
+                        $new['duration'] = $g['days_duration'];
+                        $new['lessThan'] = $g['days_less_than'];
+                    }
                 endif;
 
                 if ($criterion_code === 'default') :
@@ -552,16 +571,42 @@ class Segment extends BaseModel{
 
         foreach ($criterion['values_selected'] ?? [] as $value) {
 
-            $start_date = $value['start_date'];
-            $end_date = $value['end_date'];
+            if (isset($value['start_date']) && isset($value['end_date'])) {
+                $start_date = $value['start_date'];
+                $end_date = $value['end_date'];
 
-            $temp[] = [
-                'id' => $value['segment_value_id'] ?? null,
-                'criterion_id' => $criterion['id'],
-                'starts_at' => $start_date,
-                'finishes_at' => $end_date,
-                'type_id' => NULL,
-            ];
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_id' => $criterion['id'],
+                    'starts_at' => $start_date,
+                    'finishes_at' => $end_date,
+                    'type_id' => NULL,
+                ];
+
+            } else if (isset($value['greaterThan']) || isset($value['lessThan'])) {
+
+                $greaterThan = (int)$value['greaterThan'] > 0
+                    ? (int)$value['greaterThan']
+                    : null;
+
+                $duration = (int)$value['greaterThan'] > 0
+                    ? (int)$value['duration']
+                    : null;
+
+                $lessThan = (int)$value['lessThan'] > 0
+                    ? (int)$value['lessThan']
+                    : null;
+
+                $temp[] = [
+                    'id' => $value['segment_value_id'] ?? null,
+                    'criterion_id' => $criterion['id'],
+                    'days_greater_than' => $greaterThan,
+                    'days_duration' => $duration,
+                    'days_less_than' => $lessThan,
+                    'type_id' => NULL,
+                ];
+            }
+
         }
 
         return $temp;
@@ -675,17 +720,41 @@ class Segment extends BaseModel{
     private function validateDateTypeCriteria($segment_values, $user_criterion_value_by_criterion)
     {
         $hasAValidDateRange = false;
+        $now = Carbon::now();
 
         foreach ($segment_values as $date_range) {
 
-            if (!$date_range['starts_at'] && !$date_range['finishes_at']) continue;
-
-            $starts_at = carbonFromFormat($date_range['starts_at']);
-            $finishes_at = carbonFromFormat($date_range['finishes_at']);
-
             $user_date_criterion_value = carbonFromFormat($user_criterion_value_by_criterion->first()->value_date, "Y-m-d");
 
-            $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
+            if ($date_range['starts_at'] && $date_range['finishes_at']) {
+                $starts_at = carbonFromFormat($date_range['starts_at']);
+                $finishes_at = carbonFromFormat($date_range['finishes_at']);
+
+                $hasAValidDateRange = $user_date_criterion_value->betweenIncluded($starts_at, $finishes_at);
+
+            } else if ($date_range['days_greater_than']) {
+
+                // When condition is days count
+                // relative to date value
+
+                $duration = $date_range['duration'] ?: 0;
+                $startLimit = $date_range['days_greater_than'];
+                $endLimit = $startLimit + $duration;
+
+                $difference = $user_date_criterion_value->diffInDays($now);
+
+                $hasAValidDateRange = $startLimit === $endLimit
+                    ? $difference >= $startLimit
+                    : $difference >= $startLimit &&  $difference <= $endLimit;
+
+            } else if ($date_range['days_less_than']) {
+
+                // When condition is days count
+                // relative to date value
+
+                $startLimit = $date_range['days_less_than'];
+                $hasAValidDateRange = $user_date_criterion_value->diffInDays($now) <= $startLimit;
+            }
 
             if ($hasAValidDateRange) break;
         }
