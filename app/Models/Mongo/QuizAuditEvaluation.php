@@ -10,32 +10,16 @@ class QuizAuditEvaluation extends Model
     protected $connection = 'mongodb';
     protected $collection = 'quiz_audit_evaluations';
     protected $fillable = [
-        "active_results",
-        "attempts",
-        "total_attempts",
-        "current_quiz_started_at",
-        "current_quiz_finishes_at",
-        "taking_quiz",
-        "preguntas" ,
-        "correct_answers",
-        "failed_answers",
-        "passed",
-        "answers" ,
-        "grade",
-        "status_id",
-        "ev_updated",
-        "contador",
-        "tema_siguiente",
-        "curso_id",
-        "tema_id",
-        "encuesta_pendiente",
+        "active_results","attempts","total_attempts","current_quiz_started_at","current_quiz_finishes_at",
+        "taking_quiz","preguntas" ,"correct_answers","failed_answers","passed","answers" ,
+        "grade","status_id","ev_updated","contador","tema_siguiente","curso_id",
+        "tema_id","encuesta_pendiente","last_time_evaluated_at"
     ];
     protected function saveDataAndGenerateQR($data,$user){
         unset($data['course']);
         unset($data['curso']);
-        $data['last_time_evaluated_at'] = $data['last_time_evaluated_at']->format('Y-m-d H:i:s');
-        unset($data['last_time_evaluated_at']);
         unset($data['ev_updated_msg']);
+        $data['last_time_evaluated_at'] = $data['last_time_evaluated_at']->format('Y-m-d H:i:s');
         // dd($data);
         $quiz_audit = self::create($data);
         $course_id = $data['curso_id'];
