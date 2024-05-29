@@ -126,6 +126,8 @@ class RestQuizController extends Controller
         $data_ev['nombre_tema'] = $topic->name;
         $data_ev['nombre_curso'] = $topic->course->name;
         $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $data_ev['passed'];
+        $passing_grade = Course::getModEval($topic->course,'nota_aprobatoria');
+        $data_ev['passing_grade'] = $passing_grade;
         $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
         $data_ev['validator'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
         return response()->json(['error' => false, 'data' => $data_ev], 200);
