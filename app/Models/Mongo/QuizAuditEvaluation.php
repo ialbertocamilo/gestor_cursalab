@@ -35,4 +35,21 @@ class QuizAuditEvaluation extends Model
         Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
         return ['image_qr' => get_media_url($path),'identifier' => $quiz_audit->id];
     }
+
+    protected function validateInfoQuiz($data){
+        $identifier = $data['identifier'] ?? null;
+        $course_id = (int) $data['course_id'] ?? null;
+        $topic_id = (int) $data['topic_id'] ?? null;
+        if(is_null($identifier) || is_null($course_id) || is_null($topic_id)){
+            return [];
+        }
+        $quiz_info = QuizAuditEvaluation::where('_id',$identifier)->where('curso_id',$course_id)->where('tema_id',$topic_id)->first();
+        if($quiz_info){
+            unset($quiz_info['_id']);
+            unset($quiz_info['answers']);
+            unset($quiz_info['updated_at']);
+            unset($quiz_info['created_at']);
+        }
+        return $quiz_info;
+    }
 }

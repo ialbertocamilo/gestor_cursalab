@@ -452,4 +452,12 @@ class RestQuizController extends Controller
 
         return $this->success(['msg' => 'Encuesta guardada.']);
     }
+    public function validateInfoQuiz(Request $request){
+        try {
+            $quiz_info = QuizAuditEvaluation::validateInfoQuiz($request->all());
+            return $this->success(['quiz_info' => $quiz_info]);
+        } catch (\Throwable $th) {
+            return $this->success(['quiz_info' => []]);
+        }
+    }
 }

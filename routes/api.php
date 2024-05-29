@@ -6,6 +6,7 @@ use App\Http\Controllers\GuestRestController;
 use App\Http\Controllers\ApiRest\AuthController;
 use App\Http\Controllers\ApiRest\RestController;
 use App\Http\Controllers\ApiRest\RestDataController;
+use App\Http\Controllers\ApiRest\RestQuizController;
 use App\Http\Controllers\ApiRest\RestAyudaController;
 use App\Http\Controllers\ApiRest\RestMeetingController;
 use App\Http\Controllers\ApiRest\RestVademecumController;
@@ -49,6 +50,8 @@ use App\Http\Controllers\ApiRest\AuthImpersonationController;
 Route::get('/rest/app_versions', [FirebaseController::class, 'appVersions']);
 
 Route::post('/quizz', [AuthController::class, 'quizz']);
+Route::get('/rest/validate-info-quiz', [RestQuizController::class, 'validateInfoQuiz']);
+
 Route::post('/reset', [AuthController::class, 'reset_password']);
 
 // Route::get('/test/get-data', [AuthImpersonationController::class, 'getData']);
