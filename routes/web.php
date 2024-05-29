@@ -147,7 +147,7 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
 
     Route::get('dashboard_pbi', [GeneralController::class, 'getPowerBiView'])->middleware('hasHability:learning-analytics');
 
-    Route::prefix('general')->middleware('hasHability:dashboard')->group(base_path('routes/cms/general.php'));
+    Route::prefix('general')->middleware(['hasHability:dashboard', 'hasHability:users'])->group(base_path('routes/cms/general.php'));
     Route::prefix('common')->group(base_path('routes/cms/common.php'));
 
 
