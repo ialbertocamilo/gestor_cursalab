@@ -4,19 +4,20 @@ namespace App\Http\Controllers\ApiRest;
 
 use Carbon\Carbon;
 use App\Models\Poll;
-use App\Models\PollQuestionAnswer;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Models\Topic;
 use App\Models\Question;
 use App\Models\Taxonomy;
-
 use App\Models\SummaryUser;
-
 use App\Models\Announcement;
 use App\Models\SummaryTopic;
+
+use Illuminate\Http\Request;
+
 use App\Models\SummaryCourse;
+use App\Models\PollQuestionAnswer;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Mongo\QuizAuditEvaluation;
 use App\Http\Requests\QuizzAnswerStoreRequest;
 
 
@@ -30,7 +31,7 @@ class RestQuizController extends Controller
         $is_offline = $request->is_offline;
         $created_at = $request->created_at;
         $topic = Topic::with('course.topics.evaluation_type')->find($request->tema);
-
+        
         if (count($request->respuestas) == 0)
             return response()->json(['error' => true, 'msg' => 'Respuestas no enviadas.'], 200);
 
@@ -123,7 +124,7 @@ class RestQuizController extends Controller
 
         // $data_ev['new_grade'] = calculateValueForQualification($data_ev['new_grade'], $topic->qualification_type->position);
         $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
-
+        $data_ev['image_qr'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 
