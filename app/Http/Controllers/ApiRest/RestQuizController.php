@@ -5,14 +5,15 @@ namespace App\Http\Controllers\ApiRest;
 use Carbon\Carbon;
 use App\Models\Poll;
 use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Question;
 use App\Models\Taxonomy;
 use App\Models\SummaryUser;
 use App\Models\Announcement;
+
 use App\Models\SummaryTopic;
 
 use Illuminate\Http\Request;
-
 use App\Models\SummaryCourse;
 use App\Models\PollQuestionAnswer;
 use App\Http\Controllers\Controller;
@@ -48,7 +49,6 @@ class RestQuizController extends Controller
         $new_grade = $correct_answers_score;
         // $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
         $passed = SummaryTopic::hasPassed($new_grade,null,$topic->course);
-
         $data_ev = [
             'active_results' => (bool) $topic->active_results,
             'attempts' => $row->attempts + 1,
@@ -121,8 +121,10 @@ class RestQuizController extends Controller
             $poll = $topic->course->polls()->first();
             $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
         }
-
-        // $data_ev['new_grade'] = calculateValueForQualification($data_ev['new_grade'], $topic->qualification_type->position);
+        $attempts_limit = Course::getModEval($topic->course,'nro_intentos') ?? 5;
+        $data_ev['remaining_attempts'] = $attempts_limit - $row->attempts;
+        $data_ev['nombre_tema'] = $topic->name;
+        $data_ev['nombre_curos'] = $topic->course->name;
         $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
         $data_ev['image_qr'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
         return response()->json(['error' => false, 'data' => $data_ev], 200);

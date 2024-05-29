@@ -33,6 +33,7 @@ class QuizAuditEvaluation extends Model
     protected function saveDataAndGenerateQR($data,$user){
         unset($data['course']);
         unset($data['curso']);
+        $data['last_time_evaluated_at'] = $data['last_time_evaluated_at']->format('Y-m-d H:i:s');
         unset($data['last_time_evaluated_at']);
         unset($data['ev_updated_msg']);
         // dd($data);
@@ -46,6 +47,6 @@ class QuizAuditEvaluation extends Model
         // Ruta donde se guardará la imagen en el servidor
         $path = 'validador-evaluacion-qr/'.$course_id.'/'.$name_image;
         Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
-        return get_media_url($path);
+        return ['image_qr' => get_media_url($path),'identifier' => $quiz_audit->id];
     }
 }
