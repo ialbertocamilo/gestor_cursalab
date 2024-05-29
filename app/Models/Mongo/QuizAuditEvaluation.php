@@ -14,7 +14,8 @@ class QuizAuditEvaluation extends Model
         "taking_quiz","preguntas" ,"correct_answers","failed_answers","passed","answers" ,
         "grade","status_id","ev_updated","contador","tema_siguiente","curso_id",
         "tema_id","encuesta_pendiente","last_time_evaluated_at",
-        "remaining_attempts","nombre_tema","nombre_curso","show_certification_to_user","passing_grade"
+        "remaining_attempts","nombre_tema","nombre_curso","show_certification_to_user","passing_grade",
+        "maximun_grade"
     ];
     protected function saveDataAndGenerateQR($data,$user){
         unset($data['course']);
