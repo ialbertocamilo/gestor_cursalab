@@ -671,7 +671,7 @@ export default {
                 let limit_descriptions_jarvis = document.getElementById("limit_descriptions_jarvis");
                 ia_descriptions_generated.textContent = parseInt(vue.limits_descriptions_generate_ia.ia_descriptions_generated);
                 limit_descriptions_jarvis.textContent = parseInt(vue.limits_descriptions_generate_ia.limit_descriptions_jarvis);
-            }, 1500);
+            }, 2500);
         },
         async confirm() {
             let vue = this;           

@@ -256,6 +256,9 @@ class CheckListItem extends BaseModel
                 ->whereNotIn('id',$options_id)
                 ->delete();
         }
+        return [
+            'activity_id' =>  $activity->id
+        ];
     }
 
     protected function editTematica($tematica){

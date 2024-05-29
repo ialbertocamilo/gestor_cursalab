@@ -162,7 +162,7 @@ export default {
         addAreaToList(){
             let vue = this;
             const _id = 'insert-'+vue.areas.length+ vue.generateRandomString(4);
-            vue.areas.push({
+            vue.areas.unshift({
                 id:_id,
                 selected: true,
                 name: vue.resource.name,
