@@ -57,4 +57,11 @@ Route::controller(ActivityController::class)->group(function() {
 	Route::get('/evaluaciones/temas/{topic}/preguntas/search', 'TemasSearchPreguntas');
     Route::get('/evaluaciones/edit/{activity}', 'editActivityEvaluaciones');
 
+
+    // Pasantia
+    Route::post('/pasantia/store','PasantiaStore');
+    // Route::post('/encuestas/{activity}/update','EncuestasUpdate');
+    // Route::get('/encuestas/form-selects', 'EncuestasGetFormSelects');
+    // Route::get('/encuestas/edit/{activity}', 'editActivityEncuestas');
+
 });
