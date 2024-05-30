@@ -133,9 +133,9 @@ class RestActivityController extends Controller
                         'user_email' => $user->email
                     ];
 
-        if($lider->email_gestor) {
+        if($lider->email) {
             // enviar email
-            Mail::to($lider->email_gestor)
+            Mail::to($lider->email)
                 ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
         }
     }
