@@ -83,7 +83,7 @@ class RestActivityController extends Controller
     {
         $user = Auth::user();
         $internship = Internship::where('id', $activity->model_id)->first();
-        $leader = User::where('id', $request->user_id)->select('id', 'name', 'lastname', 'surname', 'fullname')->first();
+        $leader = User::where('id', $request->user_id)->select('id', 'name', 'lastname', 'surname', 'fullname', 'email', 'email_gestor')->first();
         $data = $request->data ?? [];
 
         $response['error'] = true;
@@ -133,9 +133,9 @@ class RestActivityController extends Controller
                         'user_email' => $user->email
                     ];
 
-        if($user->email) {
+        if($lider->email) {
             // enviar email
-            Mail::to($user->email)
+            Mail::to($lider->email)
                 ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
         }
     }

@@ -60,8 +60,8 @@ Route::controller(ActivityController::class)->group(function() {
 
     // Pasantia
     Route::post('/pasantia/store','PasantiaStore');
-    // Route::post('/encuestas/{activity}/update','EncuestasUpdate');
+    // Route::post('/pasantia/{activity}/update','EncuestasUpdate');
     // Route::get('/encuestas/form-selects', 'EncuestasGetFormSelects');
-    // Route::get('/encuestas/edit/{activity}', 'editActivityEncuestas');
+    Route::get('/pasantia/edit/{activity}', 'editActivityPasantia');
 
 });

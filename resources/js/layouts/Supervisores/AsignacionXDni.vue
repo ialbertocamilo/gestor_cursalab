@@ -14,7 +14,7 @@
                     class="col-11"
                 />
                 <v-file-input
-                    v-show="showSubidaMasiva"
+                    v-if="showSubidaMasiva"
                     show-size
                     label="Suba el archivo"
                     v-model="file"
@@ -197,6 +197,7 @@ export default {
         this.$nextTick(function () {
             let vue = this;
             vue.usuarios_ok = vue.list_users_selected
+            console.log(vue.list_users_selected);
         })
     },
     methods: {
