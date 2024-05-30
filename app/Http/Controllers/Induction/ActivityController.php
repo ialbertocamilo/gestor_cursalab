@@ -17,6 +17,7 @@ use App\Models\CheckList;
 use App\Models\CheckListItem;
 use App\Models\Course;
 use App\Models\Internship;
+use App\Models\InternshipUser;
 use App\Models\MediaTema;
 use App\Models\Meeting;
 use App\Models\Poll;
@@ -29,6 +30,7 @@ use App\Models\SortingModel;
 use App\Models\Stage;
 use App\Models\Taxonomy;
 use App\Models\Topic;
+use App\Models\User;
 use App\Models\Usuario;
 use App\Models\Workspace;
 use Exception;
@@ -1120,6 +1122,18 @@ class ActivityController extends Controller
             'internship_id' => $internship?->id ?? 0,
             'messages' => ['list' => []]
         ];
+
+        return $this->success($response);
+    }
+
+    public function editActivityPasantia(Process $process, Stage $stage, Activity $activity)
+    {
+        $internship = Internship::where('id', $activity->model_id)->first();
+        $users = $internship && $internship->leaders ? json_decode($internship->leaders) : [];
+
+        $leaders = $users ? User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname')->get() : [];
+
+        $response['leaders'] = $leaders;
 
         return $this->success($response);
     }

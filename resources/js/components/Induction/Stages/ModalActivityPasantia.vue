@@ -25,6 +25,7 @@
                                             :load_data_default="true"
                                             :list_users_selected="list_users_selected"
                                             @changeListUsers="changeListUsers"
+                                            v-if="show_list_users"
                                         >
                                         </AsignacionXDni>
                                     </v-col>
@@ -68,6 +69,7 @@ export default {
     data() {
         return {
             list_users_selected: [],
+            show_list_users: true,
             loadStep2: false,
             disabled_btn_next: true,
             stepper_box_btn1: true,
@@ -123,12 +125,17 @@ export default {
             vue.resetSelects()
             vue.resetValidation()
             vue.$refs.projectForm.reset()
+            vue.show_list_users = false
+            setTimeout(() => {
+                vue.show_list_users = true
+            }, 100);
 
             vue.resource = {}
             vue.stepper_box = 1
             vue.options.cancelLabel = "Cancelar";
             vue.options.confirmLabel = "Continuar";
             vue.loadStep2 = false
+            vue.list_users_selected = []
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -229,6 +236,9 @@ export default {
 
                     let _data = data.data
                     vue.resource = Object.assign({}, vue.resource, _data.activity)
+                    vue.$nextTick(() => {
+                        vue.list_users_selected = _data.leaders
+                    })
                 })
                 const validateForm = vue.validateForm('projectForm')
                 vue.options.confirmDisabled = !validateForm
