@@ -49,6 +49,11 @@
                         <h5>Encuesta del proceso</h5>
                         <p>Encuesta que se puede agregar luego de terminado el proceso de inducción.</p>
                     </div>
+                    <div class="bx_item_activity" @click="selectActivityModal('pasantia')">
+                        <div class="img"><img src="/img/induccion/activities/pasantia.svg"></div>
+                        <h5>Pasantía</h5>
+                        <p>Selecciona y gestiona los participantes de pasantías al ingresar a la empresa</p>
+                    </div>
                 </div>
             </v-card-text>
         </v-card>

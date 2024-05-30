@@ -16,6 +16,7 @@ use App\Models\Attendant;
 use App\Models\CheckList;
 use App\Models\CheckListItem;
 use App\Models\Course;
+use App\Models\Internship;
 use App\Models\MediaTema;
 use App\Models\Meeting;
 use App\Models\Poll;
@@ -1066,6 +1067,60 @@ class ActivityController extends Controller
             'process' => $activity,
             'messages' => ['list' => []]
         ];
+        return $this->success($response);
+    }
+
+    public function PasantiaStore(Process $process, Stage $stage, Request $request)
+    {
+        $data = $request->all();
+
+        $type_activity = Taxonomy::getFirstData('processes', 'activity_type', 'pasantia');
+
+        $platform_onboarding = Taxonomy::getFirstData('project', 'platform', 'onboarding');
+        $data['platform_id'] = $platform_onboarding?->id;
+
+        $session = $request->session()->all();
+        $workspace = $session['workspace'];
+        $data['workspace_id'] = $workspace->id;
+
+        $titulo = $stage ? 'Pasantía - '. $stage->title : 'Pasantía';
+        $users = $data['users'] ? json_decode($data['users']) : null;
+        $users = $users ? array_column($users, 'id') : null;
+
+        $internship = new Internship();
+        $internship->title = $titulo;
+        $internship->leaders = $users ? json_encode($users) : null;
+        $internship->active = true;
+        $internship->save();
+
+        cache_clear_model(Internship::class);
+
+        $data_activity = [
+            'title' => $titulo,
+            'stage_id' => $stage->id,
+            'model_id' => $internship?->id ?? null,
+            'model_type' => Internship::class,
+            'type_id' => $type_activity?->id ?? null,
+            'active' => false
+        ];
+
+        // position
+        $last_position =  Activity::where('stage_id', $stage->id)
+                        ->orderBy('position','desc')
+                        ->first()?->position;
+
+        $data_activity['position'] = $last_position + 1;
+
+        $activity = Activity::storeRequest($data_activity);
+        cache_clear_model(Activity::class);
+
+        $response = [
+            'msg' => 'Actividad creada correctamente.',
+            'activity' => $activity->original['data'],
+            'internship_id' => $internship?->id ?? 0,
+            'messages' => ['list' => []]
+        ];
+
         return $this->success($response);
     }
 }

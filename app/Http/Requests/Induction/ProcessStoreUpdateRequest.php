@@ -31,6 +31,7 @@ class ProcessStoreUpdateRequest extends FormRequest
             'count_absences' => 'boolean',
             'block_stages' => 'boolean',
             'migrate_users' => 'boolean',
+            'corporate_process' => 'boolean',
             'alert_user_deleted' => 'boolean',
             'message_user_deleted' => 'nullable',
             'absences' => 'nullable|numeric',
@@ -67,6 +68,7 @@ class ProcessStoreUpdateRequest extends FormRequest
         $count_absences = ($this->count_absences === 'true' or $this->count_absences === true or $this->count_absences === 1 or $this->count_absences === '1');
         $block_stages = ($this->block_stages === 'true' or $this->block_stages === true or $this->block_stages === 1 or $this->block_stages === '1');
         $migrate_users = ($this->migrate_users === 'true' or $this->migrate_users === true or $this->migrate_users === 1 or $this->migrate_users === '1');
+        $corporate_process = ($this->corporate_process === 'true' or $this->corporate_process === true or $this->corporate_process === 1 or $this->corporate_process === '1');
         $alert_user_deleted = ($this->alert_user_deleted === 'true' or $this->alert_user_deleted === true or $this->alert_user_deleted === 1 or $this->alert_user_deleted === '1');
         $config_completed = ($this->config_completed === 'true' or $this->config_completed === true or $this->config_completed === 1 or $this->config_completed === '1');
 
@@ -75,6 +77,7 @@ class ProcessStoreUpdateRequest extends FormRequest
         $data['count_absences'] = $count_absences;
         $data['block_stages'] = $block_stages;
         $data['migrate_users'] = $migrate_users;
+        $data['corporate_process'] = $corporate_process;
         $data['alert_user_deleted'] = $alert_user_deleted;
         $data['config_completed'] = $config_completed;
 

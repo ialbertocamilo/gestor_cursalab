@@ -479,7 +479,7 @@ export default {
             if(vue.modalDuplicarOptions.process_id)
             {
                 this.showLoader()
-                vue.$http.post(`/procesos/duplicate`, 
+                vue.$http.post(`/procesos/duplicate`,
                     {'process_id': vue.modalDuplicarOptions.process_id})
                     .then((res) => {
                         console.log(res);
@@ -615,6 +615,7 @@ export default {
                     'count_absences' : item.count_absences,
                     'block_stages': item.block_stages,
                     'migrate_users': item.migrate_users,
+                    'corporate_process': item.corporate_process,
                     'alert_user_deleted': item.alert_user_deleted,
                     'message_user_deleted': item.message_user_deleted,
                     'starts_at' : item.starts_at,
@@ -634,6 +635,7 @@ export default {
                                 'count_absences',
                                 'block_stages',
                                 'migrate_users',
+                                'corporate_process',
                                 'alert_user_deleted',
                                 'message_user_deleted',
                                 'starts_at',
