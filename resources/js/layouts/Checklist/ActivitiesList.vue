@@ -4,6 +4,13 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
+                <DefaultButton
+                    rounded
+                    outlined
+                    label="Subida masiva de actividades"
+                    icon="mdi mdi-plus"
+                    @click="openSimpleModal(modalUploadMassiveActivitiesOptions)"
+                />
                 <!-- <DefaultModalButton 
                     label="Tarea"
                     icon_name="mdi-plus"
@@ -101,14 +108,14 @@
                                                                     <span class="text_default">Editar</span>
                                                                 </div>
                                                             </div>
-                                                            <div>
+                                                            <!-- <div>
                                                                 <div class="btn_action"  :class="{'disabled': !area.active}" @click.stop="verifyStep">
                                                                     <v-icon class="ml-0 icon_size">
                                                                         {{area.active ? 'fas fa-circle' : 'far fa-circle'}}
                                                                     </v-icon>
                                                                     <span class="text_default">{{area.active ? 'Activo' : 'Inactivo'}}</span>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                             <div>
                                                                 <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="verifyStep">
                                                                     <v-icon class="ml-0 icon_size">
@@ -166,7 +173,7 @@
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}">
+                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openDeleteModal(tematica,'tematica')">
                                                                                                         <v-icon class="ml-0 icon_size">
                                                                                                             mdi mdi-trash-can
                                                                                                         </v-icon>
@@ -669,6 +676,17 @@
                 @onClose="closeSimpleModal(modalChecklist)"
             />
         </v-card>
+        <ModalUploadMassiveActivities 
+            :options="modalUploadMassiveActivitiesOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalUploadMassiveActivitiesOptions.ref"
+            @onCancel="closeSimpleModal(modalUploadMassiveActivitiesOptions)"
+            @onConfirm="closeFormModal(modalUploadMassiveActivitiesOptions, dataTable, filters)"
+            @activities="addActivities"
+            :template_url="gruped_by_areas_and_tematicas ? '/templates/Plantilla_Checklist_Agrupados.xlsx' : '/templates/Plantilla Checklist.xlsx'"
+        />
     </section>
 </template>
 <script>
@@ -680,9 +698,10 @@ import ModalAddActivity from "./Activities/ModalAddActivity";
 
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist";
+import ModalUploadMassiveActivities from "./ModalUploadMassiveActivities";
 
 export default {
-    components: {DefaultDeleteModal,ModalFormArea,DefaultRichText,ModalCreateChecklist,ModalAddActivity,ModalFormTematica,ModalEditArea},
+    components: {DefaultDeleteModal,ModalUploadMassiveActivities,ModalFormArea,DefaultRichText,ModalCreateChecklist,ModalAddActivity,ModalFormTematica,ModalEditArea},
     data() {
         return {
             panel: [],
@@ -840,7 +859,16 @@ export default {
                 {id:'simil',name:'Porcentaje de similitud'},
                 {id:'text',name:'Verificar texto'},
                 {id:'counter',name:'Contador de objetos'},
-            ]
+            ],
+            modalUploadMassiveActivitiesOptions:{
+                ref: 'UploadMassiveActivities',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Confirmar",
+                resource: "checklist",
+                title:'Importar Actividades'
+            },
         }
     },
    async mounted() {
@@ -869,6 +897,7 @@ export default {
             let vue = this;
             const checklist_id = window.location.pathname.split('/')[4];
             vue.checklist_id = checklist_id;
+            vue.modalUploadMassiveActivitiesOptions.base_endpoint = `/entrenamiento/checklist/v2/${checklist_id}`;
         },
         async loadData(){
             let vue = this;
@@ -989,6 +1018,11 @@ export default {
                     }
                     vue.openFormModal(vue.modalDeleteOptions,resource,null,'Eliminar Actividad');
                 break;
+                case 'tematica':
+                    vue.modalDeleteOptions.base_endpoint = `/entrenamiento/checklist/v2/${vue.checklist_id}/tematica`;
+                    vue.modalDeleteOptions.type = type;
+                    vue.openFormModal(vue.modalDeleteOptions,resource,null,'Eliminar temática');
+                break;
                 default:
                     break;
             }
@@ -1001,16 +1035,19 @@ export default {
                         const index_area = vue.areas.findIndex((a) => a.id == resource.area_id);
                         const index_tematica = vue.areas[index_area].tematicas.findIndex((t) => t.id == resource.tematica_id);
                         const index_activity =  vue.areas[index_area].tematicas[index_tematica].activities.findIndex((ac) => ac.id == resource.id);
-                        console.log(index_area,'index_area');
-                        console.log(index_tematica,'index_tematica');
-                        console.log(index_activity,'index_activity');
                         vue.areas[index_area].tematicas[index_tematica].activities.splice(index_activity,1);
                     }else{
                         const index_activity =  vue.activities.findIndex(ac => ac.id == resource.id);
-
                         vue.activities.splice(index_activity,1);
                     }
                     break;
+                case 'tematica':
+                    if(vue.gruped_by_areas_and_tematicas){
+                        const index_area = vue.areas.findIndex((a) => a.id == resource.parent_id);
+                        const index_tematica = vue.areas[index_area].tematicas.findIndex((t) => t.id == resource.id);
+                        vue.areas[index_area].tematicas.splice(index_tematica,1);
+                    }
+                break;
                 default:
                     break;
             }

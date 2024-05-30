@@ -582,7 +582,7 @@ export default {
                     vue.openFormModal(vue.modalFormSegmentationOptions, checklist, 'segmentation', `Segmentación del checklist - ${checklist.title}`)
                 break;
                 case 'supervisor_card':
-                    vue.openFormModal(vue.modalSupervisorOptions, checklist, null,`Supervisores - ${checklist.title}`);
+                    vue.openFormModal(vue.modalSupervisorOptions, checklist, null,`Auditores - ${checklist.title}`);
                 break;
                 default:
                 break;
