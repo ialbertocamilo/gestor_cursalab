@@ -61,7 +61,8 @@
 
         <v-divider class="mx-3"/>
 
-        <v-col cols="12" md="12" lg="12">
+        <v-col
+               cols="12" md="12" lg="12">
             <span class="mb-2">Selecciona valores:</span>
 
             <segment-values

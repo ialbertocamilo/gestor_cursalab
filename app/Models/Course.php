@@ -1383,14 +1383,45 @@ class Course extends BaseModel
             foreach ($grouped as $idx => $values) {
                 $segment_type = Criterion::find($idx);
                 if ($segment_type->field_type->code == 'date') {
-                    $select_date = CriterionValue::select('id')->where(function ($q) use ($values) {
-                        foreach ($values as $value) {
-                            $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
-                            $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
-                            $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
-                        }
-                    })->where('criterion_id', $idx)->get();
+                    $select_date = CriterionValue::select('id')
+                        ->where(function ($q) use ($values) {
+                            foreach ($values as $value) {
+
+                                // When condition is a date range
+
+                                if ($value->starts_at && $value->finishes_at) {
+                                    $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
+                                    $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
+
+                                    $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
+
+                                } else if ($value->days_greater_than) {
+
+                                    // When condition is days count
+                                    // relative to date value
+
+                                    $duration = $value->days_duration ?: 0;
+                                    $startLimit = $value->days_greater_than;
+                                    $endLimit = $startLimit + $duration;
+                                    $condition = "datediff(now(), value_date) >= $startLimit";
+                                    $condition .= $startLimit != $endLimit
+                                        ? " and datediff(now(), value_date) <= $endLimit"
+                                        : '';
+                                    $q->orWhereRaw("($condition)");
+
+                                } else if ($value->days_less_than) {
+
+                                    // When condition is days count
+                                    // relative to date value
+
+                                    $startLimit = $value->days_less_than;
+                                    $q->orWhereRaw("datediff(now(), value_date) <= $startLimit");
+                                }
+
+                            }
+                        })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
+
                 } else {
                     if(count($only_criterian_values_by_criterion) && in_array($idx,array_column($only_criterian_values_by_criterion,'criterion_id'))){
                         $index_criterion_value=array_search($idx, array_column($only_criterian_values_by_criterion, 'criterion_id'));

@@ -236,7 +236,7 @@
                                                                                                                                             isIconButton
                                                                                                                                         />
                                                                                                                                     </div>
-                                                                                                                                    <div @click.stop="saveActivity(activity)" :class="{'disabled': !activity.activity}">
+                                                                                                                                    <div @click.stop="saveActivity(activity,index_activity,index_area,index_tematica)" :class="{'disabled': !activity.activity}">
                                                                                                                                         <DefaultButton
                                                                                                                                             icon="mdi-content-save"
                                                                                                                                             isIconButton
@@ -421,7 +421,6 @@
                                             </v-col>
                                             <v-row class="col-11 px-0 mx-0" >
                                                 <v-col cols="12" class="px-0">
-                                                    {{ activity.activity }}
                                                     <DefaultRichText
                                                         clearable
                                                         :height="150"
@@ -466,7 +465,7 @@
                                                                     isIconButton
                                                                 />
                                                             </div>
-                                                            <div @click.stop="saveActivity(activity)" :class="{'disabled': !activity.activity}">
+                                                            <div @click.stop="saveActivity(activity,index_activity)" :class="{'disabled': !activity.activity}">
                                                                 <DefaultButton
                                                                     icon="mdi-content-save"
                                                                     isIconButton
@@ -627,7 +626,7 @@
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
-                @onConfirm="closeFormModal(modalDeleteOptions, dataTable, filters);loadData()"
+                @onConfirm="deleteResource"
                 @onCancel="closeFormModal(modalDeleteOptions)"
             />
             <ModalAddActivity
@@ -891,13 +890,18 @@ export default {
             let vue = this;
             vue.activities.splice(index_activity,1);
         },
-        saveActivity(activity){
+        saveActivity(activity,index_activity,index_area=null,index_tematica=null){
             let vue = this;
             if(activity.activity){
                 vue.showLoader();
                 vue.$http.post(`/entrenamiento/checklist/v2/${vue.checklist_id}/activity/save`,{
                     activity:activity
                 }).then(({data})=>{
+                    if(index_area != null){
+                        vue.areas[index_area].tematicas[index_tematica].activities[index_activity].id = data.data.activity_id;
+                    }else{
+                        vue.activities[index_activity].id = data.data.activity_id;
+                    }
                     vue.hideLoader();
                     // vue.loadData();
                     vue.showAlert('Se guardó la actividad correctamente.','success');
@@ -976,11 +980,41 @@ export default {
             switch (type) {
                 case 'activity':
                     vue.modalDeleteOptions.base_endpoint = `/entrenamiento/checklist/v2/${vue.checklist_id}/activity`;
+                    vue.modalDeleteOptions.type = type;
+                    // if(resource.id.includes('insert')){
+                    console.log(typeof resource.id);
+                    if (typeof resource.id === 'string') {
+                        vue.deleteResource(resource);
+                        break;
+                    }
                     vue.openFormModal(vue.modalDeleteOptions,resource,null,'Eliminar Actividad');
                 break;
                 default:
                     break;
             }
+        },
+        deleteResource(resource){
+            let vue = this;
+            switch (vue.modalDeleteOptions.type) {
+                case 'activity':
+                    if(vue.gruped_by_areas_and_tematicas){
+                        const index_area = vue.areas.findIndex((a) => a.id == resource.area_id);
+                        const index_tematica = vue.areas[index_area].tematicas.findIndex((t) => t.id == resource.tematica_id);
+                        const index_activity =  vue.areas[index_area].tematicas[index_tematica].activities.findIndex((ac) => ac.id == resource.id);
+                        console.log(index_area,'index_area');
+                        console.log(index_tematica,'index_tematica');
+                        console.log(index_activity,'index_activity');
+                        vue.areas[index_area].tematicas[index_tematica].activities.splice(index_activity,1);
+                    }else{
+                        const index_activity =  vue.activities.findIndex(ac => ac.id == resource.id);
+
+                        vue.activities.splice(index_activity,1);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            vue.closeFormModal(vue.modalDeleteOptions)
         },
         async chengeAgrupationChecklist(){
             let vue = this;

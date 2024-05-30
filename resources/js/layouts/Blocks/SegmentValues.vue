@@ -1,21 +1,147 @@
 <template>
     <div>
-        <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'date'">
+        <v-row  v-if="criterion.field_type.code === 'date'"
+                :style="{
+                  paddingTop: popoverIsShown ? '60px' : '10px',
+                  paddingRight: '12px !important',
+                  paddingLeft: '12px !important'}" >
         <!-- <v-row style="padding: 10px 12px !important" v-if="criterion.field_type.code === 'Fecha'"> -->
-            <v-col cols="12" md="3" lg="3" class="p-0 vertical-align">
-                <date-picker
-                    confirm
-                    confirm-text="Agregar rango"
-                    attach
-                    v-model="value1"
-                    type="date"
-                    range
-                    :placeholder="criterion.name"
-                    :lang="lang"
-                    @confirm="agregarRango()"
-                    style="width: 100% !important"
-                    value-type="YYYY-MM-DD"
-                ></date-picker>
+            <v-col cols="12" md="3" lg="3"
+                   class="p-0 vertical-align position-relative">
+
+                <b-button
+                    @click="popoverIsShown = !popoverIsShown"
+                    variant="outline-secondary">
+                    {{ criterion.name }}
+                </b-button>
+
+                <div class="custom-popover"
+                     v-if="popoverIsShown">
+                    <!--
+                       Tabs
+                       ========================================-->
+
+                    <div>
+                        <button
+                            @click="calendarIsActive = true"
+                            type="button"
+                            :class="['tab', calendarIsActive ? '' : 'outline']">
+                            Calendario
+                        </button>
+                        <button
+                            @click="calendarIsActive = false"
+                            type="button"
+                            :class="['tab', calendarIsActive ? 'outline' : '']">
+                            Vinculación de tiempo
+                        </button>
+                    </div>
+
+                    <!--
+                    Tab content: calendar
+                    ========================================-->
+                    <date-picker
+                        v-if="calendarIsActive"
+                        confirm
+                        confirm-text="Agregar rango"
+                        attach
+                        inline
+                        v-model="value1"
+                        type="date"
+                        range
+                        :placeholder="criterion.name"
+                        :lang="lang"
+                        @confirm="agregarRango()"
+                        style="width: 100% !important"
+                        value-type="YYYY-MM-DD"
+                    ></date-picker>
+
+                    <!--
+                    Tab content: relative date range selector
+                    ========================================-->
+
+                    <div v-if="!calendarIsActive"
+                         class="relative-range p-3">
+                        <div class="row">
+                            <div class="col-9 pr-0 mr-0">
+                                <div class="label-wrapper">
+                                    <input type="radio"
+                                           v-model="relativeDateType"
+                                           value="greater-than"
+                                           name="relative-range">
+                                    Se vincula a usuarios con un tiempo mayor a
+                                </div>
+                                <div class="label-wrapper mt-2 optional">
+                                    Opcional: Duración de la segmentación
+                                </div>
+                            </div>
+                            <div class="col-3 pl-0 ml-0">
+                                <div class="input-wrapper">
+                                    <input
+                                        :disabled="relativeDateType === 'less-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="greaterThan"/>
+                                    <span>Días</span>
+                                </div>
+                                <div class="input-wrapper mt-2">
+                                    <input
+                                        :disabled="relativeDateType === 'less-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="duration"/>
+                                    <span>Días</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row line">
+                            <div class="col-9 pr-0 mr-0">
+                                <div class="label-wrapper">
+                                    <input type="radio"
+                                           v-model="relativeDateType"
+                                           value="less-than"
+                                           name="relative-range">
+                                    Se vincula a usuarios con un tiempo menor a
+                                </div>
+                            </div>
+                            <div class="col-3 pl-0 ml-0">
+                                <div class="input-wrapper">
+                                    <input
+                                        :disabled="relativeDateType === 'greater-than'"
+                                        type="text"
+                                        @keydown="restrictInput"
+                                        v-model="lessThan"/>
+                                    <span>Días</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row line">
+                            <div class="col-12 d-flex justify-content-center p-0">
+                                <DefaultButton
+                                    :outlined="true"
+                                    class="mt-3 relative-range-button"
+                                    label="Agregar rango"
+                                    @click="addRelativeRange()"
+                                />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <b-popover
+                    v-if="popoverId"
+                    id="relative-range-popover"
+                    :target="popoverId"
+                    triggers="click"
+                    container=".v-dialog"
+                    placement="topright"
+                    @show="popoverShown()"
+                    @hide="popoverHidden()">
+
+
+                </b-popover>
             </v-col>
 
             <v-col cols="12" md="9" lg="9" class="p-0 vertical-align">
@@ -25,7 +151,6 @@
                     outlined
                     color="#796aee"
                     hide-details="auto"
-                    :label="criterion.name"
                     :menu-props="{ top: true, offsetY: true }"
 
                     return-object
@@ -58,8 +183,9 @@
         </v-row>
 
         <v-row
+            v-else
             :class="criterion.code === 'module' ? 'module' : ''"
-            style="padding: 10px 0px 10px 0px !important" v-else>
+            style="padding: 10px 0px 10px 0px !important">
 
             <v-col cols="12" md="12" lg="12" class="p-0 px-3 vertical-align">
 
@@ -91,6 +217,14 @@ export default {
     props: ["criterion"],
     data() {
         return {
+            popoverId: null,
+            popoverIsShown: false,
+            styleElement: null,
+            relativeDateType: 'greater-than',
+            greaterThan: 0,
+            lessThan: 0,
+            duration: 0,
+            calendarIsActive: true,
             search: null,
             debounce: null,
             value1: [new Date().toISOString().substr(0, 10), new Date().toISOString().substr(0, 10)],
@@ -98,10 +232,61 @@ export default {
             date_range_selected: []
         };
     },
+    watch: {
+        relativeDateType(newValue, oldValue) {
+
+            if (newValue === 'greater-than') {
+                this.lessThan = 0;
+            } else {
+                this.greaterThan = 0;
+                this.duration = 0;
+            }
+        },
+        popoverIsShown(newValue, oldValue) {
+
+            if (newValue) {
+                this.styleElement = document.createElement('style');
+                this.styleElement.innerHTML = '.v-window__next, .v-window__prev { display: none; }';
+                document.head.appendChild(this.styleElement);
+            } else {
+                if (this.styleElement) {
+                    this.styleElement.remove();
+                    this.styleElement = null;
+                }
+            }
+        }
+    },
+    mounted () {
+        this.popoverId = 'popover-target' + Math.floor((new Date()).getTime() / 1000)
+    },
     methods: {
+        popoverShown() {
+            this.popoverIsShown = true;
+        },
+        popoverHidden() {
+            this.popoverIsShown = false;
+        },
         cleanSelectedDates(){
             let vue = this;
             vue.value1 = [null, null];
+        },
+        restrictInput(event) {
+
+            // Get the pressed key
+            const key = event.key;
+
+            const isNumeric = /^\d+$/.test(key);
+            const isSpecialKey =
+                event.keyCode === 8 || // Backspace
+                event.keyCode === 46 || // Delete
+                event.keyCode === 37 || // Left arrow
+                event.keyCode === 39; // Right arrow
+
+            // If the key is not a number and not a special key, prevent default behavior
+
+            if (!isNumeric && !isSpecialKey) {
+                event.preventDefault();
+            }
         },
         agregarRango() {
             let vue = this;
@@ -125,8 +310,52 @@ export default {
             vue.cleanSelectedDates();
 
             vue.$emit("addDateRange", data);
-        },
 
+            this.$root.$emit('bv::hide::popover')
+        },
+        addRelativeRange() {
+
+            this.popoverIsShown = false;
+
+            // Generate range values
+
+            let durationDescription = ''
+            if (this.duration) {
+                durationDescription = `(Durante ${this.duration} días)`;
+            }
+
+            const name = this.relativeDateType === 'greater-than'
+                ? `Mayor a ${this.greaterThan} días. ${durationDescription}`
+                : `Menor a ${this.lessThan} días`;
+
+            const newDateRange = {
+                id: `new-relative-range-${Date.now()}`,
+                name: name,
+                greaterThan: this.greaterThan,
+                lessThan: this.lessThan,
+                duration: this.duration
+            };
+
+            // Add value to list
+
+            this.date_range_selected.push(newDateRange);
+
+            let data = {
+                date_range_selected: this.date_range_selected,
+                new_date_range: newDateRange,
+                criterion_code: this.criterion.code,
+            };
+
+            this.$emit("addDateRange", data);
+
+            // Reset values and close popover
+
+            this.greaterThan = 0;
+            this.lessThan = 0;
+            this.duration = 0;
+
+            this.$root.$emit('bv::hide::popover')
+        }
     },
 };
 </script>
@@ -182,5 +411,91 @@ export default {
 .module .v-text-field--outlined fieldset {
     border: 2px solid #d7d6d8 !important;
 }
+
+
+.custom-popover {
+    background: white !important;
+    border: none !important;
+    box-shadow: 0 5px 10px rgba(200,200,200,0.5);
+    width: 475px !important;
+
+    max-height: 361px;
+    position: absolute;
+    bottom: 40px;
+}
+
+.popover-body {
+    padding: 0 !important;
+    width: 475px !important;
+}
+
+.popover-body .mx-datepicker-main {
+    border: none !important;
+}
+
+button.tab {
+    height: 28px;
+    background: #796aee;
+    color: white;
+    border: 1px solid #796aee;
+    border-radius: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin: 10px 0 10px 10px;
+}
+
+button.tab.outline {
+    background: white;
+    color: #796aee;
+}
+
+#relative-range-popover {
+    left: -40px !important;
+    //top: 50px !important;
+}
+
+.relative-range input[type=radio] {
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+}
+
+.relative-range .optional {
+    margin-left: 20px;
+}
+
+.relative-range .input-wrapper {
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 3px 0 3px;
+}
+
+.relative-range .label-wrapper {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+.relative-range .input-wrapper span {
+    font-size: 10px;
+}
+
+.relative-range input[type=text] {
+    height: 40px;
+    width: 50px;
+}
+
+.relative-range-button {
+    height: 30px !important;
+}
+
+.line {
+    border-top: 1px solid #eaeaea;
+}
+
+
 
 </style>
