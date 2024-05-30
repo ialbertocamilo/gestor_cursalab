@@ -22,6 +22,8 @@ Route::controller(GeneralController::class)->group(function() {
 	Route::get('/execute-command-jarvis', 'executeCommandJarvis');
 
 	Route::get('/sync-courses-cursalab-university/{workspace_id}', 'syncCoursesCursalabUniversity');
+
+    Route::get('/segmentation/users/count', 'runCountUserSegmentation');
 });
 
 

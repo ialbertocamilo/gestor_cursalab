@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssignedRole;
+use App\Models\Role;
 use Carbon\Carbon;
 use App\Models\Prueba;
 use App\Models\Criterion;
@@ -349,10 +351,31 @@ class GeneralController extends Controller
         $has_functionality = Workspace::select('id','name','qualification_type_id')->where('id',$workspace_id)
                 ->whereRelation('functionalities','code','cursalab-university')->first();
         if(!$has_functionality){
-            return $this->success(['message'=>'Este workspace no tiene activado la funcionalidad.']); 
+            return $this->success(['message'=>'Este workspace no tiene activado la funcionalidad.']);
         }
 
         Artisan::call('sync:school-university-courses '.$workspace_id);
-        return $this->success(['message'=>'Se sincronizo los cursos correctamente.']); 
+        return $this->success(['message'=>'Se sincronizo los cursos correctamente.']);
+    }
+
+    public function runCountUserSegmentation()
+    {
+        Auth::checK();
+        $isSuperUser = AssignedRole::hasRole(Auth::user()->id, Role::SUPER_USER);
+
+        if (!$isSuperUser)
+            exit;
+
+        // Run the Artisan command
+        Artisan::call('segmentation:count-users');
+
+        // Optionally, get the output of the command
+        $output = Artisan::output();
+
+        // Return a response
+        return response()->json([
+            'message' => 'Command executed successfully.',
+            'output' => $output,
+        ]);
     }
 }

@@ -1385,9 +1385,13 @@ class Course extends BaseModel
                 if ($segment_type->field_type->code == 'date') {
                     $select_date = CriterionValue::select('id')->where(function ($q) use ($values) {
                         foreach ($values as $value) {
-                            $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
-                            $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
-                            $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
+
+                            if ($value->starts_at && $value->finishes_at) {
+                                $starts_at = carbonFromFormat($value->starts_at)->format('Y-m-d');
+                                $finishes_at = carbonFromFormat($value->finishes_at)->format('Y-m-d');
+                                $q->orWhereRaw('value_date between "' . $starts_at . '" and "' . $finishes_at . '"');
+                            }
+
                         }
                     })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
