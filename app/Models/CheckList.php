@@ -727,8 +727,9 @@ class CheckList extends BaseModel
             'feedback_disponible' => $feedback_disponible
         ];
     }
-    protected function uploadMassive($request){
+    protected function uploadMassive($checklist,$request){
         $import = new ActivityChecklistImport();
+        $import->checklist = $checklist;
         Excel::import($import, $request->file('archivo'));
         return $import->activities;
     }

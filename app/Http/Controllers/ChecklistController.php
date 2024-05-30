@@ -123,8 +123,8 @@ class ChecklistController extends Controller
         return $this->success(['courses'=>$courses]);
     }
 
-    public function uploadMassive(Request $request){
-        $activities = Checklist::uploadMassive($request);
+    public function uploadMassive(Checklist $checklist,Request $request){
+        $activities = Checklist::uploadMassive($checklist,$request);
         return $this->success(['activities'=>$activities]);
     }
 

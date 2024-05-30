@@ -683,8 +683,7 @@
             :model_id="null"
             :ref="modalUploadMassiveActivitiesOptions.ref"
             @onCancel="closeSimpleModal(modalUploadMassiveActivitiesOptions)"
-            @onConfirm="closeFormModal(modalUploadMassiveActivitiesOptions, dataTable, filters)"
-            @activities="addActivities"
+            @onConfirm="closeSimpleModal(modalUploadMassiveActivitiesOptions);loadData()"
             :template_url="gruped_by_areas_and_tematicas ? '/templates/Plantilla_Checklist_Agrupados.xlsx' : '/templates/Plantilla Checklist.xlsx'"
         />
     </section>

@@ -87,7 +87,7 @@ export default {
                     .post(`${vue.options.base_endpoint}/activity/upload-massive`, data)
                     .then(({data}) => {
                         vue.hideLoader();
-                        vue.$emit('activities',data.data.activities);
+                        vue.$emit('onConfirm',data.data.activities);
                     })
                     .catch((err) => {
                         vue.hideLoader();
