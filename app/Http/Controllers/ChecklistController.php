@@ -167,4 +167,8 @@ class ChecklistController extends Controller
         CheckListItem::changeAgrupation($checklist);
         return $this->success(['msg'=>'Se cambió el tipo de agrupación']);
     }
+    public function deleteTematica(Checklist $checklist,Taxonomy $taxonomy){
+        CheckListItem::deleteTematica($taxonomy);
+        return $this->success(['msg'=>'Se elimino la temática correctamente.']);
+    }
 }

@@ -368,18 +368,18 @@
                                             label="Selecciona el valor del criterio del responsable"
                                         />   
                                     </v-col>
-                                    <!-- <v-col cols="6">
-                                        <DefaultSimpleSection title="Autocalificación de entidad" marginy="my-1" marginx="mx-0">
+                                    <v-col cols="6" v-if="current_modality.code == 'qualify_entity'">
+                                        <DefaultSimpleSection title="Calificación de auditor" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
-                                                        v-model="resource.extra_attributes.autocalificate_entity" dense
+                                                        v-model="resource.extra_attributes.auditor_calificate_all_entity" dense
                                                         :disabled="!is_checklist_premium"
-                                                        :active-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'"
-                                                        :inactive-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'" />
+                                                        :active-label="'¿El auditor calificará solo a su entidad?'"
+                                                        :inactive-label="'¿El auditor calificará solo a su entidad?'" />
                                                     <DefaultInfoTooltip
                                                         v-if="is_checklist_premium"
-                                                        text="Tanto la entidad física como los usuarios podrán ver el resultado de sus checklist al finalizar el proceso"
+                                                        text="El auditor solo podrá calificar solo a su entidad o a todas las entidades."
                                                         top
                                                     />    
                                                     <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
@@ -390,7 +390,7 @@
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
-                                    </v-col> -->
+                                    </v-col>
                                     <v-col cols="12">
                                         <DefaultSimpleSection title="Sistema de firma del checklist" marginy="my-1" marginx="mx-0">
                                             <template slot="content">

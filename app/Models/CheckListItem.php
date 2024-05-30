@@ -165,7 +165,7 @@ class CheckListItem extends BaseModel
             $data = [];
             $activities_grouped_by_areas = $checklist->activities->groupBy('area_id');
             $taxonomy_areas = Taxonomy::whereIn('id',$checklist->activities->pluck('area_id'))->select('id','name','active')->get();
-            $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active')->get(); 
+            $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active','parent_id')->get(); 
             foreach ($activities_grouped_by_areas as $area_id => $activities_grouped_by_area) {
                 if($area_id){
                     $activities_grouped_by_tematicas = $activities_grouped_by_area->groupBy('tematica_id');
@@ -178,6 +178,7 @@ class CheckListItem extends BaseModel
                                 $tematicas[] = [
                                     'id' => $tematica->id,
                                     'name' => $tematica->name,
+                                    'parent_id' => $tematica->parent_id,
                                     'active' => $tematica->active,
                                     'activities' => $activities_grouped_by_tematica,
                                 ];
@@ -266,7 +267,10 @@ class CheckListItem extends BaseModel
             'name' => $tematica['name']
         ]);
     }
-
+    protected function deleteTematica($taxonomy){
+        self::where('tematica_id',$taxonomy->id)->delete();
+        $taxonomy->delete();
+    }
     protected function changeAgrupation($checklist){
         $extra_attributes = $checklist->extra_attributes ;
         $extra_attributes['gruped_by_areas_and_tematicas'] = isset($extra_attributes['gruped_by_areas_and_tematicas'])

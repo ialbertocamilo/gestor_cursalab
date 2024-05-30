@@ -63,6 +63,7 @@ class ChecklistStoreRequest extends FormRequest
         $extra_attributes['autocalificate_entity'] = verifyBooleanValue($extra_attributes['autocalificate_entity'] ?? null);
         $extra_attributes['required_comments'] = verifyBooleanValue($extra_attributes['required_comments'] ?? null);
         $extra_attributes['required_action_plan'] = verifyBooleanValue($extra_attributes['required_action_plan'] ?? null);
+        $extra_attributes['auditor_calificate_all_entity'] = verifyBooleanValue($extra_attributes['auditor_calificate_all_entity'] ?? null);
         
         $this->merge(['extra_attributes' => $extra_attributes]);
         return $this->all();

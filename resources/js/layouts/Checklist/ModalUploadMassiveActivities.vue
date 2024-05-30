@@ -49,6 +49,7 @@ export default {
             type: Object,
             required: true
         },
+        template_url:String,
         width: String
     },
     data() {
@@ -60,7 +61,7 @@ export default {
                 success_file:false
             },
             errores: [],
-            template_url:'/templates/Plantilla Checklist.xlsx'
+            // template_url:''
         };
     },
     methods: {

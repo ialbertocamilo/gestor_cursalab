@@ -1090,6 +1090,12 @@ class CheckList extends BaseModel
         }
         return [$list_checklists_geolocalization,$list_checklists_exclude_geolocalization,$list_checklists_libres];
     }
+    public function isGroupedByArea(){
+        $checklist = $this;
+        return isset($checklist->extra_attributes['gruped_by_areas_and_tematicas'])
+                    ? $checklist->extra_attributes['gruped_by_areas_and_tematicas'] 
+                    : false;
+    }
     protected function listActivities($checklist,$request){
         $theme_id = $request?->theme_id;
         $user_id = $request?->user_id;
