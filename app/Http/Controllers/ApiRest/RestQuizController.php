@@ -125,7 +125,7 @@ class RestQuizController extends Controller
         $data_ev['remaining_attempts'] = $attempts_limit - $row->attempts;
         $data_ev['nombre_tema'] = $topic->name;
         $data_ev['nombre_curso'] = $topic->course->name;
-        $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $data_ev['passed'];
+        $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $row?->passed;
         $passing_grade = Course::getModEval($topic->course,'nota_aprobatoria');
         $topic->course->load('qualification_type:id,position');
         $data_ev['passing_grade'] = $passing_grade;
