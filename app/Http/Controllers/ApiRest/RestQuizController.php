@@ -115,7 +115,6 @@ class RestQuizController extends Controller
 
         $row_course = SummaryCourse::updateUserData(course:$topic->course,certification_issued_at:$created_at);
         $row_user = SummaryUser::updateUserData();
-
         if ($row_course->status->code == 'enc_pend') {
 
             $poll = $topic->course->polls()->first();
@@ -125,7 +124,7 @@ class RestQuizController extends Controller
         $data_ev['remaining_attempts'] = $attempts_limit - $row->attempts;
         $data_ev['nombre_tema'] = $topic->name;
         $data_ev['nombre_curso'] = $topic->course->name;
-        $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $row?->passed;
+        $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $row_course?->status?->code == 'aprobado';
         $passing_grade = Course::getModEval($topic->course,'nota_aprobatoria');
         $topic->course->load('qualification_type:id,position');
         $data_ev['passing_grade'] = $passing_grade;
