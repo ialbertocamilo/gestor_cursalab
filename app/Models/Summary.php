@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SegmentationService;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mongo\AuditSummaryUpdate;
 
@@ -147,6 +148,16 @@ class Summary extends BaseModel
             $users_id_segmented  = ($users_id) ? $users_id : SummaryCourse::where('course_id',$course?->id)->pluck('user_id')->toArray();
         }else{
             $users_id_segmented = ($users_id) ? $users_id : $course->usersSegmented($course->segments,'users_id');
+
+            // Generate and save segmentation hash and count
+
+            SegmentationService::hashSegmentation(
+                Course::class, $course->id, $users_id_segmented
+            );
+
+            SegmentationService::saveSegmentationStats(
+                Course::class, $course->id, $users_id_segmented
+            );
         }
         $chunk_users = array_chunk($users_id_segmented,80);
         foreach ($chunk_users as $users) {

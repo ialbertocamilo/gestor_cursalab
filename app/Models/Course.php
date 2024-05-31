@@ -1421,7 +1421,6 @@ class Course extends BaseModel
                             }
                         })->where('criterion_id', $idx)->get();
                     $ids = $select_date->pluck('id');
-
                 } else {
                     if(count($only_criterian_values_by_criterion) && in_array($idx,array_column($only_criterian_values_by_criterion,'criterion_id'))){
                         $index_criterion_value=array_search($idx, array_column($only_criterian_values_by_criterion, 'criterion_id'));
