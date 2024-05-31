@@ -10,7 +10,6 @@ Route::controller(SegmentController::class)->group(function() {
     Route::get('/create', 'create');
     // Route::view('/crear', 'form-data')->name('blocks.form');
 
-
     Route::post('/store', 'store');
 
     Route::post('/multiple-segmentation', 'cloneSegmentation');
