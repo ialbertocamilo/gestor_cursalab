@@ -204,7 +204,7 @@ class RestTopicController extends Controller
                     ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id')
                     : [],
                 'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first(),
-                'show_certification_to_user' => true,
+                'show_certification_to_user' => $show_certification_to_user,
                 // 'requirements' => $topic->course->requirements()->pluck('id')
             ]
         ],'Contenido revisado correctamente.');
