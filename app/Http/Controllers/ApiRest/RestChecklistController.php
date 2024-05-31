@@ -231,11 +231,31 @@ class RestChecklistController extends Controller
         return $this->success(compact('list_checklists_geolocalization','list_checklists_libres','list_checklists_exclude_geolocalization'));
     }
     
-    public function activitiesByChecklist(Checklist $checklist,Request $request){
-        $data = Checklist::listActivities($checklist,$request);
+    public function listEntities(CheckList $checklist,Request $request){
+        $user = auth()->user();
+        $entities_criteria = Workspace::where('id',$checklist->workspace_id)->select('checklist_configuration')->first()->checklist_configuration->entities_criteria;
+        $segments_checklist = Segment::select('id')->where('model_id',$checklist->id)->where('model_type','App\\Models\\Checklist')
+        ->whereHas('values',function($q) use ($entities_criteria){
+            $q->whereIn('criterion_id',$entities_criteria);
+        })->with(['values:id,segment_id,criterion_id,criterion_value_id','values.criterion_value:id,value_text'])->get();
+        $entities = $segments_checklist->pluck('values.*.criterion_value')->flatten()->map(function($entity){
+                        return [
+                            'id' => $entity->id,
+                            'name' => $entity->value_text,
+                            'finished' => false
+                        ];
+                    });
+
+        return [
+            'entities' => $entities
+        ];
+    }
+
+    public function activitiesByChecklist(CheckList $checklist,Request $request){
+        $data = CheckList::listActivities($checklist,$request);
         return $this->success($data);
     }
-    public function saveActivities(Checklist $checklist,Request $request){
+    public function saveActivities(CheckList $checklist,Request $request){
         $data = $request->all();
         ChecklistAudit::saveActivitiesAudits($checklist,$data);
         return $this->success([
@@ -251,19 +271,19 @@ class RestChecklistController extends Controller
         ]);
     }
 
-    public function listProgress(Checklist $checklist){
+    public function listProgress(CheckList $checklist){
         $activity_progress = ChecklistAudit::listProgress($checklist);
         return $this->success([
             'activity_progress' => $activity_progress
         ]);
     }
 
-    public function listUsers(Checklist $checklist){
-        $data = Checklist::listUsers($checklist);
+    public function listUsers(CheckList $checklist){
+        $data = CheckList::listUsers($checklist);
         return $this->success($data);
     }
 
-    public function saveActivity(Checklist $checklist,Request $request){
+    public function saveActivity(CheckList $checklist,Request $request){
         $data = $request->all();
         $action_request = $request->action_request;
         $response = ChecklistAudit::saveActivity($checklist,$data,$action_request);

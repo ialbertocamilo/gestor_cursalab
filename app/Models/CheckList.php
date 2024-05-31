@@ -1163,10 +1163,13 @@ class CheckList extends BaseModel
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=>$activity->checklist_response->code,
                 'system_calification' => $system_calification,
+                'percent_progress' => 80,
+                'activities_assigned' => $_activities->count(),
+                'activities_reviewved' => 0,
                 'comments' => [
-                    ['comment'=>'Comentario principal','user'=>'Aldo'],
-                    ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
-                    ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
+                    // ['comment'=>'Comentario principal','user'=>'Aldo'],
+                    // ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
+                    // ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
                 ],
                 'photo' => $list_photos,
                 'qualification_id'=> $progress?->qualification_id ?? null,
@@ -1295,7 +1298,7 @@ class CheckList extends BaseModel
                                     $q->where('auditor_id',$user->id);
                                 })
                                 ->first();
-        
+
         $status = $audit ? [
                     'code' => 'realizado',
                     'name' => 'Realizado '.$audit->date_audit,
@@ -1305,7 +1308,10 @@ class CheckList extends BaseModel
                     'name' => 'Pendiente',
                     'color' => '#CDCDEB'
                 ];
-
+        $auditor_calificate_all_entity = $checklist->modality->code=='qualify_entity' 
+                                            && isset($checklist->extra_attributes['auditor_calificate_all_entity'])
+                                            && $checklist->extra_attributes['auditor_calificate_all_entity'];
+        
         return [
             "id" => $checklist->id,
             "title" => $checklist->title,
@@ -1318,7 +1324,8 @@ class CheckList extends BaseModel
                 'color' => $checklist->modality->color
             ],
             "type" => $checklist->type,
-            'url_maps' =>''
+            'url_maps' =>'',
+            'auditor_calificate_all_entity'=> $auditor_calificate_all_entity
         ];
     }
     
