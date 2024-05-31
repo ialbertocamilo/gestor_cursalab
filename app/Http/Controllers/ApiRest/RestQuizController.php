@@ -117,6 +117,7 @@ class RestQuizController extends Controller
         $row_user = SummaryUser::updateUserData();
         if ($row_course->status->code == 'enc_pend') {
 
+            
             $poll = $topic->course->polls()->first();
             $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
         }
