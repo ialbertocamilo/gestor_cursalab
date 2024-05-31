@@ -45,7 +45,7 @@ class QuizAuditEvaluation extends Model
         }
         $quiz_info = QuizAuditEvaluation::where('_id',$identifier)->where('curso_id',$course_id)->where('tema_id',$topic_id)->first();
         if($quiz_info){
-            $quiz_info['indentifier'] = $quiz_info['_id'];
+            $quiz_info['identifier'] = $quiz_info['_id'];
             unset($quiz_info['_id']);
             unset($quiz_info['answers']);
             unset($quiz_info['preguntas']);
