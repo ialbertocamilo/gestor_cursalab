@@ -183,6 +183,8 @@ class RestTopicController extends Controller
             $avaible_requirements_topic =  $topic_status?->code == 'revisado';
         }
         $avaible_requirements_course = $course_status?->code == 'aprobado';
+        $show_certification_to_user = $topic->course->show_certification_to_user && $course_status?->code == 'aprobado';
+
         return $this->success([
             'tema'=>[
                 'id'=> $topic->id,
@@ -201,7 +203,10 @@ class RestTopicController extends Controller
                 'requirements' => ($avaible_requirements_course)
                     ? Requirement::where('model_type','App\\Models\\Course')->where('requirement_id',$topic->course_id)->select('model_id')->pluck('model_id')
                     : [],
-                'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first()
+                'encuesta_habilitada' => $summary_course->advanced_percentage == 100 && $topic->course->polls->first(),
+                'datetime' => now(),
+                'identifier' => $summary_course->id,
+                'show_certification_to_user' => $show_certification_to_user,
                 // 'requirements' => $topic->course->requirements()->pluck('id')
             ]
         ],'Contenido revisado correctamente.');
