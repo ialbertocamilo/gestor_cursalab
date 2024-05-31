@@ -1085,7 +1085,7 @@ class ActivityController extends Controller
         $workspace = $session['workspace'];
         $data['workspace_id'] = $workspace->id;
 
-        $titulo = $stage ? 'Pasantía - '. $stage->title : 'Pasantía';
+        $titulo = $data['titulo'] ?? null;
         $users = $data['users'] ? json_decode($data['users']) : null;
         $users = $users ? array_column($users, 'id') : null;
 
@@ -1131,9 +1131,41 @@ class ActivityController extends Controller
         $internship = Internship::where('id', $activity->model_id)->first();
         $users = $internship && $internship->leaders ? json_decode($internship->leaders) : [];
 
-        $leaders = $users ? User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname')->get() : [];
+        $leaders = $users ? User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname', 'document')->get() : [];
 
         $response['leaders'] = $leaders;
+        $response['activity'] = $activity;
+
+        return $this->success($response);
+    }
+
+    public function PasantiaUpdate(Process $process, Stage $stage, Activity $activity, Request $request)
+    {
+        $data = $request->all();
+
+        $titulo = $data['titulo'] ?? null;
+        $users = $data['users'] ? json_decode($data['users']) : null;
+        $users = $users ? array_column($users, 'id') : null;
+
+        $internship = Internship::where('id', $activity->model_id)->first();
+        if($internship)
+        {
+            $internship->title = $titulo;
+            $internship->leaders = $users ? json_encode($users) : null;
+            $internship->save();
+            cache_clear_model(Internship::class);
+        }
+
+        $activity->title = $titulo;
+        $activity->save();
+        cache_clear_model(Activity::class);
+
+        $response = [
+            'msg' => 'Actividad actualizada correctamente.',
+            'activity' => $activity,
+            'internship_id' => $internship?->id ?? 0,
+            'messages' => ['list' => []]
+        ];
 
         return $this->success($response);
     }

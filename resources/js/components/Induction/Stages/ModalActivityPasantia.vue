@@ -15,15 +15,26 @@
                         <v-stepper-items>
                             <v-stepper-content step="1" class="p-0">
                                 <v-row>
+                                    <v-col cols="12" class="d-flex justify-content-center">
+                                        <DefaultInput
+                                            v-model="resource.titulo"
+                                            label="Nombre"
+                                            :dense="true"
+                                            :rules="rules.titulo"
+                                            placeholder="Ingrese un nombre"
+                                        />
+                                    </v-col>
+                                </v-row>
+                                <v-row>
                                     <v-col cols="12" class="step_modalAsignacionXDni">
                                         <AsignacionXDni
                                             description='Define los colaboradores que participarán en el proceso de pasantía dentro de la inducción'
-                                            apiSearchUser="/supervisores/search-usuarios"
+                                            apiSearchUser="/supervisores/search-leaders"
                                             apiUploadPlantilla="/supervisores/subir-excel-usuarios"
                                             :showSubidaMasiva="false"
                                             ref="AsignacionSupervisores"
                                             :load_data_default="true"
-                                            :list_users_selected="list_users_selected"
+                                            :list_users_selected="list_users_selected_load"
                                             @changeListUsers="changeListUsers"
                                             v-if="show_list_users"
                                         >
@@ -55,7 +66,7 @@
 <script>
 
 import AsignacionXDni from "../../../layouts/Supervisores/AsignacionXDni";
-const fields = [ 'model_id', 'model_type', 'stage_id', 'users' ];
+const fields = [ 'model_id', 'model_type', 'stage_id', 'users', 'titulo' ];
 
 export default {
     components: { AsignacionXDni },
@@ -69,6 +80,7 @@ export default {
     data() {
         return {
             list_users_selected: [],
+            list_users_selected_load: [],
             show_list_users: true,
             loadStep2: false,
             disabled_btn_next: true,
@@ -83,14 +95,19 @@ export default {
                 stage_id: null,
                 model_type: null,
                 name: '',
-                users: []
+                users: [],
+                titulo: ''
             },
-            resource: {},
+            resource: {
+                titulo: ''
+            },
             sections: {
                 showSectionAdvanced: {status: false},
             },
             selects: {},
-            rules: {},
+            rules: {
+                titulo: this.getRules(['required', 'max:255']),
+            },
             // resources: [],
             search: null,
             isLoading: false,
@@ -110,11 +127,27 @@ export default {
                 this.searchCourses(val);
             }, 800);
         },
-        resource: {
+        'resource.titulo': {
             handler(n, o) {
                 let vue = this;
-                // const validateForm = vue.validateForm('projectForm')
-                // vue.options.confirmDisabled = !validateForm
+
+                const validateForm = vue.validateForm('projectForm')
+                vue.options.confirmDisabled = true
+                if(this.list_users_selected.length > 0 && validateForm) {
+                    vue.options.confirmDisabled = false
+                }
+            },
+            deep: true
+        },
+        list_users_selected: {
+            handler(n, o) {
+                let vue = this;
+
+                const validateForm = vue.validateForm('projectForm')
+                vue.options.confirmDisabled = true
+                if(this.list_users_selected.length > 0 && validateForm) {
+                    vue.options.confirmDisabled = false
+                }
             },
             deep: true
         }
@@ -136,6 +169,7 @@ export default {
             vue.options.confirmLabel = "Continuar";
             vue.loadStep2 = false
             vue.list_users_selected = []
+            vue.list_users_selected_load = []
             vue.$emit('onCancel')
         },
         resetValidation() {
@@ -232,16 +266,25 @@ export default {
 
             if (resource) {
                 let url = `${base}/edit/${resource.id}`
+                this.show_list_users = false
                 await vue.$http.get(url).then(({ data }) => {
 
                     let _data = data.data
                     vue.resource = Object.assign({}, vue.resource, _data.activity)
                     vue.$nextTick(() => {
+                        vue.resource.titulo = _data.activity.title;
+                        vue.list_users_selected_load = _data.leaders
                         vue.list_users_selected = _data.leaders
+                        setTimeout(() => {
+                            this.show_list_users = true
+
+                            const validateForm = vue.validateForm('projectForm')
+                            if(this.list_users_selected.length > 0 && validateForm) {
+                                vue.options.confirmDisabled = false
+                            }
+                        }, 10);
                     })
                 })
-                const validateForm = vue.validateForm('projectForm')
-                vue.options.confirmDisabled = !validateForm
             } else {
                 vue.resource.id = null;
             }
@@ -270,10 +313,9 @@ export default {
         changeListUsers() {
             let vue = this
             this.list_users_selected = vue.$refs.AsignacionSupervisores ? vue.$refs.AsignacionSupervisores.usuarios_ok : [];
-            console.log(this.list_users_selected);
+            const validateForm = vue.validateForm('projectForm')
             vue.options.confirmDisabled = true
-            if(this.list_users_selected.length > 0) {
-
+            if(this.list_users_selected.length > 0 && validateForm) {
                 vue.options.confirmDisabled = false
             }
         }

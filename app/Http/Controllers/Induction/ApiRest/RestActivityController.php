@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MeetingAppResource;
 use App\Mail\EmailTemplate;
 use App\Models\Activity;
+use App\Models\Ambiente;
 use App\Models\Benefit;
 use App\Models\CheckList;
 use App\Models\ChecklistRpta;
@@ -128,11 +129,17 @@ class RestActivityController extends Controller
                         'meeting_date_2' => $internship->meeting_date_2,
                         'meeting_time_1' => $internship->meeting_time_1,
                         'meeting_time_2' => $internship->meeting_time_2,
-                        'lider_name' => $lider->fullname,
+                        'lider_name' => $lider->name,
                         'user_name' => $user->fullname,
                         'user_email' => $user->email
                     ];
 
+        $config = Ambiente::first();
+        $mail_data['logo'] = get_media_url($config->logo);
+
+        if(ENV('MULTIMARCA') == true){
+            $mail_data['logo'] = 'https://statics-testing.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
+        }
         if($lider->email) {
             // enviar email
             Mail::to($lider->email)

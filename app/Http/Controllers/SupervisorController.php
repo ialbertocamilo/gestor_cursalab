@@ -208,4 +208,18 @@ class SupervisorController extends Controller
         return $this->success(['users' => $data]);
     }
 
+    public function searchLeaders(Request $request)
+    {
+        $workspace = get_current_workspace();
+
+        $users = User::filterText($request->filtro)
+            ->select('id', 'document', 'name', 'lastname', 'surname')
+            ->whereRelation('subworkspace', 'parent_id', $workspace->id)
+            ->onlyClientUsers()
+            ->limit(40)
+            ->get();
+
+        return $this->success(['users' => $users]);
+    }
+
 }
