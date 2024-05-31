@@ -1108,7 +1108,7 @@ class CheckList extends BaseModel
             'activities.checklist_response:id,code',
         ]);
 
-        $_activities = [];
+        $checklist_audit = null;
         $activities_progress = collect();
         if ($checklist->modality->code != 'qualify_user') {
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
@@ -1163,13 +1163,8 @@ class CheckList extends BaseModel
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=>$activity->checklist_response->code,
                 'system_calification' => $system_calification,
-                'percent_progress' => 80,
-                'activities_assigned' => $_activities->count(),
-                'activities_reviewved' => 0,
                 'comments' => [
-                    // ['comment'=>'Comentario principal','user'=>'Aldo'],
-                    // ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
-                    // ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
+                    
                 ],
                 'photo' => $list_photos,
                 'qualification_id'=> $progress?->qualification_id ?? null,
@@ -1220,7 +1215,10 @@ class CheckList extends BaseModel
                 'required_action_plan' => $checklist->extra_attributes['required_action_plan'],
                 "type" => $checklist->type,
                 "theme"=>$theme,
-                'activities' => $activities
+                'activities' => $activities,
+                'percent_progress' => $checklist_audit?->percent_progress ?? 0,
+                'activities_assigned' => $checklist->activities->count(),
+                'activities_reviewved' =>  $checklist_audit?->activities_reviewved ?? 0,
             ]
             ];
     }
@@ -1228,6 +1226,7 @@ class CheckList extends BaseModel
         $_course =new Course();
         $checklist->loadMissing('segments');
         $checklist->loadMissing('type:id,name,code,color,icon');
+        // añadir variable SEARCH
         $users = $_course->usersSegmented(
                             course_segments:$checklist->segments,
                             addSelect:['name','lastname','surname']

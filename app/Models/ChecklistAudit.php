@@ -108,7 +108,7 @@ class ChecklistAudit extends BaseModel
     protected function saveActivity(Checklist $checklist, array $data,$action_request): array
     {
         $user = auth()->user();
-        $checklist->load(['type:id,name,code', 'modality:id,name,code']);
+        $checklist->load(['type:id,name,code', 'modality:id,name,code','activities:id,checklist_id']);
         $criterionValueUserEntity = $this->getCriterionValueUserEntity($checklist, $user);
 
         $modelType = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
@@ -149,15 +149,8 @@ class ChecklistAudit extends BaseModel
     protected function processAudit($action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate): void
     {
         $dateAudit = $dateAudit->format('Y-m-d H:i:s');
-        $checklist_audit = ChecklistAudit::where('checklist_id',$checklist->id)
-                    ->where('auditor_id',$user->id)
-                    ->where('model_type',$modelType)
-                    ->where('model_id',$modelId)
-                    ->when($checklist->extra_attributes['view_360'], function($q) use($user){
-                        $q->where('auditor_id',$user->id);
-                    })
-                    ->whereNull('finishes_at')->first();
-        $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user);
+        $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user,true);
+        $activities_reviewved = $checklist_audit?->audit_activities ? count($checklist_audit?->audit_activities) : 0;
         if(!$checklist_audit){
             $checklist_audit = ChecklistAudit::create([
                 'checklist_id' => $checklist->id,
@@ -168,12 +161,13 @@ class ChecklistAudit extends BaseModel
                 'starts_at' => $dateAudit
             ]);
         }
+        $activities_assigned = count($checklist->activities);
         $checklistActivityAudit = ChecklistActivityAudit::where([
             'checklist_audit_id' => $checklist_audit->id,
             'checklist_id' => $checklist->id,
             'checklist_activity_id' => $data['activity_id'],
         ])->first();
-
+        
         if ($checklistActivityAudit) {
             $checklistActivityAudit = $checklistActivityAudit->toArray();
             // $checklistActivityAudit['date_audit'] = $dateAudit;
@@ -230,6 +224,7 @@ class ChecklistAudit extends BaseModel
                     'datetime' => $dateAudit
                 ];
             }
+            $activities_reviewved = $activities_reviewved + 1;
             $checklistActivityAuditToCreate[] = [
                 'checklist_audit_id' => $checklist_audit->id,
                 'qualification_id' => $data['qualification_id'] ?? null,
@@ -245,6 +240,13 @@ class ChecklistAudit extends BaseModel
                 ]]) : '[]',
             ];
         }
+        //update progress
+        $checklist_audit->activities_assigned  = $activities_assigned;
+        $checklist_audit->activities_reviewved  = $activities_reviewved;
+        $checklist_audit->percent_progress  = round(($activities_reviewved/$activities_assigned),2);
+        $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
+        // dd($checklist_audit->percent_progress,$activities_reviewved/$activities_assigned,$activities_assigned,$activities_reviewved);
+        $checklist_audit->save();
     }
 
     protected function listProgress($checklist){
@@ -300,7 +302,7 @@ class ChecklistAudit extends BaseModel
                                 })
                                 ->whereNull('finishes_at')
                                 ->when($with_audit_activities, function($q){
-                                    $q->with('audit_activities:checklist_activity_id,qualification_id,photo');
+                                    $q->with('audit_activities:id,checklist_audit_id,checklist_activity_id,qualification_id,photo');
                                 })
                                 ->first();
     }
