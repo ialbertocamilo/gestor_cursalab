@@ -549,7 +549,7 @@ class Process extends BaseModel
                             $activity->status = 'pending';
                             $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
                             if($exist) {
-                                $activity->status = $exist->status->code;
+                                $activity->status = $exist->status?->code;
                                 $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
                             }
                             unset($activity->type_id);

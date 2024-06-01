@@ -210,14 +210,35 @@ class SupervisorController extends Controller
 
     public function searchLeaders(Request $request)
     {
-        $workspace = get_current_workspace();
+        $sub_workspaces_id = current_subworkspaces_id();
 
-        $users = User::filterText($request->filtro)
-            ->select('id', 'document', 'name', 'lastname', 'surname')
-            ->whereRelation('subworkspace', 'parent_id', $workspace->id)
-            ->onlyClientUsers()
-            ->limit(40)
-            ->get();
+        $type_ids = [];
+        $type_ids[] = Taxonomy::getFirstData('user', 'type', 'employee')->id;
+        $type_ids[] = Taxonomy::getFirstData('user', 'type', 'client')->id;
+
+        $with = ['subworkspace'];
+        if (get_current_workspace()->id == 25) {
+            $with = ['subworkspace', 'criterion_values' => function ($q) {
+                $q->whereIn('criterion_id', [40, 41]);
+            }];
+        }
+
+        $query = User::whereIn('type_id', $type_ids);
+        $query->with($with)->withCount('failed_topics');
+        $query->where('active', ACTIVE);
+
+        if ($request->filtro)
+            $query->filterText($request->filtro);
+
+        if ($sub_workspaces_id) {
+            $query->whereIn('subworkspace_id', $sub_workspaces_id);
+        } else {
+            $query->whereIn('subworkspace_id', current_subworkspaces_id());
+        }
+
+        $users = $query->limit(40)
+                    ->select('id', 'name', 'lastname', 'surname', 'fullname', 'document', 'email', 'email_gestor')
+                    ->get();
 
         return $this->success(['users' => $users]);
     }

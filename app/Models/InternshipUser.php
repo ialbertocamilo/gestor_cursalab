@@ -33,4 +33,9 @@ class InternshipUser extends BaseModel
     {
         $query->where('active', 1);
     }
+
+    public function status()
+    {
+        return $this->belongsTo(Taxonomy::class, 'status_id');
+    }
 }
