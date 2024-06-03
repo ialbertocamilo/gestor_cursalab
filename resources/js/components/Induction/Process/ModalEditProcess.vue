@@ -246,7 +246,7 @@
                                                             dense
                                                         ></v-switch>
                                                     </div>
-                                                    <span class="text_default">¿Es un proceso de inducción para líder corporativo?</span>
+                                                    <span class="text_default">Activar solicitud de reuniones para el proceso (se requiere correo de los participantes)</span>
                                                 </div>
                                             </div>
                                         </template>

@@ -28,7 +28,7 @@
                                 <v-row>
                                     <v-col cols="12" class="step_modalAsignacionXDni">
                                         <AsignacionXDni
-                                            description='Define los colaboradores que participarán en el proceso de pasantía dentro de la inducción'
+                                            description='Define los colaboradores a los que se podrá solicitar una reunión durante la inducción'
                                             apiSearchUser="/supervisores/search-leaders"
                                             apiUploadPlantilla="/supervisores/subir-excel-usuarios"
                                             :showSubidaMasiva="false"

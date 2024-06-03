@@ -23,7 +23,10 @@
                 border-radius:4px;
                 background: #FFCD0C;"></div>
             <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-                Hola <strong>{{ $data['lider_name'] }}</strong>, soy <strong>{{ $data['user_name'] }}</strong> y quisiera solicitar una reunión de pasantía para conocer más sobre tu área, tengo estas fechas tentativas
+                Hola <strong>{{ $data['lider_name'] }}</strong>
+            </p>
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
+                <strong>{{ $data['user_name'] }}</strong> ha enviado una solicitud de reunión contigo, tenemos las siguientes alternativas:
             </p>
             <div style="margin-left: 90%;
                 width:25px;
@@ -71,8 +74,7 @@
                 height:5px;
                 border-radius:4px;
                 background: #FFCD0C;"></div>
-            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">
-            Responde a <a href="mailto:{{ $data['user_email'] }}"><span style="font-weight:bold;">{{ $data['user_email'] }}</span></a> para confirmar alguna fecha tentativa o coordinar una nueva fecha.
+            <p style="color:#333D5D;font-size: .9rem;padding: 0px 46px;">En caso no puedas en algunas de estas opciones, envía un correo a: <a href="mailto:{{ $data['user_email'] }}" style="color: #5457E7;"><span style="font-weight:bold;">{{ $data['user_email'] }}</span></a>
             </p>
             <div style="margin-left: 8%;
                         width: 9px;

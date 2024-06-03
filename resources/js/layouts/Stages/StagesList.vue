@@ -637,7 +637,7 @@ export default {
                 ref: 'ModalActivityPasantia',
                 open: false,
                 base_endpoint: '/procesos',
-                title_modal: 'Pasantía',
+                title_modal: 'Solicitud de reunión',
                 confirmLabel: 'Continuar',
                 model_id: 0,
                 persistent: true,
@@ -1033,7 +1033,7 @@ export default {
                         name_icon = 'mdi mdi-video';
                         break;
                     case 'pasantia':
-                        name = 'Pasantía';
+                        name = 'Solicitud de reunión';
                         name_icon = 'mdi mdi-calendar-multiple-check';
                         break;
                     default:

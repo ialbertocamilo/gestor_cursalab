@@ -79,12 +79,7 @@ class RestActivityController extends Controller
                                 ->where('leader_id', $leader->id)
                                 ->where('internship_id', $internship->id)
                                 ->first();
-                if($iu && $iu->status_id == $internship_user_status_id) {
-                    $leader->status = 'sent';
-                }
-                else {
-                    $leader->status = 'pending';
-                }
+                $leader->status = $iu && $iu->status ? $iu->status->code : 'pending';
             }
         }
 
@@ -120,7 +115,7 @@ class RestActivityController extends Controller
                 $internship_user->status_id = Taxonomy::getFirstData('internship', 'status', 'email_sent')?->id ?? null;
                 $internship_user->active = true;
                 $internship_user->save();
-                $this->sendEmail($user, $leader, $internship_user);
+                $this->sendEmail($user, $leader, $internship_user, $process->id);
 
             } catch (\Exception $e) {
                 $response['error'] = true;
@@ -132,10 +127,25 @@ class RestActivityController extends Controller
         return $this->success($response);
     }
 
-    private function sendEmail($user, $lider, $internship)
+    private function sendEmail($user, $lider, $internship, $process_id)
     {
+        $process = Process::select('id', 'title', 'description', 'active')
+                    ->where('id', $process_id)
+                    ->with(['instructors' => function($q){
+                        $q->select('id', 'document', 'active', 'email', 'email_gestor');
+                    }])
+                    ->first();
+        $emails_sup = [];
+        if($process && $process->instructors) {
+            foreach($process->instructors as $instructor) {
+                if($instructor->email && str_contains($instructor->email, '@')) {
+                    array_push($emails_sup, $instructor->email);
+                }
+            }
+        }
+
         //enviar codigo al email
-        $mail_data = [ 'subject' => 'Solicitud de pasantía',
+        $mail_data = [ 'subject' => 'Solicitud de reunión',
                         'meeting_date_1' => $internship->meeting_date_1,
                         'meeting_date_2' => $internship->meeting_date_2,
                         'meeting_time_1' => $internship->meeting_time_1,
@@ -153,8 +163,15 @@ class RestActivityController extends Controller
         }
         if($lider->email) {
             // enviar email
-            Mail::to($lider->email)
-                ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
+            if(count($emails_sup) > 0) {
+                Mail::to($lider->email)
+                    ->cc($emails_sup)
+                    ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
+            }
+            else {
+                Mail::to($lider->email)
+                    ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
+            }
         }
     }
 
