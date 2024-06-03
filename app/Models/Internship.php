@@ -27,4 +27,26 @@ class Internship extends BaseModel
     {
         $query->where('active', 1);
     }
+
+    protected function getPasantiasAsignadas($user_id = null)
+    {
+        $internships = Internship::where('active', true)->get();
+        if($internships)
+        {
+            foreach($internships as $internship)
+            {
+                $leaders = $internship->leaders ? json_decode($internship->leaders) : null;
+                if(is_array($leaders))
+                {
+                    foreach ($leaders as $leader)
+                    {
+                        if($user_id == $leader) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

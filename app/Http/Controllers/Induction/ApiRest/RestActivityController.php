@@ -55,12 +55,23 @@ class RestActivityController extends Controller
 
     public function ActivityPasantia(Process $process, Activity $activity, Request $request)
     {
+        $search = $request->get('search');
+
         $user = Auth::user();
         $internship = Internship::where('id', $activity->model_id)->first();
         $users = $internship && $internship->leaders ? json_decode($internship->leaders) : [];
         $internship_user_status_id = Taxonomy::getFirstData('internship', 'status', 'email_sent')?->id ?? null;
 
-        $leaders = User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname')->get();
+        $leaders = User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname');
+        if($search)
+        {
+            $leaders->where(function($s) use ($search) {
+                $s->where('name', 'like', '%'.$search.'%');
+                $s->orWhere('lastname', 'like', '%'.$search.'%');
+                $s->orWhere('surname', 'like', '%'.$search.'%');
+            });
+        }
+        $leaders = $leaders->get();
 
         if($leaders) {
             foreach ($leaders as $leader) {
