@@ -70,346 +70,353 @@
                             </v-col>
                         </v-row>
                         
-                        <draggable v-model="areas" @start="drag=true"
-                                    @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionArea(areas, $event)">
-                                <transition-group type="transition" name="flip-list" tag="div" key="transition-area">
-                                    <v-expansion-panels key="expansion-area" v-model="panel" multiple flat>
-                                        <v-expansion-panel
-                                            v-for="(area,index_area) in areas"
-                                            :key="area.id"
-                                          
-                                        >
-                                            <div class="item-draggable areas">
-                                                <v-expansion-panel-header>
-                                                    <v-row>
-                                                        <v-col cols="6" class="d-flex align-center justify-content-center">
-                                                            <div style="margin-right: 15px;">
-                                                                <v-icon class="ml-0 mr-2 icon_size icon_size_drag">fas fa-grip-vertical
+                        <draggable 
+                            v-model="areas" 
+                            @start="drag=true"
+                            @end="drag=false" 
+                            class="custom-draggable" 
+                            ghost-class="ghost" 
+                            @change="changePositionArea(areas, $event)"
+                            style="height: 500px;overflow-y: auto;"   
+                        >
+                            <transition-group type="transition" name="flip-list" tag="div" key="transition-area">
+                                <v-expansion-panels key="expansion-area" v-model="panel" multiple flat>
+                                    <v-expansion-panel
+                                        v-for="(area,index_area) in areas"
+                                        :key="area.id"
+                                        
+                                    >
+                                        <div class="item-draggable areas">
+                                            <v-expansion-panel-header>
+                                                <v-row>
+                                                    <v-col cols="6" class="d-flex align-center justify-content-center">
+                                                        <div style="margin-right: 15px;">
+                                                            <v-icon class="ml-0 mr-2 icon_size icon_size_drag">fas fa-grip-vertical
+                                                            </v-icon>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between" style="column-gap: 20px; flex: 1;">
+                                                            <div style="flex: 1;">
+                                                                <div>
+                                                                    <span class="text_default fw-bold">{{ area.name }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </v-col>
+                                                    <v-col cols="3" class="d-flex justify-content-around text-center align-items-center" style="color:#A9B2B9">
+                                                        <span>Temáticas: {{area.tematicas.length}}</span>
+                                                        <span>Actividades: {{ getTotalActivities(area.tematicas) }}</span>
+                                                    </v-col>
+                                                    <v-col cols="3" class="bx_actions_area">
+                                                        <div>
+                                                            <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="openFormModal(modalAreaEditOptions,area,null,'Edición de áreas')">
+                                                                <v-icon class="ml-0 icon_size">
+                                                                    mdi mdi-pencil
                                                                 </v-icon>
+                                                                <span class="text_default">Editar</span>
                                                             </div>
-                                                            <div class="d-flex justify-content-between" style="column-gap: 20px; flex: 1;">
-                                                                <div style="flex: 1;">
-                                                                    <div>
-                                                                        <span class="text_default fw-bold">{{ area.name }}</span>
-                                                                    </div>
-                                                                </div>
+                                                        </div>
+                                                        <!-- <div>
+                                                            <div class="btn_action"  :class="{'disabled': !area.active}" @click.stop="verifyStep">
+                                                                <v-icon class="ml-0 icon_size">
+                                                                    {{area.active ? 'fas fa-circle' : 'far fa-circle'}}
+                                                                </v-icon>
+                                                                <span class="text_default">{{area.active ? 'Activo' : 'Inactivo'}}</span>
                                                             </div>
-                                                        </v-col>
-                                                        <v-col cols="3" class="d-flex justify-content-around text-center align-items-center" style="color:#A9B2B9">
-                                                            <span>Temáticas: {{area.tematicas.length}}</span>
-                                                            <span>Actividades: {{ getTotalActivities(area.tematicas) }}</span>
-                                                        </v-col>
-                                                        <v-col cols="3" class="bx_actions_area">
-                                                            <div>
-                                                                <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="openFormModal(modalAreaEditOptions,area,null,'Edición de áreas')">
-                                                                    <v-icon class="ml-0 icon_size">
-                                                                        mdi mdi-pencil
-                                                                    </v-icon>
-                                                                    <span class="text_default">Editar</span>
-                                                                </div>
+                                                        </div> -->
+                                                        <div>
+                                                            <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="verifyStep">
+                                                                <v-icon class="ml-0 icon_size">
+                                                                    mdi mdi-trash-can
+                                                                </v-icon>
+                                                                <span class="text_default">Eliminar</span>
                                                             </div>
-                                                            <!-- <div>
-                                                                <div class="btn_action"  :class="{'disabled': !area.active}" @click.stop="verifyStep">
-                                                                    <v-icon class="ml-0 icon_size">
-                                                                        {{area.active ? 'fas fa-circle' : 'far fa-circle'}}
-                                                                    </v-icon>
-                                                                    <span class="text_default">{{area.active ? 'Activo' : 'Inactivo'}}</span>
-                                                                </div>
-                                                            </div> -->
-                                                            <div>
-                                                                <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="verifyStep">
-                                                                    <v-icon class="ml-0 icon_size">
-                                                                        mdi mdi-trash-can
-                                                                    </v-icon>
-                                                                    <span class="text_default">Eliminar</span>
-                                                                </div>
-                                                            </div>
-                                                        </v-col>
-                                                    </v-row>
-                                                </v-expansion-panel-header>
-                                                <v-expansion-panel-content>
-                                                    <v-row>
-                                                        <v-col cols="12">
-                                                            <draggable v-model="areas.tematicas" @start="drag=true"
-                                                                    @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(area, $event)">
-                                                                <transition-group type="transition" name="flip-list" tag="div">
-                                                                    <v-expansion-panels key="expansion-area" v-model="panel_tematica" multiple flat>
-                                                                        <v-expansion-panel
-                                                                            v-for="(tematica,index_tematica) in area.tematicas"
-                                                                            :key="'act_'+tematica.id"
-                                                                            >
-                                                                                <div class="item-draggable areas areas_tematicas">
-                                                                                    <v-expansion-panel-header>
-                                                                                        <v-row>
-                                                                                            <v-col cols="6" class="d-flex align-center">
-                                                                                                <div style="margin-left: 35px; margin-right: 10px;">
-                                                                                                    <v-icon class="ml-0 mr-2 icon_size icon_size_drag">fas fa-grip-vertical
+                                                        </div>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-expansion-panel-header>
+                                            <v-expansion-panel-content>
+                                                <v-row>
+                                                    <v-col cols="12">
+                                                        <draggable v-model="areas.tematicas" @start="drag=true"
+                                                                @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(area, $event)">
+                                                            <transition-group type="transition" name="flip-list" tag="div">
+                                                                <v-expansion-panels key="expansion-area" v-model="panel_tematica" multiple flat>
+                                                                    <v-expansion-panel
+                                                                        v-for="(tematica,index_tematica) in area.tematicas"
+                                                                        :key="'act_'+tematica.id"
+                                                                        >
+                                                                            <div class="item-draggable areas areas_tematicas">
+                                                                                <v-expansion-panel-header>
+                                                                                    <v-row>
+                                                                                        <v-col cols="6" class="d-flex align-center">
+                                                                                            <div style="margin-left: 35px; margin-right: 10px;">
+                                                                                                <v-icon class="ml-0 mr-2 icon_size icon_size_drag">fas fa-grip-vertical
+                                                                                                </v-icon>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <div class="d-flex align-items-center">
+                                                                                                    <span class="text_default fw-bold">{{ tematica.name }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </v-col>
+                                                                                        <v-col cols="3" class="d-flex justify-content-center text-center" style="color:#A9B2B9">
+                                                                                            <span>Cantidad de actividades: {{ tematica.activities.length }}</span>
+                                                                                        </v-col>
+                                                                                        <v-col cols="3" class="bx_actions_area">
+                                                                                            <div>
+                                                                                                <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openFormModal(modalTematicaOptions,tematica,null,'Editar temática')">
+                                                                                                    <v-icon class="ml-0 icon_size">
+                                                                                                        mdi mdi-pencil
                                                                                                     </v-icon>
+                                                                                                    <span class="text_default">Editar</span>
                                                                                                 </div>
-                                                                                                <div>
-                                                                                                    <div class="d-flex align-items-center">
-                                                                                                        <span class="text_default fw-bold">{{ tematica.name }}</span>
-                                                                                                    </div>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <div class="btn_action"  :class="{'disabled': !tematica.active}">
+                                                                                                    <v-icon class="ml-0 icon_size">
+                                                                                                        {{tematica.active ? 'fas fa-circle' : 'far fa-circle'}}
+                                                                                                    </v-icon>
+                                                                                                    <span class="text_default">{{tematica.active ? 'Activo' : 'Inactivo'}}</span>
                                                                                                 </div>
-                                                                                            </v-col>
-                                                                                            <v-col cols="3" class="d-flex justify-content-center text-center" style="color:#A9B2B9">
-                                                                                                <span>Cantidad de actividades: {{ tematica.activities.length }}</span>
-                                                                                            </v-col>
-                                                                                            <v-col cols="3" class="bx_actions_area">
-                                                                                                <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openFormModal(modalTematicaOptions,tematica,null,'Editar temática')">
-                                                                                                        <v-icon class="ml-0 icon_size">
-                                                                                                            mdi mdi-pencil
-                                                                                                        </v-icon>
-                                                                                                        <span class="text_default">Editar</span>
-                                                                                                    </div>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openDeleteModal(tematica,'tematica')">
+                                                                                                    <v-icon class="ml-0 icon_size">
+                                                                                                        mdi mdi-trash-can
+                                                                                                    </v-icon>
+                                                                                                    <span class="text_default">Eliminar</span>
                                                                                                 </div>
-                                                                                                <div>
-                                                                                                    <div class="btn_action"  :class="{'disabled': !tematica.active}">
-                                                                                                        <v-icon class="ml-0 icon_size">
-                                                                                                            {{tematica.active ? 'fas fa-circle' : 'far fa-circle'}}
-                                                                                                        </v-icon>
-                                                                                                        <span class="text_default">{{tematica.active ? 'Activo' : 'Inactivo'}}</span>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openDeleteModal(tematica,'tematica')">
-                                                                                                        <v-icon class="ml-0 icon_size">
-                                                                                                            mdi mdi-trash-can
-                                                                                                        </v-icon>
-                                                                                                        <span class="text_default">Eliminar</span>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </v-col>
-                                                                                        </v-row>
-                                                                                    </v-expansion-panel-header>
-                                                                                    <v-expansion-panel-content>
-                                                                                        <v-row class="ml-12">
-                                                                                            <v-col cols="12">
-                                                                                                <draggable v-model="tematica.activities" @start="drag=true"
-                                                                                                        @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(acitivity, $event)">
-                                                                                                    <transition-group type="transition" name="flip-list" tag="div">
-                                                                                                        <div v-for="(activity,index_activity) in tematica.activities"
-                                                                                                            :key="'act_'+activity.id">
-                                                                                                            <div class="item-draggable areas areas_tematicas">
-                                                                                                                <v-row class="elevation-2 my-2">
-                                                                                                                    <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
-                                                                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                                                                                        </v-icon>
+                                                                                            </div>
+                                                                                        </v-col>
+                                                                                    </v-row>
+                                                                                </v-expansion-panel-header>
+                                                                                <v-expansion-panel-content>
+                                                                                    <v-row class="ml-12">
+                                                                                        <v-col cols="12">
+                                                                                            <draggable v-model="tematica.activities" @start="drag=true"
+                                                                                                    @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(acitivity, $event)">
+                                                                                                <transition-group type="transition" name="flip-list" tag="div">
+                                                                                                    <div v-for="(activity,index_activity) in tematica.activities"
+                                                                                                        :key="'act_'+activity.id">
+                                                                                                        <div class="item-draggable areas areas_tematicas">
+                                                                                                            <v-row class="elevation-2 my-2">
+                                                                                                                <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
+                                                                                                                    <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                                                                    </v-icon>
+                                                                                                                </v-col>
+                                                                                                                <v-row class="col-11 px-0 mx-0" >
+                                                                                                                    <v-col cols="12" class="px-0">
+                                                                                                                        <DefaultRichText
+                                                                                                                            clearable
+                                                                                                                            :height="150"
+                                                                                                                            v-model="activity.activity"
+                                                                                                                            label="Actividad de checklist"
+                                                                                                                            :ignoreHTMLinLengthCalculation="true"
+                                                                                                                            :key="`${activity.id}-editor`"
+                                                                                                                            ref="descriptionRichText1"
+                                                                                                                            customSelectorImage
+                                                                                                                        />
                                                                                                                     </v-col>
-                                                                                                                    <v-row class="col-11 px-0 mx-0" >
-                                                                                                                        <v-col cols="12" class="px-0">
-                                                                                                                            <DefaultRichText
-                                                                                                                                clearable
-                                                                                                                                :height="150"
-                                                                                                                                v-model="activity.activity"
-                                                                                                                                label="Actividad de checklist"
-                                                                                                                                :ignoreHTMLinLengthCalculation="true"
-                                                                                                                                :key="`${activity.id}-editor`"
-                                                                                                                                ref="descriptionRichText1"
-                                                                                                                                customSelectorImage
-                                                                                                                            />
-                                                                                                                        </v-col>
-                                                                                                                        <v-expansion-panels flat class="custom-expansion-block" v-model="activity.panel">
-                                                                                                                            <v-expansion-panel >
-                                                                                                                                <v-expansion-panel-header flat>
-                                                                                                                                    <span style="color:#5458EA" class="d-flex">
-                                                                                                                                        <i class="pr-1 mdi mdi-cog"></i>
-                                                                                                                                        Configuración avanzada
-                                                                                                                                    </span>
-                                                                                                                                    <div class="d-flex">
-                                                                                                                                        <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
-                                                                                                                                            <i class="pr-1 mdi mdi-file-document-check"></i>
-                                                                                                                                            Tipo de repuesta: {{ activity.checklist_response.name }}
-                                                                                                                                        </v-chip>
-                                                                                                                                        <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
-                                                                                                                                            <i class="pr-1 mdi mdi-file-chart"></i>
-                                                                                                                                            Será evaluable
-                                                                                                                                        </v-chip>
-                                                                                                                                        <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                                                                                                                            <i class="pr-1 mdi mdi-image"></i>
-                                                                                                                                            Se agregará foto
-                                                                                                                                        </v-chip>
-                                                                                                                                        <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                                                                                                                            <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
-                                                                                                                                            <i class="pr-1 mdi mdi-comment-outline"></i>
-                                                                                                                                            Se agregará comentario
-                                                                                                                                        </v-chip>
-                                                                                                                                    </div>
-                                                                                                                                    <v-spacer></v-spacer>
-                                                                                                                                    <div @click.stop="openDeleteModal(activity,'activity')">
-                                                                                                                                        <DefaultButton
-                                                                                                                                            icon="mdi-delete"
-                                                                                                                                            isIconButton
+                                                                                                                    <v-expansion-panels flat class="custom-expansion-block" v-model="activity.panel">
+                                                                                                                        <v-expansion-panel >
+                                                                                                                            <v-expansion-panel-header flat>
+                                                                                                                                <span style="color:#5458EA" class="d-flex">
+                                                                                                                                    <i class="pr-1 mdi mdi-cog"></i>
+                                                                                                                                    Configuración avanzada
+                                                                                                                                </span>
+                                                                                                                                <div class="d-flex">
+                                                                                                                                    <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
+                                                                                                                                        <i class="pr-1 mdi mdi-file-document-check"></i>
+                                                                                                                                        Tipo de repuesta: {{ activity.checklist_response.name }}
+                                                                                                                                    </v-chip>
+                                                                                                                                    <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                                                                                                                        <i class="pr-1 mdi mdi-file-chart"></i>
+                                                                                                                                        Será evaluable
+                                                                                                                                    </v-chip>
+                                                                                                                                    <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                                                                                                        <i class="pr-1 mdi mdi-image"></i>
+                                                                                                                                        Se agregará foto
+                                                                                                                                    </v-chip>
+                                                                                                                                    <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                                                                                                        <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
+                                                                                                                                        <i class="pr-1 mdi mdi-comment-outline"></i>
+                                                                                                                                        Se agregará comentario
+                                                                                                                                    </v-chip>
+                                                                                                                                </div>
+                                                                                                                                <v-spacer></v-spacer>
+                                                                                                                                <div @click.stop="openDeleteModal(activity,'activity')">
+                                                                                                                                    <DefaultButton
+                                                                                                                                        icon="mdi-delete"
+                                                                                                                                        isIconButton
+                                                                                                                                    />
+                                                                                                                                </div>
+                                                                                                                                <div @click.stop="saveActivity(activity,index_activity,index_area,index_tematica)" :class="{'disabled': !activity.activity}">
+                                                                                                                                    <DefaultButton
+                                                                                                                                        icon="mdi-content-save"
+                                                                                                                                        isIconButton
+                                                                                                                                        :disabled="!activity.activity"
+                                                                                                                                    />
+                                                                                                                                </div>
+                                                                                                                            </v-expansion-panel-header>
+                                                                                                                            <v-expansion-panel-content class="row">
+                                                                                                                                <v-row>
+                                                                                                                                    <v-col cols="12" class="d-flex align-items-center">
+                                                                                                                                        <span>
+                                                                                                                                            General / tipo de respuesta
+                                                                                                                                        </span>
+                                                                                                                                        <v-divider></v-divider>
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="4">
+                                                                                                                                        <DefaultSelect 
+                                                                                                                                            :items="checklist_type_response" 
+                                                                                                                                            dense 
+                                                                                                                                            item-text="name"
+                                                                                                                                            show-required 
+                                                                                                                                            v-model="activity.checklist_response"
+                                                                                                                                            return-object
+                                                                                                                                            label="Tipo de respuesta"
                                                                                                                                         />
-                                                                                                                                    </div>
-                                                                                                                                    <div @click.stop="saveActivity(activity,index_activity,index_area,index_tematica)" :class="{'disabled': !activity.activity}">
-                                                                                                                                        <DefaultButton
-                                                                                                                                            icon="mdi-content-save"
-                                                                                                                                            isIconButton
-                                                                                                                                            :disabled="!activity.activity"
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
+                                                                                                                                        <v-checkbox
+                                                                                                                                            class="my-0 mr-2 checkbox-label"
+                                                                                                                                            label="Evaluable"
+                                                                                                                                            color="primary"
+                                                                                                                                            v-model="activity.extra_attributes.is_evaluable"
+                                                                                                                                            hide-details="false"
                                                                                                                                         />
-                                                                                                                                    </div>
-                                                                                                                                </v-expansion-panel-header>
-                                                                                                                                <v-expansion-panel-content class="row">
-                                                                                                                                    <v-row>
-                                                                                                                                        <v-col cols="12" class="d-flex align-items-center">
-                                                                                                                                            <span>
-                                                                                                                                                General / tipo de respuesta
-                                                                                                                                            </span>
-                                                                                                                                            <v-divider></v-divider>
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="4">
-                                                                                                                                            <DefaultSelect 
-                                                                                                                                                :items="checklist_type_response" 
-                                                                                                                                                dense 
-                                                                                                                                                item-text="name"
-                                                                                                                                                show-required 
-                                                                                                                                                v-model="activity.checklist_response"
-                                                                                                                                                return-object
-                                                                                                                                                label="Tipo de respuesta"
-                                                                                                                                            />
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
-                                                                                                                                            <v-checkbox
-                                                                                                                                                class="my-0 mr-2 checkbox-label"
-                                                                                                                                                label="Evaluable"
-                                                                                                                                                color="primary"
-                                                                                                                                                v-model="activity.extra_attributes.is_evaluable"
-                                                                                                                                                hide-details="false"
-                                                                                                                                            />
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="3" class="d-flex align-items-center">
-                                                                                                                                            <v-checkbox
-                                                                                                                                                class="my-0 mr-2 checkbox-label"
-                                                                                                                                                label="Se usará foto como respuesta"
-                                                                                                                                                color="primary"
-                                                                                                                                                v-model="activity.extra_attributes.photo_response"
-                                                                                                                                                hide-details="false"
-                                                                                                                                            />
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="3" class="d-flex align-items-center">
-                                                                                                                                            <v-checkbox
-                                                                                                                                                class="my-0 mr-2 checkbox-label"
-                                                                                                                                                label="Actividad acepta comentario"
-                                                                                                                                                color="primary"
-                                                                                                                                                v-model="activity.extra_attributes.comment_activity"
-                                                                                                                                                hide-details="false"
-                                                                                                                                            />
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="12" v-if="activity.checklist_response.code == 'custom_option'">
-                                                                                                                                            Respuestas personalizadas:
-                                                                                                                                            <v-divider></v-divider>
-                                                                                                                                            <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
-                                                                                                                                                <DefaultInput
-                                                                                                                                                    clearable
-                                                                                                                                                    v-model="option.name"
-                                                                                                                                                    :label="`Opción ${index_option+1}`"
-                                                                                                                                                    dense
-                                                                                                                                                />
-                                                                                                                                                <DefaultButton
-                                                                                                                                                    icon="mdi-delete"
-                                                                                                                                                    isIconButton
-                                                                                                                                                    @click="deleteCustomOption(index_area,index_tematica,index_activity,index_option)"
-                                                                                                                                                />
-                                                                                                                                            </div>
-                                                                                                                                            <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(index_area,index_tematica,index_activity)">Agregar una respuesta personalizada +</span>
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="12" class="d-flex align-items-center">
-                                                                                                                                            <span>
-                                                                                                                                                Inteligencia artificial
-                                                                                                                                            </span>
-                                                                                                                                            <v-divider></v-divider>
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="4" class="d-flex align-items-center">
-                                                                                                                                            <v-checkbox
-                                                                                                                                                class="my-0 mr-2 checkbox-label"
-                                                                                                                                                label="Aplicar visión computacional"
-                                                                                                                                                color="primary"
-                                                                                                                                                v-model="activity.extra_attributes.computational_vision"
-                                                                                                                                                :disabled="!is_checklist_premium"
-                                                                                                                                                hide-details="false"
-                                                                                                                                            />
-                                                                                                                                            <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
-                                                                                                                                                    <span class="d-flex beta_upgrade">
-                                                                                                                                                        <img src="/img/premiun.svg"> Upgrade
-                                                                                                                                                    </span>
-                                                                                                                                                </div>
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
-                                                                                                                                            <DefaultSelect 
-                                                                                                                                                v-model="activity.extra_attributes.type_computational_vision"
-                                                                                                                                                :items="types_computational_vision" 
-                                                                                                                                                dense 
-                                                                                                                                                item-text="name"
-                                                                                                                                                item-value="id"
-                                                                                                                                                show-required 
-                                                                                                                                                label="Selecciona una opción"
-                                                                                                                                                :openUp="true"
-                                                                                                                                            />  
-                                                                                                                                        </v-col>
-                                                                                                                                        <v-col cols="4"
-                                                                                                                                            v-if="activity.extra_attributes.type_computational_vision && activity.extra_attributes.type_computational_vision != 'simil'"
-                                                                                                                                        >
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="3" class="d-flex align-items-center">
+                                                                                                                                        <v-checkbox
+                                                                                                                                            class="my-0 mr-2 checkbox-label"
+                                                                                                                                            label="Se usará foto como respuesta"
+                                                                                                                                            color="primary"
+                                                                                                                                            v-model="activity.extra_attributes.photo_response"
+                                                                                                                                            hide-details="false"
+                                                                                                                                        />
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="3" class="d-flex align-items-center">
+                                                                                                                                        <v-checkbox
+                                                                                                                                            class="my-0 mr-2 checkbox-label"
+                                                                                                                                            label="Actividad acepta comentario"
+                                                                                                                                            color="primary"
+                                                                                                                                            v-model="activity.extra_attributes.comment_activity"
+                                                                                                                                            hide-details="false"
+                                                                                                                                        />
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="12" v-if="activity.checklist_response.code == 'custom_option'">
+                                                                                                                                        Respuestas personalizadas:
+                                                                                                                                        <v-divider></v-divider>
+                                                                                                                                        <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
                                                                                                                                             <DefaultInput
                                                                                                                                                 clearable
-                                                                                                                                                v-model="activity.extra_attributes.type_computational_vision_value"
-                                                                                                                                                :label="`${activity.extra_attributes.type_computational_vision == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
+                                                                                                                                                v-model="option.name"
+                                                                                                                                                :label="`Opción ${index_option+1}`"
                                                                                                                                                 dense
                                                                                                                                             />
-                                                                                                                                        </v-col>
-                                                                                                                                    </v-row>
-                                                                                                                                </v-expansion-panel-content>
-                                                                                                                            </v-expansion-panel>
-                                                                                                                        </v-expansion-panels>
-                                                                                                                    </v-row>
+                                                                                                                                            <DefaultButton
+                                                                                                                                                icon="mdi-delete"
+                                                                                                                                                isIconButton
+                                                                                                                                                @click="deleteCustomOption(index_area,index_tematica,index_activity,index_option)"
+                                                                                                                                            />
+                                                                                                                                        </div>
+                                                                                                                                        <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(index_area,index_tematica,index_activity)">Agregar una respuesta personalizada +</span>
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="12" class="d-flex align-items-center">
+                                                                                                                                        <span>
+                                                                                                                                            Inteligencia artificial
+                                                                                                                                        </span>
+                                                                                                                                        <v-divider></v-divider>
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="4" class="d-flex align-items-center">
+                                                                                                                                        <v-checkbox
+                                                                                                                                            class="my-0 mr-2 checkbox-label"
+                                                                                                                                            label="Aplicar visión computacional"
+                                                                                                                                            color="primary"
+                                                                                                                                            v-model="activity.extra_attributes.computational_vision"
+                                                                                                                                            :disabled="!is_checklist_premium"
+                                                                                                                                            hide-details="false"
+                                                                                                                                        />
+                                                                                                                                        <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                                                                                                                <span class="d-flex beta_upgrade">
+                                                                                                                                                    <img src="/img/premiun.svg"> Upgrade
+                                                                                                                                                </span>
+                                                                                                                                            </div>
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
+                                                                                                                                        <DefaultSelect 
+                                                                                                                                            v-model="activity.extra_attributes.type_computational_vision"
+                                                                                                                                            :items="types_computational_vision" 
+                                                                                                                                            dense 
+                                                                                                                                            item-text="name"
+                                                                                                                                            item-value="id"
+                                                                                                                                            show-required 
+                                                                                                                                            label="Selecciona una opción"
+                                                                                                                                            :openUp="true"
+                                                                                                                                        />  
+                                                                                                                                    </v-col>
+                                                                                                                                    <v-col cols="4"
+                                                                                                                                        v-if="activity.extra_attributes.type_computational_vision && activity.extra_attributes.type_computational_vision != 'simil'"
+                                                                                                                                    >
+                                                                                                                                        <DefaultInput
+                                                                                                                                            clearable
+                                                                                                                                            v-model="activity.extra_attributes.type_computational_vision_value"
+                                                                                                                                            :label="`${activity.extra_attributes.type_computational_vision == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
+                                                                                                                                            dense
+                                                                                                                                        />
+                                                                                                                                    </v-col>
+                                                                                                                                </v-row>
+                                                                                                                            </v-expansion-panel-content>
+                                                                                                                        </v-expansion-panel>
+                                                                                                                    </v-expansion-panels>
                                                                                                                 </v-row>
-                                                                                                                
-                                                                                                            </div>
+                                                                                                            </v-row>
+                                                                                                            
                                                                                                         </div>
-                                                                                                    </transition-group>
-                                                                                                </draggable>
-                                                                                            </v-col>
-                                                                                            <v-col cols="12">
-                                                                                                <v-row class="elevation-2 my-2">
-                                                                                                    <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
-                                                                                                        <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                                                                        </v-icon>
-                                                                                                    </v-col>
-                                                                                                    <v-col cols="11">
-                                                                                                        <div class="btn_add_activity">
-                                                                                                            <span class="text_default c-default" @click="addActivity(area.id,tematica.id,index_area,index_tematica)">+ Añadir actividad</span>
-                                                                                                        </div>
-                                                                                                    </v-col>
-                                                                                                </v-row>
-                                                                                            </v-col>
-                                                                                        </v-row>
-                                                                                    </v-expansion-panel-content>
-                                                                                </div>
-                                                                        </v-expansion-panel>
-                                                                    </v-expansion-panels>
-                                                                </transition-group>
-                                                            </draggable>
-                                                        </v-col>
-                                                        <v-col cols="12" class="ml-2">
-                                                            <v-row class="elevation-2 my-2">
-                                                                <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
-                                                                    <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                                    </v-icon>
-                                                                </v-col>
-                                                                <v-col cols="11">
-                                                                    <div class="btn_add_activity">
-                                                                        <span class="text_default c-default" @click="addTematica(area.id)">+ Añadir temática</span>
-                                                                    </div>
-                                                                </v-col>
-                                                            </v-row>
-                                                        </v-col>
-                                                    </v-row>
-                                                </v-expansion-panel-content>
-                                            </div>
-                                        </v-expansion-panel>
-                                    </v-expansion-panels>
-                                </transition-group>
+                                                                                                    </div>
+                                                                                                </transition-group>
+                                                                                            </draggable>
+                                                                                        </v-col>
+                                                                                        <v-col cols="12">
+                                                                                            <v-row class="elevation-2 my-2">
+                                                                                                <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
+                                                                                                    <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                                                    </v-icon>
+                                                                                                </v-col>
+                                                                                                <v-col cols="11">
+                                                                                                    <div class="btn_add_activity">
+                                                                                                        <span class="text_default c-default" @click="addActivity(area.id,tematica.id,index_area,index_tematica)">+ Añadir actividad</span>
+                                                                                                    </div>
+                                                                                                </v-col>
+                                                                                            </v-row>
+                                                                                        </v-col>
+                                                                                    </v-row>
+                                                                                </v-expansion-panel-content>
+                                                                            </div>
+                                                                    </v-expansion-panel>
+                                                                </v-expansion-panels>
+                                                            </transition-group>
+                                                        </draggable>
+                                                    </v-col>
+                                                    <v-col cols="12" class="ml-2">
+                                                        <v-row class="elevation-2 my-2">
+                                                            <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
+                                                                <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                                </v-icon>
+                                                            </v-col>
+                                                            <v-col cols="11">
+                                                                <div class="btn_add_activity">
+                                                                    <span class="text_default c-default" @click="addTematica(area.id)">+ Añadir temática</span>
+                                                                </div>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-expansion-panel-content>
+                                        </div>
+                                    </v-expansion-panel>
+                                </v-expansion-panels>
+                            </transition-group>
                         </draggable>
                     </v-col>
                 </v-row>
@@ -1249,5 +1256,9 @@ i.icon_size_drag {
   display: flex;
   overflow-x: auto;
   scrollbar-width: thin; /* Para navegadores que soportan esta propiedad */
+}
+.sticky-container{
+    position: sticky;
+    top: 10px;
 }
 </style>

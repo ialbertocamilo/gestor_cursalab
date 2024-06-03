@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\SegmentationService;
 use Bouncer;
 use Carbon\Carbon;
 use App\Traits\CustomCRUD;
@@ -739,6 +740,12 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             } catch (\Throwable $th) {
 
             }
+
+            // Update flag to recalculate users count
+            // in segmented courses
+
+            SegmentationService::segmentationStateHasChanged($user->subworkspace_id);
+
                 //throw $th;
             DB::commit();
             return $user;

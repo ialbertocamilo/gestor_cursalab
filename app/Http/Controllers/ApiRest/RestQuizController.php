@@ -4,19 +4,21 @@ namespace App\Http\Controllers\ApiRest;
 
 use Carbon\Carbon;
 use App\Models\Poll;
-use App\Models\PollQuestionAnswer;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Question;
 use App\Models\Taxonomy;
-
 use App\Models\SummaryUser;
-
 use App\Models\Announcement;
+
 use App\Models\SummaryTopic;
+
+use Illuminate\Http\Request;
 use App\Models\SummaryCourse;
+use App\Models\PollQuestionAnswer;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Mongo\QuizAuditEvaluation;
 use App\Http\Requests\QuizzAnswerStoreRequest;
 
 
@@ -30,7 +32,7 @@ class RestQuizController extends Controller
         $is_offline = $request->is_offline;
         $created_at = $request->created_at;
         $topic = Topic::with('course.topics.evaluation_type')->find($request->tema);
-
+        
         if (count($request->respuestas) == 0)
             return response()->json(['error' => true, 'msg' => 'Respuestas no enviadas.'], 200);
 
@@ -47,7 +49,6 @@ class RestQuizController extends Controller
         $new_grade = $correct_answers_score;
         // $new_grade = SummaryTopic::calculateGrade($correct_answers, $failed_answers);
         $passed = SummaryTopic::hasPassed($new_grade,null,$topic->course);
-
         $data_ev = [
             'active_results' => (bool) $topic->active_results,
             'attempts' => $row->attempts + 1,
@@ -114,16 +115,28 @@ class RestQuizController extends Controller
 
         $row_course = SummaryCourse::updateUserData(course:$topic->course,certification_issued_at:$created_at);
         $row_user = SummaryUser::updateUserData();
-
         if ($row_course->status->code == 'enc_pend') {
 
+            
             $poll = $topic->course->polls()->first();
             $data_ev['encuesta_pendiente'] = $poll->id ?? NULL;
         }
 
-        // $data_ev['new_grade'] = calculateValueForQualification($data_ev['new_grade'], $topic->qualification_type->position);
-        $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
-
+        try {
+            $attempts_limit = Course::getModEval($topic->course,'nro_intentos') ?? 5;
+            $data_ev['remaining_attempts'] = $attempts_limit - $row->attempts;
+            $data_ev['nombre_tema'] = $topic->name;
+            $data_ev['nombre_curso'] = $topic->course->name;
+            $data_ev['show_certification_to_user'] = $topic->course->show_certification_to_user && $row_course?->status?->code == 'aprobado';
+            $passing_grade = Course::getModEval($topic->course,'nota_aprobatoria');
+            $topic->course->load('qualification_type:id,position');
+            $data_ev['passing_grade'] = $passing_grade;
+            $data_ev['maximun_grade'] = $topic->course->qualification_type->position;
+            $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
+            $data_ev['validator'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         return response()->json(['error' => false, 'data' => $data_ev], 200);
     }
 
@@ -443,5 +456,13 @@ class RestQuizController extends Controller
         }
 
         return $this->success(['msg' => 'Encuesta guardada.']);
+    }
+    public function validateInfoQuiz(Request $request){
+        try {
+            $quiz_info = QuizAuditEvaluation::validateInfoQuiz($request->all());
+            return $this->success(['quiz_info' => $quiz_info]);
+        } catch (\Throwable $th) {
+            return $this->success(['quiz_info' => []]);
+        }
     }
 }
