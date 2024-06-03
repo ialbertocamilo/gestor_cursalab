@@ -1223,14 +1223,47 @@ class CheckList extends BaseModel
             ];
     }
     protected function listUsers($checklist){
-        $_course =new Course();
-        $checklist->loadMissing('segments');
-        $checklist->loadMissing('type:id,name,code,color,icon');
-        // añadir variable SEARCH
-        $users = $_course->usersSegmented(
-                            course_segments:$checklist->segments,
-                            addSelect:['name','lastname','surname']
-                        );
+        $user = auth()->user();
+        $user->load('criterion_values');
+        $workspace_entity_criteria = Workspace::select('checklist_configuration')
+        ->where('id', $user->subworkspace->parent->id)
+        ->first()?->checklist_configuration?->entities_criteria;
+        $user_relation = $user->criterion_values->whereIn('criterion_id',$workspace_entity_criteria)->first();
+        // $criteria_segmented = ;
+        if($checklist->type->code == 'curso'){
+            $_course = Course::select('id')->where('id',$checklist->course_id)->first();
+            $_course->loadMissing(['segments','segments.values']);
+            $segments_course = $_course->segments;
+            foreach ($segments_course as $segment) {
+                // dd($segment->values,$user_relation);
+                $segment->values->push([
+                    "id" => $user_relation->id,
+                    "segment_id" => $segment->id,
+                    "criterion_id" => $user_relation->criterion_id,
+                    "criterion_value_id" => $user_relation->id,
+                    "type_id" => null,
+                    "starts_at" => null,
+                    "finishes_at" => null,
+                    "created_at" => "2022-11-01 18:49:45",
+                    "updated_at" => "2023-05-19 00:38:21",
+                    "deleted_at" => null,
+                ]);
+            }
+            $users = $_course->usersSegmented(
+                course_segments:$_course->segments,
+                addSelect:['name','lastname','surname','document']
+            );
+        }else{
+            $_course =new Course();
+
+            $checklist->loadMissing(['segments']);
+            $checklist->loadMissing('type:id,name,code,color,icon');
+            // añadir variable SEARCH
+            $users = $_course->usersSegmented(
+                                course_segments:$checklist->segments,
+                                addSelect:['name','lastname','surname','document']
+                            );
+        }
         $checklist->load('activities:id,checklist_id');
         $count_activities = count($checklist->activities);
         $completed = ChecklistAudit::select('id')->withCount(['audit_activities'])

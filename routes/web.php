@@ -276,6 +276,9 @@ Route::middleware(['auth_2fa', 'auth', 'validated-admin-session'])->group(functi
     //     ];
     //     return view('pdf.dc3',$data);
     // });
+    Route::get('/checklist-informe', function(){
+        return view('pdf.checklist-informe');
+    });
     // Route::get('/generate-report-assistance', function(){
     //     $course_id = 1492;
     //     $topic_id = 4113;
