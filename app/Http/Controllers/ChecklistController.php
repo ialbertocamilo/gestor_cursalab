@@ -108,6 +108,7 @@ class ChecklistController extends Controller
 
     public function verifyNextStep(CheckList $checklist){
         $next_step = CheckList::nextStep($checklist);
+        $checklist->load('type:id,code');
         return $this->success([
             'next_step' => $next_step,
             'checklist' => $checklist

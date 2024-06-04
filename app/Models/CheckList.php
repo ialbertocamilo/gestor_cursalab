@@ -900,6 +900,7 @@ class CheckList extends BaseModel
             $checklist = self::create($data);
             $next_step = 'create_activities';
         }
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -940,6 +941,7 @@ class CheckList extends BaseModel
         }
         CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
         $next_step = self::nextStep($checklist);
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -984,6 +986,7 @@ class CheckList extends BaseModel
         $checklist->supervisor_ids = $data['supervisor_ids'];
         $checklist->save();
         $next_step = self::nextStep($checklist);
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -1050,11 +1053,12 @@ class CheckList extends BaseModel
 
     protected function searchCourses($request){
         $current_workspace = get_current_workspace();
-        return Course::when($request->q, function($q) use ($request){
-                    $q->filtroName($request->q) ;
+        return Course::whereRelation('workspaces', 'id', $current_workspace->id)
+                ->when($request->q, function($q) use ($request){
+                    $q->where('name', 'like', "%$request->q%")
+                    ->orWhere('id', $request->q);
                 })
                 ->where('courses.active', 1)
-                ->whereRelation('workspaces', 'id', $current_workspace->id)
                 ->select(
                     'courses.id',
                     DB::raw('CONCAT(courses.id," - ",courses.name) as name')

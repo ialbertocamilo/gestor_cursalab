@@ -29,7 +29,7 @@
                         />
                     </v-col>
                     <v-col cols="8" class="py-0">
-                        <v-col cols="12">
+                        <v-col cols="12" v-if="show_segmentation_card">
                             <DefaultCardAction
                                 :card_properties="segmentation_card"
                                 horizontal
@@ -76,6 +76,7 @@ export default {
                     description:'<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>',
                     show_border:true
             },
+            show_segmentation_card:true,
             segmentation_card:{
                     icon:'mdi-clipboard-file',
                     color:"#CE98FE",
@@ -120,6 +121,8 @@ export default {
             const activity_card_description = '<span>Procesos que desarrollaran los colaboradores dentro de su checklist</span>';
             const segmentation_card_description = '<span>Selecciona criterios que filtraran a los colaboradores que realizaran el checklist</span>';
             const supervisor_card_description = '<span>Selecciona a los colaboradores que supervisaran este checklist</span>';
+            vue.show_segmentation_card = checklist.type.code != 'curso';
+            console.log(vue.show_segmentation_card,'vue.show_segmentation_card');
             switch (next_step) {
                 case 'create_activities':
                     vue.activity_card.show_border = true;

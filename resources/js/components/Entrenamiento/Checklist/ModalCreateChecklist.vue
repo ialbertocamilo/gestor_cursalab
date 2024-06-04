@@ -8,6 +8,7 @@
                         <v-row>
                             <v-col cols="7">
                                 <DefaultInput 
+                                    emojiable
                                     dense
                                     clearable
                                     v-model="resource.title"
