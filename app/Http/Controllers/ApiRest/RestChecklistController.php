@@ -245,8 +245,16 @@ class RestChecklistController extends Controller
                             'finished' => false
                         ];
                     });
-
+        $checklist->load('type:id,name,code');
         return [
+            'checklist' => [
+                'id' => $checklist->id,
+                "title" => $checklist->title,
+                "imagen" => get_media_url($checklist->imagen),
+                "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
+                "description" => $checklist->description,
+                "type" => $checklist->type,
+            ],
             'entities' => $entities
         ];
     }

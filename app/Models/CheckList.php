@@ -1227,7 +1227,7 @@ class CheckList extends BaseModel
                 //     ],
                 // ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
-                "imagen" => get_media_url($checklist->imagen,'s3'),
+                "imagen" => get_media_url($checklist->imagen),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
