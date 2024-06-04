@@ -49,22 +49,17 @@ class CourseInPerson extends Model
         }
         return compact('sessions_in_person','sessions_live','sessions_course_live');
     }
-    protected function loadTopicInfo($request,$topic){
+    protected function loadTopicInfo($topic,$request){
         $user = auth()->user();
         $request->user = $user ;
-        $sessions_in_person = Topic::with([
+        $topic->load([
             'course:id,modality_in_person_properties,name,imagen,modality_id',
             'course.modality:id,code',
             'course.schools' => function ($query) {
                 $query->select('id')->where('active', ACTIVE);
             }
-        ])
-        ->select('id', 'name','course_id','modality_in_person_properties')
-        ->where('id',$topic->id)
-        ->whereNotNull('modality_in_person_properties')
-        ->where('active',1)
-        ->first();
-        $sessions_in_person = TopicInPersonAppResource::collection([$sessions_in_person]);
+        ]);
+        $sessions_in_person = TopicInPersonAppResource::collection([$topic]);
         return $sessions_in_person[0];
     }
     protected function listCoursesByTypeCode($request,$modality_code){
