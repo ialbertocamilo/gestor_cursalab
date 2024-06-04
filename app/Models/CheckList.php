@@ -1198,7 +1198,9 @@ class CheckList extends BaseModel
         if($user_id){
             $user_checklist = User::select('name','lastname','surname')->where('id',$user_id)->first();
         }
-        
+        $activities_assigned  = $checklist->activities->count();
+        $activities_reviewved  = $checklist_audit?->activities_reviewved ?? 0;
+        $percent_progress  = round(($activities_reviewved/$activities_assigned),2);
         return [
             'user'=>[
                 'fullname' => $user_checklist?->fullname
@@ -1235,9 +1237,9 @@ class CheckList extends BaseModel
                 "type" => $checklist->type,
                 "theme"=>$theme,
                 'activities' => $activities,
-                'percent_progress' => $checklist_audit?->percent_progress ?? 0,
-                'activities_assigned' => $checklist->activities->count(),
-                'activities_reviewved' =>  $checklist_audit?->activities_reviewved ?? 0,
+                'percent_progress' => $percent_progress,
+                'activities_assigned' => $activities_assigned,
+                'activities_reviewved' =>  $activities_reviewved,
             ]
             ];
     }
@@ -1249,6 +1251,7 @@ class CheckList extends BaseModel
         ->first()?->checklist_configuration?->entities_criteria;
         $user_relation = $user->criterion_values->whereIn('criterion_id',$workspace_entity_criteria)->first();
         // $criteria_segmented = ;
+        $checklist->loadMissing('type:id,name,code,color,icon');
         if($checklist->type->code == 'curso'){
             $_course = Course::select('id')->where('id',$checklist->course_id)->first();
             $_course->loadMissing(['segments','segments.values']);
@@ -1276,7 +1279,6 @@ class CheckList extends BaseModel
             $_course =new Course();
 
             $checklist->loadMissing(['segments']);
-            $checklist->loadMissing('type:id,name,code,color,icon');
             // añadir variable SEARCH
             $users = $_course->usersSegmented(
                                 course_segments:$checklist->segments,
@@ -1316,7 +1318,7 @@ class CheckList extends BaseModel
                 ],
                 "type" => $checklist->type,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
-                "imagen" => get_media_url($checklist->imagen,'s3'),
+                "imagen" => get_media_url($checklist->imagen),
             ],
             'users' => $users,
             'users_assigned'=> count($users),
