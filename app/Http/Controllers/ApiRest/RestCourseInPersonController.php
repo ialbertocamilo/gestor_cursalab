@@ -132,8 +132,8 @@ class RestCourseInPersonController extends Controller
         return $this->success($data);
     }
 
-    public function loadTopicInfo(Topic $topic){
-        $data = CourseInPerson::loadTopicInfo($topic);
+    public function loadTopicInfo(Topic $topic,Request $request){
+        $data = CourseInPerson::loadTopicInfo($topic,$request);
         return $this->success($data);
     }
 }

@@ -49,8 +49,9 @@ class CourseInPerson extends Model
         }
         return compact('sessions_in_person','sessions_live','sessions_course_live');
     }
-    protected function loadTopicInfo($topic){
+    protected function loadTopicInfo($request,$topic){
         $user = auth()->user();
+        $request->user = $user ;
         $sessions_in_person = Topic::with([
             'course:id,modality_in_person_properties,name,imagen,modality_id',
             'course.modality:id,code',
