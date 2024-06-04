@@ -10,6 +10,7 @@ Route::controller(RestCourseInPersonController::class)->group(function() {
     Route::post('/topic/{topic}/upload-signature', 'uploadSignature'); // USER
     Route::get('/get-data', 'getData');// USER
     Route::get('/topic/{topic}/load-poll-questions', 'loadPoll');
+    Route::get('/topic/{topic}', 'loadTopicInfo');
 
     Route::get('/course/{course}/topic/{topic}/assigned', 'listUsersBySession');  // HOST
     Route::post('/topic/evaluation', 'changeStatusEvaluation'); // HOST
