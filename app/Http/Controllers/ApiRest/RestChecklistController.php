@@ -245,7 +245,8 @@ class RestChecklistController extends Controller
                             'finished' => false
                         ];
                     });
-        $checklist->load('type:id,name,code');
+        $checklist->load('type:id,name,code,color');
+        $checklist->load('modality:id,name,code,color');
         return [
             'checklist' => [
                 'id' => $checklist->id,
@@ -254,6 +255,7 @@ class RestChecklistController extends Controller
                 "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
                 "description" => $checklist->description,
                 "type" => $checklist->type,
+                'modality' => $checklist->modality
             ],
             'entities' => $entities
         ];
