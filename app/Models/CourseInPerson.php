@@ -63,7 +63,7 @@ class CourseInPerson extends Model
         ->whereNotNull('modality_in_person_properties')
         ->where('active',1)
         ->first();
-        $sessions_in_person = TopicInPersonAppResource::collection($sessions_in_person);
+        // $sessions_in_person = TopicInPersonAppResource::collection($sessions_in_person);
         return $sessions_in_person;
     }
     protected function listCoursesByTypeCode($request,$modality_code){
