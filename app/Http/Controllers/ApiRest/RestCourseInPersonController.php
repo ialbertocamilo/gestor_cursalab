@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ApiRest;
 
+use App\Models\Topic;
 use App\Models\Meeting;
 use Illuminate\Http\Request;
 use App\Models\CourseInPerson;
