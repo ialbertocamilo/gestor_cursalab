@@ -159,20 +159,21 @@
                                             </transition-group>
                                         </draggable>
 
-                                        <!-- <div class="my-2">
+                                        <div class="my-2">
                                             <DefaultButton
                                                 label="Agregar escala"
                                                 icon="mdi-plus"
                                                 :outlined="true"
                                                 :disabled="resource.evaluation_types.length >= selects.max_limit_create_evaluation_types"
-                                                @click="openFormModal(
-                                                    modalScalesChecklist,
-                                                    selects.max_limit_create_evaluation_types - resource.evaluation_types.length,
-                                                    null,
-                                                    'Agregar escala'
-                                                )"
+                                                @click="addScaleEvaluation()"
                                             />
-                                        </div> -->
+                                            <!-- @click="openFormModal(
+                                                modalScalesChecklist,
+                                                selects.max_limit_create_evaluation_types - resource.evaluation_types.length,
+                                                null,
+                                                'Agregar escala'
+                                            )" -->
+                                        </div>
                                     </template>
                                 </DefaultSimpleSection>
                             </v-col>
@@ -432,7 +433,7 @@
                     </v-form>
                 </template>
         </DefaultDialog>
-        <ModalAddScaleEvaluation
+        <!-- <ModalAddScaleEvaluation
             :ref="modalScalesChecklist.ref"
             :options="modalScalesChecklist"
             width="40vw"
@@ -440,7 +441,7 @@
             :confirmLabel="modalScalesChecklist.confirmLabel"
             @onConfirm ="closeSimpleModal(modalScalesChecklist)"
             @onCancel ="closeSimpleModal(modalScalesChecklist)"
-        />
+        /> -->
     </div>
 </template>
 <script>
@@ -449,7 +450,7 @@ import ButtonsModal from './Blocks/ButtonsModal';
 import DefaultRichText from "../../globals/DefaultRichText";
 import DefaultCardAction from "../../globals/DefaultCardAction"
 import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
-import ModalAddScaleEvaluation from './ModalAddScaleEvaluation'
+// import ModalAddScaleEvaluation from './ModalAddScaleEvaluation':
 
 const fields = [
     'title', 'type_id','modality_id','description','finishes_at','imagen'
@@ -463,7 +464,6 @@ export default {
     DefaultRichText,
     DefaultCardAction,
     ButtonEmojiPicker,
-    ModalAddScaleEvaluation
 },
     props: {
         value: Boolean,
@@ -611,7 +611,9 @@ export default {
             let vue = this;
             vue.showLoader();
             await axios.get(`${vue.options.base_endpoint}/form-selects`).then(({ data }) => {
-                vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
+                if(!vue.resource.evaluation_types || vue.resource.evaluation_types.length ==0){
+                    vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
+                }
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
                 vue.selects.qualification_types = data.data.qualification_types;
                 vue.selects.max_limit_create_evaluation_types =  data.data.checklist_default_configuration.max_limit_create_evaluation_types;
@@ -781,6 +783,16 @@ export default {
             }).catch(()=>{
                 vue.loading_description = false;
             })
+        },
+        addScaleEvaluation(){
+            let vue = this;
+            vue.resource.evaluation_types.push(
+                {id:null,name:'',color:'#FF4560',extra_attributes:{percent:'0'}},
+            )
+        },
+        removeScaleEvaluation(index){
+            let vue = this;
+            vue.resource.evaluation_types.splice(index, 1);
         },
     }
 };

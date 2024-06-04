@@ -872,8 +872,23 @@ class CheckList extends BaseModel
 
     protected function storeRequest($data, $checklist = null){
         $data = Media::requestUploadFile($data, 'imagen');
-        $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
-        $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
+        $evaluation_types = collect(json_decode($data['evaluation_types']));
+        $evaluation_types_id = [];
+        foreach ($evaluation_types as $index => $evaluation_type) {
+            $evaluation_types_id[] = Taxonomy::updateOrCreate(
+                ['id' => $evaluation_type->id,'group'=>'checklist','type' => 'custom_ystem_calification'],
+                [
+                    'group' => 'checklist',
+                    'type' => 'custom_ystem_calification',
+                    "color" => $evaluation_type->color,
+                    "icon" => $evaluation_type->icon,
+                    "name" => $evaluation_type->name,
+                    "position" => $index+1,
+                    "extra_attributes" => $evaluation_type->extra_attributes,
+                ]
+            );
+        }
+        $data['extra_attributes']['evaluation_types_id'] =  array_column($evaluation_types_id,'id');
         if($checklist){
             unset($data['course']);
             $checklist->update($data);

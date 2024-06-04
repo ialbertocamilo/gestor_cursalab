@@ -33,8 +33,9 @@ class ChecklistController extends Controller
         $checklist->load('modality:id,name,code,extra_attributes');
         $checklist->load('type:id,name,code,extra_attributes');
         $checklist->load('course:id,name');
-        $checklist->evaluation_types  = isset($checklist->extra_attributes['evaluation_types_id']) ? Taxonomy::select('id','name','code','extra_attributes')
+        $checklist->evaluation_types  = isset($checklist->extra_attributes['evaluation_types_id']) ? Taxonomy::select('id','name','code','color','icon','extra_attributes')
                                                 ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
+                                                ->orderBy('position')
                                                 ->get() : [];
         return $this->success([
             'checklist'=>$checklist
