@@ -131,9 +131,16 @@ class RestQuizController extends Controller
             $passing_grade = Course::getModEval($topic->course,'nota_aprobatoria');
             $topic->course->load('qualification_type:id,position');
             $data_ev['passing_grade'] = $passing_grade;
+            $school = $topic->course->schools->first();
+            $data_ev['school_id'] = $school->id;
+            $data_ev['school'] = $school->name;
+            $data_ev['subworkspace_id'] = $user->subworkspace_id;
+            $data_ev['user_id'] = $user->id;
             $data_ev['maximun_grade'] = $topic->course->qualification_type->position;
             $data_ev['grade'] = calculateValueForQualification($data_ev['grade'], $topic->qualification_type->position);
             $data_ev['validator'] = QuizAuditEvaluation::saveDataAndGenerateQR($data_ev,$user);
+            unset( $topic->course->schools);
+            unset( $topic->course->topics);
         } catch (\Throwable $th) {
             //throw $th;
         }

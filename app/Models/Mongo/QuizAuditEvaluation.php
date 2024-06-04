@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Models\Mongo;
+use App\Models\User;
 use App\Models\Media;
+use App\Models\Workspace;
 use Illuminate\Support\Str;
 use Jenssegers\Mongodb\Eloquent\Model;
 
@@ -10,9 +12,11 @@ class QuizAuditEvaluation extends Model
     protected $connection = 'mongodb';
     protected $collection = 'quiz_audit_evaluations';
     protected $fillable = [
-        "active_results","attempts","total_attempts","current_quiz_started_at","current_quiz_finishes_at",
+        "active_results","attempts","total_attempts","current_quiz_started_at","current_quiz_finishes_at","user_id",
         "taking_quiz","preguntas" ,"correct_answers","failed_answers","passed","answers" ,
         "grade","status_id","ev_updated","contador","tema_siguiente","curso_id",
+        "school_id","school",
+        "subworkspace_id",
         "tema_id","encuesta_pendiente","last_time_evaluated_at",
         "remaining_attempts","nombre_tema","nombre_curso","show_certification_to_user","passing_grade",
         "maximun_grade"
@@ -45,10 +49,20 @@ class QuizAuditEvaluation extends Model
         }
         $quiz_info = QuizAuditEvaluation::where('_id',$identifier)->where('curso_id',$course_id)->where('tema_id',$topic_id)->first();
         if($quiz_info){
+            $user = User::where('id',$quiz_info['user_id'])->select('name','lastname','surname')->first();
+            $subworkspace = Workspace::select('id','parent_id')->where('id',$quiz_info['subworkspace_id'])->with('parent:id,logo')->first();
             $quiz_info['identifier'] = $quiz_info['_id'];
+            $quiz_info['fullname'] = $user?->fullname;
+            $quiz_info['logo_workspace'] =get_media_url($subworkspace?->parent->logo);
+            $quiz_info['cursalab'] = get_media_url($subworkspace?->parent->logo);
             unset($quiz_info['_id']);
             unset($quiz_info['answers']);
             unset($quiz_info['preguntas']);
+            unset($quiz_info['curso_id']);
+            unset($quiz_info['tema_id']);
+            unset($quiz_info['status_id']);
+            unset($quiz_info['school_id']);
+            unset($quiz_info['user_id']);
             unset($quiz_info['updated_at']);
             unset($quiz_info['created_at']);
         }
