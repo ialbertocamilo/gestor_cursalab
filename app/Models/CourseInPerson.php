@@ -59,6 +59,7 @@ class CourseInPerson extends Model
             }
         ])
         ->select('id', 'name','course_id','modality_in_person_properties')
+        ->where('id',$topic->id)
         ->whereNotNull('modality_in_person_properties')
         ->where('active',1)
         ->first();
