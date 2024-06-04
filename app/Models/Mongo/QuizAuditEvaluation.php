@@ -50,11 +50,13 @@ class QuizAuditEvaluation extends Model
         $quiz_info = QuizAuditEvaluation::where('_id',$identifier)->where('curso_id',$course_id)->where('tema_id',$topic_id)->first();
         if($quiz_info){
             $user = User::where('id',$quiz_info['user_id'])->select('name','lastname','surname')->first();
-            $subworkspace = Workspace::select('id','parent_id')->where('id',$quiz_info['subworkspace_id'])->with('parent:id,logo')->first();
+            $subworkspace = Workspace::select('id','parent_id','name')->where('id',$quiz_info['subworkspace_id'])->with('parent:id,name,logo')->first();
             $quiz_info['identifier'] = $quiz_info['_id'];
             $quiz_info['fullname'] = $user?->fullname;
-            $quiz_info['logo_workspace'] =get_media_url($subworkspace?->parent->logo);
-            $quiz_info['cursalab'] = get_media_url($subworkspace?->parent->logo);
+            $quiz_info['workspace'] = [
+                'logo' => get_media_url($subworkspace?->parent->logo),
+                'name' => $subworkspace?->name
+            ];
             unset($quiz_info['_id']);
             unset($quiz_info['answers']);
             unset($quiz_info['preguntas']);
