@@ -1200,7 +1200,7 @@ class CheckList extends BaseModel
         }
         $activities_assigned  = $checklist->activities->count();
         $activities_reviewved  = $checklist_audit?->activities_reviewved ?? 0;
-        $percent_progress  = round(($activities_reviewved/$activities_assigned),2);
+        $percent_progress  = round(($activities_reviewved/$activities_assigned),2)*100;
         return [
             'user'=>[
                 'fullname' => $user_checklist?->fullname
