@@ -1301,14 +1301,10 @@ class CheckList extends BaseModel
         }
         $checklist->load('activities:id,checklist_id');
         $count_activities = count($checklist->activities);
-        $status_activities = ChecklistAudit::select('id','percent_progress','model_id','checklist_finished')
-                            ->withCount(['audit_activities'])
-                            ->where('checklist_id',$checklist->id)
-                            ->where('model_type','App\\Models\\User')
-                            ->whereIn('model_id',$users->pluck('id'))
-                            ->get();
-        $completed = $status_activities->where('checklist_finished',1)->all();
-        $count_users_completed = count($completed);
+        $users_id_assigned = $users->pluck('id')->toArray();
+        $status_activities = ChecklistAudit::getCurrentChecklistAudit($checklist,User::class,$users_id_assigned,$user,true);
+
+        $count_users_completed = count($status_activities->where('checklist_finished',1));
         $percent_completed =  count($users)>0 ?  round($count_users_completed/count($users) * 100,2) : 0;
         $count_users_pending = count($users) - $count_users_completed;
         $percent_pending = count($users)>0 ? round($count_users_pending/count($users) * 100,2) : 0;

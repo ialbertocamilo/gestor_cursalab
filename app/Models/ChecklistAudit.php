@@ -320,9 +320,16 @@ class ChecklistAudit extends BaseModel
     }
 
     protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false){
-        return ChecklistAudit::where('checklist_id',$checklist->id)
+        $_query = ChecklistAudit::where('checklist_id',$checklist->id)
                                 ->where('model_type',$model_type)
-                                ->where('model_id',$model_id)
+                                // ->where('model_id',$model_id)
+                                ->when($model_id, function($query) use($model_id){
+                                    if (is_array($model_id)) {
+                                        $query->whereIn('model_id', $model_id);
+                                    } else {
+                                        $query->where('model_id', $model_id);
+                                    }
+                                })
                                 ->when($checklist->extra_attributes['view_360'], function($q) use($user){
                                     $q->where('auditor_id',$user->id);
                                 })
@@ -330,6 +337,17 @@ class ChecklistAudit extends BaseModel
                                 ->when($with_audit_activities, function($q){
                                     $q->with('audit_activities:id,checklist_audit_id,checklist_activity_id,qualification_id,photo');
                                 })
-                                ->first();
+                                ->when($model_id, function($query) use($model_id){
+                                    if (is_array($model_id)) {
+                                        $query->get();
+                                    } else {
+                                        $query->first('model_id', $model_id);
+                                    }
+                                });
+        if (is_array($model_id)) {
+            return $_query->get();
+        } else {
+            return $_query->first();
+        }
     }
 }
