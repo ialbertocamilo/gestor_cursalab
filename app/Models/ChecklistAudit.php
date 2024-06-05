@@ -121,19 +121,33 @@ class ChecklistAudit extends BaseModel
         
         $checklistActivityAuditToUpdate = [];
         $checklistActivityAuditToCreate = [];
+        $assigned = 0;
+        $reviewved = 0;
+        $percent_progress = 0;
         if ($checklist->modality->code === 'qualify_user') {
             // if(isset($data['users_id'])){
                 foreach ($data['user_ids'] as $userId) {
-                    $this->processAudit($action_request,$checklist, $data, $user, $modelType, $userId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
+                    $this->processAudit(
+                        $action_request,$checklist, $data, $user, $modelType, $userId, 
+                        $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
+                        $assigned,$reviewved,$percent_progress
+                    );
                 }
             // }
         } else {
-            $this->processAudit($action_request,$checklist, $data, $user, $modelType, $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate);
+            $this->processAudit($action_request,
+                $checklist, $data, $user, $modelType, 
+                $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
+                $assigned,$reviewved,$percent_progress
+            );
         }
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToUpdate,'update');
         return [
-            'message' => 'Actividad actualizada.'
+            'message' => 'Actividad actualizada.',
+            'percent_progress' => $percent_progress,
+            'activities_assigned' => $assigned,
+            'activities_reviewved' =>  $reviewved,
         ];
     }
 
@@ -150,7 +164,11 @@ class ChecklistAudit extends BaseModel
         return $user->criterion_values->whereIn('criterion_id', $workspaceEntityCriteria)->first();
     }
 
-    protected function processAudit($action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate): void
+    protected function processAudit(
+        $action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, 
+        array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
+        &$assigned,&$reviewved,&$percent_progress
+    ): void
     {
         $dateAudit = $dateAudit->format('Y-m-d H:i:s');
         $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user,true);
@@ -267,12 +285,16 @@ class ChecklistAudit extends BaseModel
             ];
         }
         //update progress
+        
         $checklist_audit->activities_assigned  = $activities_assigned;
         $checklist_audit->activities_reviewved  = $activities_reviewved;
         $checklist_audit->percent_progress  = round(($activities_reviewved/$activities_assigned),2) * 100;
         $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
         // dd($checklist_audit->percent_progress,$activities_reviewved/$activities_assigned,$activities_assigned,$activities_reviewved);
         $checklist_audit->save();
+        $assigned = $checklist_audit->activities_assigned;
+        $reviewved = $checklist_audit->activities_reviewved;
+        $percent_progress = $checklist_audit->percent_progress;
     }
 
     protected function listProgress($checklist){
