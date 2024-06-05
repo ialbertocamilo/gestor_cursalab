@@ -1204,6 +1204,8 @@ class CheckList extends BaseModel
         }
         $activities_assigned  = $checklist->activities->count();
         $activities_reviewved  = $checklist_audit?->activities_reviewved ?? 0;
+        $finished  = boolval($checklist_audit?->checklist_finished);
+
         $percent_progress  = round(($activities_reviewved/$activities_assigned),2)*100;
         return [
             'user'=>[
@@ -1218,20 +1220,6 @@ class CheckList extends BaseModel
                 ],
                 'has_themes' => $has_themes,
                 'list_themes' => $taxonomy_tematicas,
-                // 'list_themes'=>[
-                //     [
-                //         'id'=> 1,
-                //         'name' => 'Temática 1',
-                //         'count_activities' => count($activities),
-                //         'finished' => false,
-                //     ],
-                //     [
-                //         'id'=> 2,
-                //         'name' => 'Temática 2',
-                //         'count_activities' => count($activities),
-                //         'finished' => true,
-                //     ],
-                // ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
                 "imagen" => get_media_url($checklist->imagen),
                 "description" => $checklist->description,
@@ -1244,6 +1232,7 @@ class CheckList extends BaseModel
                 'percent_progress' => $percent_progress,
                 'activities_assigned' => $activities_assigned,
                 'activities_reviewved' =>  $activities_reviewved,
+                'finished' => $finished
             ]
             ];
     }
