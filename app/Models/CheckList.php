@@ -1299,18 +1299,15 @@ class CheckList extends BaseModel
                                 addSelect:['name','lastname','surname','document']
                             );
         }
-
         $checklist->load('activities:id,checklist_id');
         $count_activities = count($checklist->activities);
-        $status_activities = ChecklistAudit::select('id','percent_progress','model_id')->withCount(['audit_activities'])
+        $status_activities = ChecklistAudit::select('id','percent_progress','model_id','checklist_finished')
+                            ->withCount(['audit_activities'])
                             ->where('checklist_id',$checklist->id)
                             ->where('model_type','App\\Models\\User')
                             ->whereIn('model_id',$users->pluck('id'))
                             ->get();
-        $completed = $status_activities->filter(function($audit) use ($count_activities) {
-                        return $audit->audit_activities_count == $count_activities;
-                    });
-
+        $completed = $status_activities->where('checklist_finished',1)->all();
         $count_users_completed = count($completed);
         $percent_completed =  count($users)>0 ?  round($count_users_completed/count($users) * 100,2) : 0;
         $count_users_pending = count($users) - $count_users_completed;
