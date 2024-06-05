@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Course;
-use App\Models\SegmentationCount;
 use App\Models\User;
 use App\Services\SegmentationService;
 use Illuminate\Console\Command;
@@ -38,10 +37,14 @@ class CountSegmentation extends Command
             ->where('active', 1)
             ->count();
 
-        if ($usersCount > 2000) {
+        if ($usersCount > 2000000) {
             $this->info('Only 2000 or less users are allowed.');
             return Command::SUCCESS;
         }
+
+        // Start time
+        $startTime = microtime(true);
+        $this->info('segmentation:count-users started at: ' . date('Y-m-d H:i:s', $startTime));
 
         $allCourses = SegmentationService::getCoursesWhereSegmentationStateHasChange();
 
@@ -51,6 +54,7 @@ class CountSegmentation extends Command
 
             try {
                 DB::beginTransaction();
+
 
                 $coursesToBeHashed = [];
 
@@ -74,9 +78,10 @@ class CountSegmentation extends Command
                     ];
                 }
 
-                // Hash courses segmentation, this is not performed in the
-                // previous loop since is slower because the database is
-                // busy with the segmentation queries
+                // Hash courses segmentation and save users list,
+                // this is not performed in the previous loop since
+                // is slower because the database is busy with the
+                // segmentation queries
 
                 foreach ($coursesToBeHashed as $courseToBeHashed) {
                     SegmentationService::hashSegmentation(
@@ -84,7 +89,17 @@ class CountSegmentation extends Command
                         $courseToBeHashed['course']->id,
                         $courseToBeHashed['segmentedUsersIds']
                     );
+
+                    SegmentationService::saveUsersList(
+                        Course::class,
+                        $courseToBeHashed['course']->id,
+                        $courseToBeHashed['segmentedUsersIds']
+                    );
                 }
+
+                SegmentationService::replicateSegmentationStats(
+                    Course::class, $courses->pluck('id')
+                );
 
                 DB::commit();
 
@@ -95,15 +110,17 @@ class CountSegmentation extends Command
                 // Handle the exception or log the error
                 dd($e->getMessage());
             }
-
-            SegmentationService::replicateSegmentationStats(
-                Course::class, $courses->pluck('id')
-            );
         }
 
         SegmentationService::resetSegmentationStateFlag();
 
-        $this->info('Segmentation count calculation has finished successfully.');
+        // End time
+        $endTime = microtime(true);
+        $this->info('segmentation:count-users ended at: ' . date('Y-m-d H:i:s', $endTime));
+
+        // Calculate the duration
+        $duration = $endTime - $startTime;
+        $this->info('Total execution time: ' . round($duration, 2) . ' seconds');
 
         return Command::SUCCESS;
     }
