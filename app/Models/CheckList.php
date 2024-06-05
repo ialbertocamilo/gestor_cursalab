@@ -1168,9 +1168,18 @@ class CheckList extends BaseModel
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
                 $system_calification = Taxonomy::select(
-                                            'id', 'name', 'color', DB::raw("JSON_UNQUOTE(extra_attributes->'$.percent') as percent")
+                                            'id', 'name', 'color', 
+                                            DB::raw("JSON_UNQUOTE(extra_attributes->'$.percent') as percent"),
+                                            DB::raw("JSON_UNQUOTE(extra_attributes->'$.emoji') as emoji")
                                         )
-                                        ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])->get();
+                                        ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
+                                        ->get()->map(function($system){
+                                            if($system->emoji){
+                                                // dd($system->emoji,$system->name);
+                                                $system->name = $system->name.' '.$system->emoji;
+                                            }
+                                            return $system;
+                                        });
             }else{
                 $system_calification = $activity->custom_options()->select('id','name','color')->get();
             }
