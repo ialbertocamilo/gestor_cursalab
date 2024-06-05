@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Course;
 use App\Models\SegmentationCount;
+use App\Models\SegmentedUser;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,6 +30,37 @@ class SegmentationService {
     }
 
     /**
+     * Save segmented users list
+     * @return void
+     */
+    public static function saveUsersList($modelType, $modelId, $usersIds) {
+
+        // Delete previous records
+
+        SegmentedUser::query()
+            ->where('model_type', $modelType)
+            ->where('model_id', $modelId)
+            ->delete();
+
+        // Save new list of items
+
+        $records = [];
+        foreach ($usersIds as $userId) {
+            $records[] = [
+                'model_type' => $modelType,
+                'model_id' => $modelId,
+                'user_id' => $userId,
+                'created_at' => now()
+            ];
+        }
+
+        // Insert the records in a single query
+
+        DB::table('segmented_users')->insertOrIgnore($records);
+
+    }
+
+    /**
      * Replicate users count to other records with the same
      * segmentation hash
      * @return void
@@ -48,6 +80,13 @@ class SegmentationService {
                         ->first()
                         ->users_count;
 
+                    $courseUsersIds = SegmentedUser::query()
+                        ->where('model_type', $modelType)
+                        ->where('model_id', $course->id)
+                        ->get()
+                        ->pluck('user_id')
+                        ->toArray();
+
                     // Get courses with the segmentation
                     // hash of the provided course
 
@@ -60,15 +99,24 @@ class SegmentationService {
                         ->pluck('id')
                         ->toArray();
 
-                    // Update stats
-
                     foreach ($coursesIdsToBeUpdated as $id) {
+
+                        // Update stats
+
                         SegmentationCount::updateOrCreate(
                             [
                                 'model_type' => $modelType,
                                 'model_id' => $id
                             ],
                             ['users_count' => $courseUsersCount]
+                        );
+
+                        // Update users list
+
+                        SegmentationService::saveUsersList(
+                            Course::class,
+                            $id,
+                            $courseUsersIds
                         );
                     }
                 }
