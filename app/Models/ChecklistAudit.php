@@ -48,18 +48,11 @@ class ChecklistAudit extends BaseModel
         return $this->morphTo();
     }
    
-    protected function saveActivitiesAudits($checklist,$data){
+    protected function saveActivitiesAudits($checklist,$data,$request){
         $user = auth()->user();
         $checklist->load('type:id,name,code');
         $checklist->load('modality:id,name,code');
-        $activities = $data['activities'];
-        $criterion_value_user_entity = null;
-        if($checklist->modality->code == 'qualify_entity'){
-            $workspace_entity_criteria = Workspace::select('checklist_configuration')
-                ->where('id', $user->subworkspace->parent->id)
-                ->first()?->checklist_configuration?->entities_criteria;
-            $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
-        }
+        //FINALIZAR Y SUBIR FIRMA
         $path_signature = '';
         if($checklist->extra_attributes['required_signature_supervisor']){
             $str_random = Str::random(5);
@@ -69,41 +62,32 @@ class ChecklistAudit extends BaseModel
             Media::uploadMediaBase64(name:'', path:$path_signature, base64:$data['signature'],save_in_media:false,status:'private');
         }
 
-        $model_type =  ($checklist->modality->code == 'qualify_entity') ? 'App\\Models\\CriterionValue'  : 'App\\Models\\User';
-        $model_id = ($checklist->modality->code == 'qualify_entity') ? $criterion_value_user_entity->id : $user->id;
-        $date_audit = now();
-        $checklist_audit = ChecklistAudit::create([
-            'identifier_request' => $data['identifier_request'],
-            'signature_supervisor' => $path_signature,
-            'checklist_id' => $checklist->id,
-            'model_type' => $model_type,
-            'model_id' => $model_id,
-            'action_plan' => $data['action_plan'] ?? null,
-            'auditor_id' => $user->id,
-            'date_audit' => $date_audit,
-        ]);
-
-        foreach ($activities as $activity) {
-            $photo = '';
-            if($activity['file_photo']){
-                // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
-                $str_random = Str::random(5);
-                $name_image = $activity['id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
-                $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
-                Media::uploadMediaBase64(name:'', path:$photo, base64:$activity['file_photo'],save_in_media:false,status:'private');
+        $checklist_audit = collect();
+        if ($checklist->modality->code != 'qualify_user') {
+            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+            if($request->entity_id){
+                $model_id = $request->entity_id;
+            }else{
+                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
             }
-            $_checklist_audit = [
-                'checklist_audit_id' => $checklist_audit->id,
-                'identifier_request'=> $data['identifier_request'],
-                'qualification_id'=> $activity['qualification_id'],
-                'photo'=> $photo,
-                'checklist_id'=>$checklist->id,
-                'checklist_activity_id'=>$activity['id'],
-                'auditor_id' => $user->id,
-                'date_audit' => $date_audit,
-            ];
-            ChecklistActivityAudit::insert($_checklist_audit);
-        } 
+            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user);
+            $checklist_audit->signature_supervisor = $path_signature;
+            $checklist_audit->checklist_finished = true;
+            $checklist_audit->save();
+        }else{
+            $model_id = $request->user_ids;
+            $model_type = User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user);
+            foreach ($checklist_audit as $key => $audit) {
+                $audit->signature_supervisor = $path_signature;
+                $audit->checklist_finished = true;
+                $audit->save();
+            }
+        }
+        return [
+            'message' => 'Checklist finalizado.',
+        ];
     }
     protected function saveActivity(Checklist $checklist, array $data,$action_request,$request): array
     {
