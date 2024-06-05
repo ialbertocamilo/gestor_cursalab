@@ -19,7 +19,8 @@ class ChecklistActivityAudit  extends BaseModel
         'checklist_activity_id',
         'auditor_id',
         'date_audit',
-        'historic_qualification'
+        'historic_qualification',
+        'comments'
     ];
 
     public function activity()

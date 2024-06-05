@@ -1256,6 +1256,7 @@ class CheckList extends BaseModel
         $user_relation = $user->criterion_values->whereIn('criterion_id',$workspace_entity_criteria)->first();
         // $criteria_segmented = ;
         $checklist->loadMissing('type:id,name,code,color,icon');
+        $summaries = collect();
         if($checklist->type->code == 'curso'){
             $_course = Course::select('id')->where('id',$checklist->course_id)->first();
             $_course->loadMissing(['segments','segments.values']);
@@ -1279,9 +1280,13 @@ class CheckList extends BaseModel
                 course_segments:$_course->segments,
                 addSelect:['name','lastname','surname','document']
             );
+            if(count($users)){
+                $summaries = SummaryCourse::select('id','user_id','advanced_percentage')->where('course_id',$checklist->course_id)
+                                ->whereIn('user_id',$users->pluck('id'))
+                                ->whereRelation('status', 'code', 'aprobado')->get();
+            }
         }else{
             $_course =new Course();
-
             $checklist->loadMissing(['segments']);
             // añadir variable SEARCH
             $users = $_course->usersSegmented(
@@ -1289,25 +1294,43 @@ class CheckList extends BaseModel
                                 addSelect:['name','lastname','surname','document']
                             );
         }
+
         $checklist->load('activities:id,checklist_id');
         $count_activities = count($checklist->activities);
-        $completed = ChecklistAudit::select('id')->withCount(['audit_activities'])
-                    ->where('checklist_id',$checklist->id)
-                    ->whereIn('model_id',$users->pluck('id'))
-                    ->get()->filter(function($audit) use ($count_activities) {
+        $status_activities = ChecklistAudit::select('id','percent_progress','model_id')->withCount(['audit_activities'])
+                            ->where('checklist_id',$checklist->id)
+                            ->where('model_type','App\\Models\\User')
+                            ->whereIn('model_id',$users->pluck('id'))
+                            ->get();
+        $completed = $status_activities->filter(function($audit) use ($count_activities) {
                         return $audit->audit_activities_count == $count_activities;
-                    });;
+                    });
+
         $count_users_completed = count($completed);
         $percent_completed =  count($users)>0 ?  round($count_users_completed/count($users) * 100,2) : 0;
         $count_users_pending = count($users) - $count_users_completed;
         $percent_pending = count($users)>0 ? round($count_users_pending/count($users) * 100,2) : 0;
-
+        $statuses = collect([
+            [ 'code' => 'pendiente', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
+            [ 'code' => 'in-progress', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
+            [ 'code' => 'completed', 'color' => '#A9B2B9', 'icon' => 'mdi-account-check' ],
+            [ 'code' => 'blocked', 'color' => '#A9B2B9', 'icon' => 'mdi-account-lock' ],
+        ]);
+        
         foreach ($users as $user) {
-            $user['status'] = [
-                'code' => 'pendiente',
-                'color' => '#5458EA',
-                'icon' => 'mdi-account'
-            ];
+            $status_code = 'pendiente';
+            if ($checklist->type->code == 'curso') {
+                $status_course = $summaries?->firstWhere('user_id', $user->id);
+                if (!$status_course) {
+                    $status_code = 'blocked';
+                } else {
+                    $status_user = $status_activities?->firstWhere('model_id', $user->id);
+                    if ($status_user && $status_code != 'blocked') {
+                        $status_code = floatval($status_user->percent_progress) >= 100.0 ? 'completed' : 'in-progress';
+                    }
+                }
+            }
+            $user['status'] = $statuses->firstWhere('code', $status_code);
         }
         return [
             'checklist' =>[

@@ -105,7 +105,7 @@ class ChecklistAudit extends BaseModel
             ChecklistActivityAudit::insert($_checklist_audit);
         } 
     }
-    protected function saveActivity(Checklist $checklist, array $data,$action_request): array
+    protected function saveActivity(Checklist $checklist, array $data,$action_request,$request): array
     {
         $user = auth()->user();
         $checklist->load(['type:id,name,code', 'modality:id,name,code','activities:id,checklist_id']);
@@ -188,10 +188,23 @@ class ChecklistAudit extends BaseModel
                     $checklist_activity_update['qualification_id'] = $data['qualification_id'];
                     $checklist_activity_update['historic_qualification'][] = $historicQualification;
                     $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
-                    break;
+                break;
+                case 'comments':
+                    $historicComments = [
+                        "user_id"=> $user->id,
+                        "comment" => $data['comment'],
+                        "date_time" => $dateAudit
+                    ];
+                    if(is_array($checklistActivityAudit['comments'])){
+                        $checklist_activity_update['comments'][] = $historicComments;
+                    }else{
+                        $checklist_activity_update['comments'] = [];
+                        $checklist_activity_update['comments'][] = $historicComments;
+                    }
+                    $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
+                break;
                 case 'insert-photo':
                     if(isset($data['file_photo'])){
-                        // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
                         $str_random = Str::random(5);
                         $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
                         $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
@@ -217,6 +230,14 @@ class ChecklistAudit extends BaseModel
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
         } else {
             $photos = [];
+            $comment = [];
+            if(isset($data['comment'])){
+                $comment[] = [
+                    "user_id"=> $user->id,
+                    "comment" => $data['comment'],
+                    "date_time" => $dateAudit
+                ];
+            }
             if(isset($data['file_photo'])){
                 // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
                 $str_random = Str::random(5);
@@ -242,6 +263,7 @@ class ChecklistAudit extends BaseModel
                     'qualification_id' => $data['qualification_id'],
                     'date_audit' => $dateAudit
                 ]]) : '[]',
+                'comments' => json_encode($comment)
             ];
         }
         //update progress
