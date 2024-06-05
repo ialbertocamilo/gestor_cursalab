@@ -77,7 +77,7 @@ class ChecklistAudit extends BaseModel
             $audit->finishes_at = now()->format('Y-m-d H:i:s');
             $checklist_audit->save();
         }else{
-            $model_id = $request->user_ids;
+            $model_id = $data['user_ids'];
             $model_type = User::class;
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user);
             foreach ($checklist_audit as $key => $audit) {
