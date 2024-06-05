@@ -289,7 +289,7 @@ class ChecklistAudit extends BaseModel
         $checklist_audit->activities_assigned  = $activities_assigned;
         $checklist_audit->activities_reviewved  = $activities_reviewved;
         $checklist_audit->percent_progress  = round(($activities_reviewved/$activities_assigned),2) * 100;
-        $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
+        // $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
         // dd($checklist_audit->percent_progress,$activities_reviewved/$activities_assigned,$activities_assigned,$activities_reviewved);
         $checklist_audit->save();
         $assigned = $checklist_audit->activities_assigned;
