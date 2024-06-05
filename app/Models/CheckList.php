@@ -1313,7 +1313,7 @@ class CheckList extends BaseModel
         $statuses = collect([
             [ 'code' => 'pendiente', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
             [ 'code' => 'in-progress', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
-            [ 'code' => 'completed', 'color' => '#A9B2B9', 'icon' => 'mdi-account-check' ],
+            [ 'code' => 'completed', 'color' => '#00E396', 'icon' => 'mdi-account-check' ],
             [ 'code' => 'blocked', 'color' => '#A9B2B9', 'icon' => 'mdi-account-lock' ],
         ]);
         
