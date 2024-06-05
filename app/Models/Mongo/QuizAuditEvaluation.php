@@ -3,6 +3,7 @@
 namespace App\Models\Mongo;
 use App\Models\User;
 use App\Models\Media;
+use App\Models\Course;
 use App\Models\Workspace;
 use Illuminate\Support\Str;
 use Jenssegers\Mongodb\Eloquent\Model;
@@ -57,6 +58,9 @@ class QuizAuditEvaluation extends Model
                 'logo' => get_media_url($subworkspace?->parent->logo),
                 'name' => $subworkspace?->name
             ];
+            $course = Course::select('platform_id')->with('platform:id,code')->where('id',$quiz_info['curso_id'])->first();
+            $quiz_info['is_training'] = $course->platform->code == 'training';
+            
             unset($quiz_info['_id']);
             unset($quiz_info['answers']);
             unset($quiz_info['preguntas']);

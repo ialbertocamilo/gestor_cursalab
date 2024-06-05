@@ -122,6 +122,10 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
+    public function platform()
+    {
+        return $this->belongsTo(Taxonomy::class, 'platform_id');
+    }
     public function modality()
     {
         return $this->belongsTo(Taxonomy::class, 'modality_id');
