@@ -1137,10 +1137,13 @@ class CheckList extends BaseModel
             }else{
                 $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
             }
-            if($request->user_id){
-                $model_id = $request->user_id;
-            }
+            
             $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
+            $activities_progress = $checklist_audit?->audit_activities ?? collect();
+        }else{
+            $model_id = $request->user_id;
+            $model_type = User::class;
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
             $activities_progress = $checklist_audit?->audit_activities ?? collect();
         }
