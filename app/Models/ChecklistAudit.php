@@ -161,183 +161,373 @@ class ChecklistAudit extends BaseModel
         return $user->criterion_values->whereIn('criterion_id', $workspaceEntityCriteria)->first();
     }
 
+    // protected function processAudit(
+    //     $action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, 
+    //     array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
+    //     &$assigned,&$reviewved,&$percent_progress,&$photos,&$qualification_id
+    // ): void
+    // {
+    //     $dateAudit = $dateAudit->format('Y-m-d H:i:s');
+    //     $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user,true);
+    //     $activities_reviewved = $checklist_audit?->audit_activities ? count($checklist_audit?->audit_activities) : 0;
+    //     if(!$checklist_audit){
+    //         $checklist_audit = ChecklistAudit::create([
+    //             'checklist_id' => $checklist->id,
+    //             'auditor_id' => $user->id,
+    //             'date_audit' => $dateAudit,
+    //             'model_type' => $modelType,
+    //             'model_id' => $modelId,
+    //             'starts_at' => $dateAudit
+    //         ]);
+    //     }
+    //     $activities_assigned = count($checklist->activities);
+    //     $checklistActivityAudit = ChecklistActivityAudit::where([
+    //         'checklist_audit_id' => $checklist_audit->id,
+    //         'checklist_id' => $checklist->id,
+    //         'checklist_activity_id' => $data['activity_id'],
+    //     ])->first();
+        
+    //     if ($checklistActivityAudit) {
+    //         $checklistActivityAudit = $checklistActivityAudit->toArray();
+    //         $checklist_activity_update = [
+    //             'id' => $checklistActivityAudit['id'],
+    //             'date_audit' => $dateAudit,
+    //         ];
+    //         switch ($action_request) {
+    //             case 'qualification':
+    //                 $photos = $checklistActivityAudit['photo'];
+    //                 $historicQualification = [
+    //                     'qualification_id' => $data['qualification_id'],
+    //                     'date_audit' => $dateAudit
+    //                 ];
+    //                 /*qualification to response type write_option*/
+    //                 if(is_string($data['qualification_response'])){
+    //                     $qualification_response = Taxonomy::updateOrCreate(
+    //                         ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
+    //                         [
+    //                             'group' => 'checklist',
+    //                             'type' => 'response_write_user',
+    //                             "name" => $data['qualification_response'],
+    //                         ]
+    //                     );
+    //                     $data['qualification_id'] = $qualification_response->id;
+    //                 }
+    //                 $qualification_id = $data['qualification_id'];
+    //                 $checklist_activity_update['qualification_id'] = $data['qualification_id'];
+    //                 $checklist_activity_update['historic_qualification'][] = $historicQualification;
+    //                 $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
+    //             break;
+    //             case 'comments':
+    //                 $photos = $checklistActivityAudit['photo'];
+    //                 $qualification_id = $checklistActivityAudit['qualification_id'];
+
+    //                 $historicComments = [
+    //                     "user_id"=> $user->id,
+    //                     "comment" => $data['comment'],
+    //                     "date_time" => $dateAudit
+    //                 ];
+    //                 if(is_array($checklistActivityAudit['comments'])){
+    //                     $checklist_activity_update['comments'][] = $historicComments;
+    //                 }else{
+    //                     $checklist_activity_update['comments'] = [];
+    //                     $checklist_activity_update['comments'][] = $historicComments;
+    //                 }
+    //                 $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
+    //             break;
+    //             case 'photo':
+    //                 $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
+    //                 $qualification_id = $checklistActivityAudit['qualification_id'];
+
+    //                 if(isset($data['action']) && $data['action'] == 'insert'){
+    //                     if(isset($data['file_photo'])){
+    //                         $str_random = Str::random(5);
+    //                         $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+    //                         $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+    //                         Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
+    //                         if(is_array($checklist_activity_update['photo'])){
+    //                             $checklist_activity_update['photo'][] = [
+    //                                 'url'=>$photo,
+    //                                 'datetime' => $dateAudit
+    //                             ];
+    //                         }else{
+    //                             $checklist_activity_update['photo'] = [];
+    //                             $checklist_activity_update['photo'][] = [
+    //                                 'url'=>$photo,
+    //                                 'datetime' => $dateAudit
+    //                             ];
+    //                         }
+    //                     }
+    //                 }
+    //                 if(isset($data['action']) && $data['action'] == 'delete'){
+    //                     if (isset($data['photo'])) {
+    //                         $photoIndex = $data['photo'];
+    //                         if (isset($checklist_activity_update['photo'][$photoIndex])) {
+    //                             unset($checklist_activity_update['photo'][$photoIndex]);
+    //                         }
+    //                         // Reindexar el array para evitar problemas con índices no consecutivos
+    //                         $checklist_activity_update['photo'] = isset($checklist_activity_update['photo'])
+    //                                                                 ? array_values($checklist_activity_update['photo']) 
+    //                                                                 : [];
+    //                     }
+    //                 }
+    //                 $photos = $checklist_activity_update['photo'];
+    //                 $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
+    //             break;
+    //         }
+    //         $checklistActivityAuditToUpdate[] = $checklist_activity_update;
+    //     } else {
+    //         $photos = [];
+    //         $comment = [];
+    //         if(isset($data['comment'])){
+    //             $comment[] = [
+    //                 "user_id"=> $user->id,
+    //                 "comment" => $data['comment'],
+    //                 "date_time" => $dateAudit
+    //             ];
+    //         }
+    //         if(isset($data['file_photo'])){
+    //             // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
+    //             $str_random = Str::random(5);
+    //             $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+    //             $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+    //             Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
+    //             $photos[] = [
+    //                 'url'=>$photo,
+    //                 'datetime' => $dateAudit
+    //             ];
+    //         }
+    //         /*qualification to response type write_option*/
+    //         if(isset($data['qualification_response']) && is_string($data['qualification_response'])){
+    //             $qualification_response = Taxonomy::updateOrCreate(
+    //                 ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
+    //                 [
+    //                     'group' => 'checklist',
+    //                     'type' => 'response_write_user',
+    //                     "name" => $data['qualification_response'],
+    //                 ]
+    //             );
+    //             $data['qualification_id'] = $qualification_response->id;
+    //         }
+    //         $activities_reviewved = $activities_reviewved + 1;
+    //         $checklistActivityAuditToCreate[] = [
+    //             'checklist_audit_id' => $checklist_audit->id,
+    //             'qualification_id' => $data['qualification_id'] ?? null,
+    //             'qualification_id' => $data['qualification_id'] ?? null,
+    //             'photo' => json_encode($photos),
+    //             'checklist_id' => $checklist->id,
+    //             'checklist_activity_id' => $data['activity_id'],
+    //             'auditor_id' => $user->id,
+    //             'date_audit' => $dateAudit,
+    //             'historic_qualification' => isset($data['qualification_id']) ? json_encode([[
+    //                 'qualification_id' => $data['qualification_id'],
+    //                 'date_audit' => $dateAudit
+    //             ]]) : '[]',
+    //             'comments' => json_encode($comment)
+    //         ];
+    //     }
+    //     //update progress
+        
+    //     $checklist_audit->activities_assigned  = $activities_assigned;
+    //     $checklist_audit->activities_reviewved  = $activities_reviewved;
+    //     $checklist_audit->percent_progress  = round(($activities_reviewved/$activities_assigned),2) * 100;
+    //     // $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
+    //     // dd($checklist_audit->percent_progress,$activities_reviewved/$activities_assigned,$activities_assigned,$activities_reviewved);
+    //     $checklist_audit->save();
+    //     $assigned = $checklist_audit->activities_assigned;
+    //     $reviewved = $checklist_audit->activities_reviewved;
+    //     $percent_progress = $checklist_audit->percent_progress;
+    // }
     protected function processAudit(
-        $action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, 
+        $action_request, Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit,
         array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
-        &$assigned,&$reviewved,&$percent_progress,&$photos,&$qualification_id
+        &$assigned, &$reviewved, &$percent_progress, &$photos, &$qualification_id
     ): void
     {
-        $dateAudit = $dateAudit->format('Y-m-d H:i:s');
-        $checklist_audit =  self::getCurrentChecklistAudit($checklist,$modelType,$modelId,$user,true);
-        $activities_reviewved = $checklist_audit?->audit_activities ? count($checklist_audit?->audit_activities) : 0;
-        if(!$checklist_audit){
+        $dateAuditFormatted = $dateAudit->format('Y-m-d H:i:s');
+        $checklist_audit = self::getCurrentChecklistAudit($checklist, $modelType, $modelId, $user, true);
+        $activities_reviewved = $checklist_audit?->audit_activities ? count($checklist_audit->audit_activities) : 0;
+        // Create a new checklist audit if it doesn't exist
+        if (!$checklist_audit) {
             $checklist_audit = ChecklistAudit::create([
                 'checklist_id' => $checklist->id,
                 'auditor_id' => $user->id,
-                'date_audit' => $dateAudit,
+                'date_audit' => $dateAuditFormatted,
                 'model_type' => $modelType,
                 'model_id' => $modelId,
-                'starts_at' => $dateAudit
+                'starts_at' => $dateAuditFormatted
             ]);
         }
         $activities_assigned = count($checklist->activities);
+        // Fetch or initialize the ChecklistActivityAudit
         $checklistActivityAudit = ChecklistActivityAudit::where([
             'checklist_audit_id' => $checklist_audit->id,
             'checklist_id' => $checklist->id,
             'checklist_activity_id' => $data['activity_id'],
         ])->first();
-        
         if ($checklistActivityAudit) {
             $checklistActivityAudit = $checklistActivityAudit->toArray();
             $checklist_activity_update = [
                 'id' => $checklistActivityAudit['id'],
-                'date_audit' => $dateAudit,
+                'date_audit' => $dateAuditFormatted,
             ];
             switch ($action_request) {
                 case 'qualification':
-                    $photos = $checklistActivityAudit['photo'];
-                    $historicQualification = [
-                        'qualification_id' => $data['qualification_id'],
-                        'date_audit' => $dateAudit
-                    ];
-                    /*qualification to response type write_option*/
-                    if(is_string($data['qualification_response'])){
-                        $qualification_response = Taxonomy::updateOrCreate(
-                            ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
-                            [
-                                'group' => 'checklist',
-                                'type' => 'response_write_user',
-                                "name" => $data['qualification_response'],
-                            ]
-                        );
-                        $data['qualification_id'] = $qualification_response->id;
-                    }
-                    $qualification_id = $data['qualification_id'];
-                    $checklist_activity_update['qualification_id'] = $data['qualification_id'];
-                    $checklist_activity_update['historic_qualification'][] = $historicQualification;
-                    $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
-                break;
+                    handleQualification($data, $checklistActivityAudit, $checklist_activity_update, $dateAuditFormatted, $photos, $qualification_id);
+                    break;
                 case 'comments':
-                    $photos = $checklistActivityAudit['photo'];
-                    $qualification_id = $checklistActivityAudit['qualification_id'];
-
-                    $historicComments = [
-                        "user_id"=> $user->id,
-                        "comment" => $data['comment'],
-                        "date_time" => $dateAudit
-                    ];
-                    if(is_array($checklistActivityAudit['comments'])){
-                        $checklist_activity_update['comments'][] = $historicComments;
-                    }else{
-                        $checklist_activity_update['comments'] = [];
-                        $checklist_activity_update['comments'][] = $historicComments;
-                    }
-                    $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
-                break;
+                    handleComments($data, $checklistActivityAudit, $checklist_activity_update, $user, $dateAuditFormatted, $photos, $qualification_id);
+                    break;
                 case 'photo':
-                    $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
-                    $qualification_id = $checklistActivityAudit['qualification_id'];
-
-                    if(isset($data['action']) && $data['action'] == 'insert'){
-                        if(isset($data['file_photo'])){
-                            $str_random = Str::random(5);
-                            $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
-                            $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
-                            Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
-                            if(is_array($checklist_activity_update['photo'])){
-                                $checklist_activity_update['photo'][] = [
-                                    'url'=>$photo,
-                                    'datetime' => $dateAudit
-                                ];
-                            }else{
-                                $checklist_activity_update['photo'] = [];
-                                $checklist_activity_update['photo'][] = [
-                                    'url'=>$photo,
-                                    'datetime' => $dateAudit
-                                ];
-                            }
-                        }
-                    }
-                    if(isset($data['action']) && $data['action'] == 'delete'){
-                        if (isset($data['photo'])) {
-                            $photoIndex = $data['photo'];
-                            if (isset($checklist_activity_update['photo'][$photoIndex])) {
-                                unset($checklist_activity_update['photo'][$photoIndex]);
-                            }
-                            // Reindexar el array para evitar problemas con índices no consecutivos
-                            $checklist_activity_update['photo'] = isset($checklist_activity_update['photo'])
-                                                                    ? array_values($checklist_activity_update['photo']) 
-                                                                    : [];
-                        }
-                    }
-                    $photos = $checklist_activity_update['photo'];
-                    $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
-                break;
+                    handlePhoto($data, $checklistActivityAudit, $checklist_activity_update, $checklist, $dateAuditFormatted, $photos, $qualification_id);
+                    break;
             }
+    
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
         } else {
-            $photos = [];
-            $comment = [];
-            if(isset($data['comment'])){
-                $comment[] = [
-                    "user_id"=> $user->id,
-                    "comment" => $data['comment'],
-                    "date_time" => $dateAudit
-                ];
-            }
-            if(isset($data['file_photo'])){
-                // $activity = Media::requestUploadFile(data:$activity,field:'photo',return_media:true);
-                $str_random = Str::random(5);
-                $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
-                $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
-                Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
-                $photos[] = [
-                    'url'=>$photo,
-                    'datetime' => $dateAudit
-                ];
-            }
-            /*qualification to response type write_option*/
-            if(isset($data['qualification_response']) && is_string($data['qualification_response'])){
-                $qualification_response = Taxonomy::updateOrCreate(
-                    ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
-                    [
-                        'group' => 'checklist',
-                        'type' => 'response_write_user',
-                        "name" => $data['qualification_response'],
-                    ]
-                );
-                $data['qualification_id'] = $qualification_response->id;
-            }
-            $activities_reviewved = $activities_reviewved + 1;
-            $checklistActivityAuditToCreate[] = [
-                'checklist_audit_id' => $checklist_audit->id,
-                'qualification_id' => $data['qualification_id'] ?? null,
-                'qualification_id' => $data['qualification_id'] ?? null,
-                'photo' => json_encode($photos),
-                'checklist_id' => $checklist->id,
-                'checklist_activity_id' => $data['activity_id'],
-                'auditor_id' => $user->id,
-                'date_audit' => $dateAudit,
-                'historic_qualification' => isset($data['qualification_id']) ? json_encode([[
-                    'qualification_id' => $data['qualification_id'],
-                    'date_audit' => $dateAudit
-                ]]) : '[]',
-                'comments' => json_encode($comment)
-            ];
+            handleNewActivity($data, $checklist, $user, $dateAuditFormatted, $checklistActivityAuditToCreate, $activities_reviewved, $photos, $qualification_id);
         }
-        //update progress
-        
-        $checklist_audit->activities_assigned  = $activities_assigned;
-        $checklist_audit->activities_reviewved  = $activities_reviewved;
-        $checklist_audit->percent_progress  = round(($activities_reviewved/$activities_assigned),2) * 100;
-        // $checklist_audit->checklist_finished  = ($activities_assigned == $activities_reviewved);
-        // dd($checklist_audit->percent_progress,$activities_reviewved/$activities_assigned,$activities_assigned,$activities_reviewved);
+    
+        // Update progress
+        $checklist_audit->activities_assigned = $activities_assigned;
+        $checklist_audit->activities_reviewved = $activities_reviewved;
+        $checklist_audit->percent_progress = round(($activities_reviewved / $activities_assigned), 2) * 100;
         $checklist_audit->save();
+    
         $assigned = $checklist_audit->activities_assigned;
         $reviewved = $checklist_audit->activities_reviewved;
         $percent_progress = $checklist_audit->percent_progress;
     }
-
+    
+    private function handleQualification(array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
+    {
+        $photos = $checklistActivityAudit['photo'];
+        $historicQualification = [
+            'qualification_id' => $data['qualification_id'],
+            'date_audit' => $dateAuditFormatted
+        ];
+    
+        if (is_string($data['qualification_response'])) {
+            $qualification_response = Taxonomy::updateOrCreate(
+                ['id' => $data['qualification_id'], 'group' => 'checklist', 'type' => 'response_write_user'],
+                [
+                    'group' => 'checklist',
+                    'type' => 'response_write_user',
+                    'name' => $data['qualification_response'],
+                ]
+            );
+            $data['qualification_id'] = $qualification_response->id;
+        }
+    
+        $qualification_id = $data['qualification_id'];
+        $checklist_activity_update['qualification_id'] = $data['qualification_id'];
+        $checklist_activity_update['historic_qualification'][] = $historicQualification;
+        $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
+    }
+    
+    private function handleComments(array $data, array $checklistActivityAudit, array &$checklist_activity_update, User $user, string $dateAuditFormatted, &$photos, &$qualification_id)
+    {
+        $photos = $checklistActivityAudit['photo'];
+        $qualification_id = $checklistActivityAudit['qualification_id'];
+    
+        $historicComments = [
+            'user_id' => $user->id,
+            'comment' => $data['comment'],
+            'date_time' => $dateAuditFormatted
+        ];
+    
+        if (is_array($checklistActivityAudit['comments'])) {
+            $checklist_activity_update['comments'][] = $historicComments;
+        } else {
+            $checklist_activity_update['comments'] = [];
+            $checklist_activity_update['comments'][] = $historicComments;
+        }
+    
+        $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
+    }
+    
+    private function handlePhoto(array $data, array $checklistActivityAudit, array &$checklist_activity_update, Checklist $checklist, string $dateAuditFormatted, &$photos, &$qualification_id)
+    {
+        $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
+        $qualification_id = $checklistActivityAudit['qualification_id'];
+    
+        if (isset($data['action']) && $data['action'] == 'insert' && isset($data['file_photo'])) {
+            $str_random = Str::random(5);
+            $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random . '.png';
+            $photo = 'checklist-photos/' . $checklist->id . '/' . $name_image;
+            Media::uploadMediaBase64(name: '', path: $photo, base64: $data['file_photo'], save_in_media: false, status: 'private');
+    
+            $checklist_activity_update['photo'][] = [
+                'url' => $photo,
+                'datetime' => $dateAuditFormatted
+            ];
+        }
+    
+        if (isset($data['action']) && $data['action'] == 'delete' && isset($data['photo'])) {
+            $photoIndex = $data['photo'];
+            if (isset($checklist_activity_update['photo'][$photoIndex])) {
+                unset($checklist_activity_update['photo'][$photoIndex]);
+                $checklist_activity_update['photo'] = array_values($checklist_activity_update['photo']);
+            }
+        }
+    
+        $photos = $checklist_activity_update['photo'];
+        $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
+    }
+    
+    private function handleNewActivity(array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, int &$activities_reviewved, &$photos, &$qualification_id)
+    {
+        $photos = [];
+        $comments = [];
+    
+        if (isset($data['comment'])) {
+            $comments[] = [
+                'user_id' => $user->id,
+                'comment' => $data['comment'],
+                'date_time' => $dateAuditFormatted
+            ];
+        }
+    
+        if (isset($data['file_photo'])) {
+            $str_random = Str::random(5);
+            $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random . '.png';
+            $photo = 'checklist-photos/' . $checklist->id . '/' . $name_image;
+            Media::uploadMediaBase64(name: '', path: $photo, base64: $data['file_photo'], save_in_media: false, status: 'private');
+            $photos[] = [
+                'url' => $photo,
+                'datetime' => $dateAuditFormatted
+            ];
+        }
+    
+        if (isset($data['qualification_response']) && is_string($data['qualification_response'])) {
+            $qualification_response = Taxonomy::updateOrCreate(
+                ['id' => $data['qualification_id'], 'group' => 'checklist', 'type' => 'response_write_user'],
+                [
+                    'group' => 'checklist',
+                    'type' => 'response_write_user',
+                    'name' => $data['qualification_response'],
+                ]
+            );
+            $data['qualification_id'] = $qualification_response->id;
+        }
+    
+        $activities_reviewved += 1;
+    
+        $checklistActivityAuditToCreate[] = [
+            'checklist_audit_id' => $checklist_audit->id,
+            'qualification_id' => $data['qualification_id'] ?? null,
+            'photo' => json_encode($photos),
+            'checklist_id' => $checklist->id,
+            'checklist_activity_id' => $data['activity_id'],
+            'auditor_id' => $user->id,
+            'date_audit' => $dateAuditFormatted,
+            'historic_qualification' => isset($data['qualification_id']) ? json_encode([[
+                'qualification_id' => $data['qualification_id'],
+                'date_audit' => $dateAuditFormatted
+            ]]) : '[]',
+            'comments' => json_encode($comments)
+        ];
+    }
+    
     protected function listProgress($checklist){
         $user = auth()->user();
         $checklist->loadMissing('modality:id,name,icon,alias');
