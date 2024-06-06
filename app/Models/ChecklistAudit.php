@@ -247,24 +247,24 @@ class ChecklistAudit extends BaseModel
                                     'datetime' => $dateAudit
                                 ];
                             }
-                            $checklist_activity_update['photo'] = json_encode($checklistActivityAudit['photo'] );
                         }
                     }
                     if(isset($data['action']) && $data['action'] == 'delete'){
                         if (isset($data['photo'])) {
                             $photoIndex = $data['photo'];
-                            if (isset($checklist_activity_update['photo'][$photoIndex])) {
-                                unset($checklist_activity_update['photo'][$photoIndex]);
+                            if (isset($checklistActivityAudit['photo'][$photoIndex])) {
+                                unset($checklistActivityAudit['photo'][$photoIndex]);
                             }
                             // Reindexar el array para evitar problemas con índices no consecutivos
-                            if(isset($checklist_activity_update['photo'])){
-                                $checklist_activity_update['photo'] = array_values($checklist_activity_update['photo']);
-                                $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
+                            if(isset($checklistActivityAudit['photo'])){
+                                $checklistActivityAudit['photo'] = array_values($checklistActivityAudit['photo']);
+                                $checklistActivityAudit['photo'] = json_encode($checklistActivityAudit['photo']);
                             }else{
-                                $checklist_activity_update['photo'] = '[]';
+                                $checklistActivityAudit['photo'] = [];
                             }
                         }
                     }
+                    $checklist_activity_update['photo'] = json_encode($checklistActivityAudit['photo'] );
                     $photos = $checklist_activity_update['photo'];
                 break;
                 default:
