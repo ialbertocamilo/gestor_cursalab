@@ -133,7 +133,7 @@ class ChecklistAudit extends BaseModel
         $list_photos = [];
         if($photos && count($photos) > 0){
             foreach ($photos as $photo) {
-                $photo->url = reportsSignedUrl($photo->url);
+                $photo['url'] = reportsSignedUrl($photo['url']);
                 $list_photos[] = $photo; 
             }
         }
@@ -187,7 +187,6 @@ class ChecklistAudit extends BaseModel
         
         if ($checklistActivityAudit) {
             $checklistActivityAudit = $checklistActivityAudit->toArray();
-            // $checklistActivityAudit['date_audit'] = $dateAudit;
             $checklist_activity_update = [
                 'id' => $checklistActivityAudit['id'],
                 'date_audit' => $dateAudit,
@@ -229,20 +228,21 @@ class ChecklistAudit extends BaseModel
                     $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
                 break;
                 case 'photo':
+                    $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
                     if(isset($data['action']) && $data['action'] == 'insert'){
                         if(isset($data['file_photo'])){
                             $str_random = Str::random(5);
                             $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
                             $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
                             Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
-                            if(is_array($checklistActivityAudit['photo'])){
-                                $checklistActivityAudit['photo'][] = [
+                            if(is_array($checklist_activity_update['photo'])){
+                                $checklist_activity_update['photo'][] = [
                                     'url'=>$photo,
                                     'datetime' => $dateAudit
                                 ];
                             }else{
-                                $checklistActivityAudit['photo'] = [];
-                                $checklistActivityAudit['photo'][] = [
+                                $checklist_activity_update['photo'] = [];
+                                $checklist_activity_update['photo'][] = [
                                     'url'=>$photo,
                                     'datetime' => $dateAudit
                                 ];
@@ -252,22 +252,17 @@ class ChecklistAudit extends BaseModel
                     if(isset($data['action']) && $data['action'] == 'delete'){
                         if (isset($data['photo'])) {
                             $photoIndex = $data['photo'];
-                            if (isset($checklistActivityAudit['photo'][$photoIndex])) {
-                                unset($checklistActivityAudit['photo'][$photoIndex]);
+                            if (isset($checklist_activity_update['photo'][$photoIndex])) {
+                                unset($checklist_activity_update['photo'][$photoIndex]);
                             }
                             // Reindexar el array para evitar problemas con índices no consecutivos
-                            if(isset($checklistActivityAudit['photo'])){
-                                $checklistActivityAudit['photo'] = array_values($checklistActivityAudit['photo']);
-                                $checklistActivityAudit['photo'] = json_encode($checklistActivityAudit['photo']);
-                            }else{
-                                $checklistActivityAudit['photo'] = [];
-                            }
+                            $checklist_activity_update['photo'] = isset($checklist_activity_update['photo'])
+                                                                    ? array_values($checklist_activity_update['photo']) 
+                                                                    : [];
                         }
                     }
-                    $checklist_activity_update['photo'] = json_encode($checklistActivityAudit['photo'] );
                     $photos = $checklist_activity_update['photo'];
-                break;
-                default:
+                    $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
                 break;
             }
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
@@ -320,10 +315,6 @@ class ChecklistAudit extends BaseModel
         $assigned = $checklist_audit->activities_assigned;
         $reviewved = $checklist_audit->activities_reviewved;
         $percent_progress = $checklist_audit->percent_progress;
-        if(is_string($photos)){
-            $photos = json_decode($photos);
-        }
-        // $photo = '';
     }
 
     protected function listProgress($checklist){
