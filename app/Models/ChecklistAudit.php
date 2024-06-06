@@ -131,9 +131,11 @@ class ChecklistAudit extends BaseModel
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToUpdate,'update');
         $list_photos = [];
-        foreach ($photos as $photo) {
-            $photo['url'] = reportsSignedUrl($photo['url']);
-            $list_photos[] = $photo; 
+        if($photos && count($photos) > 0){
+            foreach ($photos as $photo) {
+                $photo['url'] = reportsSignedUrl($photo['url']);
+                $list_photos[] = $photo; 
+            }
         }
         return [
             'message' => 'Actividad actualizada.',
@@ -318,6 +320,9 @@ class ChecklistAudit extends BaseModel
         $assigned = $checklist_audit->activities_assigned;
         $reviewved = $checklist_audit->activities_reviewved;
         $percent_progress = $checklist_audit->percent_progress;
+        if(is_string($photos)){
+            $photos = json_decode($photos);
+        }
         // $photo = '';
     }
 
