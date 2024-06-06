@@ -217,6 +217,7 @@ class ChecklistAudit extends BaseModel
                             $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
                             $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
                             Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
+                            dd($checklistActivityAudit['photo']);
                             if(is_array($checklistActivityAudit['photo'])){
                                 $checklist_activity_update['photo'][] = [
                                     'url'=>$photo,
