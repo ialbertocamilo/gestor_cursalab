@@ -239,8 +239,12 @@ class ChecklistAudit extends BaseModel
                                 unset($checklist_activity_update['photo'][$photoIndex]);
                             }
                             // Reindexar el array para evitar problemas con índices no consecutivos
-                            $checklist_activity_update['photo'] = array_values($checklist_activity_update['photo']);
-                            $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
+                            if(isset($checklist_activity_update['photo'])){
+                                $checklist_activity_update['photo'] = array_values($checklist_activity_update['photo']);
+                                $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
+                            }else{
+                                $checklist_activity_update['photo'] = '[]';
+                            }
                         }
                     }
                 break;
