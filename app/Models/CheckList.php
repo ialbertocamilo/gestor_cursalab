@@ -915,11 +915,14 @@ class CheckList extends BaseModel
                 $tematicas = $area['tematicas'];
                 foreach ($tematicas as $tematica) {
                     $activities = $tematica['activities'];
-                    dd($activities);
+                    foreach ($activities as $key => $activity) {
+                        $activity['area_id'] = $area['id'];
+                        $activity['tematica_id'] = $tematica['id'];
+                        CheckListItem::saveActivity($checklist,$activity);
+                    }
                 }
             }
         }
-        dd();
         // $activities_to_insert = [];
         // $activities_id = [];
         // foreach ($activities as $data_activity) {
@@ -952,12 +955,12 @@ class CheckList extends BaseModel
         //     }
         // }
         // CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
-        // $next_step = self::nextStep($checklist);
-        // $checklist->load('type:id,code');
-        // return [
-        //     'next_step' => $next_step,
-        //     'checklist' => $checklist
-        // ];
+        $next_step = self::nextStep($checklist);
+        $checklist->load('type:id,code');
+        return [
+            'next_step' => $next_step,
+            'checklist' => $checklist
+        ];
     }
 
     protected function getSegments( $_checklist )

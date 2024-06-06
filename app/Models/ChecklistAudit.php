@@ -139,6 +139,7 @@ class ChecklistAudit extends BaseModel
                 $list_photos[] = $photo; 
             }
         }
+        $comments = collect($comments ?? []);
         return [
             'message' => 'Actividad actualizada.',
             'percent_progress' => $percent_progress,
@@ -146,7 +147,8 @@ class ChecklistAudit extends BaseModel
             'activities_reviewved' =>  $reviewved,
             'list_photos' => $list_photos,
             'qualification_id' => $qualification_id,
-            'comments' => $comments
+            'principal_comment' => $comments->where('principal',true)->first() ?? [],
+            'comments' => $comments?->where('principal',false)->values() ?? [],
         ];
     }
 
