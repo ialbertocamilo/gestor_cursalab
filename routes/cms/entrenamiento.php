@@ -59,7 +59,6 @@ Route::controller(ChecklistController::class)
 		/*ACTIVITIES*/
 		// Route::get('/{checklist}/activities', 'formSelectsActivities')->name('activities.list');
 		Route::view('/{checklist}/activities', 'entrenamiento.checklist.activities')->name('checklist.activities');
-
 		Route::get('/{checklist}/activities-by-areas', 'activitiesByArea')->name('checklist.activities');
 		Route::get('/{checklist}/activity/form-selects', 'formSelectsActivities');
 		Route::post('/{checklist}/activity/upload-massive', 'uploadMassive');

@@ -425,10 +425,13 @@
                                 <div id="tooltip-target-1" class="btn_tooltip d-inline-flex" 
                                     @click="openFormModal(modalAreaOptions,null,null,'Gestión de áreas')"
                                 >
-                                    <v-icon class="icon_size" small :color="!(areas.length < max_areas) ? '#BDBEC0' : '#5458EA'" style="font-size: 1.25rem !important;">
+                                <!-- <v-icon class="icon_size" small :color="!(areas.length < max_areas) ? '#BDBEC0' : '#5458EA'" style="font-size: 1.25rem !important;"> -->
+
+                                    <v-icon class="icon_size" small color="#5458EA" style="font-size: 1.25rem !important;">
                                         mdi-plus-circle
                                     </v-icon>
                                 </div>
+                                
                                 <b-tooltip target="tooltip-target-1" triggers="hover" placement="bottom">
                                     Agregar una nueva área.
                                 </b-tooltip>
@@ -645,7 +648,7 @@
                             top
                             small
                         /> 
-                        <span class="mr-2 ml-1">Áreas </span>
+                        <span class="mr-2 ml-1">Áreas: {{areas.length}}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <DefaultInfoTooltip
@@ -653,7 +656,7 @@
                             top
                             small
                         /> 
-                        <span class="mr-2 ml-1">Temáticas</span>
+                        <span class="mr-2 ml-1">Temáticas: {{getTotalTematicas()}}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <DefaultInfoTooltip
@@ -661,63 +664,62 @@
                             top
                             small
                         /> 
-                        <span class="mr-2 ml-1">Actividades</span>
+                        <span class="mr-2 ml-1">Actividades: {{getTotalActivitiesByAreas()}}</span>
                     </div>
                 </div>
-                <!-- <DefaultModalButton 
+                <DefaultModalButton 
                     rounded
-                    outlined
                     label="Guardar Checklist"
                     icon_name=""
                     @click="saveActivities()"
-                /> -->
+                />
             </v-card-actions>
-            <DefaultDeleteModal
-                :options="modalDeleteOptions"
-                :ref="modalDeleteOptions.ref"
-                @onConfirm="deleteResource"
-                @onCancel="closeFormModal(modalDeleteOptions)"
-            />
-            <ModalAddActivity
-                :options="modalActivityOptions"
-                :ref="modalActivityOptions.ref"
-                width="500px"
-                @onConfirm="closeFormModal(modalActivityOptions);loadData()"
-                @onCancel="closeFormModal(modalActivityOptions)"
-            />
-            <ModalFormArea 
-                :options="modalAreaOptions"
-                :ref="modalAreaOptions.ref"
-                width="500px"
-                @onConfirm="closeFormModal(modalAreaOptions);loadData()"
-                @onCancel="closeFormModal(modalAreaOptions)"
-            />
-            <ModalFormTematica 
-                :options="modalTematicaOptions"
-                :ref="modalTematicaOptions.ref"
-                width="500px"
-                @onConfirm="closeFormModal(modalTematicaOptions);loadData()"
-                @onCancel="closeFormModal(modalTematicaOptions)"
-            />
-            <ModalEditArea 
-                :options="modalAreaEditOptions"
-                :ref="modalAreaEditOptions.ref"
-                width="500px"
-                @onConfirm="closeFormModal(modalAreaEditOptions);loadData()"
-                @onCancel="closeFormModal(modalAreaEditOptions)"
-            />
-            <ModalCreateChecklist
-                :ref="modalChecklist.ref"
-                :options="modalChecklist"
-                width="60vw"
-                @onConfirm="
-                    closeSimpleModal(modalChecklist);
-                    refreshDefaultTable(dataTable, filters, 1);
-                    loadSelects();
-                "
-                @onClose="closeSimpleModal(modalChecklist)"
-            />
         </v-card>
+        <DefaultDeleteModal
+            :options="modalDeleteOptions"
+            :ref="modalDeleteOptions.ref"
+            @onConfirm="deleteResource"
+            @onCancel="closeFormModal(modalDeleteOptions)"
+        />
+        <ModalAddActivity
+            :options="modalActivityOptions"
+            :ref="modalActivityOptions.ref"
+            width="500px"
+            @onConfirm="closeFormModal(modalActivityOptions);loadData()"
+            @onCancel="closeFormModal(modalActivityOptions)"
+        />
+        <ModalFormArea 
+            :options="modalAreaOptions"
+            :ref="modalAreaOptions.ref"
+            width="500px"
+            @onConfirm="closeFormModal(modalAreaOptions);loadData()"
+            @onCancel="closeFormModal(modalAreaOptions)"
+        />
+        <ModalFormTematica 
+            :options="modalTematicaOptions"
+            :ref="modalTematicaOptions.ref"
+            width="500px"
+            @onConfirm="closeFormModal(modalTematicaOptions);loadData()"
+            @onCancel="closeFormModal(modalTematicaOptions)"
+        />
+        <ModalEditArea 
+            :options="modalAreaEditOptions"
+            :ref="modalAreaEditOptions.ref"
+            width="500px"
+            @onConfirm="closeFormModal(modalAreaEditOptions);loadData()"
+            @onCancel="closeFormModal(modalAreaEditOptions)"
+        />
+        <ModalCreateChecklist
+            :ref="modalChecklist.ref"
+            :options="modalChecklist"
+            width="60vw"
+            @onConfirm="
+                closeSimpleModal(modalChecklist);
+                refreshDefaultTable(dataTable, filters, 1);
+                loadSelects();
+            "
+            @onClose="closeSimpleModal(modalChecklist)"
+        />
         <ModalUploadMassiveActivities 
             :options="modalUploadMassiveActivitiesOptions"
             width="55vw"
@@ -975,6 +977,18 @@ export default {
         getTotalActivities(tematicas) {
            return tematicas.reduce((sum, tematica) => sum + tematica.activities.length, 0);
         },
+        getTotalActivitiesByAreas() {
+            let vue = this;
+            let coun_activities = 0;
+            vue.areas.forEach(area => {
+                coun_activities += vue.getTotalActivities(area.tematicas);
+            });
+            return coun_activities;
+        },
+        getTotalTematicas(){
+            let vue = this;
+            return vue.areas.reduce((sum,areas) => sum + areas.tematicas.length,0);
+        },
         verifyStep(){
             console.log('no abre');
         },
@@ -999,6 +1013,18 @@ export default {
                     vue.showAlert('Se guardó la actividad correctamente.','success');
                 })
             }
+        },
+        saveActivities(){
+            let vue = this;
+            let data = vue.gruped_by_areas_and_tematicas ? vue.areas : vue.activities ;
+            vue.showLoader();
+            vue.$http.post(`/entrenamiento/checklist/v2/${vue.checklist_id}/activities/save`,{
+                    data:data
+            }).then(({data})=>{
+                vue.hideLoader();
+                // vue.loadData();
+                vue.showAlert('Se guardarón las actividades correctamente.','success');
+            })
         },
         addTematica(area_id){
             let vue = this;
@@ -1143,9 +1169,6 @@ export default {
                 // vue.loadData();
                 vue.showAlert('Se actualizó la posición correctamente.','success');
             })
-        },
-        saveActivities(){
-
         }
     }
 }

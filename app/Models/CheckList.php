@@ -907,45 +907,57 @@ class CheckList extends BaseModel
         ];
     }
 
-    protected function saveActivities($checklist,$activities){
-        $activities_to_insert = [];
-        $activities_id = [];
-        foreach ($activities as $data_activity) {
-            $activity = CheckListItem::updateOrCreate(
-                ['id' => $data_activity['id']],
-                [
-                    'activity' => $data_activity['activity'],
-                    'active' => 1,
-                    // 'type_id' => $data['type_id'],
-                    'checklist_id' => $checklist->id,
-                    'position' => $data_activity['position'],
-                    'checklist_response_id'=>$data_activity['checklist_response']['id'],
-                    'extra_attributes' => $data_activity['extra_attributes'],
-                ]
-            );
-            $activities_id[] = $activity->id;
-            if(isset($data_activity['custom_options']) && count($data_activity['custom_options'])>0 ){
-                $custom_options = $data_activity['custom_options'];
-                foreach ($custom_options as $option) {
-                    $option = Taxonomy::updateOrCreate(
-                        ['id' => $option['id'],'group' => 'checklist','type'=>'activity_option'],
-                        [
-                            'group' => 'checklist',
-                            'type'  => 'activity_option',
-                            'parent_id' => $activity->id,
-                            'name'=> $option['name']
-                        ]
-                    );
+    protected function saveActivities($checklist,$data){
+        $has_themes = $checklist->isGroupedByArea();
+        if($has_themes){
+            $areas = $data['data'];
+            foreach ($areas as $area) {
+                $tematicas = $area['tematicas'];
+                foreach ($tematicas as $tematica) {
+                    $activities = $tematica['activities'];
+                    dd($activities);
                 }
             }
         }
-        CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
-        $next_step = self::nextStep($checklist);
-        $checklist->load('type:id,code');
-        return [
-            'next_step' => $next_step,
-            'checklist' => $checklist
-        ];
+        dd();
+        // $activities_to_insert = [];
+        // $activities_id = [];
+        // foreach ($activities as $data_activity) {
+        //     $activity = CheckListItem::updateOrCreate(
+        //         ['id' => $data_activity['id']],
+        //         [
+        //             'activity' => $data_activity['activity'],
+        //             'active' => 1,
+        //             // 'type_id' => $data['type_id'],
+        //             'checklist_id' => $checklist->id,
+        //             'position' => $data_activity['position'],
+        //             'checklist_response_id'=>$data_activity['checklist_response']['id'],
+        //             'extra_attributes' => $data_activity['extra_attributes'],
+        //         ]
+        //     );
+        //     $activities_id[] = $activity->id;
+        //     if(isset($data_activity['custom_options']) && count($data_activity['custom_options'])>0 ){
+        //         $custom_options = $data_activity['custom_options'];
+        //         foreach ($custom_options as $option) {
+        //             $option = Taxonomy::updateOrCreate(
+        //                 ['id' => $option['id'],'group' => 'checklist','type'=>'activity_option'],
+        //                 [
+        //                     'group' => 'checklist',
+        //                     'type'  => 'activity_option',
+        //                     'parent_id' => $activity->id,
+        //                     'name'=> $option['name']
+        //                 ]
+        //             );
+        //         }
+        //     }
+        // }
+        // CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
+        // $next_step = self::nextStep($checklist);
+        // $checklist->load('type:id,code');
+        // return [
+        //     'next_step' => $next_step,
+        //     'checklist' => $checklist
+        // ];
     }
 
     protected function getSegments( $_checklist )
@@ -1147,9 +1159,7 @@ class CheckList extends BaseModel
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
             $activities_progress = $checklist_audit?->audit_activities ?? collect();
         }
-        $has_themes = isset($checklist->extra_attributes['gruped_by_areas_and_tematicas'])
-                    ? $checklist->extra_attributes['gruped_by_areas_and_tematicas'] 
-                    : false;
+        $has_themes = $checklist->isGroupedByArea();
 
         $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active')->get(); 
         $_activities = $checklist->activities;
@@ -1207,9 +1217,7 @@ class CheckList extends BaseModel
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=> $activity->checklist_response->code,
                 'system_calification' => $system_calification,
-                'comments' => [
-                    
-                ],
+                'comments' => $progress?->comments ?? [],
                 'photo' => $list_photos,
                 'qualification_response' => $qualification_response,
                 'qualification_id'=> $progress?->qualification_id ?? null,

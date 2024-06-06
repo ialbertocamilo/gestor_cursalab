@@ -69,8 +69,7 @@ class ChecklistController extends Controller
         ]);
     }
     public function saveActivitiesByChecklist(CheckList $checklist,Request $request){
-        $activities = $request->all(); 
-        $data = CheckList::saveActivities($checklist,$activities);
+        $data = CheckList::saveActivities($checklist,$request->all());
         $data['msg'] = 'Actividades creadas correctamente.';
         return $this->success($data);
     }
