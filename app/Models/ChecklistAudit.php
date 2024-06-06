@@ -447,7 +447,7 @@ class ChecklistAudit extends BaseModel
             'date_time' => $dateAuditFormatted
         ];
         $checklist_activity_update['comments'] = isset($checklistActivityAudit['comments']) ? $checklistActivityAudit['comments'] : [];
-        $historicComments['principal'] = count($checklist_activity_update) == 0;
+        $historicComments['principal'] = count($checklist_activity_update['comments']) == 0;
         if (is_array($checklist_activity_update['comments'])) {
             $checklist_activity_update['comments'][] = $historicComments;
         } else {

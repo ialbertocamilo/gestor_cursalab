@@ -1208,6 +1208,7 @@ class CheckList extends BaseModel
             if($activity->checklist_response->code == 'write_option' && $progress?->qualification_id){
                 $qualification_response = Taxonomy::where('id',$progress->qualification_id)->select('name')->first()?->name;
             }
+            $comments = collect($progress?->comments ?? []);
             $activities[]  = [
                 'id'=>$activity->id,
                 'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
@@ -1217,7 +1218,8 @@ class CheckList extends BaseModel
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=> $activity->checklist_response->code,
                 'system_calification' => $system_calification,
-                'comments' => $progress?->comments ?? [],
+                'principal_comment' => $comments->where('principal',true)->first() ?? [],
+                'comments' => $comments?->where('principal',false)->values() ?? [],
                 'photo' => $list_photos,
                 'qualification_response' => $qualification_response,
                 'qualification_id'=> $progress?->qualification_id ?? null,
