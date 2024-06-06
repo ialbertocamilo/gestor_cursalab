@@ -274,10 +274,12 @@ class RestChecklistController extends Controller
     }
     public function verifyPhoto(Request $request){
         // dd($request->upload_image);
+        $isVerified = (bool)rand(0, 1);
         return $this->success([
-            'color'=>'#00E396',
-            'percent' => '96',
-            'label' => 'Excelente',
+            'color' => $isVerified ? '#00E396' : '#FF0000',
+            'percent' => $isVerified ? '96' : '50',
+            'label' => $isVerified ? 'Excelente' : 'Necesita Mejorar',
+            'verified' => $isVerified,
         ]);
     }
 
