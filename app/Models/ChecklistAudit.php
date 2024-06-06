@@ -296,6 +296,18 @@ class ChecklistAudit extends BaseModel
                     'datetime' => $dateAudit
                 ];
             }
+            /*qualification to response type write_option*/
+            if(isset($data['qualification_response']) && is_string($data['qualification_response'])){
+                $qualification_response = Taxonomy::updateOrCreate(
+                    ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
+                    [
+                        'group' => 'checklist',
+                        'type' => 'response_write_user',
+                        "name" => $data['qualification_response'],
+                    ]
+                );
+                $data['qualification_id'] = $qualification_response->id;
+            }
             $activities_reviewved = $activities_reviewved + 1;
             $checklistActivityAuditToCreate[] = [
                 'checklist_audit_id' => $checklist_audit->id,
