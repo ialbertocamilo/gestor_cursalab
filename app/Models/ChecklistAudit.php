@@ -131,11 +131,9 @@ class ChecklistAudit extends BaseModel
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToUpdate,'update');
         $list_photos = [];
-        if($photos && count($photos) > 0){
-            foreach ($photos as $photo) {
-                $photo['url'] = reportsSignedUrl($photo['url']);
-                $list_photos[] = $photo; 
-            }
+        foreach ($photos as $photo) {
+            $photo['url'] = reportsSignedUrl($photo['url']);
+            $list_photos[] = $photo; 
         }
         return [
             'message' => 'Actividad actualizada.',
@@ -198,8 +196,17 @@ class ChecklistAudit extends BaseModel
                         'qualification_id' => $data['qualification_id'],
                         'date_audit' => $dateAudit
                     ];
-                    // if(is_string($data['qualification_id'])){
-
+                    /*qualification to response type write_option*/
+                    // if(is_string($data['qualification_response'])){
+                    //     $qualification_response = Taxonomy::updateOrCreate(
+                    //         ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
+                    //         [
+                    //             'group' => 'checklist',
+                    //             'type' => 'response_write_user',
+                    //             "name" => $data['qualification_response'],
+                    //         ]
+                    //     );
+                    //     $qualification_response = $qualification_response;
                     // }
                     $checklist_activity_update['qualification_id'] = $data['qualification_id'];
                     $checklist_activity_update['historic_qualification'][] = $historicQualification;
