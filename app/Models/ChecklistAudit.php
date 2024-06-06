@@ -189,6 +189,9 @@ class ChecklistAudit extends BaseModel
                         'qualification_id' => $data['qualification_id'],
                         'date_audit' => $dateAudit
                     ];
+                    // if(is_string($data['qualification_id'])){
+
+                    // }
                     $checklist_activity_update['qualification_id'] = $data['qualification_id'];
                     $checklist_activity_update['historic_qualification'][] = $historicQualification;
                     $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
@@ -207,25 +210,27 @@ class ChecklistAudit extends BaseModel
                     }
                     $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
                 break;
-                case 'insert-photo':
-                    if(isset($data['file_photo'])){
-                        $str_random = Str::random(5);
-                        $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
-                        $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
-                        Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
-                        if(is_array($checklistActivityAudit['photo'])){
-                            $checklist_activity_update['photo'][] = [
-                                'url'=>$photo,
-                                'datetime' => $dateAudit
-                            ];
-                        }else{
-                            $checklist_activity_update['photo'] = [];
-                            $checklist_activity_update['photo'][] = [
-                                'url'=>$photo,
-                                'datetime' => $dateAudit
-                            ];
+                case 'photo':
+                    if(isset($data['action']) && isset($data['insert'])){
+                        if(isset($data['file_photo'])){
+                            $str_random = Str::random(5);
+                            $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
+                            $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
+                            Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
+                            if(is_array($checklistActivityAudit['photo'])){
+                                $checklist_activity_update['photo'][] = [
+                                    'url'=>$photo,
+                                    'datetime' => $dateAudit
+                                ];
+                            }else{
+                                $checklist_activity_update['photo'] = [];
+                                $checklist_activity_update['photo'][] = [
+                                    'url'=>$photo,
+                                    'datetime' => $dateAudit
+                                ];
+                            }
+                            $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo'] );
                         }
-                        $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo'] );
                     }
                 break;
                 default:
@@ -281,6 +286,7 @@ class ChecklistAudit extends BaseModel
         $assigned = $checklist_audit->activities_assigned;
         $reviewved = $checklist_audit->activities_reviewved;
         $percent_progress = $checklist_audit->percent_progress;
+        // $photo = '';
     }
 
     protected function listProgress($checklist){
