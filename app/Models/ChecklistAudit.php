@@ -111,6 +111,7 @@ class ChecklistAudit extends BaseModel
         $reviewved = 0;
         $percent_progress = 0;
         $photos = [];
+        $comments = [];
         $qualification_id = null;
         if ($checklist->modality->code === 'qualify_user') {
             // if(isset($data['users_id'])){
@@ -118,7 +119,7 @@ class ChecklistAudit extends BaseModel
                     $this->processAudit(
                         $action_request,$checklist, $data, $user, $modelType, $userId, 
                         $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                        $assigned,$reviewved,$percent_progress,$photos,$qualification_id
+                        $assigned,$reviewved,$percent_progress,$photos,$qualification_id,$comments
                     );
                 }
             // }
@@ -126,7 +127,7 @@ class ChecklistAudit extends BaseModel
             $this->processAudit($action_request,
                 $checklist, $data, $user, $modelType, 
                 $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                $assigned,$reviewved,$percent_progress,$photos,$qualification_id
+                $assigned,$reviewved,$percent_progress,$photos,$qualification_id,$comments
             );
         }
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
@@ -144,7 +145,8 @@ class ChecklistAudit extends BaseModel
             'activities_assigned' => $assigned,
             'activities_reviewved' =>  $reviewved,
             'list_photos' => $list_photos,
-            'qualification_id' => $qualification_id
+            'qualification_id' => $qualification_id,
+            'comments' => $comments
         ];
     }
 
@@ -340,7 +342,7 @@ class ChecklistAudit extends BaseModel
     protected function processAudit(
         $action_request, Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit,
         array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
-        &$assigned, &$reviewved, &$percent_progress, &$photos, &$qualification_id
+        &$assigned, &$reviewved, &$percent_progress, &$photos, &$qualification_id,&$comments
     ): void
     {
         $dateAuditFormatted = $dateAudit->format('Y-m-d H:i:s');
@@ -372,13 +374,13 @@ class ChecklistAudit extends BaseModel
             ];
             switch ($action_request) {
                 case 'qualification':
-                    $this->handleQualification($data, $checklistActivityAudit, $checklist_activity_update, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handleQualification($data, $checklistActivityAudit, $checklist_activity_update, $dateAuditFormatted, $photos, $qualification_id,$comments);
                     break;
                 case 'comments':
-                    $this->handleComments($data, $checklistActivityAudit, $checklist_activity_update, $user, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handleComments($data, $checklistActivityAudit, $checklist_activity_update, $user, $dateAuditFormatted, $photos, $qualification_id,$comments);
                     break;
                 case 'photo':
-                    $this->handlePhoto($data, $checklistActivityAudit, $checklist_activity_update, $checklist, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handlePhoto($data, $checklistActivityAudit, $checklist_activity_update, $checklist, $dateAuditFormatted, $photos, $qualification_id,$comments);
                     break;
             }
     
@@ -401,9 +403,12 @@ class ChecklistAudit extends BaseModel
         $percent_progress = $checklist_audit->percent_progress;
     }
     
-    private function handleQualification(array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
+    private function handleQualification(array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, 
+    &$photos, &$qualification_id,&$comments)
     {
         $photos = $checklistActivityAudit['photo'];
+        $comments = $checklistActivityAudit['comments'];
+
         $historicQualification = [
             'qualification_id' => $data['qualification_id'],
             'date_audit' => $dateAuditFormatted
@@ -427,7 +432,10 @@ class ChecklistAudit extends BaseModel
         $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
     }
     
-    private function handleComments(array $data, array $checklistActivityAudit, array &$checklist_activity_update, User $user, string $dateAuditFormatted, &$photos, &$qualification_id)
+    private function handleComments(
+        array $data, array $checklistActivityAudit, array &$checklist_activity_update, User $user, string $dateAuditFormatted,
+         &$photos, &$qualification_id,&$comments
+    )
     {
         $photos = $checklistActivityAudit['photo'];
         $qualification_id = $checklistActivityAudit['qualification_id'];
@@ -439,19 +447,23 @@ class ChecklistAudit extends BaseModel
             'date_time' => $dateAuditFormatted
         ];
         $checklist_activity_update['comments'] = isset($checklistActivityAudit['comments']) ? $checklistActivityAudit['comments'] : [];
+        $historicComments['principal'] = count($checklist_activity_update) == 0;
         if (is_array($checklist_activity_update['comments'])) {
             $checklist_activity_update['comments'][] = $historicComments;
         } else {
             $checklist_activity_update['comments'] = [];
             $checklist_activity_update['comments'][] = $historicComments;
         }
-    
+        $comments = $checklist_activity_update['comments'];
         $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
     }
     
-    private function handlePhoto(array $data, array $checklistActivityAudit, array &$checklist_activity_update, Checklist $checklist, string $dateAuditFormatted, &$photos, &$qualification_id)
+    private function handlePhoto(array $data, array $checklistActivityAudit, array &$checklist_activity_update, Checklist $checklist, string $dateAuditFormatted,
+     &$photos, &$qualification_id,&$comments)
     {
         $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
+        $comments = $checklistActivityAudit['comments'];
+
         $qualification_id = $checklistActivityAudit['qualification_id'];
     
         if (isset($data['action']) && $data['action'] == 'insert' && isset($data['file_photo'])) {
