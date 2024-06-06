@@ -74,7 +74,7 @@ class ChecklistAudit extends BaseModel
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user);
             $checklist_audit->signature_supervisor = $path_signature;
             $checklist_audit->checklist_finished = true;
-            $audit->finishes_at = now()->format('Y-m-d H:i:s');
+            $checklist_audit->finishes_at = now()->format('Y-m-d H:i:s');
             $checklist_audit->save();
         }else{
             $model_id = $data['user_ids'];
