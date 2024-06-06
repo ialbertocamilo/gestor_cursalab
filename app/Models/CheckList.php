@@ -1174,7 +1174,7 @@ class CheckList extends BaseModel
                                         )
                                         ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
                                         ->get()->map(function($system){
-                                            if($system->emoji){
+                                            if($system->emoji && $system->emoji != 'null'){
                                                 // dd($system->emoji,$system->name);
                                                 $system->name = $system->name.' '.$system->emoji;
                                             }
@@ -1194,6 +1194,10 @@ class CheckList extends BaseModel
                 }
             }
             $theme = $taxonomy_tematicas->where('id',$activity->tematica_id)->first();
+            $qualification_response = '';
+            if($activity->checklist_response->code == 'write_option' && $progress?->qualification_id){
+                $qualification_response = Taxonomy::where('id',$progress->qualification_id)->select('name')->first()?->name;
+            }
             $activities[]  = [
                 'id'=>$activity->id,
                 'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
@@ -1201,12 +1205,13 @@ class CheckList extends BaseModel
                 'can_comment'=> $extra_attributes['comment_activity'],
                 'can_upload_image'=> $extra_attributes['photo_response'],
                 'can_computational_vision' => $extra_attributes['computational_vision'],
-                'type_system_calification'=>$activity->checklist_response->code,
+                'type_system_calification'=> $activity->checklist_response->code,
                 'system_calification' => $system_calification,
                 'comments' => [
                     
                 ],
                 'photo' => $list_photos,
+                'qualification_response' => $qualification_response,
                 'qualification_id'=> $progress?->qualification_id ?? null,
             ];
         }

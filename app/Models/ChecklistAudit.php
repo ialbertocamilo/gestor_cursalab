@@ -198,17 +198,17 @@ class ChecklistAudit extends BaseModel
                         'date_audit' => $dateAudit
                     ];
                     /*qualification to response type write_option*/
-                    // if(is_string($data['qualification_response'])){
-                    //     $qualification_response = Taxonomy::updateOrCreate(
-                    //         ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
-                    //         [
-                    //             'group' => 'checklist',
-                    //             'type' => 'response_write_user',
-                    //             "name" => $data['qualification_response'],
-                    //         ]
-                    //     );
-                    //     $qualification_response = $qualification_response;
-                    // }
+                    if(is_string($data['qualification_response'])){
+                        $qualification_response = Taxonomy::updateOrCreate(
+                            ['id' => $data['qualification_id'],'group'=>'checklist','type' => 'response_write_user'],
+                            [
+                                'group' => 'checklist',
+                                'type' => 'response_write_user',
+                                "name" => $data['qualification_response'],
+                            ]
+                        );
+                        $data['qualification_id'] = $qualification_response->id;
+                    }
                     $checklist_activity_update['qualification_id'] = $data['qualification_id'];
                     $checklist_activity_update['historic_qualification'][] = $historicQualification;
                     $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
