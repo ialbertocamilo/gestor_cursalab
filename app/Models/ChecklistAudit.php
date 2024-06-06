@@ -415,7 +415,7 @@ class ChecklistAudit extends BaseModel
             'date_audit' => $dateAuditFormatted
         ];
     
-        if (is_string($data['qualification_response'])) {
+        if (isset($data['qualification_response']) && is_string($data['qualification_response'])) {
             $qualification_response = Taxonomy::updateOrCreate(
                 ['id' => $data['qualification_id'], 'group' => 'checklist', 'type' => 'response_write_user'],
                 [
