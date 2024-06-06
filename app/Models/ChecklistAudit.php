@@ -229,7 +229,7 @@ class ChecklistAudit extends BaseModel
                                     'datetime' => $dateAudit
                                 ];
                             }
-                            $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo'] );
+                            $checklist_activity_update['photo'] = json_encode($checklistActivityAudit['photo'] );
                         }
                     }
                     if(isset($data['action']) && $data['action'] == 'delete'){
