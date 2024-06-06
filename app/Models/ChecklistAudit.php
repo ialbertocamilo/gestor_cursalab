@@ -517,7 +517,7 @@ class ChecklistAudit extends BaseModel
         }
     
         $activities_reviewved += 1;
-    
+        $qualification_id = isset($data['qualification_id']) ? $data['qualification_id'] : null;
         $checklistActivityAuditToCreate[] = [
             'checklist_audit_id' => $checklist_audit->id,
             'qualification_id' => $data['qualification_id'] ?? null,
