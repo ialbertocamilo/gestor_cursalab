@@ -594,7 +594,7 @@ class ChecklistAudit extends BaseModel
                                 })
                                 ->whereNull('finishes_at')
                                 ->when($with_audit_activities, function($q){
-                                    $q->with('audit_activities:id,checklist_audit_id,checklist_activity_id,qualification_id,photo');
+                                    $q->with('audit_activities:id,checklist_audit_id,checklist_activity_id,qualification_id,photo,comments');
                                 })
                                 ->when($model_id, function($query) use($model_id){
                                     if (is_array($model_id)) {
