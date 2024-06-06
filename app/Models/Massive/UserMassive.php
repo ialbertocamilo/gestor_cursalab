@@ -77,6 +77,10 @@ class UserMassive extends Massive implements ToCollection
 
     private function process_user($users, $headers, $criteria)
     {
+        if ($users['user']['document'] ?? null) {
+            info('Processing user: ' . $users['user']['document']);
+        }
+
         $count_users = count($users);
         $counter = 0;
         foreach ($users as $user) {
