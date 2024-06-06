@@ -4,12 +4,20 @@
             <v-card-title>
                 <DefaultBreadcrumbs :breadcrumbs="breadcrumbs"/>
                 <v-spacer/>
-                <!-- <DefaultModalButton 
-                    label="Tarea"
-                    icon_name="mdi-plus"
-                    @click="openFormModal(modalOptions)"
-                /> -->
-
+                <DefaultButton
+                    rounded
+                    outlined
+                    label="Subida masiva de actividades"
+                    icon="mdi mdi-plus"
+                    @click="openSimpleModal(modalUploadMassiveActivitiesOptions)"
+                />
+                <DefaultModalButton 
+                    rounded
+                    outlined
+                    label="Crear con IA"
+                    @click="openSimpleModal(modalActivitiesIAOptions)"
+                    :disabled="!is_checklist_premium"
+                />
             </v-card-title>
         </v-card>
         <v-card flat class="elevation-0 mb-4">
@@ -47,30 +55,37 @@
                         />
                     </v-col>
                 </v-row>
-                <v-row v-if="gruped_by_areas_and_tematicas">
-                    <v-col cols="12">
-                        <v-row>
-                            <v-col cols="1" class="d-flex align-center">
-                            </v-col>
-                            <v-col cols="5" class="d-flex align-center">
-                                <span class="text_default fw-bold" style="color: #6C757D;">Nombre</span>
-                            </v-col>
-                            <v-col cols="3" class="d-flex align-center justify-content-center">
-                                <span class="text_default fw-bold" style="color: #6C757D;">Contenido</span>
-                            </v-col>
-                            <v-col cols="3" class="d-flex align-center justify-content-center">
-                                <span class="text_default fw-bold" style="color: #6C757D;">Opciones</span>
-                            </v-col>
-                        </v-row>
-                        
-                        <draggable v-model="areas" @start="drag=true"
-                                    @end="drag=false" class="custom-draggable" ghost-class="ghost" @change="changePositionArea(areas, $event)">
+                <div>
+                    <v-row v-if="gruped_by_areas_and_tematicas">
+                        <v-col cols="12">
+                            <v-row>
+                                <v-col cols="1" class="d-flex align-center">
+                                </v-col>
+                                <v-col cols="5" class="d-flex align-center">
+                                    <span class="text_default fw-bold" style="color: #6C757D;">Nombre</span>
+                                </v-col>
+                                <v-col cols="3" class="d-flex align-center justify-content-center">
+                                    <span class="text_default fw-bold" style="color: #6C757D;">Contenido</span>
+                                </v-col>
+                                <v-col cols="3" class="d-flex align-center justify-content-center">
+                                    <span class="text_default fw-bold" style="color: #6C757D;">Opciones</span>
+                                </v-col>
+                            </v-row>
+                            
+                            <draggable 
+                                v-model="areas" 
+                                @start="drag=true"
+                                @end="drag=false" 
+                                class="custom-draggable" 
+                                ghost-class="ghost" 
+                                @change="changePositionArea(areas, $event)"
+                            >
                                 <transition-group type="transition" name="flip-list" tag="div" key="transition-area">
                                     <v-expansion-panels key="expansion-area" v-model="panel" multiple flat>
                                         <v-expansion-panel
                                             v-for="(area,index_area) in areas"
                                             :key="area.id"
-                                          
+                                            
                                         >
                                             <div class="item-draggable areas">
                                                 <v-expansion-panel-header>
@@ -101,14 +116,14 @@
                                                                     <span class="text_default">Editar</span>
                                                                 </div>
                                                             </div>
-                                                            <div>
+                                                            <!-- <div>
                                                                 <div class="btn_action"  :class="{'disabled': !area.active}" @click.stop="verifyStep">
                                                                     <v-icon class="ml-0 icon_size">
                                                                         {{area.active ? 'fas fa-circle' : 'far fa-circle'}}
                                                                     </v-icon>
                                                                     <span class="text_default">{{area.active ? 'Activo' : 'Inactivo'}}</span>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                             <div>
                                                                 <div class="btn_action" :class="{'disabled': !area.active}" @click.stop="verifyStep">
                                                                     <v-icon class="ml-0 icon_size">
@@ -166,7 +181,7 @@
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div>
-                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}">
+                                                                                                    <div class="btn_action" :class="{'disabled': !tematica.active}" @click.stop="openDeleteModal(tematica,'tematica')">
                                                                                                         <v-icon class="ml-0 icon_size">
                                                                                                             mdi mdi-trash-can
                                                                                                         </v-icon>
@@ -403,226 +418,260 @@
                                         </v-expansion-panel>
                                     </v-expansion-panels>
                                 </transition-group>
-                        </draggable>
-                    </v-col>
-                </v-row>
-                <v-row v-else>
-                    <v-col cols="12">
-                        <draggable v-model="activities" @start="drag_only_activities=true"
-                                @end="drag_only_activities=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(activities, $event)">
-                            <transition-group type="transition" name="flip-list" tag="div">
-                                <div v-for="(activity,index_activity) in activities"
-                                    :key="'act_only'+activity.id">
-                                    <div class="item-draggable areas areas_tematicas">
-                                        <v-row class="elevation-2 my-2">
-                                            <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
-                                                <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                                </v-icon>
-                                            </v-col>
-                                            <v-row class="col-11 px-0 mx-0" >
-                                                <v-col cols="12" class="px-0">
-                                                    <DefaultRichText
-                                                        clearable
-                                                        :height="150"
-                                                        v-model="activity.activity"
-                                                        label="Actividad de checklist"
-                                                        :ignoreHTMLinLengthCalculation="true"
-                                                        :key="`${activity.id}-editor`"
-                                                        :ref="`descriptionRichText1-${activity.id}`"
-                                                        customSelectorImage
-                                                    />
+                            </draggable>
+                        </v-col>
+                        <v-col cols="12">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div id="tooltip-target-1" class="btn_tooltip d-inline-flex" 
+                                    @click="openFormModal(modalAreaOptions,null,null,'Gestión de áreas')"
+                                >
+                                    <v-icon class="icon_size" small :color="!(areas.length < max_areas) ? '#BDBEC0' : '#5458EA'" style="font-size: 1.25rem !important;">
+                                        mdi-plus-circle
+                                    </v-icon>
+                                </div>
+                                <b-tooltip target="tooltip-target-1" triggers="hover" placement="bottom">
+                                    Agregar una nueva área.
+                                </b-tooltip>
+                            </div>
+                        </v-col>
+                    </v-row>
+                    <v-row v-else>
+                        <v-col cols="12">
+                            <draggable v-model="activities" @start="drag_only_activities=true"
+                                    @end="drag_only_activities=false" class="custom-draggable" ghost-class="ghost" @change="changePositionActivity(activities, $event)">
+                                <transition-group type="transition" name="flip-list" tag="div">
+                                    <div v-for="(activity,index_activity) in activities"
+                                        :key="'act_only'+activity.id">
+                                        <div class="item-draggable areas areas_tematicas">
+                                            <v-row class="elevation-2 my-2">
+                                                <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
+                                                    <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                                    </v-icon>
                                                 </v-col>
-                                                <v-expansion-panels flat class="custom-expansion-block" v-model="activity.panel">
-                                                    <v-expansion-panel >
-                                                        <v-expansion-panel-header flat>
-                                                            <span style="color:#5458EA" class="d-flex">
-                                                                <i class="pr-1 mdi mdi-cog"></i>
-                                                                Configuración avanzada
-                                                            </span>
-                                                            <div class="d-flex">
-                                                                <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
-                                                                    <i class="pr-1 mdi mdi-file-document-check"></i>
-                                                                    Tipo de repuesta: {{ activity.checklist_response.name }}
-                                                                </v-chip>
-                                                                <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
-                                                                    <i class="pr-1 mdi mdi-file-chart"></i>
-                                                                    Será evaluable
-                                                                </v-chip>
-                                                                <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                                                    <i class="pr-1 mdi mdi-image"></i>
-                                                                    Se agregará foto
-                                                                </v-chip>
-                                                                <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
-                                                                    <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
-                                                                    <i class="pr-1 mdi mdi-comment-outline"></i>
-                                                                    Se agregará comentario
-                                                                </v-chip>
-                                                            </div>
-                                                            <v-spacer></v-spacer>
-                                                            <div @click.stop="openDeleteModal(activity,'activity')">
-                                                                <DefaultButton
-                                                                    icon="mdi-delete"
-                                                                    isIconButton
-                                                                />
-                                                            </div>
-                                                            <div @click.stop="saveActivity(activity,index_activity)" :class="{'disabled': !activity.activity}">
-                                                                <DefaultButton
-                                                                    icon="mdi-content-save"
-                                                                    isIconButton
-                                                                    :disabled="!activity.activity"
-                                                                />
-                                                            </div>
-                                                        </v-expansion-panel-header>
-                                                        <v-expansion-panel-content class="row">
-                                                            <v-row>
-                                                                <v-col cols="12" class="d-flex align-items-center">
-                                                                    <span>
-                                                                        General / tipo de respuesta
-                                                                    </span>
-                                                                    <v-divider></v-divider>
-                                                                </v-col>
-                                                                <v-col cols="4">
-                                                                    <DefaultSelect 
-                                                                        :items="checklist_type_response" 
-                                                                        dense 
-                                                                        item-text="name"
-                                                                        show-required 
-                                                                        v-model="activity.checklist_response"
-                                                                        return-object
-                                                                        label="Tipo de respuesta"
+                                                <v-row class="col-11 px-0 mx-0" >
+                                                    <v-col cols="12" class="px-0">
+                                                        <DefaultRichText
+                                                            clearable
+                                                            :height="150"
+                                                            v-model="activity.activity"
+                                                            label="Actividad de checklist"
+                                                            :ignoreHTMLinLengthCalculation="true"
+                                                            :key="`${activity.id}-editor`"
+                                                            :ref="`descriptionRichText1-${activity.id}`"
+                                                            customSelectorImage
+                                                        />
+                                                    </v-col>
+                                                    <v-expansion-panels flat class="custom-expansion-block" v-model="activity.panel">
+                                                        <v-expansion-panel >
+                                                            <v-expansion-panel-header flat>
+                                                                <span style="color:#5458EA" class="d-flex">
+                                                                    <i class="pr-1 mdi mdi-cog"></i>
+                                                                    Configuración avanzada
+                                                                </span>
+                                                                <div class="d-flex">
+                                                                    <v-chip small v-if="activity.checklist_response" color="#9A98F7" class="mx-1" style="max-width: min-content;color: white;">
+                                                                        <i class="pr-1 mdi mdi-file-document-check"></i>
+                                                                        Tipo de repuesta: {{ activity.checklist_response.name }}
+                                                                    </v-chip>
+                                                                    <v-chip small v-if="activity.extra_attributes.is_evaluable && activity.checklist_response.code == 'scale_evaluation'" color="#E57A9B" class="mx-1" style="max-width: min-content;color: white;">
+                                                                        <i class="pr-1 mdi mdi-file-chart"></i>
+                                                                        Será evaluable
+                                                                    </v-chip>
+                                                                    <v-chip small v-if="activity.extra_attributes.photo_response" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                                        <i class="pr-1 mdi mdi-image"></i>
+                                                                        Se agregará foto
+                                                                    </v-chip>
+                                                                    <v-chip small v-if="activity.extra_attributes.comment_activity" color="#67CB91" class="mx-1" style="max-width: min-content;color: white;">
+                                                                        <!-- <v-icon>{{ mdi-message-image  }}</v-icon>  -->
+                                                                        <i class="pr-1 mdi mdi-comment-outline"></i>
+                                                                        Se agregará comentario
+                                                                    </v-chip>
+                                                                </div>
+                                                                <v-spacer></v-spacer>
+                                                                <div @click.stop="openDeleteModal(activity,'activity')">
+                                                                    <DefaultButton
+                                                                        icon="mdi-delete"
+                                                                        isIconButton
                                                                     />
-                                                                </v-col>
-                                                                <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
-                                                                    <v-checkbox
-                                                                        class="my-0 mr-2 checkbox-label"
-                                                                        label="Evaluable"
-                                                                        color="primary"
-                                                                        v-model="activity.extra_attributes.is_evaluable"
-                                                                        hide-details="false"
+                                                                </div>
+                                                                <div @click.stop="saveActivity(activity,index_activity)" :class="{'disabled': !activity.activity}">
+                                                                    <DefaultButton
+                                                                        icon="mdi-content-save"
+                                                                        isIconButton
+                                                                        :disabled="!activity.activity"
                                                                     />
-                                                                </v-col>
-                                                                <v-col cols="3" class="d-flex align-items-center">
-                                                                    <v-checkbox
-                                                                        class="my-0 mr-2 checkbox-label"
-                                                                        label="Se usará foto como respuesta"
-                                                                        color="primary"
-                                                                        v-model="activity.extra_attributes.photo_response"
-                                                                        hide-details="false"
-                                                                    />
-                                                                </v-col>
-                                                                <v-col cols="3" class="d-flex align-items-center">
-                                                                    <v-checkbox
-                                                                        class="my-0 mr-2 checkbox-label"
-                                                                        label="Actividad acepta comentario"
-                                                                        color="primary"
-                                                                        v-model="activity.extra_attributes.comment_activity"
-                                                                        hide-details="false"
-                                                                    />
-                                                                </v-col>
-                                                                <v-col cols="12" v-if="activity.checklist_response.code == 'custom_option'">
-                                                                    Respuestas personalizadas:
-                                                                    <v-divider></v-divider>
-                                                                    <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
+                                                                </div>
+                                                            </v-expansion-panel-header>
+                                                            <v-expansion-panel-content class="row">
+                                                                <v-row>
+                                                                    <v-col cols="12" class="d-flex align-items-center">
+                                                                        <span>
+                                                                            General / tipo de respuesta
+                                                                        </span>
+                                                                        <v-divider></v-divider>
+                                                                    </v-col>
+                                                                    <v-col cols="4">
+                                                                        <DefaultSelect 
+                                                                            :items="checklist_type_response" 
+                                                                            dense 
+                                                                            item-text="name"
+                                                                            show-required 
+                                                                            v-model="activity.checklist_response"
+                                                                            return-object
+                                                                            label="Tipo de respuesta"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col cols="2" class="d-flex align-items-center" v-if="activity.checklist_response.code == 'scale_evaluation'">
+                                                                        <v-checkbox
+                                                                            class="my-0 mr-2 checkbox-label"
+                                                                            label="Evaluable"
+                                                                            color="primary"
+                                                                            v-model="activity.extra_attributes.is_evaluable"
+                                                                            hide-details="false"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col cols="3" class="d-flex align-items-center">
+                                                                        <v-checkbox
+                                                                            class="my-0 mr-2 checkbox-label"
+                                                                            label="Se usará foto como respuesta"
+                                                                            color="primary"
+                                                                            v-model="activity.extra_attributes.photo_response"
+                                                                            hide-details="false"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col cols="3" class="d-flex align-items-center">
+                                                                        <v-checkbox
+                                                                            class="my-0 mr-2 checkbox-label"
+                                                                            label="Actividad acepta comentario"
+                                                                            color="primary"
+                                                                            v-model="activity.extra_attributes.comment_activity"
+                                                                            hide-details="false"
+                                                                        />
+                                                                    </v-col>
+                                                                    <v-col cols="12" v-if="activity.checklist_response.code == 'custom_option'">
+                                                                        Respuestas personalizadas:
+                                                                        <v-divider></v-divider>
+                                                                        <div v-for="(option,index_option) in activity.custom_options" class="col col-12 d-flex" :key="index_option">
+                                                                            <DefaultInput
+                                                                                clearable
+                                                                                v-model="option.name"
+                                                                                :label="`Opción ${index_option+1}`"
+                                                                                dense
+                                                                            />
+                                                                            <DefaultButton
+                                                                                icon="mdi-delete"
+                                                                                isIconButton
+                                                                                @click="deleteCustomOption(null,null,index_activity,index_option)"
+                                                                            />
+                                                                        </div>
+                                                                        <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(null,null,index_activity)">Agregar una respuesta personalizada +</span>
+                                                                    </v-col>
+                                                                    <v-col cols="12" class="d-flex align-items-center">
+                                                                        <span>
+                                                                            Inteligencia artificial
+                                                                        </span>
+                                                                        <v-divider></v-divider>
+                                                                    </v-col>
+                                                                    <v-col cols="4" class="d-flex align-items-center">
+                                                                        <v-checkbox
+                                                                            class="my-0 mr-2 checkbox-label"
+                                                                            label="Aplicar visión computacional"
+                                                                            color="primary"
+                                                                            v-model="activity.extra_attributes.computational_vision"
+                                                                            :disabled="!is_checklist_premium"
+                                                                            hide-details="false"
+                                                                        />
+                                                                        <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
+                                                                                <span class="d-flex beta_upgrade">
+                                                                                    <img src="/img/premiun.svg"> Upgrade
+                                                                                </span>
+                                                                            </div>
+                                                                    </v-col>
+                                                                    <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
+                                                                        <DefaultSelect 
+                                                                            v-model="activity.extra_attributes.type_computational_vision"
+                                                                            :items="types_computational_vision" 
+                                                                            dense 
+                                                                            item-text="name"
+                                                                            item-value="id"
+                                                                            show-required 
+                                                                            label="Selecciona una opción"
+                                                                            :openUp="true"
+                                                                        />  
+                                                                    </v-col>
+                                                                    <v-col cols="4"
+                                                                        v-if="activity.extra_attributes.type_computational_vision && activity.extra_attributes.type_computational_vision != 'simil'"
+                                                                    >
                                                                         <DefaultInput
                                                                             clearable
-                                                                            v-model="option.name"
-                                                                            :label="`Opción ${index_option+1}`"
+                                                                            v-model="activity.extra_attributes.type_computational_vision_value"
+                                                                            :label="`${activity.extra_attributes.type_computational_vision == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
                                                                             dense
                                                                         />
-                                                                        <DefaultButton
-                                                                            icon="mdi-delete"
-                                                                            isIconButton
-                                                                            @click="deleteCustomOption(null,null,index_activity,index_option)"
-                                                                        />
-                                                                    </div>
-                                                                    <span style="color: #5757EA;cursor: pointer;" @click="addCustomOption(null,null,index_activity)">Agregar una respuesta personalizada +</span>
-                                                                </v-col>
-                                                                <v-col cols="12" class="d-flex align-items-center">
-                                                                    <span>
-                                                                        Inteligencia artificial
-                                                                    </span>
-                                                                    <v-divider></v-divider>
-                                                                </v-col>
-                                                                <v-col cols="4" class="d-flex align-items-center">
-                                                                    <v-checkbox
-                                                                        class="my-0 mr-2 checkbox-label"
-                                                                        label="Aplicar visión computacional"
-                                                                        color="primary"
-                                                                        v-model="activity.extra_attributes.computational_vision"
-                                                                        :disabled="!is_checklist_premium"
-                                                                        hide-details="false"
-                                                                    />
-                                                                    <div v-if="!is_checklist_premium" class="ml-1 tag_beta_upgrade d-flex align-items-center">
-                                                                            <span class="d-flex beta_upgrade">
-                                                                                <img src="/img/premiun.svg"> Upgrade
-                                                                            </span>
-                                                                        </div>
-                                                                </v-col>
-                                                                <v-col cols="4" v-if="activity.extra_attributes.computational_vision ">
-                                                                    <DefaultSelect 
-                                                                        v-model="activity.extra_attributes.type_computational_vision"
-                                                                        :items="types_computational_vision" 
-                                                                        dense 
-                                                                        item-text="name"
-                                                                        item-value="id"
-                                                                        show-required 
-                                                                        label="Selecciona una opción"
-                                                                        :openUp="true"
-                                                                    />  
-                                                                </v-col>
-                                                                <v-col cols="4"
-                                                                    v-if="activity.extra_attributes.type_computational_vision && activity.extra_attributes.type_computational_vision != 'simil'"
-                                                                >
-                                                                    <DefaultInput
-                                                                        clearable
-                                                                        v-model="activity.extra_attributes.type_computational_vision_value"
-                                                                        :label="`${activity.extra_attributes.type_computational_vision == 'counter' ? 'Indica la cantidad a verificar' : 'Indicar el texto a verificar'}`"
-                                                                        dense
-                                                                    />
-                                                                </v-col>
-                                                            </v-row>
-                                                        </v-expansion-panel-content>
-                                                    </v-expansion-panel>
-                                                </v-expansion-panels>
+                                                                    </v-col>
+                                                                </v-row>
+                                                            </v-expansion-panel-content>
+                                                        </v-expansion-panel>
+                                                    </v-expansion-panels>
+                                                </v-row>
                                             </v-row>
-                                        </v-row>
-                                        
+                                            
+                                        </div>
                                     </div>
-                                </div>
-                            </transition-group>
-                        </draggable>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-row class="elevation-2 my-2">
-                            <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
-                                <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
-                                </v-icon>
-                            </v-col>
-                            <v-col cols="11">
-                                <div class="btn_add_activity">
-                                    <span class="text_default c-default" @click="addActivity(null,null,null,null)">+ Añadir actividad</span>
-                                </div>
-                            </v-col>
-                        </v-row>
-                    </v-col>
-                </v-row>
-                <v-row v-if="gruped_by_areas_and_tematicas">
-                    <v-col cols="12">
-                        <div class="d-flex align-items-center justify-content-center">
-                            <div id="tooltip-target-1" class="btn_tooltip d-inline-flex" 
-                                @click="openFormModal(modalAreaOptions,null,null,'Gestión de áreas')"
-                            >
-                                <v-icon class="icon_size" small :color="!(areas.length < max_areas) ? '#BDBEC0' : '#5458EA'" style="font-size: 1.25rem !important;">
-                                    mdi-plus-circle
-                                </v-icon>
-                            </div>
-                            <b-tooltip target="tooltip-target-1" triggers="hover" placement="bottom">
-                                Agregar una nueva área.
-                            </b-tooltip>
-                        </div>
-                    </v-col>
-                </v-row>
+                                </transition-group>
+                            </draggable>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-row class="elevation-2 my-2">
+                                <v-col cols="1" class="d-flex align-center justify-content-center " style="max-width: 3rem;">
+                                    <v-icon class="ml-0 mr-2 icon_size">mdi-drag-vertical
+                                    </v-icon>
+                                </v-col>
+                                <v-col cols="11">
+                                    <div class="btn_add_activity">
+                                        <span class="text_default c-default" @click="addActivity(null,null,null,null)">+ Añadir actividad</span>
+                                    </div>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </div>
             </v-card-text>
+            <v-card-actions class="d-flex justify-space-between">
+                <div v-if="gruped_by_areas_and_tematicas" class="d-flex">
+                    <div class="d-flex align-items-center">
+                        <DefaultInfoTooltip
+                            text="Conjunto donde se ubican las temáticas de tu checklist"
+                            top
+                            small
+                        /> 
+                        <span class="mr-2 ml-1">Áreas </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <DefaultInfoTooltip
+                            text="Conjunto donde se ubican las temáticas de tu checklist"
+                            top
+                            small
+                        /> 
+                        <span class="mr-2 ml-1">Temáticas</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <DefaultInfoTooltip
+                            text="Conjunto donde se ubican las temáticas de tu checklist"
+                            top
+                            small
+                        /> 
+                        <span class="mr-2 ml-1">Actividades</span>
+                    </div>
+                </div>
+                <!-- <DefaultModalButton 
+                    rounded
+                    outlined
+                    label="Guardar Checklist"
+                    icon_name=""
+                    @click="saveActivities()"
+                /> -->
+            </v-card-actions>
             <DefaultDeleteModal
                 :options="modalDeleteOptions"
                 :ref="modalDeleteOptions.ref"
@@ -669,6 +718,26 @@
                 @onClose="closeSimpleModal(modalChecklist)"
             />
         </v-card>
+        <ModalUploadMassiveActivities 
+            :options="modalUploadMassiveActivitiesOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalUploadMassiveActivitiesOptions.ref"
+            @onCancel="closeSimpleModal(modalUploadMassiveActivitiesOptions)"
+            @onConfirm="closeSimpleModal(modalUploadMassiveActivitiesOptions);loadData()"
+            :template_url="gruped_by_areas_and_tematicas ? '/templates/Plantilla_Checklist_Agrupados.xlsx' : '/templates/Plantilla Checklist.xlsx'"
+        />
+        <ActivitiesIAModal 
+            :options="modalActivitiesIAOptions"
+            width="55vw"
+            model_type="App\Models\Checklist"
+            :model_id="null"
+            :ref="modalActivitiesIAOptions.ref"
+            @onCancel="closeSimpleModal(modalActivitiesIAOptions)"
+            @onConfirm="closeSimpleModal(modalActivitiesIAOptions);loadData()"
+        />
+        <!-- @activities="addActivities" -->
     </section>
 </template>
 <script>
@@ -680,9 +749,13 @@ import ModalAddActivity from "./Activities/ModalAddActivity";
 
 import DefaultRichText from "../../components/globals/DefaultRichText";
 import ModalCreateChecklist from "../../components/Entrenamiento/Checklist/ModalCreateChecklist";
+import ModalUploadMassiveActivities from "./ModalUploadMassiveActivities";
+import ActivitiesIAModal from "./ActivitiesIAModal";
 
 export default {
-    components: {DefaultDeleteModal,ModalFormArea,DefaultRichText,ModalCreateChecklist,ModalAddActivity,ModalFormTematica,ModalEditArea},
+    components: {DefaultDeleteModal,ModalUploadMassiveActivities,ModalFormArea,
+        DefaultRichText,ModalCreateChecklist,ModalAddActivity,
+        ModalFormTematica,ModalEditArea,ActivitiesIAModal},
     data() {
         return {
             panel: [],
@@ -840,7 +913,25 @@ export default {
                 {id:'simil',name:'Porcentaje de similitud'},
                 {id:'text',name:'Verificar texto'},
                 {id:'counter',name:'Contador de objetos'},
-            ]
+            ],
+            modalUploadMassiveActivitiesOptions:{
+                ref: 'UploadMassiveActivities',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Confirmar",
+                resource: "checklist",
+                title:'Importar Actividades'
+            },
+            modalActivitiesIAOptions:{
+                ref: 'ActvitiesIAFormModal',
+                open: false,
+                persistent: true,
+                base_endpoint: "/entrenamiento/checklist/v2",
+                confirmLabel: "Continuar",
+                resource: "checklist",
+                title:'Selecciona los cursos para conseguir información'
+            },
         }
     },
    async mounted() {
@@ -869,6 +960,7 @@ export default {
             let vue = this;
             const checklist_id = window.location.pathname.split('/')[4];
             vue.checklist_id = checklist_id;
+            vue.modalUploadMassiveActivitiesOptions.base_endpoint = `/entrenamiento/checklist/v2/${checklist_id}`;
         },
         async loadData(){
             let vue = this;
@@ -989,6 +1081,11 @@ export default {
                     }
                     vue.openFormModal(vue.modalDeleteOptions,resource,null,'Eliminar Actividad');
                 break;
+                case 'tematica':
+                    vue.modalDeleteOptions.base_endpoint = `/entrenamiento/checklist/v2/${vue.checklist_id}/tematica`;
+                    vue.modalDeleteOptions.type = type;
+                    vue.openFormModal(vue.modalDeleteOptions,resource,null,'Eliminar temática');
+                break;
                 default:
                     break;
             }
@@ -1001,16 +1098,19 @@ export default {
                         const index_area = vue.areas.findIndex((a) => a.id == resource.area_id);
                         const index_tematica = vue.areas[index_area].tematicas.findIndex((t) => t.id == resource.tematica_id);
                         const index_activity =  vue.areas[index_area].tematicas[index_tematica].activities.findIndex((ac) => ac.id == resource.id);
-                        console.log(index_area,'index_area');
-                        console.log(index_tematica,'index_tematica');
-                        console.log(index_activity,'index_activity');
                         vue.areas[index_area].tematicas[index_tematica].activities.splice(index_activity,1);
                     }else{
                         const index_activity =  vue.activities.findIndex(ac => ac.id == resource.id);
-
                         vue.activities.splice(index_activity,1);
                     }
                     break;
+                case 'tematica':
+                    if(vue.gruped_by_areas_and_tematicas){
+                        const index_area = vue.areas.findIndex((a) => a.id == resource.parent_id);
+                        const index_tematica = vue.areas[index_area].tematicas.findIndex((t) => t.id == resource.id);
+                        vue.areas[index_area].tematicas.splice(index_tematica,1);
+                    }
+                break;
                 default:
                     break;
             }
@@ -1043,6 +1143,9 @@ export default {
                 // vue.loadData();
                 vue.showAlert('Se actualizó la posición correctamente.','success');
             })
+        },
+        saveActivities(){
+
         }
     }
 }
@@ -1213,5 +1316,9 @@ i.icon_size_drag {
   display: flex;
   overflow-x: auto;
   scrollbar-width: thin; /* Para navegadores que soportan esta propiedad */
+}
+.sticky-container{
+    position: sticky;
+    top: 10px;
 }
 </style>

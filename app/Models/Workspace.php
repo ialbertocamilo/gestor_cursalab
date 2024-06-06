@@ -47,7 +47,8 @@ class Workspace extends BaseModel
         'registro_capacitacion',
         'checklist_configuration',
         'course_configuration',
-        'benefits_configuration'
+        'benefits_configuration',
+        'segmentation_config'
     ];
 
     const CUSTOM_PIVOT_FIELDS = [
@@ -135,6 +136,17 @@ class Workspace extends BaseModel
     {
         return $value ? json_decode($value) : json_decode('{"company":{}}');
     }
+
+    public function setSegmentationConfigAttribute($value)
+    {
+        $this->attributes['segmentation_config'] = json_encode($value);
+    }
+
+    public function getSegmentationConfigAttribute($value)
+    {
+        return $value ? json_decode($value) : new \stdClass();
+    }
+
     public function getChecklistConfigurationAttribute($value){
         $evaluation_types = Taxonomy::getSelectData(
             group:'checklist',

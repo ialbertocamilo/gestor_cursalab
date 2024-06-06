@@ -8,7 +8,7 @@ use App\Http\Requests\{ LoginAppRequest, QuizzAppRequest,
 use App\Mail\EmailTemplate;
 use App\Models\Error;
 use App\Models\Workspace;
-use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente, Process, Taxonomy};
+use App\Models\{Ticket, Usuario, User, WorkspaceFunctionality, Ambiente, Internship, Process, Taxonomy};
 use Exception;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Auth;
@@ -265,7 +265,7 @@ class AuthController extends Controller
                 ->where('id', $workspace->parent_id)
                 ->first()
             : null;
-        
+
         //CUSTOM DESIGN BY WORKSPACE
         $custom_ambiente = Ambiente::getCustomAmbienteByWorkspace($workspace->parent_id);
         if ($workspace_data) {
@@ -294,6 +294,7 @@ class AuthController extends Controller
         }
 
         $criterios = $user->getProfileCriteria();
+        $is_mentor_onboarding = Internship::getPasantiasAsignadas($user->id);
 
         $user_data = [
             "id" => $user->id,
@@ -325,6 +326,7 @@ class AuthController extends Controller
             'criterios' => $criterios,
             'supervisor_induccion' => $supervisor_induccion,
             'user_induccion_aprendizaje' => $user_induccion_aprendizaje,
+            'is_mentor_onboarding' => $is_mentor_onboarding,
             'processes' => $processes,
             'onboarding' => $onboarding
         ];
@@ -383,9 +385,15 @@ class AuthController extends Controller
                 $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
                 $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
                 $array_full_app_side_menu = Workspace::getFullAppMenu('side_menu', $array_app_side_menu, $user);
-                
+
                 $array_app_side_menu[] = 'ind_induccion';
                 $array_full_app_side_menu['ind_induccion'] = true;
+
+                if($is_mentor_onboarding)
+                {
+                    $array_app_side_menu[] = 'is_mentor_onboarding';
+                    $array_full_app_side_menu['is_mentor_onboarding'] = true;
+                }
 
                 $config_data->app_side_menu = $array_app_side_menu;
                 $config_data->full_app_side_menu = $array_full_app_side_menu;
@@ -414,10 +422,19 @@ class AuthController extends Controller
                 ];
             }
             else {
-                $config_data->app_side_menu = $config_data->side_menu->pluck('code')->toArray();
+                $array_app_side_menu = $config_data->side_menu->pluck('code')->toArray();
                 $config_data->app_main_menu = $config_data->main_menu->pluck('code')->toArray();
                 $config_data->full_app_main_menu = Workspace::getFullAppMenu('main_menu', $config_data->app_main_menu, $user);
-                $config_data->full_app_side_menu = Workspace::getFullAppMenu('side_menu', $config_data->app_side_menu, $user);
+                $array_full_app_side_menu = Workspace::getFullAppMenu('side_menu', $array_app_side_menu, $user);
+
+                if($is_mentor_onboarding)
+                {
+                    $array_app_side_menu[] = 'is_mentor_onboarding';
+                    $array_full_app_side_menu['is_mentor_onboarding'] = true;
+                }
+
+                $config_data->app_side_menu = $array_app_side_menu;
+                $config_data->full_app_side_menu = $array_full_app_side_menu;
             }
         }
         $config_data->filters = config('data.filters');

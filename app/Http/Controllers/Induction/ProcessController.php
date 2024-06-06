@@ -48,7 +48,7 @@ class ProcessController extends Controller
         ];
         return $this->success($response);
     }
-    
+
     public function search(Request $request)
     {
         $workspace = get_current_workspace();
@@ -538,7 +538,7 @@ class ProcessController extends Controller
     }
 
     // Duplicar procesos
-    
+
 
     public function duplicate(Request $request)
     {
@@ -628,6 +628,7 @@ class ProcessController extends Controller
                 'description' => $process->description,
                 'block_stages' => $process->block_stages,
                 'migrate_users' => $process->migrate_users,
+                'corporate_process' => $process->corporate_process,
                 'alert_user_deleted' => $process->alert_user_deleted,
                 'message_user_deleted' => $process->message_user_deleted,
                 'count_absences' => $process->count_absences,
@@ -665,7 +666,7 @@ class ProcessController extends Controller
             }
             $new_process->subworkspaces()->sync($process->subworkspaces ?? []);
         }
-        
+
         //instructions
         if($process->instructions)
         {
@@ -719,7 +720,7 @@ class ProcessController extends Controller
                         }
                     }
                 }
-                    
+
                 $new_activity = Activity::create([
                     'stage_id' => $new_stage->id,
                     'title' => $activity->title,
@@ -734,9 +735,9 @@ class ProcessController extends Controller
                     'activity_requirement_id' => null,
                     'percentage_ev' => $activity->percentage_ev
                 ]);
-                
+
             }
         }
-        
+
     }
 }

@@ -433,10 +433,11 @@
         <ModalSelectActivity
             :ref="modalSelectActivity.ref"
             v-model="modalSelectActivity.open"
-            width="868px"
+            :width=modalSelectActivity.width
             :process_id="modalSelectActivity.process_id"
             :stage_id="modalSelectActivity.stage_id"
             :school_id="modalSelectActivity.school_id"
+            :show_pasantia="modalSelectActivity.show_pasantia"
             @onCancel="closeFormModal(modalSelectActivity)"
             @selectActivityModal="selectActivityModal"
         />
@@ -471,6 +472,13 @@
             @onConfirm="saveEditStage(false)"
             :options="modalActivityChecklist"
         />
+        <ModalActivityPasantia
+            :ref="modalActivityPasantia.ref"
+            :width="'868px'"
+            @onCancel="closeFormModal(modalActivityPasantia)"
+            @onConfirm="saveEditStage(false)"
+            :options="modalActivityPasantia"
+        />
         <ModalActivityEncuestas
             :ref="modalActivityEncuestas.ref"
             :width="'868px'"
@@ -504,6 +512,7 @@ import ModalEditStage from "../../components/Induction/Stages/ModalEditStage";
 import ModalActivityChecklist from "../../components/Induction/Stages/ModalActivityChecklist";
 import ModalActivityEncuestas from "../../components/Induction/Stages/ModalActivityEncuestas";
 import ModalActivityEvaluaciones from "../../components/Induction/Stages/ModalActivityEvaluaciones";
+import ModalActivityPasantia from "../../components/Induction/Stages/ModalActivityPasantia";
 import ModalQualificationStage from "../../components/Induction/Stages/ModalQualificationStage";
 
 export default {
@@ -520,6 +529,7 @@ export default {
     ModalActivityChecklist,
     ModalActivityEncuestas,
     ModalActivityEvaluaciones,
+    ModalActivityPasantia,
     ModalQualificationStage
 },
     mounted() {
@@ -534,6 +544,10 @@ export default {
         process_name: {
             type: String,
             required: true
+        },
+        show_pasantia: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -614,6 +628,16 @@ export default {
                 open: false,
                 base_endpoint: '/procesos',
                 title_modal: 'Crear encuestas',
+                confirmLabel: 'Continuar',
+                model_id: 0,
+                persistent: true,
+            },
+
+            modalActivityPasantia: {
+                ref: 'ModalActivityPasantia',
+                open: false,
+                base_endpoint: '/procesos',
+                title_modal: 'Solicitud de reunión',
                 confirmLabel: 'Continuar',
                 model_id: 0,
                 persistent: true,
@@ -1008,6 +1032,10 @@ export default {
                         name = 'Sesión en vivo';
                         name_icon = 'mdi mdi-video';
                         break;
+                    case 'pasantia':
+                        name = 'Solicitud de reunión';
+                        name_icon = 'mdi mdi-calendar-multiple-check';
+                        break;
                     default:
                         name = 'Pendiente';
                         name_icon = '';
@@ -1038,6 +1066,8 @@ export default {
                 vue.modalSelectActivity.process_id = vue.process_id
                 vue.modalSelectActivity.stage_id = stage_id
                 vue.modalSelectActivity.school_id = school_id
+                vue.modalSelectActivity.show_pasantia = this.show_pasantia
+                vue.modalSelectActivity.width= this.show_pasantia ? '1100px' : '868px'
 
                 vue.openFormModal(this.modalSelectActivity)
             }
@@ -1172,6 +1202,14 @@ export default {
                     vue.modalActivityEvaluaciones.etapa_text = 'etapa_text'
 
                     vue.openFormModal(vue.modalActivityEvaluaciones, activity)
+                }
+                else if(activity.type.code == 'pasantia')
+                {
+                    vue.modalActivityPasantia.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage.id}/activity/pasantia`
+                    vue.modalActivityPasantia.model_id = stage.id
+                    vue.modalActivityPasantia.school_id = stage.school_id
+
+                    vue.openFormModal(vue.modalActivityPasantia, activity)
                 }
             }
         },
@@ -1431,6 +1469,15 @@ export default {
 
                 vue.openFormModal(this.modalActivityEvaluaciones)
                 // vue.modalCreateProcess.open = true
+                vue.modalSelectActivity.open = false
+            }
+            else if(value == 'pasantia')
+            {
+                vue.modalActivityPasantia.base_endpoint = `/procesos/${vue.process_id}/etapas/${stage_id}/activity/pasantia`
+                vue.modalActivityPasantia.model_id = stage_id
+                vue.modalActivityPasantia.school_id = school_id
+
+                vue.openFormModal(this.modalActivityPasantia)
                 vue.modalSelectActivity.open = false
             }
         },

@@ -19,8 +19,8 @@
                         <p><strong>Recuerda que un curso será visible para tus usuarios solo si cumple los siguientes requisitos:</strong></p>
                         <ul>
                             <li>El curso debe contar con al menos un tema activo y pertenecer al menos a una escuela activa.</li>
-                            <li>El curso debe estar segmentado, ya sea por criterios o por documento.</li>
-                            <li>El curso debe encontrarse activo (de manera directa o por medio de su programación).</li>
+                            <li>El curso debe estar segmentado, es decir tener a usuarios asignados.</li>
+                            <li>El curso debe estar activo.</li>
                         </ul>
                     </template>
                 </DefaultInfoTooltip>

@@ -8,6 +8,7 @@
                         <v-row>
                             <v-col cols="7">
                                 <DefaultInput 
+                                    emojiable
                                     dense
                                     clearable
                                     v-model="resource.title"
@@ -159,20 +160,21 @@
                                             </transition-group>
                                         </draggable>
 
-                                        <!-- <div class="my-2">
+                                        <div class="my-2">
                                             <DefaultButton
                                                 label="Agregar escala"
                                                 icon="mdi-plus"
                                                 :outlined="true"
                                                 :disabled="resource.evaluation_types.length >= selects.max_limit_create_evaluation_types"
-                                                @click="openFormModal(
-                                                    modalScalesChecklist,
-                                                    selects.max_limit_create_evaluation_types - resource.evaluation_types.length,
-                                                    null,
-                                                    'Agregar escala'
-                                                )"
+                                                @click="addScaleEvaluation()"
                                             />
-                                        </div> -->
+                                            <!-- @click="openFormModal(
+                                                modalScalesChecklist,
+                                                selects.max_limit_create_evaluation_types - resource.evaluation_types.length,
+                                                null,
+                                                'Agregar escala'
+                                            )" -->
+                                        </div>
                                     </template>
                                 </DefaultSimpleSection>
                             </v-col>
@@ -368,18 +370,18 @@
                                             label="Selecciona el valor del criterio del responsable"
                                         />   
                                     </v-col>
-                                    <!-- <v-col cols="6">
-                                        <DefaultSimpleSection title="Autocalificación de entidad" marginy="my-1" marginx="mx-0">
+                                    <v-col cols="6" v-if="current_modality.code == 'qualify_entity'">
+                                        <DefaultSimpleSection title="Calificación de auditor" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
                                                 <div class="d-flex">
                                                     <DefaultToggle class="ml-4 mb-2"
-                                                        v-model="resource.extra_attributes.autocalificate_entity" dense
+                                                        v-model="resource.extra_attributes.auditor_calificate_all_entity" dense
                                                         :disabled="!is_checklist_premium"
-                                                        :active-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'"
-                                                        :inactive-label="'El responsable de la entidad puede autocalificar su tienda, local, vehiculo, etc.'" />
+                                                        :active-label="'¿El auditor calificará solo a su entidad?'"
+                                                        :inactive-label="'¿El auditor calificará solo a su entidad?'" />
                                                     <DefaultInfoTooltip
                                                         v-if="is_checklist_premium"
-                                                        text="Tanto la entidad física como los usuarios podrán ver el resultado de sus checklist al finalizar el proceso"
+                                                        text="El auditor solo podrá calificar solo a su entidad o a todas las entidades."
                                                         top
                                                     />    
                                                     <div  v-else class="ml-1 tag_beta_upgrade d-flex align-items-center">
@@ -390,7 +392,7 @@
                                                 </div>
                                             </template>
                                         </DefaultSimpleSection>
-                                    </v-col> -->
+                                    </v-col>
                                     <v-col cols="12">
                                         <DefaultSimpleSection title="Sistema de firma del checklist" marginy="my-1" marginx="mx-0">
                                             <template slot="content">
@@ -432,7 +434,7 @@
                     </v-form>
                 </template>
         </DefaultDialog>
-        <ModalAddScaleEvaluation
+        <!-- <ModalAddScaleEvaluation
             :ref="modalScalesChecklist.ref"
             :options="modalScalesChecklist"
             width="40vw"
@@ -440,7 +442,7 @@
             :confirmLabel="modalScalesChecklist.confirmLabel"
             @onConfirm ="closeSimpleModal(modalScalesChecklist)"
             @onCancel ="closeSimpleModal(modalScalesChecklist)"
-        />
+        /> -->
     </div>
 </template>
 <script>
@@ -449,7 +451,7 @@ import ButtonsModal from './Blocks/ButtonsModal';
 import DefaultRichText from "../../globals/DefaultRichText";
 import DefaultCardAction from "../../globals/DefaultCardAction"
 import ButtonEmojiPicker from '../../basicos/ButtonEmojiPicker';
-import ModalAddScaleEvaluation from './ModalAddScaleEvaluation'
+// import ModalAddScaleEvaluation from './ModalAddScaleEvaluation':
 
 const fields = [
     'title', 'type_id','modality_id','description','finishes_at','imagen'
@@ -463,7 +465,6 @@ export default {
     DefaultRichText,
     DefaultCardAction,
     ButtonEmojiPicker,
-    ModalAddScaleEvaluation
 },
     props: {
         value: Boolean,
@@ -611,7 +612,9 @@ export default {
             let vue = this;
             vue.showLoader();
             await axios.get(`${vue.options.base_endpoint}/form-selects`).then(({ data }) => {
-                vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
+                if(!vue.resource.evaluation_types || vue.resource.evaluation_types.length ==0){
+                    vue.resource.evaluation_types = data.data.checklist_default_configuration.evaluation_types;
+                }
                 vue.resource.extra_attributes.qualification_type = data.data.checklist_default_configuration.qualification_type;
                 vue.selects.qualification_types = data.data.qualification_types;
                 vue.selects.max_limit_create_evaluation_types =  data.data.checklist_default_configuration.max_limit_create_evaluation_types;
@@ -781,6 +784,16 @@ export default {
             }).catch(()=>{
                 vue.loading_description = false;
             })
+        },
+        addScaleEvaluation(){
+            let vue = this;
+            vue.resource.evaluation_types.push(
+                {id:null,name:'',color:'#FF4560',extra_attributes:{percent:'0'}},
+            )
+        },
+        removeScaleEvaluation(index){
+            let vue = this;
+            vue.resource.evaluation_types.splice(index, 1);
         },
     }
 };

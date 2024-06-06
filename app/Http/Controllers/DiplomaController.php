@@ -184,7 +184,7 @@ class DiplomaController extends Controller
             $width = imagesx($image);
 
             $bg_info['image_width'] = $width;
-            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info,$real_info['font_id']);
+            $image = Diploma::setDynamicsToImage($image, $e_dinamics, $bg_info, $real_info,$real_info['font_id'] ?? null);
             $preview = Diploma::jpg_to_base64($image);
 
             return $preview;

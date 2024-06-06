@@ -33,8 +33,9 @@ class ChecklistController extends Controller
         $checklist->load('modality:id,name,code,extra_attributes');
         $checklist->load('type:id,name,code,extra_attributes');
         $checklist->load('course:id,name');
-        $checklist->evaluation_types  = isset($checklist->extra_attributes['evaluation_types_id']) ? Taxonomy::select('id','name','code','extra_attributes')
+        $checklist->evaluation_types  = isset($checklist->extra_attributes['evaluation_types_id']) ? Taxonomy::select('id','name','code','color','icon','extra_attributes')
                                                 ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
+                                                ->orderBy('position')
                                                 ->get() : [];
         return $this->success([
             'checklist'=>$checklist
@@ -107,6 +108,7 @@ class ChecklistController extends Controller
 
     public function verifyNextStep(CheckList $checklist){
         $next_step = CheckList::nextStep($checklist);
+        $checklist->load('type:id,code');
         return $this->success([
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -123,8 +125,8 @@ class ChecklistController extends Controller
         return $this->success(['courses'=>$courses]);
     }
 
-    public function uploadMassive(Request $request){
-        $activities = Checklist::uploadMassive($request);
+    public function uploadMassive(Checklist $checklist,Request $request){
+        $activities = Checklist::uploadMassive($checklist,$request);
         return $this->success(['activities'=>$activities]);
     }
 
@@ -166,5 +168,9 @@ class ChecklistController extends Controller
     public function changeAgrupation(Checklist $checklist){
         CheckListItem::changeAgrupation($checklist);
         return $this->success(['msg'=>'Se cambió el tipo de agrupación']);
+    }
+    public function deleteTematica(Checklist $checklist,Taxonomy $taxonomy){
+        CheckListItem::deleteTematica($taxonomy);
+        return $this->success(['msg'=>'Se elimino la temática correctamente.']);
     }
 }

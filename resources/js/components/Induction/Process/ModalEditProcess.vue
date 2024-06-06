@@ -157,7 +157,7 @@
                                             </div>
                                         </v-col>
                                     </v-row>
-                                    
+
                                     <DefaultModalSectionExpand
                                         title="Avanzado"
                                         :expand="sections.showSectionAdvanced"
@@ -178,7 +178,7 @@
                                                     <span class="text_default">¿Deseas que las etapas se mantengan siempre disponibles?</span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
@@ -193,7 +193,7 @@
                                                     <span class="text_default">¿Los usuarios que terminan Inducción deben pasar automáticamente a Aprendizaje?</span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div>
                                                 <div class="d-flex align-center">
                                                     <div class="bx_switch_attendance me-2">
@@ -232,6 +232,21 @@
                                                             />
                                                         </fieldset>
                                                     </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div class="d-flex align-center">
+                                                    <div class="bx_switch_attendance me-2">
+                                                        <v-switch
+                                                            class="default-toggle"
+                                                            inset
+                                                            hide-details="auto"
+                                                            v-model="process.corporate_process"
+                                                            dense
+                                                        ></v-switch>
+                                                    </div>
+                                                    <span class="text_default">Activar solicitud de reuniones para el proceso (se requiere correo de los participantes)</span>
                                                 </div>
                                             </div>
                                         </template>

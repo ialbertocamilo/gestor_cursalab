@@ -20,8 +20,15 @@ Route::controller(RestProcessController::class)->group(function () {
     Route::get('/user/processes/{process}/data/instructions', 'getUserProcessInstructions');
     Route::post('/user/processes/{process}/data/instructions/save', 'saveUserProcessInstructions');
 
-    
+
     Route::get('/faqs', 'getFaqs');
+
+    // lider
+
+    Route::get('/pasantias-asignadas', 'getPasantiasAsignadas');
+    Route::get('/pasantias-asignadas/{process}/data', 'getPasantiaAsignada');
+    Route::post('/pasantia-user-info', 'getPasantiaUserInfo');
+    Route::post('/pasantia-user-info/save', 'savePasantiaUserInfo');
 
     // momentaneo
     Route::get('/', 'getSupervisorProcesses');

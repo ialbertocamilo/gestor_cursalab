@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Induction\ApiRest;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MeetingAppResource;
+use App\Mail\EmailTemplate;
 use App\Models\Activity;
+use App\Models\Ambiente;
 use App\Models\Benefit;
 use App\Models\CheckList;
 use App\Models\ChecklistRpta;
 use App\Models\ChecklistRptaItem;
 use App\Models\Course;
 use App\Models\EntrenadorUsuario;
+use App\Models\Internship;
+use App\Models\InternshipUser;
 use App\Models\MediaTema;
 use App\Models\Meeting;
 use App\Models\Poll;
@@ -26,6 +30,7 @@ use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use stdClass;
 
 class RestActivityController extends Controller
@@ -46,6 +51,128 @@ class RestActivityController extends Controller
         $result['data'] = json_decode($res->toJson(), true);
 
         return $this->successApp($result);
+    }
+
+    public function ActivityPasantia(Process $process, Activity $activity, Request $request)
+    {
+        $search = $request->get('search');
+
+        $user = Auth::user();
+        $internship = Internship::where('id', $activity->model_id)->first();
+        $users = $internship && $internship->leaders ? json_decode($internship->leaders) : [];
+        $internship_user_status_id = Taxonomy::getFirstData('internship', 'status', 'email_sent')?->id ?? null;
+
+        $leaders = User::whereIn('id', $users)->select('id', 'name', 'lastname', 'surname', 'fullname');
+        if($search)
+        {
+            $leaders->where(function($s) use ($search) {
+                $s->where('name', 'like', '%'.$search.'%');
+                $s->orWhere('lastname', 'like', '%'.$search.'%');
+                $s->orWhere('surname', 'like', '%'.$search.'%');
+            });
+        }
+        $leaders = $leaders->get();
+
+        if($leaders) {
+            foreach ($leaders as $leader) {
+                $iu = InternshipUser::where('user_id', $user->id)
+                                ->where('leader_id', $leader->id)
+                                ->where('internship_id', $internship->id)
+                                ->first();
+                $leader->status = $iu && $iu->status ? $iu->status->code : 'pending';
+            }
+        }
+
+        return $this->success(compact('leaders'));
+    }
+
+    public function SaveActivityPasantia(Process $process, Activity $activity,  Request $request )
+    {
+        $user = Auth::user();
+        $internship = Internship::where('id', $activity->model_id)->first();
+        $leader = User::where('id', $request->user_id)->select('id', 'name', 'lastname', 'surname', 'fullname', 'email', 'email_gestor')->first();
+        $data = $request->data ?? [];
+
+        $response['error'] = true;
+
+        if($internship && $leader)
+        {
+            try {
+                $internship_user = new InternshipUser();
+                $internship_user->user_id = $user->id;
+                $internship_user->internship_id = $internship->id;
+                $internship_user->leader_id = $leader->id;
+
+                if(isset($data['fecha1']))
+                    $internship_user->meeting_date_1 = $data['fecha1'];
+                if(isset($data['hora1']))
+                    $internship_user->meeting_time_1 = $data['hora1'];
+                if(isset($data['fecha2']))
+                    $internship_user->meeting_date_2 = $data['fecha2'];
+                if(isset($data['hora2']))
+                    $internship_user->meeting_time_2 = $data['hora2'];
+
+                $internship_user->status_id = Taxonomy::getFirstData('internship', 'status', 'email_sent')?->id ?? null;
+                $internship_user->active = true;
+                $internship_user->save();
+                $this->sendEmail($user, $leader, $internship_user, $process->id);
+
+            } catch (\Exception $e) {
+                $response['error'] = true;
+            }
+        }
+
+        $response['error'] = false;
+
+        return $this->success($response);
+    }
+
+    private function sendEmail($user, $lider, $internship, $process_id)
+    {
+        $process = Process::select('id', 'title', 'description', 'active')
+                    ->where('id', $process_id)
+                    ->with(['instructors' => function($q){
+                        $q->select('id', 'document', 'active', 'email', 'email_gestor');
+                    }])
+                    ->first();
+        $emails_sup = [];
+        if($process && $process->instructors) {
+            foreach($process->instructors as $instructor) {
+                if($instructor->email && str_contains($instructor->email, '@')) {
+                    array_push($emails_sup, $instructor->email);
+                }
+            }
+        }
+
+        //enviar codigo al email
+        $mail_data = [ 'subject' => 'Solicitud de reunión',
+                        'meeting_date_1' => $internship->meeting_date_1,
+                        'meeting_date_2' => $internship->meeting_date_2,
+                        'meeting_time_1' => $internship->meeting_time_1,
+                        'meeting_time_2' => $internship->meeting_time_2,
+                        'lider_name' => $lider->name,
+                        'user_name' => $user->fullname,
+                        'user_email' => $user->email
+                    ];
+
+        $config = Ambiente::first();
+        $mail_data['logo'] = get_media_url($config->logo);
+
+        if(ENV('MULTIMARCA') == true){
+            $mail_data['logo'] = 'https://statics-testing.sfo2.cdn.digitaloceanspaces.com/inretail-test2/images/wrkspc-40-wrkspc-35-logo-cursalab-2022-1-3-20230601193902-j6kjcrhock0inws-20230602170501-alIlkd31SSNTnIm.png';
+        }
+        if($lider->email) {
+            // enviar email
+            if(count($emails_sup) > 0) {
+                Mail::to($lider->email)
+                    ->cc($emails_sup)
+                    ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
+            }
+            else {
+                Mail::to($lider->email)
+                    ->send(new EmailTemplate('emails.pasantia_enviar_solicitud_a_lider', $mail_data));
+            }
+        }
     }
 
     public function ActivityPoll(Process $process, Poll $poll, Request $request)
@@ -126,12 +253,12 @@ class RestActivityController extends Controller
     public function ActivityChecklist(Process $process, Checklist $checklist, Request $request)
     {
         $user = Auth::user();
-        
+
         $checklistRpta = ChecklistRpta::where('checklist_id',$checklist->id)
                                         ->where('student_id', $user->id)
                                         ->whereNotNull('coach_id')
                                         ->first();
-                                        
+
         $trainer_id = $checklistRpta?->coach_id ?? null;
         // if (!$checklistRpta) {
         //     $checklistRpta = ChecklistRpta::create([
@@ -269,7 +396,7 @@ class RestActivityController extends Controller
         return response()->json(['error' => false, 'data' => $topics_data], 200);
         // *********
     }
-    
+
     public function RegisterUserChecklist(Process $process, User $user, Request $request )
     {
         $trainer = Auth::user();
@@ -294,7 +421,7 @@ class RestActivityController extends Controller
                         $total += 100;
                     }
                 }
-                
+
                 $summary_activity->status_id = Taxonomy::getFirstData('user-activity', 'status', 'finished')?->id;
                 $summary_activity->progress = count($activities) ? ($total / count($activities)) : 0;
                 $summary_activity->save();
@@ -306,7 +433,7 @@ class RestActivityController extends Controller
         return $this->success($response);
     }
 
-  
+
     // public function updateProcessSummaryUser($user = null, $process_id = null, $stage_id = null)
     // {
     //     $tax_user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');

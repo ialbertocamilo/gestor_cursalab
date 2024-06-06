@@ -62,7 +62,7 @@ Route::controller(ChecklistController::class)
 
 		Route::get('/{checklist}/activities-by-areas', 'activitiesByArea')->name('checklist.activities');
 		Route::get('/{checklist}/activity/form-selects', 'formSelectsActivities');
-		Route::post('/activity/upload-massive', 'uploadMassive');
+		Route::post('/{checklist}/activity/upload-massive', 'uploadMassive');
 		Route::get('/{checklist}/activities/list', 'listActivitiesByChecklist');
 		Route::post('/{checklist}/activities/save', 'saveActivitiesByChecklist');
 		Route::post('/{checklist}/activity/save', 'saveActivityByChecklist');
@@ -88,6 +88,7 @@ Route::controller(ChecklistController::class)
 		/* TEMATICAS*/
 		Route::post('/{checklist}/tematica/save','saveTematica');
 		Route::post('/{checklist}/tematica/edit','editTematica');
+		Route::delete('/{checklist}/tematica/{taxonomy}/destroy','deleteTematica');
 		/* TEMATICAS*/
 		/* AREAS*/
 		Route::get('/areas', 'listAreas');

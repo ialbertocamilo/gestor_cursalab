@@ -14,7 +14,7 @@
                     class="col-11"
                 />
                 <v-file-input
-                    v-show="showSubidaMasiva"
+                    v-if="showSubidaMasiva"
                     show-size
                     label="Suba el archivo"
                     v-model="file"
@@ -197,6 +197,7 @@ export default {
         this.$nextTick(function () {
             let vue = this;
             vue.usuarios_ok = vue.list_users_selected
+            console.log(vue.list_users_selected);
         })
     },
     methods: {
@@ -207,6 +208,8 @@ export default {
             if (validar.length === 0) vue.usuarios_ok.push(usuario);
 
             vue.filtro_result.splice(index, 1);
+
+            vue.$emit("changeListUsers");
         },
         eliminarUsuario(dni) {
             let vue = this;
@@ -215,6 +218,8 @@ export default {
             }
             let index = vue.usuarios_ok.findIndex((us) => us.dni == dni);
             vue.usuarios_ok.splice(index, 1);
+
+            vue.$emit("changeListUsers");
         },
         subirExcel() {
             let vue = this;

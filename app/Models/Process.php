@@ -22,6 +22,7 @@ class Process extends BaseModel
         'description',
         'block_stages',
         'migrate_users',
+        'corporate_process',
         'alert_user_deleted',
         'message_user_deleted',
         'count_absences',
@@ -54,6 +55,7 @@ class Process extends BaseModel
         'config_completed' => 'boolean',
         'block_stages' => 'boolean',
         'migrate_users' => 'boolean',
+        'corporate_process' => 'boolean',
         'alert_user_deleted' => 'boolean'
     ];
 
@@ -371,7 +373,7 @@ class Process extends BaseModel
         // $benefits_asigned = array_column($user->getSegmentedByModelType(Process::class),'id');
 
         $processes_assigned = $user->processes()->get()->pluck('id')->toArray();
-        
+
         $field = 'created_at';
         $sort = 'DESC';
 
@@ -547,7 +549,7 @@ class Process extends BaseModel
                             $activity->status = 'pending';
                             $exist = ProcessSummaryActivity::where('user_id', $user->id)->where('activity_id', $activity->id)->first();
                             if($exist) {
-                                $activity->status = $exist->status->code;
+                                $activity->status = $exist->status?->code;
                                 $activity->progress = $exist->progress ? round($exist->progress) : $exist->progress;
                             }
                             unset($activity->type_id);
@@ -598,7 +600,7 @@ class Process extends BaseModel
                 'url_download' => null,
                 'login_aprendizaje' => false
             ];
-            
+
             $tax_user_process_finished = Taxonomy::getFirstData('user-process', 'status', 'finished');
             // if($user_summary_process?->status_id == $tax_user_process_finished?->id)
             if($process->user_activities_progressbar >= 100)

@@ -727,8 +727,9 @@ class CheckList extends BaseModel
             'feedback_disponible' => $feedback_disponible
         ];
     }
-    protected function uploadMassive($request){
+    protected function uploadMassive($checklist,$request){
         $import = new ActivityChecklistImport();
+        $import->checklist = $checklist;
         Excel::import($import, $request->file('archivo'));
         return $import->activities;
     }
@@ -871,8 +872,23 @@ class CheckList extends BaseModel
 
     protected function storeRequest($data, $checklist = null){
         $data = Media::requestUploadFile($data, 'imagen');
-        $evaluation_types = collect(json_decode($data['evaluation_types']))->pluck('id')->toArray();
-        $data['extra_attributes']['evaluation_types_id'] =  $evaluation_types;
+        $evaluation_types = collect(json_decode($data['evaluation_types']));
+        $evaluation_types_id = [];
+        foreach ($evaluation_types as $index => $evaluation_type) {
+            $evaluation_types_id[] = Taxonomy::updateOrCreate(
+                ['id' => $evaluation_type->id,'group'=>'checklist','type' => 'custom_ystem_calification'],
+                [
+                    'group' => 'checklist',
+                    'type' => 'custom_ystem_calification',
+                    "color" => $evaluation_type->color,
+                    "icon" => $evaluation_type->icon,
+                    "name" => $evaluation_type->name,
+                    "position" => $index+1,
+                    "extra_attributes" => $evaluation_type->extra_attributes,
+                ]
+            );
+        }
+        $data['extra_attributes']['evaluation_types_id'] =  array_column($evaluation_types_id,'id');
         if($checklist){
             unset($data['course']);
             $checklist->update($data);
@@ -884,6 +900,7 @@ class CheckList extends BaseModel
             $checklist = self::create($data);
             $next_step = 'create_activities';
         }
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -924,6 +941,7 @@ class CheckList extends BaseModel
         }
         CheckListItem::where('checklist_id',$checklist->id)->whereNotIn('id',$activities_id)->delete();
         $next_step = self::nextStep($checklist);
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -968,6 +986,7 @@ class CheckList extends BaseModel
         $checklist->supervisor_ids = $data['supervisor_ids'];
         $checklist->save();
         $next_step = self::nextStep($checklist);
+        $checklist->load('type:id,code');
         return [
             'next_step' => $next_step,
             'checklist' => $checklist
@@ -1034,11 +1053,12 @@ class CheckList extends BaseModel
 
     protected function searchCourses($request){
         $current_workspace = get_current_workspace();
-        return Course::when($request->q, function($q) use ($request){
-                    $q->filtroName($request->q) ;
+        return Course::whereRelation('workspaces', 'id', $current_workspace->id)
+                ->when($request->q, function($q) use ($request){
+                    $q->where('name', 'like', "%$request->q%")
+                    ->orWhere('id', $request->q);
                 })
                 ->where('courses.active', 1)
-                ->whereRelation('workspaces', 'id', $current_workspace->id)
                 ->select(
                     'courses.id',
                     DB::raw('CONCAT(courses.id," - ",courses.name) as name')
@@ -1090,6 +1110,12 @@ class CheckList extends BaseModel
         }
         return [$list_checklists_geolocalization,$list_checklists_exclude_geolocalization,$list_checklists_libres];
     }
+    public function isGroupedByArea(){
+        $checklist = $this;
+        return isset($checklist->extra_attributes['gruped_by_areas_and_tematicas'])
+                    ? $checklist->extra_attributes['gruped_by_areas_and_tematicas'] 
+                    : false;
+    }
     protected function listActivities($checklist,$request){
         $theme_id = $request?->theme_id;
         $user_id = $request?->user_id;
@@ -1101,12 +1127,23 @@ class CheckList extends BaseModel
             'activities.checklist_response:id,code',
         ]);
 
-        $_activities = [];
+        $checklist_audit = null;
         $activities_progress = collect();
         if ($checklist->modality->code != 'qualify_user') {
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+            
+            if($request->entity_id){
+                $model_id = $request->entity_id;
+            }else{
+                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            }
+            
             $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
-            $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
+            $activities_progress = $checklist_audit?->audit_activities ?? collect();
+        }else{
+            $model_id = $request->user_id;
+            $model_type = User::class;
             $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
             $activities_progress = $checklist_audit?->audit_activities ?? collect();
         }
@@ -1131,9 +1168,18 @@ class CheckList extends BaseModel
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
                 $system_calification = Taxonomy::select(
-                                            'id', 'name', 'color', DB::raw("JSON_UNQUOTE(extra_attributes->'$.percent') as percent")
+                                            'id', 'name', 'color', 
+                                            DB::raw("JSON_UNQUOTE(extra_attributes->'$.percent') as percent"),
+                                            DB::raw("JSON_UNQUOTE(extra_attributes->'$.emoji') as emoji")
                                         )
-                                        ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])->get();
+                                        ->whereIn('id',$checklist->extra_attributes['evaluation_types_id'])
+                                        ->get()->map(function($system){
+                                            if($system->emoji){
+                                                // dd($system->emoji,$system->name);
+                                                $system->name = $system->name.' '.$system->emoji;
+                                            }
+                                            return $system;
+                                        });
             }else{
                 $system_calification = $activity->custom_options()->select('id','name','color')->get();
             }
@@ -1142,7 +1188,8 @@ class CheckList extends BaseModel
             $list_photos = [];
             if($photos && count($photos) > 0){
                 foreach ($photos as $photo) {
-                    $photo['url'] = get_media_url($photo['url']);
+                    // $photo['url'] = get_media_url($photo['url']);
+                    $photo['url'] = reportsSignedUrl($photo['url']);
                     $list_photos[] = $photo; 
                 }
             }
@@ -1157,9 +1204,7 @@ class CheckList extends BaseModel
                 'type_system_calification'=>$activity->checklist_response->code,
                 'system_calification' => $system_calification,
                 'comments' => [
-                    ['comment'=>'Comentario principal','user'=>'Aldo'],
-                    ['comment'=>'Comentario secundario 1','user'=>'Crusbel'],
-                    ['comment'=>'Comentario secundatio 2','user'=>'Aldo'],
+                    
                 ],
                 'photo' => $list_photos,
                 'qualification_id'=> $progress?->qualification_id ?? null,
@@ -1174,7 +1219,11 @@ class CheckList extends BaseModel
         if($user_id){
             $user_checklist = User::select('name','lastname','surname')->where('id',$user_id)->first();
         }
-        
+        $activities_assigned  = $checklist->activities->count();
+        $activities_reviewved  = $checklist_audit?->activities_reviewved ?? 0;
+        $finished  = boolval($checklist_audit?->checklist_finished);
+
+        $percent_progress  = round(($activities_reviewved/$activities_assigned),2)*100;
         return [
             'user'=>[
                 'fullname' => $user_checklist?->fullname
@@ -1188,59 +1237,99 @@ class CheckList extends BaseModel
                 ],
                 'has_themes' => $has_themes,
                 'list_themes' => $taxonomy_tematicas,
-                // 'list_themes'=>[
-                //     [
-                //         'id'=> 1,
-                //         'name' => 'Temática 1',
-                //         'count_activities' => count($activities),
-                //         'finished' => false,
-                //     ],
-                //     [
-                //         'id'=> 2,
-                //         'name' => 'Temática 2',
-                //         'count_activities' => count($activities),
-                //         'finished' => true,
-                //     ],
-                // ],
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
-                "imagen" => get_media_url($checklist->imagen,'s3'),
+                "imagen" => get_media_url($checklist->imagen),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
                 "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
                 'required_action_plan' => $checklist->extra_attributes['required_action_plan'],
                 "type" => $checklist->type,
                 "theme"=>$theme,
-                'activities' => $activities
+                'activities' => $activities,
+                'percent_progress' => $percent_progress,
+                'activities_assigned' => $activities_assigned,
+                'activities_reviewved' =>  $activities_reviewved,
+                'finished' => $finished
             ]
             ];
     }
     protected function listUsers($checklist){
-        $_course =new Course();
-        $checklist->loadMissing('segments');
+        $user = auth()->user();
+        $user->load('criterion_values');
+        $workspace_entity_criteria = Workspace::select('checklist_configuration')
+        ->where('id', $user->subworkspace->parent->id)
+        ->first()?->checklist_configuration?->entities_criteria;
+        $user_relation = $user->criterion_values->whereIn('criterion_id',$workspace_entity_criteria)->first();
+        // $criteria_segmented = ;
         $checklist->loadMissing('type:id,name,code,color,icon');
-        $users = $_course->usersSegmented(
-                            course_segments:$checklist->segments,
-                            addSelect:['name','lastname','surname']
-                        );
+        $summaries = collect();
+        if($checklist->type->code == 'curso'){
+            $_course = Course::select('id')->where('id',$checklist->course_id)->first();
+            $_course->loadMissing(['segments','segments.values']);
+            $segments_course = $_course->segments;
+            foreach ($segments_course as $segment) {
+                // dd($segment->values,$user_relation);
+                $segment->values->push([
+                    "id" => $user_relation->id,
+                    "segment_id" => $segment->id,
+                    "criterion_id" => $user_relation->criterion_id,
+                    "criterion_value_id" => $user_relation->id,
+                    "type_id" => null,
+                    "starts_at" => null,
+                    "finishes_at" => null,
+                    "created_at" => "2022-11-01 18:49:45",
+                    "updated_at" => "2023-05-19 00:38:21",
+                    "deleted_at" => null,
+                ]);
+            }
+            $users = $_course->usersSegmented(
+                course_segments:$_course->segments,
+                addSelect:['name','lastname','surname','document']
+            );
+            if(count($users)){
+                $summaries = SummaryCourse::select('id','user_id','advanced_percentage')->where('course_id',$checklist->course_id)
+                                ->whereIn('user_id',$users->pluck('id'))
+                                ->whereRelation('status', 'code', 'aprobado')->get();
+            }
+        }else{
+            $_course =new Course();
+            $checklist->loadMissing(['segments']);
+            // añadir variable SEARCH
+            $users = $_course->usersSegmented(
+                                course_segments:$checklist->segments,
+                                addSelect:['name','lastname','surname','document']
+                            );
+        }
         $checklist->load('activities:id,checklist_id');
         $count_activities = count($checklist->activities);
-        $completed = ChecklistAudit::select('id')->withCount(['audit_activities'])
-                    ->where('checklist_id',$checklist->id)
-                    ->whereIn('model_id',$users->pluck('id'))
-                    ->get()->filter(function($audit) use ($count_activities) {
-                        return $audit->audit_activities_count == $count_activities;
-                    });;
-        $count_users_completed = count($completed);
+        $users_id_assigned = $users->pluck('id')->toArray();
+        $status_activities = ChecklistAudit::getCurrentChecklistAudit($checklist,User::class,$users_id_assigned,$user,true);
+
+        $count_users_completed = count($status_activities->where('checklist_finished',1));
         $percent_completed =  count($users)>0 ?  round($count_users_completed/count($users) * 100,2) : 0;
         $count_users_pending = count($users) - $count_users_completed;
         $percent_pending = count($users)>0 ? round($count_users_pending/count($users) * 100,2) : 0;
-
+        $statuses = collect([
+            [ 'code' => 'pendiente', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
+            [ 'code' => 'in-progress', 'color' => '#5458EA', 'icon' => 'mdi-account' ],
+            [ 'code' => 'completed', 'color' => '#00E396', 'icon' => 'mdi-account-check' ],
+            [ 'code' => 'blocked', 'color' => '#A9B2B9', 'icon' => 'mdi-account-lock' ],
+        ]);
+        
         foreach ($users as $user) {
-            $user['status'] = [
-                'code' => 'pendiente',
-                'color' => '#5458EA',
-                'icon' => 'mdi-account'
-            ];
+            $status_code = 'pendiente';
+            if ($checklist->type->code == 'curso') {
+                $status_course = $summaries?->firstWhere('user_id', $user->id);
+                if (!$status_course) {
+                    $status_code = 'blocked';
+                } else {
+                    $status_user = $status_activities?->firstWhere('model_id', $user->id);
+                    if ($status_user && $status_code != 'blocked') {
+                        $status_code = floatval($status_user->percent_progress) >= 100.0 ? 'completed' : 'in-progress';
+                    }
+                }
+            }
+            $user['status'] = $statuses->firstWhere('code', $status_code);
         }
         return [
             'checklist' =>[
@@ -1255,7 +1344,7 @@ class CheckList extends BaseModel
                 ],
                 "type" => $checklist->type,
                 "required_geolocalization"=>$checklist->extra_attributes['required_geolocation'],
-                "imagen" => get_media_url($checklist->imagen,'s3'),
+                "imagen" => get_media_url($checklist->imagen),
             ],
             'users' => $users,
             'users_assigned'=> count($users),
@@ -1288,7 +1377,7 @@ class CheckList extends BaseModel
                                     $q->where('auditor_id',$user->id);
                                 })
                                 ->first();
-        
+
         $status = $audit ? [
                     'code' => 'realizado',
                     'name' => 'Realizado '.$audit->date_audit,
@@ -1298,7 +1387,10 @@ class CheckList extends BaseModel
                     'name' => 'Pendiente',
                     'color' => '#CDCDEB'
                 ];
-
+        $auditor_calificate_all_entity = $checklist->modality->code=='qualify_entity' 
+                                            && isset($checklist->extra_attributes['auditor_calificate_all_entity'])
+                                            && $checklist->extra_attributes['auditor_calificate_all_entity'];
+        
         return [
             "id" => $checklist->id,
             "title" => $checklist->title,
@@ -1311,7 +1403,8 @@ class CheckList extends BaseModel
                 'color' => $checklist->modality->color
             ],
             "type" => $checklist->type,
-            'url_maps' =>''
+            'url_maps' =>'',
+            'auditor_calificate_all_entity'=> $auditor_calificate_all_entity
         ];
     }
     

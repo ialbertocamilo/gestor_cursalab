@@ -49,6 +49,7 @@ export default {
             type: Object,
             required: true
         },
+        template_url:String,
         width: String
     },
     data() {
@@ -60,7 +61,7 @@ export default {
                 success_file:false
             },
             errores: [],
-            template_url:'/templates/Plantilla Checklist.xlsx'
+            // template_url:''
         };
     },
     methods: {
@@ -72,6 +73,7 @@ export default {
         resetValidation() {
             let vue = this
         }
+        
         ,
         async confirmModal() {
             let vue = this;
@@ -86,7 +88,7 @@ export default {
                     .post(`${vue.options.base_endpoint}/activity/upload-massive`, data)
                     .then(({data}) => {
                         vue.hideLoader();
-                        vue.$emit('activities',data.data.activities);
+                        vue.$emit('onConfirm',data.data.activities);
                     })
                     .catch((err) => {
                         vue.hideLoader();

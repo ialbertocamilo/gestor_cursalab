@@ -37,17 +37,22 @@
                     <div class="bx_item_activity" @click="selectActivityModal('evaluaciones')">
                         <div class="img"><img src="/img/induccion/activities/pruebas.svg"></div>
                         <h5>Evaluación</h5>
-                        <p>Comprueba si aprendieron durante el proceso de inducción</p>
+                        <p>Comprueba si aprendieron durante el proceso de inducción.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectActivityModal('checklist')">
                         <div class="img"><img src="/img/induccion/activities/checklist.svg"></div>
                         <h5>Checklist</h5>
-                        <p>Se evalúa los procesos que realiza la empresa o procesos que realizara el colaborador</p>
+                        <p>Se evalúa los procesos que realiza la empresa o procesos que realizara el colaborador.</p>
                     </div>
                     <div class="bx_item_activity" @click="selectActivityModal('encuestas')">
                         <div class="img"><img src="/img/induccion/activities/encuestas.svg"></div>
                         <h5>Encuesta del proceso</h5>
                         <p>Encuesta que se puede agregar luego de terminado el proceso de inducción.</p>
+                    </div>
+                    <div class="bx_item_activity" @click="selectActivityModal('pasantia')" v-if="show_pasantia">
+                        <div class="img"><img src="/img/induccion/activities/pasantia.svg"></div>
+                        <h5>Solicitud de reunión</h5>
+                        <p>Selecciona y gestiona los participantes de solicitud de reunión.</p>
                     </div>
                 </div>
             </v-card-text>
@@ -61,6 +66,7 @@ export default {
     props:{
         value: null,
         width: null,
+        show_pasantia: false,
         // process_id: {
         //     type: Number,
         //     required: true
