@@ -133,7 +133,7 @@ class ChecklistAudit extends BaseModel
         $list_photos = [];
         if($photos && count($photos) > 0){
             foreach ($photos as $photo) {
-                $photo['url'] = reportsSignedUrl($photo['url']);
+                $photo->url = reportsSignedUrl($photo->url);
                 $list_photos[] = $photo; 
             }
         }
