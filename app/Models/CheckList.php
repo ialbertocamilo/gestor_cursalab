@@ -1189,7 +1189,7 @@ class CheckList extends BaseModel
             if($photos && count($photos) > 0){
                 foreach ($photos as $photo) {
                     // $photo['url'] = get_media_url($photo['url']);
-                    $photo['url'] = generateSignedUrl($photo['url']);
+                    $photo['url'] = reportsSignedUrl($photo['url']);
                     $list_photos[] = $photo; 
                 }
             }
