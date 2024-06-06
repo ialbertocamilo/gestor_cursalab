@@ -1221,7 +1221,7 @@ class CheckList extends BaseModel
                 'can_computational_vision' => $extra_attributes['computational_vision'],
                 'type_system_calification'=> $activity->checklist_response->code,
                 'system_calification' => $system_calification,
-                'principal_comment' => $comments->where('principal',true)->first() ?? [],
+                'principal_comment' => $comments  ? $comments->where('principal',true)->first() : null,
                 'comments' => $comments?->where('principal',false)->values() ?? [],
                 'photo' => $list_photos,
                 'qualification_response' => $qualification_response,
