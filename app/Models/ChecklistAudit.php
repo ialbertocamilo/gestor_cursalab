@@ -218,7 +218,6 @@ class ChecklistAudit extends BaseModel
                             $photo = 'checklist-photos/'.$checklist->id.'/'.$name_image;
                             Media::uploadMediaBase64(name:'', path:$photo, base64:$data['file_photo'],save_in_media:false,status:'private');
                             if(is_array($checklistActivityAudit['photo'])){
-                                
                                 $checklist_activity_update['photo'][] = [
                                     'url'=>$photo,
                                     'datetime' => $dateAudit
@@ -231,6 +230,17 @@ class ChecklistAudit extends BaseModel
                                 ];
                             }
                             $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo'] );
+                        }
+                    }
+                    if(isset($data['action']) && $data['action'] == 'delete'){
+                        if (isset($data['photo'])) {
+                            $photoIndex = $data['photo'];
+                            if (isset($checklist_activity_update['photo'][$photoIndex])) {
+                                unset($checklist_activity_update['photo'][$photoIndex]);
+                            }
+                            // Reindexar el array para evitar problemas con índices no consecutivos
+                            $checklist_activity_update['photo'] = array_values($checklist_activity_update['photo']);
+                            $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
                         }
                     }
                 break;
