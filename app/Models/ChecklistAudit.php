@@ -211,7 +211,7 @@ class ChecklistAudit extends BaseModel
                     $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
                 break;
                 case 'photo':
-                    if(isset($data['action']) && isset($data['insert'])){
+                    if(isset($data['action']) && $data['action'] == 'insert'){
                         if(isset($data['file_photo'])){
                             $str_random = Str::random(5);
                             $name_image = $data['activity_id'] . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'.png';
