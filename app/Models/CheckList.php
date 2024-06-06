@@ -1211,7 +1211,7 @@ class CheckList extends BaseModel
             if($activity->checklist_response->code == 'write_option' && $progress?->qualification_id){
                 $qualification_response = Taxonomy::where('id',$progress->qualification_id)->select('name')->first()?->name;
             }
-            $comments = collect($progress?->comments ?? []);
+            $comments = $progress?->comments ? collect( $progress?->comments) : null;
             $activities[]  = [
                 'id'=>$activity->id,
                 'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
