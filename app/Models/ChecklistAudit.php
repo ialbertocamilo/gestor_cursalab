@@ -111,13 +111,14 @@ class ChecklistAudit extends BaseModel
         $reviewved = 0;
         $percent_progress = 0;
         $photos = [];
+        $qualification_id = null;
         if ($checklist->modality->code === 'qualify_user') {
             // if(isset($data['users_id'])){
                 foreach ($data['user_ids'] as $userId) {
                     $this->processAudit(
                         $action_request,$checklist, $data, $user, $modelType, $userId, 
                         $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                        $assigned,$reviewved,$percent_progress,$photos
+                        $assigned,$reviewved,$percent_progress,$photos,$qualification_id
                     );
                 }
             // }
@@ -125,7 +126,7 @@ class ChecklistAudit extends BaseModel
             $this->processAudit($action_request,
                 $checklist, $data, $user, $modelType, 
                 $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                $assigned,$reviewved,$percent_progress,$photos
+                $assigned,$reviewved,$percent_progress,$photos,$qualification_id
             );
         }
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
@@ -142,7 +143,8 @@ class ChecklistAudit extends BaseModel
             'percent_progress' => $percent_progress,
             'activities_assigned' => $assigned,
             'activities_reviewved' =>  $reviewved,
-            'list_photos' => $list_photos
+            'list_photos' => $list_photos,
+            'qualification_id' => $qualification_id
         ];
     }
 
@@ -162,7 +164,7 @@ class ChecklistAudit extends BaseModel
     protected function processAudit(
         $action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, 
         array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
-        &$assigned,&$reviewved,&$percent_progress,&$photos
+        &$assigned,&$reviewved,&$percent_progress,&$photos,&$qualification_id
     ): void
     {
         $dateAudit = $dateAudit->format('Y-m-d H:i:s');
@@ -193,6 +195,7 @@ class ChecklistAudit extends BaseModel
             ];
             switch ($action_request) {
                 case 'qualification':
+                    $photos = $checklistActivityAudit['photo'];
                     $historicQualification = [
                         'qualification_id' => $data['qualification_id'],
                         'date_audit' => $dateAudit
@@ -209,11 +212,14 @@ class ChecklistAudit extends BaseModel
                         );
                         $data['qualification_id'] = $qualification_response->id;
                     }
+                    $qualification_id = $data['qualification_id'];
                     $checklist_activity_update['qualification_id'] = $data['qualification_id'];
                     $checklist_activity_update['historic_qualification'][] = $historicQualification;
                     $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
                 break;
                 case 'comments':
+                    $photos = $checklistActivityAudit['photo'];
+
                     $historicComments = [
                         "user_id"=> $user->id,
                         "comment" => $data['comment'],
