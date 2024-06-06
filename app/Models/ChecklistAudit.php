@@ -219,6 +219,7 @@ class ChecklistAudit extends BaseModel
                 break;
                 case 'comments':
                     $photos = $checklistActivityAudit['photo'];
+                    $qualification_id = $checklistActivityAudit['qualification_id'];
 
                     $historicComments = [
                         "user_id"=> $user->id,
@@ -235,6 +236,8 @@ class ChecklistAudit extends BaseModel
                 break;
                 case 'photo':
                     $checklist_activity_update['photo'] = $checklistActivityAudit['photo'];
+                    $qualification_id = $checklistActivityAudit['qualification_id'];
+
                     if(isset($data['action']) && $data['action'] == 'insert'){
                         if(isset($data['file_photo'])){
                             $str_random = Str::random(5);
