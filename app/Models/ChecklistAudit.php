@@ -401,7 +401,7 @@ class ChecklistAudit extends BaseModel
         $percent_progress = $checklist_audit->percent_progress;
     }
     
-    private function handleQualification($checklist_audit,array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
+    private function handleQualification(array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
     {
         $photos = $checklistActivityAudit['photo'];
         $historicQualification = [
@@ -478,7 +478,7 @@ class ChecklistAudit extends BaseModel
     }
     
     private function handleNewActivity(
-        array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, 
+        $checklist_audit,array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, 
         int &$activities_reviewved, &$photos, &$qualification_id
     )
     {
