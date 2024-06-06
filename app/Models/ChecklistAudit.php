@@ -110,13 +110,14 @@ class ChecklistAudit extends BaseModel
         $assigned = 0;
         $reviewved = 0;
         $percent_progress = 0;
+        $photos = [];
         if ($checklist->modality->code === 'qualify_user') {
             // if(isset($data['users_id'])){
                 foreach ($data['user_ids'] as $userId) {
                     $this->processAudit(
                         $action_request,$checklist, $data, $user, $modelType, $userId, 
                         $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                        $assigned,$reviewved,$percent_progress
+                        $assigned,$reviewved,$percent_progress,$photos
                     );
                 }
             // }
@@ -124,7 +125,7 @@ class ChecklistAudit extends BaseModel
             $this->processAudit($action_request,
                 $checklist, $data, $user, $modelType, 
                 $modelId, $dateAudit, $checklistActivityAuditToCreate, $checklistActivityAuditToUpdate,
-                $assigned,$reviewved,$percent_progress
+                $assigned,$reviewved,$percent_progress,$photos
             );
         }
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
@@ -153,7 +154,7 @@ class ChecklistAudit extends BaseModel
     protected function processAudit(
         $action_request,Checklist $checklist, array $data, User $user, string $modelType, int $modelId, \Illuminate\Support\Carbon $dateAudit, 
         array &$checklistActivityAuditToCreate, array &$checklistActivityAuditToUpdate,
-        &$assigned,&$reviewved,&$percent_progress
+        &$assigned,&$reviewved,&$percent_progress,&$photos
     ): void
     {
         $dateAudit = $dateAudit->format('Y-m-d H:i:s');
@@ -247,6 +248,7 @@ class ChecklistAudit extends BaseModel
                             }
                         }
                     }
+                    $photos = $checklist_activity_update['photo'];
                 break;
                 default:
                 break;
