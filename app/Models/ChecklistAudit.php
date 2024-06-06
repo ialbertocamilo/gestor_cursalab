@@ -372,19 +372,19 @@ class ChecklistAudit extends BaseModel
             ];
             switch ($action_request) {
                 case 'qualification':
-                    handleQualification($data, $checklistActivityAudit, $checklist_activity_update, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handleQualification($data, $checklistActivityAudit, $checklist_activity_update, $dateAuditFormatted, $photos, $qualification_id);
                     break;
                 case 'comments':
-                    handleComments($data, $checklistActivityAudit, $checklist_activity_update, $user, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handleComments($data, $checklistActivityAudit, $checklist_activity_update, $user, $dateAuditFormatted, $photos, $qualification_id);
                     break;
                 case 'photo':
-                    handlePhoto($data, $checklistActivityAudit, $checklist_activity_update, $checklist, $dateAuditFormatted, $photos, $qualification_id);
+                    $this->handlePhoto($data, $checklistActivityAudit, $checklist_activity_update, $checklist, $dateAuditFormatted, $photos, $qualification_id);
                     break;
             }
     
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
         } else {
-            handleNewActivity($data, $checklist, $user, $dateAuditFormatted, $checklistActivityAuditToCreate, $activities_reviewved, $photos, $qualification_id);
+            $this->handleNewActivity($data, $checklist, $user, $dateAuditFormatted, $checklistActivityAuditToCreate, $activities_reviewved, $photos, $qualification_id);
         }
     
         // Update progress
