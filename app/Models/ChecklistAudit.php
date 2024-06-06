@@ -434,6 +434,7 @@ class ChecklistAudit extends BaseModel
     
         $historicComments = [
             'user_id' => $user->id,
+            'name' => $user->fullname,
             'comment' => $data['comment'],
             'date_time' => $dateAuditFormatted
         ];
