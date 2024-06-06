@@ -139,6 +139,10 @@ class ChecklistAudit extends BaseModel
                 $list_photos[] = $photo; 
             }
         }
+
+        if(!is_array($comments)){
+            $comments = [];
+        }
         return [
             'message' => 'Actividad actualizada.',
             'percent_progress' => $percent_progress,
