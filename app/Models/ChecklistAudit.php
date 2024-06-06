@@ -384,7 +384,10 @@ class ChecklistAudit extends BaseModel
     
             $checklistActivityAuditToUpdate[] = $checklist_activity_update;
         } else {
-            $this->handleNewActivity($data, $checklist, $user, $dateAuditFormatted, $checklistActivityAuditToCreate, $activities_reviewved, $photos, $qualification_id);
+            $this->handleNewActivity($checklist_audit,$data, $checklist, $user, $dateAuditFormatted, 
+                $checklistActivityAuditToCreate, $activities_reviewved, 
+                $photos, $qualification_id
+            );
         }
     
         // Update progress
@@ -398,7 +401,7 @@ class ChecklistAudit extends BaseModel
         $percent_progress = $checklist_audit->percent_progress;
     }
     
-    private function handleQualification(array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
+    private function handleQualification($checklist_audit,array $data, array $checklistActivityAudit, array &$checklist_activity_update, string $dateAuditFormatted, &$photos, &$qualification_id)
     {
         $photos = $checklistActivityAudit['photo'];
         $historicQualification = [
@@ -474,7 +477,10 @@ class ChecklistAudit extends BaseModel
         $checklist_activity_update['photo'] = json_encode($checklist_activity_update['photo']);
     }
     
-    private function handleNewActivity(array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, int &$activities_reviewved, &$photos, &$qualification_id)
+    private function handleNewActivity(
+        array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, 
+        int &$activities_reviewved, &$photos, &$qualification_id
+    )
     {
         $photos = [];
         $comments = [];
