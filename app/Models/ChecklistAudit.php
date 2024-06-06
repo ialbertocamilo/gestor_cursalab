@@ -146,8 +146,8 @@ class ChecklistAudit extends BaseModel
             'activities_reviewved' =>  $reviewved,
             'list_photos' => $list_photos,
             'qualification_id' => $qualification_id,
-            'principal_comment' =>  count($comments) > 0  ? $comments->where('principal',true)->first() : null,
-            'comments' => $comments  ? $comments?->where('principal',false)->values() : [],
+            'principal_comment' =>  count($comments) > 0  ? collect($comments)?->where('principal',true)->first() : null,
+            'comments' =>  count($comments) > 0  ? collect($comments)?->where('principal',false)->values() : [],
         ];
     }
 
