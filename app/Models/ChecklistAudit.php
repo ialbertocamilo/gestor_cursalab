@@ -130,11 +130,19 @@ class ChecklistAudit extends BaseModel
         }
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToCreate,'insert');
         ChecklistActivityAudit::insertUpdateMassive($checklistActivityAuditToUpdate,'update');
+        $list_photos = [];
+        if($photos && count($photos) > 0){
+            foreach ($photos as $photo) {
+                $photo['url'] = reportsSignedUrl($photo['url']);
+                $list_photos[] = $photo; 
+            }
+        }
         return [
             'message' => 'Actividad actualizada.',
             'percent_progress' => $percent_progress,
             'activities_assigned' => $assigned,
             'activities_reviewved' =>  $reviewved,
+            'list_photos' => $list_photos
         ];
     }
 
