@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -79,14 +80,16 @@ class CheckList extends BaseModel
         $default_image = 'https://sfo2.digitaloceanspaces.com/cursalab2-statics/cursalab-assets/images/default_image_checklist.png';
         return is_null($imagen) ? $default_image : $imagen; 
     }
-    public function getFinishesAtAttribute($finishes_at){
-        if (is_string($finishes_at)) {
-            $finishes_at = new \DateTime($finishes_at);
+    public function getFinishesAtAttribute($finishes_at) {
+        if(!$finishes_at){
+            return null;
         }
-        if ($finishes_at instanceof \DateTime) {
-            return $finishes_at->format('Y-m-d');
+        try {
+            return Carbon::parse($finishes_at)->format('Y-m-d');
+        } catch (\Throwable $th) {
+            info('catch'.$finishes_at);
+            return null;
         }
-
         return null;
     }
     /*======================================================= SCOPES ==================================================================== */
@@ -1164,8 +1167,9 @@ class CheckList extends BaseModel
         }
         $has_themes = $checklist->isGroupedByArea();
 
-        $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active')->get(); 
+        $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active','parent_id')->get(); 
         $_activities = $checklist->activities;
+        $theme = null;
         if($has_themes){
             if($request->theme_id){
                 $_activities = $checklist->activities->where('tematica_id',$theme_id)->values();
@@ -1206,7 +1210,10 @@ class CheckList extends BaseModel
                     $list_photos[] = $photo; 
                 }
             }
-            $theme = $taxonomy_tematicas->where('id',$activity->tematica_id)->first();
+            if($has_themes && !$theme){
+                $theme = $taxonomy_tematicas->where('id',$activity->tematica_id)->first();
+                $theme->area = Taxonomy::where('id',$theme->parent_id)->select('name')->first()?->name;
+            }
             $qualification_response = '';
             if($activity->checklist_response->code == 'write_option' && $progress?->qualification_id){
                 $qualification_response = Taxonomy::where('id',$progress->qualification_id)->select('name')->first()?->name;
