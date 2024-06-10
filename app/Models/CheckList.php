@@ -1181,6 +1181,7 @@ class CheckList extends BaseModel
             $tematica->count_activities = $checklist->activities->where('tematica_id',$tematica->id)->count();
             $tematica->finished = false;
         }
+        $counter_activity = 1;
         foreach ($_activities as $index => $activity) {
             $extra_attributes = $activity->extra_attributes;
             if($activity->checklist_response->code == 'scale_evaluation'){
@@ -1221,7 +1222,7 @@ class CheckList extends BaseModel
             $comments = $progress?->comments ? collect( $progress?->comments) : null;
             $activities[]  = [
                 'id'=>$activity->id,
-                'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($index+1) : 'Actividad '.($index+1),
+                'name'=> $has_themes ? $theme?->name.' - '.'Actividad '.($counter_activity) : 'Actividad '.($counter_activity),
                 'description'=> $activity->activity,
                 'can_comment'=> $extra_attributes['comment_activity'],
                 'can_upload_image'=> $extra_attributes['photo_response'],
@@ -1234,6 +1235,7 @@ class CheckList extends BaseModel
                 'qualification_response' => $qualification_response,
                 'qualification_id'=> $progress?->qualification_id ?? null,
             ];
+            $counter_activity = $counter_activity + 1;
         }
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
         ->where('id', $user->subworkspace->parent->id)
