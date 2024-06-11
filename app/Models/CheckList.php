@@ -1287,6 +1287,7 @@ class CheckList extends BaseModel
                 'id' => $tematica_id,
                 'name' => $activities->first()->tematica->name,
                 'count_activities_finished'=> $count_activities_with_progress,
+                'count_activities'=> $activities->count(),
                 'finished' =>  $count_activities_with_progress == $activities->count()
             ];
         }
