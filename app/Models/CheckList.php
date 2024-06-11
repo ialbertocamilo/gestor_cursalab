@@ -1266,6 +1266,7 @@ class CheckList extends BaseModel
     }
 
     public function listThemes($request){
+        
         $user = auth()->user();
         $checklist = $this;
         $has_themes = $checklist->isGroupedByArea();
