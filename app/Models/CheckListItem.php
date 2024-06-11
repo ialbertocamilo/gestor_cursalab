@@ -46,6 +46,10 @@ class CheckListItem extends BaseModel
     {
         return $this->belongsTo(Taxonomy::class, 'type_id');
     }
+    public function tematica()
+    {
+        return $this->belongsTo(Taxonomy::class, 'tematica_id');
+    }
 
     /*======================================================= SCOPES ==================================================================== */
 

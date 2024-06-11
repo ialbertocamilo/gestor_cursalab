@@ -232,33 +232,7 @@ class RestChecklistController extends Controller
     }
     
     public function listEntities(CheckList $checklist,Request $request){
-        $user = auth()->user();
-        $entities_criteria = Workspace::where('id',$checklist->workspace_id)->select('checklist_configuration')->first()->checklist_configuration->entities_criteria;
-        $segments_checklist = Segment::select('id')->where('model_id',$checklist->id)->where('model_type','App\\Models\\Checklist')
-        ->whereHas('values',function($q) use ($entities_criteria){
-            $q->whereIn('criterion_id',$entities_criteria);
-        })->with(['values:id,segment_id,criterion_id,criterion_value_id','values.criterion_value:id,value_text'])->get();
-        $entities = $segments_checklist->pluck('values.*.criterion_value')->flatten()->map(function($entity){
-                        return [
-                            'id' => $entity->id,
-                            'name' => $entity->value_text,
-                            'finished' => false
-                        ];
-                    });
-        $checklist->load('type:id,name,code,color');
-        $checklist->load('modality:id,name,code,color');
-        return [
-            'checklist' => [
-                'id' => $checklist->id,
-                "title" => $checklist->title,
-                "imagen" => get_media_url($checklist->imagen),
-                "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
-                "description" => $checklist->description,
-                "type" => $checklist->type,
-                'modality' => $checklist->modality
-            ],
-            'entities' => $entities
-        ];
+       return $checklist->listEntities($request);
     }
 
     public function activitiesByChecklist(CheckList $checklist,Request $request){
@@ -290,8 +264,8 @@ class RestChecklistController extends Controller
         ]);
     }
 
-    public function listUsers(CheckList $checklist){
-        $data = CheckList::listUsers($checklist);
+    public function listUsers(CheckList $checklist,Request $request){
+        $data = CheckList::listUsers($checklist,$request);
         return $this->success($data);
     }
 
@@ -299,6 +273,11 @@ class RestChecklistController extends Controller
         $data = $request->all();
         $action_request = $request->action_request;
         $response = ChecklistAudit::saveActivity($checklist,$data,$action_request,$request);
+        return $this->success($response);
+    }
+
+    public function listThemes(CheckList $checklist,Request $request){
+        $response = $checklist->listThemes($request);
         return $this->success($response);
     }
 }

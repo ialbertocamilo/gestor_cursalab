@@ -22,6 +22,7 @@ Route::controller(RestChecklistController::class)->group(function () {
         Route::post('/checklist/{checklist}/save_activities', 'saveActivities');
 
         Route::get('/checklist/{checklist}/list_progress', 'listProgress');
+        Route::get('/checklist/{checklist}/list-themes', 'listThemes');
         Route::post('/activity/{activity}/verify_photo', 'verifyPhoto');
 
 

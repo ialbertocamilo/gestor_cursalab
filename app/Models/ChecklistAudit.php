@@ -65,8 +65,8 @@ class ChecklistAudit extends BaseModel
         $checklist_audit = collect();
         if ($checklist->modality->code != 'qualify_user') {
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
-            if($request->entity_id){
-                $model_id = $request->entity_id;
+            if(isset($data['entity_id'])){
+                $model_id = $data['entity_id'];
             }else{
                 $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
             }

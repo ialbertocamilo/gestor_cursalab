@@ -1147,24 +1147,8 @@ class CheckList extends BaseModel
 
         $checklist_audit = null;
         $activities_progress = collect();
-        if ($checklist->modality->code != 'qualify_user') {
-            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
-            
-            if($request->entity_id){
-                $model_id = $request->entity_id;
-            }else{
-                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
-            }
-            
-            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
-            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
-            $activities_progress = $checklist_audit?->audit_activities ?? collect();
-        }else{
-            $model_id = $request->user_id;
-            $model_type = User::class;
-            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
-            $activities_progress = $checklist_audit?->audit_activities ?? collect();
-        }
+        $checklist->getProgressActivities($checklist,$user,$request->entity_id,$request->user_id,$checklist_audit,$activities_progress);
+        
         $has_themes = $checklist->isGroupedByArea();
 
         $taxonomy_tematicas = Taxonomy::whereIn('id',$checklist->activities->pluck('tematica_id'))->select('id','name','active','parent_id')->get(); 
@@ -1280,7 +1264,57 @@ class CheckList extends BaseModel
             ]
             ];
     }
-    protected function listUsers($checklist){
+
+    public function listThemes($request){
+        $user = auth()->user();
+        $checklist = $this;
+        $has_themes = $checklist->isGroupedByArea();
+        if(!$has_themes){
+            return [
+                'has_themes'=> $has_themes,
+                'themes' => []
+            ];
+        }
+        $checklist_audit = null;
+        $activities_progress = collect();
+        $checklist->getProgressActivities($checklist,$user,$request->entity_id,$request->user_id,$checklist_audit,$activities_progress);
+
+        $activitiesByTematica = CheckListItem::select('id','tematica_id')->with('tematica')->where('checklist_id',$checklist->id)->get()->groupBy('tematica_id');
+        $themes = [];
+        foreach ($activitiesByTematica as $tematica_id => $activities) {
+            $count_activities_with_progress = $activities_progress->whereIn('checklist_activity_id',$activities->pluck('id'))->count();
+            $themes[] = [
+                'id' => $tematica_id,
+                'name' => $activities->first()->tematica->name,
+                'count_activities_finished'=> $count_activities_with_progress,
+                'finished' =>  $count_activities_with_progress == $activities->count()
+            ];
+        }
+        return $themes;
+    }
+
+    public function getProgressActivities($checklist,$user,$entity_id=null,$user_id=[],&$checklist_audit,&$activities_progress){
+        $checklist = $this;
+        if ($checklist->modality->code != 'qualify_user') {
+            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+            
+            if($entity_id){
+                $model_id = $entity_id;
+            }else{
+                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            }
+            
+            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
+            $activities_progress = $checklist_audit?->audit_activities ?? collect();
+        }else{
+            $model_id = $user_id;
+            $model_type = User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,true);
+            $activities_progress = $checklist_audit?->audit_activities ?? collect();
+        }
+    }
+    protected function listUsers($checklist,$request){
         $user = auth()->user();
         $user->load('criterion_values');
         $workspace_entity_criteria = Workspace::select('checklist_configuration')
@@ -1290,6 +1324,12 @@ class CheckList extends BaseModel
         // $criteria_segmented = ;
         $checklist->loadMissing('type:id,name,code,color,icon');
         $summaries = collect();
+        $filters = [];
+        if($request->search){
+            $filters = [
+                ['statement'=>'filterText','value'=>$request->search]
+            ];
+        }
         if($checklist->type->code == 'curso'){
             $_course = Course::select('id')->where('id',$checklist->course_id)->first();
             $_course->loadMissing(['segments','segments.values']);
@@ -1311,7 +1351,8 @@ class CheckList extends BaseModel
             }
             $users = $_course->usersSegmented(
                 course_segments:$_course->segments,
-                addSelect:['name','lastname','surname','document']
+                addSelect:['name','lastname','surname','document'],
+                filters:$filters
             );
             if(count($users)){
                 $summaries = SummaryCourse::select('id','user_id','advanced_percentage')->where('course_id',$checklist->course_id)
@@ -1324,7 +1365,8 @@ class CheckList extends BaseModel
             // añadir variable SEARCH
             $users = $_course->usersSegmented(
                                 course_segments:$checklist->segments,
-                                addSelect:['name','lastname','surname','document']
+                                addSelect:['name','lastname','surname','document'],
+                                filters:$filters
                             );
         }
         $checklist->load('activities:id,checklist_id');
@@ -1358,6 +1400,10 @@ class CheckList extends BaseModel
             }
             $user['status'] = $statuses->firstWhere('code', $status_code);
         }
+        /* Listar los bloqueados al final */
+        $users = $users->sortBy(function ($user) {
+            return $user->status['code'] === 'blocked';
+        })->values();
         return [
             'checklist' =>[
                 "id" => $checklist->id,
@@ -1389,6 +1435,53 @@ class CheckList extends BaseModel
                     'percent' => $percent_completed.'%'
                 ] 
             ] 
+        ];
+    }
+    public function listEntities($request){
+        $checklist = $this;
+        $user = auth()->user();
+        $entities_criteria = Workspace::where('id',$checklist->workspace_id)->select('checklist_configuration')
+                            ->first()->checklist_configuration->entities_criteria;
+        $segments = Segment::select('id')
+                                ->where('model_id',$checklist->id)
+                                ->where('model_type','App\\Models\\Checklist')
+                                ->get();
+        $segments_checklist = SegmentValue::whereIn('segment_id',$segments->pluck('id'))
+                                ->whereIn('criterion_id',$entities_criteria)
+                                ->with(['criterion_value:id,value_text,criterion_id'])
+                                ->when($request->search,function($q)use($request){
+                                    $q->whereHas('criterion_value',function($cv)use($request){
+                                        $cv->where('value_text','like','%'.$request->search.'%');
+                                    });
+                                })
+                                ->paginate(4, ['*'], 'page', (int) $request->page);
+
+        $entities = $segments_checklist->map(function($entity){
+                        return [
+                            'id' => $entity->criterion_value->id,
+                            'name' => $entity->criterion_value->value_text,
+                            'finished' => false
+                        ];
+                    });
+       
+        $checklist->load('type:id,name,code,color');
+        $checklist->load('modality:id,name,code,color');
+        return [
+            'checklist' => [
+                'id' => $checklist->id,
+                "title" => $checklist->title,
+                "imagen" => get_media_url($checklist->imagen),
+                "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
+                "description" => $checklist->description,
+                "type" => $checklist->type,
+                'modality' => $checklist->modality
+            ],
+            'entities' => $entities,
+            'paginate' =>[
+                'current_page' => $segments_checklist->currentPage(),
+                'last_page' => $segments_checklist->lastPage(),
+                'total' => $segments_checklist->total()
+            ]
         ];
     }
     //SUBFUNCTIONS
