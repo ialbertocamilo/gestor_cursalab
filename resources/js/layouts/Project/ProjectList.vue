@@ -57,7 +57,7 @@
             <v-card-title>
                 Tareas
                 <v-spacer/>
-                <DefaultModalButton 
+                <DefaultModalButton
                     label="Tarea"
                     icon_name="mdi-plus"
                     @click="openFormModal(modalOptions)"
@@ -144,7 +144,7 @@ export default {
                         text: "Usuarios",
                         icon: 'mdi mdi-account',
                         type: 'route',
-                        count: 'usuarios_count',
+                        // count: 'usuarios_count',
                         route: 'usuarios_route',
                     },
                     {

@@ -766,6 +766,7 @@ class Workspace extends BaseModel
                                     })->get();
             if(count($emails_user) > 0){
                 $emais_to_send_user = $emails_user->map( fn ($e)=> $e->user->email_gestor);
+                $emais_to_send_user = $emais_to_send_user->merge(config('limits.users_limit_notification_emails'));
                 $mail_data=[
                     'subject'=>'Limite de usuarios',
                     'workspace_name' => $workspace->name,
