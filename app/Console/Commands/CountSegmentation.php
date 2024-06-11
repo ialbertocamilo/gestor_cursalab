@@ -37,7 +37,7 @@ class CountSegmentation extends Command
             ->where('active', 1)
             ->count();
 
-        if ($usersCount > 2000000) {
+        if ($usersCount > 2000) {
             $this->info('Only 2000 or less users are allowed.');
             return Command::SUCCESS;
         }
