@@ -24,6 +24,7 @@ class QuizAuditEvaluation extends Model
     ];
     protected function saveDataAndGenerateQR($data,$user){
         unset($data['course']);
+        
         unset($data['curso']);
         unset($data['ev_updated_msg']);
         $data['last_time_evaluated_at'] = $data['last_time_evaluated_at']->format('Y-m-d H:i:s');
