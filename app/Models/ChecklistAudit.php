@@ -99,8 +99,8 @@ class ChecklistAudit extends BaseModel
 
         $modelType = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
         $dateAudit = now();
-        if($request->entity_id){
-            $modelId = $request->entity_id;
+        if($request->entity_id || $data['entity_id']){
+            $modelId = $request->entity_id ?? $data['entity_id'];
         }else{
             $modelId = $checklist->modality->code === 'qualify_entity' ? $criterionValueUserEntity->id : $user->id;
         }
