@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
-class UserProgress extends Model 
+class UserProgress extends Model
 {
 	protected function getDataProgress($user = null)
     {
@@ -33,8 +33,9 @@ class UserProgress extends Model
                 ->count() + $user_compatibles_courses_count
             : 0;
 
+        $freeCourseType = Taxonomy::getFirstData('course', 'type', 'free');
         $assigned_courses_count = $assigned_courses
-                ->where('type.code', '<>', 'free')
+                ->where('type_id', '<>', $freeCourseType->id)
                 ->count();
 
         $pending_courses = $assigned_courses_count - $completed_courses;
@@ -46,7 +47,10 @@ class UserProgress extends Model
                 ->whereRelation('status', 'code', 'desaprobado')->count()
             : 0;
 
-        $general_percentage = $assigned_courses->count() > 0 && $summary_user ? round(($completed_courses / $assigned_courses->where('type.code', '<>', 'free')->count()) * 100) : 0;
+
+        $general_percentage = $assigned_courses->count() > 0 && $summary_user
+            ? round(($completed_courses / $assigned_courses_count) * 100)
+            : 0;
         $general_percentage = min($general_percentage, 100);
 
         $total_certificates = Certificate::getTotalByUser($user, $assigned_courses);
@@ -92,12 +96,12 @@ class UserProgress extends Model
                                 ->where('subworkspace_id',$user->subworkspace_id)
                                 ->whereIn('school_id',array_keys($schools->all()))
                                 ->get();
-       
+
         $positions_courses = CourseSchool::select('school_id','course_id','position')
                                 ->whereIn('school_id',array_keys($schools->all()))
                                 ->whereIn('course_id',$user_courses->pluck('id'))
                                 ->get();
-                                
+
         foreach ($schools as $school_id => $courses) {
             // $school_position = $positions_schools->where('school_id', $school_id)->first()?->position;
             $school_workspace = $positions_schools->where('school_id', $school_id)->first();
@@ -147,7 +151,7 @@ class UserProgress extends Model
 
         $total = $courses->count();
         $completed = $courses->where('estado', 'aprobado')->count();
-        
+
         $percentage = $total ? ($completed / $total) * 100 : 0;
 
         return [
@@ -363,7 +367,7 @@ class UserProgress extends Model
         $rows = [];
 
         foreach ($questions as $key => $question) {
-            
+
             $answer = collect($answers)->where('preg_id', $question['id'])->first();
 
             if ($answer) {
@@ -380,9 +384,9 @@ class UserProgress extends Model
                         'es_correcta' => $is_correct,
                         'puntos' => $question['score'],
                     ],
-                ];  
+                ];
 
-                $rows[] = $row;              
+                $rows[] = $row;
             }
         }
 
