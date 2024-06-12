@@ -624,6 +624,7 @@ class ChecklistAudit extends BaseModel
         ];
     }
     protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false,$last_finished=false,$filters=[]){
+        //Falta añadir cuando es replicable el checklist
         $_query = ChecklistAudit::where('checklist_id',$checklist->id)
                                 ->where('model_type',$model_type)
                                 // ->where('model_id',$model_id)

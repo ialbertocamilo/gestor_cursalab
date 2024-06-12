@@ -283,6 +283,64 @@ class RestChecklistController extends Controller
 
     public function saveActionPlan(CheckList $checklist,Request $request){
         $response = ChecklistAudit::saveActionPlan($checklist,$request->all(),$request);
-        return $this->success($response);
+    }
+
+    public function checklistsProgress(){
+        $user = auth()->user();
+        $data = [
+            'fullname'=> $user,
+            'entity_name' => 'Tienda',
+            'graphic' => [
+                'labels'=>[ 'Excelente', 'Regular', 'Deficiente' ],
+                'colors' => [
+                    'rgba(0, 227, 150, 1)',
+                    'rgba(255, 183, 0, 1)',
+                    'rgba(255, 69, 96, 1)'
+                ],
+                'data'=> [ 350, 450, 100 ],
+            ],
+            'checklists'=>[
+                [
+                    "id" => 1,
+                    "title" => 'Checklist 1',
+                    "status" => 'Pendiente',
+                    "modality" => [
+                        'id' => 1,
+                        'name' => 'Entidad',
+                        'code' => 'entity',
+                        'color' => '#5C8D7D'
+                    ],
+                    "type" => 'curso',
+                    'url_maps' =>''
+                ],
+                [
+                    "id" => 2,
+                    "title" => 'Checklist 1',
+                    "status" => 'Pendiente',
+                    "modality" => [
+                        'id' => 1,
+                        'name' => 'Entidad',
+                        'code' => 'entity',
+                        'color' => '#5C8D7D'
+                    ],
+                    "type" => 'curso',
+                    'url_maps' =>''
+                ],
+                [
+                    "id" => 3,
+                    "title" => 'Checklist 1',
+                    "status" => 'Pendiente',
+                    "modality" => [
+                        'id' => 1,
+                        'name' => 'Entidad',
+                        'code' => 'entity',
+                        'color' => '#5C8D7D'
+                    ],
+                    "type" => 'curso',
+                    'url_maps' =>''
+                ],
+            ]
+        ];
+        return $this->success($data);
     }
 }
