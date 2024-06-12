@@ -1260,7 +1260,8 @@ class CheckList extends BaseModel
                 'percent_progress' => $percent_progress,
                 'activities_assigned' => $activities_assigned,
                 'activities_reviewved' =>  $activities_reviewved,
-                'finished' => $finished
+                'finished' => $finished,
+                'show_modal_action_plan' => $finished &&  $checklist->extra_attributes['required_action_plan'] && !boolval($checklist_audit?->action_plan)
             ]
             ];
     }
