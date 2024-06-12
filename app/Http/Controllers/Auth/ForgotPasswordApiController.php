@@ -60,7 +60,7 @@ class ForgotPasswordApiController extends Controller
             // Usuario existe pero no está activo
             return response()->json([
                 'success' => false,
-                'message' => 'El usuario no está activo.'
+                'message' => $userExists['mensaje']
             ], 404);
         }
 
