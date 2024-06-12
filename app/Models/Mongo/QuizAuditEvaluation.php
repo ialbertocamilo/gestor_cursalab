@@ -31,7 +31,8 @@ class QuizAuditEvaluation extends Model
         $quiz_audit = self::create($data);
         $course_id = $data['curso_id'];
         $topic_id = $data['tema_id'];
-        $route_qr = config('app.web_url')."validador-evaluacion?identificator={$quiz_audit->id}&course_id={$course_id}&topic_id={$topic_id}";
+        $gestor_url = env('APP_URL');
+        $route_qr = config('app.web_url')."validador-evaluacion?api_url={$gestor_url}&identificator={$quiz_audit->id}&course_id={$course_id}&topic_id={$topic_id}";
         $qr_code_string = generate_qr_code_in_base_64($route_qr,300,300,1,1);
         $str_random = Str::random(5);
         $name_image = $user->id . '-' . $quiz_audit->id . '-' . date('YmdHis') . '-' . Str::random(4).'.png';
