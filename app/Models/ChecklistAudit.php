@@ -655,7 +655,7 @@ class ChecklistAudit extends BaseModel
                                     }
                                 });
         if(count($filters)){
-            $_query = addExtraFiltersaddExtraFilters($_query,$filters);
+            $_query = addExtraFilters($_query,$filters);
         }                   
         return is_array($model_id) ? $_query->get() : $_query->first();
     }
