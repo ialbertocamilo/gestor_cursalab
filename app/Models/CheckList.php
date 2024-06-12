@@ -1140,11 +1140,11 @@ class CheckList extends BaseModel
 
         $user = auth()->user();
         $checklist->loadMissing([
+            'modality:id,code',
             'type:id,name,code,color',
             'activities:id,checklist_id,checklist_response_id,extra_attributes,activity,type_id,active,position,tematica_id,area_id',
             'activities.checklist_response:id,code',
         ]);
-
         $checklist_audit = null;
         $activities_progress = collect();
         $checklist->getProgressActivities($checklist,$user,$request->entity_id,$request->user_id,$checklist_audit,$activities_progress);
@@ -1300,7 +1300,6 @@ class CheckList extends BaseModel
         $checklist = $this;
         if ($checklist->modality->code != 'qualify_user') {
             $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
-            
             if($entity_id){
                 $model_id = $entity_id;
             }else{

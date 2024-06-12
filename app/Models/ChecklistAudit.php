@@ -623,7 +623,7 @@ class ChecklistAudit extends BaseModel
             'message' => 'Plan de acción guardado correctamente.'
         ];
     }
-    protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false,$last_finished=true,$filters=[]){
+    protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false,$last_finished=false,$filters=[]){
         $_query = ChecklistAudit::where('checklist_id',$checklist->id)
                                 ->where('model_type',$model_type)
                                 // ->where('model_id',$model_id)
