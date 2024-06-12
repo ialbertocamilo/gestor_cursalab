@@ -1458,12 +1458,19 @@ class CheckList extends BaseModel
                                     });
                                 })
                                 ->paginate(4, ['*'], 'page', (int) $request->page);
-
-        $entities = $segments_checklist->map(function($entity){
+        
+        $entities = $segments_checklist->map(function($entity)use ($checklist,$user){
+                        $filters = [
+                            ['statement'=>'where','field'=>'checklist_finished','value'=>1]
+                        ];
+                        $audit = ChecklistAudit::getCurrentChecklistAudit(
+                                    $checklist,CriterionValue::class,$entity->criterion_value->id,$user,
+                                    false,true,$filters
+                                );
                         return [
                             'id' => $entity->criterion_value->id,
                             'name' => $entity->criterion_value->value_text,
-                            'finished' => false
+                            'finished' => boolval($audit)
                         ];
                     });
        
