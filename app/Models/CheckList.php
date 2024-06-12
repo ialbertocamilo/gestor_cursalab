@@ -1287,7 +1287,7 @@ class CheckList extends BaseModel
             $count_activities_with_progress = $activities_progress->whereIn('checklist_activity_id',$activities->pluck('id'))->count();
             $themes[] = [
                 'id' => $tematica_id,
-                'name' => $activities?->first()->tematica->name,
+                'name' => $activities?->first()->tematica?->name,
                 'count_activities_finished'=> $count_activities_with_progress,
                 'count_activities'=> $activities->count(),
                 'finished' =>  $count_activities_with_progress == $activities->count()
