@@ -280,4 +280,9 @@ class RestChecklistController extends Controller
         $response = $checklist->listThemes($request);
         return $this->success($response);
     }
+
+    public function saveActionPlan(CheckList $checklist,Request $request){
+        $response = ChecklistAudit::saveActionPlan($checklist,$request->all(),$request);
+        return $this->success($response);
+    }
 }

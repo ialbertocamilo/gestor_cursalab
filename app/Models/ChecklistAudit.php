@@ -393,7 +393,7 @@ class ChecklistAudit extends BaseModel
         } else {
             $this->handleNewActivity($checklist_audit,$data, $checklist, $user, $dateAuditFormatted, 
                 $checklistActivityAuditToCreate, $activities_reviewved, 
-                $photos, $qualification_id
+                $photos, $qualification_id,$comments
             );
         }
     
@@ -497,7 +497,7 @@ class ChecklistAudit extends BaseModel
     
     private function handleNewActivity(
         $checklist_audit,array $data, Checklist $checklist, User $user, string $dateAuditFormatted, array &$checklistActivityAuditToCreate, 
-        int &$activities_reviewved, &$photos, &$qualification_id
+        int &$activities_reviewved, &$photos, &$qualification_id,&$comments
     )
     {
         $photos = [];
@@ -507,7 +507,8 @@ class ChecklistAudit extends BaseModel
             $comments[] = [
                 'user_id' => $user->id,
                 'comment' => $data['comment'],
-                'date_time' => $dateAuditFormatted
+                'date_time' => $dateAuditFormatted,
+                'principal' => true,
             ];
         }
     
@@ -595,8 +596,34 @@ class ChecklistAudit extends BaseModel
             ]
         ];
     }
+    protected function saveActionPlan($checklist,$data,$request){
+        $user = auth()->user();
+        if ($checklist->modality->code != 'qualify_user') {
+            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+            if($request->entity_id){
+                $model_id = $request->entity_id;
+            }else{
+                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            }
 
-    protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false){
+            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+            $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,false,true);
+            $checklist_audit->action_plan=$data['action_plan'];
+            $checklist_audit->save();
+        }else{
+            $model_ids = $data['user_ids'];
+            $model_type = User::class;
+            foreach ($model_ids as $key => $model_id) {
+                $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,false,true);
+                $checklist_audit->action_plan=$data['action_plan'];
+                $checklist_audit->save();
+            }
+        }
+        return [
+            'message' => 'Plan de acción guardado correctamente.'
+        ];
+    }
+    protected function getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,$with_audit_activities=false,$last_finished=true,$filters=[]){
         $_query = ChecklistAudit::where('checklist_id',$checklist->id)
                                 ->where('model_type',$model_type)
                                 // ->where('model_id',$model_id)
@@ -610,7 +637,6 @@ class ChecklistAudit extends BaseModel
                                 ->when($checklist->extra_attributes['view_360'], function($q) use($user){
                                     $q->where('auditor_id',$user->id);
                                 })
-                                ->whereNull('finishes_at')
                                 ->when($with_audit_activities, function($q){
                                     $q->with('audit_activities:id,checklist_audit_id,checklist_activity_id,qualification_id,photo,comments');
                                 })
@@ -620,11 +646,19 @@ class ChecklistAudit extends BaseModel
                                     } else {
                                         $query->first('model_id', $model_id);
                                     }
+                                })
+                                ->where(function ($query) use ($last_finished) {
+                                    if($last_finished){
+                                        $query->whereNotNull('finishes_at')->orderBy('finishes_at','desc');
+                                    }else{
+                                        $query->whereNull('finishes_at');
+                                    }
                                 });
-        if (is_array($model_id)) {
-            return $_query->get();
-        } else {
-            return $_query->first();
-        }
+        if(count($filters)){
+            $_query = addExtraFiltersaddExtraFilters($_query,$filters);
+        }                   
+        return is_array($model_id) ? $_query->get() : $_query->first();
     }
+
+    
 }

@@ -778,3 +778,20 @@ function currentPlatform(){
 function verifyBooleanValue($value){
     return ($value === 'true' or $value === true or $value === 1 or $value === '1');
 }
+
+function addExtraFilters($query,$filters){
+    foreach ($filters as $filter) {
+        $statement = $filter['statement'] ?? null;
+        $field = $filter['field'] ?? null;
+        $value = $filter['value'] ?? null;
+        $operator = $filter['operator'] ?? '=';
+        if($field && $operator){
+            /*Example: $query->where('subworkspace_id',32) , $query->whereNotNull('email') */
+            ($value) ? $query->$statement($field,$operator, $value) : $query->$statement($field);
+        }else if($statement && $value){
+            /*Example: $query->filterText($value)*/
+            $query->$statement($value);
+        }
+    }  
+    return $query;
+}
