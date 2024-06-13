@@ -1465,9 +1465,13 @@ class CheckList extends BaseModel
         $criterion_values_id = [];
         $criterion_values_id[] = $checklist->extra_attributes['autocalificate_entity_criteria_value'];
         $criterion_values_id[] = $entity->id;
-        $list_users = User::select('id','name','lastname','surname')->whereHas('criterion_values',function($q) use ($criterion_values_id){
-            $q->whereIn('id',$criterion_values_id);
-        })->paginate(10, ['*'], 'page', (int) $request->page);
+        $list_users = User::select('id','name','lastname','surname')
+                        ->when($request->search,function($q) use ($request){
+                            $q->filterText($request->search);
+                        })
+                        ->whereHas('criterion_values',function($q) use ($criterion_values_id){
+                            $q->whereIn('id',$criterion_values_id);
+                        })->paginate(10, ['*'], 'page', (int) $request->page);
         return [
             'supervised' => $list_users->items(),
             'paginate' =>[
