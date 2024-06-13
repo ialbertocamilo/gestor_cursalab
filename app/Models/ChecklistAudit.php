@@ -662,7 +662,7 @@ class ChecklistAudit extends BaseModel
         Media::uploadMediaBase64(name:'', path:$path_signature, base64:$data['signature'],save_in_media:false,status:'private');
         $checklist_audit->signature_supervised = json_encode([
             'path_signature' => $path_signature,
-            'supervised_id' => $request->user_id ?? $request->supervised_id
+            'supervised_id' => isset($data['user_id']) ? $data['user_id'] : $request->user_id ?? $request->supervised_id
         ]);
         $checklist_audit->save();
         return [
