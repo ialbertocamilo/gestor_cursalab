@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Requirement;
 use App\Models\Tag;
 use App\Models\Poll;
 use App\Models\Post;
@@ -98,7 +99,7 @@ class TemaController extends Controller
         }
         $dinamyc_link = $dinamyc_link.'/lista-reuniones';
 
-        
+
         $is_offline = $course->is_offline;
         $response = compact('tags', 'requisitos', 'evaluation_types', 'qualification_types', 'qualification_type',
                              'media_url', 'default_position', 'max_position','limits_ia_convert',
@@ -276,6 +277,13 @@ class TemaController extends Controller
         $tema_evaluable = Topic::where('course_id', $course->id)->where('assessable', ACTIVE)->first();
         $course->assessable = $tema_evaluable ? 1 : 0;
         $course->save();
+
+        // Remove topic requirement
+
+        Requirement::query()
+            ->where('model_type', 'App\\Models\\Topic')
+            ->where('model_id', $topic->id)
+            ->delete();
 
         $response = [
             'tema' => $topic,

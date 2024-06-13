@@ -40,7 +40,6 @@
 export default {
     props: {
         ID: {
-            type: String,
             required: true
         },
         description: {
