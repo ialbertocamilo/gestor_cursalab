@@ -15,6 +15,7 @@ class ChecklistAudit extends BaseModel
         'id',
         'identifier_request',
         'signature_supervisor',
+        // 'signature_supervised',
         'checklist_id',
         'percent_progress',
         'checklist_finished',

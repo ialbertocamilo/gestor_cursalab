@@ -1236,7 +1236,6 @@ class CheckList extends BaseModel
         $activities_assigned  = $checklist->activities->count();
         $activities_reviewved  = $checklist_audit?->activities_reviewved ?? 0;
         $finished  = boolval($checklist_audit?->checklist_finished);
-
         $percent_progress  = round(($activities_reviewved/$activities_assigned),2)*100;
         return [
             'user'=>[
@@ -1252,6 +1251,7 @@ class CheckList extends BaseModel
                 'has_themes' => $has_themes,
                 'list_themes' => $taxonomy_tematicas,
                 'required_signature_supervisor'=>$checklist->extra_attributes['required_signature_supervisor'],
+                'required_signature_supervised' => $checklist->extra_attributes['required_signature_supervised'],
                 "imagen" => get_media_url($checklist->imagen),
                 "description" => $checklist->description,
                 'supervisor' => $user->fullname,
@@ -1264,7 +1264,8 @@ class CheckList extends BaseModel
                 'activities_assigned' => $activities_assigned,
                 'activities_reviewved' =>  $activities_reviewved,
                 'finished' => $finished,
-                'show_modal_action_plan' => $finished &&  $checklist->extra_attributes['required_action_plan'] && !boolval($checklist_audit?->action_plan)
+                'show_modal_action_plan' => $finished &&  $checklist->extra_attributes['required_action_plan'] && !boolval($checklist_audit?->action_plan),
+                'show_modal_signature_supervised' => $finished &&  $checklist->extra_attributes['required_signature_supervised'] && boolval($checklist_audit?->action_plan)
             ]
             ];
     }
