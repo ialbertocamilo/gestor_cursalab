@@ -1549,7 +1549,7 @@ class CheckList extends BaseModel
                                 })
                                 ->first();
 
-        $status = $audit ? [
+        $status = $audit && $audit?->checklist_finished ? [
                     'code' => 'realizado',
                     'name' => 'Realizado '.$audit->date_audit,
                     'color' => '#25B374'
