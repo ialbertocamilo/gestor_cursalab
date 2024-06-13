@@ -414,9 +414,9 @@ class Topic extends BaseModel
         $temp['list'] = [];
 
         foreach ($requirements as $requirement) {
-            $requisito = Topic::find($requirement->requirement_id);
+            $requisito = Topic::find($requirement->model_id);
             $route = route('temas.editTema', [$school->id, $topic->course->id, $requirement->requirement_id]);
-            $temp['list'][] = "<a href='{$route}'>" . $requisito->name . "</a>";
+            $temp['list'][] = "" . $requisito->name . " (ID: $requisito->id)";
         }
 
         return $temp;

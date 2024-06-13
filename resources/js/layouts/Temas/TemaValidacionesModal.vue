@@ -36,6 +36,7 @@
                         <li v-for="(item, i) in validation.list" :key="i" v-html="item"/>
                     </ul>
                 </div>
+                <!--
                 <div class="mt-2">
                     <label class="form-check-label"
                            v-text="'Si deseas descargar el reporte antes del cambio haz click aquí 👇'"/>
@@ -50,6 +51,7 @@
                         />
                     </div>
                 </div>
+                -->
             </div>
             <div
                 v-else
