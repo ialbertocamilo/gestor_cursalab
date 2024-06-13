@@ -188,10 +188,10 @@ class TemaController extends Controller
         if(!Topic::validateAvaiableAccount($course,$data)){
             return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
         }
-        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
 
         $tema = Topic::storeRequest($data);
+        $this->uploadQRTopic($tema);
         $course->storeUpdateMeeting();
         $response = [
             'tema' => $tema,
@@ -229,7 +229,6 @@ class TemaController extends Controller
         if(!Topic::validateAvaiableAccount($course,$data,$topic)){
             return $this->error('No se puede crear la sesión virtual debido a que no hay una cuenta disponible en el horario elegido.');
         }
-        $data = $this->uploadQRTopic($data);
         $data = Media::requestUploadFile($data, 'imagen');
 
         // info($data);
@@ -239,8 +238,8 @@ class TemaController extends Controller
             if (count($validations['list']) > 0)
                 return $this->success(compact('validations'), 'Ocurrió un error.', 422);
         endif;
-
         $topic = Topic::storeRequest($data, $topic);
+        $this->uploadQRTopic($topic);
         $course->storeUpdateMeeting();
         $response = [
             'tema' => $topic,
@@ -250,15 +249,30 @@ class TemaController extends Controller
 
         return $this->success($response);
     }
-    private function uploadQRTopic($data){
-        if(isset($data['path_qr']) && str_contains($data['path_qr'], 'base64')){
-            $name =  'qr/'.Str::slug($data['name']).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
+    private function uploadQRTopic($topic){
+        $dinamyc_link = 'https://app.cursalab.io';
+        $gestor_url = env('APP_URL');
+        if(Str::contains($gestor_url, 'inretail') ){
+            $dinamyc_link = 'https://inretail.cursalab.io';
+        }
+        if(Str::contains($gestor_url, 'potenciandotutalentongr') ){
+            $dinamyc_link = 'https://potenciandotutalentongr.pe';
+        }
+        if(Str::contains($gestor_url, 'campusaustralgroup') ){
+            $dinamyc_link = 'https://campusaustralgroup.com';
+        }
+        $dinamyc_link = $dinamyc_link.'/lista-reuniones/opciones-curso/'.$tema->id;
+        if(!$topic->path_qr){
+            $qr_code_string = generate_qr_code_in_base_64($dinamyc_link,300,300,1,1);
+            $name =  'qr/'.Str::slug($topic->name).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
             $name = Str::of($name)->limit(100);
             $path = $name.'.png';
-            $media = Media::uploadMediaBase64('', $path, $data['path_qr'],false);
-            $data['path_qr'] = get_media_url($path,'s3');
+            // Ruta donde se guardará la imagen en el servidor
+            $path = 'validador-evaluacion-qr/'.$course_id.'/'.$name_image;
+            Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
+            $topic->path_qr = get_media_url($path);
+            $topic->save();
         }
-        return $data;
     }
     public function destroy(School $school, Course $course, Topic $topic, Request $request)
     {
