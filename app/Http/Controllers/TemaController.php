@@ -268,7 +268,7 @@ class TemaController extends Controller
             $name = Str::of($name)->limit(100);
             $path = $name.'.png';
             // Ruta donde se guardará la imagen en el servidor
-            $path = 'validador-evaluacion-qr/'.$course_id.'/'.$name_image;
+            $path = 'validador-evaluacion-qr/'.$course_id.'/'.$path;
             Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
             $topic->path_qr = get_media_url($path);
             $topic->save();
