@@ -64,10 +64,10 @@ class ChecklistAudit extends BaseModel
 
         $checklist_audit = collect();
         if ($checklist->modality->code != 'qualify_user') {
-            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
             if(isset($data['entity_id'])){
                 $model_id = $data['entity_id'];
             }else{
+                $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
                 $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
             }
             $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
@@ -436,7 +436,14 @@ class ChecklistAudit extends BaseModel
         $checklist_activity_update['historic_qualification'][] = $historicQualification;
         $checklist_activity_update['historic_qualification'] = json_encode($checklistActivityAudit['historic_qualification']);
     }
-    
+    // $checklist_activity_update['comments'] = isset($checklistActivityAudit['comments']) ? $checklistActivityAudit['comments'] : [];
+        // $historicComments['principal'] = count($checklist_activity_update['comments']) == 0;
+        // if (is_array($checklist_activity_update['comments'])) {
+        //     $checklist_activity_update['comments'][] = $historicComments;
+        // } else {
+        //     $checklist_activity_update['comments'] = [];
+        //     $checklist_activity_update['comments'][] = $historicComments;
+        // }
     private function handleComments(
         array $data, array $checklistActivityAudit, array &$checklist_activity_update, User $user, string $dateAuditFormatted,
          &$photos, &$qualification_id,&$comments
@@ -451,14 +458,23 @@ class ChecklistAudit extends BaseModel
             'comment' => $data['comment'],
             'date_time' => $dateAuditFormatted
         ];
-        $checklist_activity_update['comments'] = isset($checklistActivityAudit['comments']) ? $checklistActivityAudit['comments'] : [];
-        $historicComments['principal'] = count($checklist_activity_update['comments']) == 0;
-        if (is_array($checklist_activity_update['comments'])) {
-            $checklist_activity_update['comments'][] = $historicComments;
+
+        if (isset($checklistActivityAudit['comments'])) {
+            $commentsCollection = collect($checklistActivityAudit['comments']);
+            $userHasComment = $commentsCollection->firstWhere('user_id', $user->id);
+            if ($userHasComment) {
+                $userHasComment['comment'] = $data['comment'];
+                $commentsCollection = $commentsCollection->map(function ($comment) use ($userHasComment) {
+                    return $comment['user_id'] === $userHasComment['user_id'] ? $userHasComment : $comment;
+                });
+            } else {
+                $commentsCollection->push($historicComments);
+            }
+            $checklist_activity_update['comments'] = $commentsCollection->toArray();
         } else {
-            $checklist_activity_update['comments'] = [];
-            $checklist_activity_update['comments'][] = $historicComments;
+            $checklist_activity_update['comments'] = [$historicComments];
         }
+
         $comments = $checklist_activity_update['comments'];
         $checklist_activity_update['comments'] = json_encode($checklist_activity_update['comments']);
     }
@@ -599,10 +615,10 @@ class ChecklistAudit extends BaseModel
     protected function saveActionPlan($checklist,$data,$request){
         $user = auth()->user();
         if ($checklist->modality->code != 'qualify_user') {
-            $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
             if($request->entity_id){
                 $model_id = $request->entity_id;
             }else{
+                $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
                 $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
             }
 
