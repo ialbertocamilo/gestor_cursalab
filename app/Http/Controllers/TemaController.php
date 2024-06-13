@@ -262,17 +262,15 @@ class TemaController extends Controller
             $dinamyc_link = 'https://campusaustralgroup.com';
         }
         $dinamyc_link = $dinamyc_link.'/lista-reuniones/opciones-curso/'.$topic->id;
-        if(!$topic->path_qr){
-            $qr_code_string = generate_qr_code_in_base_64($dinamyc_link,300,300,1,1);
-            $name =  'qr/'.Str::slug($topic->name).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
-            $name = Str::of($name)->limit(100);
-            $path = $name.'.png';
-            // Ruta donde se guardará la imagen en el servidor
-            $path = 'validador-evaluacion-qr/'.$topic->course_id.'/'.$path;
-            Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
-            $topic->path_qr = get_media_url($path);
-            $topic->save();
-        }
+        $qr_code_string = generate_qr_code_in_base_64($dinamyc_link,300,300,1,1);
+        $name =  'qr/'.Str::slug($topic->name).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
+        $name = Str::of($name)->limit(100);
+        $path = $name.'.png';
+        // Ruta donde se guardará la imagen en el servidor
+        $path = 'validador-evaluacion-qr/'.$topic->course_id.'/'.$path;
+        Media::uploadMediaBase64(name:'', path:$path, base64:$qr_code_string,save_in_media:false);
+        $topic->path_qr = get_media_url($path);
+        $topic->save();
     }
     public function destroy(School $school, Course $course, Topic $topic, Request $request)
     {
