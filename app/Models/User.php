@@ -744,8 +744,13 @@ class User extends Authenticatable implements Identifiable, Recordable, HasMedia
             // Update flag to recalculate users count
             // in segmented courses
 
-            SegmentationService::segmentationStateHasChanged($user->subworkspace_id);
+            $usersCount = User::query()
+                ->where('active', 1)
+                ->count();
 
+            if ($usersCount <= 2000) {
+                SegmentationService::segmentationStateHasChanged($user->subworkspace_id);
+            }
                 //throw $th;
             DB::commit();
             return $user;
