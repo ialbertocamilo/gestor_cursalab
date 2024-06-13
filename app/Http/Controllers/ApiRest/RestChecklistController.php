@@ -283,12 +283,13 @@ class RestChecklistController extends Controller
 
     public function saveActionPlan(CheckList $checklist,Request $request){
         $response = ChecklistAudit::saveActionPlan($checklist,$request->all(),$request);
+        return $this->success($response);
     }
 
     public function checklistsProgress(){
         $user = auth()->user();
         $data = [
-            'fullname'=> $user,
+            // 'fullname'=> $user,
             'entity_name' => 'Tienda',
             'graphic' => [
                 'labels'=>[ 'Excelente', 'Regular', 'Deficiente' ],
