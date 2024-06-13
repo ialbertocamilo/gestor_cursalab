@@ -261,7 +261,7 @@ class TemaController extends Controller
         if(Str::contains($gestor_url, 'campusaustralgroup') ){
             $dinamyc_link = 'https://campusaustralgroup.com';
         }
-        $dinamyc_link = $dinamyc_link.'/lista-reuniones/opciones-curso/'.$tema->id;
+        $dinamyc_link = $dinamyc_link.'/lista-reuniones/opciones-curso/'.$topic->id;
         if(!$topic->path_qr){
             $qr_code_string = generate_qr_code_in_base_64($dinamyc_link,300,300,1,1);
             $name =  'qr/'.Str::slug($topic->name).'-'.get_current_workspace()?->id . '-' . date('YmdHis') . '-' . Str::random(3);
