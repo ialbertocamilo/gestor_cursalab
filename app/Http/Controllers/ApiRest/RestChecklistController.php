@@ -285,6 +285,10 @@ class RestChecklistController extends Controller
         $response = ChecklistAudit::saveActionPlan($checklist,$request->all(),$request);
         return $this->success($response);
     }
+    public function saveSignatureSupervised(CheckList $checklist,Request $request){
+        $response = ChecklistAudit::saveSignatureSupervised($checklist,$request->all(),$request);
+        return $this->success($response);
+    }
 
     public function checklistsProgress(){
         $user = auth()->user();
@@ -342,6 +346,11 @@ class RestChecklistController extends Controller
                 ],
             ]
         ];
+        return $this->success($data);
+    }
+    
+    public function listSupervisedChecklist(Checklist $checklist,CriterionValue $entity){
+        $data = Checklist::listSupervisedChecklist($checklist,$entity);
         return $this->success($data);
     }
 }

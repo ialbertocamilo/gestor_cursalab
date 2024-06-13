@@ -15,7 +15,7 @@ class ChecklistAudit extends BaseModel
         'id',
         'identifier_request',
         'signature_supervisor',
-        // 'signature_supervised',
+        'signature_supervised',
         'checklist_id',
         'percent_progress',
         'checklist_finished',
@@ -636,6 +636,32 @@ class ChecklistAudit extends BaseModel
                 $checklist_audit->save();
             }
         }
+        return [
+            'message' => 'Plan de acción guardado correctamente.'
+        ];
+    }
+    protected function saveSignatureSupervised($checklist,$data,$request){
+        $user = auth()->user();
+        if ($checklist->modality->code != 'qualify_user') {
+            if($request->entity_id){
+                $model_id = $request->entity_id;
+            }else{
+                $criterion_value_user_entity = ChecklistAudit::getCriterionValueUserEntity($checklist, $user);
+                $model_id = $checklist->modality->code === 'qualify_entity' ? $criterion_value_user_entity->id : $user->id;
+            }
+            $model_type = $checklist->modality->code === 'qualify_entity' ? CriterionValue::class : User::class;
+        }else{
+            $model_id = $request->user_id;
+            $model_type = User::class;
+        }
+        $checklist_audit =  ChecklistAudit::getCurrentChecklistAudit($checklist,$model_type,$model_id,$user,false,true);
+        $str_random = Str::random(5);
+        $name_image = $user->subworkspace_id . '-' . Str::random(4) . '-' . date('YmdHis') . '-' . $str_random.'_supervised.png';
+        // Ruta donde se guardará la imagen en el servidor
+        $path_signature = 'checklist-signatures/'.$checklist->id.'/'.$name_image;
+        Media::uploadMediaBase64(name:'', path:$path_signature, base64:$data['signature'],save_in_media:false,status:'private');
+        $checklist_audit->signature_supervised = $path_signature;
+        $checklist_audit->save();
         return [
             'message' => 'Plan de acción guardado correctamente.'
         ];

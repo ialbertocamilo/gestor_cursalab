@@ -172,4 +172,5 @@ class ChecklistController extends Controller
         CheckListItem::deleteTematica($taxonomy);
         return $this->success(['msg'=>'Se elimino la temática correctamente.']);
     }
+
 }

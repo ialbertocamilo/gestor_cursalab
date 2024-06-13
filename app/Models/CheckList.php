@@ -1460,6 +1460,15 @@ class CheckList extends BaseModel
             ] 
         ];
     }
+    protected function listSupervisedChecklist($checklist,$entity){
+        $user = auth()->user();
+        $criterion_values_id = [];
+        $criterion_values_id[] = $checklist->extra_attributes['autocalificate_entity_criteria_value'];
+        $criterion_values_id[] = $entity->id;
+        $list_users = User::whereHas('criterion_value_user',function($q) use ($criterion_values_id){
+            
+        });
+    }
     public function listEntities($request){
         $checklist = $this;
         $user = auth()->user();
