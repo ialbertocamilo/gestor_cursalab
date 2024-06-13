@@ -1,6 +1,6 @@
 <template>
     <div class="w-100">
-        <div class="d-flex justify-content-center mb-2" v-if="title">
+        <div class="d-flex justify-content-center mb-2" v-icf="title">
             <label class="default-rich-text-title">{{ title }}</label>
         </div>
         <fieldset class="editor">
