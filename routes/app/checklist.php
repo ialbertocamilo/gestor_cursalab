@@ -26,7 +26,7 @@ Route::controller(RestChecklistController::class)->group(function () {
         Route::get('/checklist/{checklist}/{entity}/list-supervised', 'listSupervisedChecklist');
 
         Route::post('/checklist/{checklist}/save_action_plan', 'saveActionPlan');
-        Route::post('/checklist/{checklist}/save_signaure_supervised', 'saveSignatureSupervised');
+        Route::post('/checklist/{checklist}/save_signature_supervised', 'saveSignatureSupervised');
 
         Route::post('/activity/{activity}/verify_photo', 'verifyPhoto');
         Route::get('/checklists/progress', 'checklistsProgress');
