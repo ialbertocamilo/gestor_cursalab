@@ -1258,6 +1258,7 @@ class CheckList extends BaseModel
                 "required_geolocalization"=> $checklist->extra_attributes['required_geolocation'],
                 'required_action_plan' => $checklist->extra_attributes['required_action_plan'],
                 "type" => $checklist->type,
+                'modality' => $checklist->modality,
                 "theme"=>$theme,
                 'activities' => $activities,
                 'percent_progress' => $percent_progress,
