@@ -660,7 +660,10 @@ class ChecklistAudit extends BaseModel
         // Ruta donde se guardará la imagen en el servidor
         $path_signature = 'checklist-signatures/'.$checklist->id.'/'.$name_image;
         Media::uploadMediaBase64(name:'', path:$path_signature, base64:$data['signature'],save_in_media:false,status:'private');
-        $checklist_audit->signature_supervised = $path_signature;
+        $checklist_audit->signature_supervised = json_encode([
+            'path_signature' => $path_signature,
+            'supervised_id' => $request->user_id ?? $request->supervised_id
+        ]);
         $checklist_audit->save();
         return [
             'message' => 'Plan de acción guardado correctamente.'
