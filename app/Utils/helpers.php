@@ -430,6 +430,7 @@ function current_subworkspaces_id($field = 'id')
         return $subworkspaces->pluck($field)->toarray();
     }
 
+    
     return [];
 }
 
