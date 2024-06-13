@@ -1281,13 +1281,30 @@ class CheckList extends BaseModel
         $activities_progress = collect();
         $checklist->getProgressActivities($checklist,$user,$request->entity_id,$request->user_id,$checklist_audit,$activities_progress);
 
-        $activitiesByTematica = CheckListItem::select('id','tematica_id')->with('tematica')->where('checklist_id',$checklist->id)->get()->groupBy('tematica_id');
+        $activitiesByTematica = CheckListItem::select(
+                                    'checklist_items.id',
+                                    'checklist_items.tematica_id',
+                                    DB::raw('CONCAT(area.name, " - ", tematica.name) as area_tematica')
+                                )
+                                ->join('taxonomies as tematica', 'checklist_items.tematica_id', '=', 'tematica.id')
+                                ->join('taxonomies as area', 'area.id', '=', 'checklist_items.area_id')
+                                ->where('checklist_items.checklist_id', $checklist->id)
+                                ->when($request->search, function ($q) use ($request) {
+                                    $q->where(function ($query) use ($request) {
+                                        $searchTerm = '%' . $request->search . '%';
+                                        $query->where('area.name', 'like', $searchTerm)
+                                              ->orWhere('tematica.name', 'like', $searchTerm);
+                                    });
+                                })                                
+                                ->orderBy('checklist_items.area_id','asc')
+                                ->get()->groupBy('tematica_id');
+                                //;
         $themes = [];
         foreach ($activitiesByTematica as $tematica_id => $activities) {
             $count_activities_with_progress = $activities_progress->whereIn('checklist_activity_id',$activities->pluck('id'))->count();
             $themes[] = [
                 'id' => $tematica_id,
-                'name' => $activities?->first()->tematica?->name,
+                'name' => $activities?->first()?->area_tematica,
                 'count_activities_finished'=> $count_activities_with_progress,
                 'count_activities'=> $activities->count(),
                 'finished' =>  $count_activities_with_progress == $activities->count()
