@@ -349,8 +349,8 @@ class RestChecklistController extends Controller
         return $this->success($data);
     }
     
-    public function listSupervisedChecklist(Checklist $checklist,CriterionValue $entity){
-        $data = Checklist::listSupervisedChecklist($checklist,$entity);
+    public function listSupervisedChecklist(Checklist $checklist,CriterionValue $entity,Request $request){
+        $data = Checklist::listSupervisedChecklist($checklist,$entity,$request);
         return $this->success($data);
     }
 }
