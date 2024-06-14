@@ -1577,7 +1577,7 @@ class CheckList extends BaseModel
             ],
             "type" => $checklist->type,
             'url_maps' =>'',
-            'auditor_calificate_all_entity'=> $auditor_calificate_all_entity
+            'auditor_calificate_all_entity'=> !$auditor_calificate_all_entity
         ];
     }
     
