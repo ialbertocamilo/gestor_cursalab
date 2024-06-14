@@ -419,6 +419,7 @@ function get_subworkspaces_id($workspace)
         return $subworkspaces->pluck('id')->toarray();
     }
 
+    
     return [];
 }
 
