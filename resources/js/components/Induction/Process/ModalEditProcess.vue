@@ -57,7 +57,7 @@
                                                     </legend>
                                                     <editor
                                                         @input="maxCharacters(process.description)"
-                                                        api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                        api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                                         v-model="process.description"
                                                         :init="{
                                                             content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -213,7 +213,7 @@
                                                             <legend>Edita el mensaje que se mostrará al usuario
                                                             </legend>
                                                             <editor
-                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                                                 v-model="process.message_user_deleted"
                                                                 :init="{
                                                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -621,7 +621,7 @@
                                                                             <editor
                                                                                 @onfocus="instructionSelected(instruction.description, instruction.id)"
                                                                                 @input="instructionSelected(instruction.description, instruction.id)"
-                                                                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                                                                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                                                                 v-model="instruction.description"
                                                                                 :init="{
                                                                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
