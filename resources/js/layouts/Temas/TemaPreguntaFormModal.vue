@@ -38,7 +38,7 @@
                                 <RequiredFieldSymbol/>
                             </legend>
                             <editor
-                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                 v-model="resource.pregunta"
                                 :init="{
                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -70,7 +70,7 @@
                         <fieldset class="editor">
                             <legend>Respuesta</legend>
                             <editor
-                                api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                 v-model="tempAnswer"
                                 :init="{
                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',

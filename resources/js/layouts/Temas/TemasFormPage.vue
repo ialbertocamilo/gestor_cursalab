@@ -34,7 +34,7 @@
                             <fieldset class="editor mt-2">
                                 <legend>Descripción y/u objetivos</legend>
                                 <editor
-                                    api-key="6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85"
+                                    api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
                                     v-model="resource.content"
                                     :init="{
                                         deprecation_warnings: false,
