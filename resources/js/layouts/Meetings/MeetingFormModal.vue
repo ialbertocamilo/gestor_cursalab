@@ -246,7 +246,7 @@
                         <fieldset class="editor">
                             <legend>Descripción</legend>
                             <editor
-                                api-key="dph7cfjyhfkb998no53zdbcbwxvxtge2o84f02zppo4eix1g"
+                                :api-key="$root.getEditorAPIKey()"
                                 v-model="resource.description"
                                 :init="{
                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',

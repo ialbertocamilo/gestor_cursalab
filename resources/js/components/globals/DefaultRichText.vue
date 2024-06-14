@@ -11,7 +11,7 @@
 
             <!-- api key prod:  6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85-->
             <editor
-                api-key="dph7cfjyhfkb998no53zdbcbwxvxtge2o84f02zppo4eix1g"
+                :api-key="$root.getEditorAPIKey()"
                 v-model="localText"
                 :init="{
                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',

@@ -18,6 +18,7 @@
     <meta name="BUCKET_BASE_URL" content="{{ App\Services\FileService::generateUrl('/') }}">
     <meta name="REPORTS_BASE_URL" content="{{ env('REPORTS_BASE_URL') }}">
     <meta name="JARVIS_BASE_URL" content="{{ env('JARVIS_BASE_URL') }}">
+    <meta name="EDITOR" content="{{ base64_encode(env('EDITOR_API_KEY')) }}">
 
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}">
