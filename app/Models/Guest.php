@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\UsuarioMaster;
-use App\Models\UsuarioMaster;
-use App\Models\UsuarioMaster;
 use Carbon\Carbon;
 use App\RegisterUrl;
 use App\Mail\EmailTemplate;
