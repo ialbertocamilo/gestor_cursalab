@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\UsuarioMaster;
+use App\Models\UsuarioMaster;
+use App\Models\UsuarioMaster;
 use Carbon\Carbon;
 use App\RegisterUrl;
 use App\Mail\EmailTemplate;
@@ -52,20 +55,29 @@ class Guest extends BaseModel {
             }
             $guest->delete();
         }
-        $message = count($guest_ids) > 0 ? 'Invitados eliminados' : 'Invitado eliminado'  ; 
+        $message = count($guest_ids) > 0 ? 'Invitados eliminados' : 'Invitado eliminado'  ;
         return ['message'=> $message];
     }
     protected function sendGuestCodeVerificationByEmail($request){
         $currentRange = env('AUTH2FA_CODE_DIGITS');
         $currentMinutes = env('AUTH2FA_EXPIRE_TIME');
-        $email_is_registered = User::select('id')->where('email',$request->email)->first();
-        if($email_is_registered){
+
+        $email_is_registered = env('MULTIMARCA')
+            ? UsuarioMaster::where('email', $request->email)->first()
+            : User::where('email', $request->email)->first();
+
+        if ($email_is_registered) {
             return ['message'=>'El email ya se encuentra registrado en la plataforma.','email_sent'=>false];
         }
-        $document_is_registered = User::select('id')->where('email',$request->document)->first();
-        if($document_is_registered){
+
+        $document_is_registered = env('MULTIMARCA')
+            ? UsuarioMaster::where('dni', $request->document)->first()
+            : User::where('document', $request->document)->first();
+
+        if ($document_is_registered) {
             return ['message'=>'El documento ya se encuentra registrado en la plataforma.','email_sent'=>false];
         }
+
         $start = '1'.str_repeat('0', $currentRange - 1);
         $end = str_repeat('9', $currentRange);
         $currentCode = rand($start, $end);
@@ -85,7 +97,7 @@ class Guest extends BaseModel {
         if(!$guest_link){
             return ['message'=>'Link inválido'];
         }
-        
+
         $data['criterion_list_final'] = [];
         foreach ($data['criterion_list'] as $criterion_code => $value_text) {
             $criterion_value = CriterionValue::whereRelation('criterion','code',$criterion_code)
@@ -104,7 +116,7 @@ class Guest extends BaseModel {
             }
             $data['criterion_list'][$criterion_code] = $criterion_value?->id;
         }
-        
+
         $data['active'] = false;
         $current_workspace = get_current_workspace();
         if($guest_link->activate_by_default){
