@@ -58,7 +58,7 @@
                                         <v-col cols="12" md="10" lg="10" class="vertical-align text-right">
                                             <v-container>
                                                 <editor
-                                                    api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
+                                                    api-key="dph7cfjyhfkb998no53zdbcbwxvxtge2o84f02zppo4eix1g"
                                                     v-model="pregunta.pregunta"
                                                     :init="{
                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -86,7 +86,7 @@
                                         <v-col cols="12" md="10" lg="10" class="vertical-align text-right">
                                             <v-container>
                                                 <editor
-                                                    api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
+                                                    api-key="dph7cfjyhfkb998no53zdbcbwxvxtge2o84f02zppo4eix1g"
                                                     v-model="opcOpcion"
                                                     :init="{
                                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
