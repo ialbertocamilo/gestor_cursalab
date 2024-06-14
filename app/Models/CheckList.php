@@ -1225,7 +1225,7 @@ class CheckList extends BaseModel
         ->where('id', $user->subworkspace->parent->id)
         ->first()?->checklist_configuration?->entities_criteria;
         if($request->entity_id){
-            $criterion_value_user_entity = CriterionValue::select('value_text')->where('id',$request->entity_id)->first();
+            $criterion_value_user_entity = CriterionValue::select('value_text','id')->where('id',$request->entity_id)->first();
         }else{
             $criterion_value_user_entity = $user->criterion_values->whereIn('criterion_id', $workspace_entity_criteria)->first();
         }
@@ -1245,6 +1245,7 @@ class CheckList extends BaseModel
                 'id' => $checklist->id,
                 "title" => $checklist->title,
                 "entity" =>[
+                    "id" => $criterion_value_user_entity?->id,
                     "name"=> $criterion_value_user_entity?->value_text,
                     "icon"=>"store",
                 ],
