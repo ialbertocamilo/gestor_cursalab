@@ -48,7 +48,24 @@ class ChecklistAudit extends BaseModel
     {
         return $this->morphTo();
     }
-   
+    protected function saveDataDummy(){
+        $users = User::whereIn('id',[59386,59387])->get();
+        $checklist = CheckList::where('id',994)->with(['type','modality','activities'])->first();
+        $qualification_ids = $checklist->extra_attributes['evaluation_types_id'];
+        $activies = $checklist->activities;
+        foreach ($activies as $activity) {
+            foreach ($users as $user) {
+                $number_rand = rand(0,count($qualification_ids)-1);
+                $data['activity_id'] = $activity->id;
+                $data['qualification_id'] = $qualification_ids[$number_rand];
+                $data['entity_id'] = 180853;
+                $request = [
+                    'entity_id' => 180853
+                ];
+                self::saveActivity($checklist,$data,'qualification',(object) $request ,$user);
+            }
+        }
+    }
     protected function saveActivitiesAudits($checklist,$data,$request){
         $user = auth()->user();
         $checklist->load('type:id,name,code');
@@ -92,9 +109,9 @@ class ChecklistAudit extends BaseModel
             'message' => 'Checklist finalizado.',
         ];
     }
-    protected function saveActivity(Checklist $checklist, array $data,$action_request,$request): array
+    protected function saveActivity(Checklist $checklist, array $data,$action_request,$request,$_user=null): array
     {
-        $user = auth()->user();
+        $user = $_user ?? auth()->user();
         $checklist->load(['type:id,name,code', 'modality:id,name,code','activities:id,checklist_id']);
         $criterionValueUserEntity = $this->getCriterionValueUserEntity($checklist, $user);
 
