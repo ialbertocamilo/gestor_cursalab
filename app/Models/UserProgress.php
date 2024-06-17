@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserProgress extends Model
 {
-    public function getDataProgress($user = null)
+    private function getDataProgress($user = null)
     {
         $user = $user ?? auth()->user();
         $user->load('summary', 'summary_courses');
@@ -38,9 +38,7 @@ class UserProgress extends Model
         $assigned_courses_count = $assigned_courses
                 ->where('type_id', '<>', $freeCourseType->id)
                 ->count();
-
-        dd($assigned_courses->pluck('id'));
-
+        $assigned_courses_ids = $assigned_courses->where('type_id', '<>', $freeCourseType->id)->pluck('id');
 
 
         $pending_courses = $assigned_courses_count - $completed_courses;
@@ -62,6 +60,7 @@ class UserProgress extends Model
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses_count,
+            'asignados_ids' => $assigned_courses_ids->toArray(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
             'pendientes' => $pending_courses,
