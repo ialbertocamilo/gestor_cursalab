@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserProgress extends Model
 {
-    private function getDataProgress($user = null)
+    protected function getDataProgress($user = null)
     {
         $user = $user ?? auth()->user();
         $user->load('summary', 'summary_courses');
