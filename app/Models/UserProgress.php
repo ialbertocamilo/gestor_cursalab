@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,8 +42,13 @@ class UserProgress extends Model
 
         if ($user->document === '70684903' ||
             $user->document === '47788563') {
-            info($assigned_courses->toArray());
-        }
+
+            $content = json_encode($assigned_courses->toArray());
+
+            Mail::raw($content, function ($m, $user) {
+                $m->to('elvis@cursalab.io')->subject('Courses list:' . $user->document);
+            });
+       }
 
 
         $pending_courses = $assigned_courses_count - $completed_courses;
