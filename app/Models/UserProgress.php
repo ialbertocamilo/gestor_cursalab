@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserProgress extends Model
 {
-    protected function getDataProgress($user = null)
+    public function getDataProgress($user = null)
     {
         $user = $user ?? auth()->user();
         $user->load('summary', 'summary_courses');
@@ -39,16 +39,8 @@ class UserProgress extends Model
                 ->where('type_id', '<>', $freeCourseType->id)
                 ->count();
 
+        dd($assigned_courses->pluck('id'));
 
-        if ($user->document === '70684903' ||
-            $user->document === '47788563') {
-
-            $content = json_encode($assigned_courses->toArray());
-
-            Mail::raw($content, function ($m, $user) {
-                $m->to('elvis@cursalab.io')->subject('Courses list:' . $user->document);
-            });
-       }
 
 
         $pending_courses = $assigned_courses_count - $completed_courses;
