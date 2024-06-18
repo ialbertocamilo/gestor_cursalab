@@ -1010,8 +1010,9 @@ class Topic extends BaseModel
         $available_topic_req = false;
         if (!$topic_requirement) {
             $available_topic = true;
-            
+
         } else {
+            
             // $summary_requirement_topic = SummaryTopic::with('status:id,name,code')
             //     ->where('user_id', $user->id)
             //     ->where('topic_id', $topic_requirement->requirement_id)
