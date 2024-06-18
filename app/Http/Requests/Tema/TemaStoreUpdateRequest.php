@@ -49,7 +49,8 @@ class TemaStoreUpdateRequest extends FormRequest
             'modality_in_person_properties' => 'nullable',
             'tags' => 'nullable',
             'review_all_duration_media' => 'nullable',
-            'open_evaluation_button' => 'nullable'
+            'open_evaluation_button' => 'nullable',
+            'type_requirement' => 'nullable'
         ];
     }
 
