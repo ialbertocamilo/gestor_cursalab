@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\ApiRest;
 
 use App\Models\User;
+use App\Models\Jarvis;
 use App\Models\Segment;
 use App\Models\Taxonomy;
 use App\Models\CheckList;
 use App\Models\Workspace;
 use App\Models\SegmentValue;
 use Illuminate\Http\Request;
+use App\Models\CheckListItem;
 use App\Models\ChecklistRpta;
 use App\Models\ChecklistAudit;
 use App\Models\CriterionValue;
@@ -246,14 +248,13 @@ class RestChecklistController extends Controller
             'message' => 'Actividad guardada correctamente.'
         ]);
     }
-    public function verifyPhoto(Request $request){
-        // dd($request->upload_image);
-        $isVerified = (bool)rand(0, 1);
+    public function verifyPhoto(CheckListItem $activity,Request $request){
+        $data = Jarvis::verifyPhoto($activity,$request); 
         return $this->success([
-            'color' => $isVerified ? '#00E396' : '#FF0000',
-            'percent' => $isVerified ? '96' : '50',
-            'label' => $isVerified ? 'Excelente' : 'Necesita Mejorar',
-            'verified' => $isVerified,
+            'color' => $data['is_verified'] ? '#00E396' : '#FF0000',
+            'percent' => $data['similarity'] ?? 0,
+            'label' => $data['is_verified'] ? 'Excelente' : 'Necesita Mejorar',
+            'verified' => $data['is_verified'],
         ]);
     }
 

@@ -28,6 +28,7 @@
                     Generar nuevo reporte
                 </button>
                 <button
+                     v-if="permissions.show_informe_section"
                     @click="activeTab = 'new-informe'"
                     :class="{ active: activeTab === 'new-informe' }"
                     type="button">
@@ -636,12 +637,12 @@
         </v-card>
         <v-card v-if="activeTab === 'new-informe'" flat class="elevation-0 --mb-4">
             <v-tabs vertical class="reports-menu" v-model="selecteInformeTab">
-                <v-tab class="justify-content-start py-7" :key="'#informe-general-checklist'">
+                <!-- <v-tab class="justify-content-start py-7" :key="'#informe-general-checklist'">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
                         Informe general checklist
                     </span>
-                </v-tab>
+                </v-tab> -->
                 <v-tab class="justify-content-start py-7" :key="'#informe-detallado-checklist'">
                     <v-icon left>mdi-account</v-icon>
                     <span class="pt-2">
@@ -649,21 +650,24 @@
                     </span>
                 </v-tab>
                 <!-- ITEMS -->
-                <v-tab-item>
-                    <v-card flat>
-                        <v-card-text>
-                            <NotasUsuario
-                                :workspaceId="workspaceId"
-                                :adminId="adminId"
-                                :reportsBaseUrl="reportsBaseUrl"
-                                :API_REPORTES="API_REPORTES"/>
-                        </v-card-text>
-                    </v-card>
-                </v-tab-item>
-                <v-tab-item>
+                <!-- <v-tab-item>
                     <v-card flat>
                         <v-card-text>
                             <GeneralChecklist
+                                :workspaceId="workspaceId"
+                                :adminId="adminId"
+                                :reportsBaseUrl="reportsBaseUrl"
+                                :API_REPORTES="API_REPORTES"
+                                :modules="modules"
+                                @generateReport="generateReport($event)"
+                            />
+                        </v-card-text>
+                    </v-card>
+                </v-tab-item> -->
+                <v-tab-item>
+                    <v-card flat>
+                        <v-card-text>
+                            <DetailedChecklist
                                 :workspaceId="workspaceId"
                                 :adminId="adminId"
                                 :reportsBaseUrl="reportsBaseUrl"
@@ -758,6 +762,7 @@ import ProcessProgress from '../components/Reportes/ProcessProgress.vue';
 import ProcessDetail from '../components/Reportes/ProcessDetail.vue';
 
 import GeneralChecklist from '../components/Reportes/Informes/GeneralChecklist.vue';
+import DetailedChecklist from '../components/Reportes/Informes/DetailedChecklist.vue';
 
 export default {
     components: {
@@ -792,7 +797,8 @@ export default {
         UsersBenefitReport,
         Dc3Dc4,
         ProcessProgress,
-        ProcessDetail
+        ProcessDetail,
+        DetailedChecklist
     },
     data() {
         return {
@@ -859,6 +865,7 @@ export default {
                 show_report_criterios_vacios:false,
                 show_report_multiple_usuarios:false,
                 show_report_process_progress:false,
+                show_informe_section:false,
             }
         }
     },

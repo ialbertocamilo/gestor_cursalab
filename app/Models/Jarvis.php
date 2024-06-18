@@ -93,7 +93,31 @@ class Jarvis extends Model
             
         }
     }
-    
+    protected function verifyPhoto($activity,$request){
+        $multipart = [];
+        $compare_image = $request->file('file_image');
+        $fileContents = file_get_contents($compare_image);
+        $filename = $compare_image->getClientOriginalName();
+        $mimeType = $compare_image->getMimeType();
+        $multipart[] = [
+            'name' => 'attachments[]',
+            'contents' => $fileContents,
+            'filename' => $filename,
+            'headers' => ['Content-Type' => $mimeType]
+        ];
+        if($activity->extra_attributes['computational_vision'] && $activity->extra_attributes['type_computational_vision'] == 'simil'){
+            return self::compareImages($activity,$request,$multipart);
+        }
+        if($activity->extra_attributes['computational_vision'] 
+            && $activity->extra_attributes['type_computational_vision'] == 'text'
+        ){
+            return self::findText($activity,$request,$multipart);
+        }
+        return [
+            'is_verified' => false,
+            'similarity' => 0
+        ];
+    }
     protected function generateChecklistJarvis($request){
         $files = $request->file('files');
         $number_activities = $request->number_activities;
@@ -201,6 +225,61 @@ class Jarvis extends Model
         $post_number = str(mt_rand(1000, 9999));
         return $this->jarvis_folder.'/'.'wk_id_'.$workspace_id . '_tp_id_' . $topic_id . '_mt_id_' . $media_topic_id . '_rnd_' . $post_number.'.txt';
     }
+    private function findText($activity,$request,$multipart){
+        $find_text = $activity->extra_attributes['type_computational_vision_value'];
+        $response = Http::withOptions([
+            'verify' => false,
+        ])
+        ->attach($multipart)
+        ->attach('find_text', $find_text)
+        ->timeout(900)->post(env('JARVIS_BASE_URL').'/find_text');
+        if ($response->successful()) {
+            $data = $response->json();
+            return [
+                'is_verified' => $data['similarity'] >= 70,
+                'similarity' => round($data['similarity'],2)
+            ];
+        }
+        return [
+            'is_verified' => false,
+            'similarity' => 0,
+        ];
+    }
+    private function compareImages($activity,$request,$multipart){
+        $pattern = '/<img[^>]+src="([^">]+)"/';
+        // Aplicar la expresión regular a la cadena
+        if (preg_match($pattern, $activity->activity, $matches)) {
+            $src_activity_image = $matches[1];
+            $fileContents = file_get_contents($src_activity_image);
+            // Obtener el nombre del archivo desde la URL
+            $filename = basename($src_activity_image);
+            // Obtener el MIME type del archivo
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_buffer($finfo, $fileContents);
+            finfo_close($finfo);
 
+            $multipart[] = [
+                'name' => 'attachments[]',
+                'contents' => $fileContents,
+                'filename' => $filename,
+                'headers' => ['Content-Type' => $mimeType]
+            ];
+        }
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->attach($multipart)->timeout(900)->post(env('JARVIS_BASE_URL').'/compare_images');
+        // 
+        if ($response->successful()) {
+            $data = $response->json();
+            return [
+                'is_verified' => $data['similarity'] >= 70,
+                'similarity' => round($data['similarity'],2)
+            ];
+        }
+        return [
+            'is_verified' => false,
+            'similarity' => 0,
+        ];
+    }
     /* -----------------------------------------------------END PRIVATE FUNCTIONS-------------------------------------------------------------------------------------*/
 }

@@ -3,7 +3,7 @@
     <v-main>
         <ResumenExpand titulo="Resumen del reporte">
             <template v-slot:resumen>
-                Descarga el informe general de actividades en un checklist.
+                Descarga el informe detallado de actividades en un checklist.
             </template>
 
             <list-item titulo="Documento, Apellidos y nombres, Género" subtitulo="Datos personales" />
@@ -161,14 +161,24 @@ export default {
         }
     },
     mounted() {
-        this.fetchFiltersData();
+        // this.fetchFiltersData();
         this.fetchChecklist();
+        this.setDefaultDates();
     },
     methods: {
         /**
          * Fetch reports' filter data
          * @returns {Promise<void>}
          */
+         setDefaultDates() {
+            const endDate = new Date(); // Fecha actual
+            const startDate = new Date();
+            let FechaFiltro = this.$refs.FechasFiltros;
+            startDate.setMonth(startDate.getMonth() - 1); // Un mes atrás
+            // Formatear fechas en YYYY-MM-DD para el datepicker
+            FechaFiltro.start = startDate.toISOString().split('T')[0];
+            FechaFiltro.end = endDate.toISOString().split('T')[0];
+        },
         async fetchFiltersData () {
 
             // Fetch schools
@@ -275,7 +285,7 @@ export default {
          */
         async fetchChecklist(){
 
-            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.workspaceId}`;
+            let url = `${this.$props.reportsBaseUrl}/filtros/courses/checklist/${this.$props.workspaceId}`;
             const res = await axios.get(url);
             this.Checklist_items = res.data;
         },

@@ -49,7 +49,7 @@ class ChecklistAudit extends BaseModel
         return $this->morphTo();
     }
     protected function saveDataDummy(){
-        $users = User::whereIn('id',[59386,59387])->get();
+        $users = User::whereIn('id',[59386,59387,86190])->get();
         $checklist = CheckList::where('id',994)->with(['type','modality','activities'])->first();
         $qualification_ids = $checklist->extra_attributes['evaluation_types_id'];
         $activies = $checklist->activities;

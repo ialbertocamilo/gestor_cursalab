@@ -116,8 +116,7 @@ class ReportsController extends Controller
                 $permissions['show_report_videoteca'] =  $isSuperUser || boolval($menus->where('code','videoteca')->first());
                 $permissions['show_report_vademecun'] =  $isSuperUser || boolval($menus->where('code','vademecun')->first());
                 $permissions['show_report_vademecun'] =  $isSuperUser || boolval($menus->where('code','vademecun')->first());
-
-                
+                $permissions['show_informe_section'] =  $isSuperUser || boolval($menus->where('code','checklist-premium')->first());
                 //Constraints by default
                 $permissions['show_report_notas_usuario'] = true;
                 $permissions['show_report_usuarios'] = true;
