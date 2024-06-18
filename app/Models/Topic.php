@@ -11,7 +11,8 @@ class Topic extends BaseModel
         'name', 'slug', 'description', 'content', 'imagen', 'external_id',
         'position', 'visits_count', 'assessable', 'evaluation_verified', 'qualification_type_id',
         'topic_requirement_id', 'type_evaluation_id', 'duplicate_id', 'course_id','path_qr',
-        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties', 'open_evaluation_button'
+        'active', 'active_results', 'position','review_all_duration_media','modality_in_person_properties', 'open_evaluation_button',
+        'type_requirement',
     ];
 
        protected $casts = [
@@ -1019,9 +1020,12 @@ class Topic extends BaseModel
 //            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $activity_requirement = in_array($summary_requirement_topic?->status_id, $statuses);
             $test_requirement = $summary_requirement_topic?->result == 1;
-
-            if ($activity_requirement || $test_requirement)
+            if($topic->type_requirement == 'inverse' && ($summary_requirement_topic?->result == 1 || $summary_requirement_topic?->result == 0)){
                 $available_topic = true;
+            }
+            if ($activity_requirement || $test_requirement){
+                $available_topic = true;
+            }
         }
 
         $topic_req_name = null;

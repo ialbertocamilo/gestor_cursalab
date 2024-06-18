@@ -29,6 +29,19 @@
                           :description="'Código identificador único del tema'" />
                     </v-col>
                     <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
+                        <DefaultSelect
+                            dense
+                            label="Tipo de requisito"
+                            placeholder="Seleccione un tipo de requisito"
+                            v-model="resource.type_requirement"
+                            :items="types_requirement"
+                            clearable
+                            item-text="name"
+                            item-value="id"
+                        />
+                    </v-col>
+                    <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
+                   
                         <DefaultAutocomplete
                             dense
                             label="Requisito"
@@ -726,6 +739,10 @@ export default {
             modalDateFilter2: {
                 open: false
             },
+            types_requirement:[
+                {id:'requirement',name:'Requerimiento Normal'},
+                {id:'requirement-inverse',name:'Requerimiento Inverso'},
+            ],
             resourceDefault: {
                 id: null,
                 name: null,
