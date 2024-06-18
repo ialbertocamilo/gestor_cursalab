@@ -388,5 +388,22 @@ const app = new Vue({
                 console.error("Error general:", error);
             }
         },
+        /**
+         * Get TinyMCE editor API Key from meta
+         * element which is base64 encoded
+         * @returns {string}
+         */
+        getEditorAPIKey() {
+
+            // Decode Base64 API key or return default API key
+
+            let key = document
+                .querySelector('meta[name=EDITOR]')
+                .getAttribute('content');
+
+            return key
+                ? atob(key)
+                : 'dph7cfjyhfkb998no53zdbcbwxvxtge2o84f02zppo4eix1g'
+        }
     }
 });

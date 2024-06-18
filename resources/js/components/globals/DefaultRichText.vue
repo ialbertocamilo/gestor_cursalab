@@ -8,10 +8,10 @@
                 <RequiredFieldSymbol v-if="showRequired"/>
             </legend>
             <!-- api key test: nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug-->
-            
+
             <!-- api key prod:  6i5h0y3ol5ztpk0hvjegnzrbq0hytc360b405888q1tu0r85-->
             <editor
-                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
+                :api-key="$root.getEditorAPIKey()"
                 v-model="localText"
                 :init="{
                     content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -111,7 +111,7 @@
                 </v-form>
             </template>
         </DefaultDialog>
-        
+
     </div>
 </template>
 
@@ -296,7 +296,7 @@ export default {
                     return `<i class='mdi mdi-file-upload'></i>`
                     break;
             }
-           
+
         },
         // changeLimits(ia_descriptions_generated,limit_descriptions_jarvis){
         //     let html_ia_descriptions_generated = document.getElementById("ia_descriptions_generated");
@@ -328,7 +328,7 @@ export default {
         },
         uploadImage(){
             let vue = this;
-            let formData = new FormData(); 
+            let formData = new FormData();
             if(!vue.resource.title || !vue.resource.multimedia){
                 vue.showAlert('Es necesario añadir un título y una imagen.','warning');
                 return;

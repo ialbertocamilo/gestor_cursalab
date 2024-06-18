@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -37,12 +38,7 @@ class UserProgress extends Model
         $assigned_courses_count = $assigned_courses
                 ->where('type_id', '<>', $freeCourseType->id)
                 ->count();
-
-
-        if ($user->document === '70684903' ||
-            $user->document === '47788563') {
-            info($assigned_courses->toArray());
-        }
+        $assigned_courses_ids = $assigned_courses->where('type_id', '<>', $freeCourseType->id)->pluck('id');
 
 
         $pending_courses = $assigned_courses_count - $completed_courses;
@@ -64,6 +60,7 @@ class UserProgress extends Model
 
         $response['summary_user'] = [
             'asignados' => $assigned_courses_count,
+            'asignados_ids' => $assigned_courses_ids->toArray(),
             'aprobados' => $completed_courses,
             'desaprobados' => $disapproved_courses,
             'pendientes' => $pending_courses,

@@ -102,7 +102,7 @@
                         </v-col>
                         <v-col cols="6">
                             <editor
-                                api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
+                                :api-key="$root.getEditorAPIKey()"
                                 v-model="resource.description"
                                 :init="{
                                 content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
@@ -272,7 +272,7 @@
                                                                                     <div class="lbl_silabo_bloque">Descripción</div>
                                                                                     <div class="border_editor_silabo">
                                                                                         <editor
-                                                                                            api-key="nsw7a23axxk8mjk3ibgzh0z6h2ef5d7xcuckp0cjdugrywug"
+                                                                                            :api-key="$root.getEditorAPIKey()"
                                                                                             v-model="silabo.value"
                                                                                             :init="{
                                                                                             content_style: 'img { vertical-align: middle; }; p {font-family: Roboto-Regular }',
