@@ -1015,6 +1015,7 @@ class Topic extends BaseModel
         } else {
 
             
+            
             // $summary_requirement_topic = SummaryTopic::with('status:id,name,code')
             //     ->where('user_id', $user->id)
             //     ->where('topic_id', $topic_requirement->requirement_id)
