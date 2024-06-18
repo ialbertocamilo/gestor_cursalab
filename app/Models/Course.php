@@ -1724,7 +1724,8 @@ class Course extends BaseModel
         $config = $this->scheduled_restarts;
 
         $tiempo_en_minutos = $this->parseConfigInMinutes($config);
-        if ($config AND $config['activado'] AND $tiempo_en_minutos > 0) {
+        $activado = $config['activado'] ?? false;
+        if ($config && $activado && $tiempo_en_minutos > 0) {
 
             return $tiempo_en_minutos;
         }
