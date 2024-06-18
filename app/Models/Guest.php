@@ -26,6 +26,7 @@ class Guest extends BaseModel {
         return $this->belongsTo(Taxonomy::class, 'status_id' );
     }
     public static function searchForGrid( $request ) {
+        
         $query = self::select( 'id', 'email', 'user_id', 'status_id', 'date_invitation' )
         ->where('workspace_id',get_current_workspace()->id)
         ->with(['user:id,name,lastname,surname,active','status:id,name']);
