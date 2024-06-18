@@ -40,7 +40,7 @@
                             item-value="id"
                         />
                     </v-col>
-                    <v-col cols="6" v-if="selects.course_code_modality == 'asynchronous'">
+                    <v-col cols="12" v-if="selects.course_code_modality == 'asynchronous'">
                    
                         <DefaultAutocomplete
                             dense
