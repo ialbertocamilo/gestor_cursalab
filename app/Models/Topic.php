@@ -1020,7 +1020,7 @@ class Topic extends BaseModel
 //            $activity_requirement = in_array($summary_requirement_topic?->status?->code, ['aprobado', 'realizado', 'revisado']);
             $activity_requirement = in_array($summary_requirement_topic?->status_id, $statuses);
             $test_requirement = $summary_requirement_topic?->result == 1;
-            if($topic->type_requirement == 'inverse' && ($summary_requirement_topic?->result == 1 || $summary_requirement_topic?->result == 0)){
+            if($topic->type_requirement == 'inverse' && ($summary_requirement_topic?->result === 1 || $summary_requirement_topic?->result === 0)){
                 $available_topic = true;
             }
             if ($activity_requirement || $test_requirement){
